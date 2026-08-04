@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MHR Deck Lab — Marvel Hero Rush Deck Builder</title>
+<style>
+  :root{
+    --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
+    --paper:#EDE7DA; --muted:#8B96A5;
+    --merah:#E4442E; --kuning:#F2B01E; --biru:#3B87E8; --hijau:#33A45C;
+    --accent:#F2B01E;
+    --disp:'Arial Narrow','Helvetica Neue Condensed','Roboto Condensed',Impact,sans-serif;
+    --body:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:'Consolas','SF Mono','Roboto Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--ink);color:var(--paper);font-family:var(--body);font-size:14px}
+  body{min-height:100vh}
+
+  header{
+    padding:18px 20px 14px;border-bottom:2px solid var(--line);
+    background:
+      linear-gradient(180deg, rgba(242,176,30,.06), transparent 70%),
+      var(--ink);
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  .brand h1{
+    font-family:var(--disp);font-size:30px;letter-spacing:.06em;line-height:1;
+    text-transform:uppercase;font-weight:900;
+  }
+  .brand h1 .stripe{color:var(--accent)}
+  .brand p{color:var(--muted);font-size:12px;margin-top:4px;letter-spacing:.02em}
+  .hdr-stats{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .pill{
+    border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;
+    color:var(--muted);background:var(--panel);
+  }
+  .pill b{color:var(--paper);font-family:var(--mono)}
+
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:0;align-items:start}
+  @media (max-width:920px){ .layout{grid-template-columns:1fr} }
+
+  /* ------- filter bar ------- */
+  .filters{
+    position:sticky;top:0;z-index:5;background:var(--ink);
+    padding:12px 20px;border-bottom:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  }
+  .filters input[type=search]{
+    flex:1 1 220px;min-width:180px;background:var(--panel);border:1px solid var(--line);
+    color:var(--paper);border-radius:8px;padding:8px 12px;font-size:13px;outline:none;
+  }
+  .filters input[type=search]:focus{border-color:var(--accent)}
+  .filters select{
+    background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:8px 10px;font-size:12.5px;outline:none;cursor:pointer;
+  }
+  .cbtns{display:flex;gap:6px}
+  .cbtn{
+    width:30px;height:30px;border-radius:8px;border:2px solid var(--line);cursor:pointer;
+    opacity:.35;transition:.15s;flex:none;
+  }
+  .cbtn[data-on="1"]{opacity:1;border-color:var(--paper)}
+  .cbtn.merah{background:var(--merah)} .cbtn.kuning{background:var(--kuning)}
+  .cbtn.biru{background:var(--biru)}   .cbtn.hijau{background:var(--hijau)}
+  .reset{
+    background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;
+    padding:8px 12px;font-size:12px;cursor:pointer;
+  }
+  .reset:hover{color:var(--paper);border-color:var(--paper)}
+  .count-note{width:100%;color:var(--muted);font-size:12px}
+
+  /* ------- card list ------- */
+  .cards{padding:10px 12px 80px;display:flex;flex-direction:column;gap:8px}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px 10px 16px;position:relative;overflow:hidden;
+  }
+  .card::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--cardc,#666);
+  }
+  .card-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .card-name{font-family:var(--disp);font-size:16.5px;font-weight:800;letter-spacing:.02em}
+  .card-no{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .rar{font-family:var(--mono);font-size:10.5px;color:var(--ink);background:var(--paper);
+    border-radius:4px;padding:1px 5px;font-weight:700}
+  .card-stats{display:flex;gap:12px;margin:6px 0 4px;flex-wrap:wrap}
+  .stat{font-size:12px;color:var(--muted)}
+  .stat b{color:var(--paper);font-family:var(--mono);font-size:12.5px}
+  .card-trait{font-size:11.5px;color:var(--muted);font-style:italic}
+  .card-eff{font-size:12.5px;line-height:1.5;color:#C9CFD8;margin-top:6px;
+    border-top:1px dashed var(--line);padding-top:6px}
+  .card-actions{position:absolute;right:10px;top:10px;display:flex;gap:6px;align-items:center}
+  .btn-add{
+    background:var(--accent);color:#1A1206;border:none;border-radius:8px;
+    font-weight:800;font-size:13px;padding:6px 12px;cursor:pointer;font-family:var(--disp);
+    letter-spacing:.05em;
+  }
+  .btn-add:hover{filter:brightness(1.1)}
+  .in-deck{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:700}
+
+  /* ------- deck panel ------- */
+  .deck{
+    position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--panel2);
+    border-left:2px solid var(--line);padding:16px 16px 40px;
+  }
+  @media (max-width:920px){
+    .deck{position:fixed;inset:auto 0 0 0;height:62vh;z-index:20;border-left:none;
+      border-top:2px solid var(--accent);transform:translateY(calc(100% - 46px));transition:.25s}
+    .deck.open{transform:translateY(0)}
+  }
+  .deck-grip{display:none;text-align:center;color:var(--accent);font-family:var(--disp);
+    font-weight:800;letter-spacing:.08em;padding-bottom:10px;cursor:pointer}
+  @media (max-width:920px){ .deck-grip{display:block} }
+  .deck h2{font-family:var(--disp);font-size:20px;letter-spacing:.05em;text-transform:uppercase}
+  .deck-total{font-family:var(--mono);font-size:13px;color:var(--muted);margin:2px 0 12px}
+  .deck-total b{color:var(--paper)}
+  .deck-total .warn{color:var(--merah)}
+  .deck-total .ok{color:var(--hijau)}
+
+  .curve{display:flex;gap:5px;align-items:flex-end;height:74px;margin:8px 0 2px}
+  .curve .bar{flex:1;background:var(--line);border-radius:4px 4px 0 0;position:relative;
+    min-height:3px;transition:.2s}
+  .curve .bar span{position:absolute;top:-16px;left:0;right:0;text-align:center;
+    font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .curve-x{display:flex;gap:5px;margin-bottom:12px}
+  .curve-x div{flex:1;text-align:center;font-family:var(--mono);font-size:10px;color:var(--muted)}
+
+  .cdist{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-bottom:14px;background:var(--line)}
+  .cdist div{transition:.2s}
+
+  .deck-sec-title{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    margin:12px 0 6px;border-bottom:1px solid var(--line);padding-bottom:4px}
+  .dline{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px}
+  .dline:hover{background:rgba(255,255,255,.04)}
+  .dline .dot{width:9px;height:9px;border-radius:3px;flex:none}
+  .dline .nm{flex:1;font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dline .lv{font-family:var(--mono);font-size:11px;color:var(--muted);flex:none}
+  .qbtn{width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:none;
+    color:var(--paper);cursor:pointer;font-size:13px;line-height:1;flex:none}
+  .qbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .qty{font-family:var(--mono);font-size:12.5px;width:16px;text-align:center;flex:none}
+
+  .deck-settings{display:flex;gap:8px;margin:10px 0}
+  .deck-settings label{font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:3px;flex:1}
+  .deck-settings input{background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:6px;padding:5px 8px;font-family:var(--mono);width:100%}
+
+  .deck-actions{display:flex;gap:8px;margin-top:14px}
+  .btn2{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:9px 6px;cursor:pointer;font-size:12.5px;font-weight:600}
+  .btn2:hover{border-color:var(--accent)}
+  .btn2.danger:hover{border-color:var(--merah);color:var(--merah)}
+  textarea.export{width:100%;height:130px;margin-top:10px;background:var(--ink);
+    border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:10px;
+    font-family:var(--mono);font-size:11.5px;display:none}
+  textarea.export.show{display:block}
+  .empty{color:var(--muted);font-size:12.5px;text-align:center;padding:24px 8px;line-height:1.6}
+  .card-body{display:flex;gap:12px}
+  .card-img{width:78px;flex:none;border-radius:6px;align-self:flex-start;display:none;
+    border:1px solid var(--line)}
+  .card-img.loaded{display:block}
+  .card-main{flex:1;min-width:0}
+  .card-link{font-size:11px;color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--muted)}
+  .card-link:hover{color:var(--accent);border-color:var(--accent)}
+  .deckmgr{display:flex;gap:6px;margin:0 0 12px}
+  .deckmgr select{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:7px 8px;font-size:12.5px;min-width:0}
+  .deckmgr .qbtn{width:30px;height:30px;font-size:15px}
+  .savenote{font-size:10.5px;color:var(--hijau);margin:-6px 0 8px;min-height:14px}
+  footer{border-top:1px solid var(--line);margin-top:8px;padding:18px 20px 26px;
+    color:var(--muted);font-size:11px;line-height:1.7;text-align:center}
+  footer a{color:var(--muted)}
+  .foot-note{color:var(--muted);font-size:11px;line-height:1.5;margin-top:16px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>MHR <span class="stripe">DECK LAB</span></h1>
+    <p>Perancang deck Marvel Hero Rush TCG · Database 200 kartu (BP01 · PB01 · PR · SD01–SD04) · Bahasa Indonesia</p>
+  </div>
+  <div class="hdr-stats">
+    <div class="pill">Kartu unik <b id="hTotal">0</b></div>
+    <div class="pill">Ditampilkan <b id="hShown">0</b></div>
+    <div class="pill">Deck <b id="hDeck">0</b></div>
+  </div>
+</header>
+
+<div class="layout">
+  <main>
+    <div class="filters">
+      <input id="q" type="search" placeholder="Cari nama, efek, atau trait… (mis. Prune, Machine, Thor)">
+      <div class="cbtns" id="cbtns">
+        <button class="cbtn merah"  data-c="Merah"  data-on="1" title="Merah"></button>
+        <button class="cbtn kuning" data-c="Kuning" data-on="1" title="Kuning"></button>
+        <button class="cbtn biru"   data-c="Biru"   data-on="1" title="Biru"></button>
+        <button class="cbtn hijau"  data-c="Hijau"  data-on="1" title="Hijau"></button>
+      </div>
+      <select id="fSeries"><option value="">Semua seri</option></select>
+      <select id="fLevel"><option value="">Semua level</option></select>
+      <select id="fRange"><option value="">Semua jarak</option></select>
+      <select id="fRarity"><option value="">Semua rarity</option></select>
+      <select id="fSort">
+        <option value="no">Urut: Nomor</option>
+        <option value="lv">Urut: Level</option>
+        <option value="pw">Urut: Power</option>
+        <option value="nm">Urut: Nama</option>
+      </select>
+      <button class="reset" id="btnReset">Reset</button>
+      <div class="count-note" id="noteShown"></div>
+    </div>
+    <div class="cards" id="cards"></div>
+  </main>
+
+  <aside class="deck" id="deckPanel">
+    <div class="deck-grip" id="deckGrip">▲ DECK SAYA</div>
+    <h2>Deck Saya</h2>
+    <div class="deck-total" id="deckTotal"></div>
+    <div class="deckmgr">
+      <select id="deckSelect" title="Pilih deck"></select>
+      <button class="qbtn" id="btnNewDeck" title="Buat deck baru">+</button>
+      <button class="qbtn" id="btnDelDeck" title="Hapus deck ini">🗑</button>
+    </div>
+    <div class="savenote" id="saveNote"></div>
+
+    <div class="deck-settings">
+      <label>Target ukuran deck
+        <input id="setSize" type="number" min="1" value="50">
+      </label>
+      <label>Maks. salinan per kartu
+        <input id="setMax" type="number" min="1" value="3">
+      </label>
+    </div>
+
+    <div class="deck-sec-title">Kurva level</div>
+    <div class="curve" id="curve"></div>
+    <div class="curve-x" id="curveX"></div>
+
+    <div class="deck-sec-title">Komposisi warna</div>
+    <div class="cdist" id="cdist"></div>
+
+    <div class="deck-sec-title">Daftar kartu</div>
+    <div id="deckList"><div class="empty">Deck masih kosong.<br>Klik <b>+ Deck</b> pada kartu untuk menambahkan.</div></div>
+
+    <div class="deck-actions">
+      <button class="btn2" id="btnExport">Salin daftar deck</button>
+      <button class="btn2 danger" id="btnClear">Kosongkan</button>
+    </div>
+    <textarea class="export" id="exportBox" readonly></textarea>
+
+    <p class="foot-note">Catatan: target ukuran deck dan batas salinan bisa disesuaikan dengan aturan resmi turnamen yang berlaku. Data kartu bersumber dari database resmi marvelherorush.com (bahasa Indonesia). Deck tersimpan otomatis di browser perangkat ini (localStorage) — aman ditutup dan dibuka kembali.</p>
+  </aside>
+</div>
+
+<footer>
+  MHR Deck Lab adalah alat bantu buatan penggemar (fan-made) dan <b>tidak berafiliasi dengan atau disponsori oleh
+  Marvel maupun penerbit Marvel Hero Rush</b>. Seluruh nama kartu, teks efek, serta merek dagang terkait adalah milik
+  pemegang haknya masing-masing. Data kartu dirujuk dari
+  <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
+  Alat ini akan diturunkan apabila diminta oleh pemegang hak.
+</footer>
+
+<script>
+/* ====== DATABASE KARTU (dinormalisasi & dideduplikasi per nomor kartu) ====== */
+/* field: no, nm(nama), s(seri), c(warna), l(level), r(jarak), p(power), f(trait), ra(rarity), e(efek) */
+const DB = [
+{no:"BP01-001",nm:"[Antimatter] Iron Man",s:"BP01",c:"Merah",l:6,r:1,p:6500,f:"Human/Avengers",ra:["UR","MR","SEC"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Prune 1 karakter lawan dengan LvX atau lebih rendah dari FIELD ke VOID. X adalah jumlah kartu yang Anda RETREAT saat memanggil kartu ini."},
+{no:"BP01-002",nm:"[Covert Ops] Black Widow",s:"BP01",c:"Merah",l:3,r:1,p:2000,f:"Human/Avengers",ra:["UR","MR"],e:"[COUNTER-ACTI](HAND) Buang kartu ini dari tangan. Jika dilakukan, 1 karakter lawan mendapatkan Power -2000 pada giliran ini."},
+{no:"BP01-003",nm:"[Thunder Ally] Thor",s:"BP01",c:"Merah",l:6,r:3,p:3500,f:"Asgard/Avengers",ra:["UR","MR","SEC"],e:"[TRIG](WING) Saat giliran Anda berakhir, jika kartu ini tidak menyerang pada giliran ini, 1 karakter musuh di BATTLE mendapatkan Power -X pada giliran ini. X adalah Power dari kartu ini."},
+{no:"BP01-004",nm:"[Never Back Down] Hulk",s:"BP01",c:"Merah",l:2,r:1,p:500,f:"Human/Avengers",ra:["GR","MR"],e:"[AUTO](FIELD) Jika Anda hanya memiliki karakter merah di FIELD, kartu ini mendapat Lv +X dan Power +X000. X adalah jumlah karakter lawan di BATTLE."},
+{no:"BP01-005",nm:"[Red Room Experiment Subject] Black Widow",s:"BP01",c:"Merah",l:3,r:1,p:2500,f:"Human/Avengers",ra:["GR"],e:"[TRIG](HAND) Saat karakter merah Anda menyerang, Anda bisa membuang kartu ini dari tangan ke RETREAT. Jika dilakukan, 1 karakter merah Anda di BATTLE mendapat Power +3000 pada giliran ini."},
+{no:"BP01-006",nm:"[Silent Hunter] Black Panther",s:"BP01",c:"Merah",l:5,r:2,p:500,f:"Human/Avengers/Wakanda",ra:["GR","MR"],e:"[AUTO](FIELD) Jika jumlah kartu di tangan ganjil, kartu ini mendapat R +2, jika genap kartu ini mendapat Power +5500."},
+{no:"BP01-007",nm:"[Void Reforge] Vision",s:"BP01",c:"Merah",l:6,r:1,p:5000,f:"Machine/Avengers",ra:["GR","MR"],e:"[TRIG](VOID) Saat kartu ini masuk ke VOID dari RETREAT, Anda bisa membuang 2 kartu dari tangan. Jika dilakukan, tempatkan kartu ini dari VOID ke FIELD Anda, dan karakter lawan di FRONT mendapat Power -1000 pada giliran ini."},
+{no:"BP01-008",nm:"[Pulse Uninstall] War Machine",s:"BP01",c:"Merah",l:1,r:3,p:1500,f:"Human/Avengers",ra:["GR"],e:"[TRIG](FIELD) Saat kartu ini masuk ke FIELD, Anda bisa Prune semua kartu yang terpasang dari semua karakter di kedua FIELD ke VOID."},
+{no:"BP01-009",nm:"[Pulse Assembler] Iron Man",s:"BP01",c:"Merah",l:3,r:1,p:3500,f:"Human/Avengers",ra:["GR"],e:"[ACTI](BATTLE/ONCE PER TURN) Jika tidak ada kartu di BASE Anda, Prune 1 karakter merah Anda dengan Lv5 atau lebih dari RETREAT ke VOID. Jika dilakukan, 1 karakter lawan di BATTLE mendapat Power -1000 pada giliran ini."},
+{no:"BP01-010",nm:"[Evolution Protocol] Ultron",s:"BP01",c:"Merah",l:1,r:1,p:500,f:"Machine",ra:["SR"],e:"[ACTI](HAND) Pasang kartu ini dari tangan ke 1 karakter Anda dengan Lv4 atau lebih tinggi dan Trait [Machine] di FIELD. [ACTI](BACK/ONCE PER TURN) Buka 1 kartu tertutup di BASE Anda. Jika dilakukan dan kartu tersebut adalah kartu Lv1 dan memiliki Trait [Machine], kembalikan kartu tersebut ke tangan."},
+{no:"BP01-011",nm:"[Thunder Speed] Thor",s:"BP01",c:"Merah",l:3,r:1,p:3000,f:"Asgard/Avengers",ra:["SR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, ambil 1 kartu dari atas deck. Jika dilakukan, kartu ini memiliki kesempatan dua kali untuk menyerang (hanya ke karakter) pada giliran ini."},
+{no:"BP01-012",nm:"[Thunder Charge] Thor",s:"BP01",c:"Merah",l:3,r:1,p:3500,f:"Asgard/Avengers",ra:["SR"],e:"[TRIG](BATTLE) Saat kartu ini dipanggil ke FIELD, jika ada karakter merah di BASE, Anda bisa menaruh 2 kartu teratas deck Anda ke BASE secara tertutup."},
+{no:"BP01-013",nm:"[Wakanda Forever] Black Panther",s:"BP01",c:"Merah",l:5,r:1,p:500,f:"Human/Avengers/Wakanda",ra:["SR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, pindahkan 1 karakter lawan dengan trait [Human] dan Power 5000 atau lebih tinggi dari BATTLE ke BASE lawan, lalu tutup karakter itu."},
+{no:"BP01-014",nm:"[Defense Program] Ultron",s:"BP01",c:"Merah",l:5,r:1,p:5000,f:"Machine",ra:["SR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, jika ada karakter dengan trait [Ultron] selain kartu ini, Anda bisa RETREAT 1 karakter lawan Lv3 atau lebih rendah di BATTLE."},
+{no:"BP01-015",nm:"[Disintegration Ray] Vision",s:"BP01",c:"Merah",l:6,r:2,p:2500,f:"Machine/Avengers",ra:["SR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Anda bisa Prune 1 karakter lawan dengan Power 4000 atau lebih rendah di BATTLE."},
+{no:"BP01-016",nm:"[Dimension Piercer] Iron Man",s:"BP01",c:"Merah",l:3,r:1,p:3500,f:"Human/Avengers",ra:["SR"],e:"[TRIG](BATTLE/ONCE PER TURN) Saat Anda memanggil karakter Lv4 atau lebih tinggi ke FIELD, Anda bisa memindahkan 1 karakter lawan Lv3 atau lebih rendah dari BATTLE ke BASE lawan."},
+{no:"BP01-017",nm:"[Avenge Wrath] Hulk",s:"BP01",c:"Merah",l:4,r:1,p:4000,f:"Human/Avengers",ra:["SR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Anda bisa Prune 1 karakter lawan dari RETREAT ke VOID. Jika dilakukan, kartu ini mendapat Power +1000 pada giliran ini."},
+{no:"BP01-018",nm:"[The Retaliator] Iron Man",s:"BP01",c:"Merah",l:3,r:1,p:2500,f:"Human/Avengers",ra:["R","MR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, jika karakter Anda lebih sedikit dari karakter di BATTLE lawan, satu karakter Lv3 atau lebih rendah di BATTLE musuh mendapatkan -2000 Power pada giliran ini."},
+{no:"BP01-019",nm:"[Vibranium Mining] Black Panther",s:"BP01",c:"Merah",l:3,r:2,p:1500,f:"Human/Avengers/Wakanda",ra:["R"],e:"[TRIG](BATTLE/ONCE PER TURN) Saat kartu ini menyerang, Anda bisa membuang kartu teratas deck Anda ke RETREAT. Jika dilakukan, kartu ini mendapat Power +2000 pada giliran ini."},
+{no:"BP01-020",nm:"[The Devastator] Hulk",s:"BP01",c:"Merah",l:1,r:1,p:1000,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Prune 1 karakter merah Anda dari RETREAT ke VOID. Jika dilakukan, Anda mengambil 1 kartu dari atas deck."},
+{no:"BP01-021",nm:"[Thunder Caller] Thor",s:"BP01",c:"Merah",l:2,r:1,p:2000,f:"Asgard/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, lihat 3 kartu teratas deck, ambil 1 kartu dengan Trait [Human] ke tangan dan buang sisanya."},
+{no:"BP01-022",nm:"[Top Agent] Black Widow",s:"BP01",c:"Merah",l:1,r:2,p:500,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, jika ada karakter dengan Trait [Avengers] selain kartu ini, Anda bisa RETREAT 1 karakter lawan Lv3 atau lebih rendah dengan efek [AUTO] dari FIELD."},
+{no:"BP01-023",nm:"[MK44-The Brawler] Hulk Buster",s:"BP01",c:"Merah",l:1,r:1,p:1000,f:"Machine",ra:["R"],e:"[COUNTER-ACTI](FIELD/ONCE PER TURN) Pasang kartu ini ke 1 karakter Anda di FIELD, jika dilakukan RETREAT kartu lain yang terpasang pada karakter tersebut selain kartu ini. [AUTO](FIELD) Karakter yang terpasang kartu ini mendapatkan +1000 Power."},
+{no:"BP01-024",nm:"[Synchronize Targeting] War Machine",s:"BP01",c:"Merah",l:2,r:2,p:500,f:"Human/Avengers",ra:["R"],e:"[AUTO](BATTLE) Semua R dari karakter Anda dengan nama [Iron Man] di BATTLE menjadi 2."},
+{no:"BP01-025",nm:"[Thunder Wrath] Thor",s:"BP01",c:"Merah",l:6,r:2,p:5000,f:"Asgard/Avengers",ra:["R"],e:"[AUTO](BATTLE) Jika kartu ini adalah satu-satunya kartu di BATTLE Anda, kartu ini memperoleh kemampuan [DOUBLE ATTACK] ([AUTO/BATTLE] Kartu ini memiliki kesempatan dua kali untuk menyerang.)"},
+{no:"BP01-026",nm:"[Cosmic Legacy] Silver Surfer",s:"BP01",c:"Merah",l:3,r:2,p:2500,f:"Zenn-La",ra:["R"],e:"[TRIG](RETREAT) Saat kartu ini masuk ke RETREAT sebagai syarat pemanggilan, Anda bisa menaruh kartu teratas deck tertutup ke BASE. Jika dilakukan, kembalikan kartu ini ke bawah deck."},
+{no:"BP01-027",nm:"[Combined Operations] Iron Man",s:"BP01",c:"Merah",l:3,r:1,p:3000,f:"Human/Avengers",ra:["R"],e:"[AUTO](BATTLE) Jika 2 karakter di WING memiliki Lv asli yang sama, karakter lawan di FRONT mendapat Power -1000."},
+{no:"BP01-028",nm:"[Behind Enemy Lines] Black Widow",s:"BP01",c:"Merah",l:1,r:1,p:500,f:"Human/Avengers",ra:["R"],e:"[ACTI](HAND) Jika lawan memiliki karakter di BASE, tempatkan kartu ini dari tangan ke BASE lawan. [TRIG](FIELD) Saat kartu ini masuk ke FIELD, RETREAT 1 karakter Anda Lv3 atau lebih rendah di BASE (dipilih lawan)."},
+{no:"BP01-029",nm:"[Cover Operations] War Machine",s:"BP01",c:"Merah",l:3,r:1,p:2500,f:"Human/Avengers",ra:["R"],e:"[AUTO](FIELD) Jika 2 karakter di WING memiliki Lv asli yang sama, ubah semua R karakter Anda di WING menjadi 2."},
+{no:"BP01-030",nm:"[Leverage Up] Hulk Buster",s:"BP01",c:"Merah",l:1,r:1,p:500,f:"Machine",ra:["R"],e:"[ACTI](HAND) Pasangkan kartu ini dari tangan ke 1 karakter merah Lv1 milikmu di FIELD. [AUTO](FIELD) Lv karakter yang dipasangkan dengan kartu ini menjadi 6."},
+{no:"BP01-031",nm:"[Genius Burden] Ultron",s:"BP01",c:"Kuning",l:6,r:2,p:5000,f:"Machine",ra:["UR","MR"],e:"[AUTO](BATTLE) Semua karakter dengan trait [Machine] di WING mendapat Power +1000. Jika namanya mengandung [Ultron], mendapat tambahan R +1."},
+{no:"BP01-032",nm:"[Multiple Hits] Black Panther",s:"BP01",c:"Kuning",l:6,r:2,p:5000,f:"Human/Avengers/Wakanda",ra:["UR","MR"],e:"[UNIQUE]([AUTO/FIELD] Tidak diperbolehkan ada karakter lain dengan nama yang sama dengan kartu ini pada FIELD Anda. Efek ini tidak dapat hilang.) [TRIG](HAND) Saat karakter kuning Anda mengalami Both Lose, Anda bisa menaruh kartu ini dari tangan ke BATTLE. Jika dilakukan, 1 karakter lawan mendapat Power -1000 pada giliran ini."},
+{no:"BP01-033",nm:"[Covering Fire] War Machine",s:"BP01",c:"Kuning",l:4,r:3,p:2500,f:"Human/Avengers",ra:["UR","MR"],e:"[TRIG](BACK) Saat karakter dengan trait [Avengers] menyerang, 1 karakter lawan di BATTLE mendapat Power -500 pada giliran ini."},
+{no:"BP01-034",nm:"[Genius Burden] Iron Man",s:"BP01",c:"Kuning",l:1,r:2,p:500,f:"Human/Avengers",ra:["GR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, lihat 3 kartu teratas deck, ambil 1 kartu dengan trait [Machine] ke tangan dan buang sisanya."},
+{no:"BP01-035",nm:"[MK44-The Commander] Hulk Buster",s:"BP01",c:"Kuning",l:3,r:1,p:3500,f:"Machine",ra:["GR","MR"],e:"[COUNTER-ACTI](FIELD/ONCE PER TURN) Pasang kartu ini ke karakter di FIELD Anda. Jika dilakukan, RETREAT semua kartu lain yang terpasang. [TRIG](BATTLE) Saat kartu ini ditempelkan pada karakter di BATTLE, karakter tersebut dapat melakukan 1 kali BATTLE move."},
+{no:"BP01-036",nm:"[You Are Not Alone] Hulk",s:"BP01",c:"Kuning",l:5,r:1,p:4000,f:"Human/Avengers",ra:["GR"],e:"[AUTO](BATTLE) Kartu ini mendapat Power +X000. X adalah jumlah karakter kuning Anda di BATTLE selain kartu ini."},
+{no:"BP01-037",nm:"[Ultron Army] Ultron",s:"BP01",c:"Kuning",l:4,r:2,p:3500,f:"Machine",ra:["GR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Anda bisa meletakkan 1 karakter Lv2 atau lebih rendah dengan trait [Ultron] dari RETREAT ke FIELD."},
+{no:"BP01-038",nm:"[Buzzer Beater] Wasp",s:"BP01",c:"Kuning",l:1,r:2,p:500,f:"Human/Avengers",ra:["GR","MR"],e:"[TRIG](BATTLE) Saat giliran lawan dimulai, jika ada karakter kuning di FRONT tanpa nama [Wasp], Anda bisa menukar posisi dengan kartu ini. Jika dilakukan, kartu ini mendapat Power +2500 hingga akhir pertempuran."},
+{no:"BP01-039",nm:"[Stray Current] Thor",s:"BP01",c:"Kuning",l:3,r:1,p:3500,f:"Asgard/Avengers",ra:["GR","MR"],e:"[ACTI](HAND) Jika ada 3 karakter kuning, tempatkan kartu ini dari tangan ke BATTLE."},
+{no:"BP01-040",nm:"[Death And Rebirth] Ultron",s:"BP01",c:"Kuning",l:2,r:2,p:2500,f:"Machine",ra:["SR"],e:"[ACTI](HAND) Prune 3 karakter dengan nama berbeda dan trait [Machine] dari RETREAT ke VOID. Jika dilakukan, tempatkan kartu ini ke FIELD."},
+{no:"BP01-041",nm:"[Shadow Dance] Black Panther",s:"BP01",c:"Kuning",l:2,r:2,p:2500,f:"Human/Avengers/Wakanda",ra:["SR"],e:"[TRIG](BATTLE) Saat berhasil menyerang weakness lawan, ambil 1 kartu dari atas deck lalu buang 1 kartu dari tangan ke RETREAT."},
+{no:"BP01-042",nm:"[Red Room Legacy] Black Widow",s:"BP01",c:"Kuning",l:3,r:1,p:2500,f:"Human/Avengers",ra:["SR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, tempatkan 1 karakter kuning Lv2 atau lebih rendah dari RETREAT ke BATTLE."},
+{no:"BP01-043",nm:"[Reinstall] Vision",s:"BP01",c:"Kuning",l:3,r:1,p:3000,f:"Machine/Avengers",ra:["SR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, RETREAT 1 karakter dengan nama [Ultron]. Jika dilakukan, ambil 1 kartu dari atas deck lalu tempatkan 1 karakter Lv3 atau lebih rendah Anda."},
+{no:"BP01-044",nm:"[Break Cover] War Machine",s:"BP01",c:"Kuning",l:1,r:1,p:2000,f:"Machine/Avengers",ra:["SR"],e:"[TRIG](FIELD) Saat lawan menaruh karakter di giliran Anda, Anda bisa RETREAT kartu ini. Jika dilakukan, tukar karakter Lv4 atau lebih rendah bernama [Iron Man] dengan karakter di FRONT."},
+{no:"BP01-045",nm:"[Psycho-Projection] Vision",s:"BP01",c:"Kuning",l:2,r:1,p:2500,f:"Machine/Avengers",ra:["SR"],e:"[TRIG](BATTLE/ONCE PER TURN) Saat Power kartu ini meningkat, 1 karakter milik Anda di BATTLE dengan trait [Machine] mendapat Power +X pada giliran ini. X adalah jumlah Power yang baru saja bertambah pada kartu ini."},
+{no:"BP01-046",nm:"[Banner Assimilation] Hulk",s:"BP01",c:"Kuning",l:6,r:1,p:4000,f:"Human/Avengers",ra:["SR","MR"],e:"[AUTO](HAND) Kartu ini mendapat Lv -X. X adalah jumlah karakter dengan trait [Avengers] di FIELD."},
+{no:"BP01-047",nm:"[Central Control System] Iron Man",s:"BP01",c:"Kuning",l:1,r:1,p:500,f:"Human/Avengers",ra:["SR"],e:"[COUNTER-ACTI](FIELD/ONCE PER TURN) Lepaskan 1 kartu terpasang yang memiliki nama [Hulk Buster] ke arena BATTLE. Jika dilakukan, kartu itu mendapat Power +1000 pada giliran ini."},
+{no:"BP01-048",nm:"[Agent's Premonition] Black Widow",s:"BP01",c:"Kuning",l:2,r:1,p:1500,f:"Human/Avengers",ra:["R"],e:"[ACTI](BATTLE/ONCE PER TURN) Lihat 3 kartu teratas deck, susun kembali ke atas/bawah sesuai keinginan Anda."},
+{no:"BP01-049",nm:"[Personal Grudge] Hulk",s:"BP01",c:"Kuning",l:5,r:1,p:5000,f:"Human/Avengers",ra:["R"],e:"[AUTO](BATTLE) Di giliran Anda, jarak dengan karakter lawan di BACK menjadi 1."},
+{no:"BP01-050",nm:"[Superconductive Charge] Thor",s:"BP01",c:"Kuning",l:3,r:1,p:3500,f:"Asgard/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, 1 karakter lawan tidak bisa bergerak pada giliran ini."},
+{no:"BP01-051",nm:"[Aid Attack] Black Widow",s:"BP01",c:"Kuning",l:2,r:1,p:2000,f:"Human/Avengers",ra:["R"],e:"[TRIG](RETREAT) Saat kartu ini masuk ke RETREAT dari FIELD karena syarat pemanggilan, 1 karakter kuning Anda di FIELD mendapatkan Power +2000 pada giliran ini."},
+{no:"BP01-052",nm:"[Nemesis] Hulk Buster",s:"BP01",c:"Kuning",l:2,r:1,p:2500,f:"Machine",ra:["R"],e:"[TRIG](HAND) Saat karakter Lv4+ dengan trait [Machine] masuk ke FIELD, jika tidak ada [Hulk Buster], Anda bisa menaruh kartu ini dari tangan ke FIELD."},
+{no:"BP01-053",nm:"[Giant Killer] Hulk Buster",s:"BP01",c:"Kuning",l:3,r:1,p:3000,f:"Machine",ra:["R"],e:"[TRIG](BATTLE) Saat kartu ini menyerang, jika targetnya adalah karakter Lv4 atau lebih tinggi, kartu ini mendapatkan +1500 Power pada giliran ini."},
+{no:"BP01-054",nm:"[Ultron-Spawn Rebuild] Ultron",s:"BP01",c:"Kuning",l:1,r:1,p:1000,f:"Machine",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Anda bisa membuang 1 karakter dengan trait [Machine] dari tangan. Jika dilakukan, kembalikan 1 karakter Lv4 atau lebih tinggi bernama [Ultron] dari RETREAT ke tangan Anda."},
+{no:"BP01-055",nm:"[Break New Ground] Wasp",s:"BP01",c:"Kuning",l:1,r:1,p:1000,f:"Human/Avengers",ra:["R"],e:"[AUTO](BATTLE) Untuk setiap 3000 Power karakter lawan di FRONT, kartu ini mendapat R +1."},
+{no:"BP01-056",nm:"[Melee Combat] Thor",s:"BP01",c:"Kuning",l:4,r:1,p:4000,f:"Asgard/Avengers",ra:["R"],e:"[AUTO](BATTLE) Jika karakter lawan di FRONT memiliki R -1, kartu ini mendapat Power +1500."},
+{no:"BP01-057",nm:"[Fractured Recompile] Vision",s:"BP01",c:"Kuning",l:5,r:2,p:3500,f:"Machine/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, tempatkan 1 karakter Lv1 dengan trait [Machine] dari RETREAT Anda ke BASE Anda."},
+{no:"BP01-058",nm:"[Overclock Loading] Iron Man",s:"BP01",c:"Kuning",l:6,r:1,p:3500,f:"Human/Avengers",ra:["R"],e:"[AUTO](FIELD) Jika total R lawan di BATTLE 3 atau lebih, kartu ini mendapat Power +3500."},
+{no:"BP01-059",nm:"[Hunting Instinct] Black Panther",s:"BP01",c:"Kuning",l:6,r:3,p:4000,f:"Human/Avengers/Wakanda",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, kartu ini mendapat kemampuan [ASSAULT] ([AUTO/BATTLE] Kalau kartu ini menyerang dan memenangkan pertarungan, kartu ini dianggap menyerang weakness milik lawan.) pada giliran ini."},
+{no:"BP01-060",nm:"[Anti-Tank] War Machine",s:"BP01",c:"Kuning",l:2,r:1,p:2000,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, karakter musuh yang berada di FRONT mendapatkan -1000 Power pada giliran ini."},
+{no:"BP01-061",nm:"[Follow Shadow] New Black Panther",s:"BP01",c:"Biru",l:6,r:2,p:6000,f:"Human/Wakanda",ra:["UR"],e:"[COUNTER-ACTI](HAND) RETREAT 2 kartu tertutup milik Anda di BASE. Jika dilakukan, tukar kartu ini dari tangan dengan 1 karakter biru Lv4 atau lebih tinggi dengan nama berbeda di BATTLE."},
+{no:"BP01-062",nm:"[Freedom Will] Captain America",s:"BP01",c:"Biru",l:4,r:3,p:1000,f:"Human/Avengers",ra:["UR","MR","SEC"],e:"[COUNTER-ACTI](FIELD/ONCE PER TURN) Kartu ini melakukan 1 kali BATTLE-BASE move. Jika dilakukan, 1 karakter Anda di BATTLE mendapat Power +1000 pada giliran ini. [AUTO](BASE) Kartu ini tidak terpengaruh efek karakter Lv4 atau lebih rendah."},
+{no:"BP01-063",nm:"[Time Abduction] Loki",s:"BP01",c:"Biru",l:4,r:1,p:3500,f:"Asgard/Variant",ra:["UR","MR"],e:"[TRIG](HAND) Saat Power karakter Anda berkurang, Anda bisa Prune kartu ini dari tangan ke VOID. Jika dilakukan, Anda Prune 1 karakter lawan dengan Power 3500 atau lebih rendah dari BATTLE lawan ke VOID."},
+{no:"BP01-064",nm:"[Quantum Core] Ant-Man",s:"BP01",c:"Biru",l:4,r:1,p:4000,f:"Human/Avengers",ra:["GR"],e:"[AUTO](BATTLE) Pada Battle Phase, jika ada karakter biru lain di BATTLE, kartu ini mendapat Power +2500."},
+{no:"BP01-065",nm:"[Material Reload] Falcon",s:"BP01",c:"Biru",l:4,r:1,p:5500,f:"Human/Avengers",ra:["GR","MR"],e:"[TRIG](RETREAT) Saat kartu ini masuk ke RETREAT karena kalah bertarung, tempatkan 2 kartu teratas deck secara tertutup ke BASE."},
+{no:"BP01-066",nm:"[Turn The Tide] Captain America",s:"BP01",c:"Biru",l:4,r:1,p:4500,f:"Human/Avengers",ra:["GR"],e:"[TRIG](HAND) Saat karakter Anda dengan Lv4 atau lebih rendah dan memiliki Trait [Human] masuk ke RETREAT dari BATTLE karena kalah bertarung atau efek kartu lawan, Prune kartu ini dari tangan ke VOID. Jika dilakukan, letakkan karakter yang kalah tersebut ke FIELD."},
+{no:"BP01-067",nm:"[Hostile Focus] Winter Soldier",s:"BP01",c:"Biru",l:3,r:1,p:4000,f:"Human/Avengers",ra:["GR"],e:"[TRIG](FIELD/ONCE PER TURN) Saat karakter lawan menyerang, Anda bisa mengganti target serangannya ke target lain yang valid (Anda yang memilih)."},
+{no:"BP01-068",nm:"[Wakanda Forever] New Black Panther",s:"BP01",c:"Biru",l:6,r:2,p:4500,f:"Human/Wakanda",ra:["GR"],e:"[TRIG](RETREAT) Saat kartu ini masuk ke RETREAT karena kalah bertarung, jika karakter pemenang memiliki trait [Human], RETREAT karakter tersebut."},
+{no:"BP01-069",nm:"[Fantastic Calling] Human Torch",s:"BP01",c:"Biru",l:4,r:1,p:1000,f:"Human/Fantastic Four",ra:["GR"],e:"[ACTI](FIELD/ONCE PER TURN) Tukar 1 karakter LvX +1 dari tangan dengan 1 karakter Anda di BATTLE (selain kartu ini). X adalah Lv karakter tersebut. Jika dilakukan, tarik 1 kartu lalu kembalikan kartu ini ke bawah deck."},
+{no:"BP01-070",nm:"[Time Guide] Loki",s:"BP01",c:"Biru",l:3,r:1,p:1000,f:"Asgard/Variant",ra:["SR"],e:"[TRIG](FIELD/ONCE PER TURN) Saat karakter biru masuk ke FIELD, Anda bisa menaruh 1 kartu teratas deck secara tertutup ke BASE."},
+{no:"BP01-071",nm:"[Shift] New Black Panther",s:"BP01",c:"Biru",l:5,r:1,p:5000,f:"Human/Wakanda",ra:["SR"],e:"[AUTO](FRONT) Kartu ini mendapat Power +1000. [AUTO](WING) Kartu ini mendapat R +2."},
+{no:"BP01-072",nm:"[Force Field] Invisible Woman",s:"BP01",c:"Biru",l:4,r:2,p:3000,f:"Human/Fantastic Four",ra:["SR","MR"],e:"[TRIG](HAND) Saat weakness Anda diserang, Anda bisa Prune kartu ini dari tangan ke VOID. Jika dilakukan, kembalikan 1 karakter tanpa nama [Invisible Woman] dari RETREAT ke bawah deck dan 1 karakter lawan di BATTLE mendapat R -2 pada giliran ini."},
+{no:"BP01-073",nm:"[Fantastic Perfusion] Human Torch",s:"BP01",c:"Biru",l:4,r:2,p:4000,f:"Human/Fantastic Four",ra:["SR","MR"],e:"[TRIG](FIELD/ONCE PER TURN) Saat Anda mengembalikan kartu ke bawah deck, kartu ini mendapat R +1 dan Power +X000. X adalah jumlah kartu dengan trait [Fantastic Four] di FIELD."},
+{no:"BP01-074",nm:"[Genius Burden] Mr. Fantastic",s:"BP01",c:"Biru",l:4,r:4,p:2000,f:"Human/Fantastic Four",ra:["SR","MR"],e:"[COUNTER-ACTI](BACK/ONCE PER TURN) Jika jumlah kartu di tangan adalah 4, tempatkan 1 karakter Lv4 dari tangan ke FIELD, jika tidak kembalikan 1 karakter dari RETREAT ke bawah deck."},
+{no:"BP01-075",nm:"[Power Support] The Thing",s:"BP01",c:"Biru",l:4,r:1,p:5000,f:"Human/Fantastic Four",ra:["SR","MR"],e:"[AUTO](FIELD) Semua karakter Anda dengan trait [Fantastic Four] di tangan mendapat Lv -1."},
+{no:"BP01-076",nm:"[The End Of Time] Loki",s:"BP01",c:"Biru",l:1,r:1,p:500,f:"Asgard/Variant",ra:["SR"],e:"[AUTO](FIELD) Kartu ini mendapat Power +X000. X adalah jumlah karakter bernama [Loki] di RETREAT."},
+{no:"BP01-077",nm:"[I Need You] Captain America",s:"BP01",c:"Biru",l:3,r:1,p:3500,f:"Human/Avengers",ra:["SR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, tarik 1 kartu dari deck. Jika dilakukan, tempatkan kartu teratas deck secara tertutup ke BASE."},
+{no:"BP01-078",nm:"[Deadly Airdrop] Falcon",s:"BP01",c:"Biru",l:2,r:1,p:2000,f:"Human/Avengers",ra:["R"],e:"[TRIG](RETREAT) Saat masuk RETREAT karena kalah, Anda bisa melihat 1 kartu teratas di deck. Jika itu karakter biru Lv4, tempatkan ke BASE, jika tidak buang ke RETREAT."},
+{no:"BP01-079",nm:"[Eagle's Gaze] Hawkeye",s:"BP01",c:"Biru",l:1,r:2,p:500,f:"Human/Avengers",ra:["R"],e:"[AUTO](FIELD) Jika lawan memiliki karakter Power 5000 atau lebih di FIELD, karakter Anda di BACK mendapat R +1."},
+{no:"BP01-080",nm:"[Martyrdom] Captain America",s:"BP01",c:"Biru",l:3,r:1,p:3000,f:"Human/Avengers",ra:["R"],e:"[TRIG](HAND) Saat karakter lawan Lv3 menyerang, jika total Lv di BATTLE milik Anda lebih rendah, Anda bisa Prune kartu ini dari tangan ke VOID. Jika dilakukan, RETREAT karakter lawan Lv3 tersebut."},
+{no:"BP01-081",nm:"[Quantum Entanglement] Ant-Man",s:"BP01",c:"Biru",l:2,r:1,p:2000,f:"Human/Avengers",ra:["R"],e:"[TRIG](HAND) Saat karakter biru Anda diserang, Anda bisa pasang kartu ini ke karakter penyerang lawan. [AUTO](FIELD) R karakter yang dipasang menjadi 1."},
+{no:"BP01-082",nm:"[Sensory Deprivation] Daredevil",s:"BP01",c:"Biru",l:3,r:1,p:3500,f:"Human/The Defenders",ra:["R"],e:"[AUTO](BATTLE) Karakter lawan dengan trait [Human] di FRONT mendapat Power -500."},
+{no:"BP01-083",nm:"[Freedom Watch] New Captain America",s:"BP01",c:"Biru",l:3,r:2,p:1500,f:"Human/Avengers",ra:["R"],e:"[COUNTER]([AUTO/HAND] Kartu ini dapat digunakan pada COUNTER PHASE atau COUNTER STEP.)"},
+{no:"BP01-084",nm:"[Freedom View] New Captain America",s:"BP01",c:"Biru",l:1,r:1,p:1000,f:"Human/Avengers",ra:["R"],e:"[AUTO](BATTLE) Jika jumlah karakter di kedua BATTLE sama, karakter Anda di FRONT mendapat R +1."},
+{no:"BP01-085",nm:"[Void Banish] Scarlet Witch",s:"BP01",c:"Biru",l:3,r:2,p:2500,f:"Mutant/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat giliran Anda berakhir, Anda bisa Prune 1 karakter dari RETREAT milik Anda ke VOID. Jika dilakukan, salah satu karakter di FIELD Anda dapat melakukan BATTLE-BASE move."},
+{no:"BP01-086",nm:"[Tactical Instruction] Daredevil",s:"BP01",c:"Biru",l:4,r:1,p:4500,f:"Human/The Defenders",ra:["R"],e:"[AUTO](FIELD) Karakter dengan trait [Human] di FRONT mendapat Power +500."},
+{no:"BP01-087",nm:"[Flash Arrow] Hawkeye",s:"BP01",c:"Biru",l:2,r:3,p:500,f:"Human/Avengers",ra:["R"],e:"[COUNTER-ACTI](BATTLE/ONCE PER TURN) Buang 1 karakter dari tangan Anda yang memiliki trait [Avengers] ke RETREAT. Jika dilakukan, 1 karakter musuh di BATTLE mendapatkan -1000 Power pada giliran ini."},
+{no:"BP01-088",nm:"[Radar Sense] Daredevil",s:"BP01",c:"Biru",l:3,r:1,p:2500,f:"Human/The Defenders",ra:["R"],e:"[AUTO](BATTLE) Jika lawan memiliki karakter Power 5000 atau lebih di BATTLE, kartu ini mendapat R +3."},
+{no:"BP01-089",nm:"[Quantum Realm] Ant-Man",s:"BP01",c:"Biru",l:3,r:1,p:2500,f:"Human/Avengers",ra:["R"],e:"[AUTO](BATTLE) Jika lawan hanya memiliki 1 karakter Lv6, kartu ini mendapat R +1 dan karakter Lv6 itu mendapat R -1."},
+{no:"BP01-090",nm:"[Freedom Decision] Captain America",s:"BP01",c:"Biru",l:3,r:1,p:500,f:"Human/Avengers",ra:["R"],e:"[ACTI](HAND) Prune kartu ini dari tangan ke VOID. Jika dilakukan, Anda melewati Battle Phase dan 1 karakter lawan mendapat Power -X pada giliran ini. X adalah total semua Power karakter Anda di BATTLE."},
+{no:"BP01-091",nm:"[Hacker Arrow] Hawkeye",s:"BP01",c:"Hijau",l:6,r:4,p:5000,f:"Human/Avengers",ra:["UR","MR"],e:"[TRIG](FIELD/ONCE PER TURN) Saat kartu tertutup milik lawan di BASE bertambah, jika hanya ada karakter hijau di FIELD, Anda bisa buang 1 kartu dari tangan ke RETREAT. Jika dilakukan, RETREAT 2 kartu set lawan dari BASE."},
+{no:"BP01-092",nm:"[Quantum Superposition] Ant-Man",s:"BP01",c:"Hijau",l:2,r:2,p:1500,f:"Human/Avengers",ra:["UR","MR"],e:"[TRIG](RETREAT) Saat kartu ini masuk RETREAT dari FIELD, Prune kartu ini dari RETREAT ke VOID. Jika dilakukan, dan Anda punya 4 kartu atau lebih di BASE, Anda bisa menaruh 1 karakter dengan trait [Avengers] dari tangan ke BASE."},
+{no:"BP01-093",nm:"[Thunder Ally] Mighty Thor",s:"BP01",c:"Hijau",l:4,r:3,p:3500,f:"Human/Asgard",ra:["UR","MR"],e:"[TRIG](WING) Saat kartu ini menyerang, jika ada karakter dengan Power 4000 atau kurang di WING yang belum menyerang, kartu ini mendapat Power +X pada giliran ini. X adalah Power karakter di WING tersebut. Jika dilakukan, karakter WING tersebut tidak dapat menyerang pada giliran ini."},
+{no:"BP01-094",nm:"[God Of Story] Loki",s:"BP01",c:"Hijau",l:6,r:1,p:6500,f:"Asgard",ra:["GR"],e:"[TRIG](FIELD) Saat giliranmu berakhir, Anda bisa RETREAT 1 karakter lawan LvX atau X kartu set."},
+{no:"BP01-095",nm:"[Sacrifice For Justice] Captain America",s:"BP01",c:"Hijau",l:3,r:1,p:4000,f:"Human/Avengers",ra:["GR"],e:"[TRIG](RETREAT) Saat masuk RETREAT karena efek discard, Anda bisa Prune kartu ini dari RETREAT ke VOID. Jika dilakukan, pindahkan 1 karakter lawan Lv3 atau lebih rendah dari BATTLE ke BASE lawan."},
+{no:"BP01-096",nm:"[I Am The Shield] New Captain America",s:"BP01",c:"Hijau",l:3,r:1,p:4000,f:"Human/Avengers",ra:["GR","MR"],e:"[COUNTER-ACTI](FIELD/ONCE PER TURN) Jika Anda punya karakter dengan nama [Captain America] di BATTLE selain kartu ini, buang 1 kartu dari tangan, lalu tukar kartu ini dari FIELD dengan kartu tersebut."},
+{no:"BP01-097",nm:"[Original Mutant] Namor",s:"BP01",c:"Hijau",l:3,r:1,p:4000,f:"Mutant/Atlantis",ra:["GR","MR"],e:"[AUTO](BATTLE) R karakter di FRONT menjadi 3."},
+{no:"BP01-098",nm:"[Chaos Clairvoyance] Scarlet Witch",s:"BP01",c:"Hijau",l:1,r:2,p:500,f:"Mutant/Avengers",ra:["GR"],e:"[TRIG](RETREAT) Saat kartu ini masuk RETREAT karena efek discard, Anda bisa pasang kartu ini ke karakter lawan di FIELD dan RETREAT semua kartu terpasang lainnya. [AUTO](FIELD) Karakter yang dipasang kartu ini hanya bisa menyerang karakter dengan Lv6."},
+{no:"BP01-099",nm:"[Pym Arrow] Hawkeye",s:"BP01",c:"Hijau",l:3,r:2,p:2500,f:"Human/Avengers",ra:["GR"],e:"[TRIG](FIELD) Saat karakter lawan Lv4 atau lebih tinggi masuk ke FIELD, Anda bisa buang 2 kartu di tangan. Jika dilakukan, Prune kartu ini dan 1 karakter lawan di FIELD."},
+{no:"BP01-100",nm:"[Hearing Disarm] Daredevil",s:"BP01",c:"Hijau",l:1,r:1,p:500,f:"Human/The Defenders",ra:["SR"],e:"[COUNTER]([AUTO/HAND] Kartu ini dapat digunakan pada COUNTER PHASE atau COUNTER STEP.) [TRIG](FIELD) Saat kartu ini memasuki FIELD, satu karakter lawan di FIELD mendapatkan R -1 pada giliran ini."},
+{no:"BP01-101",nm:"[MIRV Arrow] Hawkeye",s:"BP01",c:"Hijau",l:3,r:2,p:2000,f:"Human/Avengers",ra:["SR","MR"],e:"[TRIG](FIELD/ONCE PER TURN) Saat weakness Anda diserang, Anda bisa RETREAT hingga 3 kartu set dari BASE. Jika dilakukan, tempatkan 1 karakter LvX dari tangan ke BATTLE. X adalah jumlah kartu yang di-RETREAT oleh efek ini."},
+{no:"BP01-102",nm:"[Quantum Collapse] Ant-Man",s:"BP01",c:"Hijau",l:6,r:1,p:6000,f:"Human/Avengers",ra:["SR"],e:"[TRIG](RETREAT) Saat masuk RETREAT dari FIELD, Prune kartu ini dari RETREAT ke VOID. Jika dilakukan, Prune 1 karakter lawan Lv3 atau lebih rendah dari BASE ke VOID."},
+{no:"BP01-103",nm:"[Tactical Intimidation] Winter Soldier",s:"BP01",c:"Hijau",l:3,r:1,p:4000,f:"Human/Avengers",ra:["SR"],e:"[TRIG](FIELD) Saat kartu ini melakukan BATTLE-BASE move, Anda bisa memindahkan karakter lawan dari FRONT ke BACK."},
+{no:"BP01-104",nm:"[Time Reversal] Scarlet Witch",s:"BP01",c:"Hijau",l:6,r:3,p:4000,f:"Mutant/Avengers",ra:["SR"],e:"[TRIG](RETREAT) Saat masuk RETREAT karena discard, Anda bisa mengembalikan masing-masing 1 karakter dengan Lv sama dari kedua BATTLE ke atas deck. [ACTI](BATTLE/ONCE PER TURN) Pindahkan 1 karakter Anda dari RETREAT ke bawah deck Anda."},
+{no:"BP01-105",nm:"[Mental Synchronization] New Black Panther",s:"BP01",c:"Hijau",l:3,r:1,p:3500,f:"Human/Wakanda",ra:["SR"],e:"[TRIG](FIELD/ONCE PER TURN) Saat karakter Anda menyerang target Power 5000 atau lebih, karakter itu mendapat Power +1000."},
+{no:"BP01-106",nm:"[Search For Comrade] Falcon",s:"BP01",c:"Hijau",l:1,r:2,p:500,f:"Human/Avengers",ra:["SR","MR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Anda bisa buang 1 karakter hijau dari tangan ke RETREAT. Jika dilakukan, tarik 2 kartu dari deck Anda."},
+{no:"BP01-107",nm:"[Freedom Radiance] Captain America",s:"BP01",c:"Hijau",l:3,r:1,p:3000,f:"Human/Avengers",ra:["SR"],e:"[AUTO](BATTLE) Jika ada karakter hijau dengan Power 4000 atau lebih di BATTLE Anda, semua karakter lawan Lv4 atau lebih rendah mendapat Power -500. [TRIG](RETREAT) Saat masuk ke RETREAT karena discard, Anda bisa menaruh kartu ini ke BASE secara tertutup."},
+{no:"BP01-108",nm:"[Airbag Arrow] Hawkeye",s:"BP01",c:"Hijau",l:3,r:2,p:2000,f:"Human/Avengers",ra:["R"],e:"[ACTI](FIELD/ONCE PER TURN) Buang 1 karakter Anda dengan trait [Avengers] dari tangan. Jika dilakukan, tempatkan 2 kartu teratas deck ke BASE secara tertutup."},
+{no:"BP01-109",nm:"[Hearing Position] Daredevil",s:"BP01",c:"Hijau",l:1,r:1,p:500,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat masuk ke FIELD, lawan menaruh 1 kartu dari tangan ke BASE tertutup."},
+{no:"BP01-110",nm:"[God of Lies] Loki",s:"BP01",c:"Hijau",l:1,r:1,p:500,f:"Asgard",ra:["R"],e:"[AUTO](BASE) Jika tidak ada karakter di BATTLE, Lv kartu ini menjadi 5."},
+{no:"BP01-111",nm:"[Quantum Gate] Ant-Man",s:"BP01",c:"Hijau",l:3,r:2,p:2500,f:"Human/Avengers",ra:["R"],e:"[TRIG](RETREAT) Saat masuk RETREAT dari FIELD, Prune kartu ini ke VOID. Jika dilakukan, 1 karakter Anda dapat melakukan BATTLE-BASE move."},
+{no:"BP01-112",nm:"[Darkness Surrounds] Daredevil",s:"BP01",c:"Hijau",l:1,r:1,p:2000,f:"Human/The Defenders",ra:["R"],e:"[TRIG](FIELD) Saat masuk FIELD, RETREAT 1 kartu set lawan di BASE."},
+{no:"BP01-113",nm:"[Suddenly] Falcon",s:"BP01",c:"Hijau",l:6,r:1,p:6000,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD/ONCE PER TURN) Saat karakter lawan di BACK menyerang, kartu ini dapat melakukan BATTLE-BASE move."},
+{no:"BP01-114",nm:"[Hit & Run] Winter Soldier",s:"BP01",c:"Hijau",l:3,r:2,p:2000,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini melakukan BATTLE-BASE move, 1 karakter lawan di BATTLE mendapat Power -1000 pada giliran ini."},
+{no:"BP01-115",nm:"[Weaver of Lies] Loki",s:"BP01",c:"Hijau",l:6,r:1,p:6000,f:"Asgard",ra:["R"],e:"[AUTO](FIELD) Karakter lawan di BACK mendapat Lv -2."},
+{no:"BP01-116",nm:"[Rearguard Retreat] Falcon",s:"BP01",c:"Hijau",l:3,r:1,p:3500,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat karakter lawan di WING menyerang, Anda bisa memindahkan 1 karakter Anda dari BATTLE ke BASE. Jika dilakukan, kartu ini melakukan BATTLE-BASE move."},
+{no:"BP01-117",nm:"[Ancestral Blessing] New Black Panther",s:"BP01",c:"Hijau",l:1,r:2,p:1500,f:"Human/Wakanda",ra:["R"],e:"[AUTO](BATTLE) Jika warna karakter lawan di FRONT berbeda, karakter Anda di FRONT mendapat R +1."},
+{no:"BP01-118",nm:"[Run & Search] Winter Soldier",s:"BP01",c:"Hijau",l:3,r:1,p:2500,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini melakukan BATTLE-BASE move, Anda ambil 1 kartu dari atas deck, lalu buang 1 kartu dari tangan ke RETREAT."},
+{no:"BP01-119",nm:"[True Justice] Captain America",s:"BP01",c:"Hijau",l:6,r:1,p:6000,f:"Human/Avengers",ra:["R","MR"],e:"[TRIG](RETREAT) Apabila kartu ini masuk ke RETREAT akibat dibuang dari tangan akibat efek kartu, Anda bisa menukar kartu ini dengan 1 karakter Lv6 Anda di FIELD."},
+{no:"BP01-120",nm:"[Quantum Tunneling] Ant-Man",s:"BP01",c:"Hijau",l:3,r:1,p:1500,f:"Human/Avengers",ra:["R"],e:"[TRIG](RETREAT) Saat masuk ke RETREAT dari FIELD, Prune kartu ini dari RETREAT ke VOID. Jika dilakukan, kembalikan 1 karakter Lv3 tanpa nama [Ant-Man] dari VOID ke atas deck."},
+{no:"EB01-006",nm:"[Super Strike] Hulk",s:"PR",c:"Merah",l:6,r:1,p:6000,f:"-",ra:["ER"],e:"[TRIG](BATTLE) Saat karakter musuh dengan Lv6 memasuki FIELD, karakter tersebut dan karakter ini mendapatkan Power -1000 pada giliran ini."},
+{no:"EB01-007",nm:"[Spiritual Resonance] Vision",s:"PR",c:"Kuning",l:3,r:3,p:2500,f:"Machine/Avengers",ra:["ER"],e:"[ACTI](BATTLE/ONCE PER TURN) RETREAT 1 karakter Anda dengan Lv3 dan Trait [Avengers] dari FIELD. Jika dilakukan, letakkan 1 karakter Lv3 dan Trait [Avengers] dari tangan ke BATTLE."},
+{no:"EB01-008",nm:"[Chaos Origins] Scarlet Witch",s:"PR",c:"Biru",l:6,r:3,p:500,f:"Mutant/Avengers",ra:["ER"],e:"[TRIG](FIELD/ONCE PER TURN) Saat kartu ini melakukan BATTLE-BASE move, karakter ini mendapatkan Power +X000 pada giliran ini, dimana X adalah jumlah karakter Anda yang ada di VOID."},
+{no:"EB01-009",nm:"[Take on Two] Winter Soldier",s:"PR",c:"Hijau",l:3,r:2,p:3000,f:"Human/Avengers",ra:["ER"],e:"[TRIG](BATTLE) Saat karakter ini memenangkan pertarungan, Anda bisa RETREAT karakter ini dan 1 karakter musuh dengan Lv3 atau lebih rendah di BATTLE musuh."},
+{no:"PB01-001",nm:"[Destroyer] Drax",s:"PB01",c:"Merah",l:6,r:1,p:6000,f:"GOTG",ra:["PR"],e:"[TRIG](BATTLE) Saat karakter ini memenangkan pertarungan, semua karakter dengan tipe [GOTG] di BATTLE selain karakter ini, mendapatkan R +1 pada giliran ini."},
+{no:"PB01-002",nm:"[My Rabbit] Rocket Raccoon",s:"PB01",c:"Kuning",l:3,r:3,p:500,f:"GOTG",ra:["PR"],e:"[TRIG](BATTLE) Saat karakter ini menyerang, jika pada giliran ini target serangan ini sudah diserang sebelumnya, RETREAT target tersebut."},
+{no:"PB01-003",nm:"[Galaxy Dancer] Star-Lord",s:"PB01",c:"Biru",l:4,r:2,p:2500,f:"GOTG",ra:["PR"],e:"[UNIQUE]([AUTO/FIELD] Tidak diperbolehkan ada karakter lain dengan nama yang sama dengan kartu ini pada FIELD Anda. Efek ini tidak dapat hilang.) [TRIG](BASE) Saat karakter musuh memasuki FIELD karena efek, Anda bisa Prune kartu ini dari BASE ke VOID. Jika dilakukan, pindahkan karakter tersebut ke bawah deck lawan."},
+{no:"PB01-004",nm:"[Dangerous Sisters] Nebula",s:"PB01",c:"Biru",l:1,r:1,p:500,f:"GOTG",ra:["PR"],e:"[AUTO](BATTLE) Karakter ini mendapatkan R +X dan Power +X000, dimana X adalah jumlah karakter dengan tipe [GOTG] di BATTLE selain karakter ini."},
+{no:"PB01-005",nm:"[Dangerous Sisters] Gamora",s:"PB01",c:"Hijau",l:5,r:2,p:4000,f:"GOTG",ra:["PR"],e:"[ACTI](HAND) Jika Anda memiliki 2 atau lebih karakter dengan tipe [GOTG] di BATTLE, letakkan karakter ini dari tangan ke FIELD."},
+{no:"PB01-006",nm:"[I Am Groot] Groot",s:"PB01",c:"Hijau",l:2,r:1,p:7500,f:"GOTG",ra:["PR"],e:"[AUTO](BATTLE) Karakter ini mendapatkan Power -X000, dimana X adalah jumlah karakter di tangan Anda."},
+{no:"PB01-007",nm:"[Preemptive Strike] Iron Man",s:"PB01",c:"Merah",l:3,r:2,p:1500,f:"Human/Avengers",ra:["PR"],e:"[TRIG](BATTLE) Saat karakter ini menyerang, apabila target serangannya memiliki Power lebih besar dari karakter ini, karakter tersebut mendapatkan -2000 Power pada giliran ini."},
+{no:"PB01-008",nm:"[Thunder Teleportation] Thor",s:"PB01",c:"Kuning",l:6,r:3,p:4000,f:"Asgard/Avengers",ra:["PR"],e:"[AUTO](HAND) Jika Anda hanya memiliki karakter kuning di BATTLE, karakter ini mendapatkan [COUNTER]([AUTO/HAND] Kartu ini dapat digunakan pada COUNTER PHASE atau COUNTER STEP)."},
+{no:"PB01-009",nm:"[Heaven Sent Troops] Hulk",s:"PB01",c:"Kuning",l:6,r:1,p:6000,f:"Human/Avengers",ra:["PR"],e:"[ACTI](HAND) RETREAT 6 kartu di BASE Anda, jika dilakukan letakkan kartu ini dari tangan ke FIELD."},
+{no:"PB01-010",nm:"[Blade In The Back] Captain America",s:"PB01",c:"Biru",l:4,r:0,p:4500,f:"Human/Avengers",ra:["PR"],e:"[ACTI](HAND) Jika jumlah kartu tertutup di BASE Anda lebih banyak dari musuh, letakkan kartu ini dari tangan ke BATTLE musuh. [TRIG](BATTLE) Saat karakter ini memasuki FIELD, RETREAT 1 karakter Anda dengan Power 4500 atau lebih rendah dari BATTLE."},
+{no:"PB01-011",nm:"[Astral Visitor] Doctor Strange",s:"PB01",c:"Hijau",l:3,r:2,p:2000,f:"Human/Avengers/Kamar-Taj",ra:["PR"],e:"[ACTI](VOID/ONCE PER TURN) Prune 1 karakter Anda dengan Lv4 atau lebih, dari RETREAT ke VOID. Jika dilakukan, letakkan karakter ini dari VOID ke FIELD Anda."},
+{no:"SD01-001",nm:"[Self-Destruct Program] Iron Man",s:"SD01",c:"Merah",l:6,r:3,p:3500,f:"Human/Avengers",ra:["UR","MR","SEC"],e:"[TRIG](BATTLE/ONCE PER TURN) Saat kartu ini dipasang oleh kartu lain, jika ada karakter Lv5 atau lebih tinggi di BATTLE musuh, Anda dapat RETREAT semua kartu yang terpasang pada kartu ini. Setelah itu, Prune 1 karakter musuh LvX atau lebih rendah dari FIELD musuh ke VOID. X adalah total Lv kartu terpasang yang di-RETREAT karena efek ini."},
+{no:"SD01-002",nm:"[MK44-The Long Range] Hulk Buster",s:"SD01",c:"Merah",l:6,r:2,p:2500,f:"Machine",ra:["GR"],e:"[COUNTER-ACTI](FIELD/ONCE PER TURN) Pasang kartu ini ke 1 karakter sendiri di FIELD, jika dilakukan RETREAT 1 kartu lain yang terpasang pada karakter tersebut. [AUTO](FIELD) Karakter yang dipasang kartu ini mendapatkan R +2 dan Power +2500."},
+{no:"SD01-003",nm:"[Fire Support] War Machine",s:"SD01",c:"Merah",l:2,r:1,p:3500,f:"Human/Avengers",ra:["GR"],e:"[TRIG](BATTLE/ONCE PER TURN) Saat R atau Power karakter ini meningkat, satu karakter di BATTLE musuh mendapatkan -1000 Power pada giliran ini."},
+{no:"SD01-004",nm:"[Ordnance Barrage] War Machine",s:"SD01",c:"Merah",l:3,r:2,p:2000,f:"Human/Avengers",ra:["SR"],e:"[AUTO](BATTLE) Selama Battle Phase musuh, kartu ini mendapatkan +X000 Power, di mana X adalah jumlah total karakter musuh di arena BATTLE."},
+{no:"SD01-005",nm:"[Hero Call] Thor",s:"SD01",c:"Merah",l:3,r:1,p:3500,f:"Asgard/Avengers",ra:["SR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Anda dapat RETREAT 2 kartu dari BASE. Jika dilakukan dan semua kartu yang di-RETREAT oleh efek ini berwarna merah, ambil 2 kartu dari atas deck."},
+{no:"SD01-006",nm:"[Hourglass Bite] Black Widow",s:"SD01",c:"Merah",l:5,r:3,p:2500,f:"Human/Avengers",ra:["SR"],e:"[ACTI](HAND) Buang kartu ini dari tangan Anda ke RETREAT. Jika dilakukan, RETREAT 1 karakter dari BATTLE, 1 kartu dari BASE Anda, dan 1 karakter Lv5 atau lebih rendah dari BATTLE musuh."},
+{no:"SD01-007",nm:"[Ordnance Drop] Iron Man",s:"SD01",c:"Merah",l:2,r:1,p:2500,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Anda dapat membuang 1 kartu dari tangan Anda ke RETREAT. Setelah melakukannya, 1 karakter musuh Lv5 atau lebih rendah di FIELD mendapatkan -2000 Power pada giliran ini."},
+{no:"SD01-008",nm:"[Rage Exhaustion] Hulk",s:"SD01",c:"Merah",l:5,r:1,p:3500,f:"Human/Avengers",ra:["R"],e:"[AUTO](HAND) Jika tidak ada pemain yang memiliki karakter Lv4 atau lebih tinggi di FIELD, Lv kartu ini -2."},
+{no:"SD01-009",nm:"[MK44-The Pulse] Hulk Buster",s:"SD01",c:"Merah",l:4,r:2,p:2500,f:"Machine",ra:["R"],e:"[ACTI](HAND) Buang 1 kartu dari tangan Anda selain kartu ini ke RETREAT. Jika dilakukan, pasang kartu ini dari tangan ke 1 karakter di FIELD Anda. [TRIG](RETREAT) Saat kartu ini ditempatkan di RETREAT, tunjukkan 1 kartu di BASE Anda. Jika dilakukan, tempatkan 2 karakter dengan Lv yang sama secara tertutup dari RETREAT ke BASE Anda."},
+{no:"SD01-010",nm:"[The Red Room Wraith] Black Widow",s:"SD01",c:"Merah",l:3,r:1,p:3500,f:"Human/Avengers",ra:["R"],e:"[ACTI](HAND) Pasang kartu ini dari tanganmu ke 1 karakter di FIELD yang memiliki trait [Human]. [AUTO](FIELD) Karakter yang dipasang kartu ini mendapatkan R +1."},
+{no:"SD01-011",nm:"[The Retaliator] Black Panther",s:"SD01",c:"Merah",l:6,r:1,p:5000,f:"Human/Avengers/Wakanda",ra:["R"],e:"[COUNTER]([AUTO/HAND] Kartu ini dapat dipanggil pada saat tahapan counter atau langkah counter.)"},
+{no:"SD01-014",nm:"[The Retaliator] Iron Man",s:"SD01",c:"Merah",l:3,r:1,p:2500,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, jika karakter Anda lebih sedikit dari karakter di BATTLE lawan, satu karakter Lv3 atau lebih rendah di BATTLE musuh mendapatkan -2000 Power pada giliran ini."},
+{no:"SD01-015",nm:"[The Devastator] Hulk",s:"SD01",c:"Merah",l:1,r:1,p:1000,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Prune 1 karakter merah Anda dari RETREAT ke VOID. Jika dilakukan, Anda mengambil 1 kartu dari atas deck."},
+{no:"SD01-016",nm:"[MK44-The Brawler] Hulk Buster",s:"SD01",c:"Merah",l:1,r:1,p:1000,f:"Machine",ra:["R"],e:"[COUNTER-ACTI](FIELD/ONCE PER TURN) Pasang kartu ini ke 1 karakter Anda di FIELD, jika dilakukan RETREAT kartu lain yang terpasang pada karakter tersebut selain kartu ini. [AUTO](FIELD) Karakter yang terpasang kartu ini mendapatkan +1000 Power."},
+{no:"SD01-017",nm:"[Thunder Wrath] Thor",s:"SD01",c:"Merah",l:6,r:2,p:5000,f:"Asgard/Avengers",ra:["R"],e:"[AUTO](BATTLE) Jika kartu ini adalah satu-satunya kartu di BATTLE Anda, kartu ini memperoleh kemampuan [DOUBLE ATTACK] ([AUTO/BATTLE] Kartu ini memiliki kesempatan dua kali untuk menyerang.)"},
+{no:"SD01-018",nm:"[Cosmic Legacy] Silver Surfer",s:"SD01",c:"Merah",l:3,r:2,p:2500,f:"Zenn-La",ra:["R"],e:"[TRIG](RETREAT) Saat kartu ini masuk ke RETREAT sebagai syarat pemanggilan, Anda bisa menaruh kartu teratas deck tertutup ke BASE. Jika dilakukan, kembalikan kartu ini ke bawah deck."},
+{no:"SD02-001",nm:"[Hive Processor] Ultron",s:"SD02",c:"Kuning",l:6,r:1,p:500,f:"Machine",ra:["UR","MR","SEC"],e:"[UNIQUE]([AUTO/FIELD] Tidak diperbolehkan ada karakter lain dengan nama yang sama dengan kartu ini pada FIELD Anda. Efek ini tidak dapat hilang.) [AUTO](BATTLE) Kartu ini mendapatkan +X000 Power, di mana X adalah jumlah kartu tertutup di BASE Anda. [AUTO](BATTLE) Jika ada 9 atau lebih karakter kuning di RETREAT Anda, semua karakter Lv1 di BATTLE Anda dengan Trait [Machine] mendapatkan +X000 Power, di mana X adalah jumlah kartu tertutup di BASE Anda."},
+{no:"SD02-002",nm:"[Phase-Driven] Vision",s:"SD02",c:"Kuning",l:6,r:1,p:6000,f:"Machine/Avengers",ra:["GR"],e:"[UNIQUE]([AUTO/FIELD] Tidak diperbolehkan ada karakter lain dengan nama yang sama dengan kartu ini pada FIELD Anda. Efek ini tidak dapat hilang.) [AUTO](BATTLE) Kartu ini mendapatkan R +X, di mana X adalah jumlah kartu tertutup di BASE Anda. [TRIG](BATTLE) Ketika karakter dengan Trait [Machine] di BATTLE Anda dikalahkan dan ditempatkan di RETREAT, tempatkan karakter tersebut kembali di BASE Anda dalam keadaan tertutup."},
+{no:"SD02-003",nm:"[Kinetic Redirection] Black Panther",s:"SD02",c:"Kuning",l:6,r:2,p:6000,f:"Human/Avengers/Wakanda",ra:["GR"],e:"[AUTO](FRONT) Kartu ini tidak akan RETREAT jika saling mengalahkan. [AUTO](BACK) Karakter FRONT musuh mendapatkan -500 Power."},
+{no:"SD02-004",nm:"[Tough Guardian] Hulk",s:"SD02",c:"Kuning",l:3,r:1,p:3000,f:"Human/Avengers",ra:["SR"],e:"[COUNTER]([AUTO/HAND] Kartu ini dapat dipanggil pada saat tahapan counter atau langkah counter.)"},
+{no:"SD02-005",nm:"[The Drone Surge] Ultron",s:"SD02",c:"Kuning",l:1,r:1,p:500,f:"Machine",ra:["SR"],e:"[ACTI](BASE/ONCE PER TURN) Buang 3 kartu teratas dari deck Anda. Jika dilakukan, ambil 1 kartu dari deck dan letakkan kartu ini secara tertutup di BASE Anda."},
+{no:"SD02-006",nm:"[Powered Armor] Iron Man",s:"SD02",c:"Kuning",l:4,r:1,p:3000,f:"Human/Avengers",ra:["SR"],e:"[TRIG](BATTLE) Saat kartu ini dipanggil ke FIELD, Anda dapat memasang 2 karakter Lv1 dengan Trait [Machine] ke kartu ini dari RETREAT Anda. [ACTI](BATTLE/ONCE PER TURN) Pindahkan kartu yang terpasang dari kartu ini ke BASE Anda."},
+{no:"SD02-007",nm:"[Unchained Fury] Red Hulk",s:"SD02",c:"Kuning",l:6,r:2,p:3000,f:"Human",ra:["R"],e:"[ACTI](HAND) Jika Anda hanya memiliki karakter kuning di RETREAT dengan jumlah 9 kartu atau lebih, letakkan kartu ini dari tangan ke FIELD Anda."},
+{no:"SD02-008",nm:"[System Anima] Vision",s:"SD02",c:"Kuning",l:1,r:1,p:500,f:"Machine/Avengers",ra:["R"],e:"[ACTI](BASE/ONCE PER TURN) 1 karakter di BATTLE Anda mendapatkan R +1 pada giliran ini. Jika dilakukan, tutup kartu ini."},
+{no:"SD02-009",nm:"[Cataclysm Protocol] Vision",s:"SD02",c:"Kuning",l:1,r:1,p:500,f:"Machine/Avengers",ra:["R"],e:"[ACTI](BASE/ONCE PER TURN) 1 karakter musuh di BATTLE musuh mendapatkan -1000 Power pada giliran ini. Jika dilakukan, tutup kartu ini."},
+{no:"SD02-010",nm:"[Salvage and Sortie] War Machine",s:"SD02",c:"Kuning",l:1,r:1,p:1500,f:"Human/Avengers",ra:["R"],e:"[TRIG](BATTLE) Saat kartu ini dipanggil ke FIELD, tempatkan 1 karakter Lv1 dengan Trait [Machine] dari RETREAT ke BASE Anda."},
+{no:"SD02-011",nm:"[Thunder Resonance] Thor",s:"SD02",c:"Kuning",l:3,r:1,p:1000,f:"Asgard/Avengers",ra:["R"],e:"[TRIG](BACK/ONCE PER TURN) Saat karakter Anda dengan Lv3 atau lebih rendah kalah dalam pertarungan, tunjukkan 1 kartu tertutup Anda dari BASE. Jika dilakukan dan kartu tertutup tersebut mempunyai Lv yang sama dengan karakter yang kalah, buka kartu tertutup tersebut."},
+{no:"SD02-014",nm:"[Giant Killer] Hulk Buster",s:"SD02",c:"Kuning",l:3,r:1,p:3000,f:"Machine",ra:["R"],e:"[TRIG](BATTLE) Saat kartu ini menyerang, jika targetnya adalah karakter Lv4 atau lebih tinggi, kartu ini mendapatkan +1500 Power pada giliran ini."},
+{no:"SD02-015",nm:"[Fractured Recompile] Vision",s:"SD02",c:"Kuning",l:5,r:2,p:3500,f:"Machine/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, tempatkan 1 karakter Lv1 dengan trait [Machine] dari RETREAT Anda ke BASE Anda."},
+{no:"SD02-016",nm:"[Hunting Instinct] Black Panther",s:"SD02",c:"Kuning",l:6,r:3,p:4000,f:"Human/Avengers/Wakanda",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, kartu ini mendapat kemampuan [ASSAULT] ([AUTO/BATTLE] Kalau kartu ini menyerang dan memenangkan pertarungan, kartu ini dianggap menyerang weakness milik lawan.) pada giliran ini."},
+{no:"SD02-017",nm:"[Anti-Tank] War Machine",s:"SD02",c:"Kuning",l:2,r:1,p:2000,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, karakter musuh yang berada di FRONT mendapatkan -1000 Power pada giliran ini."},
+{no:"SD02-018",nm:"[Melee Combat] Thor",s:"SD02",c:"Kuning",l:4,r:1,p:4000,f:"Asgard/Avengers",ra:["R"],e:"[AUTO](BATTLE) Jika karakter lawan di FRONT memiliki R -1, kartu ini mendapat Power +1500."},
+{no:"SD03-001",nm:"[Supreme Watcher] Captain America",s:"SD03",c:"Biru",l:6,r:1,p:500,f:"Human/Avengers",ra:["UR","MR","SEC"],e:"[COUNTER]([AUTO/HAND] Kartu ini dapat dipanggil pada saat tahapan counter atau langkah counter.) [TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, kartu ini mendapatkan Power +X pada giliran ini. X adalah Power salah satu karakter lawan di FIELD."},
+{no:"SD03-002",nm:"[Wing Gust] Falcon",s:"SD03",c:"Biru",l:3,r:1,p:3500,f:"Human/Avengers",ra:["GR"],e:"[TRIG](FIELD) Saat kartu ini ditempatkan di FIELD, pindahkan 1 karakter musuh Lv4 atau lebih rendah dari WING ke BASE musuh. Jika dilakukan, dan musuh memiliki 4 kartu atau lebih di BASE, letakkan karakter tersebut secara tertutup."},
+{no:"SD03-003",nm:"[Urgent Calls] Nick Fury",s:"SD03",c:"Biru",l:4,r:2,p:4000,f:"Human/S.H.I.E.L.D.",ra:["GR"],e:"[TRIG](FIELD) Saat kartu ini melakukan pergerakan BATTLE-BASE move, Anda bisa meletakkan 1 karakter dengan trait [Avengers] dari tangan ke BATTLE Anda. Jika dilakukan, RETREAT kartu ini pada akhir giliran."},
+{no:"SD03-004",nm:"[Cold Shadow] New Black Panther",s:"SD03",c:"Biru",l:3,r:1,p:3500,f:"Human/Wakanda",ra:["SR"],e:"[AUTO](BACK) Kartu ini mendapatkan R +2. [AUTO](BASE) Kartu ini mendapatkan Lv +1."},
+{no:"SD03-005",nm:"[Base Regroup] Captain America",s:"SD03",c:"Biru",l:2,r:1,p:2500,f:"Human/Avengers",ra:["SR"],e:"[TRIG](FIELD/ONCE PER TURN) Saat kartu ini melakukan pergerakan BATTLE-BASE move, Anda dapat mengembalikan 1 kartu tertutup dari BASE ke tangan Anda."},
+{no:"SD03-006",nm:"[Traction Arrow] Hawkeye",s:"SD03",c:"Biru",l:4,r:3,p:2500,f:"Human/Avengers",ra:["SR"],e:"[UNIQUE]([AUTO/FIELD] Tidak diperbolehkan ada karakter lain dengan nama yang sama dengan kartu ini pada FIELD Anda. Efek ini tidak dapat hilang.) [ACTI](BATTLE/ONCE PER TURN) Buang 2 kartu teratas dari deck Anda. Jika dilakukan Anda mengambil 1 kartu."},
+{no:"SD03-007",nm:"[Quantum Siphon] Ant-Man",s:"SD03",c:"Biru",l:1,r:1,p:1000,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini melakukan pergerakan BATTLE-BASE move, Anda dapat Prune kartu ini dari FIELD ke VOID. Jika dilakukan, letakkan 3 kartu teratas dari deck ke BASE secara tertutup."},
+{no:"SD03-008",nm:"[Freedom Inspirer] New Captain America",s:"SD03",c:"Biru",l:6,r:1,p:6000,f:"Human/Avengers",ra:["R"],e:"[ACTI](BATTLE/TWICE PER TURN) RETREAT salah satu 1 kartu tertutup dari BASE Anda. Jika dilakukan, 1 karakter di BATTLE mendapatkan +500 Power pada giliran ini."},
+{no:"SD03-009",nm:"[Fire Cover] Phil Coulson",s:"SD03",c:"Biru",l:3,r:2,p:2500,f:"Human/S.H.I.E.L.D.",ra:["R"],e:"[TRIG](FIELD/ONCE PER TURN) Saat karakter Anda memenangkan pertarungan, Anda dapat menukar posisi kartu ini dengan karakter tersebut."},
+{no:"SD03-010",nm:"[Justice Descends] Captain America",s:"SD03",c:"Biru",l:6,r:0,p:5000,f:"Human/Avengers",ra:["R"],e:"[TRIG](HAND) Saat karakter musuh Lv6 ditempatkan ke Battle FIELD, Anda dapat menempatkan kartu ini dari tangan Anda ke BATTLE Anda sendiri."},
+{no:"SD03-011",nm:"[Ancestral Plane] New Black Panther",s:"SD03",c:"Biru",l:3,r:2,p:2500,f:"Human/Wakanda",ra:["R"],e:"[AUTO](FRONT) Semua karakter musuh di WING mendapatkan -1000 Power. [AUTO](WING) Karakter musuh yang berada di FRONT mendapatkan -500 Power."},
+{no:"SD03-014",nm:"[Freedom Watcher] New Captain America",s:"SD03",c:"Biru",l:3,r:2,p:1500,f:"Human/Avengers",ra:["R"],e:"[COUNTER]([AUTO/HAND] Kartu ini dapat digunakan pada COUNTER PHASE atau COUNTER STEP.)"},
+{no:"SD03-015",nm:"[Martyrdom] Captain America",s:"SD03",c:"Biru",l:3,r:1,p:3000,f:"Human/Avengers",ra:["R"],e:"[TRIG](HAND) Saat karakter lawan Lv3 menyerang, jika total Lv di BATTLE milik Anda lebih rendah, Anda bisa Prune kartu ini dari tangan ke VOID. Jika dilakukan, RETREAT karakter lawan Lv3 tersebut."},
+{no:"SD03-016",nm:"[Quantum Entanglement] Ant-Man",s:"SD03",c:"Biru",l:2,r:1,p:2000,f:"Human/Avengers",ra:["R"],e:"[TRIG](HAND) Saat karakter biru Anda diserang, Anda bisa pasang kartu ini ke karakter penyerang lawan. [AUTO](FIELD) R karakter yang dipasang menjadi 1."},
+{no:"SD03-017",nm:"[Flash Arrow] Hawkeye",s:"SD03",c:"Biru",l:2,r:3,p:500,f:"Human/Avengers",ra:["R"],e:"[COUNTER-ACTI](BATTLE/ONCE PER TURN) Buang 1 karakter dari tangan Anda yang memiliki trait [Avengers] ke RETREAT. Jika dilakukan, 1 karakter musuh di BATTLE mendapatkan -1000 Power pada giliran ini."},
+{no:"SD03-018",nm:"[Void Banish] Scarlet Witch",s:"SD03",c:"Biru",l:3,r:2,p:2500,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat giliran Anda berakhir, Anda bisa Prune 1 karakter dari RETREAT milik Anda ke VOID. Jika dilakukan, salah satu karakter di FIELD Anda dapat melakukan BATTLE-BASE move."},
+{no:"SD04-001",nm:"[God of Trick] Loki",s:"SD04",c:"Hijau",l:6,r:1,p:6000,f:"Asgard",ra:["UR","MR","SEC"],e:"[COUNTER-ACTI](HAND) Pasangkan kartu ini dari tangan Anda ke 1 karakter di FIELD yang memiliki Trait [Human]. [AUTO](FIELD) Karakter yang dipasangkan ke kartu ini akan mengalami perubahan R menjadi 0 dan mendapatkan +1000 Power."},
+{no:"SD04-002",nm:"[Clustered Arrow] Hawkeye",s:"SD04",c:"Hijau",l:6,r:3,p:500,f:"Human/Avengers",ra:["GR"],e:"[TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, buang 2 kartu teratas dari deck Anda. Jika dilakukan, 1 karakter musuh di BATTLE mendapatkan -X000 Power pada giliran ini. X adalah jumlah total Lv kartu yang dibuang karena efek ini."},
+{no:"SD04-003",nm:"[Quantum Rewind] Ant-Man",s:"SD04",c:"Hijau",l:3,r:0,p:5500,f:"Human/Avengers",ra:["GR"],e:"[TRIG](RETREAT) Saat kartu ini ditempatkan ke RETREAT, Prune kartu ini dari RETREAT ke VOID. Setelah itu, kembalikan 1 karakter Lv tertinggi dari BATTLE Anda dan 1 karakter Lv terendah dari BATTLE lawan ke tangan."},
+{no:"SD04-004",nm:"[Justice Descends] New Captain America",s:"SD04",c:"Hijau",l:3,r:1,p:3500,f:"Human/Avengers",ra:["SR"],e:"[BLOCK]([COUNTER-ACTI](BATTLE/ONCE PER TURN) Saat karakter lawan menyerang, jika kartu ini dapat menjadi target serangan, alihkan serangan tersebut ke kartu ini.)"},
+{no:"SD04-005",nm:"[Quantum Teleportation] Ant-Man",s:"SD04",c:"Hijau",l:3,r:2,p:2000,f:"Human/Avengers",ra:["SR"],e:"[TRIG](RETREAT) Saat kartu ini ditempatkan ke RETREAT, Prune kartu ini dari RETREAT ke VOID. Jika dilakukan, 1 karakter Lv3 atau lebih rendah di FIELD Anda mendapatkan kemampuan [AIR STRIKE] ([AUTO/BATTLE] Bahkan jika ada karakter di BATTLE lawan, kartu ini dapat menyerang BATTLE tempat karakter tersebut berada sebagai weakness) pada giliran ini."},
+{no:"SD04-006",nm:"[Covert Maneuvers] Nick Fury",s:"SD04",c:"Hijau",l:1,r:2,p:1500,f:"Human/S.H.I.E.L.D.",ra:["SR"],e:"[TRIG](FIELD/ONCE PER TURN) Saat kartu ini melakukan pergerakan BATTLE-BASE move, kembalikan 1 karakter di FIELD Anda yang memiliki Trait [Avengers] ke tangan. Jika dilakukan, Anda mengambil 1 kartu dari atas deck."},
+{no:"SD04-007",nm:"[HYDRA Commander] Crossbones",s:"SD04",c:"Hijau",l:2,r:1,p:3000,f:"Human/Hydra",ra:["R"],e:"[ACTI](FIELD/ONCE PER TURN) 1 karakter Anda di FIELD dapat melakukan 1 kali BATTLE-BASE move."},
+{no:"SD04-008",nm:"[Tactical Repositioning] Baron Zemo",s:"SD04",c:"Hijau",l:5,r:0,p:6000,f:"Human/Hydra",ra:["R"],e:"[TRIG](RETREAT) Saat kartu ini dibuang ke RETREAT karena efek, letakkan 2 kartu teratas dari deck Anda secara tertutup di BASE."},
+{no:"SD04-009",nm:"[Tactical Repositioning] Captain America",s:"SD04",c:"Hijau",l:3,r:1,p:3500,f:"Human/Avengers",ra:["R"],e:"[TRIG](RETREAT) Saat kartu ini dibuang ke RETREAT karena efek, Anda dapat menempatkan kartu ini dari RETREAT ke FIELD Anda. Jika dilakukan, lawan meletakkan 1 kartu teratas dari deck lawan ke BASE lawan secara tertutup."},
+{no:"SD04-010",nm:"[Coiled Strike] Hydra",s:"SD04",c:"Hijau",l:3,r:3,p:1000,f:"Human/Hydra",ra:["R"],e:"[COUNTER]([AUTO/HAND] Kartu ini dapat dipanggil pada saat tahapan counter atau langkah counter.)"},
+{no:"SD04-011",nm:"[Subterranean Network] Mole Man",s:"SD04",c:"Hijau",l:4,r:1,p:3500,f:"Human",ra:["R"],e:"[ACTI](BATTLE/ONCE PER TURN) Ubah R dari 1 karakter di BATTLE sendiri menjadi 2 pada giliran ini."},
+{no:"SD04-014",nm:"[True Justice] Captain America",s:"SD04",c:"Hijau",l:6,r:1,p:6000,f:"Human/Avengers",ra:["R"],e:"[TRIG](RETREAT) Apabila kartu ini masuk ke RETREAT akibat dibuang dari tangan akibat efek kartu, Anda bisa menukar kartu ini dengan 1 karakter Lv6 Anda di FIELD."},
+{no:"SD04-015",nm:"[Quantum Gate] Ant-Man",s:"SD04",c:"Hijau",l:3,r:2,p:2500,f:"Human/Avengers",ra:["R"],e:"[TRIG](RETREAT) Saat masuk RETREAT dari FIELD, Prune kartu ini ke VOID. Jika dilakukan, 1 karakter Anda dapat melakukan BATTLE-BASE move."},
+{no:"SD04-016",nm:"[Weaver of Lies] Loki",s:"SD04",c:"Hijau",l:6,r:1,p:6000,f:"Asgard",ra:["R"],e:"[AUTO](FIELD) Karakter lawan di BACK mendapat Lv -2."},
+{no:"SD04-017",nm:"[Hit & Run] Winter Soldier",s:"SD04",c:"Hijau",l:3,r:2,p:2000,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini melakukan BATTLE-BASE move, 1 karakter lawan di BATTLE mendapat Power -1000 pada giliran ini."},
+{no:"SD04-018",nm:"[Run & Search] Winter Soldier",s:"SD04",c:"Hijau",l:3,r:1,p:2500,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini melakukan BATTLE-BASE move, Anda ambil 1 kartu dari atas deck, lalu buang 1 kartu dari tangan ke RETREAT."},
+{no:"TB01-001",nm:"[Lord of Battleworlds] Doctor Doom",s:"PR",c:"Hijau",l:6,r:2,p:2500,f:"Battleworld",ra:["TR"],e:"[UNIQUE COUNTER] [TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Prune 1 kartu lawan dengan Lv2 atau lebih rendah dari FIELD ke VOID."}
+];
+
+/* ============================ APLIKASI ============================ */
+const CMAP = {Merah:'var(--merah)', Kuning:'var(--kuning)', Biru:'var(--biru)', Hijau:'var(--hijau)'};
+const $ = s => document.querySelector(s);
+
+const state = {
+  q:'', colors:new Set(['Merah','Kuning','Biru','Hijau']),
+  series:'', level:'', range:'', rarity:'', sort:'no',
+  deck:{}  // key: card no -> qty
+};
+
+/* --- penyimpanan multi-deck (localStorage) --- */
+const STORE_KEY = 'mhrDeckLab_v1';
+let store = { active:'Deck 1', decks:{'Deck 1':{}}, size:50, max:3 };
+try {
+  const raw = localStorage.getItem(STORE_KEY);
+  if(raw){ const p = JSON.parse(raw);
+    if(p && p.decks && Object.keys(p.decks).length) store = p; }
+} catch(e){ /* localStorage tidak tersedia — jalan tanpa penyimpanan */ }
+if(!store.decks[store.active]) store.active = Object.keys(store.decks)[0];
+state.deck = store.decks[store.active];
+
+let saveTmr=null;
+function persist(){
+  store.decks[store.active] = state.deck;
+  store.size = parseInt($('#setSize').value)||50;
+  store.max  = parseInt($('#setMax').value)||3;
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+    const n=$('#saveNote'); if(n){ n.textContent='✓ tersimpan otomatis';
+      clearTimeout(saveTmr); saveTmr=setTimeout(()=>n.textContent='',1600); }
+  } catch(e){}
+}
+
+function renderDeckSelect(){
+  const sel=$('#deckSelect');
+  sel.innerHTML = Object.keys(store.decks).map(n=>
+    `<option${n===store.active?' selected':''}>${n.replace(/</g,'&lt;')}</option>`).join('');
+}
+
+/* --- isi dropdown --- */
+(function initFilters(){
+  const uniq = (arr)=>[...new Set(arr)];
+  uniq(DB.map(c=>c.s)).sort().forEach(v=>$('#fSeries').insertAdjacentHTML('beforeend',`<option>${v}</option>`));
+  uniq(DB.map(c=>c.l)).sort((a,b)=>a-b).forEach(v=>$('#fLevel').insertAdjacentHTML('beforeend',`<option value="${v}">Level ${v}</option>`));
+  uniq(DB.map(c=>c.r)).sort((a,b)=>a-b).forEach(v=>$('#fRange').insertAdjacentHTML('beforeend',`<option value="${v}">Jarak ${v}</option>`));
+  uniq(DB.flatMap(c=>c.ra)).sort().forEach(v=>$('#fRarity').insertAdjacentHTML('beforeend',`<option>${v}</option>`));
+  $('#hTotal').textContent = DB.length;
+})();
+
+function filtered(){
+  const q = state.q.toLowerCase();
+  let arr = DB.filter(c=>
+    state.colors.has(c.c) &&
+    (!state.series || c.s===state.series) &&
+    (!state.level  || String(c.l)===state.level) &&
+    (state.range==='' || String(c.r)===state.range) &&
+    (!state.rarity || c.ra.includes(state.rarity)) &&
+    (!q || (c.nm+' '+c.e+' '+c.f+' '+c.no).toLowerCase().includes(q))
+  );
+  const s = state.sort;
+  if(s==='lv') arr.sort((a,b)=>a.l-b.l || a.no.localeCompare(b.no));
+  else if(s==='pw') arr.sort((a,b)=>b.p-a.p || a.no.localeCompare(b.no));
+  else if(s==='nm') arr.sort((a,b)=>a.nm.localeCompare(b.nm));
+  else arr.sort((a,b)=>a.no.localeCompare(b.no));
+  return arr;
+}
+
+function imgFallback(img,no){
+  const exts=['png','jpg','webp'];
+  let i=parseInt(img.dataset.ext)+1;
+  if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
+  else { img.onerror=null; img.style.display='none'; }
+}
+
+function renderCards(){
+  const arr = filtered();
+  $('#hShown').textContent = arr.length;
+  $('#noteShown').textContent = `${arr.length} kartu cocok dengan filter.`;
+  $('#cards').innerHTML = arr.map(c=>{
+    const q = state.deck[c.no]||0;
+    return `<div class="card" style="--cardc:${CMAP[c.c]}" data-no="${c.no}">
+      <div class="card-body">
+        <img class="card-img" loading="lazy" alt="" data-ext="0" src="images/${c.no}.png"
+          onerror="imgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">
+        <div class="card-main">
+          <div class="card-top">
+            <span class="card-name">${c.nm}</span>
+            <span class="card-no">${c.no}</span>
+            ${c.ra.map(r=>`<span class="rar">${r}</span>`).join('')}
+          </div>
+          <div class="card-stats">
+            <span class="stat">Lv <b>${c.l}</b></span>
+            <span class="stat">Jarak <b>${c.r}</b></span>
+            <span class="stat">Power <b>${c.p}</b></span>
+            <span class="stat">Warna <b>${c.c}</b></span>
+          </div>
+          <div class="card-trait">${c.f} · <a class="card-link" target="_blank" rel="noopener"
+            href="https://www.marvelherorush.com/id/cards">lihat kartu di situs resmi ↗</a></div>
+          <div class="card-eff">${c.e}</div>
+        </div>
+      </div>
+      <div class="card-actions">
+        ${q?`<span class="in-deck">×${q}</span>`:''}
+        <button class="btn-add" data-act="add">+ Deck</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">Tidak ada kartu yang cocok. Coba longgarkan filter.</div>';
+}
+
+/* --- deck --- */
+function deckCount(){ return Object.values(state.deck).reduce((a,b)=>a+b,0); }
+function addCard(no){
+  const max = Math.max(1, parseInt($('#setMax').value)||3);
+  const cur = state.deck[no]||0;
+  if(cur >= max) return;
+  state.deck[no] = cur+1;
+  renderAll();
+}
+function decCard(no){
+  if(!state.deck[no]) return;
+  state.deck[no]--;
+  if(state.deck[no]<=0) delete state.deck[no];
+  renderAll();
+}
+
+function renderDeck(){
+  const total = deckCount();
+  const target = Math.max(1, parseInt($('#setSize').value)||50);
+  $('#hDeck').textContent = total;
+  const diff = target-total;
+  $('#deckTotal').innerHTML = `<b>${total}</b> / ${target} kartu · ` +
+    (diff===0 ? `<span class="ok">pas dengan target</span>`
+     : diff>0 ? `kurang <b>${diff}</b>` : `<span class="warn">lebih ${-diff}</span>`);
+
+  // kurva level
+  const lv = {1:0,2:0,3:0,4:0,5:0,6:0};
+  const col = {Merah:0,Kuning:0,Biru:0,Hijau:0};
+  const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q}));
+  entries.forEach(({c,q})=>{ lv[c.l]+=q; col[c.c]+=q; });
+  const maxLv = Math.max(1,...Object.values(lv));
+  $('#curve').innerHTML = Object.entries(lv).map(([l,n])=>
+    `<div class="bar" style="height:${Math.round(n/maxLv*100)}%;background:${n?'var(--accent)':'var(--line)'}"><span>${n||''}</span></div>`).join('');
+  $('#curveX').innerHTML = Object.keys(lv).map(l=>`<div>Lv${l}</div>`).join('');
+
+  // distribusi warna
+  $('#cdist').innerHTML = total===0 ? '' :
+    Object.entries(col).filter(([,n])=>n>0)
+      .map(([c,n])=>`<div style="width:${n/total*100}%;background:${CMAP[c]}" title="${c}: ${n}"></div>`).join('');
+
+  // daftar
+  if(entries.length===0){
+    $('#deckList').innerHTML = '<div class="empty">Deck masih kosong.<br>Klik <b>+ Deck</b> pada kartu untuk menambahkan.</div>';
+  } else {
+    entries.sort((a,b)=>a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
+    $('#deckList').innerHTML = entries.map(({c,q})=>
+      `<div class="dline">
+        <span class="dot" style="background:${CMAP[c.c]}"></span>
+        <span class="lv">L${c.l}</span>
+        <span class="nm" title="${c.no} · ${c.f}">${c.nm}</span>
+        <button class="qbtn" data-dec="${c.no}">−</button>
+        <span class="qty">${q}</span>
+        <button class="qbtn" data-inc="${c.no}">+</button>
+      </div>`).join('');
+  }
+}
+
+function renderAll(){ renderCards(); renderDeck(); persist(); }
+
+/* --- events --- */
+$('#q').addEventListener('input', e=>{ state.q=e.target.value; renderCards(); });
+$('#fSeries').addEventListener('change', e=>{ state.series=e.target.value; renderCards(); });
+$('#fLevel').addEventListener('change', e=>{ state.level=e.target.value; renderCards(); });
+$('#fRange').addEventListener('change', e=>{ state.range=e.target.value; renderCards(); });
+$('#fRarity').addEventListener('change', e=>{ state.rarity=e.target.value; renderCards(); });
+$('#fSort').addEventListener('change', e=>{ state.sort=e.target.value; renderCards(); });
+$('#cbtns').addEventListener('click', e=>{
+  const b=e.target.closest('.cbtn'); if(!b) return;
+  const c=b.dataset.c;
+  if(b.dataset.on==='1'){ b.dataset.on='0'; state.colors.delete(c); }
+  else { b.dataset.on='1'; state.colors.add(c); }
+  renderCards();
+});
+$('#btnReset').addEventListener('click', ()=>{
+  state.q=''; state.series=''; state.level=''; state.range=''; state.rarity=''; state.sort='no';
+  state.colors=new Set(['Merah','Kuning','Biru','Hijau']);
+  $('#q').value=''; ['fSeries','fLevel','fRange','fRarity'].forEach(id=>$('#'+id).value='');
+  $('#fSort').value='no';
+  document.querySelectorAll('.cbtn').forEach(b=>b.dataset.on='1');
+  renderCards();
+});
+$('#cards').addEventListener('click', e=>{
+  const card=e.target.closest('.card'); if(!card) return;
+  if(e.target.dataset.act==='add') addCard(card.dataset.no);
+});
+$('#deckList').addEventListener('click', e=>{
+  if(e.target.dataset.inc) addCard(e.target.dataset.inc);
+  if(e.target.dataset.dec) decCard(e.target.dataset.dec);
+});
+$('#setSize').addEventListener('input', ()=>{ renderDeck(); persist(); });
+$('#setMax').addEventListener('input', ()=>{ renderDeck(); persist(); });
+$('#btnClear').addEventListener('click', ()=>{
+  if(deckCount()===0) return;
+  if(confirm('Kosongkan seluruh deck?')){ state.deck={}; renderAll(); }
+});
+$('#btnExport').addEventListener('click', ()=>{
+  const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q}));
+  entries.sort((a,b)=>a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
+  const lines = entries.map(({c,q})=>`${q}x ${c.no} ${c.nm} (Lv${c.l} ${c.c})`);
+  const txt = `=== DECK MARVEL HERO RUSH ===\nTotal: ${deckCount()} kartu\n\n` + (lines.join('\n')||'(kosong)');
+  const box = $('#exportBox');
+  box.value = txt; box.classList.add('show');
+  box.select();
+  try { document.execCommand('copy'); $('#btnExport').textContent='Tersalin ✓';
+    setTimeout(()=>$('#btnExport').textContent='Salin daftar deck',1500);
+  } catch(e){}
+});
+$('#deckGrip').addEventListener('click', ()=>$('#deckPanel').classList.toggle('open'));
+
+$('#deckSelect').addEventListener('change', e=>{
+  store.decks[store.active] = state.deck;   // simpan deck aktif dulu
+  store.active = e.target.value;
+  state.deck = store.decks[store.active] || {};
+  renderAll();
+});
+$('#btnNewDeck').addEventListener('click', ()=>{
+  let nama = prompt('Nama deck baru:', `Deck ${Object.keys(store.decks).length+1}`);
+  if(nama===null) return;
+  nama = nama.trim() || `Deck ${Object.keys(store.decks).length+1}`;
+  if(store.decks[nama]){ alert('Nama deck sudah dipakai.'); return; }
+  store.decks[store.active] = state.deck;
+  store.decks[nama] = {};
+  store.active = nama;
+  state.deck = store.decks[nama];
+  renderDeckSelect(); renderAll();
+});
+$('#btnDelDeck').addEventListener('click', ()=>{
+  if(Object.keys(store.decks).length<=1){ alert('Minimal harus ada 1 deck.'); return; }
+  if(!confirm(`Hapus deck "${store.active}"?`)) return;
+  delete store.decks[store.active];
+  store.active = Object.keys(store.decks)[0];
+  state.deck = store.decks[store.active];
+  renderDeckSelect(); renderAll();
+});
+
+/* muat pengaturan tersimpan */
+$('#setSize').value = store.size || 50;
+$('#setMax').value  = store.max  || 3;
+renderDeckSelect();
+renderAll();
+</script>
+</body>
+</html>
