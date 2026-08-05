@@ -172,6 +172,72 @@
   footer{border-top:1px solid var(--line);margin-top:8px;padding:18px 20px 26px;
     color:var(--muted);font-size:11px;line-height:1.7;text-align:center}
   footer a{color:var(--muted)}
+  /* --- pengalih tampilan --- */
+  .viewtog{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .viewtog button{background:none;border:none;color:var(--muted);padding:8px 11px;
+    font-size:12.5px;cursor:pointer}
+  .viewtog button[aria-pressed="true"]{background:var(--accent);color:#1A1206;font-weight:700}
+  /* --- tampilan grid --- */
+  .cards.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px;
+    padding:14px 12px 80px}
+  @media (max-width:640px){ .cards.grid{grid-template-columns:repeat(2,1fr);gap:10px} }
+  .cards.grid .card{padding:0;background:none;border:none;overflow:visible}
+  .cards.grid .card::before{display:none}
+  .cards.grid .card-body{display:block}
+  .cards.grid .card-main{display:none}
+  .cards.grid .g-wrap{position:relative;border-radius:10px;overflow:hidden;
+    border:2px solid var(--cardc);background:var(--panel);cursor:zoom-in}
+  .cards.grid .card-img{width:100%;height:auto;aspect-ratio:63/88;object-fit:cover;
+    display:block;border:none;border-radius:0}
+  .cards.grid .g-ph{aspect-ratio:63/88;padding:10px;display:flex;flex-direction:column;gap:6px;
+    background:linear-gradient(165deg,#232B34,#141920)}
+  .cards.grid .g-lv{width:28px;height:28px;border-radius:50%;background:var(--cardc);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:900;font-size:15px}
+  .cards.grid .g-nm{font-family:var(--disp);font-weight:800;font-size:12px;line-height:1.3;flex:1;overflow:hidden}
+  .cards.grid .g-bt{font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .cards.grid .g-cap{font-size:11.5px;line-height:1.35;margin-top:6px;font-weight:600;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .cards.grid .g-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px}
+  .cards.grid .card-actions{position:static;display:flex;gap:6px;margin-top:7px}
+  .cards.grid .btn-add{flex:1;padding:6px 4px;font-size:12px}
+  .cards.grid .in-deck{position:absolute;top:6px;right:6px;background:var(--accent);color:#1A1206;
+    border-radius:7px;padding:2px 7px;font-family:var(--mono);font-weight:800;font-size:12px;z-index:2}
+  /* --- kartu daftar: gambar bisa diklik --- */
+  .card-img{cursor:zoom-in}
+  .card-name{cursor:zoom-in}
+  .card-name:hover{color:var(--accent)}
+  /* --- popup gambar --- */
+  .lb{position:fixed;inset:0;z-index:60;background:rgba(6,8,11,.93);display:flex;
+    align-items:center;justify-content:center;padding:22px;cursor:zoom-out}
+  .lb[hidden]{display:none}
+  .lb-inner{display:flex;gap:22px;align-items:flex-start;max-width:960px;width:100%;
+    justify-content:center;cursor:auto}
+  .lb-img{max-height:82vh;max-width:min(430px,60vw);border-radius:12px;
+    border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.6)}
+  .lb-ph{width:330px;aspect-ratio:63/88;border-radius:12px;border:3px solid var(--lbc);
+    background:linear-gradient(165deg,#232B34,#141920);padding:16px;display:flex;
+    flex-direction:column;gap:10px}
+  .lb-ph .g-lv{width:38px;height:38px;border-radius:50%;background:var(--lbc);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:900;font-size:20px}
+  .lb-ph .g-nm{font-family:var(--disp);font-weight:800;font-size:17px;line-height:1.3;flex:1}
+  .lb-info{max-width:360px;color:var(--paper);padding-top:4px}
+  .lb-info h3{font-family:var(--disp);font-size:23px;line-height:1.2;letter-spacing:.02em}
+  .lb-info .no{font-family:var(--mono);font-size:12px;color:var(--muted);margin:5px 0 12px}
+  .lb-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:14px}
+  .lb-stats div{font-size:12.5px;color:var(--muted)}
+  .lb-stats b{color:var(--paper);font-family:var(--mono);font-size:13.5px}
+  .lb-eff{font-size:13px;line-height:1.6;color:#C9CFD8;border-top:1px solid var(--line);padding-top:12px}
+  .lb-add{margin-top:16px;width:100%;background:var(--accent);color:#1A1206;border:none;
+    border-radius:9px;padding:11px;font-family:var(--disp);font-weight:800;font-size:15px;
+    letter-spacing:.05em;cursor:pointer}
+  .lb-x{position:fixed;top:16px;right:20px;background:var(--panel);border:1px solid var(--line);
+    color:var(--paper);border-radius:9px;padding:9px 14px;cursor:pointer;font-size:13px;z-index:61}
+  @media (max-width:760px){
+    .lb{padding:12px;overflow-y:auto;align-items:flex-start}
+    .lb-inner{flex-direction:column;align-items:center;gap:14px}
+    .lb-img{max-width:78vw;max-height:60vh}
+    .lb-info{max-width:100%;padding:0 4px 30px}
+  }
   /* --- halaman tampilan deck --- */
   .dview{position:fixed;inset:0;z-index:50;background:rgba(6,8,11,.94);overflow-y:auto;padding:16px}
   .dview[hidden]{display:none}
@@ -204,7 +270,7 @@
 <header>
   <div class="brand">
     <h1>MHR <span class="stripe">DECK LAB</span></h1>
-    <p>Marvel Hero Rush Deck Builder · 200 kartu (BP01 · PB01 · PR · SD01–SD04) · Bahasa Indonesia</p>
+    <p>Perancang deck Marvel Hero Rush TCG · Database 200 kartu (BP01 · PB01 · PR · SD01–SD04) · Bahasa Indonesia</p>
   </div>
   <div class="hdr-stats">
     <div class="pill">Kartu unik <b id="hTotal">0</b></div>
@@ -233,6 +299,10 @@
         <option value="pw">Urut: Power</option>
         <option value="nm">Urut: Nama</option>
       </select>
+      <div class="viewtog" id="viewTog">
+        <button data-view="list" aria-pressed="true" title="Tampilan daftar">☰ Daftar</button>
+        <button data-view="grid" aria-pressed="false" title="Tampilan grid">▦ Grid</button>
+      </div>
       <button class="reset" id="btnReset">Reset</button>
       <div class="count-note" id="noteShown"></div>
     </div>
@@ -292,6 +362,11 @@
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
 </footer>
+
+<div class="lb" id="lightbox" hidden>
+  <button class="lb-x" id="lbClose">✕ Tutup</button>
+  <div class="lb-inner" id="lbInner"></div>
+</div>
 
 <div class="dview" id="deckView" hidden>
   <div class="dview-bar">
@@ -519,7 +594,7 @@ const $ = s => document.querySelector(s);
 
 const state = {
   q:'', colors:new Set(['Merah','Kuning','Biru','Hijau']),
-  series:'', level:'', range:'', rarity:'', sort:'no',
+  series:'', level:'', range:'', rarity:'', sort:'no', view:'list',
   deck:{}  // key: card no -> qty
 };
 
@@ -539,6 +614,7 @@ function persist(){
   store.decks[store.active] = state.deck;
   store.size = parseInt($('#setSize').value)||50;
   store.max  = parseInt($('#setMax').value)||3;
+  store.view = state.view;
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(store));
     const n=$('#saveNote'); if(n){ n.textContent='✓ tersimpan otomatis';
@@ -587,19 +663,14 @@ function imgFallback(img,no){
   else { img.onerror=null; img.style.display='none'; }
 }
 
-function renderCards(){
-  const arr = filtered();
-  $('#hShown').textContent = arr.length;
-  $('#noteShown').textContent = `${arr.length} kartu cocok dengan filter.`;
-  $('#cards').innerHTML = arr.map(c=>{
-    const q = state.deck[c.no]||0;
-    return `<div class="card" style="--cardc:${CMAP[c.c]}" data-no="${c.no}">
+function cardListHTML(c,q){
+  return `<div class="card" style="--cardc:${CMAP[c.c]}" data-no="${c.no}">
       <div class="card-body">
-        <img class="card-img" alt="" data-ext="0" src="images/${c.no}.jpg"
+        <img class="card-img" alt="" data-ext="0" src="images/${c.no}.jpg" data-zoom="${c.no}"
           onerror="imgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">
         <div class="card-main">
           <div class="card-top">
-            <span class="card-name">${c.nm}</span>
+            <span class="card-name" data-zoom="${c.no}">${c.nm}</span>
             <span class="card-no">${c.no}</span>
             ${c.ra.map(r=>`<span class="rar">${r}</span>`).join('')}
           </div>
@@ -619,6 +690,45 @@ function renderCards(){
         <button class="btn-add" data-act="add">+ Deck</button>
       </div>
     </div>`;
+}
+
+function cardGridHTML(c,q){
+  return `<div class="card" style="--cardc:${CMAP[c.c]}" data-no="${c.no}">
+      <div class="g-wrap" data-zoom="${c.no}">
+        ${q?`<span class="in-deck">×${q}</span>`:''}
+        <img class="card-img" alt="" data-ext="0" src="images/${c.no}.jpg"
+          onerror="gridImgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">
+        <div class="g-ph" style="display:none">
+          <div class="g-lv">${c.l}</div>
+          <div class="g-nm">${c.nm}</div>
+          <div class="g-bt">${c.no} · R-${c.r} / ${c.p}</div>
+        </div>
+      </div>
+      <div class="g-cap">${c.nm}</div>
+      <div class="g-sub">${c.no} · Lv${c.l} · R-${c.r} · ${c.p}</div>
+      <div class="card-actions">
+        <button class="btn-add" data-act="add">+ Deck</button>
+      </div>
+    </div>`;
+}
+
+function gridImgFallback(img,no){
+  const exts=['jpg','png','webp'];
+  let i=parseInt(img.dataset.ext)+1;
+  if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
+  else { img.onerror=null; img.style.display='none';
+         const ph=img.nextElementSibling; if(ph) ph.style.display='flex'; }
+}
+
+function renderCards(){
+  const arr = filtered();
+  $('#hShown').textContent = arr.length;
+  $('#noteShown').textContent = `${arr.length} kartu cocok dengan filter.`;
+  const grid = state.view === 'grid';
+  $('#cards').className = 'cards' + (grid ? ' grid' : '');
+  $('#cards').innerHTML = arr.map(c=>{
+    const q = state.deck[c.no]||0;
+    return grid ? cardGridHTML(c,q) : cardListHTML(c,q);
   }).join('') || '<div class="empty">Tidak ada kartu yang cocok. Coba longgarkan filter.</div>';
 }
 
@@ -705,6 +815,8 @@ $('#btnReset').addEventListener('click', ()=>{
 });
 $('#cards').addEventListener('click', e=>{
   const card=e.target.closest('.card'); if(!card) return;
+  const z = e.target.closest('[data-zoom]');
+  if(z){ openLightbox(z.dataset.zoom); return; }
   if(e.target.dataset.act==='add') addCard(card.dataset.no);
 });
 $('#deckList').addEventListener('click', e=>{
@@ -769,6 +881,74 @@ $('#btnRenDeck').addEventListener('click', ()=>{
   renderDeckSelect(); renderAll();
 });
 
+/* --- pengalih tampilan daftar / grid --- */
+$('#viewTog').addEventListener('click', e=>{
+  const b = e.target.closest('[data-view]'); if(!b) return;
+  state.view = b.dataset.view;
+  [...$('#viewTog').children].forEach(x=>x.setAttribute('aria-pressed', x===b));
+  renderCards();
+  if(store){ store.view = state.view; persist(); }
+});
+
+/* --- popup gambar kartu --- */
+let lbNo = null;
+function openLightbox(no){
+  const c = DB.find(d=>d.no===no); if(!c) return;
+  lbNo = no;
+  const q = state.deck[no]||0;
+  $('#lbInner').innerHTML = `
+    <div>
+      <img class="lb-img" alt="${c.nm}" data-ext="0" src="images/${c.no}.jpg"
+        onerror="lbImgFallback(this,'${c.no}')">
+      <div class="lb-ph" style="--lbc:${CMAP[c.c]};display:none">
+        <div class="g-lv">${c.l}</div>
+        <div class="g-nm">${c.nm}</div>
+        <div class="g-bt">${c.no} · R-${c.r} / ${c.p}</div>
+      </div>
+    </div>
+    <div class="lb-info">
+      <h3>${c.nm}</h3>
+      <div class="no">${c.no} · ${c.s} · ${c.ra.join(' / ')}</div>
+      <div class="lb-stats">
+        <div>Level <b>${c.l}</b></div>
+        <div>Jarak serangan <b>${c.r}</b></div>
+        <div>Kekuatan bertarung <b>${c.p}</b></div>
+        <div>Warna <b>${c.c}</b></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:10px">${c.f}</div>
+      <div class="lb-eff">${c.e}</div>
+      <button class="lb-add" id="lbAdd">+ Tambah ke deck${q?` (kini ×${q})`:''}</button>
+    </div>`;
+  $('#lightbox').hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+function lbImgFallback(img,no){
+  const exts=['jpg','png','webp'];
+  let i=parseInt(img.dataset.ext)+1;
+  if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
+  else { img.onerror=null; img.style.display='none';
+         const ph=img.nextElementSibling; if(ph) ph.style.display='flex'; }
+}
+function closeLightbox(){
+  $('#lightbox').hidden = true; lbNo = null;
+  document.body.style.overflow = '';
+}
+$('#lbClose').addEventListener('click', closeLightbox);
+$('#lightbox').addEventListener('click', e=>{
+  if(e.target.id === 'lightbox') closeLightbox();          // klik latar untuk menutup
+  if(e.target.id === 'lbAdd' && lbNo){
+    addCard(lbNo);
+    const q = state.deck[lbNo]||0;
+    e.target.textContent = q ? `+ Tambah ke deck (kini ×${q})` : '+ Tambah ke deck';
+  }
+});
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape'){
+    if(!$('#lightbox').hidden) closeLightbox();
+    else if(!$('#deckView').hidden){ $('#deckView').hidden = true; document.body.style.overflow=''; }
+  }
+});
+
 /* --- tampilan deck untuk dibagikan --- */
 function openDeckView(){
   const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q}));
@@ -813,7 +993,12 @@ $('#btnDvPng').addEventListener('click', async ()=>{
   $('#btnDvPng').textContent = '⬇ Unduh PNG';
 });
 
+
 /* muat pengaturan tersimpan */
+if(store.view === 'grid'){
+  state.view = 'grid';
+  [...$('#viewTog').children].forEach(x=>x.setAttribute('aria-pressed', x.dataset.view==='grid'));
+}
 $('#setSize').value = store.size || 50;
 $('#setMax').value  = store.max  || 3;
 renderDeckSelect();
