@@ -633,7 +633,7 @@ function filtered(){
 }
 
 function imgFallback(img,no){
-  const exts=['png','jpg','webp'];
+  const exts=['jpg','png','webp'];
   let i=parseInt(img.dataset.ext)+1;
   if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
   else { img.onerror=null; img.style.display='none'; }
@@ -649,7 +649,7 @@ function renderCards(){
       <div class="card-body">
         ${imgURL[c.no]
           ? `<img class="card-img loaded" alt="" src="${imgURL[c.no]}">`
-          : `<img class="card-img" alt="" data-ext="0" src="images/${c.no}.png"
+          : `<img class="card-img" alt="" data-ext="0" src="images/${c.no}.jpg"
               onerror="imgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">`}
         <div class="card-main">
           <div class="card-top">
@@ -850,6 +850,13 @@ $('#fileBulk').addEventListener('change', async e=>{
     ? `\nDilewati: ${skip.slice(0,6).join(', ')}${skip.length>6?' …':''}\n(Nama file harus mengandung nomor kartu, contoh: BP01-004.jpg)` : ''));
 });
 
+function dvImgFallback(img,no){
+  const exts=['jpg','png','webp'];
+  let i=parseInt(img.dataset.ext)+1;
+  if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
+  else { img.onerror=null; img.remove(); }
+}
+
 /* --- tampilan deck untuk dibagikan --- */
 function openDeckView(){
   const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q}));
@@ -869,8 +876,9 @@ function openDeckView(){
       </div>`;
     const img = im
       ? `<img src="${im}" alt="">`
-      : `<img src="images/${c.no}.png" alt=""
-           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`;
+      : `<img src="images/${c.no}.jpg" alt="" data-ext="0" style="display:none"
+           onerror="dvImgFallback(this,'${c.no}')"
+           onload="this.style.display='block';this.nextElementSibling.style.display='none'">`;
     return `<div class="dv-card">${img}${ph}<div class="dv-qty">${q}</div></div>`;
   }).join('');
   $('#deckView').hidden = false;
