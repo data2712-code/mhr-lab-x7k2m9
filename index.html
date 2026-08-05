@@ -172,6 +172,33 @@
   footer{border-top:1px solid var(--line);margin-top:8px;padding:18px 20px 26px;
     color:var(--muted);font-size:11px;line-height:1.7;text-align:center}
   footer a{color:var(--muted)}
+  .btn-cam{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;
+    font-size:12px;padding:6px 8px;cursor:pointer}
+  .btn-cam:hover{border-color:var(--accent);color:var(--accent)}
+  /* --- halaman tampilan deck --- */
+  .dview{position:fixed;inset:0;z-index:50;background:rgba(6,8,11,.94);overflow-y:auto;padding:16px}
+  .dview[hidden]{display:none}
+  .dview-bar{display:flex;gap:8px;justify-content:flex-end;max-width:1060px;margin:0 auto 10px}
+  .dview-sheet{background:#12161B;border:1px solid var(--line);border-radius:16px;
+    max-width:1060px;margin:0 auto;padding:26px 26px 20px}
+  .dview-sheet h2{font-family:var(--disp);font-size:26px;letter-spacing:.05em;text-transform:uppercase}
+  .dv-meta{color:var(--muted);font-family:var(--mono);font-size:12px;margin:4px 0 4px}
+  .dview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px 14px;margin-top:16px}
+  @media (max-width:640px){ .dview-grid{grid-template-columns:repeat(3,1fr);gap:16px 10px} }
+  .dv-card{position:relative}
+  .dv-card>img{width:100%;aspect-ratio:63/88;object-fit:cover;border-radius:9px;display:block;
+    border:1px solid var(--line)}
+  .dv-ph{aspect-ratio:63/88;border-radius:9px;border:3px solid var(--dvc);
+    background:linear-gradient(165deg,#232B34,#141920);padding:10px;
+    display:flex;flex-direction:column;gap:7px}
+  .dv-lv{width:30px;height:30px;border-radius:50%;background:var(--dvc);color:#fff;flex:none;
+    display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:900;font-size:16px}
+  .dv-nm{font-family:var(--disp);font-weight:800;font-size:12.5px;line-height:1.3;flex:1;overflow:hidden}
+  .dv-bt{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  .dv-qty{position:absolute;right:-7px;bottom:-9px;background:#fff;color:#101418;
+    font-family:var(--mono);font-weight:800;font-size:17px;min-width:36px;height:36px;
+    border-radius:11px;border:3px solid #101418;display:flex;align-items:center;justify-content:center}
+  .dv-foot{margin-top:22px;color:var(--muted);font-size:11px;font-family:var(--mono);text-align:right}
   .foot-note{color:var(--muted);font-size:11px;line-height:1.5;margin-top:16px}
 </style>
 </head>
@@ -210,6 +237,7 @@
         <option value="nm">Urut: Nama</option>
       </select>
       <button class="reset" id="btnReset">Reset</button>
+      <button class="reset" id="btnBulk" title="Unggah banyak gambar sekaligus. Nama file harus mengandung nomor kartu, contoh: BP01-004.jpg">📷 Gambar kartu</button>
       <div class="count-note" id="noteShown"></div>
     </div>
     <div class="cards" id="cards"></div>
@@ -222,6 +250,7 @@
     <div class="deckmgr">
       <select id="deckSelect" title="Pilih deck"></select>
       <button class="qbtn" id="btnNewDeck" title="Buat deck baru">+</button>
+      <button class="qbtn" id="btnRenDeck" title="Ganti nama deck ini">✎</button>
       <button class="qbtn" id="btnDelDeck" title="Hapus deck ini">🗑</button>
     </div>
     <div class="savenote" id="saveNote"></div>
@@ -245,7 +274,10 @@
     <div class="deck-sec-title">Daftar kartu</div>
     <div id="deckList"><div class="empty">Deck masih kosong.<br>Klik <b>+ Deck</b> pada kartu untuk menambahkan.</div></div>
 
-    <div class="deck-actions">
+    <button class="btn2" id="btnDeckView"
+      style="width:100%;margin-top:14px;border-color:var(--accent);color:var(--accent);font-weight:700">
+      🖼 Lihat deck — tampilan untuk dibagikan</button>
+    <div class="deck-actions" style="margin-top:8px">
       <button class="btn2" id="btnExport">Salin daftar deck</button>
       <button class="btn2 danger" id="btnClear">Kosongkan</button>
     </div>
@@ -255,6 +287,8 @@
   </aside>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <footer>
   MHR Deck Lab adalah alat bantu buatan penggemar (fan-made) dan <b>tidak berafiliasi dengan atau disponsori oleh
   Marvel maupun penerbit Marvel Hero Rush</b>. Seluruh nama kartu, teks efek, serta merek dagang terkait adalah milik
@@ -262,6 +296,22 @@
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
 </footer>
+
+<input type="file" id="fileOne" accept="image/*" hidden>
+<input type="file" id="fileBulk" accept="image/*" multiple hidden>
+
+<div class="dview" id="deckView" hidden>
+  <div class="dview-bar">
+    <button class="btn2" id="btnDvPng" style="flex:none;padding:9px 14px">⬇ Unduh PNG</button>
+    <button class="btn2" id="btnDvClose" style="flex:none;padding:9px 14px">✕ Tutup</button>
+  </div>
+  <div class="dview-sheet" id="dviewSheet">
+    <h2 id="dvTitle"></h2>
+    <div class="dv-meta" id="dvMeta"></div>
+    <div class="dview-grid" id="dvGrid"></div>
+    <div class="dv-foot">Dibuat dengan MHR Deck Lab</div>
+  </div>
+</div>
 
 <script>
 /* ====== DATABASE KARTU (dinormalisasi & dideduplikasi per nomor kartu) ====== */
@@ -471,7 +521,53 @@ const DB = [
 
 /* ============================ APLIKASI ============================ */
 const CMAP = {Merah:'var(--merah)', Kuning:'var(--kuning)', Biru:'var(--biru)', Hijau:'var(--hijau)'};
+const CORDER = {Merah:0, Kuning:1, Biru:2, Hijau:3};
 const $ = s => document.querySelector(s);
+
+/* --- penyimpanan gambar kartu (IndexedDB, per-browser) --- */
+const idb = {
+  db:null,
+  open(){ return new Promise((res,rej)=>{
+    if(this.db) return res(this.db);
+    if(!window.indexedDB) return rej(new Error('no idb'));
+    const r=indexedDB.open('mhrDeckLabImg',1);
+    r.onupgradeneeded=()=>r.result.createObjectStore('imgs');
+    r.onsuccess=()=>{this.db=r.result;res(this.db)};
+    r.onerror=()=>rej(r.error);
+  })},
+  async set(k,v){ const db=await this.open(); return new Promise((res,rej)=>{
+    const tx=db.transaction('imgs','readwrite'); tx.objectStore('imgs').put(v,k);
+    tx.oncomplete=res; tx.onerror=()=>rej(tx.error); })},
+};
+const imgURL = {};   // nomor kartu -> object URL
+
+async function loadImages(){
+  try{
+    const db=await idb.open();
+    const st=db.transaction('imgs').objectStore('imgs');
+    const keys=await new Promise((res,rej)=>{const r=st.getAllKeys();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+    const st2=db.transaction('imgs').objectStore('imgs');
+    const vals=await new Promise((res,rej)=>{const r=st2.getAll();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+    keys.forEach((k,i)=>{ if(vals[i]) imgURL[k]=URL.createObjectURL(vals[i]); });
+    if(keys.length) renderCards();
+  }catch(e){}
+}
+
+async function processImageFile(file,no){
+  try{
+    const bmp = await createImageBitmap(file);
+    const maxW = 420, sc = Math.min(1, maxW/bmp.width);
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(bmp.width*sc); cv.height = Math.round(bmp.height*sc);
+    cv.getContext('2d').drawImage(bmp,0,0,cv.width,cv.height);
+    const blob = await new Promise(r=>cv.toBlob(r,'image/jpeg',.85));
+    if(!blob) return false;
+    await idb.set(no,blob);
+    if(imgURL[no]) URL.revokeObjectURL(imgURL[no]);
+    imgURL[no] = URL.createObjectURL(blob);
+    return true;
+  }catch(e){ return false; }
+}
 
 const state = {
   q:'', colors:new Set(['Merah','Kuning','Biru','Hijau']),
@@ -551,8 +647,10 @@ function renderCards(){
     const q = state.deck[c.no]||0;
     return `<div class="card" style="--cardc:${CMAP[c.c]}" data-no="${c.no}">
       <div class="card-body">
-        <img class="card-img" loading="lazy" alt="" data-ext="0" src="images/${c.no}.png"
-          onerror="imgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">
+        ${imgURL[c.no]
+          ? `<img class="card-img loaded" alt="" src="${imgURL[c.no]}">`
+          : `<img class="card-img" loading="lazy" alt="" data-ext="0" src="images/${c.no}.png"
+              onerror="imgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">`}
         <div class="card-main">
           <div class="card-top">
             <span class="card-name">${c.nm}</span>
@@ -572,6 +670,7 @@ function renderCards(){
       </div>
       <div class="card-actions">
         ${q?`<span class="in-deck">×${q}</span>`:''}
+        <button class="btn-cam" data-cam="${c.no}" title="Unggah gambar untuk kartu ini">📷</button>
         <button class="btn-add" data-act="add">+ Deck</button>
       </div>
     </div>`;
@@ -661,6 +760,7 @@ $('#btnReset').addEventListener('click', ()=>{
 });
 $('#cards').addEventListener('click', e=>{
   const card=e.target.closest('.card'); if(!card) return;
+  if(e.target.dataset.cam){ camTarget=e.target.dataset.cam; $('#fileOne').click(); return; }
   if(e.target.dataset.act==='add') addCard(card.dataset.no);
 });
 $('#deckList').addEventListener('click', e=>{
@@ -713,11 +813,95 @@ $('#btnDelDeck').addEventListener('click', ()=>{
   renderDeckSelect(); renderAll();
 });
 
+$('#btnRenDeck').addEventListener('click', ()=>{
+  let nama = prompt('Nama baru untuk deck ini:', store.active);
+  if(nama===null) return;
+  nama = nama.trim();
+  if(!nama || nama===store.active) return;
+  if(store.decks[nama]){ alert('Nama deck sudah dipakai.'); return; }
+  store.decks[nama] = state.deck;
+  delete store.decks[store.active];
+  store.active = nama;
+  renderDeckSelect(); renderAll();
+});
+
+/* --- unggah gambar --- */
+let camTarget = null;
+$('#fileOne').addEventListener('change', async e=>{
+  const f = e.target.files[0]; e.target.value='';
+  if(!f || !camTarget) return;
+  const ok = await processImageFile(f, camTarget);
+  camTarget = null;
+  if(ok) renderCards(); else alert('Gagal memproses gambar. Coba file lain.');
+});
+$('#btnBulk').addEventListener('click', ()=>$('#fileBulk').click());
+$('#fileBulk').addEventListener('change', async e=>{
+  const files=[...e.target.files]; e.target.value='';
+  if(!files.length) return;
+  let ok=0, skip=[];
+  for(const f of files){
+    const m = f.name.toUpperCase().match(/(?:BP01|PB01|EB01|TB01|SD0[1-4])-\d{3}/);
+    if(m && DB.some(c=>c.no===m[0])){
+      (await processImageFile(f, m[0])) ? ok++ : skip.push(f.name);
+    } else skip.push(f.name);
+  }
+  renderCards();
+  alert(`${ok} gambar tersimpan.` + (skip.length
+    ? `\nDilewati: ${skip.slice(0,6).join(', ')}${skip.length>6?' …':''}\n(Nama file harus mengandung nomor kartu, contoh: BP01-004.jpg)` : ''));
+});
+
+/* --- tampilan deck untuk dibagikan --- */
+function openDeckView(){
+  const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q}));
+  if(!entries.length){ alert('Deck masih kosong.'); return; }
+  entries.sort((a,b)=>CORDER[a.c.c]-CORDER[b.c.c] || a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
+  const col={Merah:0,Kuning:0,Biru:0,Hijau:0};
+  entries.forEach(({c,q})=>col[c.c]+=q);
+  $('#dvTitle').textContent = store.active;
+  $('#dvMeta').textContent = `${deckCount()} kartu · ` +
+    Object.entries(col).filter(([,n])=>n>0).map(([c,n])=>`${c} ${n}`).join(' · ');
+  $('#dvGrid').innerHTML = entries.map(({c,q})=>{
+    const im = imgURL[c.no];
+    const ph = `<div class="dv-ph" style="--dvc:${CMAP[c.c]};${im?'display:none':''}">
+        <div class="dv-lv">${c.l}</div>
+        <div class="dv-nm">${c.nm}</div>
+        <div class="dv-bt">${c.no} · R-${c.r} / ${c.p}</div>
+      </div>`;
+    const img = im
+      ? `<img src="${im}" alt="">`
+      : `<img src="images/${c.no}.png" alt=""
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`;
+    return `<div class="dv-card">${img}${ph}<div class="dv-qty">${q}</div></div>`;
+  }).join('');
+  $('#deckView').hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+$('#btnDeckView').addEventListener('click', openDeckView);
+$('#btnDvClose').addEventListener('click', ()=>{
+  $('#deckView').hidden = true;
+  document.body.style.overflow = '';
+});
+$('#btnDvPng').addEventListener('click', async ()=>{
+  if(typeof html2canvas === 'undefined'){
+    alert('Library unduh PNG belum termuat (butuh internet). Silakan screenshot manual.'); return;
+  }
+  $('#btnDvPng').textContent = 'Memproses…';
+  try{
+    const cv = await html2canvas($('#dviewSheet'), {backgroundColor:'#12161B', scale:2, useCORS:true});
+    const a = document.createElement('a');
+    a.download = (store.active.replace(/[^\w\- ]+/g,'').trim()||'deck') + '.png';
+    a.href = cv.toDataURL('image/png');
+    a.click();
+  }catch(e){ alert('Gagal membuat PNG — silakan screenshot manual.'); }
+  $('#btnDvPng').textContent = '⬇ Unduh PNG';
+});
+
 /* muat pengaturan tersimpan */
 $('#setSize').value = store.size || 50;
 $('#setMax').value  = store.max  || 3;
 renderDeckSelect();
 renderAll();
+loadImages();
 </script>
 </body>
 </html>
