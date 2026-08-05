@@ -649,7 +649,7 @@ function renderCards(){
       <div class="card-body">
         ${imgURL[c.no]
           ? `<img class="card-img loaded" alt="" src="${imgURL[c.no]}">`
-          : `<img class="card-img" loading="lazy" alt="" data-ext="0" src="images/${c.no}.png"
+          : `<img class="card-img" alt="" data-ext="0" src="images/${c.no}.png"
               onerror="imgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">`}
         <div class="card-main">
           <div class="card-top">
