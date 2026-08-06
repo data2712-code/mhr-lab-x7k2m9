@@ -32,6 +32,15 @@
   .brand h1 .stripe{color:var(--accent)}
   .brand p{color:var(--muted);font-size:12px;margin-top:4px;letter-spacing:.02em}
   .hdr-stats{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .tiktok{display:inline-flex;align-items:center;gap:7px;text-decoration:none;
+    background:var(--paper);color:#101418;border-radius:999px;padding:7px 14px;
+    font-size:12.5px;font-weight:700;transition:.15s;white-space:nowrap}
+  .tiktok:hover{background:var(--accent);transform:translateY(-1px)}
+  .tiktok svg{width:15px;height:15px;flex:none}
+  .foot-tiktok{display:inline-flex;align-items:center;gap:6px;color:var(--paper);
+    text-decoration:none;font-weight:700;border-bottom:1px solid var(--accent);padding-bottom:1px}
+  .foot-tiktok:hover{color:var(--accent)}
+  .foot-cta{margin-bottom:12px;font-size:12.5px;color:var(--muted)}
   .pill{
     border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;
     color:var(--muted);background:var(--panel);
@@ -276,6 +285,8 @@
     <div class="pill">Kartu unik <b id="hTotal">0</b></div>
     <div class="pill">Ditampilkan <b id="hShown">0</b></div>
     <div class="pill">Deck <b id="hDeck">0</b></div>
+    <a class="tiktok" href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener"
+      title="Follow @deteprtm di TikTok"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 0 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-1.85-2.48V9.79a5.94 5.94 0 1 0 4.94 5.85V8.9a7 7 0 0 0 4.07 1.3V7.12a4.19 4.19 0 0 1-3.01-1.3z"/></svg> Follow @deteprtm</a>
   </div>
 </header>
 
@@ -356,6 +367,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <footer>
+  <div class="foot-cta">
+    Dibuat oleh
+    <a class="foot-tiktok" href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 0 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-1.85-2.48V9.79a5.94 5.94 0 1 0 4.94 5.85V8.9a7 7 0 0 0 4.07 1.3V7.12a4.19 4.19 0 0 1-3.01-1.3z"/></svg> @deteprtm</a>
+    — follow untuk update deck, tips, dan pembahasan Marvel Hero Rush.
+  </div>
   MHR Deck Lab adalah alat bantu buatan penggemar (fan-made) dan <b>tidak berafiliasi dengan atau disponsori oleh
   Marvel maupun penerbit Marvel Hero Rush</b>. Seluruh nama kartu, teks efek, serta merek dagang terkait adalah milik
   pemegang haknya masing-masing. Data kartu dirujuk dari
