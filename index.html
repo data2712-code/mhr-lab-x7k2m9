@@ -167,9 +167,11 @@
   textarea.export.show{display:block}
   .empty{color:var(--muted);font-size:12.5px;text-align:center;padding:24px 8px;line-height:1.6}
   .card-body{display:flex;gap:12px}
-  .card-img{width:78px;flex:none;border-radius:6px;align-self:flex-start;display:none;
-    border:1px solid var(--line)}
-  .card-img.loaded{display:block}
+  .card-img{width:78px;flex:none;border-radius:6px;align-self:flex-start;
+    aspect-ratio:63/88;object-fit:cover;background:var(--panel2);
+    border:1px solid var(--line);opacity:0;transition:opacity .25s}
+  .card-img.loaded{opacity:1}
+  .card-img.failed{display:none}
   .card-main{flex:1;min-width:0}
   .card-link{font-size:11px;color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--muted)}
   .card-link:hover{color:var(--accent);border-color:var(--accent)}
@@ -197,7 +199,8 @@
   .cards.grid .g-wrap{position:relative;border-radius:10px;overflow:hidden;
     border:2px solid var(--cardc);background:var(--panel);cursor:zoom-in}
   .cards.grid .card-img{width:100%;height:auto;aspect-ratio:63/88;object-fit:cover;
-    display:block;border:none;border-radius:0}
+    display:block;border:none;border-radius:0;background:var(--panel2)}
+  .cards.grid .card-img.failed{display:none}
   .cards.grid .g-ph{aspect-ratio:63/88;padding:10px;display:flex;flex-direction:column;gap:6px;
     background:linear-gradient(165deg,#232B34,#141920)}
   .cards.grid .g-lv{width:28px;height:28px;border-radius:50%;background:var(--cardc);color:#fff;
@@ -676,13 +679,14 @@ function imgFallback(img,no){
   const exts=['jpg','png','webp'];
   let i=parseInt(img.dataset.ext)+1;
   if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
-  else { img.onerror=null; img.style.display='none'; }
+  else { img.onerror=null; img.classList.add('failed'); }
 }
 
 function cardListHTML(c,q){
   return `<div class="card" style="--cardc:${CMAP[c.c]}" data-no="${c.no}">
       <div class="card-body">
         <img class="card-img" alt="" data-ext="0" src="images/${c.no}.jpg" data-zoom="${c.no}"
+          loading="lazy" decoding="async" width="78" height="109"
           onerror="imgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">
         <div class="card-main">
           <div class="card-top">
@@ -713,6 +717,7 @@ function cardGridHTML(c,q){
       <div class="g-wrap" data-zoom="${c.no}">
         ${q?`<span class="in-deck">×${q}</span>`:''}
         <img class="card-img" alt="" data-ext="0" src="images/${c.no}.jpg"
+          loading="lazy" decoding="async" width="450" height="629"
           onerror="gridImgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">
         <div class="g-ph" style="display:none">
           <div class="g-lv">${c.l}</div>
@@ -732,7 +737,7 @@ function gridImgFallback(img,no){
   const exts=['jpg','png','webp'];
   let i=parseInt(img.dataset.ext)+1;
   if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
-  else { img.onerror=null; img.style.display='none';
+  else { img.onerror=null; img.classList.add('failed');
          const ph=img.nextElementSibling; if(ph) ph.style.display='flex'; }
 }
 
@@ -942,7 +947,7 @@ function lbImgFallback(img,no){
   const exts=['jpg','png','webp'];
   let i=parseInt(img.dataset.ext)+1;
   if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
-  else { img.onerror=null; img.style.display='none';
+  else { img.onerror=null; img.classList.add('failed');
          const ph=img.nextElementSibling; if(ph) ph.style.display='flex'; }
 }
 function closeLightbox(){
