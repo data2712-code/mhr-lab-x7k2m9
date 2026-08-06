@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MHR Deck Lab — Marvel Hero Rush Deck Builder</title>
+<meta name="description" content="Deck builder Marvel Hero Rush TCG: 200 kartu lengkap dengan gambar, stat, dan teks efek bahasa Indonesia. Susun deck, bagikan sebagai link atau gambar.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MHR Deck Lab — Marvel Hero Rush Deck Builder">
+<meta property="og:description" content="Susun deck Marvel Hero Rush: 200 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
+<meta property="og:image" content="og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -183,6 +189,12 @@
   footer{border-top:1px solid var(--line);margin-top:8px;padding:18px 20px 26px;
     color:var(--muted);font-size:11px;line-height:1.7;text-align:center}
   footer a{color:var(--muted)}
+  .share-note{background:rgba(242,176,30,.1);border:1px solid var(--accent);border-radius:10px;
+    padding:11px 13px;margin-bottom:12px;font-size:12.5px;line-height:1.6}
+  .share-note b{color:var(--accent)}
+  .share-note .row{display:flex;gap:8px;margin-top:10px}
+  .hdscale{background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:9px 10px;font-size:12.5px;cursor:pointer}
   /* --- pengalih tampilan --- */
   .viewtog{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
   .viewtog button{background:none;border:none;color:var(--muted);padding:8px 11px;
@@ -358,7 +370,8 @@
       style="width:100%;margin-top:14px;border-color:var(--accent);color:var(--accent);font-weight:700">
       🖼 Lihat deck — tampilan untuk dibagikan</button>
     <div class="deck-actions" style="margin-top:8px">
-      <button class="btn2" id="btnExport">Salin daftar deck</button>
+      <button class="btn2" id="btnLink">🔗 Salin link deck</button>
+      <button class="btn2" id="btnExport">Salin daftar</button>
       <button class="btn2 danger" id="btnClear">Kosongkan</button>
     </div>
     <textarea class="export" id="exportBox" readonly></textarea>
@@ -389,14 +402,27 @@
 
 <div class="dview" id="deckView" hidden>
   <div class="dview-bar">
-    <button class="btn2" id="btnDvPng" style="flex:none;padding:9px 14px">⬇ Unduh PNG</button>
+    <select class="hdscale" id="hdScale" title="Resolusi gambar hasil unduhan">
+      <option value="auto" selected>Resolusi: Otomatis</option>
+      <option value="1">1× (resolusi asli kartu)</option>
+      <option value="1.5">1,5×</option>
+      <option value="2">2×</option>
+      <option value="3">3× (file sangat besar)</option>
+    </select>
+    <button class="btn2" id="btnDvHd" style="flex:none;padding:9px 14px;border-color:var(--accent);color:var(--accent);font-weight:700">⬇ Unduh HD</button>
+    <button class="btn2" id="btnDvPng" style="flex:none;padding:9px 14px">⬇ PNG biasa</button>
     <button class="btn2" id="btnDvClose" style="flex:none;padding:9px 14px">✕ Tutup</button>
   </div>
   <div class="dview-sheet" id="dviewSheet">
     <h2 id="dvTitle"></h2>
     <div class="dv-meta" id="dvMeta"></div>
     <div class="dview-grid" id="dvGrid"></div>
-    <div class="dv-foot">Dibuat dengan MHR Deck Lab</div>
+    <div class="dv-foot" style="text-align:left;color:var(--muted);font-family:var(--body);font-size:11.5px;line-height:1.6">
+      💡 Untuk hasil paling tajam: gunakan <b>Unduh HD</b>, lalu kirim di WhatsApp
+      <b>sebagai Dokumen</b> (ikon 📎 → Document), bukan sebagai foto — kalau dikirim sebagai foto,
+      WhatsApp akan mengompres ulang gambarnya.
+      <span style="float:right;font-family:var(--mono)">Dibuat dengan MHR Deck Lab</span>
+    </div>
   </div>
 </div>
 
@@ -999,6 +1025,190 @@ $('#btnDvClose').addEventListener('click', ()=>{
   $('#deckView').hidden = true;
   document.body.style.overflow = '';
 });
+
+/* --- ekspor HD: menggambar langsung ke canvas pada resolusi asli gambar --- */
+function loadImg(src){
+  return new Promise(res=>{
+    const im = new Image();
+    im.onload = ()=>res(im);
+    im.onerror = ()=>res(null);
+    im.src = src;
+  });
+}
+async function loadCardImgAny(no){
+  for(const ext of ['jpg','png','webp']){
+    const im = await loadImg(`images/${no}.${ext}`);
+    if(im) return im;
+  }
+  return null;
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+
+const HEXC = {Merah:'#E4442E', Kuning:'#F2B01E', Biru:'#3B87E8', Hijau:'#33A45C'};
+
+$('#btnDvHd').addEventListener('click', async ()=>{
+  const btn = $('#btnDvHd');
+  const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q}));
+  if(!entries.length){ alert('Deck masih kosong.'); return; }
+  entries.sort((a,b)=>CORDER[a.c.c]-CORDER[b.c.c] || a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
+  btn.disabled = true; btn.textContent = 'Memuat gambar…';
+
+  // muat semua gambar pada resolusi asli
+  const imgs = {};
+  for(let i=0;i<entries.length;i++){
+    const no = entries[i].c.no;
+    if(!(no in imgs)) imgs[no] = await loadCardImgAny(no);
+    btn.textContent = `Memuat… ${i+1}/${entries.length}`;
+  }
+
+  // ukuran kartu = resolusi gambar terbesar yang ditemukan, dikali skala pilihan
+  let NW = 450, NH = 620;
+  for(const no in imgs){
+    if(imgs[no]){ NW = Math.max(NW, imgs[no].naturalWidth);
+                  NH = Math.round(NW * imgs[no].naturalHeight / imgs[no].naturalWidth); break; }
+  }
+  // batas aman area kanvas: Safari iOS jauh lebih ketat daripada desktop
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const BUDGET = isIOS ? 16.0e6 : 40.0e6;
+
+  const nCard = entries.length;
+  const colsFor = nCard <= 4 ? nCard : (nCard <= 9 ? 3 : (nCard <= 24 ? 5 : 6));
+  const rowsFor = Math.ceil(nCard/colsFor);
+  // luas kanvas pada skala 1 (termasuk padding, header, footer)
+  const areaAt1 = (()=>{
+    const g=Math.round(NW*0.05), p=Math.round(NW*0.09), hd=Math.round(NW*0.44), ft=Math.round(NW*0.20);
+    return (p*2 + colsFor*NW + (colsFor-1)*g) * (p + hd + rowsFor*NH + (rowsFor-1)*g + ft);
+  })();
+  const maxScale = Math.sqrt(BUDGET/areaAt1);
+
+  const pick = $('#hdScale').value;
+  let SC, clamped = false;
+  if(pick === 'auto'){
+    SC = [3,2,1.5,1].find(v=>v <= maxScale) || Math.max(0.5, Math.floor(maxScale*20)/20);
+  } else {
+    SC = parseFloat(pick) || 1;
+    if(SC > maxScale){ SC = Math.max(0.5, Math.floor(maxScale*20)/20); clamped = true; }
+  }
+  let CW = Math.round(NW * SC), CH = Math.round(NH * SC);
+
+  const n = entries.length;
+  const cols = n <= 4 ? n : (n <= 9 ? 3 : (n <= 24 ? 5 : 6));
+  const rows = Math.ceil(n/cols);
+  const GAP = Math.round(CW*0.05), PAD = Math.round(CW*0.09);
+  const HEAD = Math.round(CW*0.44), FOOT = Math.round(CW*0.20);
+
+  const W = PAD*2 + cols*CW + (cols-1)*GAP;
+  const H = PAD + HEAD + rows*CH + (rows-1)*GAP + FOOT;
+
+  if(clamped){
+    alert(`Resolusi diturunkan otomatis ke ${SC}× karena ${n} kartu pada skala yang dipilih ` +
+          `melebihi batas kemampuan browser ini` + (isIOS ? ' (iPhone/iPad lebih terbatas).' : '.') +
+          `\n\nUntuk hasil lebih tajam: bagi deck jadi beberapa gambar, atau unduh dari laptop.`);
+  }
+
+  btn.textContent = 'Menyusun…';
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+
+  // latar
+  ctx.fillStyle = '#12161B'; ctx.fillRect(0,0,W,H);
+
+  // judul
+  const col = {Merah:0,Kuning:0,Biru:0,Hijau:0};
+  entries.forEach(({c,q})=>col[c.c]+=q);
+  const meta = `${deckCount()} kartu  ·  ` +
+    Object.entries(col).filter(([,v])=>v>0).map(([k,v])=>`${k} ${v}`).join('  ·  ');
+
+  ctx.fillStyle = '#EDE7DA';
+  ctx.font = `900 ${Math.round(CW*0.20)}px Arial, sans-serif`;
+  ctx.textBaseline = 'top';
+  ctx.fillText(store.active.toUpperCase(), PAD, PAD*0.7);
+  ctx.fillStyle = '#8B96A5';
+  ctx.font = `${Math.round(CW*0.075)}px "Courier New", monospace`;
+  ctx.fillText(meta, PAD, PAD*0.7 + Math.round(CW*0.24));
+
+  // kartu
+  for(let i=0;i<n;i++){
+    const {c,q} = entries[i];
+    const cx = i % cols, cy = Math.floor(i/cols);
+    const x = PAD + cx*(CW+GAP), y = PAD + HEAD + cy*(CH+GAP);
+    const im = imgs[c.no];
+
+    if(im){
+      ctx.save(); roundRect(ctx,x,y,CW,CH,CW*0.045); ctx.clip();
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(im, x, y, CW, CH);
+      ctx.restore();
+    } else {
+      // placeholder teks bila gambar tidak ada
+      ctx.save();
+      roundRect(ctx,x,y,CW,CH,CW*0.045);
+      ctx.fillStyle = '#1B222A'; ctx.fill();
+      ctx.lineWidth = CW*0.016; ctx.strokeStyle = HEXC[c.c]; ctx.stroke();
+      ctx.clip();
+      ctx.fillStyle = HEXC[c.c];
+      ctx.beginPath(); ctx.arc(x+CW*0.15, y+CW*0.15, CW*0.085, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font = `900 ${Math.round(CW*0.10)}px Arial, sans-serif`;
+      ctx.fillText(String(c.l), x+CW*0.15, y+CW*0.155);
+      ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.fillStyle = '#EDE7DA'; ctx.font = `bold ${Math.round(CW*0.062)}px Arial, sans-serif`;
+      const words = c.nm.split(' '); let line='', ly = y+CW*0.30;
+      for(const w of words){
+        const t = line ? line+' '+w : w;
+        if(ctx.measureText(t).width > CW*0.82){ ctx.fillText(line, x+CW*0.09, ly); ly += CW*0.075; line = w; }
+        else line = t;
+      }
+      ctx.fillText(line, x+CW*0.09, ly);
+      ctx.fillStyle = '#8B96A5'; ctx.font = `${Math.round(CW*0.05)}px "Courier New", monospace`;
+      ctx.fillText(`${c.no} · R-${c.r} / ${c.p}`, x+CW*0.09, y+CH-CW*0.13);
+      ctx.restore();
+    }
+
+    // badge jumlah
+    const bs = CW*0.20, bx = x+CW-bs*0.62, by = y+CH-bs*0.62;
+    ctx.save();
+    roundRect(ctx, bx, by, bs, bs, bs*0.28);
+    ctx.fillStyle = '#101418'; ctx.fill();
+    roundRect(ctx, bx+bs*0.09, by+bs*0.09, bs*0.82, bs*0.82, bs*0.22);
+    ctx.fillStyle = '#ffffff'; ctx.fill();
+    ctx.fillStyle = '#101418'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `900 ${Math.round(bs*0.52)}px Arial, sans-serif`;
+    ctx.fillText(String(q), bx+bs*0.5, by+bs*0.52);
+    ctx.restore();
+  }
+
+  // footer
+  ctx.fillStyle = '#8B96A5'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
+  ctx.font = `${Math.round(CW*0.058)}px "Courier New", monospace`;
+  ctx.fillText('Dibuat dengan MHR Deck Lab  ·  TikTok @deteprtm', W-PAD, H-PAD*0.55);
+
+  // simpan sebagai JPEG mutu tinggi (ukuran file jauh lebih kecil, ketajaman setara)
+  const nama = (store.active.replace(/[^\w\- ]+/g,'').trim() || 'deck');
+  cv.toBlob(b=>{
+    if(!b){ alert('Gagal membuat gambar.'); btn.disabled=false; btn.textContent='⬇ Unduh HD'; return; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = `${nama}-HD.jpg`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+    btn.disabled = false;
+    btn.textContent = `✓ ${cv.width}×${cv.height} · ${(b.size/1024/1024).toFixed(1)} MB`;
+    setTimeout(()=>btn.textContent = '⬇ Unduh HD', 4000);
+  }, 'image/jpeg', 0.97);
+});
+
 $('#btnDvPng').addEventListener('click', async ()=>{
   if(typeof html2canvas === 'undefined'){
     alert('Library unduh PNG belum termuat (butuh internet). Silakan screenshot manual.'); return;
@@ -1015,6 +1225,121 @@ $('#btnDvPng').addEventListener('click', async ()=>{
 });
 
 
+
+
+/* ==================== BAGIKAN DECK SEBAGAI LINK ==================== */
+/* Format: #d=1.<nama-base64url>.<kode kartu>
+   Kode kartu: 1 huruf seri + 3 digit nomor + jumlah (basis36, 1 karakter).
+   Angka "1" di depan adalah versi format — jangan diubah artinya; kalau nanti
+   formatnya berganti, naikkan jadi 2 dan tetap dukung pembacaan versi 1. */
+const SER2L = {BP01:'A', PB01:'B', EB01:'C', TB01:'D', SD01:'E', SD02:'F', SD03:'G', SD04:'H'};
+const L2SER = Object.fromEntries(Object.entries(SER2L).map(([k,v])=>[v,k]));
+
+function b64urlEncode(str){
+  return btoa(unescape(encodeURIComponent(str)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function b64urlDecode(str){
+  str = str.replace(/-/g,'+').replace(/_/g,'/');
+  while(str.length % 4) str += '=';
+  try { return decodeURIComponent(escape(atob(str))); } catch(e){ return ''; }
+}
+
+function encodeDeck(deck, nama){
+  const parts = [];
+  for(const [no,q] of Object.entries(deck)){
+    const m = no.match(/^([A-Z0-9]+)-(\d{3})$/);
+    if(!m) continue;
+    const L = SER2L[m[1]];
+    if(!L) continue;
+    parts.push(L + m[2] + Math.min(q,35).toString(36));
+  }
+  return `1.${b64urlEncode(nama||'Deck')}.${parts.join('')}`;
+}
+
+function decodeDeck(code){
+  const seg = code.split('.');
+  if(seg[0] !== '1') return null;                    // versi tak dikenal
+  const nama = b64urlDecode(seg[1]||'') || 'Deck dibagikan';
+  const body = seg[2] || '';
+  const deck = {}; let unknown = 0;
+  for(let i=0; i+5<=body.length; i+=5){
+    const L = body[i], num = body.slice(i+1,i+4), q = parseInt(body[i+4],36);
+    const ser = L2SER[L];
+    const no = ser ? `${ser}-${num}` : null;
+    if(no && DB.some(c=>c.no===no) && q>0) deck[no] = q;
+    else unknown++;
+  }
+  return {nama, deck, unknown};
+}
+
+function deckShareURL(){
+  const base = location.origin + location.pathname;
+  return base + '#d=' + encodeDeck(state.deck, store.active);
+}
+
+$('#btnLink').addEventListener('click', async ()=>{
+  if(!deckCount()){ alert('Deck masih kosong.'); return; }
+  const url = deckShareURL();
+  const btn = $('#btnLink');
+  try{
+    await navigator.clipboard.writeText(url);
+    btn.textContent = '✓ Link tersalin';
+  }catch(e){
+    const box = $('#exportBox');
+    box.value = url; box.classList.add('show'); box.select();
+    try{ document.execCommand('copy'); btn.textContent = '✓ Link tersalin'; }
+    catch(e2){ btn.textContent = 'Salin manual dari kotak ↓'; }
+  }
+  setTimeout(()=>btn.textContent = '🔗 Salin link deck', 2200);
+});
+
+/* --- baca link yang dibuka --- */
+function handleSharedLink(){
+  const h = location.hash;
+  if(!h.startsWith('#d=')) return;
+  const res = decodeDeck(decodeURIComponent(h.slice(3)));
+  history.replaceState(null,'',location.pathname);   // bersihkan agar tidak terbaca ulang
+  if(!res || !Object.keys(res.deck).length){
+    alert('Link deck tidak dapat dibaca — mungkin dibuat dengan versi yang berbeda.');
+    return;
+  }
+  const jml = Object.values(res.deck).reduce((a,b)=>a+b,0);
+  const box = document.createElement('div');
+  box.className = 'share-note';
+  box.innerHTML = `Ada deck yang dibagikan: <b>${res.nama.replace(/</g,'&lt;')}</b> — ${jml} kartu` +
+    (res.unknown ? ` <span style="color:var(--merah)">(${res.unknown} kartu tidak dikenali dan dilewati)</span>` : '') +
+    `<div class="row">
+       <button class="btn2" id="shSave" style="border-color:var(--accent);color:var(--accent);font-weight:700">Simpan sebagai deck saya</button>
+       <button class="btn2" id="shView">Lihat saja</button>
+       <button class="btn2" id="shNo" style="flex:none;padding:9px 12px">✕</button>
+     </div>`;
+  const panel = $('#deckPanel');
+  panel.insertBefore(box, panel.querySelector('.deckmgr'));
+
+  const openAs = (simpan)=>{
+    let nama = res.nama;
+    if(simpan){
+      let i = 2; while(store.decks[nama]) nama = `${res.nama} (${i++})`;
+      store.decks[store.active] = state.deck;      // amankan deck yang sedang dibuka
+      store.decks[nama] = {...res.deck};
+      store.active = nama;
+      state.deck = store.decks[nama];
+      renderDeckSelect(); renderAll();
+    } else {
+      const simpanDeck = {...res.deck};
+      const tmp = store.active;
+      state.deck = simpanDeck;                     // tampilkan tanpa menyimpan
+      renderCards(); renderDeck();
+      store.decks[tmp] = store.decks[tmp] || {};
+    }
+    box.remove();
+  };
+  $('#shSave').addEventListener('click', ()=>openAs(true));
+  $('#shView').addEventListener('click', ()=>{ openAs(false); openDeckView(); });
+  $('#shNo').addEventListener('click', ()=>box.remove());
+}
+
 /* muat pengaturan tersimpan */
 if(store.view === 'grid'){
   state.view = 'grid';
@@ -1024,6 +1349,7 @@ $('#setSize').value = store.size || 50;
 $('#setMax').value  = store.max  || 3;
 renderDeckSelect();
 renderAll();
+handleSharedLink();
 </script>
 </body>
 </html>
