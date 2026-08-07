@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v2.4** · 7 Agustus 2026
+**Versi saat ini: v2.5** · 7 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -49,9 +49,12 @@ Format satu entri (field `cr` opsional):
 
 ```javascript
   { nm:'Nama Deck', cr:'Nama Pembuat',
-    ds:'Deskripsi singkat gaya main dan kombo utamanya.',
+    ds:'',
     cd:'1.<kode dari link deck>' },
 ```
+
+Field `ds` bisa dibiarkan kosong (`ds:''`) — blok deskripsinya otomatis tidak
+ditampilkan. Isi kalau suatu saat ingin menjelaskan gaya main decknya.
 
 Menghapus deck contoh: hapus barisnya. Mengubah urutan: pindahkan barisnya.
 Panel admin tidak terlihat oleh pengunjung biasa. Ini hanya menyembunyikan dari
@@ -64,12 +67,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v2.4.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v2.5.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v2.4` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v2.5` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v2.4</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v2.5</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -97,6 +100,12 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v2.5 — 7 Agustus 2026
+- Deskripsi deck contoh dikosongkan — tiap deck kini hanya menampilkan nama,
+  kredit pembuat, komposisi warna, jumlah kartu, dan rata-rata level
+- Blok deskripsi otomatis disembunyikan kalau `ds` kosong, jadi tidak ada ruang
+  menggantung di kartu deck
 
 ### v2.4 — 7 Agustus 2026
 - Deck contoh keempat: **Merah – Kuning** oleh Katalio — mesin [Machine]/[Ultron]
