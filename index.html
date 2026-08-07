@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!-- ===================================================================
+     MHR DECK LAB  ·  versi 2.1  ·  7 Agustus 2026
+     Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
+     Live: https://data2712-code.github.io/MHR-Deck-Lab/
+     Riwayat update lengkap: lihat README.md di repository
+     =================================================================== -->
 <html lang="id">
 <head>
 <meta charset="UTF-8">
@@ -10,6 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 200 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="version" content="2.1">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -189,6 +196,35 @@
   footer{border-top:1px solid var(--line);margin-top:8px;padding:18px 20px 26px;
     color:var(--muted);font-size:11px;line-height:1.7;text-align:center}
   footer a{color:var(--muted)}
+  /* --- filter mekanik --- */
+  .mech{display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:2px}
+  .mech button{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+    border-radius:999px;padding:5px 11px;font-size:11.5px;cursor:pointer;transition:.15s}
+  .mech button:hover{color:var(--paper)}
+  .mech button[aria-pressed="true"]{background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:700}
+  .mech .lbl{font-size:11px;color:var(--muted);align-self:center;letter-spacing:.06em;
+    text-transform:uppercase;margin-right:2px}
+  /* --- peringatan aturan deck --- */
+  .rule{border-radius:9px;padding:8px 11px;font-size:12px;line-height:1.5;margin-bottom:10px;
+    display:flex;gap:8px;align-items:flex-start}
+  .rule.bad{background:rgba(228,68,46,.12);border:1px solid var(--merah);color:#FFD8D2}
+  .rule.ok{background:rgba(51,164,92,.12);border:1px solid var(--hijau);color:#D6F0DF}
+  .rule b{color:#fff}
+  /* --- statistik deck --- */
+  .stats2{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-bottom:12px}
+  .stats2 div{font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;
+    border-bottom:1px dotted var(--line);padding-bottom:3px}
+  .stats2 b{color:var(--paper);font-family:var(--mono);font-size:12px}
+  .rbar{display:flex;gap:4px;align-items:flex-end;height:46px;margin:4px 0 2px}
+  .rbar .b{flex:1;background:var(--line);border-radius:3px 3px 0 0;min-height:3px;position:relative}
+  .rbar .b span{position:absolute;top:-15px;left:0;right:0;text-align:center;
+    font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+  .rbarx{display:flex;gap:4px;margin-bottom:12px}
+  .rbarx div{flex:1;text-align:center;font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+  .traits{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px}
+  .traits span{font-size:10.5px;font-family:var(--mono);background:var(--panel);
+    border:1px solid var(--line);border-radius:5px;padding:2px 7px;color:var(--muted)}
+  .traits span b{color:var(--paper)}
   .share-note{background:rgba(242,176,30,.1);border:1px solid var(--accent);border-radius:10px;
     padding:11px 13px;margin-bottom:12px;font-size:12.5px;line-height:1.6}
   .share-note b{color:var(--accent)}
@@ -318,6 +354,7 @@
       <select id="fSeries"><option value="">Semua seri</option></select>
       <select id="fLevel"><option value="">Semua level</option></select>
       <select id="fRange"><option value="">Semua jarak</option></select>
+      <select id="fTrait"><option value="">Semua trait</option></select>
       <select id="fRarity"><option value="">Semua rarity</option></select>
       <select id="fSort">
         <option value="no">Urut: Nomor</option>
@@ -330,6 +367,17 @@
         <button data-view="grid" aria-pressed="false" title="Tampilan grid">▦ Grid</button>
       </div>
       <button class="reset" id="btnReset">Reset</button>
+      <div class="mech" id="mechBar">
+        <span class="lbl">Mekanik</span>
+        <button data-m="prune" aria-pressed="false">Prune</button>
+        <button data-m="counter" aria-pressed="false">Counter</button>
+        <button data-m="move" aria-pressed="false">BATTLE-BASE move</button>
+        <button data-m="attach" aria-pressed="false">Pasang</button>
+        <button data-m="set" aria-pressed="false">Kartu tertutup</button>
+        <button data-m="retreat" aria-pressed="false">Trigger RETREAT</button>
+        <button data-m="draw" aria-pressed="false">Tarik kartu</button>
+        <button data-m="debuff" aria-pressed="false">Turunkan Power</button>
+      </div>
       <div class="count-note" id="noteShown"></div>
     </div>
     <div class="cards" id="cards"></div>
@@ -356,12 +404,24 @@
       </label>
     </div>
 
+    <div id="ruleBox"></div>
+
+    <div class="deck-sec-title">Statistik</div>
+    <div class="stats2" id="stats2"></div>
+
     <div class="deck-sec-title">Kurva level</div>
     <div class="curve" id="curve"></div>
     <div class="curve-x" id="curveX"></div>
 
     <div class="deck-sec-title">Komposisi warna</div>
     <div class="cdist" id="cdist"></div>
+
+    <div class="deck-sec-title">Sebaran jarak serangan (R)</div>
+    <div class="rbar" id="rbar"></div>
+    <div class="rbarx" id="rbarx"></div>
+
+    <div class="deck-sec-title">Trait terbanyak</div>
+    <div class="traits" id="traits"></div>
 
     <div class="deck-sec-title">Daftar kartu</div>
     <div id="deckList"><div class="empty">Deck masih kosong.<br>Klik <b>+ Deck</b> pada kartu untuk menambahkan.</div></div>
@@ -393,6 +453,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v2.1</div>
 </footer>
 
 <div class="lb" id="lightbox" hidden>
@@ -635,11 +696,29 @@ const DB = [
 /* ============================ APLIKASI ============================ */
 const CMAP = {Merah:'var(--merah)', Kuning:'var(--kuning)', Biru:'var(--biru)', Hijau:'var(--hijau)'};
 const CORDER = {Merah:0, Kuning:1, Biru:2, Hijau:3};
+
+/* pola pencocokan filter mekanik (dicek pada teks efek kartu) */
+const MECH = {
+  prune:   /\bPrune\b/i,
+  counter: /\[COUNTER/i,
+  move:    /BATTLE-BASE move|BATTLE-BASE/i,
+  attach:  /\bPasang\b|dipasang|terpasang|[Pp]asangkan/,
+  set:     /tertutup/i,
+  retreat: /(masuk|ditempatkan|dibuang)[^.]{0,40}RETREAT/i,
+  draw:    /(ambil|tarik|mengambil|menarik)\s+\d*\s*kartu/i,
+  debuff:  /Power -/,
+};
+
+/* daftar trait unik, dipecah dari field trait tiap kartu */
+function traitsOf(c){
+  return (c.f||'').split('/').map(t=>t.trim()).filter(t=>t && t!=='-');
+}
 const $ = s => document.querySelector(s);
 
 const state = {
   q:'', colors:new Set(['Merah','Kuning','Biru','Hijau']),
-  series:'', level:'', range:'', rarity:'', sort:'no', view:'list',
+  series:'', level:'', range:'', rarity:'', trait:'', sort:'no', view:'list',
+  mech:new Set(),
   deck:{}  // key: card no -> qty
 };
 
@@ -680,6 +759,7 @@ function renderDeckSelect(){
   uniq(DB.map(c=>c.l)).sort((a,b)=>a-b).forEach(v=>$('#fLevel').insertAdjacentHTML('beforeend',`<option value="${v}">Level ${v}</option>`));
   uniq(DB.map(c=>c.r)).sort((a,b)=>a-b).forEach(v=>$('#fRange').insertAdjacentHTML('beforeend',`<option value="${v}">Jarak ${v}</option>`));
   uniq(DB.flatMap(c=>c.ra)).sort().forEach(v=>$('#fRarity').insertAdjacentHTML('beforeend',`<option>${v}</option>`));
+  uniq(DB.flatMap(traitsOf)).sort().forEach(v=>$('#fTrait').insertAdjacentHTML('beforeend',`<option>${v}</option>`));
   $('#hTotal').textContent = DB.length;
 })();
 
@@ -691,6 +771,8 @@ function filtered(){
     (!state.level  || String(c.l)===state.level) &&
     (state.range==='' || String(c.r)===state.range) &&
     (!state.rarity || c.ra.includes(state.rarity)) &&
+    (!state.trait || traitsOf(c).includes(state.trait)) &&
+    [...state.mech].every(m => MECH[m] && MECH[m].test(c.e)) &&
     (!q || (c.nm+' '+c.e+' '+c.f+' '+c.no).toLowerCase().includes(q))
   );
   const s = state.sort;
@@ -781,8 +863,9 @@ function renderCards(){
 
 /* --- deck --- */
 function deckCount(){ return Object.values(state.deck).reduce((a,b)=>a+b,0); }
+function maxCopy(){ return Math.max(1, parseInt($('#setMax').value)||3); }
 function addCard(no){
-  const max = Math.max(1, parseInt($('#setMax').value)||3);
+  const max = maxCopy();
   const cur = state.deck[no]||0;
   if(cur >= max) return;
   state.deck[no] = cur+1;
@@ -819,6 +902,52 @@ function renderDeck(){
     Object.entries(col).filter(([,n])=>n>0)
       .map(([c,n])=>`<div style="width:${n/total*100}%;background:${CMAP[c]}" title="${c}: ${n}"></div>`).join('');
 
+  // ---- validasi aturan deck ----
+  const dipakai = Object.entries(col).filter(([,n])=>n>0).map(([c])=>c);
+  const lebih = Object.entries(state.deck).filter(([,q])=>q > maxCopy()).map(([no])=>no);
+  const masalah = [];
+  if(dipakai.length > 2)
+    masalah.push(`Deck memakai <b>${dipakai.length} warna</b> (${dipakai.join(', ')}) — maksimal 2 warna.`);
+  if(lebih.length)
+    masalah.push(`<b>${lebih.length} kartu</b> melebihi ${maxCopy()} salinan: ${lebih.slice(0,4).join(', ')}${lebih.length>4?' …':''}`);
+  if(total > target)
+    masalah.push(`Jumlah kartu melebihi target (<b>${total}</b> dari ${target}).`);
+
+  const rb = $('#ruleBox');
+  if(total === 0) rb.innerHTML = '';
+  else if(masalah.length)
+    rb.innerHTML = `<div class="rule bad"><span>⚠</span><div>${masalah.join('<br>')}</div></div>`;
+  else if(total === target)
+    rb.innerHTML = `<div class="rule ok"><span>✓</span><div>Deck sah: ${total} kartu, ${dipakai.length} warna (${dipakai.join(' + ')}).</div></div>`;
+  else
+    rb.innerHTML = `<div class="rule ok"><span>✓</span><div>Aturan warna & salinan terpenuhi${dipakai.length?` — ${dipakai.join(' + ')}`:''}. Masih kurang ${target-total} kartu.</div></div>`;
+
+  // ---- statistik deck ----
+  const st = $('#stats2');
+  if(total === 0){ st.innerHTML = ''; $('#rbar').innerHTML=''; $('#rbarx').innerHTML=''; $('#traits').innerHTML=''; }
+  else {
+    let totLv = 0, totPw = 0;
+    const rr = {0:0,1:0,2:0,3:0,4:0}, tr = {};
+    entries.forEach(({c,q})=>{
+      totLv += c.l*q; totPw += c.p*q;
+      rr[c.r] = (rr[c.r]||0) + q;
+      traitsOf(c).forEach(t=>tr[t] = (tr[t]||0) + q);
+    });
+    st.innerHTML = `
+      <div><span>Rata-rata Lv</span><b>${(totLv/total).toFixed(2)}</b></div>
+      <div><span>Rata-rata Power</span><b>${Math.round(totPw/total)}</b></div>
+      <div><span>Total Power</span><b>${totPw.toLocaleString('id-ID')}</b></div>
+      <div><span>Kartu unik</span><b>${entries.length}</b></div>`;
+
+    const maxR = Math.max(1,...Object.values(rr));
+    $('#rbar').innerHTML = Object.entries(rr).map(([r,n])=>
+      `<div class="b" style="height:${Math.round(n/maxR*100)}%;background:${n?'var(--biru)':'var(--line)'}"><span>${n||''}</span></div>`).join('');
+    $('#rbarx').innerHTML = Object.keys(rr).map(r=>`<div>R-${r}</div>`).join('');
+
+    $('#traits').innerHTML = Object.entries(tr).sort((a,b)=>b[1]-a[1]).slice(0,8)
+      .map(([t,n])=>`<span>${t} <b>${n}</b></span>`).join('');
+  }
+
   // daftar
   if(entries.length===0){
     $('#deckList').innerHTML = '<div class="empty">Deck masih kosong.<br>Klik <b>+ Deck</b> pada kartu untuk menambahkan.</div>';
@@ -844,6 +973,14 @@ $('#fSeries').addEventListener('change', e=>{ state.series=e.target.value; rende
 $('#fLevel').addEventListener('change', e=>{ state.level=e.target.value; renderCards(); });
 $('#fRange').addEventListener('change', e=>{ state.range=e.target.value; renderCards(); });
 $('#fRarity').addEventListener('change', e=>{ state.rarity=e.target.value; renderCards(); });
+$('#fTrait').addEventListener('change', e=>{ state.trait=e.target.value; renderCards(); });
+$('#mechBar').addEventListener('click', e=>{
+  const b=e.target.closest('[data-m]'); if(!b) return;
+  const m=b.dataset.m;
+  if(state.mech.has(m)){ state.mech.delete(m); b.setAttribute('aria-pressed','false'); }
+  else { state.mech.add(m); b.setAttribute('aria-pressed','true'); }
+  renderCards();
+});
 $('#fSort').addEventListener('change', e=>{ state.sort=e.target.value; renderCards(); });
 $('#cbtns').addEventListener('click', e=>{
   const b=e.target.closest('.cbtn'); if(!b) return;
@@ -853,9 +990,11 @@ $('#cbtns').addEventListener('click', e=>{
   renderCards();
 });
 $('#btnReset').addEventListener('click', ()=>{
-  state.q=''; state.series=''; state.level=''; state.range=''; state.rarity=''; state.sort='no';
+  state.q=''; state.series=''; state.level=''; state.range=''; state.rarity=''; state.trait=''; state.sort='no';
+  state.mech.clear();
+  document.querySelectorAll('#mechBar [data-m]').forEach(b=>b.setAttribute('aria-pressed','false'));
   state.colors=new Set(['Merah','Kuning','Biru','Hijau']);
-  $('#q').value=''; ['fSeries','fLevel','fRange','fRarity'].forEach(id=>$('#'+id).value='');
+  $('#q').value=''; ['fSeries','fLevel','fRange','fRarity','fTrait'].forEach(id=>$('#'+id).value='');
   $('#fSort').value='no';
   document.querySelectorAll('.cbtn').forEach(b=>b.dataset.on='1');
   renderCards();

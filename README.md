@@ -1,5 +1,7 @@
 # MHR Deck Lab
 
+**Versi saat ini: v2.1** · 7 Agustus 2026
+
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
 
@@ -30,6 +32,21 @@ Semua data deck tersimpan di browser pengguna (localStorage).
 1. Edit / ganti `index.html`
 2. Repository → **Add file → Upload files** → drop file → **Commit changes**
 3. Tunggu 1–2 menit, buka situs dengan `?v=` angka baru untuk melewati cache
+4. Perbarui bagian **Riwayat Update** di README ini
+
+### Cara mengecek versi file
+
+Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
+
+| Lokasi | Cara melihat |
+|---|---|
+| Nama file kiriman | `mhr_deck_lab_public_v2.1.html` |
+| Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
+| `<meta name="version">` | di dalam `<head>` |
+| Pojok bawah situs | teks kecil `v2.1` di bawah disclaimer footer |
+
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v2.1</div>`
+di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
 Nama file harus persis nomor kartu, huruf besar (`BP01-004.jpg`) — GitHub Pages
@@ -41,6 +58,7 @@ bersifat case-sensitive.
 |---|---|
 | Sumber data kartu | API resmi `server.marvelherorush.com/marvel/card/list` (200 kartu unik) |
 | Ukuran gambar kartu | 450 × 620 px, ber-watermark SAMPLE, ±80 KB per file |
+| Aturan deck | 50 kartu, maksimal 3 salinan per kartu, maksimal 2 warna (bisa diubah di panel) |
 | Penyimpanan deck | localStorage, per browser per perangkat |
 | Format link deck | `#d=1.<nama-base64url>.<kode kartu>` — versi 1 |
 | Batas GitHub Pages | Situs 1 GB, bandwidth 100 GB/bulan (soft limit) |
@@ -54,6 +72,19 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v2.1 — 7 Agustus 2026
+- **Validasi aturan deck** di panel: memperingatkan kalau deck memakai lebih dari
+  2 warna, ada kartu melebihi batas salinan, atau jumlah kartu melewati target.
+  Menampilkan konfirmasi hijau kalau deck sudah sah
+- **Filter trait**: dropdown 16 trait (Avengers, Machine, GOTG, Asgard, Wakanda,
+  Hydra, Mutant, Fantastic Four, S.H.I.E.L.D., dll)
+- **Filter mekanik**: 8 tombol cepat berdasarkan pola pada teks efek kartu —
+  Prune (30 kartu), Counter (22), BATTLE-BASE move (18), Pasang (15),
+  Kartu tertutup (24), Trigger RETREAT (28), Tarik kartu (16), Turunkan Power (14).
+  Bisa dikombinasikan dengan filter lain
+- **Statistik deck diperluas**: rata-rata Level, rata-rata Power, total Power,
+  jumlah kartu unik, sebaran jarak serangan (R-0 s/d R-4), dan 8 trait terbanyak
 
 ### v2.0 — 6 Agustus 2026
 - Bagikan deck sebagai **link**: deck disandikan di dalam URL, penerima bisa
@@ -113,6 +144,11 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 - [ ] Reintegrasi fitur cetak kartu proxy (PDF A4, kode ada di backup)
 - [ ] Backup & restore data deck untuk pindah perangkat
+- [ ] Impor deck dari teks (pasangan dari "Salin daftar deck")
+- [ ] Navigasi ◀ ▶ / panah keyboard di dalam popup kartu
+- [ ] Duplikat deck untuk mencoba variasi
+- [ ] Filter bar yang bisa dilipat di layar HP
 - [ ] Gambar kartu resolusi lebih tinggi (>450 px) untuk hasil unduhan lebih tajam
+- [ ] Pelacakan koleksi kartu yang dimiliki (pekerjaan besar, perlu dipikirkan matang)
 - [ ] Update database saat set kartu baru rilis
 - [ ] Pertimbangkan Cloudflare Pages jika bandwidth mendekati batas
