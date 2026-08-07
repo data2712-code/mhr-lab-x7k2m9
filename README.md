@@ -1,11 +1,11 @@
 # MHR Deck Lab
 
-**Versi saat ini: v2.1** · 7 Agustus 2026
+**Versi saat ini: v2.3** · 7 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
 
-🔗 **Live:** https://data2712-code.github.io/MHR-Deck-Lab/
+🔗 **Live:** https://data2712-code.github.io/mhr-lab-x7k2m9/
 📱 **TikTok:** [@deteprtm](https://www.tiktok.com/@deteprtm)
 
 > Fan-made, tidak berafiliasi dengan atau disponsori oleh Marvel maupun penerbit
@@ -17,7 +17,7 @@ Dibuat karena belum ada deck builder resmi untuk game ini.
 ## Struktur file
 
 ```
-MHR-Deck-Lab/
+mhr-lab-x7k2m9/
 ├── index.html        ← seluruh aplikasi (HTML + CSS + JS + database 200 kartu)
 ├── og-image.jpg      ← gambar preview saat link dibagikan
 ├── robots.txt        ← kontrol pengindeksan mesin pencari
@@ -34,18 +34,42 @@ Semua data deck tersimpan di browser pengguna (localStorage).
 3. Tunggu 1–2 menit, buka situs dengan `?v=` angka baru untuk melewati cache
 4. Perbarui bagian **Riwayat Update** di README ini
 
+### Cara menambah deck contoh
+
+1. Susun deck di aplikasi seperti biasa
+2. Buka situs dengan `?admin=1` di belakang alamat, misal
+   `https://data2712-code.github.io/mhr-lab-x7k2m9/?admin=1`
+   (simpan sebagai bookmark agar tidak perlu mengetik ulang)
+3. Klik tombol **★** di panel deck → panel admin muncul di atas daftar deck contoh
+4. Isi nama dan deskripsi singkat → **Buat kode dari deck aktif** → **Salin**
+5. Di GitHub: buka `index.html` → ikon **pensil** (Edit) → `Ctrl+F` cari `DECK_CONTOH`
+6. Tempel kode yang disalin ke dalam daftar → **Commit changes**
+
+Format satu entri (field `cr` opsional):
+
+```javascript
+  { nm:'Nama Deck', cr:'Nama Pembuat',
+    ds:'Deskripsi singkat gaya main dan kombo utamanya.',
+    cd:'1.<kode dari link deck>' },
+```
+
+Menghapus deck contoh: hapus barisnya. Mengubah urutan: pindahkan barisnya.
+Panel admin tidak terlihat oleh pengunjung biasa. Ini hanya menyembunyikan dari
+tampilan, bukan pengamanan — tapi tombol itu memang tidak punya kuasa apa pun,
+karena satu-satunya cara mengubah daftar adalah commit ke repository ini.
+
 ### Cara mengecek versi file
 
 Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v2.1.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v2.3.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v2.1` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v2.3` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v2.1</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v2.3</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -63,6 +87,7 @@ bersifat case-sensitive.
 | Format link deck | `#d=1.<nama-base64url>.<kode kartu>` — versi 1 |
 | Batas GitHub Pages | Situs 1 GB, bandwidth 100 GB/bulan (soft limit) |
 | Rem darurat | Settings → Pages → **Unpublish site** (reversibel) |
+| Nama repository | diacak (`mhr-lab-x7k2m9`) agar link tidak mudah ditemukan; `robots.txt` melarang pengindeksan |
 
 **Kode link deck:** 1 huruf seri + 3 digit nomor + jumlah (basis36).
 Seri: `A`=BP01, `B`=PB01, `C`=EB01, `D`=TB01, `E`=SD01, `F`=SD02, `G`=SD03, `H`=SD04.
@@ -72,6 +97,22 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v2.3 — 7 Agustus 2026
+- Deck contoh diganti dengan **tiga deck yang sedang banyak dipakai di komunitas**
+  (Merah–Hijau, Merah–Biru, Biru–Hijau) — semuanya karya Fadhel
+- Kredit pembuat deck ditampilkan pada tiap deck contoh (field `cr`)
+- Pembuat kode di mode admin kini punya kolom kredit pembuat
+
+### v2.2 — 7 Agustus 2026
+- **Deck contoh bawaan** — tombol ★ di panel deck membuka daftar deck contoh
+  (Ultron Engine, Quantum Tempo, Prune Aggro) lengkap dengan komposisi warna,
+  rata-rata level, dan penjelasan gaya main. Bisa disimpan sebagai deck sendiri
+  atau dilihat isinya dulu; deck yang sedang disusun tidak tertimpa
+- **Mode admin** (`?admin=1`) — pembuat kode deck contoh yang hanya tampil untuk
+  pemilik situs, menghasilkan potongan kode siap tempel ke `DECK_CONTOH`
+- Daftar deck contoh hanya bisa diubah oleh pemilik repository — tidak ada jalur
+  bagi pengguna untuk mengirim deck ke situs, jadi tidak perlu moderasi
 
 ### v2.1 — 7 Agustus 2026
 - **Validasi aturan deck** di panel: memperingatkan kalau deck memakai lebih dari
