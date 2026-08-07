@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 2.1  ·  7 Agustus 2026
+     MHR DECK LAB  ·  versi 2.3  ·  7 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/MHR-Deck-Lab/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 200 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="2.1">
+<meta name="version" content="2.3">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -225,6 +225,33 @@
   .traits span{font-size:10.5px;font-family:var(--mono);background:var(--panel);
     border:1px solid var(--line);border-radius:5px;padding:2px 7px;color:var(--muted)}
   .traits span b{color:var(--paper)}
+  /* --- deck contoh --- */
+  .samp-sheet{background:#12161B;border:1px solid var(--line);border-radius:16px;
+    max-width:760px;margin:0 auto;padding:24px 26px 26px}
+  .samp-sheet h2{font-family:var(--disp);font-size:24px;letter-spacing:.05em;text-transform:uppercase}
+  .samp-sub{color:var(--muted);font-size:12px;margin:4px 0 18px;line-height:1.6}
+  .samp-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;
+    transition:.15s}
+  .samp-card:hover{border-color:var(--accent)}
+  .samp-top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:5px}
+  .samp-nm{font-family:var(--disp);font-weight:800;font-size:17px;letter-spacing:.02em}
+  .samp-meta{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .samp-col{display:inline-flex;gap:4px;align-items:center}
+  .samp-col i{width:9px;height:9px;border-radius:3px;display:inline-block}
+  .samp-desc{font-size:12.5px;line-height:1.55;color:#C9CFD8;margin-bottom:11px}
+  .samp-act{display:flex;gap:8px;flex-wrap:wrap}
+  .samp-act button{background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:7px 13px;font-size:12.5px;cursor:pointer}
+  .samp-act button.main{background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:700}
+  .samp-act button:hover{border-color:var(--accent)}
+  .admin-box{border:1px dashed var(--accent);border-radius:10px;padding:12px 13px;margin-bottom:14px;
+    background:rgba(242,176,30,.06)}
+  .admin-box .t{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);
+    margin-bottom:7px;font-weight:700}
+  .admin-box textarea{width:100%;height:88px;background:var(--ink);border:1px solid var(--line);
+    color:var(--paper);border-radius:8px;padding:9px;font-family:var(--mono);font-size:11px;resize:vertical}
+  .admin-box input{width:100%;background:var(--ink);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:7px 9px;font-size:12.5px;margin-bottom:7px}
   .share-note{background:rgba(242,176,30,.1);border:1px solid var(--accent);border-radius:10px;
     padding:11px 13px;margin-bottom:12px;font-size:12.5px;line-height:1.6}
   .share-note b{color:var(--accent)}
@@ -389,6 +416,7 @@
     <div class="deck-total" id="deckTotal"></div>
     <div class="deckmgr">
       <select id="deckSelect" title="Pilih deck"></select>
+      <button class="qbtn" id="btnSamples" title="Deck contoh">★</button>
       <button class="qbtn" id="btnNewDeck" title="Buat deck baru">+</button>
       <button class="qbtn" id="btnRenDeck" title="Ganti nama deck ini">✎</button>
       <button class="qbtn" id="btnDelDeck" title="Hapus deck ini">🗑</button>
@@ -453,8 +481,21 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v2.1</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v2.3</div>
 </footer>
+
+<div class="dview" id="sampView" hidden>
+  <div class="dview-bar">
+    <button class="btn2" id="btnSampClose" style="flex:none;padding:9px 14px">✕ Tutup</button>
+  </div>
+  <div class="samp-sheet">
+    <h2>Deck Contoh</h2>
+    <div class="samp-sub">Beberapa rancangan deck sebagai titik awal. Muat salah satunya,
+      lalu ubah sesuai gaya main Anda — deck yang sedang Anda susun tidak akan tertimpa.</div>
+    <div id="adminBox"></div>
+    <div id="sampList"></div>
+  </div>
+</div>
 
 <div class="lb" id="lightbox" hidden>
   <button class="lb-x" id="lbClose">✕ Tutup</button>
@@ -1131,6 +1172,7 @@ $('#lightbox').addEventListener('click', e=>{
 document.addEventListener('keydown', e=>{
   if(e.key === 'Escape'){
     if(!$('#lightbox').hidden) closeLightbox();
+    else if(!$('#sampView').hidden){ $('#sampView').hidden = true; document.body.style.overflow=''; }
     else if(!$('#deckView').hidden){ $('#deckView').hidden = true; document.body.style.overflow=''; }
   }
 });
@@ -1478,6 +1520,134 @@ function handleSharedLink(){
   $('#shView').addEventListener('click', ()=>{ openAs(false); openDeckView(); });
   $('#shNo').addEventListener('click', ()=>box.remove());
 }
+
+
+/* ==================== DECK CONTOH ====================
+   CARA MENAMBAH DECK CONTOH:
+   1. Susun deck di aplikasi, lalu buka Deck Contoh dengan alamat ?admin=1
+   2. Klik "Buat kode deck contoh" — hasilnya sudah berformat siap tempel
+   3. Tempel barisnya ke dalam daftar DECK_CONTOH di bawah ini, lalu Commit
+   Untuk menghapus: hapus barisnya. Untuk mengubah urutan: pindahkan barisnya.
+   Hanya pemilik repository yang bisa mengubah daftar ini. */
+const DECK_CONTOH = [
+  { nm:'Merah - Hijau', cr:'Fadhel',
+    ds:'Deck kombo Loki: enam salinan Lv6 Loki (God Of Story + God of Trick) sebagai penutup, disokong Hawkeye Airbag/Clustered Arrow untuk mengisi BASE. Lv1 Daredevil dan Falcon menjaga arus kartu di awal. Kurvanya sengaja melompat — 26 kartu Lv3 lalu langsung 13 kartu Lv6, tanpa Lv2 dan Lv5.',
+    cd:'1.TWVyYWggLSBIaWphdQ.A0023A0222A0113A0272A0012A0033A1003A1063A0973A0993A1073A1083H0033H0103A0933A0943H0013H0022' },
+  { nm:'Merah - Biru', cr:'Fadhel',
+    ds:'Paling condong ke [Avengers] — 43 dari 50 kartu. Trio Black Widow dan Thunder Speed Thor jadi mesin Lv3, ditutup Antimatter Iron Man serta Disintegration Ray Vision untuk Prune. Biru menyumbang deretan Captain America bertipe COUNTER, plus beberapa kartu tech satu salinan seperti Follow Shadow dan Supreme Watcher.',
+    cd:'1.TWVyYWggLSBCaXJ1.A0023A0053A0223A0833A0632A0663A0903E0161A0113A0773G0063A0643A0273G0043A0671A0291A0153A0013G0011A0131A0611' },
+  { nm:'Biru - Hijau', cr:'Fadhel',
+    ds:'Versi kontrol dari kombo Loki. Captain America biru (I Need You, Turn The Tide, Freedom Watch) menahan tempo lawan sambil menyiapkan Lv6, dengan I Am Groot Lv2 berpower 7500 sebagai dinding awal. Cold Shadow New Black Panther menambah jangkauan dari BACK.',
+    cd:'1.QmlydSAtIEhpamF1.A0773A0833A0632A0622A0663G0012G0043A1003A1063B0063A0973A0993A1073A1083H0103A0942H0013H0023' },
+];
+
+const isAdmin = new URLSearchParams(location.search).get('admin') === '1';
+
+function sampSummary(deck){
+  const col = {};
+  let tot = 0, lvSum = 0;
+  for(const [no,q] of Object.entries(deck)){
+    const c = DB.find(d=>d.no===no); if(!c) continue;
+    col[c.c] = (col[c.c]||0)+q; tot += q; lvSum += c.l*q;
+  }
+  return {tot, col, avgLv: tot ? (lvSum/tot).toFixed(2) : '0'};
+}
+
+function renderSamples(){
+  // panel admin (hanya tampil dengan ?admin=1)
+  $('#adminBox').innerHTML = !isAdmin ? '' : `
+    <div class="admin-box">
+      <div class="t">Mode admin — buat kode deck contoh</div>
+      <input id="admNm" placeholder="Nama deck contoh" value="${(store.active||'').replace(/"/g,'&quot;')}">
+      <input id="admCr" placeholder="Kredit pembuat deck (opsional, mis. Fadhel)">
+      <input id="admDs" placeholder="Deskripsi singkat (gaya main, kombo utama)">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn2" id="admGen" style="flex:none;padding:8px 12px;border-color:var(--accent);color:var(--accent);font-weight:700">Buat kode dari deck aktif</button>
+        <button class="btn2" id="admCopy" style="flex:none;padding:8px 12px">Salin</button>
+      </div>
+      <textarea id="admOut" readonly placeholder="Kode akan muncul di sini — tempel ke daftar DECK_CONTOH di index.html"></textarea>
+    </div>`;
+
+  $('#sampList').innerHTML = DECK_CONTOH.map((d,i)=>{
+    const r = decodeDeck(d.cd);
+    const s = r ? sampSummary(r.deck) : {tot:0,col:{},avgLv:'0'};
+    const chips = Object.entries(s.col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]])
+      .map(([c,n])=>`<span class="samp-col"><i style="background:${CMAP[c]}"></i>${c} ${n}</span>`).join(' · ');
+    return `<div class="samp-card">
+      <div class="samp-top">
+        <span class="samp-nm">${d.nm}</span>
+        ${d.cr?`<span class="samp-meta">by ${d.cr}</span>`:''}
+        <span class="samp-meta">${s.tot} kartu · rata-rata Lv ${s.avgLv}</span>
+      </div>
+      <div class="samp-meta" style="margin-bottom:8px">${chips}</div>
+      <div class="samp-desc">${d.ds}</div>
+      <div class="samp-act">
+        <button class="main" data-samp-save="${i}">Simpan sebagai deck saya</button>
+        <button data-samp-view="${i}">Lihat isi deck</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">Belum ada deck contoh.</div>';
+}
+
+$('#btnSamples').addEventListener('click', ()=>{
+  renderSamples();
+  $('#sampView').hidden = false;
+  document.body.style.overflow = 'hidden';
+});
+$('#btnSampClose').addEventListener('click', ()=>{
+  $('#sampView').hidden = true;
+  document.body.style.overflow = '';
+});
+
+$('#sampList').addEventListener('click', e=>{
+  const bs = e.target.closest('[data-samp-save]');
+  const bv = e.target.closest('[data-samp-view]');
+  if(!bs && !bv) return;
+  const idx = parseInt(bs ? bs.dataset.sampSave : bv.dataset.sampView);
+  const d = DECK_CONTOH[idx];
+  if(!d) return;
+  const r = decodeDeck(d.cd);
+  if(!r || !Object.keys(r.deck).length){ alert('Kode deck contoh tidak dapat dibaca.'); return; }
+
+  if(bs){
+    let nama = d.nm;
+    let i = 2; while(store.decks[nama]) nama = `${d.nm} (${i++})`;
+    store.decks[store.active] = state.deck;        // amankan deck yang sedang dibuka
+    store.decks[nama] = {...r.deck};
+    store.active = nama;
+    state.deck = store.decks[nama];
+    renderDeckSelect(); renderAll();
+    $('#sampView').hidden = true; document.body.style.overflow = '';
+  } else {
+    state.deck = {...r.deck};                      // tampilkan tanpa menyimpan
+    renderCards(); renderDeck();
+    $('#sampView').hidden = true; document.body.style.overflow = '';
+    openDeckView();
+  }
+});
+
+/* --- pembuat kode (mode admin) --- */
+$('#adminBox').addEventListener('click', e=>{
+  if(e.target.id === 'admGen'){
+    if(!deckCount()){ alert('Deck aktif masih kosong.'); return; }
+    const nm = ($('#admNm').value || store.active).trim().replace(/'/g,"\\'");
+    const ds = ($('#admDs').value || 'Tambahkan deskripsi singkat di sini.').trim().replace(/'/g,"\\'");
+    const cd = encodeDeck(state.deck, nm);
+    const cr = ($('#admCr').value || '').trim().replace(/'/g,"\\'");
+    $('#admOut').value =
+      `  { nm:'${nm}',${cr?` cr:'${cr}',`:''}\n` +
+      `    ds:'${ds}',\n` +
+      `    cd:'${cd}' },`;
+  }
+  if(e.target.id === 'admCopy'){
+    const t = $('#admOut');
+    if(!t.value){ alert('Buat kodenya dulu.'); return; }
+    t.select();
+    navigator.clipboard.writeText(t.value).catch(()=>document.execCommand('copy'));
+    e.target.textContent = '✓ Tersalin';
+    setTimeout(()=>e.target.textContent = 'Salin', 1800);
+  }
+});
 
 /* muat pengaturan tersimpan */
 if(store.view === 'grid'){
