@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v2.5** · 7 Agustus 2026
+**Versi saat ini: v2.7** · 7 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -61,18 +61,37 @@ Panel admin tidak terlihat oleh pengunjung biasa. Ini hanya menyembunyikan dari
 tampilan, bukan pengamanan — tapi tombol itu memang tidak punya kuasa apa pun,
 karena satu-satunya cara mengubah daftar adalah commit ke repository ini.
 
+### Statistik pengunjung (Cloudflare Web Analytics)
+
+**Sudah aktif sejak v2.7.** Lihat datanya di https://dash.cloudflare.com →
+**Analytics & Logs → Web Analytics**.
+
+Yang tercatat: jumlah kunjungan, halaman yang dibuka, negara, jenis perangkat,
+dan sumber trafik (termasuk berapa yang datang dari TikTok).
+
+Tanpa cookie dan tidak melacak individu, jadi tidak perlu banner persetujuan cookie.
+
+Catatan:
+- Data butuh beberapa menit sampai muncul pertama kali
+- Karena domainnya `github.io` (dipakai bersama), statistik hanya mencakup
+  halaman di bawah path repository ini
+- Untuk mematikan: hapus atau beri komentar pada tag `<script>` Cloudflare
+  di akhir `index.html`
+- GitHub Insights → Traffic **bukan** statistik situs — itu hanya kunjungan
+  ke halaman repository
+
 ### Cara mengecek versi file
 
 Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v2.5.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v2.7.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v2.5` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v2.7` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v2.5</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v2.7</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -100,6 +119,15 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v2.7 — 7 Agustus 2026
+- **Cloudflare Web Analytics aktif** — statistik pengunjung mulai tercatat,
+  tanpa cookie dan tanpa pelacakan individu
+
+### v2.6 — 7 Agustus 2026
+- Blok **Cloudflare Web Analytics** disiapkan di akhir `index.html`, masih
+  dinonaktifkan (dikomentari). Tinggal tempel token dan buang tanda komentar
+  untuk mengaktifkan — lihat bagian "Statistik pengunjung" di bawah
 
 ### v2.5 — 7 Agustus 2026
 - Deskripsi deck contoh dikosongkan — tiap deck kini hanya menampilkan nama,
