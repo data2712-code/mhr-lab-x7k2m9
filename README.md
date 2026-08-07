@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v2.3** · 7 Agustus 2026
+**Versi saat ini: v2.4** · 7 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -64,12 +64,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v2.3.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v2.4.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v2.3` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v2.4` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v2.3</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v2.4</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -97,6 +97,12 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v2.4 — 7 Agustus 2026
+- Deck contoh keempat: **Merah – Kuning** oleh Katalio — mesin [Machine]/[Ultron]
+  dengan 20 kartu Lv1 sebagai fondasi
+- Deskripsi keempat deck contoh dilengkapi (sebelumnya sempat berisi teks sementara)
+- URL repository di komentar kepala file diperbarui ke nama repo yang sekarang
 
 ### v2.3 — 7 Agustus 2026
 - Deck contoh diganti dengan **tiga deck yang sedang banyak dipakai di komunitas**
