@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v3.1** · 8 Agustus 2026
+**Versi saat ini: v3.3** · 10 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -61,6 +61,38 @@ Panel admin tidak terlihat oleh pengunjung biasa. Ini hanya menyembunyikan dari
 tampilan, bukan pengamanan — tapi tombol itu memang tidak punya kuasa apa pun,
 karena satu-satunya cara mengubah daftar adalah commit ke repository ini.
 
+### Cara mengubah jadwal turnamen LGS
+
+Buka `index.html` → Edit → `Ctrl+F` cari `const LGS`. Format tiap toko:
+
+```javascript
+  { nm:'Nama Toko', map:'https://maps.app.goo.gl/xxxx',
+    hp:'628xxxxxxxxxx',                     // opsional — nomor WhatsApp toko
+    wa:'https://chat.whatsapp.com/xxxx',    // opsional — link grup WhatsApp
+    jd:[ {h:1, w:'19.00 - Selesai'} ] },
+```
+
+Field `hp` dan `wa` boleh dikosongkan atau dihapus — tombol "Chat toko" dan
+"Grup WA" hanya muncul kalau field-nya ada. Nomor `hp` ditulis tanpa tanda `+`
+dan tanpa spasi, contoh `6281234567890`.
+
+`h` adalah hari: 1 Senin, 2 Selasa, 3 Rabu, 4 Kamis, 5 Jumat, 6 Sabtu, 7 Minggu.
+Satu toko boleh punya beberapa jadwal — tambahkan objek lain di dalam `jd`.
+
+Jangan lupa ubah `LGS_UPDATE` ke tanggal terakhir jadwal dicek, karena tanggal itu
+ditampilkan ke pengunjung sebagai penanda seberapa baru datanya.
+
+Jadwal saat ini (6 sesi/minggu):
+
+| Hari | LGS | Jam |
+|---|---|---|
+| Senin | Ogre Gandaria Neverland | 19.00 – Selesai |
+| Kamis | Invaders Board Game Station | 19.00 – Selesai |
+| Jumat | Ogre Gandaria Neverland | On Demand |
+| Sabtu | Global Hobiz Store | 13.00 – Selesai |
+| Sabtu | TwoStompas | 15.00 – Selesai |
+| Minggu | ONIC TCG Viridian Vault | 15.00 – Selesai |
+
 ### Statistik pengunjung (Cloudflare Web Analytics)
 
 **Sudah aktif sejak v2.7.** Lihat datanya di https://dash.cloudflare.com →
@@ -86,12 +118,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v3.1.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v3.3.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v3.1` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v3.3` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v3.1</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v3.3</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -107,7 +139,7 @@ bersifat case-sensitive.
 | Aturan deck | 50 kartu, maksimal 3 salinan per kartu, maksimal 2 warna (bisa diubah di panel) |
 | Penyimpanan deck | localStorage, per browser per perangkat |
 | Format link deck | `#d=1.<nama-base64url>.<kode kartu>` — versi 1 |
-| Navigasi halaman | `#cards` (utama), `#build`, `#meta`. `#d=` selalu diperiksa lebih dulu agar link deck lama tidak rusak |
+| Navigasi halaman | `#cards` (utama), `#build`, `#meta`, `#lgs`. `#d=` selalu diperiksa lebih dulu agar link deck lama tidak rusak |
 | Batas GitHub Pages | Situs 1 GB, bandwidth 100 GB/bulan (soft limit) |
 | Rem darurat | Settings → Pages → **Unpublish site** (reversibel) |
 | Nama repository | diacak (`mhr-lab-x7k2m9`) agar link tidak mudah ditemukan; `robots.txt` melarang pengindeksan |
@@ -121,7 +153,28 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ## Riwayat Update
 
-### v3.1 — 8 Agustus 2026
+> Catatan: tanggal pada versi v1.0–v3.0 adalah perkiraan dari urutan pengerjaan,
+> bukan catatan waktu yang tercatat otomatis. Silakan koreksi kalau ada yang keliru.
+
+### v3.3 — 10 Agustus 2026
+- Keterangan di halaman Turnamen: imbauan **menghubungi toko langsung** untuk
+  konfirmasi jadwal, format, dan biaya ikut, serta anjuran **gabung grup WhatsApp
+  komunitas tiap toko** karena pengumuman biasanya lewat sana lebih dulu
+- Field opsional **`hp`** (nomor WhatsApp toko) dan **`wa`** (link grup WhatsApp)
+  pada data LGS — tombol "Chat toko" dan "Grup WA" otomatis muncul kalau diisi,
+  dan tidak ditampilkan kalau dikosongkan
+
+### v3.2 — 10 Agustus 2026
+- **Tab baru 📅 Turnamen** — jadwal weekly tournament Marvel Hero Rush di 5 Local
+  Game Shop area Jakarta (6 sesi per minggu), dengan tautan Google Maps tiap toko
+- Panel **"Hari ini"** otomatis menyorot jadwal sesuai hari saat halaman dibuka;
+  kalau hari itu kosong, diberi keterangan dan diarahkan ke daftar hari lain
+- Kartu per hari diurutkan mulai dari hari ini, hanya menampilkan hari yang ada
+  jadwalnya. Ditambah daftar ringkas per toko
+- Label navigasi memakai versi pendek di layar HP agar empat tab tetap nyaman
+- Catatan tanggal pembaruan jadwal dan imbauan konfirmasi ke toko sebelum datang
+
+### v3.1 — 10 Agustus 2026
 - **8 kartu baru** dari Starter Deck: seri Hero File nomor 012 dan 013 di
   SD01–SD04. Total database kini **208 kartu**
   - SD01-012 Iron Man (Lv6 R-2 6000) · SD01-013 Hulk (Lv3 R-1 4500)
