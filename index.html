@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 3.0  ·  7 Agustus 2026
+     MHR DECK LAB  ·  versi 3.1  ·  8 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -10,13 +10,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MHR Deck Lab — Marvel Hero Rush Deck Builder</title>
-<meta name="description" content="Deck builder Marvel Hero Rush TCG: 200 kartu lengkap dengan gambar, stat, dan teks efek bahasa Indonesia. Susun deck, bagikan sebagai link atau gambar.">
+<meta name="description" content="Deck builder Marvel Hero Rush TCG: 208 kartu lengkap dengan gambar, stat, dan teks efek bahasa Indonesia. Susun deck, bagikan sebagai link atau gambar.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="MHR Deck Lab — Marvel Hero Rush Deck Builder">
-<meta property="og:description" content="Susun deck Marvel Hero Rush: 200 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
+<meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="3.0">
+<meta name="version" content="3.1">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -425,7 +425,7 @@
 <header>
   <div class="brand">
     <h1>MHR <span class="stripe">DECK LAB</span></h1>
-    <p>Marvel Hero Rush TCG Deck Builder · 200 kartu (BP01 · PB01 · PR · SD01–SD04) · Ver. Indonesia</p>
+    <p>Marvel Hero Rush TCG Deck Builder · 208 kartu (BP01 · PB01 · PR · SD01–SD04) · Ver. Indonesia</p>
   </div>
   <div class="hdr-stats">
     <div class="pill">Kartu unik <b id="hTotal">0</b></div>
@@ -437,7 +437,7 @@
 </header>
 
 <nav class="tabs" id="navTabs">
-  <button data-page="cards" aria-current="true">🃏 Kartu <span class="cnt" id="navCard">200</span></button>
+  <button data-page="cards" aria-current="true">🃏 Kartu <span class="cnt" id="navCard">208</span></button>
   <button data-page="build" aria-current="false">🛠 Deck Builder <span class="cnt" id="navDeck">0</span></button>
   <button data-page="meta" aria-current="false">🏆 Deck Meta <span class="cnt" id="navMeta">0</span></button>
 </nav>
@@ -567,7 +567,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v3.0</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v3.1</div>
 </footer>
 
 <div class="lb" id="lightbox" hidden>
@@ -804,7 +804,15 @@ const DB = [
 {no:"SD04-016",nm:"[Weaver of Lies] Loki",s:"SD04",c:"Hijau",l:6,r:1,p:6000,f:"Asgard",ra:["R"],e:"[AUTO](FIELD) Karakter lawan di BACK mendapat Lv -2."},
 {no:"SD04-017",nm:"[Hit & Run] Winter Soldier",s:"SD04",c:"Hijau",l:3,r:2,p:2000,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini melakukan BATTLE-BASE move, 1 karakter lawan di BATTLE mendapat Power -1000 pada giliran ini."},
 {no:"SD04-018",nm:"[Run & Search] Winter Soldier",s:"SD04",c:"Hijau",l:3,r:1,p:2500,f:"Human/Avengers",ra:["R"],e:"[TRIG](FIELD) Saat kartu ini melakukan BATTLE-BASE move, Anda ambil 1 kartu dari atas deck, lalu buang 1 kartu dari tangan ke RETREAT."},
-{no:"TB01-001",nm:"[Lord of Battleworlds] Doctor Doom",s:"PR",c:"Hijau",l:6,r:2,p:2500,f:"Battleworld",ra:["TR"],e:"[UNIQUE COUNTER] [TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Prune 1 kartu lawan dengan Lv2 atau lebih rendah dari FIELD ke VOID."}
+{no:"TB01-001",nm:"[Lord of Battleworlds] Doctor Doom",s:"PR",c:"Hijau",l:6,r:2,p:2500,f:"Battleworld",ra:["TR"],e:"[UNIQUE COUNTER] [TRIG](FIELD) Saat kartu ini dipanggil ke FIELD, Prune 1 kartu lawan dengan Lv2 atau lebih rendah dari FIELD ke VOID."},
+{no:"SD01-012",nm:"[Hero File] Iron Man",s:"SD01",c:"Merah",l:6,r:2,p:6000,f:"Human/Avengers",ra:["R"],e:"(Kartu ini tidak memiliki teks efek.)"},
+{no:"SD01-013",nm:"[Hero File] Hulk",s:"SD01",c:"Merah",l:3,r:1,p:4500,f:"Human/Avengers",ra:["R"],e:"(Kartu ini tidak memiliki teks efek.)"},
+{no:"SD02-012",nm:"[Hero File] Thor",s:"SD02",c:"Kuning",l:3,r:4,p:2500,f:"Asgard/Avengers",ra:["R"],e:"(Kartu ini tidak memiliki teks efek.)"},
+{no:"SD02-013",nm:"[Hero File] Vision",s:"SD02",c:"Kuning",l:2,r:3,p:2500,f:"Machine/Avengers",ra:["R"],e:"(Kartu ini tidak memiliki teks efek.)"},
+{no:"SD03-012",nm:"[Hero File] Captain America",s:"SD03",c:"Biru",l:4,r:1,p:5500,f:"Human/Avengers",ra:["R"],e:"(Kartu ini tidak memiliki teks efek.)"},
+{no:"SD03-013",nm:"[Hero File] Falcon",s:"SD03",c:"Biru",l:3,r:2,p:3500,f:"Human/Avengers",ra:["R"],e:"(Kartu ini tidak memiliki teks efek.)"},
+{no:"SD04-012",nm:"[Hero File] Ant-Man",s:"SD04",c:"Hijau",l:3,r:0,p:5500,f:"Human/Avengers",ra:["R"],e:"(Kartu ini tidak memiliki teks efek.)"},
+{no:"SD04-013",nm:"[Hero File] Hawkeye",s:"SD04",c:"Hijau",l:5,r:5,p:3500,f:"Human/Avengers",ra:["R"],e:"(Kartu ini tidak memiliki teks efek.)"}
 ];
 
 /* ============================ APLIKASI ============================ */
@@ -1043,7 +1051,7 @@ function renderDeck(){
   if(total === 0){ st.innerHTML = ''; $('#rbar').innerHTML=''; $('#rbarx').innerHTML=''; $('#traits').innerHTML=''; }
   else {
     let totLv = 0, totPw = 0;
-    const rr = {0:0,1:0,2:0,3:0,4:0}, tr = {};
+    const rr = {0:0,1:0,2:0,3:0,4:0,5:0}, tr = {};
     entries.forEach(({c,q})=>{
       totLv += c.l*q; totPw += c.p*q;
       rr[c.r] = (rr[c.r]||0) + q;
