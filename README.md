@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v3.0** · 7 Agustus 2026
+**Versi saat ini: v3.1** · 8 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -86,12 +86,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v3.0.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v3.1.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v3.0` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v3.1` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v3.0</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v3.1</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -102,7 +102,7 @@ bersifat case-sensitive.
 
 | Hal | Keterangan |
 |---|---|
-| Sumber data kartu | API resmi `server.marvelherorush.com/marvel/card/list` (200 kartu unik) |
+| Sumber data kartu | API resmi `server.marvelherorush.com/marvel/card/list` (200 kartu) + 8 kartu Hero File SD01–SD04 dari scan kartu = **208 kartu** |
 | Ukuran gambar kartu | 450 × 620 px, ber-watermark SAMPLE, ±80 KB per file |
 | Aturan deck | 50 kartu, maksimal 3 salinan per kartu, maksimal 2 warna (bisa diubah di panel) |
 | Penyimpanan deck | localStorage, per browser per perangkat |
@@ -120,6 +120,17 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v3.1 — 8 Agustus 2026
+- **8 kartu baru** dari Starter Deck: seri Hero File nomor 012 dan 013 di
+  SD01–SD04. Total database kini **208 kartu**
+  - SD01-012 Iron Man (Lv6 R-2 6000) · SD01-013 Hulk (Lv3 R-1 4500)
+  - SD02-012 Thor (Lv3 R-4 2500) · SD02-013 Vision (Lv2 R-3 2500)
+  - SD03-012 Captain America (Lv4 R-1 5500) · SD03-013 Falcon (Lv3 R-2 3500)
+  - SD04-012 Ant-Man (Lv3 R-0 5500) · SD04-013 Hawkeye (Lv5 R-5 3500)
+- Semuanya kartu tanpa teks efek (vanilla)
+- Grafik sebaran jarak serangan di panel deck diperluas ke **R-5**, karena
+  Hero File Hawkeye memperkenalkan jarak baru yang sebelumnya belum ada
 
 ### v3.0 — 7 Agustus 2026 · restrukturisasi navigasi
 - **Tiga halaman terpisah** dengan navigasi tab (di HP menjadi bilah bawah):
