@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 2.7  ·  7 Agustus 2026
+     MHR DECK LAB  ·  versi 3.0  ·  7 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 200 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="2.7">
+<meta name="version" content="3.0">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -65,7 +65,7 @@
 
   /* ------- filter bar ------- */
   .filters{
-    position:sticky;top:0;z-index:5;background:var(--ink);
+    position:sticky;top:45px;z-index:5;background:var(--ink);
     padding:12px 20px;border-bottom:1px solid var(--line);
     display:flex;flex-wrap:wrap;gap:8px;align-items:center;
   }
@@ -124,7 +124,7 @@
 
   /* ------- deck panel ------- */
   .deck{
-    position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--panel2);
+    position:sticky;top:45px;height:calc(100vh - 45px);overflow-y:auto;background:var(--panel2);
     border-left:2px solid var(--line);padding:16px 16px 40px;
   }
   @media (max-width:920px){
@@ -252,6 +252,74 @@
     color:var(--paper);border-radius:8px;padding:9px;font-family:var(--mono);font-size:11px;resize:vertical}
   .admin-box input{width:100%;background:var(--ink);border:1px solid var(--line);color:var(--paper);
     border-radius:8px;padding:7px 9px;font-size:12.5px;margin-bottom:7px}
+  /* ================= NAVIGASI HALAMAN ================= */
+  nav.tabs{display:flex;gap:4px;padding:0 20px;border-bottom:2px solid var(--line);
+    background:var(--ink);position:sticky;top:0;z-index:8}
+  nav.tabs button{background:none;border:none;border-bottom:3px solid transparent;
+    color:var(--muted);padding:12px 16px 10px;font-size:13.5px;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;gap:7px;transition:.15s;margin-bottom:-2px}
+  nav.tabs button:hover{color:var(--paper)}
+  nav.tabs button[aria-current="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+  nav.tabs .cnt{font-family:var(--mono);font-size:10.5px;background:var(--panel);
+    border:1px solid var(--line);border-radius:999px;padding:1px 7px}
+  nav.tabs button[aria-current="true"] .cnt{border-color:var(--accent);color:var(--accent)}
+
+  /* halaman: KARTU — panel deck disembunyikan, grid melebar */
+  body.page-cards .deck{display:none}
+  body.page-cards .layout{grid-template-columns:minmax(0,1fr)}
+  body.page-cards .cards.grid{grid-template-columns:repeat(auto-fill,minmax(196px,1fr))}
+  /* halaman: META */
+  body:not(.page-meta) #metaPage{display:none}
+  body.page-meta .filters, body.page-meta .cards, body.page-meta .deck{display:none}
+  body.page-meta .layout{grid-template-columns:minmax(0,1fr)}
+
+  /* ================= HALAMAN DECK META ================= */
+  .meta-wrap{padding:22px 20px 90px;max-width:1180px;margin:0 auto}
+  .meta-head h2{font-family:var(--disp);font-size:26px;letter-spacing:.05em;text-transform:uppercase}
+  .meta-head p{color:var(--muted);font-size:12.5px;line-height:1.6;margin:5px 0 16px;max-width:640px}
+  .meta-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+  .meta-filter button{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+    border-radius:999px;padding:6px 13px;font-size:12px;cursor:pointer}
+  .meta-filter button[aria-pressed="true"]{background:var(--accent);color:#1A1206;
+    border-color:var(--accent);font-weight:700}
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+  .meta-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    overflow:hidden;display:flex;flex-direction:column;transition:.15s}
+  .meta-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .meta-strip{display:flex;height:104px;background:var(--ink);gap:1px}
+  .meta-strip img{flex:1;min-width:0;height:100%;object-fit:cover;object-position:50% 22%}
+  .meta-strip .ph{flex:1;background:var(--phc,#232B34)}
+  .meta-body{padding:13px 15px 15px;display:flex;flex-direction:column;flex:1}
+  .meta-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .meta-nm{font-family:var(--disp);font-weight:800;font-size:18px;letter-spacing:.02em}
+  .meta-by{font-size:11.5px;color:var(--muted)}
+  .meta-by b{color:var(--paper)}
+  .meta-bar{display:flex;height:7px;border-radius:4px;overflow:hidden;margin:9px 0 8px;background:var(--line)}
+  .meta-stat{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;
+    color:var(--muted);margin-bottom:6px}
+  .meta-stat b{color:var(--paper)}
+  .meta-desc{font-size:12.5px;line-height:1.55;color:#C9CFD8;margin-bottom:12px}
+  .meta-act{display:flex;gap:7px;margin-top:auto;flex-wrap:wrap}
+  .meta-act button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:8px 6px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+  .meta-act button.main{background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:700}
+  .meta-act button:hover{border-color:var(--accent)}
+
+  /* ================= MOBILE: navigasi bawah ================= */
+  @media (max-width:920px){
+    .filters{top:0}
+    nav.tabs{position:fixed;bottom:0;left:0;right:0;top:auto;border-bottom:none;
+      border-top:2px solid var(--line);padding:0;z-index:30;
+      background:#0B0F13;justify-content:space-around}
+    nav.tabs button{flex:1;flex-direction:column;gap:3px;padding:9px 4px 8px;font-size:11px;
+      border-bottom:none;border-top:3px solid transparent;margin-bottom:0}
+    nav.tabs button[aria-current="true"]{border-top-color:var(--accent);border-bottom-color:transparent}
+    nav.tabs .cnt{display:none}
+    .deck{bottom:56px!important}
+    body.page-build .cards{padding-bottom:64px}
+    .meta-wrap{padding-bottom:80px}
+    footer{padding-bottom:74px}
+  }
   .share-note{background:rgba(242,176,30,.1);border:1px solid var(--accent);border-radius:10px;
     padding:11px 13px;margin-bottom:12px;font-size:12.5px;line-height:1.6}
   .share-note b{color:var(--accent)}
@@ -368,6 +436,25 @@
   </div>
 </header>
 
+<nav class="tabs" id="navTabs">
+  <button data-page="cards" aria-current="true">🃏 Kartu <span class="cnt" id="navCard">200</span></button>
+  <button data-page="build" aria-current="false">🛠 Deck Builder <span class="cnt" id="navDeck">0</span></button>
+  <button data-page="meta" aria-current="false">🏆 Deck Meta <span class="cnt" id="navMeta">0</span></button>
+</nav>
+
+<section id="metaPage">
+  <div class="meta-wrap">
+    <div class="meta-head">
+      <h2>Deck Meta Komunitas</h2>
+      <p>Deck yang sedang banyak dipakai di komunitas MHR Indonesia. Muat salah satunya ke
+        Deck Builder untuk dilihat isinya atau dimodifikasi — deck yang sedang Anda susun tidak tertimpa.</p>
+    </div>
+    <div class="meta-filter" id="metaFilter"></div>
+    <div id="adminBox"></div>
+    <div class="meta-grid" id="metaGrid"></div>
+  </div>
+</section>
+
 <div class="layout">
   <main>
     <div class="filters">
@@ -416,7 +503,6 @@
     <div class="deck-total" id="deckTotal"></div>
     <div class="deckmgr">
       <select id="deckSelect" title="Pilih deck"></select>
-      <button class="qbtn" id="btnSamples" title="Deck contoh">★</button>
       <button class="qbtn" id="btnNewDeck" title="Buat deck baru">+</button>
       <button class="qbtn" id="btnRenDeck" title="Ganti nama deck ini">✎</button>
       <button class="qbtn" id="btnDelDeck" title="Hapus deck ini">🗑</button>
@@ -481,21 +567,8 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v2.7</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v3.0</div>
 </footer>
-
-<div class="dview" id="sampView" hidden>
-  <div class="dview-bar">
-    <button class="btn2" id="btnSampClose" style="flex:none;padding:9px 14px">✕ Tutup</button>
-  </div>
-  <div class="samp-sheet">
-    <h2>Deck Contoh</h2>
-    <div class="samp-sub">Beberapa rancangan deck sebagai titik awal. Muat salah satunya,
-      lalu ubah sesuai gaya main Anda — deck yang sedang Anda susun tidak akan tertimpa.</div>
-    <div id="adminBox"></div>
-    <div id="sampList"></div>
-  </div>
-</div>
 
 <div class="lb" id="lightbox" hidden>
   <button class="lb-x" id="lbClose">✕ Tutup</button>
@@ -759,7 +832,7 @@ const $ = s => document.querySelector(s);
 const state = {
   q:'', colors:new Set(['Merah','Kuning','Biru','Hijau']),
   series:'', level:'', range:'', rarity:'', trait:'', sort:'no', view:'list',
-  mech:new Set(),
+  mech:new Set(), page:'cards',
   deck:{}  // key: card no -> qty
 };
 
@@ -893,6 +966,7 @@ function gridImgFallback(img,no){
 function renderCards(){
   const arr = filtered();
   $('#hShown').textContent = arr.length;
+  const nc = $('#navCard'); if(nc) nc.textContent = arr.length;
   $('#noteShown').textContent = `${arr.length} kartu cocok dengan filter.`;
   const grid = state.view === 'grid';
   $('#cards').className = 'cards' + (grid ? ' grid' : '');
@@ -923,6 +997,7 @@ function renderDeck(){
   const total = deckCount();
   const target = Math.max(1, parseInt($('#setSize').value)||50);
   $('#hDeck').textContent = total;
+  const nd = $('#navDeck'); if(nd) nd.textContent = total;
   const diff = target-total;
   $('#deckTotal').innerHTML = `<b>${total}</b> / ${target} kartu · ` +
     (diff===0 ? `<span class="ok">pas dengan target</span>`
@@ -1172,7 +1247,6 @@ $('#lightbox').addEventListener('click', e=>{
 document.addEventListener('keydown', e=>{
   if(e.key === 'Escape'){
     if(!$('#lightbox').hidden) closeLightbox();
-    else if(!$('#sampView').hidden){ $('#sampView').hidden = true; document.body.style.overflow=''; }
     else if(!$('#deckView').hidden){ $('#deckView').hidden = true; document.body.style.overflow=''; }
   }
 });
@@ -1495,6 +1569,7 @@ function handleSharedLink(){
        <button class="btn2" id="shView">Lihat saja</button>
        <button class="btn2" id="shNo" style="flex:none;padding:9px 12px">✕</button>
      </div>`;
+  setPage('build', true);
   const panel = $('#deckPanel');
   panel.insertBefore(box, panel.querySelector('.deckmgr'));
 
@@ -1546,97 +1621,157 @@ const DECK_CONTOH = [
 
 const isAdmin = new URLSearchParams(location.search).get('admin') === '1';
 
-function sampSummary(deck){
-  const col = {};
-  let tot = 0, lvSum = 0;
+/* ==================== NAVIGASI HALAMAN ==================== */
+const PAGES = ['cards','build','meta'];
+function setPage(p, dariHash){
+  if(!PAGES.includes(p)) p = 'cards';
+  state.page = p;
+  document.body.className = 'page-' + p;
+  [...$('#navTabs').children].forEach(b=>
+    b.setAttribute('aria-current', String(b.dataset.page === p)));
+  if(p === 'meta') renderMeta();
+  if(p === 'cards' || p === 'build') renderCards();
+  if(!dariHash) history.replaceState(null,'','#'+p);
+  window.scrollTo({top:0});
+  if(store){ store.page = p; persist(); }
+}
+$('#navTabs').addEventListener('click', e=>{
+  const b = e.target.closest('[data-page]'); if(!b) return;
+  setPage(b.dataset.page);
+});
+
+/* ==================== HALAMAN DECK META ==================== */
+function deckStats(deck){
+  const col = {}; let tot = 0, lvSum = 0, unik = 0;
   for(const [no,q] of Object.entries(deck)){
     const c = DB.find(d=>d.no===no); if(!c) continue;
-    col[c.c] = (col[c.c]||0)+q; tot += q; lvSum += c.l*q;
+    col[c.c] = (col[c.c]||0)+q; tot += q; lvSum += c.l*q; unik++;
   }
-  return {tot, col, avgLv: tot ? (lvSum/tot).toFixed(2) : '0'};
+  return {tot, col, unik, avgLv: tot ? (lvSum/tot).toFixed(2) : '0',
+          warna: Object.keys(col).sort((a,b)=>CORDER[a]-CORDER[b])};
 }
 
-function renderSamples(){
-  // panel admin (hanya tampil dengan ?admin=1)
+/* kartu Lv tertinggi dipakai sebagai pratinjau strip gambar */
+function previewCards(deck, n){
+  return Object.keys(deck).map(no=>DB.find(d=>d.no===no)).filter(Boolean)
+    .sort((a,b)=>b.l-a.l || b.p-a.p).slice(0,n);
+}
+
+let metaFilterWarna = '';
+
+function renderMeta(){
+  const parsed = DECK_CONTOH.map(d=>({d, r:decodeDeck(d.cd)}))
+    .filter(x=>x.r && Object.keys(x.r.deck).length)
+    .map(x=>({...x, s:deckStats(x.r.deck)}));
+
+  $('#navMeta').textContent = parsed.length;
+
+  // filter kombinasi warna
+  const kombinasi = [...new Set(parsed.map(x=>x.s.warna.join(' - ')))].sort();
+  $('#metaFilter').innerHTML =
+    [`<button data-mf="" aria-pressed="${metaFilterWarna===''}">Semua (${parsed.length})</button>`]
+    .concat(kombinasi.map(k=>{
+      const n = parsed.filter(x=>x.s.warna.join(' - ')===k).length;
+      return `<button data-mf="${k}" aria-pressed="${metaFilterWarna===k}">${k} (${n})</button>`;
+    })).join('');
+
+  const tampil = metaFilterWarna
+    ? parsed.filter(x=>x.s.warna.join(' - ')===metaFilterWarna) : parsed;
+
+  $('#metaGrid').innerHTML = tampil.map(({d,s},i)=>{
+    const idx = DECK_CONTOH.indexOf(d);
+    const strip = previewCards(decodeDeck(d.cd).deck, 4).map(c=>
+      `<img alt="" data-ext="0" src="images/${c.no}.jpg" loading="lazy"
+        onerror="metaImgFallback(this,'${c.no}','${CMAP[c.c]}')">`).join('') ||
+      `<div class="ph"></div>`;
+    const bar = Object.entries(s.col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]])
+      .map(([c,n])=>`<div style="width:${n/s.tot*100}%;background:${CMAP[c]}" title="${c}: ${n}"></div>`).join('');
+    return `<div class="meta-card">
+      <div class="meta-strip">${strip}</div>
+      <div class="meta-body">
+        <div class="meta-top">
+          <span class="meta-nm">${d.nm}</span>
+          ${d.cr?`<span class="meta-by">by <b>${d.cr}</b></span>`:''}
+        </div>
+        <div class="meta-bar">${bar}</div>
+        <div class="meta-stat">
+          <span><b>${s.tot}</b> kartu</span>
+          <span><b>${s.unik}</b> unik</span>
+          <span>rata-rata Lv <b>${s.avgLv}</b></span>
+        </div>
+        ${d.ds?`<div class="meta-desc">${d.ds}</div>`:''}
+        <div class="meta-act">
+          <button class="main" data-meta-load="${idx}">Muat ke Deck Builder</button>
+          <button data-meta-view="${idx}">Lihat visual</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">Belum ada deck meta yang cocok dengan filter ini.</div>';
+}
+
+function metaImgFallback(img,no,warna){
+  const exts=['jpg','png','webp'];
+  let i=parseInt(img.dataset.ext)+1;
+  if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
+  else { img.onerror=null; img.outerHTML = `<div class="ph" style="--phc:${warna}"></div>`; }
+}
+
+$('#metaFilter').addEventListener('click', e=>{
+  const b = e.target.closest('[data-mf]'); if(!b) return;
+  metaFilterWarna = b.dataset.mf;
+  renderMeta();
+});
+
+$('#metaGrid').addEventListener('click', e=>{
+  const bl = e.target.closest('[data-meta-load]');
+  const bv = e.target.closest('[data-meta-view]');
+  if(!bl && !bv) return;
+  const d = DECK_CONTOH[parseInt(bl ? bl.dataset.metaLoad : bv.dataset.metaView)];
+  if(!d) return;
+  const r = decodeDeck(d.cd);
+  if(!r || !Object.keys(r.deck).length){ alert('Kode deck tidak dapat dibaca.'); return; }
+
+  if(bl){
+    let nama = d.nm + (d.cr?` (${d.cr})`:'');
+    const asli = nama; let i = 2;
+    while(store.decks[nama]) nama = `${asli} ${i++}`;
+    store.decks[store.active] = state.deck;      // amankan deck yang sedang dibuka
+    store.decks[nama] = {...r.deck};
+    store.active = nama;
+    state.deck = store.decks[nama];
+    renderDeckSelect();
+    setPage('build');
+    renderAll();
+  } else {
+    state.deck = {...r.deck};                    // pratinjau tanpa menyimpan
+    renderDeck();
+    openDeckView();
+  }
+});
+
+/* --- pembuat kode deck meta (mode admin) --- */
+function renderAdminBox(){
   $('#adminBox').innerHTML = !isAdmin ? '' : `
     <div class="admin-box">
-      <div class="t">Mode admin — buat kode deck contoh</div>
-      <input id="admNm" placeholder="Nama deck contoh" value="${(store.active||'').replace(/"/g,'&quot;')}">
-      <input id="admCr" placeholder="Kredit pembuat deck (opsional, mis. Fadhel)">
-      <input id="admDs" placeholder="Deskripsi singkat (gaya main, kombo utama)">
+      <div class="t">Mode admin — buat kode deck meta</div>
+      <input id="admNm" placeholder="Nama deck" value="${(store.active||'').replace(/"/g,'&quot;')}">
+      <input id="admCr" placeholder="Kredit pembuat deck (opsional)">
+      <input id="admDs" placeholder="Deskripsi singkat (opsional, boleh dikosongkan)">
       <div style="display:flex;gap:8px;margin-bottom:8px">
         <button class="btn2" id="admGen" style="flex:none;padding:8px 12px;border-color:var(--accent);color:var(--accent);font-weight:700">Buat kode dari deck aktif</button>
         <button class="btn2" id="admCopy" style="flex:none;padding:8px 12px">Salin</button>
       </div>
       <textarea id="admOut" readonly placeholder="Kode akan muncul di sini — tempel ke daftar DECK_CONTOH di index.html"></textarea>
     </div>`;
-
-  $('#sampList').innerHTML = DECK_CONTOH.map((d,i)=>{
-    const r = decodeDeck(d.cd);
-    const s = r ? sampSummary(r.deck) : {tot:0,col:{},avgLv:'0'};
-    const chips = Object.entries(s.col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]])
-      .map(([c,n])=>`<span class="samp-col"><i style="background:${CMAP[c]}"></i>${c} ${n}</span>`).join(' · ');
-    return `<div class="samp-card">
-      <div class="samp-top">
-        <span class="samp-nm">${d.nm}</span>
-        ${d.cr?`<span class="samp-meta">by ${d.cr}</span>`:''}
-        <span class="samp-meta">${s.tot} kartu · rata-rata Lv ${s.avgLv}</span>
-      </div>
-      <div class="samp-meta" style="margin-bottom:8px">${chips}</div>
-      ${d.ds?`<div class="samp-desc">${d.ds}</div>`:''}
-      <div class="samp-act">
-        <button class="main" data-samp-save="${i}">Simpan sebagai deck saya</button>
-        <button data-samp-view="${i}">Lihat isi deck</button>
-      </div>
-    </div>`;
-  }).join('') || '<div class="empty">Belum ada deck contoh.</div>';
 }
 
-$('#btnSamples').addEventListener('click', ()=>{
-  renderSamples();
-  $('#sampView').hidden = false;
-  document.body.style.overflow = 'hidden';
-});
-$('#btnSampClose').addEventListener('click', ()=>{
-  $('#sampView').hidden = true;
-  document.body.style.overflow = '';
-});
-
-$('#sampList').addEventListener('click', e=>{
-  const bs = e.target.closest('[data-samp-save]');
-  const bv = e.target.closest('[data-samp-view]');
-  if(!bs && !bv) return;
-  const idx = parseInt(bs ? bs.dataset.sampSave : bv.dataset.sampView);
-  const d = DECK_CONTOH[idx];
-  if(!d) return;
-  const r = decodeDeck(d.cd);
-  if(!r || !Object.keys(r.deck).length){ alert('Kode deck contoh tidak dapat dibaca.'); return; }
-
-  if(bs){
-    let nama = d.nm;
-    let i = 2; while(store.decks[nama]) nama = `${d.nm} (${i++})`;
-    store.decks[store.active] = state.deck;        // amankan deck yang sedang dibuka
-    store.decks[nama] = {...r.deck};
-    store.active = nama;
-    state.deck = store.decks[nama];
-    renderDeckSelect(); renderAll();
-    $('#sampView').hidden = true; document.body.style.overflow = '';
-  } else {
-    state.deck = {...r.deck};                      // tampilkan tanpa menyimpan
-    renderCards(); renderDeck();
-    $('#sampView').hidden = true; document.body.style.overflow = '';
-    openDeckView();
-  }
-});
-
-/* --- pembuat kode (mode admin) --- */
 $('#adminBox').addEventListener('click', e=>{
   if(e.target.id === 'admGen'){
-    if(!deckCount()){ alert('Deck aktif masih kosong.'); return; }
+    if(!deckCount()){ alert('Deck aktif masih kosong. Susun dulu di Deck Builder.'); return; }
     const nm = ($('#admNm').value || store.active).trim().replace(/'/g,"\\'");
-    const ds = ($('#admDs').value || 'Tambahkan deskripsi singkat di sini.').trim().replace(/'/g,"\\'");
-    const cd = encodeDeck(state.deck, nm);
     const cr = ($('#admCr').value || '').trim().replace(/'/g,"\\'");
+    const ds = ($('#admDs').value || '').trim().replace(/'/g,"\\'");
+    const cd = encodeDeck(state.deck, nm);
     $('#admOut').value =
       `  { nm:'${nm}',${cr?` cr:'${cr}',`:''}\n` +
       `    ds:'${ds}',\n` +
@@ -1652,7 +1787,8 @@ $('#adminBox').addEventListener('click', e=>{
   }
 });
 
-/* muat pengaturan tersimpan */
+/* muat pengaturan tersimpan *//* muat pengaturan tersimpan */
+if(!store.view) store.view = 'grid';      // default tampilan grid
 if(store.view === 'grid'){
   state.view = 'grid';
   [...$('#viewTog').children].forEach(x=>x.setAttribute('aria-pressed', x.dataset.view==='grid'));
@@ -1660,8 +1796,27 @@ if(store.view === 'grid'){
 $('#setSize').value = store.size || 50;
 $('#setMax').value  = store.max  || 3;
 renderDeckSelect();
+renderAdminBox();
 renderAll();
-handleSharedLink();
+
+/* Urutan penting: link deck (#d=) diperiksa LEBIH DULU agar link lama yang
+   sudah tersebar di komunitas tetap berfungsi, baru navigasi halaman. */
+const hashAwal = location.hash;
+if(hashAwal.startsWith('#d=')){
+  setPage('build', true);
+  handleSharedLink();
+} else {
+  const p = hashAwal.replace('#','');
+  setPage(PAGES.includes(p) ? p : (store.page || 'cards'), true);
+}
+
+/* dukung tombol maju/mundur browser */
+window.addEventListener('hashchange', ()=>{
+  const h = location.hash;
+  if(h.startsWith('#d=')){ setPage('build', true); handleSharedLink(); return; }
+  const p = h.replace('#','');
+  if(PAGES.includes(p) && p !== state.page) setPage(p, true);
+});
 </script>
 <!-- ===================================================================
      CLOUDFLARE WEB ANALYTICS — aktif
