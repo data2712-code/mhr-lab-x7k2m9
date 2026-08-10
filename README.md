@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v2.7** · 7 Agustus 2026
+**Versi saat ini: v3.0** · 7 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -40,7 +40,7 @@ Semua data deck tersimpan di browser pengguna (localStorage).
 2. Buka situs dengan `?admin=1` di belakang alamat, misal
    `https://data2712-code.github.io/mhr-lab-x7k2m9/?admin=1`
    (simpan sebagai bookmark agar tidak perlu mengetik ulang)
-3. Klik tombol **★** di panel deck → panel admin muncul di atas daftar deck contoh
+3. Buka tab **🏆 Deck Meta** → panel admin muncul di atas galeri deck
 4. Isi nama dan deskripsi singkat → **Buat kode dari deck aktif** → **Salin**
 5. Di GitHub: buka `index.html` → ikon **pensil** (Edit) → `Ctrl+F` cari `DECK_CONTOH`
 6. Tempel kode yang disalin ke dalam daftar → **Commit changes**
@@ -86,12 +86,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v2.7.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v3.0.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v2.7` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v3.0` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v2.7</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v3.0</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -107,6 +107,7 @@ bersifat case-sensitive.
 | Aturan deck | 50 kartu, maksimal 3 salinan per kartu, maksimal 2 warna (bisa diubah di panel) |
 | Penyimpanan deck | localStorage, per browser per perangkat |
 | Format link deck | `#d=1.<nama-base64url>.<kode kartu>` — versi 1 |
+| Navigasi halaman | `#cards` (utama), `#build`, `#meta`. `#d=` selalu diperiksa lebih dulu agar link deck lama tidak rusak |
 | Batas GitHub Pages | Situs 1 GB, bandwidth 100 GB/bulan (soft limit) |
 | Rem darurat | Settings → Pages → **Unpublish site** (reversibel) |
 | Nama repository | diacak (`mhr-lab-x7k2m9`) agar link tidak mudah ditemukan; `robots.txt` melarang pengindeksan |
@@ -119,6 +120,22 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v3.0 — 7 Agustus 2026 · restrukturisasi navigasi
+- **Tiga halaman terpisah** dengan navigasi tab (di HP menjadi bilah bawah):
+  - 🃏 **Kartu** — halaman utama, database kartu tanpa panel deck sehingga grid
+    memakai seluruh lebar layar dan gambar kartu tampil lebih besar
+  - 🛠 **Deck Builder** — daftar kartu + panel deck bersebelahan seperti sebelumnya
+  - 🏆 **Deck Meta** — galeri deck komunitas
+- **Halaman Deck Meta** menggantikan tombol ★: kartu deck lebih besar dengan strip
+  pratinjau 4 kartu Lv tertinggi, bar komposisi warna, statistik, kredit pembuat,
+  dan filter berdasarkan kombinasi warna
+- Navigasi lewat hash (`#cards`, `#build`, `#meta`) sehingga tiap halaman bisa
+  di-bookmark, dan tombol maju/mundur browser berfungsi
+- **Link deck lama tetap aman** — `#d=` diperiksa lebih dulu sebelum navigasi
+  halaman diproses, lalu otomatis membuka Deck Builder
+- Panel admin pembuat kode deck meta dipindah ke halaman Deck Meta
+- Penghitung jumlah kartu hasil filter dan jumlah kartu di deck tampil di tab
 
 ### v2.7 — 7 Agustus 2026
 - **Cloudflare Web Analytics aktif** — statistik pengunjung mulai tercatat,
