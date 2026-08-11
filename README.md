@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v3.3** · 10 Agustus 2026
+**Versi saat ini: v3.4** · 11 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -34,13 +34,13 @@ Semua data deck tersimpan di browser pengguna (localStorage).
 3. Tunggu 1–2 menit, buka situs dengan `?v=` angka baru untuk melewati cache
 4. Perbarui bagian **Riwayat Update** di README ini
 
-### Cara menambah deck contoh
+### Cara menambah deck komunitas
 
 1. Susun deck di aplikasi seperti biasa
 2. Buka situs dengan `?admin=1` di belakang alamat, misal
    `https://data2712-code.github.io/mhr-lab-x7k2m9/?admin=1`
    (simpan sebagai bookmark agar tidak perlu mengetik ulang)
-3. Buka tab **🏆 Deck Meta** → panel admin muncul di atas galeri deck
+3. Buka tab **🏆 Deck Komunitas** → panel admin muncul di atas galeri deck
 4. Isi nama dan deskripsi singkat → **Buat kode dari deck aktif** → **Salin**
 5. Di GitHub: buka `index.html` → ikon **pensil** (Edit) → `Ctrl+F` cari `DECK_CONTOH`
 6. Tempel kode yang disalin ke dalam daftar → **Commit changes**
@@ -118,12 +118,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v3.3.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v3.4.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v3.3` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v3.4` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v3.3</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v3.4</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -152,6 +152,19 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v3.4 — 11 Agustus 2026
+- Menu **Deck Meta** diganti namanya menjadi **Deck Komunitas** (di HP: "Komunitas"),
+  termasuk judul halaman dan teks pendukungnya. Ikon 🏆 tetap
+- Nama teknis tidak diubah: `#meta`, `data-page="meta"`, `id="metaPage"`,
+  `renderMeta`, dan sejenisnya tetap sama, jadi bookmark `#meta` tetap berfungsi
+
+### Perbaikan data gambar — 10 Agustus 2026
+- 🔧 **Fix:** file `images/EB01-007.jpg` dan `images/EB01-009.jpg` tertukar
+  (EB01-007 = Spiritual Resonance Vision, EB01-009 = Take on Two Winter Soldier).
+  Hanya file gambarnya yang salah nama — data kartu di database sudah benar
+- Audit menyeluruh 200 gambar dilakukan dengan membaca nomor tercetak di pojok
+  tiap kartu: tidak ada pasangan lain yang tertukar
 
 > Catatan: tanggal pada versi v1.0–v3.0 adalah perkiraan dari urutan pengerjaan,
 > bukan catatan waktu yang tercatat otomatis. Silakan koreksi kalau ada yang keliru.

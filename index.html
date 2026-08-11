@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 3.3  ·  10 Agustus 2026
+     MHR DECK LAB  ·  versi 3.4  ·  11 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="3.3">
+<meta name="version" content="3.4">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -274,7 +274,7 @@
   body.page-meta .filters, body.page-meta .cards, body.page-meta .deck{display:none}
   body.page-meta .layout{grid-template-columns:minmax(0,1fr)}
 
-  /* ================= HALAMAN DECK META ================= */
+  /* ================= HALAMAN DECK KOMUNITAS ================= */
   .meta-wrap{padding:22px 20px 90px;max-width:1180px;margin:0 auto}
   .meta-head h2{font-family:var(--disp);font-size:26px;letter-spacing:.05em;text-transform:uppercase}
   .meta-head p{color:var(--muted);font-size:12.5px;line-height:1.6;margin:5px 0 16px;max-width:640px}
@@ -487,14 +487,14 @@
 <nav class="tabs" id="navTabs">
   <button data-page="cards" aria-current="true">🃏 <span class="tl">Kartu</span><span class="ts">Kartu</span> <span class="cnt" id="navCard">208</span></button>
   <button data-page="build" aria-current="false">🛠 <span class="tl">Deck Builder</span><span class="ts">Builder</span> <span class="cnt" id="navDeck">0</span></button>
-  <button data-page="meta" aria-current="false">🏆 <span class="tl">Deck Meta</span><span class="ts">Meta</span> <span class="cnt" id="navMeta">0</span></button>
+  <button data-page="meta" aria-current="false">🏆 <span class="tl">Deck Komunitas</span><span class="ts">Komunitas</span> <span class="cnt" id="navMeta">0</span></button>
   <button data-page="lgs" aria-current="false">📅 <span class="tl">Turnamen</span><span class="ts">Turnamen</span> <span class="cnt" id="navLgs">0</span></button>
 </nav>
 
 <section id="metaPage">
   <div class="meta-wrap">
     <div class="meta-head">
-      <h2>Deck Meta Komunitas</h2>
+      <h2>Deck Komunitas</h2>
       <p>Deck yang sedang banyak dipakai di komunitas MHR Indonesia. Muat salah satunya ke
         Deck Builder untuk dilihat isinya atau dimodifikasi — deck yang sedang Anda susun tidak tertimpa.</p>
     </div>
@@ -633,7 +633,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v3.3</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v3.4</div>
 </footer>
 
 <div class="lb" id="lightbox" hidden>
@@ -1813,7 +1813,7 @@ $('#navTabs').addEventListener('click', e=>{
   setPage(b.dataset.page);
 });
 
-/* ==================== HALAMAN DECK META ==================== */
+/* ==================== HALAMAN DECK KOMUNITAS ==================== */
 function deckStats(deck){
   const col = {}; let tot = 0, lvSum = 0, unik = 0;
   for(const [no,q] of Object.entries(deck)){
@@ -1879,7 +1879,7 @@ function renderMeta(){
         </div>
       </div>
     </div>`;
-  }).join('') || '<div class="empty">Belum ada deck meta yang cocok dengan filter ini.</div>';
+  }).join('') || '<div class="empty">Belum ada deck komunitas yang cocok dengan filter ini.</div>';
 }
 
 function metaImgFallback(img,no,warna){
@@ -1922,11 +1922,11 @@ $('#metaGrid').addEventListener('click', e=>{
   }
 });
 
-/* --- pembuat kode deck meta (mode admin) --- */
+/* --- pembuat kode deck komunitas (mode admin) --- */
 function renderAdminBox(){
   $('#adminBox').innerHTML = !isAdmin ? '' : `
     <div class="admin-box">
-      <div class="t">Mode admin — buat kode deck meta</div>
+      <div class="t">Mode admin — buat kode deck komunitas</div>
       <input id="admNm" placeholder="Nama deck" value="${(store.active||'').replace(/"/g,'&quot;')}">
       <input id="admCr" placeholder="Kredit pembuat deck (opsional)">
       <input id="admDs" placeholder="Deskripsi singkat (opsional, boleh dikosongkan)">
