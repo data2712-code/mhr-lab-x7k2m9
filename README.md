@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v3.4** · 11 Agustus 2026
+**Versi saat ini: v3.5** · 14 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -61,6 +61,52 @@ Panel admin tidak terlihat oleh pengunjung biasa. Ini hanya menyembunyikan dari
 tampilan, bukan pengamanan — tapi tombol itu memang tidak punya kuasa apa pun,
 karena satu-satunya cara mengubah daftar adalah commit ke repository ini.
 
+### Cetak kartu proxy (khusus mode admin)
+
+Fitur ini **hanya tampil untuk Anda**, tidak untuk pengunjung biasa.
+
+1. Buka situs dengan `?admin=1` di belakang alamat, misal
+   `https://data2712-code.github.io/mhr-lab-x7k2m9/?admin=1`
+2. Susun deck di tab **🛠 Deck Builder**
+3. Di bagian paling bawah panel deck, klik **🖨 Cetak kartu proxy (PDF)**
+   (kotak bergaris kuning "Mode admin")
+4. Daftar cetak otomatis terisi dari deck aktif. Bisa disesuaikan: tombol **+ / − / ✕**
+   per kartu, cari kartu lain di kolom pencarian, atau **↺ Muat dari deck aktif**
+5. Klik **⬇ Buat PDF** → berkas `proxy-<nama deck>.pdf` terunduh
+
+Spesifikasi hasil cetak:
+
+| Hal | Nilai |
+|---|---|
+| Kertas | A4 210 × 297 mm, potret |
+| Ukuran kartu | 63 × 88 mm (ukuran standar TCG, pas masuk sleeve) |
+| Per halaman | 9 kartu (grid 3 × 3), otomatis terpusat |
+| Margin | 8,5 mm samping · 14,5 mm atas-bawah (pada jarak antar kartu 2 mm) |
+
+Empat opsi yang bisa diatur sebelum membuat PDF:
+
+- **Garis potong** — tanda potong tipis di area margin (tidak menimpa gambar kartu)
+- **Jarak antar kartu** — 0 / 2 / 4 mm; makin lega makin mudah dipotong
+- **Kartu tanpa gambar dicetak sebagai kartu teks** — kartu yang belum ada berkas
+  gambarnya di folder `images/` dicetak sebagai kartu berisi nama, level, jarak, power,
+  trait, dan teks efek, jadi tetap bisa dipakai bermain. Kalau opsi ini dimatikan,
+  kartu tersebut dilewati
+- **Catatan kecil di kaki halaman** — keterangan "proxy SAMPLE (bukan kartu resmi)",
+  nama deck, dan nomor halaman
+
+**Penting saat mencetak:** di dialog print pilih skala **100% / "Ukuran asli"**, jangan
+"Fit to page" — kalau tidak, ukurannya menyusut beberapa milimeter dan tidak lagi pas
+dengan kartu asli. Pengingat ini juga tertulis di dalam aplikasinya.
+
+Catatan teknis: pembuat PDF memakai library **jsPDF** yang dimuat dari CDN
+(`cdnjs.cloudflare.com`) **hanya saat tombol Buat PDF diklik** — pengunjung biasa tidak
+pernah mengunduhnya, jadi tidak ada tambahan beban muat halaman. Artinya fitur ini butuh
+koneksi internet saat dipakai.
+
+Seperti panel admin deck komunitas, `?admin=1` hanya **menyembunyikan dari tampilan**,
+bukan pengamanan. Itu tidak masalah: tombol ini tidak punya kuasa apa pun atas situs —
+dia hanya menyusun PDF dari gambar yang memang sudah publik di folder `images/`.
+
 ### Cara mengubah jadwal turnamen LGS
 
 Buka `index.html` → Edit → `Ctrl+F` cari `const LGS`. Format tiap toko:
@@ -118,12 +164,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v3.4.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v3.5.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v3.4` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v3.5` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v3.4</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v3.5</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -152,6 +198,21 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v3.5 — 14 Agustus 2026
+- **Fitur cetak kartu proxy dikeluarkan — khusus mode admin.** Tombol
+  **🖨 Cetak kartu proxy (PDF)** muncul di bagian bawah panel deck, hanya saat situs
+  dibuka dengan `?admin=1`. Pengunjung biasa tidak melihat tombol maupun panelnya
+- Output **PDF A4**, kartu **63 × 88 mm**, **9 kartu per halaman**, otomatis terpusat
+- Daftar cetak terisi otomatis dari deck aktif, bisa disesuaikan per kartu (+ / − / ✕),
+  ditambah kartu lain lewat pencarian, atau dimuat ulang dari deck
+- Opsi: garis potong di area margin, jarak antar kartu (0 / 2 / 4 mm), kartu teks untuk
+  kartu yang belum ada berkas gambarnya, dan catatan kecil di kaki halaman
+- Ringkasan langsung menampilkan jumlah kartu, jumlah halaman A4, dan sisa slot kosong
+  di halaman terakhir. Kartu tanpa berkas gambar ditandai di daftar sebelum PDF dibuat
+- Library **jsPDF** dimuat dari CDN hanya saat tombol Buat PDF diklik, jadi tidak
+  menambah beban muat halaman bagi pengunjung biasa
+- Panduan pemakaian lengkap: lihat bagian **Cetak kartu proxy** di atas
 
 ### v3.4 — 11 Agustus 2026
 - Menu **Deck Meta** diganti namanya menjadi **Deck Komunitas** (di HP: "Komunitas"),
@@ -320,7 +381,7 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ## Rencana / ide berikutnya
 
-- [ ] Reintegrasi fitur cetak kartu proxy (PDF A4, kode ada di backup)
+- [x] ~~Reintegrasi fitur cetak kartu proxy (PDF A4)~~ — selesai di v3.5, khusus mode admin
 - [ ] Backup & restore data deck untuk pindah perangkat
 - [ ] Impor deck dari teks (pasangan dari "Salin daftar deck")
 - [ ] Navigasi ◀ ▶ / panah keyboard di dalam popup kartu
