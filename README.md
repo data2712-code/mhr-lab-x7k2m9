@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v3.5** · 11 Agustus 2026
+**Versi saat ini: v5.0** · 17 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -33,6 +33,20 @@ Semua data deck tersimpan di browser pengguna (localStorage).
 2. Repository → **Add file → Upload files** → drop file → **Commit changes**
 3. Tunggu 1–2 menit, buka situs dengan `?v=` angka baru untuk melewati cache
 4. Perbarui bagian **Riwayat Update** di README ini
+
+### Cara menambah teks / gambar bahasa Inggris
+
+Gambar Inggris disimpan di `images/en/` dengan penamaan sama seperti versi
+Indonesia (`BP01-001.jpg`, varian `BP01-001_MR.jpg`).
+
+Untuk 16 kartu promo yang belum punya versi Inggris: begitu terbit, tambahkan
+`nm_en` dan `e_en` pada entri kartunya di `index.html`, lalu unggah gambarnya
+ke `images/en/`. Kartu itu otomatis ikut tampil di mode Inggris — tidak perlu
+mengubah kode lain.
+
+Menambah teks antarmuka baru: tambahkan satu baris di kamus `T` di dalam
+`index.html` dengan format `kunci: ['teks Indonesia','English text']`, lalu
+pakai `t('kunci')` di JavaScript atau `data-i18n="kunci"` di HTML.
 
 ### Cara menambah varian artwork (alternate art)
 
@@ -138,12 +152,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v3.5.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v5.0.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v3.5` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v5.0` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v3.5</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v5.0</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -158,6 +172,7 @@ bersifat case-sensitive.
 | Ukuran gambar kartu | lebar 450 px, ber-watermark SAMPLE, ±80–90 KB per file |
 | Varian artwork | 40 berkas alternate art, penamaan `NOMOR_RARITY.jpg` (mis. `BP01-001_MR.jpg`) |
 | Aturan deck | 50 kartu, maksimal 3 salinan per kartu, maksimal 2 warna (bisa diubah di panel) |
+| Aturan draw awal | 6 kartu; mulligan = kembalikan ke bawah deck, ambil sejumlah sama dari atas, lalu kocok ulang. Resmi maks 1×, simulator dibebaskan berulang |
 | Penyimpanan deck | localStorage, per browser per perangkat |
 | Format link deck | `#d=1.<nama-base64url>.<kode kartu>` — versi 1 |
 | Navigasi halaman | `#cards` (utama), `#build`, `#meta`, `#lgs`. `#d=` selalu diperiksa lebih dulu agar link deck lama tidak rusak |
@@ -173,6 +188,93 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v5.0 — 17 Agustus 2026 · dua bahasa (ID / EN)
+- **Pengalih bahasa 🌐 ID / EN** di header. Mengubah antarmuka, nama kartu, teks
+  efek, dan gambar kartu sekaligus. Pilihan tersimpan per pengguna
+- **Data Inggris resmi** digabungkan dari API (`language=en`): 192 kartu karakter,
+  semuanya cocok persis dengan database — tidak ada satu pun selisih level,
+  jarak, maupun power
+- **192 gambar kartu Inggris + 41 varian artwork** di folder `images/en/`
+- **16 kartu promo** (PB01, EB01, TB01) otomatis disembunyikan di mode Inggris
+  karena versi Inggrisnya belum terbit. Datanya tetap tersimpan — begitu gambar
+  dan teksnya tersedia, tinggal ditampilkan tanpa ubah kode
+- **34 kartu RUSH POINT** dari data Inggris sengaja tidak dimasukkan: itu penanda
+  skor, bukan kartu yang masuk deck
+- BP01-061 kini tercatat punya varian MR (dari data Inggris)
+- Pencarian bekerja di kedua bahasa sekaligus — mengetik istilah Indonesia
+  maupun Inggris sama-sama menemukan kartunya
+
+### v4.2 — 17 Agustus 2026
+- Keterangan di layar simulasi: di permainan resmi mulligan **hanya boleh 1×**,
+  sementara di simulator sengaja dibebaskan berulang agar bisa mencoba banyak
+  kemungkinan pembukaan. Penanda merah muncul kalau mulligan sudah lebih dari sekali
+
+### v4.1 — 17 Agustus 2026 · simulasi draw awal
+- Tombol **🎴 Simulasi draw 6 kartu** di panel deck membuka layar simulasi
+  pembukaan permainan dari deck yang sedang disusun
+- **Mulligan sesuai aturan MHR**: kartu yang ditandai dikembalikan ke *bawah*
+  deck, lalu diambil kartu baru sejumlah sama dari *atas* deck, kemudian deck
+  dikocok ulang. Jumlah kartu di tangan selalu tetap 6
+- **Tabel peluang** tiap kartu muncul di 6 kartu pembuka, dihitung dengan
+  distribusi hipergeometrik — bukan hasil pengambilan acak, jadi angkanya eksak.
+  Diverifikasi terhadap 50.000 simulasi acak: selisih di bawah 0,15 poin persen
+- Ringkasan isi tangan: sebaran level dan komposisi warna
+- Kartu di tangan dan di tabel peluang bisa diklik untuk melihat detailnya
+- Peringatan otomatis kalau jumlah kartu deck belum sesuai target
+
+### v4.0 — 17 Agustus 2026 · alat tinjau ulang deck
+Ditujukan untuk alur kerja meninjau dan mengganti kartu setelah deck jadi.
+- **Klik nama kartu di daftar deck** → popup kartu terbuka lengkap dengan gambar
+  besar, stat, dan teks efeknya. Berfungsi di HP maupun laptop
+- **Pratinjau melayang**: di perangkat berkursor, menyorot nama kartu di daftar
+  deck langsung memunculkan gambar kartunya tanpa perlu klik. Posisinya menyesuaikan
+  agar tidak keluar layar
+- **Filter "★ Di deck"** — menampilkan hanya kartu yang sudah masuk deck, sehingga
+  mudah meninjau ulang isi deck sambil tetap bisa mengatur jumlah salinannya
+- **Kartu di layar "Lihat deck" bisa diklik** untuk membuka gambar besar. Layar
+  deck tetap terbuka di belakang popup, jadi peninjauan tidak terputus
+
+### v3.9 — 17 Agustus 2026
+- 🔧 **Fix kritis:** halaman utama tidak memuat kartu sama sekali sampai pengguna
+  membuka tab lain. Penyebabnya deklarasi `const isAdmin` ikut terhapus saat data
+  dipindah ke `data.js` di v3.6, sehingga inisialisasi berhenti di tengah jalan
+- Ditambah **jaring pengaman inisialisasi**: tiap langkah awal dijalankan terpisah,
+  sehingga satu kegagalan tidak lagi membuat seluruh halaman kosong. Kesalahan
+  dicatat di Console browser (F12) untuk memudahkan penelusuran
+- Seluruh fitur diuji otomatis di lingkungan DOM tiruan sebelum dirilis:
+  muat awal, navigasi 4 halaman, tambah kartu, batas 3 salinan, Lihat deck,
+  pratinjau deck komunitas, filter, popup kartu, dan pemilih varian artwork
+
+### v3.8 — 17 Agustus 2026
+- 🔧 **Fix:** tombol **"Lihat deck"** di Deck Builder selalu memunculkan pesan
+  "Deck masih kosong" walau decknya terisi. Penyebabnya regresi dari v3.6:
+  fungsi `openDeckView` dipasang langsung sebagai penangan klik, sehingga browser
+  meneruskan objek Event sebagai argumen dan objek itu dibaca sebagai isi deck
+- Ditambah pengaman di dalam `openDeckView`: argumen yang bukan objek data deck
+  biasa akan diabaikan, sehingga kesalahan serupa tidak terulang
+
+### v3.7 — 17 Agustus 2026
+- **Filter bisa dilipat di layar HP** (masukan komunitas: bar filter memakan
+  terlalu banyak ruang layar). Yang tampil hanya kolom pencarian dan tombol
+  **⚙ Filter**; sisanya muncul saat tombol ditekan
+- Tombol Filter menampilkan **lencana jumlah filter aktif**, sehingga pengguna
+  tetap tahu ada filter yang menyala walau menunya sedang dilipat
+- Header lebih ringkas di HP: tiga penghitung (Kartu unik / Ditampilkan / Deck)
+  disembunyikan karena informasinya sudah ada di lencana navigasi bawah
+- Tampilan desktop tidak berubah sama sekali
+
+### v3.6 — 16 Agustus 2026
+- 🔧 **Fix penting:** deck komunitas dan jadwal LGS dipindah ke berkas terpisah
+  **`data.js`**. Sebelumnya keduanya ditulis di dalam `index.html`, sehingga setiap
+  kali `index.html` diperbarui, deck yang ditambahkan manual ikut hilang.
+  Sekarang `data.js` tidak pernah ikut diganti
+- 🔧 **Fix penting:** tombol **"Lihat visual"** pada deck komunitas (dan "Lihat saja"
+  pada link deck) sebelumnya menimpa deck yang sedang disusun — judul yang tampil
+  salah, dan deck pengguna bisa tertimpa isi deck komunitas saat penyimpanan
+  otomatis berjalan. Pratinjau kini benar-benar terpisah dari deck aktif
+- Nama variabel `DECK_CONTOH` diganti `DECK_KOMUNITAS` agar sesuai nama menunya
+- Kalau `data.js` gagal dimuat, aplikasi tetap berjalan dengan daftar kosong
 
 ### Varian artwork batch 1 — 16 Agustus 2026
 - **40 berkas alternate art** diunggah ke `images/` — melengkapi seluruh varian
