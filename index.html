@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 3.6  ·  16 Agustus 2026
+     MHR DECK LAB  ·  versi 3.8  ·  17 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="3.6">
+<meta name="version" content="3.8">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -92,6 +92,34 @@
   }
   .reset:hover{color:var(--paper);border-color:var(--paper)}
   .count-note{width:100%;color:var(--muted);font-size:12px}
+  /* pembungkus filter lanjutan: transparan di desktop, dilipat di HP */
+  .fadv{display:contents}
+  .fbtn{display:none}
+  @media (max-width:920px){
+    .filters{padding:9px 12px;gap:7px}
+    .fbtn{display:inline-flex;align-items:center;gap:7px;flex:none;
+      background:var(--panel);border:1px solid var(--line);color:var(--paper);
+      border-radius:8px;padding:8px 13px;font-size:12.5px;cursor:pointer}
+    .fbtn[aria-expanded="true"]{background:var(--accent);color:#1A1206;
+      border-color:var(--accent);font-weight:700}
+    .fbadge{background:var(--accent);color:#1A1206;border-radius:999px;
+      min-width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;
+      font-family:var(--mono);font-size:10.5px;font-weight:800;padding:0 5px}
+    .fbtn[aria-expanded="true"] .fbadge{background:#1A1206;color:var(--accent)}
+    .fadv{display:none}
+    .filters.open .fadv{display:flex;flex-wrap:wrap;gap:8px;width:100%;
+      padding-top:9px;margin-top:2px;border-top:1px solid var(--line)}
+    .filters.open .fadv select{flex:1 1 44%;min-width:0}
+    .filters.open .fadv .viewtog{flex:1 1 44%}
+    .filters.open .fadv .viewtog button{flex:1;justify-content:center}
+    .filters.open .fadv .reset{flex:1 1 44%}
+    .count-note{font-size:11.5px;margin-top:1px}
+    /* header lebih ringkas — penghitung sudah tampil di navigasi bawah */
+    header{padding:12px 16px 10px}
+    .hdr-stats .pill{display:none}
+    .brand h1{font-size:25px}
+    .brand p{font-size:11px;margin-top:3px}
+  }
 
   /* ------- card list ------- */
   .cards{padding:10px 12px 80px;display:flex;flex-direction:column;gap:8px}
@@ -537,7 +565,11 @@
 <div class="layout">
   <main>
     <div class="filters">
-      <input id="q" type="search" placeholder="Cari nama, efek, atau trait… (mis. Prune, Machine, Thor)">
+      <input id="q" type="search" placeholder="Cari nama, efek, atau trait…">
+      <button class="fbtn" id="btnFilter" aria-expanded="false">
+        <span>⚙ Filter</span><span class="fbadge" id="fBadge" hidden>0</span>
+      </button>
+      <div class="fadv" id="fAdv">
       <div class="cbtns" id="cbtns">
         <button class="cbtn merah"  data-c="Merah"  data-on="1" title="Merah"></button>
         <button class="cbtn kuning" data-c="Kuning" data-on="1" title="Kuning"></button>
@@ -570,6 +602,7 @@
         <button data-m="retreat" aria-pressed="false">Trigger RETREAT</button>
         <button data-m="draw" aria-pressed="false">Tarik kartu</button>
         <button data-m="debuff" aria-pressed="false">Turunkan Power</button>
+      </div>
       </div>
       <div class="count-note" id="noteShown"></div>
     </div>
@@ -649,7 +682,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v3.6</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v3.8</div>
 </footer>
 
 <div class="lb" id="lightbox" hidden>
@@ -1078,6 +1111,7 @@ function renderCards(){
   const arr = filtered();
   $('#hShown').textContent = arr.length;
   const nc = $('#navCard'); if(nc) nc.textContent = arr.length;
+  updateFilterBadge();
   $('#noteShown').textContent = `${arr.length} kartu cocok dengan filter.`;
   const grid = state.view === 'grid';
   $('#cards').className = 'cards' + (grid ? ' grid' : '');
@@ -1201,6 +1235,26 @@ $('#fLevel').addEventListener('change', e=>{ state.level=e.target.value; renderC
 $('#fRange').addEventListener('change', e=>{ state.range=e.target.value; renderCards(); });
 $('#fRarity').addEventListener('change', e=>{ state.rarity=e.target.value; renderCards(); });
 $('#fTrait').addEventListener('change', e=>{ state.trait=e.target.value; renderCards(); });
+/* tombol lipat filter (hanya tampil di layar HP) */
+$('#btnFilter').addEventListener('click', ()=>{
+  const bar = document.querySelector('.filters');
+  const buka = !bar.classList.contains('open');
+  bar.classList.toggle('open', buka);
+  $('#btnFilter').setAttribute('aria-expanded', String(buka));
+});
+
+/* jumlah filter yang sedang aktif — supaya tetap terlihat walau menu dilipat */
+function updateFilterBadge(){
+  let n = 0;
+  if(state.colors.size < 4) n++;
+  ['series','level','range','trait','rarity'].forEach(k=>{ if(state[k]) n++; });
+  n += state.mech.size;
+  const b = $('#fBadge');
+  if(!b) return;
+  b.textContent = n;
+  b.hidden = n === 0;
+}
+
 $('#mechBar').addEventListener('click', e=>{
   const b=e.target.closest('[data-m]'); if(!b) return;
   const m=b.dataset.m;
@@ -1413,9 +1467,15 @@ document.addEventListener('keydown', e=>{
 let dvDeck = null, dvNama = '';
 
 function openDeckView(deckLain, judulLain){
-  const sumber = deckLain || state.deck;
+  // Pengaman: hanya terima objek data deck biasa. Kalau fungsi ini terpasang
+  // langsung sebagai penangan klik, argumen pertama berisi objek Event —
+  // itu harus diabaikan, bukan dianggap deck kosong.
+  const sah = deckLain && typeof deckLain === 'object' &&
+              !(typeof Event !== 'undefined' && deckLain instanceof Event) &&
+              Object.getPrototypeOf(deckLain) === Object.prototype;
+  const sumber = sah ? deckLain : state.deck;
   dvDeck = sumber;
-  dvNama = judulLain || store.active;
+  dvNama = (sah && judulLain) ? judulLain : store.active;
   const entries = Object.entries(sumber).map(([no,q])=>({c:DB.find(d=>d.no===no),q}))
     .filter(x=>x.c);
   if(!entries.length){ alert('Deck masih kosong.'); return; }
@@ -1440,7 +1500,7 @@ function openDeckView(deckLain, judulLain){
   $('#deckView').hidden = false;
   document.body.style.overflow = 'hidden';
 }
-$('#btnDeckView').addEventListener('click', openDeckView);
+$('#btnDeckView').addEventListener('click', ()=>openDeckView());
 $('#btnDvClose').addEventListener('click', ()=>{
   $('#deckView').hidden = true;
   dvDeck = null; dvNama = '';
