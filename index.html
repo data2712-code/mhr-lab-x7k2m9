@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 3.5  ·  11 Agustus 2026
+     MHR DECK LAB  ·  versi 3.6  ·  16 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="3.5">
+<meta name="version" content="3.6">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -634,6 +634,9 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- Data yang Anda kelola sendiri: deck komunitas + jadwal turnamen LGS.
+     Sengaja dipisah agar TIDAK ikut tertimpa saat index.html diperbarui. -->
+<script src="data.js"></script>
 
 <footer>
   <div class="foot-cta">
@@ -646,7 +649,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v3.5</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v3.6</div>
 </footer>
 
 <div class="lb" id="lightbox" hidden>
@@ -1399,19 +1402,29 @@ $('#lightbox').addEventListener('click', e=>{
 document.addEventListener('keydown', e=>{
   if(e.key === 'Escape'){
     if(!$('#lightbox').hidden) closeLightbox();
-    else if(!$('#deckView').hidden){ $('#deckView').hidden = true; document.body.style.overflow=''; }
+    else if(!$('#deckView').hidden){ $('#deckView').hidden = true; dvDeck=null; dvNama=''; document.body.style.overflow=''; }
   }
 });
 
 /* --- tampilan deck untuk dibagikan --- */
-function openDeckView(){
-  const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q}));
+/* Deck yang sedang DITAMPILKAN di layar "Lihat deck".
+   Sengaja dipisah dari state.deck (deck yang sedang disusun) supaya
+   pratinjau deck komunitas atau deck dari link TIDAK menimpa deck pengguna. */
+let dvDeck = null, dvNama = '';
+
+function openDeckView(deckLain, judulLain){
+  const sumber = deckLain || state.deck;
+  dvDeck = sumber;
+  dvNama = judulLain || store.active;
+  const entries = Object.entries(sumber).map(([no,q])=>({c:DB.find(d=>d.no===no),q}))
+    .filter(x=>x.c);
   if(!entries.length){ alert('Deck masih kosong.'); return; }
   entries.sort((a,b)=>CORDER[a.c.c]-CORDER[b.c.c] || a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
   const col={Merah:0,Kuning:0,Biru:0,Hijau:0};
   entries.forEach(({c,q})=>col[c.c]+=q);
-  $('#dvTitle').textContent = store.active;
-  $('#dvMeta').textContent = `${deckCount()} kartu · ` +
+  const totalTampil = entries.reduce((a,x)=>a+x.q,0);
+  $('#dvTitle').textContent = dvNama;
+  $('#dvMeta').textContent = `${totalTampil} kartu · ` +
     Object.entries(col).filter(([,n])=>n>0).map(([c,n])=>`${c} ${n}`).join(' · ');
   $('#dvGrid').innerHTML = entries.map(({c,q})=>{
     const ph = `<div class="dv-ph" style="--dvc:${CMAP[c.c]}">
@@ -1430,6 +1443,7 @@ function openDeckView(){
 $('#btnDeckView').addEventListener('click', openDeckView);
 $('#btnDvClose').addEventListener('click', ()=>{
   $('#deckView').hidden = true;
+  dvDeck = null; dvNama = '';
   document.body.style.overflow = '';
 });
 
@@ -1468,7 +1482,9 @@ const HEXC = {Merah:'#E4442E', Kuning:'#F2B01E', Biru:'#3B87E8', Hijau:'#33A45C'
 
 $('#btnDvHd').addEventListener('click', async ()=>{
   const btn = $('#btnDvHd');
-  const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q}));
+  const sumber = dvDeck || state.deck;
+  const entries = Object.entries(sumber).map(([no,q])=>({c:DB.find(d=>d.no===no),q}))
+    .filter(x=>x.c);
   if(!entries.length){ alert('Deck masih kosong.'); return; }
   entries.sort((a,b)=>CORDER[a.c.c]-CORDER[b.c.c] || a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
   btn.disabled = true; btn.textContent = 'Memuat gambar…';
@@ -1539,13 +1555,14 @@ $('#btnDvHd').addEventListener('click', async ()=>{
   // judul
   const col = {Merah:0,Kuning:0,Biru:0,Hijau:0};
   entries.forEach(({c,q})=>col[c.c]+=q);
-  const meta = `${deckCount()} kartu  ·  ` +
+  const totalHD = entries.reduce((a,x)=>a+x.q,0);
+  const meta = `${totalHD} kartu  ·  ` +
     Object.entries(col).filter(([,v])=>v>0).map(([k,v])=>`${k} ${v}`).join('  ·  ');
 
   ctx.fillStyle = '#EDE7DA';
   ctx.font = `900 ${Math.round(CW*0.20)}px Arial, sans-serif`;
   ctx.textBaseline = 'top';
-  ctx.fillText(store.active.toUpperCase(), PAD, PAD*0.7);
+  ctx.fillText((dvNama || store.active).toUpperCase(), PAD, PAD*0.7);
   ctx.fillStyle = '#8B96A5';
   ctx.font = `${Math.round(CW*0.075)}px "Courier New", monospace`;
   ctx.fillText(meta, PAD, PAD*0.7 + Math.round(CW*0.24));
@@ -1608,7 +1625,7 @@ $('#btnDvHd').addEventListener('click', async ()=>{
   ctx.fillText('Dibuat dengan MHR Deck Lab  ·  TikTok @deteprtm', W-PAD, H-PAD*0.55);
 
   // simpan sebagai JPEG mutu tinggi (ukuran file jauh lebih kecil, ketajaman setara)
-  const nama = (store.active.replace(/[^\w\- ]+/g,'').trim() || 'deck');
+  const nama = ((dvNama || store.active).replace(/[^\w\- ]+/g,'').trim() || 'deck');
   cv.toBlob(b=>{
     if(!b){ alert('Gagal membuat gambar.'); btn.disabled=false; btn.textContent='⬇ Unduh HD'; return; }
     const a = document.createElement('a');
@@ -1630,7 +1647,7 @@ $('#btnDvPng').addEventListener('click', async ()=>{
   try{
     const cv = await html2canvas($('#dviewSheet'), {backgroundColor:'#12161B', scale:2, useCORS:true});
     const a = document.createElement('a');
-    a.download = (store.active.replace(/[^\w\- ]+/g,'').trim()||'deck') + '.png';
+    a.download = ((dvNama || store.active).replace(/[^\w\- ]+/g,'').trim()||'deck') + '.png';
     a.href = cv.toDataURL('image/png');
     a.click();
   }catch(e){ alert('Gagal membuat PNG — silakan screenshot manual.'); }
@@ -1741,70 +1758,27 @@ function handleSharedLink(){
       state.deck = store.decks[nama];
       renderDeckSelect(); renderAll();
     } else {
-      const simpanDeck = {...res.deck};
-      const tmp = store.active;
-      state.deck = simpanDeck;                     // tampilkan tanpa menyimpan
-      renderCards(); renderDeck();
-      store.decks[tmp] = store.decks[tmp] || {};
+      // pratinjau murni: deck yang sedang disusun tetap utuh
+      openDeckView({...res.deck}, res.nama);
     }
     box.remove();
   };
   $('#shSave').addEventListener('click', ()=>openAs(true));
-  $('#shView').addEventListener('click', ()=>{ openAs(false); openDeckView(); });
+  $('#shView').addEventListener('click', ()=>openAs(false));
   $('#shNo').addEventListener('click', ()=>box.remove());
 }
 
 
-/* ==================== DECK CONTOH ====================
-   CARA MENAMBAH DECK CONTOH:
-   1. Susun deck di aplikasi, lalu buka Deck Contoh dengan alamat ?admin=1
-   2. Klik "Buat kode deck contoh" — hasilnya sudah berformat siap tempel
-   3. Tempel barisnya ke dalam daftar DECK_CONTOH di bawah ini, lalu Commit
-   Untuk menghapus: hapus barisnya. Untuk mengubah urutan: pindahkan barisnya.
-   Hanya pemilik repository yang bisa mengubah daftar ini. */
-const DECK_CONTOH = [
-  { nm:'Merah - Hijau', cr:'Fadhel',
-    ds:'',
-    cd:'1.TWVyYWggLSBIaWphdQ.A0023A0222A0113A0272A0012A0033A1003A1063A0973A0993A1073A1083H0033H0103A0933A0943H0013H0022' },
-  { nm:'Merah - Biru', cr:'Fadhel',
-    ds:'',
-    cd:'1.TWVyYWggLSBCaXJ1.A0023A0053A0223A0833A0632A0663A0903E0161A0113A0773G0063A0643A0273G0043A0671A0291A0153A0013G0011A0131A0611' },
-  { nm:'Biru - Hijau', cr:'Fadhel',
-    ds:'',
-    cd:'1.QmlydSAtIEhpamF1.A0773A0833A0632A0622A0663G0012G0043A1003A1063B0063A0973A0993A1073A1083H0103A0942H0013H0023' },
-  { nm:'Merah - Kuning', cr:'Katalio',
-    ds:'',
-    cd:'1.TWVyYWggLSBLdW5pbmc.A0081A0232A0023A0263A0142A0013A0153A0343A0543F0053F0082F0093F0103A0423A0433F0043A0372A0313A0462' },
-];
-
-const isAdmin = new URLSearchParams(location.search).get('admin') === '1';
-
-
-/* ==================== TURNAMEN MINGGUAN LGS ====================
-   CARA MENAMBAH / MENGUBAH JADWAL:
-   Sunting daftar LGS di bawah. Format tiap toko:
-     { nm:'Nama Toko', map:'link Google Maps',
-       hp:'628xxxxxxxxxx',                  <- opsional, nomor WhatsApp toko
-       wa:'https://chat.whatsapp.com/xxxx', <- opsional, link grup WhatsApp
-       jd:[ {h:1, w:'19.00 - Selesai'} ] }
-   h = hari: 1 Senin, 2 Selasa, 3 Rabu, 4 Kamis, 5 Jumat, 6 Sabtu, 7 Minggu
-   Satu toko boleh punya beberapa jadwal.
-   Field hp dan wa boleh dikosongkan atau dihapus — tombolnya otomatis tidak
-   ditampilkan. Nomor hp ditulis tanpa tanda + dan tanpa spasi, mis. 6281234567890.
-   Ubah juga LGS_UPDATE ke tanggal terakhir jadwal ini dicek. */
-const LGS_UPDATE = '10 Agustus 2026';
-const LGS = [
-  { nm:'Ogre Gandaria Neverland', map:'https://maps.app.goo.gl/7wAqGnKSyeECnt8C6',
-    jd:[ {h:1, w:'19.00 - Selesai'}, {h:5, w:'On Demand'} ] },
-  { nm:'Invaders Board Game Station', map:'https://maps.app.goo.gl/pWxvL18uXMr5EGBC7',
-    jd:[ {h:4, w:'19.00 - Selesai'} ] },
-  { nm:'Global Hobiz Store', map:'https://maps.app.goo.gl/8BQJ1EZJQXPyrMqh8',
-    jd:[ {h:6, w:'13.00 - Selesai'} ] },
-  { nm:'TwoStompas', map:'https://maps.app.goo.gl/ss2chXHcrwmUJAnF9',
-    jd:[ {h:6, w:'15.00 - Selesai'} ] },
-  { nm:'ONIC TCG Viridian Vault', map:'https://maps.app.goo.gl/yLw8FSPnj6wMfDGTA',
-    jd:[ {h:7, w:'15.00 - Selesai'} ] },
-];
+/* ==================== DATA DARI data.js ====================
+   Daftar deck komunitas dan jadwal LGS TIDAK lagi ditulis di berkas ini,
+   melainkan di data.js — supaya isinya tidak hilang saat index.html
+   diperbarui. Kalau data.js gagal dimuat, aplikasi tetap berjalan dengan
+   daftar kosong, bukan error. */
+const DECK_KOMUNITAS = (typeof window !== 'undefined' && Array.isArray(window.DECK_KOMUNITAS))
+  ? window.DECK_KOMUNITAS : [];
+const LGS = (typeof window !== 'undefined' && Array.isArray(window.LGS))
+  ? window.LGS : [];
+const LGS_UPDATE = (typeof window !== 'undefined' && window.LGS_UPDATE) || '-';
 
 const HARI = {1:'Senin',2:'Selasa',3:'Rabu',4:'Kamis',5:'Jumat',6:'Sabtu',7:'Minggu'};
 const PIN = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
@@ -1917,7 +1891,7 @@ function previewCards(deck, n){
 let metaFilterWarna = '';
 
 function renderMeta(){
-  const parsed = DECK_CONTOH.map(d=>({d, r:decodeDeck(d.cd)}))
+  const parsed = DECK_KOMUNITAS.map(d=>({d, r:decodeDeck(d.cd)}))
     .filter(x=>x.r && Object.keys(x.r.deck).length)
     .map(x=>({...x, s:deckStats(x.r.deck)}));
 
@@ -1936,7 +1910,7 @@ function renderMeta(){
     ? parsed.filter(x=>x.s.warna.join(' - ')===metaFilterWarna) : parsed;
 
   $('#metaGrid').innerHTML = tampil.map(({d,s},i)=>{
-    const idx = DECK_CONTOH.indexOf(d);
+    const idx = DECK_KOMUNITAS.indexOf(d);
     const strip = previewCards(decodeDeck(d.cd).deck, 4).map(c=>
       `<img alt="" data-ext="0" src="images/${c.no}.jpg" loading="lazy"
         onerror="metaImgFallback(this,'${c.no}','${CMAP[c.c]}')">`).join('') ||
@@ -1983,7 +1957,7 @@ $('#metaGrid').addEventListener('click', e=>{
   const bl = e.target.closest('[data-meta-load]');
   const bv = e.target.closest('[data-meta-view]');
   if(!bl && !bv) return;
-  const d = DECK_CONTOH[parseInt(bl ? bl.dataset.metaLoad : bv.dataset.metaView)];
+  const d = DECK_KOMUNITAS[parseInt(bl ? bl.dataset.metaLoad : bv.dataset.metaView)];
   if(!d) return;
   const r = decodeDeck(d.cd);
   if(!r || !Object.keys(r.deck).length){ alert('Kode deck tidak dapat dibaca.'); return; }
@@ -2000,9 +1974,8 @@ $('#metaGrid').addEventListener('click', e=>{
     setPage('build');
     renderAll();
   } else {
-    state.deck = {...r.deck};                    // pratinjau tanpa menyimpan
-    renderDeck();
-    openDeckView();
+    // pratinjau murni: tidak menyentuh deck yang sedang disusun sama sekali
+    openDeckView({...r.deck}, d.nm + (d.cr?` — by ${d.cr}`:''));
   }
 });
 
@@ -2018,7 +1991,7 @@ function renderAdminBox(){
         <button class="btn2" id="admGen" style="flex:none;padding:8px 12px;border-color:var(--accent);color:var(--accent);font-weight:700">Buat kode dari deck aktif</button>
         <button class="btn2" id="admCopy" style="flex:none;padding:8px 12px">Salin</button>
       </div>
-      <textarea id="admOut" readonly placeholder="Kode akan muncul di sini — tempel ke daftar DECK_CONTOH di index.html"></textarea>
+      <textarea id="admOut" readonly placeholder="Kode akan muncul di sini — tempel ke daftar DECK_KOMUNITAS di data.js"></textarea>
     </div>`;
 }
 
