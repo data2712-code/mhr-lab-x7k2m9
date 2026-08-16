@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 4.0  ·  17 Agustus 2026
+     MHR DECK LAB  ·  versi 4.2  ·  17 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="4.0">
+<meta name="version" content="4.2">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -96,6 +96,50 @@
   .onlydeck[aria-pressed="true"]{background:var(--accent);color:#1A1206;
     border-color:var(--accent);font-weight:700}
   /* pratinjau gambar saat kursor menyorot nama kartu di daftar deck */
+  /* ================= SIMULASI DRAW ================= */
+  .sim-sheet{background:#12161B;border:1px solid var(--line);border-radius:16px;
+    max-width:1000px;margin:0 auto;padding:24px 26px 26px}
+  .sim-sheet h2{font-family:var(--disp);font-size:25px;letter-spacing:.05em;text-transform:uppercase}
+  .sim-sub{color:var(--muted);font-size:12px;margin:4px 0 16px;line-height:1.6}
+  .sim-warn{background:rgba(228,68,46,.12);border:1px solid var(--merah);color:#FFD8D2;
+    border-radius:9px;padding:9px 12px;font-size:12.5px;margin-bottom:14px}
+  .sim-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .sim-bar button{background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:9px;padding:10px 15px;font-size:13px;cursor:pointer;font-weight:600}
+  .sim-bar button:hover:not(:disabled){border-color:var(--accent)}
+  .sim-bar button.main{background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:800}
+  .sim-bar button:disabled{opacity:.4;cursor:not-allowed}
+  .sim-info{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-left:auto}
+  .sim-info b{color:var(--paper)}
+  .sim-hand{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:6px}
+  @media (max-width:760px){ .sim-hand{grid-template-columns:repeat(3,1fr);gap:9px} }
+  .sim-card{position:relative;cursor:pointer;border-radius:10px;overflow:hidden;
+    border:2px solid var(--line);background:var(--panel);transition:.15s}
+  .sim-card:hover{border-color:var(--accent)}
+  .sim-card[data-tukar="1"]{border-color:var(--merah);opacity:.55}
+  .sim-card>img{width:100%;aspect-ratio:63/88;object-fit:cover;display:block}
+  .sim-ph{aspect-ratio:63/88;padding:9px;display:flex;flex-direction:column;gap:5px;
+    background:linear-gradient(165deg,#232B34,#141920)}
+  .sim-ph .lv{width:26px;height:26px;border-radius:50%;background:var(--sc);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:900;font-size:14px}
+  .sim-ph .nm{font-family:var(--disp);font-weight:800;font-size:11px;line-height:1.25;flex:1;overflow:hidden}
+  .sim-ph .bt{font-family:var(--mono);font-size:9px;color:var(--muted)}
+  .sim-tag{position:absolute;top:6px;right:6px;background:var(--merah);color:#fff;
+    border-radius:6px;padding:2px 7px;font-size:10.5px;font-weight:800;display:none}
+  .sim-card[data-tukar="1"] .sim-tag{display:block}
+  .sim-hint{font-size:11.5px;color:var(--muted);margin-bottom:18px;line-height:1.5}
+  .sim-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media (max-width:760px){ .sim-cols{grid-template-columns:1fr;gap:14px} }
+  .sim-sec{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:9px}
+  .sim-row{display:flex;justify-content:space-between;gap:10px;font-size:12px;
+    padding:4px 0;border-bottom:1px dotted var(--line)}
+  .sim-row:last-child{border-bottom:none}
+  .sim-row b{font-family:var(--mono);color:var(--paper)}
+  .sim-row .kartu{display:flex;align-items:center;gap:7px;min-width:0}
+  .sim-row .kartu i{width:8px;height:8px;border-radius:3px;flex:none}
+  .sim-row .kartu span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sim-tbl{max-height:270px;overflow-y:auto;padding-right:4px}
   .hoverprev{position:fixed;z-index:70;width:216px;border-radius:10px;
     border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.65);
     pointer-events:none;background:var(--panel)}
@@ -666,8 +710,9 @@
     <div class="deck-sec-title">Daftar kartu</div>
     <div id="deckList"><div class="empty">Deck masih kosong.<br>Klik <b>+ Deck</b> pada kartu untuk menambahkan.</div></div>
 
+    <button class="btn2" id="btnSim" style="width:100%;margin-top:14px">🎴 Simulasi draw 6 kartu</button>
     <button class="btn2" id="btnDeckView"
-      style="width:100%;margin-top:14px;border-color:var(--accent);color:var(--accent);font-weight:700">
+      style="width:100%;margin-top:8px;border-color:var(--accent);color:var(--accent);font-weight:700">
       🖼 Lihat deck — tampilan untuk dibagikan</button>
     <div class="deck-actions" style="margin-top:8px">
       <button class="btn2" id="btnLink">🔗 Salin link deck</button>
@@ -696,8 +741,42 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v4.0</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v4.2</div>
 </footer>
+
+<div class="dview" id="simView" hidden>
+  <div class="dview-bar">
+    <button class="btn2" id="btnSimClose" style="flex:none;padding:9px 14px">✕ Tutup</button>
+  </div>
+  <div class="sim-sheet">
+    <h2>Simulasi Draw Awal</h2>
+    <div class="sim-sub">Mensimulasikan 6 kartu pembuka dari deck yang sedang Anda susun.
+      Aturan mulligan: kartu yang ditukar dikembalikan ke <b>bawah</b> deck, lalu diambil
+      kartu baru sejumlah yang sama dari <b>atas</b> deck, kemudian deck dikocok ulang.<br>
+      <span style="color:#C9CFD8">Catatan: di permainan resmi mulligan hanya boleh dilakukan
+      <b>satu kali</b>. Di simulator ini sengaja dibebaskan berulang kali agar Anda bisa
+      mencoba banyak kemungkinan pembukaan dari deck yang sama.</span></div>
+    <div id="simWarn"></div>
+    <div class="sim-bar">
+      <button class="main" id="simDraw">🔀 Kocok &amp; ambil 6 kartu</button>
+      <button id="simMull" disabled>♻ Mulligan</button>
+      <span class="sim-info" id="simInfo"></span>
+    </div>
+    <div class="sim-hand" id="simHand"></div>
+    <div class="sim-hint">Klik kartu untuk menandainya akan ditukar. Klik nama kartu di
+      daftar bawah untuk melihat detailnya.</div>
+    <div class="sim-cols">
+      <div>
+        <div class="sim-sec">Isi tangan saat ini</div>
+        <div id="simTangan"></div>
+      </div>
+      <div>
+        <div class="sim-sec">Peluang muncul di 6 kartu pembuka</div>
+        <div class="sim-tbl" id="simPeluang"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <img class="hoverprev" id="hoverPrev" hidden alt="">
 
@@ -1319,6 +1398,177 @@ $('#deckList').addEventListener('click', e=>{
   if(z){ sembunyikanPratinjau(); openLightbox(z.dataset.zoom); }
 });
 
+
+/* ==================== SIMULASI DRAW AWAL ====================
+   Aturan yang diterapkan:
+   - Ambil 6 kartu dari deck yang sudah dikocok
+   - Mulligan: kartu yang ditukar dikembalikan ke BAWAH deck, lalu diambil
+     kartu baru sejumlah sama dari ATAS deck
+   - Setelah mulligan, deck dikocok ulang
+   Karena kartu yang dikembalikan berada di dasar tumpukan, kartu itu tidak
+   mungkin langsung terambil lagi pada mulligan yang sama. */
+const UKURAN_TANGAN = 6;
+let simDeck = [], simTangan = [], simTukar = new Set(), simRonde = 0;
+
+function kocok(a){
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function tumpukanDariDeck(){
+  const arr = [];
+  for(const [no,q] of Object.entries(state.deck)){
+    if(!DB.some(d=>d.no===no)) continue;
+    for(let i=0;i<q;i++) arr.push(no);
+  }
+  return arr;
+}
+function urutTangan(){
+  simTangan.sort((a,b)=>{
+    const x = DB.find(d=>d.no===a), y = DB.find(d=>d.no===b);
+    return CORDER[x.c]-CORDER[y.c] || x.l-y.l || x.no.localeCompare(y.no);
+  });
+}
+
+function simMulai(){
+  simDeck = kocok(tumpukanDariDeck());
+  simTangan = simDeck.splice(0, Math.min(UKURAN_TANGAN, simDeck.length));
+  simTukar.clear();
+  simRonde = 0;
+  urutTangan();
+  renderSim();
+}
+
+function simMulligan(){
+  if(!simTukar.size) return;
+  const dibuang = [...simTukar].map(i=>simTangan[i]).filter(Boolean);
+  simTangan = simTangan.filter((_,i)=>!simTukar.has(i));
+  simDeck.push(...dibuang);                                  // kembalikan ke bawah deck
+  simTangan.push(...simDeck.splice(0, dibuang.length));       // ambil dari atas deck
+  kocok(simDeck);                                            // kocok ulang
+  simTukar.clear();
+  simRonde++;
+  urutTangan();
+  renderSim();
+}
+
+/* peluang hipergeometrik: minimal 1 salinan terambil dalam n kartu */
+function kombinasi(n,k){
+  if(k<0 || k>n) return 0;
+  k = Math.min(k, n-k);
+  let r = 1;
+  for(let i=0;i<k;i++) r = r*(n-i)/(i+1);
+  return r;
+}
+function peluangMinimal1(N, K, n){
+  if(N<=0 || K<=0) return 0;
+  if(n>=N) return 1;
+  return 1 - kombinasi(N-K, n)/kombinasi(N, n);
+}
+
+function renderSim(){
+  const totalDeck = deckCount();
+  const target = parseInt($('#setSize').value)||50;
+  $('#simWarn').innerHTML =
+    totalDeck === 0 ? '<div class="sim-warn">Deck masih kosong — tambahkan kartu dulu di Deck Builder.</div>'
+    : totalDeck < UKURAN_TANGAN ? `<div class="sim-warn">Deck hanya berisi ${totalDeck} kartu, kurang dari 6.</div>`
+    : totalDeck !== target
+      ? `<div class="sim-warn">Deck berisi ${totalDeck} kartu, belum sesuai target ${target}. Peluang di bawah dihitung dari ${totalDeck} kartu yang ada sekarang.</div>`
+      : '';
+
+  $('#simHand').innerHTML = simTangan.map((no,i)=>{
+    const c = DB.find(d=>d.no===no);
+    return `<div class="sim-card" data-idx="${i}" data-tukar="${simTukar.has(i)?1:0}">
+      <span class="sim-tag">TUKAR</span>
+      <img src="${artFile(no)}" alt="" data-ext="0" style="display:none"
+        onerror="simImgFallback(this,'${no}')"
+        onload="this.style.display='block';this.nextElementSibling.style.display='none'">
+      <div class="sim-ph" style="--sc:${CMAP[c.c]}">
+        <div class="lv">${c.l}</div>
+        <div class="nm">${c.nm}</div>
+        <div class="bt">${c.no} · R-${c.r} / ${c.p}</div>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty" style="grid-column:1/-1">Belum ada kartu. Tekan tombol kocok di atas.</div>';
+
+  $('#simMull').disabled = simTukar.size === 0;
+  $('#simMull').textContent = simTukar.size ? `♻ Mulligan ${simTukar.size} kartu` : '♻ Mulligan';
+  $('#simInfo').innerHTML = simTangan.length
+    ? `sisa deck <b>${simDeck.length}</b> · mulligan <b>${simRonde}×</b>` +
+      (simRonde > 1 ? ` <span style="color:var(--merah)">(resmi maks 1×)</span>` : '') : '';
+
+  if(!simTangan.length){ $('#simTangan').innerHTML = '<div class="sim-row">—</div>'; }
+  else {
+    const lv = {}, col = {};
+    simTangan.forEach(no=>{
+      const c = DB.find(d=>d.no===no);
+      lv[c.l] = (lv[c.l]||0)+1; col[c.c] = (col[c.c]||0)+1;
+    });
+    $('#simTangan').innerHTML = simTangan.map(no=>{
+      const c = DB.find(d=>d.no===no);
+      return `<div class="sim-row">
+        <span class="kartu" data-zoom="${c.no}" style="cursor:zoom-in">
+          <i style="background:${CMAP[c.c]}"></i><span>${c.nm}</span></span>
+        <b>Lv${c.l}</b></div>`;
+    }).join('') +
+      `<div class="sim-row" style="margin-top:8px;border-top:1px solid var(--line);padding-top:8px">
+        <span>Sebaran level</span>
+        <b>${Object.keys(lv).sort().map(k=>`Lv${k}×${lv[k]}`).join(' · ')}</b></div>
+       <div class="sim-row"><span>Warna</span>
+        <b>${Object.entries(col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]]).map(([k,v])=>`${k} ${v}`).join(' · ')}</b></div>`;
+  }
+
+  const N = totalDeck;
+  const baris = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no), q}))
+    .filter(x=>x.c)
+    .map(x=>({...x, p: peluangMinimal1(N, x.q, UKURAN_TANGAN)}))
+    .sort((a,b)=>b.p-a.p || a.c.l-b.c.l);
+  $('#simPeluang').innerHTML = N
+    ? baris.map(({c,q,p})=>`<div class="sim-row">
+        <span class="kartu" data-zoom="${c.no}" style="cursor:zoom-in">
+          <i style="background:${CMAP[c.c]}"></i><span>${c.nm}</span></span>
+        <b>${q}× · ${(p*100).toFixed(1)}%</b></div>`).join('')
+    : '<div class="sim-row">—</div>';
+}
+
+function simImgFallback(img,no){
+  const exts=['jpg','png','webp'];
+  let i=parseInt(img.dataset.ext)+1;
+  if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
+  else { img.onerror=null; img.remove(); }
+}
+
+$('#btnSim').addEventListener('click', ()=>{
+  if(!deckCount()){ alert('Deck masih kosong.'); return; }
+  simMulai();
+  $('#simView').hidden = false;
+  document.body.style.overflow = 'hidden';
+});
+$('#btnSimClose').addEventListener('click', ()=>{
+  $('#simView').hidden = true;
+  document.body.style.overflow = '';
+});
+$('#simDraw').addEventListener('click', simMulai);
+$('#simMull').addEventListener('click', simMulligan);
+$('#simHand').addEventListener('click', e=>{
+  const k = e.target.closest('[data-idx]');
+  if(!k) return;
+  const i = parseInt(k.dataset.idx);
+  if(simTukar.has(i)) simTukar.delete(i); else simTukar.add(i);
+  renderSim();
+});
+$('#simTangan').addEventListener('click', e=>{
+  const z = e.target.closest('[data-zoom]');
+  if(z) openLightbox(z.dataset.zoom);
+});
+$('#simPeluang').addEventListener('click', e=>{
+  const z = e.target.closest('[data-zoom]');
+  if(z) openLightbox(z.dataset.zoom);
+});
+/* ==================== SIMULASI DRAW SELESAI ==================== */
+
 /* ---- pratinjau melayang saat kursor menyorot nama kartu di daftar deck.
    Hanya untuk perangkat yang punya kursor; di layar sentuh cukup ketuk namanya. ---- */
 const adaKursor = typeof window.matchMedia === 'function' &&
@@ -1518,8 +1768,9 @@ function pilihVarian(no, rar, tombol){
 function closeLightbox(){
   $('#lightbox').hidden = true; lbNo = null;
   // layar "Lihat deck" bisa saja masih terbuka di belakang popup
-  const dvTerbuka = $('#deckView') && !$('#deckView').hidden;
-  document.body.style.overflow = dvTerbuka ? 'hidden' : '';
+  const adaOverlay = ($('#deckView') && !$('#deckView').hidden) ||
+                     ($('#simView')  && !$('#simView').hidden);
+  document.body.style.overflow = adaOverlay ? 'hidden' : '';
 }
 $('#lbClose').addEventListener('click', closeLightbox);
 $('#lightbox').addEventListener('click', e=>{
@@ -1539,6 +1790,7 @@ $('#lightbox').addEventListener('click', e=>{
 document.addEventListener('keydown', e=>{
   if(e.key === 'Escape'){
     if(!$('#lightbox').hidden) closeLightbox();
+    else if(!$('#simView').hidden){ $('#simView').hidden = true; document.body.style.overflow=''; }
     else if(!$('#deckView').hidden){ $('#deckView').hidden = true; dvDeck=null; dvNama=''; document.body.style.overflow=''; }
   }
 });
