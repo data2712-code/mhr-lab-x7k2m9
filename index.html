@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 3.9  ·  17 Agustus 2026
+     MHR DECK LAB  ·  versi 4.0  ·  17 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="3.9">
+<meta name="version" content="4.0">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -92,6 +92,18 @@
   }
   .reset:hover{color:var(--paper);border-color:var(--paper)}
   .count-note{width:100%;color:var(--muted);font-size:12px}
+  /* tombol filter "hanya kartu di deck" */
+  .onlydeck[aria-pressed="true"]{background:var(--accent);color:#1A1206;
+    border-color:var(--accent);font-weight:700}
+  /* pratinjau gambar saat kursor menyorot nama kartu di daftar deck */
+  .hoverprev{position:fixed;z-index:70;width:216px;border-radius:10px;
+    border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.65);
+    pointer-events:none;background:var(--panel)}
+  .hoverprev[hidden]{display:none}
+  /* nama kartu di daftar deck bisa diklik */
+  .dline .nm{cursor:zoom-in}
+  .dline .nm:hover{color:var(--accent)}
+  .dv-card{cursor:zoom-in}
   /* pembungkus filter lanjutan: transparan di desktop, dilipat di HP */
   .fadv{display:contents}
   .fbtn{display:none}
@@ -591,6 +603,8 @@
         <button data-view="list" aria-pressed="true" title="Tampilan daftar">☰ Daftar</button>
         <button data-view="grid" aria-pressed="false" title="Tampilan grid">▦ Grid</button>
       </div>
+      <button class="reset onlydeck" id="btnOnlyDeck" aria-pressed="false"
+        title="Tampilkan hanya kartu yang sudah masuk deck">★ Di deck</button>
       <button class="reset" id="btnReset">Reset</button>
       <div class="mech" id="mechBar">
         <span class="lbl">Mekanik</span>
@@ -682,8 +696,10 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v3.9</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v4.0</div>
 </footer>
+
+<img class="hoverprev" id="hoverPrev" hidden alt="">
 
 <div class="lb" id="lightbox" hidden>
   <button class="lb-x" id="lbClose">✕ Tutup</button>
@@ -955,7 +971,7 @@ const $ = s => document.querySelector(s);
 const state = {
   q:'', colors:new Set(['Merah','Kuning','Biru','Hijau']),
   series:'', level:'', range:'', rarity:'', trait:'', sort:'no', view:'list',
-  mech:new Set(), page:'cards',
+  mech:new Set(), page:'cards', onlyDeck:false,
   deck:{}  // key: card no -> qty
 };
 
@@ -1010,6 +1026,7 @@ function filtered(){
     (state.range==='' || String(c.r)===state.range) &&
     (!state.rarity || c.ra.includes(state.rarity)) &&
     (!state.trait || traitsOf(c).includes(state.trait)) &&
+    (!state.onlyDeck || (state.deck[c.no]||0) > 0) &&
     [...state.mech].every(m => MECH[m] && MECH[m].test(c.e)) &&
     (!q || (c.nm+' '+c.e+' '+c.f+' '+c.no).toLowerCase().includes(q))
   );
@@ -1218,7 +1235,7 @@ function renderDeck(){
       `<div class="dline">
         <span class="dot" style="background:${CMAP[c.c]}"></span>
         <span class="lv">L${c.l}</span>
-        <span class="nm" title="${c.no} · ${c.f}">${c.nm}</span>
+        <span class="nm" title="${c.no} · ${c.f}" data-zoom="${c.no}" data-prev="${c.no}">${c.nm}</span>
         <button class="qbtn" data-dec="${c.no}">−</button>
         <span class="qty">${q}</span>
         <button class="qbtn" data-inc="${c.no}">+</button>
@@ -1235,6 +1252,12 @@ $('#fLevel').addEventListener('change', e=>{ state.level=e.target.value; renderC
 $('#fRange').addEventListener('change', e=>{ state.range=e.target.value; renderCards(); });
 $('#fRarity').addEventListener('change', e=>{ state.rarity=e.target.value; renderCards(); });
 $('#fTrait').addEventListener('change', e=>{ state.trait=e.target.value; renderCards(); });
+$('#btnOnlyDeck').addEventListener('click', ()=>{
+  state.onlyDeck = !state.onlyDeck;
+  $('#btnOnlyDeck').setAttribute('aria-pressed', String(state.onlyDeck));
+  renderCards();
+});
+
 /* tombol lipat filter (hanya tampil di layar HP) */
 $('#btnFilter').addEventListener('click', ()=>{
   const bar = document.querySelector('.filters');
@@ -1249,6 +1272,7 @@ function updateFilterBadge(){
   if(state.colors.size < 4) n++;
   ['series','level','range','trait','rarity'].forEach(k=>{ if(state[k]) n++; });
   n += state.mech.size;
+  if(state.onlyDeck) n++;
   const b = $('#fBadge');
   if(!b) return;
   b.textContent = n;
@@ -1273,6 +1297,8 @@ $('#cbtns').addEventListener('click', e=>{
 $('#btnReset').addEventListener('click', ()=>{
   state.q=''; state.series=''; state.level=''; state.range=''; state.rarity=''; state.trait=''; state.sort='no';
   state.mech.clear();
+  state.onlyDeck = false;
+  $('#btnOnlyDeck').setAttribute('aria-pressed','false');
   document.querySelectorAll('#mechBar [data-m]').forEach(b=>b.setAttribute('aria-pressed','false'));
   state.colors=new Set(['Merah','Kuning','Biru','Hijau']);
   $('#q').value=''; ['fSeries','fLevel','fRange','fRarity','fTrait'].forEach(id=>$('#'+id).value='');
@@ -1287,9 +1313,64 @@ $('#cards').addEventListener('click', e=>{
   if(e.target.dataset.act==='add') addCard(card.dataset.no);
 });
 $('#deckList').addEventListener('click', e=>{
-  if(e.target.dataset.inc) addCard(e.target.dataset.inc);
-  if(e.target.dataset.dec) decCard(e.target.dataset.dec);
+  if(e.target.dataset.inc) return addCard(e.target.dataset.inc);
+  if(e.target.dataset.dec) return decCard(e.target.dataset.dec);
+  const z = e.target.closest('[data-zoom]');
+  if(z){ sembunyikanPratinjau(); openLightbox(z.dataset.zoom); }
 });
+
+/* ---- pratinjau melayang saat kursor menyorot nama kartu di daftar deck.
+   Hanya untuk perangkat yang punya kursor; di layar sentuh cukup ketuk namanya. ---- */
+const adaKursor = typeof window.matchMedia === 'function' &&
+                  window.matchMedia('(hover: hover)').matches;
+
+function tampilkanPratinjau(no, x, y){
+  const el = $('#hoverPrev');
+  if(!el) return;
+  if(el.dataset.no !== no){
+    el.dataset.no = no;
+    el.dataset.ext = '0';
+    el.src = artFile(no);
+  }
+  el.hidden = false;
+  posisikanPratinjau(x, y);
+}
+function posisikanPratinjau(x, y){
+  const el = $('#hoverPrev');
+  if(!el || el.hidden) return;
+  const w = 216, h = w * 88/63, m = 12;
+  let kiri = x - w - m;                       // utamakan sisi kiri kursor
+  if(kiri < m) kiri = Math.min(x + m, window.innerWidth - w - m);
+  let atas = y - h/2;
+  atas = Math.max(m, Math.min(atas, window.innerHeight - h - m));
+  el.style.left = kiri + 'px';
+  el.style.top  = atas + 'px';
+}
+function sembunyikanPratinjau(){
+  const el = $('#hoverPrev');
+  if(el){ el.hidden = true; el.dataset.no = ''; }
+}
+$('#hoverPrev').addEventListener('error', function(){
+  const exts = ['jpg','png','webp'];
+  let i = parseInt(this.dataset.ext||'0') + 1;
+  if(i < exts.length && this.dataset.no){
+    this.dataset.ext = i;
+    this.src = `images/${this.dataset.no}.${exts[i]}`;
+  } else { sembunyikanPratinjau(); }
+});
+
+if(adaKursor){
+  $('#deckList').addEventListener('mouseover', e=>{
+    const t = e.target.closest('[data-prev]');
+    if(t) tampilkanPratinjau(t.dataset.prev, e.clientX, e.clientY);
+  });
+  $('#deckList').addEventListener('mousemove', e=>{
+    if(e.target.closest('[data-prev]')) posisikanPratinjau(e.clientX, e.clientY);
+    else sembunyikanPratinjau();
+  });
+  $('#deckList').addEventListener('mouseleave', sembunyikanPratinjau);
+  window.addEventListener('scroll', sembunyikanPratinjau, {passive:true});
+}
 $('#setSize').addEventListener('input', ()=>{ renderDeck(); persist(); });
 $('#setMax').addEventListener('input', ()=>{ renderDeck(); persist(); });
 $('#btnClear').addEventListener('click', ()=>{
@@ -1436,7 +1517,9 @@ function pilihVarian(no, rar, tombol){
 
 function closeLightbox(){
   $('#lightbox').hidden = true; lbNo = null;
-  document.body.style.overflow = '';
+  // layar "Lihat deck" bisa saja masih terbuka di belakang popup
+  const dvTerbuka = $('#deckView') && !$('#deckView').hidden;
+  document.body.style.overflow = dvTerbuka ? 'hidden' : '';
 }
 $('#lbClose').addEventListener('click', closeLightbox);
 $('#lightbox').addEventListener('click', e=>{
@@ -1495,12 +1578,17 @@ function openDeckView(deckLain, judulLain){
     const img = `<img src="${artFile(c.no)}" alt="" data-ext="0" style="display:none"
            onerror="dvImgFallback(this,'${c.no}')"
            onload="this.style.display='block';this.nextElementSibling.style.display='none'">`;
-    return `<div class="dv-card">${img}${ph}<div class="dv-qty">${q}</div></div>`;
+    return `<div class="dv-card" data-zoom="${c.no}">${img}${ph}<div class="dv-qty">${q}</div></div>`;
   }).join('');
   $('#deckView').hidden = false;
   document.body.style.overflow = 'hidden';
 }
 $('#btnDeckView').addEventListener('click', ()=>openDeckView());
+$('#dvGrid').addEventListener('click', e=>{
+  const z = e.target.closest('[data-zoom]');
+  if(z) openLightbox(z.dataset.zoom);
+});
+
 $('#btnDvClose').addEventListener('click', ()=>{
   $('#deckView').hidden = true;
   dvDeck = null; dvNama = '';
