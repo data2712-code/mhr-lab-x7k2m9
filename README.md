@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v5.0** · 17 Agustus 2026
+**Versi saat ini: v5.1** · 17 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -152,12 +152,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v5.0.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v5.1.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v5.0` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v5.1` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v5.0</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v5.1</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -171,7 +171,9 @@ bersifat case-sensitive.
 | Sumber data kartu | API resmi `server.marvelherorush.com/marvel/card/list` (200 kartu) + 8 kartu Hero File SD01–SD04 dari scan kartu = **208 kartu** |
 | Ukuran gambar kartu | lebar 450 px, ber-watermark SAMPLE, ±80–90 KB per file |
 | Varian artwork | 40 berkas alternate art, penamaan `NOMOR_RARITY.jpg` (mis. `BP01-001_MR.jpg`) |
-| Aturan deck | 50 kartu, maksimal 3 salinan per kartu, maksimal 2 warna (bisa diubah di panel) |
+| Aturan deck | 50 kartu, maksimal 3 salinan **per nama karakter**, maksimal 2 warna (101.1) |
+| Rush Deck | 9 Rush Card, tanpa batasan pilihan (101.2) — tidak dikelola di Deck Lab |
+| Warna yang ada | Merah, Kuning, Biru, Hijau, **Orange, Purple** (201.5.b) — dua terakhir belum terbit |
 | Aturan draw awal | 6 kartu; mulligan = kembalikan ke bawah deck, ambil sejumlah sama dari atas, lalu kocok ulang. Resmi maks 1×, simulator dibebaskan berulang |
 | Penyimpanan deck | localStorage, per browser per perangkat |
 | Format link deck | `#d=1.<nama-base64url>.<kode kartu>` — versi 1 |
@@ -188,6 +190,18 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v5.1 — 17 Agustus 2026 · penyesuaian dengan rulebook resmi
+Berdasarkan Comprehensive Rules 1.00 (16 Juni 2026).
+- 🔧 **Fix aturan penting:** batas 3 salinan ternyata dihitung **per nama karakter**,
+  bukan per nomor kartu (aturan 101.1.d). 19 nama karakter dicetak ulang di seri SD
+  dengan nomor berbeda — sebelumnya Deck Lab mengizinkan 3× BP01-018 **dan**
+  3× SD01-014 sekaligus (6 salinan nama sama), padahal itu deck tidak sah
+- Tombol "+ Deck" otomatis nonaktif dan berubah jadi "Kuota penuh" saat kuota
+  nama sudah terpakai, apa pun nomor kartunya
+- Penanda **⇄** pada kartu yang namanya dicetak ulang di seri lain, agar pemain
+  tahu kuota salinannya digabung
+- Keempat deck komunitas sudah diperiksa: semuanya tetap sah
 
 ### v5.0 — 17 Agustus 2026 · dua bahasa (ID / EN)
 - **Pengalih bahasa 🌐 ID / EN** di header. Mengubah antarmuka, nama kartu, teks
@@ -463,6 +477,26 @@ Ditujukan untuk alur kerja meninjau dan mengganti kartu setelah deck jadi.
 
 ---
 
+## Catatan dari rulebook resmi (Comprehensive Rules 1.00)
+
+Hal-hal yang berpengaruh atau berpotensi berpengaruh ke Deck Lab:
+
+- **101.1.d** — batas 3 salinan per **nama karakter**, bukan nomor kartu. Sudah
+  diterapkan di v5.1
+- **201.5.b** — ada **6 warna**: Merah, Kuning, Biru, Hijau, Orange, Purple.
+  Database saat ini baru punya 4; filter warna perlu ditambah saat Orange/Purple terbit
+- **201.14.b** — rarity yang ada juga mencakup **HR** (Hero Rare) dan **LR**
+  (Legend Rare), belum muncul di database
+- **301.19** — Summon Lv1–3 langsung; Lv4+ harus me-RETREAT karakter yang total
+  Level-nya sama dengan Level kartu yang dipanggil. Inilah alasan kurva level penting;
+  kartu Lv rendah berfungsi sebagai "biaya" untuk memanggil kartu Lv tinggi
+- **301.21.g** — kartu tertutup di BASE dihitung sebagai Lv1 saat dipakai membayar Summon
+- **101.2 / 103.1.a** — Rush Deck berisi 9 Rush Card; menaruh 9 Rush Card di Timeline
+  lawan = menang. Tidak ada batasan pilihan Rush Card, jadi bukan keputusan deck-building
+- **303.2.a.2.1** — tiap giliran menarik 2 kartu; **303.2.a.6.1.3** — batas tangan 9 kartu
+- **305** — kemampuan kunci: Response/COUNTER, Intercept/BLOCK, Double Strike,
+  Raid/ASSAULT, Aerial Assault/AIR STRIKE, Unique
+
 ## Rencana / ide berikutnya
 
 - [ ] Reintegrasi fitur cetak kartu proxy (PDF A4, kode ada di backup)
@@ -473,5 +507,8 @@ Ditujukan untuk alur kerja meninjau dan mengganti kartu setelah deck jadi.
 - [ ] Filter bar yang bisa dilipat di layar HP
 - [ ] Gambar kartu resolusi lebih tinggi (>450 px) untuk hasil unduhan lebih tajam
 - [ ] Pelacakan koleksi kartu yang dimiliki (pekerjaan besar, perlu dipikirkan matang)
+- [ ] Filter mekanik untuk kemampuan kunci rulebook (BLOCK, ASSAULT, AIR STRIKE, UNIQUE)
+- [ ] Statistik "biaya Summon": rasio kartu Lv1–3 terhadap Lv4–6 (aturan 301.19)
+- [ ] Siapkan warna Orange & Purple saat setnya terbit
 - [ ] Update database saat set kartu baru rilis
 - [ ] Pertimbangkan Cloudflare Pages jika bandwidth mendekati batas

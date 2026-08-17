@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 5.0  ·  17 Agustus 2026
+     MHR DECK LAB  ·  versi 5.1  ·  17 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="5.0">
+<meta name="version" content="5.1">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -527,6 +527,9 @@
   .lb-var button.na{opacity:.4;cursor:not-allowed;text-decoration:line-through}
   .lb-var .msg{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.5;min-height:15px}
   .rar.alt{background:var(--accent);color:#1A1206}
+  .twin{font-family:var(--mono);font-size:12px;color:var(--accent);cursor:help;
+    border:1px solid var(--line);border-radius:6px;padding:3px 6px}
+  .btn-add:disabled{opacity:.45;cursor:not-allowed;background:var(--panel);color:var(--muted)}
   .lb-add{margin-top:16px;width:100%;background:var(--accent);color:#1A1206;border:none;
     border-radius:9px;padding:11px;font-family:var(--disp);font-weight:800;font-size:15px;
     letter-spacing:.05em;cursor:pointer}
@@ -742,7 +745,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v5.0</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v5.1</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1159,6 +1162,19 @@ function imgFallback(img,no){
   else { img.onerror=null; img.classList.add('failed'); }
 }
 
+/* kartu ini punya nama kembar di seri lain? (kuota salinan digabung) */
+function kembar(c){ return DB.some(d=>d.nm===c.nm && d.no!==c.no); }
+/* kuota nama sudah penuh? */
+function penuh(c){
+  const max = maxCopy();
+  let n = 0;
+  for(const [no,q] of Object.entries(state.deck)){
+    const x = DB.find(d=>d.no===no);
+    if(x && x.nm === c.nm) n += q;
+  }
+  return n >= max;
+}
+
 function cardListHTML(c,q){
   return `<div class="card" style="--cardc:${CMAP[c.c]}" data-no="${c.no}">
       <div class="card-body">
@@ -1184,7 +1200,8 @@ function cardListHTML(c,q){
       </div>
       <div class="card-actions">
         ${q?`<span class="in-deck">×${q}</span>`:''}
-        <button class="btn-add" data-act="add">${t('cAdd')}</button>
+        ${kembar(c) ? `<span class="twin" title="${t('cSameName')}">⇄</span>` : ''}
+        <button class="btn-add" data-act="add"${penuh(c)?' disabled':''}>${penuh(c)?t('cFull'):t('cAdd')}</button>
       </div>
     </div>`;
 }
@@ -1235,9 +1252,23 @@ function renderCards(){
 /* --- deck --- */
 function deckCount(){ return Object.values(state.deck).reduce((a,b)=>a+b,0); }
 function maxCopy(){ return Math.max(1, parseInt($('#setMax').value)||3); }
+/* Aturan resmi 101.1.d: batas salinan dihitung per NAMA karakter, bukan per
+   nomor kartu. Sejumlah kartu BP01 dicetak ulang di seri SD dengan nomor
+   berbeda tetapi nama sama, sehingga keduanya berbagi kuota yang sama. */
+function salinanNama(nama, kecuali){
+  let n = 0;
+  for(const [no,q] of Object.entries(state.deck)){
+    if(no === kecuali) continue;
+    const c = DB.find(d=>d.no===no);
+    if(c && c.nm === nama) n += q;
+  }
+  return n;
+}
 function addCard(no){
   const max = maxCopy();
   const cur = state.deck[no]||0;
+  const c0 = DB.find(d=>d.no===no);
+  if(c0 && salinanNama(c0.nm, no) + cur >= max) return;
   if(cur >= max) return;
   state.deck[no] = cur+1;
   renderAll();
@@ -1276,12 +1307,19 @@ function renderDeck(){
 
   // ---- validasi aturan deck ----
   const dipakai = Object.entries(col).filter(([,n])=>n>0).map(([c])=>c);
-  const lebih = Object.entries(state.deck).filter(([,q])=>q > maxCopy()).map(([no])=>no);
+  // hitung total salinan per nama karakter
+  const perNama = {};
+  Object.entries(state.deck).forEach(([no,q])=>{
+    const c = DB.find(d=>d.no===no);
+    if(c) perNama[c.nm] = (perNama[c.nm]||0) + q;
+  });
+  const lebih = Object.entries(perNama).filter(([,q])=>q > maxCopy())
+    .map(([nm,q])=>`${state.lang==='en' ? (DB.find(d=>d.nm===nm)||{}).nm_en || nm : nm} ×${q}`);
   const masalah = [];
   if(dipakai.length > 2)
     masalah.push(`${t('ruleColors')} <b>${dipakai.length} ${t('ruleColors2')}</b> (${dipakai.map(x=>t(x)).join(', ')}) — ${t('ruleMax2')}`);
   if(lebih.length)
-    masalah.push(`<b>${lebih.length} ${t('cards')}</b> ${t('ruleCopies')} ${maxCopy()} ${t('ruleCopies2')} ${lebih.slice(0,4).join(', ')}${lebih.length>4?' …':''}`);
+    masalah.push(`${t('ruleCopies')} <b>${maxCopy()}</b> ${t('ruleCopies2')} ${lebih.slice(0,4).join(', ')}${lebih.length>4?' …':''}`);
   if(total > target)
     masalah.push(`${t('ruleOver')} (<b>${total}</b> / ${target}).`);
 
@@ -1479,6 +1517,9 @@ const T = {
   cPower:       ['Power','Power'],
   cColor:       ['Warna','Color'],
   cAdd:         ['+ Deck','+ Deck'],
+  cFull:        ['Kuota penuh','Quota full'],
+  cSameName:    ['Nama sama dicetak ulang di seri lain — kuota salinan digabung',
+                 'Same name reprinted in another set — copy quota is shared'],
   cOfficial:    ['lihat kartu di situs resmi ↗','view on official site ↗'],
   cAttack:      ['Jarak serangan','Attack range'],
   cFight:       ['Kekuatan bertarung','Fighting power'],
@@ -1519,8 +1560,8 @@ const T = {
   ruleColors:   ['Deck memakai','Deck uses'],
   ruleColors2:  ['warna','colors'],
   ruleMax2:     ['maksimal 2 warna.','maximum 2 colors.'],
-  ruleCopies:   ['kartu melebihi','cards exceed'],
-  ruleCopies2:  ['salinan:','copies:'],
+  ruleCopies:   ['Ada nama karakter yang melebihi','Some character names exceed'],
+  ruleCopies2:  ['salinan — batas dihitung per nama karakter:','copies — the limit counts per character name:'],
   ruleOver:     ['Jumlah kartu melebihi target','Card count exceeds target'],
   ruleOk:       ['Deck sah:','Deck is valid:'],
   ruleOkColors: ['warna','colors'],
