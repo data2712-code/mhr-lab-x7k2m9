@@ -48,10 +48,28 @@ window.DECK_KOMUNITAS = [
   { nm:'Budget SD Hijau - Biru', cr:'@deteprtm',
     ds:'',
     cd:'1.QnVkZ2V0IFNEIEhpamF1IC0gQmlydQ.G0011G0022G0043G0063G0083G0113G0143G0153G0163G0173H0011H0022H0032H0053H0073H0103H0113H0173H0183' },
-  { nm:'Budget SD Kuning - Hijau', cr:'@deteprtm',
+  { nm:'Budget SD Kuning - Biru', cr:'@deteprtm',
     ds:'',
     cd:'1.QnVkZ2V0IFNEIEt1bmluZyAtIEhpamF1.G0011G0022G0043G0063G0083G0102G0113G0123G0143G0153G0173G0163F0133F0123F0143F0173F0043F0032F0161' },
 ];
+
+/* ========== DUKUNGAN SUKARELA ==========
+   Tombol "☕ Dukung" di header dan keterangan di footer hanya muncul kalau
+   bagian ini ada dan url-nya diawali https://. Untuk mematikannya sementara,
+   cukup beri // di depan tiap barisnya.
+
+   teks: kalimat yang tampil di footer — silakan diubah kapan saja.
+         id = Bahasa Indonesia, en = English. */
+window.DUKUNG = {
+  url:   'https://saweria.co/data2712',
+  label: 'Saweria',
+  teks: {
+    id: 'MHR Deck Lab dibuat dan dirawat sendiri untuk komunitas, gratis dan tanpa iklan. ' +
+        'Dukungan sukarela Anda akan dipakai untuk biaya pengembangan fitur selanjutnya.',
+    en: 'MHR Deck Lab is built and maintained for the community — free and ad-free. ' +
+        'Your voluntary support will go toward developing the next features.'
+  }
+};
 
 /* ========== JADWAL TURNAMEN LGS ==========
    h = hari: 1 Senin, 2 Selasa, 3 Rabu, 4 Kamis, 5 Jumat, 6 Sabtu, 7 Minggu
