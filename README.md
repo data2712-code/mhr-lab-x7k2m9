@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v5.1** · 17 Agustus 2026
+**Versi saat ini: v5.5** · 18 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -33,6 +33,46 @@ Semua data deck tersimpan di browser pengguna (localStorage).
 2. Repository → **Add file → Upload files** → drop file → **Commit changes**
 3. Tunggu 1–2 menit, buka situs dengan `?v=` angka baru untuk melewati cache
 4. Perbarui bagian **Riwayat Update** di README ini
+
+### Cara menambah set kartu baru
+
+Sejak v5.2 data kartu ada di `cards.js`, terpisah dari aplikasi. Untuk menambah set:
+ganti `cards.js` saja — `index.html` tidak perlu disentuh. Format tiap entri
+dijelaskan di komentar kepala berkas itu.
+
+### Dukungan sukarela (Saweria / Trakteer / Ko-fi)
+
+Tambahkan satu baris ini di `data.js` — bukan di `index.html`:
+
+```javascript
+window.DUKUNG = {
+  url:   'https://saweria.co/data2712',
+  label: 'Saweria',
+  teks: {
+    id: 'Kalimat ajakan dalam Bahasa Indonesia…',
+    en: 'The English version of the message…'
+  }
+};
+```
+
+Field `teks` opsional. Kalau dikosongkan, dipakai kalimat bawaan. Boleh juga
+berupa teks biasa (satu bahasa saja).
+
+Tombol "☕ Dukung" akan muncul di header dan keterangan di footer. Kalau baris ini
+tidak ada atau URL-nya bukan `https://`, tombolnya tidak ditampilkan sama sekali —
+jadi aman dibiarkan kosong sampai akunnya siap.
+
+Untuk mematikan sementara, cukup beri komentar pada barisnya (`// window.DUKUNG = ...`).
+
+### Backup & Restore
+
+Tombol **💾 Backup** di panel deck mengunduh berkas
+`mhr-deck-lab-backup-YYYY-MM-DD.json` berisi semua deck, pilihan varian artwork,
+dan pengaturan. **📂 Restore** memulihkannya di perangkat mana pun.
+
+Perlu diketahui: ini **menyalin, bukan menyinkronkan**. Setelah restore, kedua
+perangkat berjalan terpisah — perubahan di satu sisi tidak otomatis kembali ke sisi
+lain. Sinkronisasi dua arah butuh backend.
 
 ### Cara menambah teks / gambar bahasa Inggris
 
@@ -152,12 +192,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v5.1.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v5.5.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v5.1` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v5.5` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v5.1</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v5.5</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -190,6 +230,62 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v5.5 — 18 Agustus 2026
+- Dukungan sukarela **aktif**: Saweria `saweria.co/data2712`
+- Kalimat ajakan dukungan kini bisa diatur dari `data.js` lewat field `teks`
+  (mendukung `{id, en}` agar mengikuti bahasa aktif), jadi bisa diubah kapan saja
+  tanpa menyentuh `index.html`
+
+### v5.4 — 18 Agustus 2026
+- 🔧 **Fix tampilan HP:** pada tampilan daftar, tombol "+ Deck" yang melayang di
+  pojok kanan atas menutupi judul kartu yang panjang. Kini tombol turun ke bawah
+  kartu di layar sempit, jadi tidak ada teks yang tertimpa. Tampilan grid dan
+  desktop tidak berubah
+- **Dukungan sukarela (opsional).** Tombol "☕ Dukung" di header dan keterangan di
+  footer, muncul **hanya kalau** `window.DUKUNG` diisi di `data.js`. Tautan wajib
+  `https://`; selain itu diabaikan demi keamanan. Teks ikut bahasa aktif
+
+### v5.3 — 18 Agustus 2026
+- 🔧 Batas kewajaran pada berkas backup: salinan per kartu dipangkas maksimal 99
+  dan jumlah deck maksimal 200. Sebelumnya berkas yang rusak atau diedit manual
+  bisa memuat angka ekstrem (mis. 999 salinan) yang membuat tampilan deck
+  menggambar ratusan kartu dan berpotensi menyendat browser
+
+### v5.2 — 18 Agustus 2026
+- **Database kartu dipisah ke `cards.js`.** `index.html` turun dari 214 KB ke 131 KB.
+  Menambah set baru kini cukup mengganti `cards.js` — berkas aplikasi tidak disentuh.
+  Kalau `cards.js` gagal dimuat, muncul pesan jelas alih-alih halaman kosong
+- **Backup & Restore deck.** Tombol di panel deck menyimpan seluruh deck, pilihan
+  varian artwork, dan pengaturan ke satu berkas JSON, lalu memulihkannya di
+  perangkat lain. Tidak ada server — berkas berpindah lewat penyimpanan Anda sendiri
+  - Saat restore, **tanggal pembuatan berkas ditampilkan** beserta keterangan apakah
+    lebih baru atau lebih lama dari data di perangkat itu
+  - Default **gabung**: deck lama tetap utuh, nama yang bentrok diberi akhiran.
+    Opsi timpa tersedia dengan konfirmasi
+  - Kartu yang tidak dikenal dilewati dan dilaporkan, bukan menolak seluruh berkas
+  - Berkas asing atau rusak ditolak tanpa mengubah data apa pun
+  - Pengingat halus muncul kalau deck belum pernah dicadangkan
+- **Jadwal turnamen diperbarui**: Ogre Gandaria Neverland kini Jumat 19.00 (sebelumnya
+  On Demand), dan Global Hobiz Store menambah sesi Rabu 19.30. Total 7 sesi/minggu
+
+### v5.2 — 18 Agustus 2026
+- **Database kartu dipisah ke `cards.js`.** `index.html` turun dari 214 KB ke 120 KB.
+  Penambahan set baru kini cukup mengganti `cards.js`, tanpa menyentuh berkas aplikasi
+- **Backup & restore deck.** Tombol di panel deck menyimpan seluruh deck ke satu
+  berkas JSON, dan memulihkannya di perangkat lain:
+  - **Mode gabung** (default): deck dari berkas ditambahkan, deck yang sudah ada
+    tetap utuh; nama yang bentrok diberi akhiran
+  - **Mode timpa**: mengganti semua, dengan konfirmasi lebih dulu
+  - Sebelum memilih, ditampilkan **tanggal dan waktu pembuatan berkas** beserta
+    keterangan apakah berkas itu lebih baru atau lebih lama dari backup terakhir
+    di perangkat ini
+  - Kartu yang tidak dikenali dilewati dan dilaporkan jumlahnya, bukan menggagalkan
+    seluruh proses
+  - Bahasa dan mode tampilan sengaja tidak ikut dipulihkan — itu preferensi per perangkat
+  - Pengingat muncul kalau pengguna sudah punya deck tapi belum pernah backup
+- Jadwal LGS diperbarui: Ogre Gandaria Neverland Jumat kini 19.00 (sebelumnya
+  On Demand), Global Hobiz Store menambah sesi Rabu 19.30. Total 7 sesi per minggu
 
 ### v5.1 — 17 Agustus 2026 · penyesuaian dengan rulebook resmi
 Berdasarkan Comprehensive Rules 1.00 (16 Juni 2026).
@@ -500,7 +596,6 @@ Hal-hal yang berpengaruh atau berpotensi berpengaruh ke Deck Lab:
 ## Rencana / ide berikutnya
 
 - [ ] Reintegrasi fitur cetak kartu proxy (PDF A4, kode ada di backup)
-- [ ] Backup & restore data deck untuk pindah perangkat
 - [ ] Impor deck dari teks (pasangan dari "Salin daftar deck")
 - [ ] Navigasi ◀ ▶ / panah keyboard di dalam popup kartu
 - [ ] Duplikat deck untuk mencoba variasi
