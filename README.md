@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v5.7** · 20 Agustus 2026
+**Versi saat ini: v6.0** · 20 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -116,6 +116,39 @@ jadi tidak akan muncul gambar rusak.
 `index.html` tidak perlu diubah saat menambah varian — cukup unggah gambarnya
 ke folder `images/`.
 
+### Ekspor lembar decklist (PDF teks)
+
+Tombol **📄 Decklist PDF** di panel deck — **untuk semua pengguna**, bukan admin saja.
+Menghasilkan berkas `decklist-<nama deck>.pdf` berisi teks saja (tanpa gambar), jadi
+ukurannya hanya beberapa KB dan enak dicetak di printer hitam-putih.
+
+Isi lembarnya, mengikuti gaya lembar decklist turnamen:
+
+1. Kop **MHR DECK LAB** beserta tanggal cetak
+2. Nama deck + ringkasan: total kartu, komposisi warna, rata-rata Lv, dan status
+   terhadap target ukuran deck
+3. Kotak **Kode Deck** — kode dari fitur "Salin link deck", jadi decknya bisa dibuka
+   ulang di Deck Lab hanya dari lembar cetaknya
+4. Blok **Data Pemain** yang kosong untuk diisi tulisan tangan: Nama Pemain, Tanggal,
+   Kontak / WhatsApp, Nama Event, LGS / Tempat, dan Tanda Tangan
+5. Tabel kartu **dikelompokkan per warna** dengan kolom Nama Kartu · Seri · Nomor · Lv ·
+   Jumlah, ditutup **Subtotal** tiap warna dan **Total** keseluruhan
+Kaki halaman sengaja dibiarkan bersih. Nomor halaman hanya ditulis kalau lembarnya
+lebih dari satu, supaya urutannya tidak tertukar saat dicetak.
+
+Deck 50 kartu dengan ~21 jenis kartu masih muat satu halaman A4; kalau kartunya lebih
+banyak, tabelnya otomatis lanjut ke halaman berikutnya dengan nama deck dan kepala
+kolom yang diulang.
+
+Isinya mengikuti **bahasa aktif** (ID/EN), termasuk nama kartu. Karena PDF memakai font
+standar, karakter di luar Latin-1 diganti otomatis — mis. nama Inggris `「Top Agent」Black
+Widow` dicetak `"Top Agent" Black Widow`, dan emoji pada nama deck dibuang.
+
+Sama seperti cetak proxy, library **jsPDF** dimuat dari CDN hanya saat tombolnya diklik.
+
+> Tombol **Salin daftar** dihapus di v5.8 — **Salin tabel** sudah mencakup kebutuhannya,
+> dan untuk versi cetak kini ada Decklist PDF.
+
 ### Cetak kartu proxy (khusus mode admin)
 
 Fitur ini **hanya ada di mode admin** — pengunjung biasa tidak melihat tombol
@@ -124,8 +157,8 @@ maupun panelnya.
 1. Buka situs dengan `?admin=1`, misal
    `https://data2712-code.github.io/mhr-lab-x7k2m9/?admin=1`
 2. Susun deck di tab **🛠 Deck Builder** seperti biasa
-3. Pindah ke tab **🏆 Deck Komunitas** → di dalam kotak **Mode admin**, bagian bawah,
-   klik **🖨 Cetak kartu proxy (PDF)**
+3. Di **panel deck**, paling bawah (di bawah tombol Backup/Restore), muncul kotak
+   **Mode admin — cetak kartu proxy** → klik **🖨 Cetak kartu proxy (PDF)**
 4. Daftar cetak otomatis terisi dari deck aktif. Bisa disesuaikan: **+ / − / ✕** per
    kartu, cari kartu lain di kolom pencarian, atau **↺ Muat dari deck aktif**
 5. Klik **⬇ Buat PDF** → berkas `proxy-<nama deck>.pdf` terunduh
@@ -251,12 +284,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v5.7.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.0.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v5.7` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.0` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v5.7</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.0</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -289,6 +322,47 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.0 — 20 Agustus 2026
+- **Decklist PDF dirapikan** sesuai masukan: tulisan "LEMBAR DECKLIST" di kop dihapus
+  (kini hanya "MHR DECK LAB" dan tanggal cetak), dan seluruh kaki halaman — keterangan
+  fan-made serta alamat situs — dihilangkan
+- Nomor halaman **hanya muncul kalau PDF-nya lebih dari satu halaman**, jadi lembar
+  decklist satu halaman benar-benar bersih di bagian bawah
+- Halaman lanjutan kini berkepala **nama deck** saja (sebelumnya "LEMBAR DECKLIST · nama deck")
+- Kunci bahasa yang tidak terpakai lagi (`dlSheet`, `dlNote`) dihapus dari kamus
+
+> Penomoran: setelah v5.9, langkah kecil berikutnya akan tertulis v5.10 yang mudah
+> tertukar dengan v5.1 — jadi dinaikkan ke v6.0. Kalau lebih suka pola lain, tinggal
+> ubah angkanya di tiga tempat (komentar kepala berkas, `<meta name="version">`, footer).
+
+### v5.9 — 20 Agustus 2026
+- **Statistik "Kartu unik" dihilangkan** dari panel Deck Builder, dari ringkasan
+  Decklist PDF, dan dari kartu deck di galeri Deck Komunitas. Alasannya: angka itu
+  dihitung **per nomor kartu**, sementara batas 3 salinan dihitung **per nama karakter**
+  (aturan 101.1.d) — dua cara hitung yang berbeda dengan nama yang mirip, jadi lebih
+  berpotensi membingungkan daripada membantu
+- Pill di header yang tulisannya juga "Kartu unik" diganti menjadi **"Total kartu"**
+  (EN: "Total cards"). Angkanya tidak berubah — itu memang jumlah kartu di database
+  (208 di mode Indonesia, 192 di mode Inggris), bukan statistik deck
+- Baris statistik deck yang jumlahnya kini ganjil otomatis melebar penuh, jadi tidak
+  ada kolom menggantung di panel
+
+### v5.8 — 20 Agustus 2026
+- **Cetak kartu proxy dipindah ke Deck Builder.** Tombolnya sekarang di bagian bawah
+  panel deck, bukan lagi di tab Deck Komunitas — lebih dekat dengan alur menyusun deck.
+  Batas aksesnya tidak berubah: tetap hanya muncul dengan `?admin=1`
+- **Tombol "Salin daftar" dihapus.** "Salin tabel" sudah mencakup kebutuhannya
+- **Fitur baru: 📄 Decklist PDF** (untuk semua pengguna) — lembar decklist berisi teks
+  saja: kop, ringkasan deck, kotak Kode Deck, blok data pemain untuk diisi tangan
+  (nama, kontak, event, tanggal, LGS, tanda tangan), lalu tabel kartu per warna dengan
+  kolom Nama · Seri · Nomor · Lv · Jumlah, subtotal tiap warna, dan total keseluruhan
+  - Berkasnya hanya beberapa KB karena tanpa gambar — enak dicetak hitam-putih
+  - Deck 50 kartu (~21 kartu unik) muat satu halaman A4; lebih dari itu otomatis
+    berlanjut dengan kepala kolom yang diulang
+  - Mengikuti bahasa aktif, termasuk nama kartu
+  - Karakter di luar Latin-1 diganti otomatis agar tidak jadi karakter aneh di PDF:
+    `「Top Agent」Black Widow` → `"Top Agent" Black Widow`, emoji di nama deck dibuang
 
 ### v5.7 — 20 Agustus 2026
 - **Fitur cetak kartu proxy dipasang — khusus mode admin.** Tombol
