@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 5.7  ·  20 Agustus 2026
+     MHR DECK LAB  ·  versi 6.0  ·  20 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="5.7">
+<meta name="version" content="6.0">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -313,6 +313,8 @@
   .stats2 div{font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;
     border-bottom:1px dotted var(--line);padding-bottom:3px}
   .stats2 b{color:var(--paper);font-family:var(--mono);font-size:12px}
+  /* jumlah statistik ganjil: baris terakhir melebar penuh agar tidak menggantung */
+  .stats2 div:last-child:nth-child(odd){grid-column:1/-1}
   .rbar{display:flex;gap:4px;align-items:flex-end;height:46px;margin:4px 0 2px}
   .rbar .b{flex:1;background:var(--line);border-radius:3px 3px 0 0;min-height:3px;position:relative}
   .rbar .b span{position:absolute;top:-15px;left:0;right:0;text-align:center;
@@ -661,7 +663,7 @@
     <p data-i18n="tagline">Marvel Hero Rush TCG Deck Builder · 208 kartu (BP01 · PB01 · PR · SD01–SD04) · Ver. Indonesia</p>
   </div>
   <div class="hdr-stats">
-    <div class="pill"><span data-i18n="statUnique">Kartu unik</span> <b id="hTotal">0</b></div>
+    <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">0</b></div>
     <div class="pill"><span data-i18n="statShown">Ditampilkan</span> <b id="hShown">0</b></div>
     <div class="pill"><span data-i18n="statDeck">Deck</span> <b id="hDeck">0</b></div>
     <a class="dukung" id="btnDukung" target="_blank" rel="noopener" hidden></a>
@@ -806,8 +808,8 @@
       <span data-i18n="viewDeckBtn">🖼 Lihat deck — tampilan untuk dibagikan</span></button>
     <div class="deck-actions" style="margin-top:8px">
       <button class="btn2" id="btnLink" data-i18n="copyLink">🔗 Salin link deck</button>
-      <button class="btn2" id="btnExport" data-i18n="copyList">Salin daftar</button>
       <button class="btn2" id="btnTabel" data-i18n="copyTable">Salin tabel</button>
+      <button class="btn2" id="btnDlPdf" data-i18n="dlBtn">📄 Decklist PDF</button>
       <button class="btn2 danger" id="btnClear" data-i18n="clearDeck">Kosongkan</button>
     </div>
     <div class="bk-row">
@@ -817,6 +819,8 @@
     <input type="file" id="bkFile" accept=".json,application/json" hidden>
     <div id="bkNote"></div>
     <textarea class="export" id="exportBox" readonly></textarea>
+
+    <div id="proxyAdmin"></div>
 
     <p class="foot-note">Catatan: target ukuran deck dan batas salinan bisa disesuaikan dengan aturan resmi turnamen yang berlaku. Data kartu bersumber dari database resmi marvelherorush.com (bahasa Indonesia). Deck tersimpan otomatis di browser perangkat ini (localStorage) — aman ditutup dan dibuka kembali.</p>
   </aside>
@@ -840,7 +844,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v5.7</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.0</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1291,8 +1295,7 @@ function renderDeck(){
     st.innerHTML = `
       <div><span>${t('avgLv')}</span><b>${(totLv/total).toFixed(2)}</b></div>
       <div><span>${t('avgPower')}</span><b>${Math.round(totPw/total)}</b></div>
-      <div><span>${t('totalPower')}</span><b>${totPw.toLocaleString(state.lang==='en'?'en-US':'id-ID')}</b></div>
-      <div><span>${t('uniqueCards')}</span><b>${entries.length}</b></div>`;
+      <div><span>${t('totalPower')}</span><b>${totPw.toLocaleString(state.lang==='en'?'en-US':'id-ID')}</b></div>`;
 
     const maxR = Math.max(1,...Object.values(rr));
     $('#rbar').innerHTML = Object.entries(rr).map(([r,n])=>
@@ -1420,7 +1423,7 @@ const T = {
   navMetaS:     ['Komunitas','Community'],
   navLgs:       ['Turnamen','Tournaments'],
   navLgsS:      ['Turnamen','Events'],
-  statUnique:   ['Kartu unik','Unique cards'],
+  statUnique:   ['Total kartu','Total cards'],
   statShown:    ['Ditampilkan','Showing'],
   statDeck:     ['Deck','Deck'],
   follow:       ['Follow @deteprtm','Follow @deteprtm'],
@@ -1497,7 +1500,6 @@ const T = {
   avgLv:        ['Rata-rata Lv','Average Lv'],
   avgPower:     ['Rata-rata Power','Average Power'],
   totalPower:   ['Total Power','Total Power'],
-  uniqueCards:  ['Kartu unik','Unique cards'],
   levelCurve:   ['Kurva level','Level curve'],
   colorComp:    ['Komposisi warna','Color composition'],
   rangeSpread:  ['Sebaran jarak serangan (R)','Attack range spread (R)'],
@@ -1518,8 +1520,26 @@ const T = {
   simBtn:       ['🎴 Simulasi draw 6 kartu','🎴 Simulate opening 6 cards'],
   viewDeckBtn:  ['🖼 Lihat deck — tampilan untuk dibagikan','🖼 View deck — shareable layout'],
   copyLink:     ['🔗 Salin link deck','🔗 Copy deck link'],
-  copyList:     ['Salin daftar','Copy list'],
   copyTable:    ['Salin tabel','Copy table'],
+  /* --- lembar decklist PDF (teks) --- */
+  dlBtn:        ['📄 Decklist PDF','📄 Decklist PDF'],
+  dlBusy:       ['Menyusun…','Building…'],
+  dlCode:       ['Kode Deck','Deck Code'],
+  dlPlayer:     ['Data Pemain — silakan diisi dengan tulisan tangan',
+                 'Player Details — please fill in by hand'],
+  dlPName:      ['Nama Pemain','Player Name'],
+  dlPContact:   ['Kontak / WhatsApp','Contact / WhatsApp'],
+  dlPEvent:     ['Nama Event','Event Name'],
+  dlPDate:      ['Tanggal','Date'],
+  dlPStore:     ['LGS / Tempat','Store / Venue'],
+  dlPSign:      ['Tanda Tangan','Signature'],
+  dlSeries:     ['SERI','SET'],
+  dlSub:        ['Subtotal','Subtotal'],
+  dlTargetOk:   ['sesuai target','matches target'],
+  dlTargetNo:   ['belum sesuai target','does not match target'],
+  dlPage:       ['hal.','page'],
+  dlNoLib:      ['Library pembuat PDF gagal dimuat — butuh koneksi internet. Coba lagi setelah tersambung.',
+                 'The PDF library failed to load — an internet connection is required. Please try again once connected.'],
   tblDeck:      ['Deck','Deck'],
   tblTotal:     ['Total','Total'],
   tblAvgLv:     ['Rata-rata Lv','Average Lv'],
@@ -1893,18 +1913,230 @@ $('#btnTabel').addEventListener('click', ()=>{
   setTimeout(()=>b.textContent = t('copyTable'), 1800);
 });
 
-$('#btnExport').addEventListener('click', ()=>{
-  const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q}));
-  entries.sort((a,b)=>a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
-  const lines = entries.map(({c,q})=>`${q}x ${c.no} ${c.nm} (Lv${c.l} ${c.c})`);
-  const txt = `=== DECK MARVEL HERO RUSH ===\nTotal: ${deckCount()} kartu\n\n` + (lines.join('\n')||'(kosong)');
-  const box = $('#exportBox');
-  box.value = txt; box.classList.add('show');
-  box.select();
-  try { document.execCommand('copy'); $('#btnExport').textContent='Tersalin ✓';
-    setTimeout(()=>$('#btnExport').textContent='Salin daftar deck',1500);
-  } catch(e){}
+/* Tombol "Salin daftar" dihapus di v5.8 — "Salin tabel" sudah mencakup
+   kebutuhannya, dan untuk versi cetak ada tombol Decklist PDF. */
+
+/* ==================== LEMBAR DECKLIST PDF (teks saja) ====================
+   Berkas PDF A4 berisi kop, kode deck, blok data pemain yang diisi tangan,
+   lalu tabel kartu per warna dengan subtotal dan total — mengikuti gaya
+   lembar decklist turnamen. Tidak memuat gambar sama sekali, jadi berkasnya
+   kecil dan enak dicetak di printer hitam-putih.
+   Fitur ini untuk semua pengguna (bukan admin-only). */
+
+/* jsPDF memakai font standar (WinAnsi), jadi karakter di luar Latin-1 —
+   mis. 「 」 pada nama kartu Inggris atau emoji di nama deck — harus
+   diganti dulu, kalau tidak hasilnya jadi karakter aneh. */
+function pdfSafe(s){
+  return String(s == null ? '' : s)
+    .replace(/[「『“]/g, '"')
+    .replace(/[」』”]/g, '" ')      /* 「Nama」Karakter -> "Nama" Karakter */
+    .replace(/[‘’]/g, "'")
+    .replace(/【/g, '[').replace(/】/g, ']')
+    .replace(/[—–]/g, '-')
+    .replace(/[×✕]/g, 'x')
+    .replace(/[^\x09\x0A\x0D\x20-\xFF]/g, '')
+    .replace(/" {2,}/g, '" ')
+    .trim();
+}
+
+function tanggalCetak(){
+  try {
+    return new Date().toLocaleDateString(state.lang === 'en' ? 'en-GB' : 'id-ID',
+      {day:'2-digit', month:'long', year:'numeric'});
+  } catch(e){ return ''; }
+}
+
+async function buatDecklistPDF(){
+  const btn = $('#btnDlPdf');
+  const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no), q}))
+    .filter(x=>x.c);
+  if(!entries.length){ alert(t('mDeckEmpty')); return; }
+
+  btn.disabled = true; btn.textContent = t('dlBusy');
+  if(!await pxEnsureJsPDF()){
+    btn.disabled = false; btn.textContent = t('dlBtn');
+    alert(t('dlNoLib')); return;
+  }
+
+  const total  = entries.reduce((a,x)=>a+x.q, 0);
+  const lvSum  = entries.reduce((a,x)=>a + x.c.l*x.q, 0);
+  const col    = {};
+  entries.forEach(({c,q})=>col[c.c] = (col[c.c]||0) + q);
+  const target = Math.max(1, parseInt($('#setSize').value) || 50);
+
+  const {jsPDF} = window.jspdf;
+  const pdf = new jsPDF({unit:'mm', format:'a4', orientation:'portrait', compress:true});
+  const PW = 210, PH = 297, M = 15, R = PW - M;      // kiri 15, kanan 195
+  const COL = { nama:M, seri:103, no:126, lv:156, jml:170 };
+  const BARIS = 6.2, BATAS_BAWAH = PH - 14;
+  let y = 0, halaman = 0;
+
+  const garis = (yy, tebal)=>{
+    pdf.setLineWidth(tebal || 0.1);
+    pdf.setDrawColor(tebal ? 60 : 175);
+    pdf.line(M, yy, R, yy);
+  };
+  const kepalaKolom = ()=>{
+    pdf.setFillColor(238,238,238);
+    pdf.rect(M, y, R-M, BARIS, 'F');
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(7.6); pdf.setTextColor(60);
+    const yt = y + BARIS - 2;
+    pdf.text(pdfSafe(t('tblName')),  COL.nama + 1.5, yt);
+    pdf.text(pdfSafe(t('dlSeries')), COL.seri + 1.5, yt);
+    pdf.text(pdfSafe(t('tblNo')),    COL.no   + 1.5, yt);
+    pdf.text(pdfSafe(t('tblLv')),    COL.lv   + 1.5, yt);
+    pdf.text(pdfSafe(t('tblQty')),   R - 1.5, yt, {align:'right'});
+    y += BARIS;
+    garis(y);
+  };
+  const halamanBaru = (ulangKepala)=>{
+    if(halaman > 0) pdf.addPage();
+    halaman++;
+    y = M;
+    if(ulangKepala){
+      pdf.setFont('helvetica','bold'); pdf.setFontSize(9); pdf.setTextColor(90);
+      pdf.text(pdfSafe(store.active), M, y);
+      y += 5; garis(y, 0.3); y += 3;
+      kepalaKolom();
+    }
+  };
+
+  /* ---------- halaman 1: kop ---------- */
+  halamanBaru(false);
+  pdf.setFont('helvetica','bold'); pdf.setFontSize(16); pdf.setTextColor(20);
+  pdf.text('MHR DECK LAB', M, y + 4);
+  pdf.setFont('helvetica','normal'); pdf.setFontSize(9.5); pdf.setTextColor(110);
+  pdf.text(pdfSafe(tanggalCetak()), R, y + 4, {align:'right'});
+  y += 7; garis(y, 0.4); y += 6;
+
+  /* nama deck */
+  pdf.setFont('helvetica','bold'); pdf.setFontSize(13); pdf.setTextColor(20);
+  pdf.text(pdfSafe(store.active), M, y + 3);
+  y += 8;
+
+  /* ringkasan singkat */
+  const ringkas = `${t('tblTotal')}: ${total} ${t('cards')}  ·  ` +
+    Object.keys(col).sort((a,b)=>CORDER[a]-CORDER[b]).map(k=>`${t(k)} ${col[k]}`).join(' · ') +
+    `  ·  ${t('tblAvgLv')} ${(lvSum/total).toFixed(2)}  ·  target ${target} ` +
+    `(${total === target ? t('dlTargetOk') : t('dlTargetNo')})`;
+  pdf.setFont('helvetica','normal'); pdf.setFontSize(8.6); pdf.setTextColor(70);
+  pdf.text(pdfSafe(ringkas), M, y);
+  y += 6;
+
+  /* kode deck */
+  const kode = encodeDeck(state.deck, store.active);
+  const potong = pdf.splitTextToSize(kode, R - M - 4);
+  const tinggiKode = 5.5 + potong.length * 3.4;
+  pdf.setDrawColor(175); pdf.setLineWidth(0.2);
+  pdf.rect(M, y, R - M, tinggiKode);
+  pdf.setFont('helvetica','bold'); pdf.setFontSize(7.4); pdf.setTextColor(110);
+  pdf.text(pdfSafe(t('dlCode')), M + 2, y + 3.6);
+  pdf.setFont('courier','normal'); pdf.setFontSize(7); pdf.setTextColor(40);
+  potong.forEach((ln,i)=>pdf.text(ln, M + 2, y + 7.2 + i*3.4));
+  y += tinggiKode + 6;
+
+  /* ---------- blok data pemain ---------- */
+  pdf.setFont('helvetica','bold'); pdf.setFontSize(8.4); pdf.setTextColor(60);
+  pdf.text(pdfSafe(t('dlPlayer')), M, y);
+  y += 3;
+  const kolomKiri = [t('dlPName'), t('dlPContact'), t('dlPStore')];
+  const kolomKanan = [t('dlPDate'), t('dlPEvent'), t('dlPSign')];
+  const lebar = (R - M) / 2, tinggiSel = 11;
+  pdf.setDrawColor(175); pdf.setLineWidth(0.2);
+  for(let i=0;i<3;i++){
+    const yy = y + i*tinggiSel;
+    pdf.rect(M, yy, lebar, tinggiSel);
+    pdf.rect(M + lebar, yy, lebar, tinggiSel);
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(7.2); pdf.setTextColor(120);
+    pdf.text(pdfSafe(kolomKiri[i]),  M + 2, yy + 3.6);
+    pdf.text(pdfSafe(kolomKanan[i]), M + lebar + 2, yy + 3.6);
+  }
+  y += 3*tinggiSel + 7;
+
+  /* ---------- tabel kartu per warna ---------- */
+  kepalaKolom();
+  const urutWarna = Object.keys(col).sort((a,b)=>CORDER[a]-CORDER[b]);
+  urutWarna.forEach(warna=>{
+    const isi = entries.filter(x=>x.c.c === warna)
+      .sort((a,b)=>a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
+
+    if(y + BARIS*3 > BATAS_BAWAH) halamanBaru(true);
+
+    /* judul kelompok warna */
+    pdf.setFillColor(248,248,248);
+    pdf.rect(M, y, R-M, BARIS, 'F');
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(8.6); pdf.setTextColor(30);
+    pdf.text(pdfSafe(t(warna).toUpperCase()), COL.nama + 1.5, y + BARIS - 2);
+    pdf.text(pdfSafe(`${col[warna]} ${t('cards')}`), R - 1.5, y + BARIS - 2, {align:'right'});
+    y += BARIS; garis(y);
+
+    isi.forEach(({c,q})=>{
+      if(y + BARIS > BATAS_BAWAH) halamanBaru(true);
+      pdf.setFont('helvetica','normal'); pdf.setFontSize(8.8); pdf.setTextColor(25);
+      let nama = pdfSafe(cardName(c));
+      while(pdf.getTextWidth(nama) > COL.seri - COL.nama - 4 && nama.length > 6){
+        nama = nama.slice(0, -2) + '.';
+      }
+      pdf.text(nama, COL.nama + 1.5, y + BARIS - 2);
+      pdf.setTextColor(70);
+      pdf.text(pdfSafe(c.s), COL.seri + 1.5, y + BARIS - 2);
+      pdf.setFont('courier','normal'); pdf.setFontSize(8.2);
+      pdf.text(pdfSafe(c.no), COL.no + 1.5, y + BARIS - 2);
+      pdf.text('Lv' + c.l,   COL.lv + 1.5, y + BARIS - 2);
+      pdf.setFont('helvetica','bold'); pdf.setFontSize(9); pdf.setTextColor(20);
+      pdf.text(String(q), R - 1.5, y + BARIS - 2, {align:'right'});
+      y += BARIS; garis(y);
+    });
+
+    /* subtotal per warna */
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(8.6); pdf.setTextColor(60);
+    pdf.text(pdfSafe(t('dlSub')), COL.lv - 22, y + BARIS - 2, {align:'right'});
+    pdf.text(String(col[warna]), R - 1.5, y + BARIS - 2, {align:'right'});
+    y += BARIS + 3;
+  });
+
+  /* total keseluruhan — kalau tidak muat, halaman baru tanpa kepala kolom
+     supaya tidak tampil sebagai tabel kosong berisi satu baris */
+  if(y + BARIS + 2 > BATAS_BAWAH){
+    halamanBaru(false);
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(9); pdf.setTextColor(90);
+    pdf.text(pdfSafe(store.active), M, y);
+    y += 5; garis(y, 0.3); y += 3;
+  }
+  pdf.setFillColor(232,232,232);
+  pdf.rect(M, y, R-M, BARIS + 1, 'F');
+  pdf.setFont('helvetica','bold'); pdf.setFontSize(10); pdf.setTextColor(20);
+  pdf.text(pdfSafe(t('tblTotal')), COL.lv - 22, y + BARIS - 1.4, {align:'right'});
+  pdf.text(`${total}`, R - 1.5, y + BARIS - 1.4, {align:'right'});
+  y += BARIS + 1;
+  garis(y, 0.4);
+
+  /* Kaki halaman sengaja dibiarkan kosong (v6.0). Nomor halaman hanya ditulis
+     kalau lembarnya lebih dari satu, supaya urutannya tidak tertukar saat dicetak. */
+  const jml = pdf.getNumberOfPages();
+  if(jml > 1){
+    for(let p=1; p<=jml; p++){
+      pdf.setPage(p);
+      pdf.setFont('helvetica','normal'); pdf.setFontSize(6.6); pdf.setTextColor(140);
+      pdf.text(`${t('dlPage')} ${p}/${jml}`, R, PH - 7, {align:'right'});
+    }
+  }
+
+  const nama = (store.active.replace(/[^\w\- ]+/g,'').trim() || 'deck');
+  pdf.save(`decklist-${nama}.pdf`);
+  btn.disabled = false;
+  btn.textContent = `✓ PDF · ${jml} ${t('dlPage')}`;
+  setTimeout(()=>btn.textContent = t('dlBtn'), 2600);
+}
+$('#btnDlPdf').addEventListener('click', ()=>{
+  buatDecklistPDF().catch(err=>{
+    console.error('[MHR Deck Lab] gagal membuat decklist PDF:', err);
+    $('#btnDlPdf').disabled = false;
+    $('#btnDlPdf').textContent = t('dlBtn');
+    alert(t('dlNoLib'));
+  });
 });
+
 $('#deckGrip').addEventListener('click', ()=>$('#deckPanel').classList.toggle('open'));
 
 $('#deckSelect').addEventListener('change', e=>{
@@ -2753,12 +2985,12 @@ $('#navTabs').addEventListener('click', e=>{
 
 /* ==================== HALAMAN DECK KOMUNITAS ==================== */
 function deckStats(deck){
-  const col = {}; let tot = 0, lvSum = 0, unik = 0;
+  const col = {}; let tot = 0, lvSum = 0;
   for(const [no,q] of Object.entries(deck)){
     const c = DB.find(d=>d.no===no); if(!c) continue;
-    col[c.c] = (col[c.c]||0)+q; tot += q; lvSum += c.l*q; unik++;
+    col[c.c] = (col[c.c]||0)+q; tot += q; lvSum += c.l*q;
   }
-  return {tot, col, unik, avgLv: tot ? (lvSum/tot).toFixed(2) : '0',
+  return {tot, col, avgLv: tot ? (lvSum/tot).toFixed(2) : '0',
           warna: Object.keys(col).sort((a,b)=>CORDER[a]-CORDER[b])};
 }
 
@@ -2807,7 +3039,6 @@ function renderMeta(){
         <div class="meta-bar">${bar}</div>
         <div class="meta-stat">
           <span><b>${s.tot}</b> kartu</span>
-          <span><b>${s.unik}</b> unik</span>
           <span>rata-rata Lv <b>${s.avgLv}</b></span>
         </div>
         ${d.ds?`<div class="meta-desc">${d.ds}</div>`:''}
@@ -2872,19 +3103,28 @@ function renderAdminBox(){
         <button class="btn2" id="admCopy" style="flex:none;padding:8px 12px">Salin</button>
       </div>
       <textarea id="admOut" readonly placeholder="Kode akan muncul di sini — tempel ke daftar DECK_KOMUNITAS di data.js"></textarea>
-      <div class="px-launch">
-        <p><b>Cetak kartu proxy.</b> Menyusun berkas PDF A4 berisi kartu ukuran 63 × 88 mm,
-          9 kartu per halaman, siap dipotong. Daftar cetak otomatis terisi dari deck aktif
-          dan masih bisa disesuaikan di dalam panelnya.</p>
-        <button class="btn2" id="btnProxy"
-          style="width:100%;border-color:var(--accent);color:var(--accent);font-weight:700">
-          🖨 Cetak kartu proxy (PDF)</button>
-      </div>
     </div>`;
 }
 
+/* Pemicu cetak kartu proxy — di panel deck (Deck Builder), hanya mode admin. */
+function renderProxyAdmin(){
+  const box = $('#proxyAdmin');
+  if(!box) return;
+  box.innerHTML = !isAdmin ? '' : `
+    <div class="admin-box" style="margin-top:14px;margin-bottom:0">
+      <div class="t">Mode admin — cetak kartu proxy</div>
+      <p style="font-size:12px;color:#C9CFD8;line-height:1.55;margin-bottom:9px">
+        Menyusun berkas PDF A4 berisi kartu ukuran 63 × 88 mm, 9 kartu per halaman,
+        siap dipotong. Daftar cetak otomatis terisi dari deck aktif dan masih bisa
+        disesuaikan di dalam panelnya. Tombol ini hanya muncul dengan <code>?admin=1</code>.</p>
+      <button class="btn2" id="btnProxy"
+        style="width:100%;border-color:var(--accent);color:var(--accent);font-weight:700">
+        🖨 Cetak kartu proxy (PDF)</button>
+    </div>`;
+  if(isAdmin) $('#btnProxy').addEventListener('click', openProxy);
+}
+
 $('#adminBox').addEventListener('click', e=>{
-  if(e.target.closest('#btnProxy')){ openProxy(); return; }
   if(e.target.id === 'admGen'){
     if(!deckCount()){ alert(t('mDeckEmptyAdd')); return; }
     const nm = ($('#admNm').value || store.active).trim().replace(/'/g,"\\'");
@@ -3238,7 +3478,7 @@ $('#pxPdf').addEventListener('click', async ()=>{
     if(foot){
       pdf.setFontSize(6);
       pdf.setTextColor(150);
-      pdf.text(`MHR Deck Lab · proxy SAMPLE (bukan kartu resmi) · ${store.active} · cetak 100% / ukuran asli`,
+      pdf.text(pdfSafe(`MHR Deck Lab · proxy SAMPLE (bukan kartu resmi) · ${store.active} · cetak 100% / ukuran asli`),
                mx, PH - 5);
       pdf.text(`hal. ${p+1}/${halaman}`, PW - mx, PH - 5, {align:'right'});
     }
@@ -3287,6 +3527,7 @@ if(!DB.length){
 amanJalankan('bahasa', applyLang);
 amanJalankan('renderDeckSelect', renderDeckSelect);
 amanJalankan('renderAdminBox',   renderAdminBox);
+amanJalankan('renderProxyAdmin', renderProxyAdmin);
 amanJalankan('renderAll',        renderAll);
 amanJalankan('bkNote', renderBkNote);
 amanJalankan('dukung', renderDukung);
