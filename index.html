@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 5.5  ·  18 Agustus 2026
+     MHR DECK LAB  ·  versi 5.7  ·  20 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="5.5">
+<meta name="version" content="5.7">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -596,6 +596,61 @@
     border-radius:11px;border:3px solid #101418;display:flex;align-items:center;justify-content:center}
   .dv-foot{margin-top:22px;color:var(--muted);font-size:11px;font-family:var(--mono);text-align:right}
   .foot-note{color:var(--muted);font-size:11px;line-height:1.5;margin-top:16px}
+
+  /* --- cetak kartu proxy (hanya mode admin, dipicu dari panel admin) --- */
+  .px-launch{margin-top:10px;border-top:1px dashed rgba(242,176,30,.35);padding-top:11px}
+  .px-launch p{font-size:12px;color:#C9CFD8;line-height:1.55;margin-bottom:9px}
+  .pxv{position:fixed;inset:0;z-index:58;background:rgba(6,8,11,.95);overflow-y:auto;padding:16px}
+  .pxv[hidden]{display:none}
+  .pxv-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;
+    max-width:880px;margin:0 auto 10px}
+  .pxv-bar .h{font-family:var(--disp);font-size:19px;letter-spacing:.05em;text-transform:uppercase}
+  .pxv-bar .h span{display:block;color:var(--accent);font-size:10.5px;font-family:var(--mono);
+    letter-spacing:.06em;text-transform:none;margin-top:3px}
+  .pxv-sheet{background:#12161B;border:1px solid var(--line);border-radius:16px;
+    max-width:880px;margin:0 auto;padding:20px 20px 18px}
+  .px-sec{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);
+    font-weight:700;margin:16px 0 8px}
+  .px-sec:first-child{margin-top:0}
+  .px-opt{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:9px 18px}
+  .px-opt label{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#C9CFD8}
+  .px-opt select{background:var(--ink);border:1px solid var(--line);color:var(--paper);
+    border-radius:7px;padding:5px 8px;font-size:12.5px}
+  .px-find{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .px-find input{flex:1;min-width:190px;background:var(--ink);border:1px solid var(--line);
+    color:var(--paper);border-radius:8px;padding:8px 11px;font-size:12.5px}
+  .px-sug{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .px-sug button{background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:999px;padding:5px 11px;font-size:12px;cursor:pointer}
+  .px-sug button:hover{border-color:var(--accent);color:var(--accent)}
+  .px-sum{font-family:var(--mono);font-size:12px;color:var(--muted);margin:0 0 8px}
+  .px-sum b{color:var(--paper)}
+  .px-list{max-height:44vh;overflow-y:auto;border:1px solid var(--line);border-radius:10px;
+    background:var(--panel)}
+  .px-row{display:flex;align-items:center;gap:10px;padding:7px 9px;border-bottom:1px solid var(--line)}
+  .px-row:last-child{border-bottom:none}
+  .px-row img{width:31px;aspect-ratio:63/88;object-fit:cover;border-radius:4px;
+    background:var(--panel2);flex:none;border:1px solid var(--line)}
+  .px-row .nm{flex:1;min-width:0;font-size:12.5px;line-height:1.35}
+  .px-row .nm b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .px-row .nm i{font-family:var(--mono);font-size:10.5px;color:var(--muted);font-style:normal}
+  .px-row .nm i.noimg{color:var(--accent);display:block;font-size:10.5px;margin-top:1px;font-family:var(--body)}
+  .px-q{display:flex;align-items:center;gap:6px;flex:none}
+  .px-q button{width:27px;height:27px;background:var(--panel2);border:1px solid var(--line);
+    color:var(--paper);border-radius:7px;cursor:pointer;font-size:14px;line-height:1}
+  .px-q button:hover{border-color:var(--accent);color:var(--accent)}
+  .px-q b{font-family:var(--mono);min-width:24px;text-align:center;font-size:13.5px}
+  .px-empty{padding:18px;color:var(--muted);font-size:12.5px;text-align:center;line-height:1.6}
+  .px-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .px-act .main{border-color:var(--accent);color:var(--accent);font-weight:700}
+  .px-note{color:var(--muted);font-size:11.5px;line-height:1.65;margin-top:15px;
+    border-top:1px solid var(--line);padding-top:12px}
+  .px-note b{color:#C9CFD8}
+  @media (max-width:640px){
+    .pxv{padding:10px}
+    .pxv-sheet{padding:15px 13px 14px}
+    .px-list{max-height:38vh}
+  }
 </style>
 </head>
 <body>
@@ -752,6 +807,7 @@
     <div class="deck-actions" style="margin-top:8px">
       <button class="btn2" id="btnLink" data-i18n="copyLink">🔗 Salin link deck</button>
       <button class="btn2" id="btnExport" data-i18n="copyList">Salin daftar</button>
+      <button class="btn2" id="btnTabel" data-i18n="copyTable">Salin tabel</button>
       <button class="btn2 danger" id="btnClear" data-i18n="clearDeck">Kosongkan</button>
     </div>
     <div class="bk-row">
@@ -784,7 +840,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v5.5</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v5.7</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -851,6 +907,61 @@
       WhatsApp akan mengompres ulang gambarnya.
       <span style="float:right;font-family:var(--mono)">Dibuat dengan MHR Deck Lab</span>
     </div>
+  </div>
+</div>
+
+<!-- ========== CETAK KARTU PROXY — hanya mode admin (?admin=1) ==========
+     Dipicu dari panel admin di tab Deck Komunitas. Teksnya sengaja hanya
+     Bahasa Indonesia (sama seperti panel admin lain) karena tidak pernah
+     dilihat pengunjung; nama kartu tetap ikut bahasa aktif. -->
+<div class="pxv" id="proxyView" hidden>
+  <div class="pxv-bar">
+    <div class="h">🖨 Cetak kartu proxy
+      <span>mode admin · A4 · kartu 63 × 88 mm · 9 kartu per halaman</span></div>
+    <button class="btn2" id="pxClose" style="flex:none;padding:9px 14px">✕ Tutup</button>
+  </div>
+  <div class="pxv-sheet">
+    <div class="px-sec">Pengaturan cetak</div>
+    <div class="px-opt">
+      <label><input type="checkbox" id="pxCut" checked> Garis potong di pinggir halaman</label>
+      <label>Jarak antar kartu
+        <select id="pxGap">
+          <option value="0">0 mm (rapat)</option>
+          <option value="2" selected>2 mm (mudah dipotong)</option>
+          <option value="4">4 mm (paling lega)</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="pxText" checked> Kartu tanpa gambar dicetak sebagai kartu teks</label>
+      <label><input type="checkbox" id="pxFoot" checked> Catatan kecil di kaki halaman</label>
+    </div>
+
+    <div class="px-sec">Tambah kartu ke daftar cetak</div>
+    <div class="px-find">
+      <input id="pxSearch" type="search" placeholder="Cari nama atau nomor kartu… (mis. Hulk, BP01-004)">
+      <button class="btn2" id="pxReload" style="flex:none;padding:8px 12px">↺ Muat dari deck aktif</button>
+    </div>
+    <div class="px-sug" id="pxSug"></div>
+
+    <div class="px-sec">Daftar cetak</div>
+    <div class="px-sum" id="pxSum"></div>
+    <div class="px-list" id="pxList"></div>
+
+    <div class="px-act">
+      <button class="btn2 main" id="pxPdf" style="flex:none;padding:10px 16px">⬇ Buat PDF</button>
+      <button class="btn2" id="pxEmpty" style="flex:none;padding:10px 14px">Kosongkan daftar</button>
+    </div>
+
+    <p class="px-note">
+      <b>Saat mencetak PDF-nya, pilih skala 100% / "Ukuran asli"</b> — jangan "Fit to page"
+      atau "Sesuaikan halaman", karena ukurannya akan menyusut beberapa milimeter dan tidak
+      lagi pas dengan kartu asli di sleeve. Sebaiknya cetak di kertas tebal (mis. 210–260 gsm)
+      atau tempel di belakang kartu biasa di dalam sleeve.<br><br>
+      Gambar mengikuti <b>bahasa aktif</b> dan <b>pilihan varian artwork</b> Anda; kalau versi
+      Inggris atau variannya belum ada, otomatis dipakai gambar Indonesia versi utama.
+      Semua gambar ber-watermark <b>SAMPLE</b>. Kartu proxy hanya untuk latihan dan uji coba
+      deck pribadi — bukan kartu resmi, tidak sah untuk turnamen, dan tidak untuk dijual.
+      Panel ini hanya muncul di mode admin (<code>?admin=1</code>).
+    </p>
   </div>
 </div>
 
@@ -1408,6 +1519,15 @@ const T = {
   viewDeckBtn:  ['🖼 Lihat deck — tampilan untuk dibagikan','🖼 View deck — shareable layout'],
   copyLink:     ['🔗 Salin link deck','🔗 Copy deck link'],
   copyList:     ['Salin daftar','Copy list'],
+  copyTable:    ['Salin tabel','Copy table'],
+  tblDeck:      ['Deck','Deck'],
+  tblTotal:     ['Total','Total'],
+  tblAvgLv:     ['Rata-rata Lv','Average Lv'],
+  tblQty:       ['JML','QTY'],
+  tblNo:        ['NOMOR','NUMBER'],
+  tblLv:        ['LV','LV'],
+  tblName:      ['NAMA KARTU','CARD NAME'],
+  tblMade:      ['Dibuat dengan MHR Deck Lab','Made with MHR Deck Lab'],
   clearDeck:    ['Kosongkan','Clear'],
   linkCopied:   ['✓ Link tersalin','✓ Link copied'],
   copied:       ['Tersalin ✓','Copied ✓'],
@@ -1726,6 +1846,53 @@ $('#btnClear').addEventListener('click', ()=>{
   if(deckCount()===0) return;
   if(confirm(t('mClearAll'))){ state.deck={}; renderAll(); }
 });
+/* Format tabel teks: dikelompokkan per warna, memuat jumlah, nomor kartu,
+   level, dan nama. Cocok ditempel ke WhatsApp/Discord atau lembar kerja. */
+function tabelDeck(){
+  const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no), q}))
+    .filter(x=>x.c);
+  if(!entries.length) return '';
+  const total = entries.reduce((a,x)=>a+x.q, 0);
+  const col = {};
+  let lvSum = 0;
+  entries.forEach(({c,q})=>{ col[c.c] = (col[c.c]||0)+q; lvSum += c.l*q; });
+
+  const pad = (s2,n)=>String(s2).padEnd(n);
+  const baris = [];
+  baris.push('=== MHR DECK LAB ===');
+  baris.push(`${t('tblDeck')}: ${store.active}`);
+  baris.push(`${t('tblTotal')}: ${total} ${t('cards')}  |  ` +
+    Object.entries(col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]])
+      .map(([k,v])=>`${t(k)} ${v}`).join(' · ') +
+    `  |  ${t('tblAvgLv')} ${(lvSum/total).toFixed(2)}`);
+  baris.push('');
+
+  Object.keys(col).sort((a,b)=>CORDER[a]-CORDER[b]).forEach(warna=>{
+    const isi = entries.filter(x=>x.c.c===warna)
+      .sort((a,b)=>a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
+    baris.push(`--- ${t(warna).toUpperCase()} (${col[warna]}) ---`);
+    baris.push(`${pad(t('tblQty'),4)}${pad(t('tblNo'),11)}${pad(t('tblLv'),4)}${t('tblName')}`);
+    isi.forEach(({c,q})=>{
+      baris.push(`${pad(q+'x',4)}${pad(c.no,11)}${pad('Lv'+c.l,4)}${cardName(c)}`);
+    });
+    baris.push('');
+  });
+  baris.push(`${t('tblMade')} — ${location.origin}${location.pathname}`);
+  return baris.join('\n');
+}
+
+$('#btnTabel').addEventListener('click', ()=>{
+  const teks = tabelDeck();
+  if(!teks){ alert(t('mDeckEmpty')); return; }
+  const box = $('#exportBox');
+  box.value = teks; box.classList.add('show'); box.select();
+  const b = $('#btnTabel');
+  navigator.clipboard.writeText(teks)
+    .then(()=>{ b.textContent = t('copied'); })
+    .catch(()=>{ try{ document.execCommand('copy'); b.textContent = t('copied'); }catch(e){} });
+  setTimeout(()=>b.textContent = t('copyTable'), 1800);
+});
+
 $('#btnExport').addEventListener('click', ()=>{
   const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q}));
   entries.sort((a,b)=>a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
@@ -1889,6 +2056,7 @@ $('#lightbox').addEventListener('click', e=>{
 document.addEventListener('keydown', e=>{
   if(e.key === 'Escape'){
     if(!$('#lightbox').hidden) closeLightbox();
+    else if(!$('#proxyView').hidden) closeProxy();
     else if(!$('#simView').hidden){ $('#simView').hidden = true; document.body.style.overflow=''; }
     else if(!$('#deckView').hidden){ $('#deckView').hidden = true; dvDeck=null; dvNama=''; document.body.style.overflow=''; }
   }
@@ -1923,7 +2091,7 @@ function openDeckView(deckLain, judulLain){
   $('#dvGrid').innerHTML = entries.map(({c,q})=>{
     const ph = `<div class="dv-ph" style="--dvc:${CMAP[c.c]}">
         <div class="dv-lv">${c.l}</div>
-        <div class="dv-nm">${c.nm}</div>
+        <div class="dv-nm">${cardName(c)}</div>
         <div class="dv-bt">${c.no} · R-${c.r} / ${c.p}</div>
       </div>`;
     const img = `<img src="${artFile(c.no)}" alt="" data-ext="0" style="display:none"
@@ -1933,6 +2101,16 @@ function openDeckView(deckLain, judulLain){
   }).join('');
   $('#deckView').hidden = false;
   document.body.style.overflow = 'hidden';
+}
+/* Cadangan gambar di layar "Lihat deck": varian pilihan → versi utama bahasa
+   aktif → versi Indonesia → png/webp. Fungsi ini sempat hilang saat refactor,
+   sehingga setiap gambar yang gagal dimuat memicu error di Console dan rantai
+   cadangannya tidak pernah jalan. */
+function dvImgFallback(img,no){
+  const rantai = pxRantaiGambar(no);
+  const i = (parseInt(img.dataset.ext)||0) + 1;
+  if(i < rantai.length){ img.dataset.ext = i; img.src = rantai[i]; return; }
+  img.onerror = null;                 // placeholder berwarna tetap tampil
 }
 $('#btnDeckView').addEventListener('click', ()=>openDeckView());
 $('#dvGrid').addEventListener('click', e=>{
@@ -2694,10 +2872,19 @@ function renderAdminBox(){
         <button class="btn2" id="admCopy" style="flex:none;padding:8px 12px">Salin</button>
       </div>
       <textarea id="admOut" readonly placeholder="Kode akan muncul di sini — tempel ke daftar DECK_KOMUNITAS di data.js"></textarea>
+      <div class="px-launch">
+        <p><b>Cetak kartu proxy.</b> Menyusun berkas PDF A4 berisi kartu ukuran 63 × 88 mm,
+          9 kartu per halaman, siap dipotong. Daftar cetak otomatis terisi dari deck aktif
+          dan masih bisa disesuaikan di dalam panelnya.</p>
+        <button class="btn2" id="btnProxy"
+          style="width:100%;border-color:var(--accent);color:var(--accent);font-weight:700">
+          🖨 Cetak kartu proxy (PDF)</button>
+      </div>
     </div>`;
 }
 
 $('#adminBox').addEventListener('click', e=>{
+  if(e.target.closest('#btnProxy')){ openProxy(); return; }
   if(e.target.id === 'admGen'){
     if(!deckCount()){ alert(t('mDeckEmptyAdd')); return; }
     const nm = ($('#admNm').value || store.active).trim().replace(/'/g,"\\'");
@@ -2718,6 +2905,360 @@ $('#adminBox').addEventListener('click', e=>{
     setTimeout(()=>e.target.textContent = 'Salin', 1800);
   }
 });
+
+/* ==================== CETAK KARTU PROXY (MODE ADMIN) ====================
+   Dipicu dari panel admin di tab Deck Komunitas, jadi hanya ada saat situs
+   dibuka dengan ?admin=1. Ini menyembunyikan dari tampilan, bukan pengamanan —
+   dan itu memadai, karena panel ini tidak punya kuasa apa pun atas situs:
+   dia hanya menyusun PDF dari gambar yang sudah publik di folder images/.
+
+   Tata letak: A4 210 × 297 mm, kartu 63 × 88 mm (ukuran standar TCG),
+   3 × 3 = 9 kartu per halaman, otomatis terpusat.
+   jsPDF dimuat dari CDN hanya saat tombol Buat PDF diklik — pengunjung biasa
+   tidak pernah mengunduhnya. */
+const PXP = { PW:210, PH:297, CW:63, CH:88, COLS:3, ROWS:3 };
+let pxSel = {};                 // nomor kartu -> jumlah yang dicetak
+const pxImgCache = {};          // kunci berkas -> {url,fmt} | null
+
+function pxTotal(){ return Object.values(pxSel).reduce((a,b)=>a+b,0); }
+
+function openProxy(){
+  if(!isAdmin) return;
+  if(!pxTotal()) pxLoadFromDeck(false);
+  renderPxList();
+  $('#pxSug').innerHTML = '';
+  $('#pxSearch').value = '';
+  $('#proxyView').hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+function closeProxy(){
+  $('#proxyView').hidden = true;
+  document.body.style.overflow = '';
+}
+function pxLoadFromDeck(pesan){
+  if(!deckCount()){ if(pesan) alert('Deck aktif masih kosong. Susun dulu di Deck Builder.'); return; }
+  pxSel = {...state.deck};
+  if(pesan) renderPxList();
+}
+
+function renderPxList(){
+  const entries = Object.entries(pxSel)
+    .map(([no,q])=>({c:DB.find(d=>d.no===no), q}))
+    .filter(x=>x.c);
+  entries.sort((a,b)=>CORDER[a.c.c]-CORDER[b.c.c] || a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
+
+  const total = entries.reduce((a,x)=>a+x.q,0);
+  const perPage = PXP.COLS * PXP.ROWS;
+  const hal = Math.ceil(total / perPage) || 0;
+  const sisa = total ? (hal*perPage - total) : 0;
+  $('#pxSum').innerHTML = total
+    ? `<b>${total}</b> kartu · <b>${hal}</b> halaman A4 · ` +
+      (sisa ? `${sisa} slot kosong di halaman terakhir` : 'halaman terakhir penuh')
+    : 'Daftar cetak masih kosong.';
+
+  $('#pxList').innerHTML = entries.length ? entries.map(({c,q})=>`
+    <div class="px-row">
+      <img alt="" data-ext="0" src="${artFile(c.no)}" loading="lazy"
+           onerror="pxRowImgFallback(this,'${c.no}')">
+      <div class="nm"><b>${cardName(c).replace(/</g,'&lt;')}</b>
+        <i>${c.no} · ${c.c} · Lv${c.l} · R-${c.r} / ${c.p}</i></div>
+      <div class="px-q">
+        <button data-px="dec" data-no="${c.no}" title="Kurangi">−</button>
+        <b>${q}</b>
+        <button data-px="inc" data-no="${c.no}" title="Tambah">+</button>
+        <button data-px="del" data-no="${c.no}" title="Hapus dari daftar">✕</button>
+      </div>
+    </div>`).join('')
+    : `<div class="px-empty">Daftar cetak masih kosong.<br>
+       Klik <b>↺ Muat dari deck aktif</b> atau cari kartu di kolom pencarian di atas.</div>`;
+}
+/* Cadangan gambar untuk baris daftar: varian → versi utama → versi Indonesia */
+function pxRowImgFallback(img,no){
+  const rantai = pxRantaiGambar(no);
+  const i = (parseInt(img.dataset.ext)||0) + 1;
+  if(i < rantai.length){ img.dataset.ext = i; img.src = rantai[i]; return; }
+  img.onerror = null;
+  img.style.visibility = 'hidden';
+  const nm = img.closest('.px-row') && img.closest('.px-row').querySelector('.nm');
+  if(nm && !nm.querySelector('.noimg')){
+    const tag = document.createElement('i');
+    tag.className = 'noimg';
+    tag.textContent = '⚠ belum ada berkas gambar — akan dicetak sebagai kartu teks';
+    nm.appendChild(tag);
+  }
+}
+/* Urutan pencarian berkas gambar: varian pilihan di bahasa aktif, versi utama
+   di bahasa aktif, lalu versi Indonesia (yang selalu lengkap), baru png/webp. */
+function pxRantaiGambar(no){
+  const c = DB.find(d=>d.no===no);
+  const utamaAktif = `${artDir()}${no}.jpg`;
+  const daftar = [artFile(no), utamaAktif, `images/${no}.jpg`,
+                  `images/${no}.png`, `images/${no}.webp`];
+  if(c && artDir() !== 'images/') daftar.splice(3, 0, `${artDir()}${no}.png`);
+  return [...new Set(daftar)];
+}
+
+/* --- kontrol daftar & pencarian --- */
+$('#pxList').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-px]'); if(!b) return;
+  const no = b.dataset.no;
+  if(b.dataset.px === 'inc') pxSel[no] = Math.min(99, (pxSel[no]||0) + 1);
+  if(b.dataset.px === 'dec'){ pxSel[no] = (pxSel[no]||0) - 1; if(pxSel[no] < 1) delete pxSel[no]; }
+  if(b.dataset.px === 'del') delete pxSel[no];
+  renderPxList();
+});
+$('#pxSearch').addEventListener('input', ()=>{
+  const q = $('#pxSearch').value.trim().toLowerCase();
+  if(q.length < 2){ $('#pxSug').innerHTML = ''; return; }
+  const hit = DB.filter(c => cardName(c).toLowerCase().includes(q) ||
+                             c.nm.toLowerCase().includes(q) ||
+                             c.no.toLowerCase().includes(q)).slice(0,12);
+  $('#pxSug').innerHTML = hit.length
+    ? hit.map(c=>`<button data-add="${c.no}">+ ${c.no} · ${cardName(c).replace(/</g,'&lt;')}</button>`).join('')
+    : `<span style="font-size:12px;color:var(--muted)">Tidak ada kartu yang cocok.</span>`;
+});
+$('#pxSug').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-add]'); if(!b) return;
+  pxSel[b.dataset.add] = Math.min(99, (pxSel[b.dataset.add]||0) + 1);
+  renderPxList();
+});
+$('#pxReload').addEventListener('click', ()=>pxLoadFromDeck(true));
+$('#pxEmpty').addEventListener('click', ()=>{ pxSel = {}; renderPxList(); });
+$('#pxClose').addEventListener('click', closeProxy);
+
+/* --- memuat gambar kartu sebagai data URL untuk ditanam ke PDF ---
+   Berkas .jpg dipakai apa adanya (tanpa dikompres ulang, jadi ketajamannya
+   tetap dan ukuran PDF lebih kecil). Format lain dikonversi lewat canvas. */
+function pxCanvasJpeg(im, mutu){
+  const cv = document.createElement('canvas');
+  cv.width  = im.naturalWidth  || 450;
+  cv.height = im.naturalHeight || 620;
+  cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+  return cv.toDataURL('image/jpeg', mutu || 0.95);
+}
+function pxBlobToDataURL(b){
+  return new Promise(res=>{
+    const fr = new FileReader();
+    fr.onload = ()=>res(fr.result);
+    fr.onerror = ()=>res(null);
+    fr.readAsDataURL(b);
+  });
+}
+async function pxCardImage(no){
+  const kunci = artFile(no) + '|' + artDir();
+  if(kunci in pxImgCache) return pxImgCache[kunci];
+  let out = null;
+  for(const src of pxRantaiGambar(no)){
+    try{
+      const r = await fetch(src, {cache:'force-cache'});
+      if(!r.ok) continue;
+      const b = await r.blob();
+      if(!b.size || (b.type && !/^image\//.test(b.type))) continue;
+      const du = await pxBlobToDataURL(b);
+      if(!du || !/^data:image\//.test(du)) continue;
+      if(/\.jpe?g$/i.test(src)){ out = {url:du, fmt:'JPEG'}; break; }
+      if(/\.png$/i.test(src)){  out = {url:du, fmt:'PNG'};  break; }
+      const im = await loadImg(du);                       // webp → JPEG
+      if(im){ out = {url:pxCanvasJpeg(im), fmt:'JPEG'}; break; }
+    }catch(e){ /* fetch bisa gagal saat dibuka lewat file:// — pakai cara di bawah */ }
+  }
+  if(!out){                                               // cadangan: <img> + canvas
+    for(const src of pxRantaiGambar(no)){
+      const im = await loadImg(src);
+      if(im){ out = {url:pxCanvasJpeg(im), fmt:'JPEG'}; break; }
+    }
+  }
+  pxImgCache[kunci] = out;
+  return out;
+}
+
+/* --- kartu teks untuk kartu yang belum ada berkas gambarnya --- */
+function pxTextCard(c){
+  const W = 450, H = 620, col = HEXC[c.c] || '#888';
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  x.fillStyle = '#F4F1E8'; x.fillRect(0,0,W,H);
+  x.strokeStyle = col; x.lineWidth = 16; x.strokeRect(8,8,W-16,H-16);
+  x.fillStyle = col; x.fillRect(16,16,W-32,86);
+
+  x.fillStyle = '#fff'; x.textBaseline = 'middle'; x.textAlign = 'center';
+  x.beginPath(); x.arc(70,59,30,0,Math.PI*2); x.fill();
+  x.fillStyle = col; x.font = '900 32px Arial, sans-serif';
+  x.fillText(String(c.l), 70, 61);
+  x.fillStyle = '#fff'; x.textAlign = 'right'; x.font = 'bold 20px Arial, sans-serif';
+  x.fillText(`${c.c.toUpperCase()} · R-${c.r} · ${c.p}`, W-30, 61);
+
+  x.textAlign = 'left'; x.textBaseline = 'top';
+  let y = 128;
+  const wrap = (txt, font, lh, maxY, warna)=>{
+    x.font = font; x.fillStyle = warna;
+    for(const par of String(txt).split('\n')){
+      let line = '';
+      for(const w of par.split(' ')){
+        const tt = line ? line+' '+w : w;
+        if(x.measureText(tt).width > W-70){
+          x.fillText(line, 35, y); y += lh; line = w;
+          if(y > maxY) return;
+        } else line = tt;
+      }
+      x.fillText(line, 35, y); y += lh;
+      if(y > maxY) return;
+    }
+  };
+  wrap(cardName(c), 'bold 27px Arial, sans-serif', 33, 250, '#14181D');
+  y += 6;
+  wrap(`${c.f || '-'} · ${(c.ra||[]).join('/') || '-'}`, '19px Arial, sans-serif', 25, 300, '#5A6673');
+  y += 10;
+  x.strokeStyle = '#C9C3B4'; x.lineWidth = 2;
+  x.beginPath(); x.moveTo(35,y); x.lineTo(W-35,y); x.stroke();
+  y += 14;
+  wrap(cardEff(c) || '', '20px Arial, sans-serif', 27, H-120, '#2A3038');
+
+  x.fillStyle = '#8B8677'; x.font = '19px "Courier New", monospace';
+  x.fillText(c.no, 35, H-58);
+  x.textAlign = 'right';
+  x.fillText('PROXY · SAMPLE', W-35, H-58);
+
+  x.save();                                    // watermark miring
+  x.translate(W/2, H/2); x.rotate(-Math.PI/9);
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.fillStyle = 'rgba(20,24,29,.10)';
+  x.font = '900 74px Arial, sans-serif';
+  x.fillText('SAMPLE', 0, 0);
+  x.restore();
+
+  return {url: cv.toDataURL('image/jpeg', 0.92), fmt:'JPEG'};
+}
+
+/* --- memuat jsPDF hanya saat dibutuhkan --- */
+function pxEnsureJsPDF(){
+  if(window.jspdf && window.jspdf.jsPDF) return Promise.resolve(true);
+  return new Promise(res=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload  = ()=>res(!!(window.jspdf && window.jspdf.jsPDF));
+    s.onerror = ()=>res(false);
+    document.head.appendChild(s);
+  });
+}
+
+/* --- pembuat PDF --- */
+$('#pxPdf').addEventListener('click', async ()=>{
+  const btn = $('#pxPdf');
+  const list = [];
+  Object.entries(pxSel).forEach(([no,q])=>{
+    const c = DB.find(d=>d.no===no);
+    if(c) for(let i=0;i<q;i++) list.push(c);
+  });
+  if(!list.length){ alert('Daftar cetak masih kosong.'); return; }
+  if(list.length > 180 &&
+     !confirm(`${list.length} kartu = ${Math.ceil(list.length/9)} halaman A4. Lanjutkan?`)) return;
+
+  list.sort((a,b)=>CORDER[a.c]-CORDER[b.c] || a.l-b.l || a.no.localeCompare(b.no));
+
+  const asli = '⬇ Buat PDF';
+  btn.disabled = true; btn.textContent = 'Memuat jsPDF…';
+  if(!await pxEnsureJsPDF()){
+    btn.disabled = false; btn.textContent = asli;
+    alert('Library pembuat PDF gagal dimuat — butuh koneksi internet. Coba lagi setelah tersambung.');
+    return;
+  }
+
+  const pakaiTeks = $('#pxText').checked;
+  const unik = [...new Set(list.map(c=>c.no))];
+  const src = {}, tanpaGambar = [];
+  for(let i=0;i<unik.length;i++){
+    const no = unik[i];
+    let img = await pxCardImage(no);
+    if(!img){
+      tanpaGambar.push(no);
+      img = pakaiTeks ? pxTextCard(DB.find(d=>d.no===no)) : null;
+    }
+    src[no] = img;
+    btn.textContent = `Memuat gambar… ${i+1}/${unik.length}`;
+  }
+
+  const cetak = list.filter(c=>src[c.no]);
+  if(!cetak.length){
+    btn.disabled = false; btn.textContent = asli;
+    alert('Tidak ada kartu yang bisa dicetak — semua kartu di daftar belum punya berkas gambar, ' +
+          'dan opsi "kartu teks" sedang dimatikan.');
+    return;
+  }
+
+  btn.textContent = 'Menyusun PDF…';
+  const {jsPDF} = window.jspdf;
+  const pdf = new jsPDF({unit:'mm', format:'a4', orientation:'portrait', compress:true});
+
+  const GAP = parseFloat($('#pxGap').value) || 0;
+  const {CW,CH,COLS,ROWS,PW,PH} = PXP;
+  const gridW = COLS*CW + (COLS-1)*GAP;
+  const gridH = ROWS*CH + (ROWS-1)*GAP;
+  const mx = (PW - gridW)/2, my = (PH - gridH)/2;
+  const perPage = COLS*ROWS;
+  const halaman = Math.ceil(cetak.length/perPage);
+  const cut  = $('#pxCut').checked;
+  const foot = $('#pxFoot').checked;
+  const markL = Math.max(3, Math.min(6, Math.min(mx, my) - 2.5));
+
+  for(let p=0; p<halaman; p++){
+    if(p > 0) pdf.addPage();
+    const isi = cetak.slice(p*perPage, (p+1)*perPage);
+    const kolom = new Set(), baris = new Set();
+
+    isi.forEach((c, s)=>{
+      const cx = s % COLS, cy = Math.floor(s / COLS);
+      kolom.add(cx); baris.add(cy);
+      const x = mx + cx*(CW+GAP), y = my + cy*(CH+GAP);
+      const im = src[c.no];
+      try { pdf.addImage(im.url, im.fmt, x, y, CW, CH, undefined, 'FAST'); }
+      catch(err){ console.error('[MHR Deck Lab] gagal menempel gambar ' + c.no, err); }
+    });
+
+    if(cut){                                   // tanda potong, hanya di area margin
+      pdf.setLineWidth(0.08);
+      pdf.setDrawColor(130);
+      [...kolom].forEach(cx=>{
+        const x1 = mx + cx*(CW+GAP);
+        [x1, x1+CW].forEach(x=>{
+          pdf.line(x, my - 2 - markL, x, my - 2);
+          pdf.line(x, my + gridH + 2, x, my + gridH + 2 + markL);
+        });
+      });
+      [...baris].forEach(cy=>{
+        const y1 = my + cy*(CH+GAP);
+        [y1, y1+CH].forEach(y=>{
+          pdf.line(mx - 2 - markL, y, mx - 2, y);
+          pdf.line(mx + gridW + 2, y, mx + gridW + 2 + markL, y);
+        });
+      });
+    }
+
+    if(foot){
+      pdf.setFontSize(6);
+      pdf.setTextColor(150);
+      pdf.text(`MHR Deck Lab · proxy SAMPLE (bukan kartu resmi) · ${store.active} · cetak 100% / ukuran asli`,
+               mx, PH - 5);
+      pdf.text(`hal. ${p+1}/${halaman}`, PW - mx, PH - 5, {align:'right'});
+    }
+  }
+
+  const nama = (store.active.replace(/[^\w\- ]+/g,'').trim() || 'deck');
+  pdf.save(`proxy-${nama}.pdf`);
+
+  btn.disabled = false;
+  btn.textContent = `✓ ${cetak.length} kartu · ${halaman} halaman`;
+  setTimeout(()=>btn.textContent = asli, 4000);
+
+  if(tanpaGambar.length){
+    alert((pakaiTeks
+        ? `${tanpaGambar.length} kartu belum punya berkas gambar, jadi dicetak sebagai kartu teks:\n`
+        : `${tanpaGambar.length} kartu dilewati karena belum punya berkas gambar:\n`)
+      + tanpaGambar.join(', '));
+  }
+});
+
 
 /* muat pengaturan tersimpan *//* muat pengaturan tersimpan */
 state.lang = (store.lang === 'en') ? 'en' : 'id';
@@ -2742,12 +3283,6 @@ if(!DB.length){
     Pastikan berkas itu ada di folder yang sama dengan index.html.<br><br>
     <span style="font-size:11px">Card database failed to load — cards.js is missing or unreadable.</span>
   </div>`;
-}
-if(!DB.length){
-  document.getElementById('cards').innerHTML =
-    '<div class="empty">Gagal memuat data kartu (<b>cards.js</b>).<br>' +
-    'Pastikan berkas cards.js berada di folder yang sama dengan index.html, ' +
-    'lalu muat ulang halaman.</div>';
 }
 amanJalankan('bahasa', applyLang);
 amanJalankan('renderDeckSelect', renderDeckSelect);
