@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v5.5** · 18 Agustus 2026
+**Versi saat ini: v5.7** · 20 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -11,6 +11,14 @@ Dibuat karena belum ada deck builder resmi untuk game ini.
 > Fan-made, tidak berafiliasi dengan atau disponsori oleh Marvel maupun penerbit
 > Marvel Hero Rush. Seluruh nama kartu, teks efek, dan artwork adalah milik
 > pemegang haknya masing-masing. Gambar kartu menggunakan versi ber-watermark SAMPLE.
+
+**Catatan izin (internal, tidak ditampilkan di situs).** Penggunaan gambar kartu
+telah mendapat izin **dengan syarat setiap gambar diberi watermark SAMPLE** —
+syarat ini wajib dipatuhi untuk semua batch gambar di masa depan, termasuk set baru.
+Donasi juga diperbolehkan **sebatas biaya pengembangan** untuk membantu komunitas
+menyusun deck dan mempermudah pemain baru. Di luar itu (iklan berbayar, fitur
+berlangganan, penjualan gambar) belum tercakup dan perlu izin terpisah.
+Simpan bukti tertulis izinnya beserta nama pemberi dan tanggalnya.
 
 ---
 
@@ -108,6 +116,57 @@ jadi tidak akan muncul gambar rusak.
 `index.html` tidak perlu diubah saat menambah varian — cukup unggah gambarnya
 ke folder `images/`.
 
+### Cetak kartu proxy (khusus mode admin)
+
+Fitur ini **hanya ada di mode admin** — pengunjung biasa tidak melihat tombol
+maupun panelnya.
+
+1. Buka situs dengan `?admin=1`, misal
+   `https://data2712-code.github.io/mhr-lab-x7k2m9/?admin=1`
+2. Susun deck di tab **🛠 Deck Builder** seperti biasa
+3. Pindah ke tab **🏆 Deck Komunitas** → di dalam kotak **Mode admin**, bagian bawah,
+   klik **🖨 Cetak kartu proxy (PDF)**
+4. Daftar cetak otomatis terisi dari deck aktif. Bisa disesuaikan: **+ / − / ✕** per
+   kartu, cari kartu lain di kolom pencarian, atau **↺ Muat dari deck aktif**
+5. Klik **⬇ Buat PDF** → berkas `proxy-<nama deck>.pdf` terunduh
+
+Spesifikasi hasil cetak:
+
+| Hal | Nilai |
+|---|---|
+| Kertas | A4 210 × 297 mm, potret |
+| Ukuran kartu | 63 × 88 mm (ukuran standar TCG, pas masuk sleeve) |
+| Per halaman | 9 kartu (grid 3 × 3), otomatis terpusat |
+| Margin | 8,5 mm samping · 14,5 mm atas–bawah (pada jarak antar kartu 2 mm) |
+
+Empat opsi sebelum PDF dibuat:
+
+- **Garis potong** — tanda potong tipis di area margin saja, tidak menimpa gambar kartu
+- **Jarak antar kartu** — 0 / 2 / 4 mm; makin lega makin mudah dipotong
+- **Kartu tanpa gambar dicetak sebagai kartu teks** — berisi nama, level, jarak, power,
+  trait, dan teks efek, jadi tetap bisa dipakai bermain. Kalau dimatikan, kartu itu
+  dilewati dan jumlahnya dilaporkan
+- **Catatan kecil di kaki halaman** — keterangan "proxy SAMPLE (bukan kartu resmi)",
+  nama deck, dan nomor halaman
+
+**Sumber gambar** mengikuti bahasa aktif dan pilihan varian artwork, dengan urutan
+cadangan: varian pilihan → versi utama bahasa aktif → versi Indonesia → `.png`/`.webp`.
+Jadi kalau gambar Inggris atau variannya belum ada, yang dipakai gambar Indonesia versi
+utama, bukan kartu teks.
+
+**Penting saat mencetak:** di dialog print pilih skala **100% / "Ukuran asli"**, jangan
+"Fit to page" — kalau tidak, ukurannya menyusut beberapa milimeter dan tidak lagi pas
+dengan kartu asli. Pengingat ini juga tertulis di dalam panelnya.
+
+Catatan teknis: pembuat PDF memakai library **jsPDF** dari CDN
+(`cdnjs.cloudflare.com`), dimuat **hanya saat tombol Buat PDF diklik** — pengunjung biasa
+tidak pernah mengunduhnya, jadi kecepatan muat halaman tidak berubah. Konsekuensinya:
+fitur ini butuh koneksi internet saat dipakai.
+
+Seperti panel admin lain, `?admin=1` hanya **menyembunyikan dari tampilan**, bukan
+pengamanan. Itu memadai: panel ini tidak punya kuasa apa pun atas situs — dia hanya
+menyusun PDF dari gambar yang memang sudah publik di folder `images/`.
+
 ### Cara menambah deck komunitas
 
 1. Susun deck di aplikasi seperti biasa
@@ -192,12 +251,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v5.5.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v5.7.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v5.5` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v5.7` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v5.5</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v5.7</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -230,6 +289,40 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v5.7 — 20 Agustus 2026
+- **Fitur cetak kartu proxy dipasang — khusus mode admin.** Tombol
+  **🖨 Cetak kartu proxy (PDF)** ada di dalam kotak Mode admin pada tab
+  **Deck Komunitas**, jadi hanya muncul saat situs dibuka dengan `?admin=1`
+- Output **PDF A4**, kartu **63 × 88 mm**, **9 kartu per halaman**, otomatis terpusat.
+  Terverifikasi lewat pengukuran berkas PDF-nya, bukan hanya tampilan layar
+- Daftar cetak terisi otomatis dari deck aktif dan bisa disesuaikan per kartu, ditambah
+  kartu lain lewat pencarian (nama Indonesia maupun Inggris), atau dimuat ulang dari deck
+- Opsi: garis potong di area margin, jarak antar kartu (0 / 2 / 4 mm), kartu teks untuk
+  kartu yang belum ada berkas gambarnya, dan catatan kecil di kaki halaman
+- Gambar mengikuti **bahasa aktif** dan **pilihan varian artwork**, dengan rantai cadangan
+  ke versi Indonesia kalau berkas Inggris/variannya belum ada
+- **jsPDF dimuat dari CDN hanya saat tombol Buat PDF diklik**, jadi tidak menambah beban
+  muat halaman bagi pengunjung biasa
+- Ringkasan menampilkan jumlah kartu, jumlah halaman A4, dan sisa slot kosong di halaman
+  terakhir; kartu tanpa berkas gambar ditandai di daftar sebelum PDF dibuat
+- 🔧 **Fix:** fungsi `dvImgFallback` sudah tidak ada di berkas sejak refactor, padahal
+  masih dipanggil dari layar **Lihat deck**. Akibatnya setiap gambar yang gagal dimuat
+  memicu error di Console dan rantai cadangan `.jpg → .png → .webp` tidak pernah jalan.
+  Fungsinya dipasang kembali, sekaligus ikut mencoba versi Indonesia kalau berkas
+  bahasa aktif tidak ada
+- 🔧 **Fix:** nama kartu di layar **Lihat deck** (kartu tanpa gambar) masih memakai nama
+  Indonesia walau situs sedang berbahasa Inggris
+- 🔧 Blok pesan "cards.js gagal dimuat" yang tertulis dua kali di bagian inisialisasi
+  dirapikan jadi satu — versi kedua memanggil elemen tanpa pengaman dan menimpa
+  pesan yang lebih informatif
+- Catatan: entri `v5.2` yang tertulis dua kali di README ini juga dirapikan
+
+### v5.6 — 20 Agustus 2026
+- Tombol **Salin tabel** di panel deck: format teks berkategori warna berisi
+  jumlah, nomor kartu, level, dan nama kartu, plus ringkasan komposisi dan
+  rata-rata level. Cocok ditempel ke WhatsApp, Discord, atau lembar kerja.
+  Format lama ("Salin daftar") tetap ada
 
 ### v5.5 — 18 Agustus 2026
 - Dukungan sukarela **aktif**: Saweria `saweria.co/data2712`
@@ -268,24 +361,6 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
   - Pengingat halus muncul kalau deck belum pernah dicadangkan
 - **Jadwal turnamen diperbarui**: Ogre Gandaria Neverland kini Jumat 19.00 (sebelumnya
   On Demand), dan Global Hobiz Store menambah sesi Rabu 19.30. Total 7 sesi/minggu
-
-### v5.2 — 18 Agustus 2026
-- **Database kartu dipisah ke `cards.js`.** `index.html` turun dari 214 KB ke 120 KB.
-  Penambahan set baru kini cukup mengganti `cards.js`, tanpa menyentuh berkas aplikasi
-- **Backup & restore deck.** Tombol di panel deck menyimpan seluruh deck ke satu
-  berkas JSON, dan memulihkannya di perangkat lain:
-  - **Mode gabung** (default): deck dari berkas ditambahkan, deck yang sudah ada
-    tetap utuh; nama yang bentrok diberi akhiran
-  - **Mode timpa**: mengganti semua, dengan konfirmasi lebih dulu
-  - Sebelum memilih, ditampilkan **tanggal dan waktu pembuatan berkas** beserta
-    keterangan apakah berkas itu lebih baru atau lebih lama dari backup terakhir
-    di perangkat ini
-  - Kartu yang tidak dikenali dilewati dan dilaporkan jumlahnya, bukan menggagalkan
-    seluruh proses
-  - Bahasa dan mode tampilan sengaja tidak ikut dipulihkan — itu preferensi per perangkat
-  - Pengingat muncul kalau pengguna sudah punya deck tapi belum pernah backup
-- Jadwal LGS diperbarui: Ogre Gandaria Neverland Jumat kini 19.00 (sebelumnya
-  On Demand), Global Hobiz Store menambah sesi Rabu 19.30. Total 7 sesi per minggu
 
 ### v5.1 — 17 Agustus 2026 · penyesuaian dengan rulebook resmi
 Berdasarkan Comprehensive Rules 1.00 (16 Juni 2026).
@@ -595,11 +670,10 @@ Hal-hal yang berpengaruh atau berpotensi berpengaruh ke Deck Lab:
 
 ## Rencana / ide berikutnya
 
-- [ ] Reintegrasi fitur cetak kartu proxy (PDF A4, kode ada di backup)
+- [x] ~~Cetak kartu proxy (PDF A4, khusus mode admin)~~ — selesai di v5.7
 - [ ] Impor deck dari teks (pasangan dari "Salin daftar deck")
 - [ ] Navigasi ◀ ▶ / panah keyboard di dalam popup kartu
 - [ ] Duplikat deck untuk mencoba variasi
-- [ ] Filter bar yang bisa dilipat di layar HP
 - [ ] Gambar kartu resolusi lebih tinggi (>450 px) untuk hasil unduhan lebih tajam
 - [ ] Pelacakan koleksi kartu yang dimiliki (pekerjaan besar, perlu dipikirkan matang)
 - [ ] Filter mekanik untuk kemampuan kunci rulebook (BLOCK, ASSAULT, AIR STRIKE, UNIQUE)
