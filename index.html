@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.0  ·  20 Agustus 2026
+     MHR DECK LAB  ·  versi 6.1  ·  26 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.0">
+<meta name="version" content="6.1">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -419,6 +419,10 @@
     font-weight:700;margin-bottom:8px}
   .lgs-today .row{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;padding:4px 0;font-size:13.5px}
   .lgs-today .row .jam{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  /* ikon peta di panel "hari ini" sempat tampil sebesar layar karena belum
+     punya ukuran — samakan dengan ikon di kartu per hari */
+  .lgs-today .row a{display:inline-flex;align-items:center;gap:5px}
+  .lgs-today .row a svg{width:12px;height:12px;flex:none;opacity:.65}
   .lgs-today .kosong{font-size:13px;color:#C9CFD8}
   .lgs-days{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px;margin-bottom:26px}
   .lgs-day{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px 15px}
@@ -447,8 +451,14 @@
     border-radius:8px;padding:8px 13px;font-size:12.5px;text-decoration:none;white-space:nowrap;
     display:inline-flex;align-items:center;gap:6px;flex:none}
   .lgs-map:hover{border-color:var(--accent);color:var(--accent)}
+  .lgs-map svg{width:13px;height:13px;flex:none;opacity:.75}
   .lgs-note{color:var(--muted);font-size:11.5px;line-height:1.6;margin-top:18px;
     border-top:1px solid var(--line);padding-top:14px}
+  /* lencana kota — dipakai di panel hari ini, kartu per hari, dan daftar toko */
+  .kota{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted);
+    border:1px solid var(--line);border-radius:5px;padding:1px 6px;white-space:nowrap}
+  .lgs-store .kota{vertical-align:3px;margin-left:7px}
+  .lgs-item .baris{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 
   /* ================= MOBILE: navigasi bawah ================= */
   @media (max-width:920px){
@@ -697,11 +707,12 @@
   <div class="lgs-wrap">
     <div class="lgs-head">
       <h2>Weekly Tournament</h2>
-      <p>Jadwal turnamen mingguan Marvel Hero Rush di Local Game Shop area Jakarta.
-        Klik nama toko atau tombol lokasi untuk membuka Google Maps. Untuk memastikan jadwal,
-        menanyakan format turnamen, atau minta link grup WhatsApp komunitas, hubungi tokonya langsung —
-        keterangan lengkap ada di bawah.</p>
+      <p>Jadwal turnamen mingguan Marvel Hero Rush di Local Game Shop, kini di beberapa kota.
+        Klik nama toko atau tombol lokasi untuk membuka Google Maps. Jam main ditulis lengkap dengan
+        zona waktunya (WIB / WITA / WIT). Untuk memastikan jadwal, menanyakan format turnamen, atau
+        minta link grup WhatsApp komunitas, hubungi tokonya langsung — keterangan lengkap ada di bawah.</p>
     </div>
+    <div class="meta-filter" id="lgsFilter"></div>
     <div class="lgs-today" id="lgsToday"></div>
     <div class="lgs-days" id="lgsDays"></div>
     <div class="deck-sec-title" style="max-width:none">Daftar Local Game Shop</div>
@@ -844,7 +855,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.0</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.1</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2901,26 +2912,55 @@ function hariIni(){
   return d === 0 ? 7 : d;
 }
 
+/* Kota mana saja yang ada di data, urut kemunculan. Toko tanpa field kota
+   dikelompokkan sebagai '(tanpa kota)' agar tetap tampil. */
+function kotaLGS(){
+  return [...new Set(LGS.map(t=>t.kota).filter(Boolean))];
+}
+/* Sisipkan zona waktu tepat setelah jam pertama: "19.30 - Selesai" + WIB
+   menjadi "19.30 WIB - Selesai". Teks tanpa jam (mis. "On Demand") dibiarkan. */
+function jamTz(w, tz){
+  if(!tz) return w;
+  return /\d{1,2}[.:]\d{2}/.test(w) ? w.replace(/(\d{1,2}[.:]\d{2})/, `$1 ${tz}`) : w;
+}
+let lgsFilterKota = '';
+
 function renderLgs(){
   const hi = hariIni();
+  const semuaKota = kotaLGS();
+  if(lgsFilterKota && !semuaKota.includes(lgsFilterKota)) lgsFilterKota = '';
+  const daftar = LGS.filter(t=>!lgsFilterKota || t.kota === lgsFilterKota);
+
   const perHari = {};
-  LGS.forEach(t=>t.jd.forEach(j=>{
-    (perHari[j.h] = perHari[j.h] || []).push({nm:t.nm, map:t.map, w:j.w});
+  daftar.forEach(t=>t.jd.forEach(j=>{
+    (perHari[j.h] = perHari[j.h] || []).push({nm:t.nm, map:t.map, w:j.w, kota:t.kota, tz:t.tz});
   }));
 
-  $('#navLgs').textContent = LGS.length;
+  $('#navLgs').textContent = daftar.length;
+
+  // filter kota — hanya ditampilkan kalau memang ada lebih dari satu kota
+  $('#lgsFilter').innerHTML = semuaKota.length > 1
+    ? [['','Semua kota'], ...semuaKota.map(k=>[k,k])].map(([v,label])=>
+        `<button data-kota="${v}" aria-pressed="${lgsFilterKota === v}">${label}` +
+        (v ? ` <span style="opacity:.6">${LGS.filter(t=>t.kota===v).length}</span>` : '') +
+        `</button>`).join('')
+    : '';
+
+  const lencana = k => k ? `<span class="kota">${k}</span>` : '';
 
   // panel hari ini
   const kini = perHari[hi] || [];
   $('#lgsToday').innerHTML =
-    `<div class="t">Hari ini — ${HARI[hi]}</div>` +
+    `<div class="t">Hari ini — ${HARI[hi]}${lgsFilterKota ? ' · ' + lgsFilterKota : ''}</div>` +
     (kini.length
       ? kini.map(x=>`<div class="row">
             <a href="${x.map}" target="_blank" rel="noopener"
               style="color:var(--paper);text-decoration:none;font-weight:700">${x.nm} ${PIN}</a>
-            <span class="jam">${x.w}</span>
+            ${lencana(x.kota)}
+            <span class="jam">${jamTz(x.w, x.tz)}</span>
           </div>`).join('')
-      : `<div class="kosong">Tidak ada jadwal turnamen hari ini. Cek daftar di bawah untuk hari lainnya.</div>`);
+      : `<div class="kosong">Tidak ada jadwal turnamen hari ini${lgsFilterKota ? ' di ' + lgsFilterKota : ''}. ` +
+        `Cek daftar di bawah untuk hari lainnya.</div>`);
 
   // kartu per hari (hanya hari yang ada jadwalnya), dimulai dari hari ini
   const urut = [];
@@ -2929,18 +2969,23 @@ function renderLgs(){
     <div class="lgs-day${h===hi?' now':''}">
       <h3>${HARI[h]}${h===hi?'<span class="badge">hari ini</span>':''}</h3>
       ${perHari[h].map(x=>`<div class="lgs-item">
-          <a href="${x.map}" target="_blank" rel="noopener">${x.nm} ${PIN}</a>
-          <span class="jam">${x.w}</span>
+          <div class="baris">
+            <a href="${x.map}" target="_blank" rel="noopener">${x.nm} ${PIN}</a>
+            ${lencana(x.kota)}
+          </div>
+          <span class="jam">${jamTz(x.w, x.tz)}</span>
         </div>`).join('')}
-    </div>`).join('');
+    </div>`).join('') ||
+    `<div class="lgs-day"><h3>Belum ada jadwal</h3>
+      <div class="lgs-item"><span class="jam">Tidak ada jadwal untuk kota ini.</span></div></div>`;
 
   // daftar per toko
-  $('#lgsStores').innerHTML = LGS.map(t=>`
+  $('#lgsStores').innerHTML = daftar.map(t=>`
     <div class="lgs-store">
       <div>
-        <span class="nm">${t.nm}</span>
+        <span class="nm">${t.nm}${lencana(t.kota)}</span>
         <div class="sch">${t.jd.slice().sort((a,b)=>a.h-b.h)
-          .map(j=>`<span${j.h===hi?' style="border-color:var(--accent);color:var(--accent)"':''}>${HARI[j.h]} · ${j.w}</span>`).join('')}</div>
+          .map(j=>`<span${j.h===hi?' style="border-color:var(--accent);color:var(--accent)"':''}>${HARI[j.h]} · ${jamTz(j.w, t.tz)}</span>`).join('')}</div>
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
         <a class="lgs-map" href="${t.map}" target="_blank" rel="noopener">${PIN} Lokasi</a>
@@ -2958,10 +3003,20 @@ function renderLgs(){
     `komunitas masing-masing — di situ biasanya jadwal terbaru, perubahan jam, dan pengumuman turnamen ` +
     `disebarkan lebih dulu. Cara paling mudah: tanyakan link grupnya saat menghubungi toko atau saat ` +
     `datang bermain, atau cek akun media sosial toko yang bersangkutan.<br><br>` +
+    `<b style="color:var(--paper)">Perhatikan zona waktunya.</b> Jam yang tertulis memakai zona waktu ` +
+    `kota tempat tokonya berada (WIB, WITA, atau WIT), bukan zona waktu perangkat Anda. Selisihnya ` +
+    `satu jam antar zona — WITA lebih cepat 1 jam dari WIB, WIT lebih cepat 2 jam.<br><br>` +
     `Jadwal di halaman ini terakhir diperbarui ${LGS_UPDATE}. Ada LGS lain yang mengadakan turnamen ` +
     `mingguan, atau punya nomor kontak dan link grup yang bisa ditampilkan di sini? Kabari lewat TikTok ` +
     `<a href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener">@deteprtm</a>.`;
 }
+
+$('#lgsFilter').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-kota]');
+  if(!b) return;
+  lgsFilterKota = b.dataset.kota;
+  renderLgs();
+});
 
 /* ==================== NAVIGASI HALAMAN ==================== */
 const PAGES = ['cards','build','meta','lgs'];
