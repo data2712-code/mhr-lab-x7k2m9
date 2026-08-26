@@ -72,21 +72,55 @@ window.DUKUNG = {
 };
 
 /* ========== JADWAL TURNAMEN LGS ==========
-   h = hari: 1 Senin, 2 Selasa, 3 Rabu, 4 Kamis, 5 Jumat, 6 Sabtu, 7 Minggu
-   Satu toko boleh punya beberapa jadwal.
+   h  = hari: 1 Senin, 2 Selasa, 3 Rabu, 4 Kamis, 5 Jumat, 6 Sabtu, 7 Minggu
+   w  = jam main. Tulis jamnya saja seperti biasa ('19.30 - Selesai') —
+        zona waktu TIDAK perlu diketik di sini, aplikasi menyisipkannya sendiri
+        dari field tz, jadi tampil menjadi '19.30 WIB - Selesai'.
+   kota = kota tempat toko berada. Ini yang dipakai untuk lencana kota dan
+        untuk baris filter di atas jadwal (filter otomatis muncul kalau kotanya
+        lebih dari satu).
+   tz = zona waktu kota tersebut: 'WIB' (UTC+7, Sumatera–Jawa–Kalbar/Kalteng),
+        'WITA' (UTC+8, Bali–NTB–NTT–Kalsel/Kaltim/Kaltara–Sulawesi),
+        'WIT' (UTC+9, Maluku–Papua).
+   Satu toko boleh punya beberapa jadwal — tambahkan objek lain di dalam jd.
    Field hp (nomor WhatsApp toko) dan wa (link grup WhatsApp) opsional —
    tombolnya otomatis tidak tampil kalau dikosongkan.
    Nomor hp tanpa tanda + dan tanpa spasi, contoh: 6281234567890 */
-window.LGS_UPDATE = '17 Agustus 2026';
+window.LGS_UPDATE = '26 Agustus 2026';
 window.LGS = [
-  { nm:'Ogre Gandaria Neverland', map:'https://maps.app.goo.gl/7wAqGnKSyeECnt8C6',
+  /* ---------- JAKARTA ---------- */
+  { nm:'Ogre Gandaria Neverland', kota:'Jakarta', tz:'WIB',
+    map:'https://maps.app.goo.gl/7wAqGnKSyeECnt8C6',
     jd:[ {h:1, w:'19.00 - Selesai'}, {h:5, w:'19.00 - Selesai'} ] },
-  { nm:'Invaders Board Game Station', map:'https://maps.app.goo.gl/pWxvL18uXMr5EGBC7',
+  { nm:'Invaders Board Game Station', kota:'Jakarta', tz:'WIB',
+    map:'https://maps.app.goo.gl/pWxvL18uXMr5EGBC7',
     jd:[ {h:4, w:'19.00 - Selesai'} ] },
-  { nm:'Global Hobiz Store', map:'https://maps.app.goo.gl/8BQJ1EZJQXPyrMqh8',
+  { nm:'Global Hobiz Store', kota:'Jakarta', tz:'WIB',
+    map:'https://maps.app.goo.gl/8BQJ1EZJQXPyrMqh8',
     jd:[ {h:3, w:'19.30 - Selesai'}, {h:6, w:'13.00 - Selesai'} ] },
-  { nm:'TwoStompas', map:'https://maps.app.goo.gl/ss2chXHcrwmUJAnF9',
+  { nm:'TwoStompas', kota:'Jakarta', tz:'WIB',
+    map:'https://maps.app.goo.gl/ss2chXHcrwmUJAnF9',
     jd:[ {h:6, w:'15.00 - Selesai'} ] },
-  { nm:'ONIC TCG Viridian Vault', map:'https://maps.app.goo.gl/yLw8FSPnj6wMfDGTA',
+  { nm:'ONIC TCG Viridian Vault', kota:'Jakarta', tz:'WIB',
+    map:'https://maps.app.goo.gl/yLw8FSPnj6wMfDGTA',
     jd:[ {h:7, w:'15.00 - Selesai'} ] },
+
+  /* ---------- TANGERANG SELATAN ---------- */
+  { nm:'Catnie Hobbies & Games', kota:'Tangerang Selatan', tz:'WIB',
+    map:'https://maps.app.goo.gl/MDPiU3MRvqSWybW27',
+    jd:[ {h:7, w:'14.00 - Selesai'} ] },
+
+  /* ---------- BATAM ---------- */
+  { nm:'Gattchaa One Batam Mall', kota:'Batam', tz:'WIB',
+    map:'https://share.google/ufGPacTa06OHPWLfi',
+    jd:[ {h:1, w:'19.30 - Selesai'} ] },
+  { nm:'House of Cards', kota:'Batam', tz:'WIB',
+    map:'https://share.google/D1PSrddxbi4iKLpAY',
+    jd:[ {h:3, w:'19.00 - Selesai'} ] },
+  { nm:'Gale Force Games', kota:'Batam', tz:'WIB',
+    map:'https://share.google/aB4TPR379JHjwGvXY',
+    jd:[ {h:5, w:'19.00 - Selesai'}, {h:7, w:'16.00 - Selesai'} ] },
+  { nm:'Gattchaa Mega Mall Batam Center', kota:'Batam', tz:'WIB',
+    map:'https://share.google/iUeCNf1jNzVs8x2yo',
+    jd:[ {h:6, w:'17.30 - Selesai'} ] },
 ];
