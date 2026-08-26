@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.1  ·  26 Agustus 2026
+     MHR DECK LAB  ·  versi 6.3  ·  26 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.1">
+<meta name="version" content="6.3">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -361,6 +361,7 @@
   nav.tabs button:hover{color:var(--paper)}
   nav.tabs button[aria-current="true"]{color:var(--accent);border-bottom-color:var(--accent)}
   nav.tabs .ts{display:none}
+  nav.tabs button[hidden]{display:none}   /* atribut hidden kalah dari display:flex */
   nav.tabs .cnt{font-family:var(--mono);font-size:10.5px;background:var(--panel);
     border:1px solid var(--line);border-radius:999px;padding:1px 7px}
   nav.tabs button[aria-current="true"] .cnt{border-color:var(--accent);color:var(--accent)}
@@ -693,8 +694,8 @@
 <section id="metaPage">
   <div class="meta-wrap">
     <div class="meta-head">
-      <h2>Deck Komunitas</h2>
-      <p>Deck yang sedang banyak dipakai di komunitas MHR Indonesia. Muat salah satunya ke
+      <h2 data-i18n="metaHead">Deck Komunitas</h2>
+      <p data-i18n="metaIntro">Deck yang sedang banyak dipakai di komunitas MHR Indonesia. Muat salah satunya ke
         Deck Builder untuk dilihat isinya atau dimodifikasi — deck yang sedang Anda susun tidak tertimpa.</p>
     </div>
     <div class="meta-filter" id="metaFilter"></div>
@@ -706,7 +707,7 @@
 <section id="lgsPage">
   <div class="lgs-wrap">
     <div class="lgs-head">
-      <h2>Weekly Tournament</h2>
+      <h2 data-i18n="lgsHead">Weekly Tournament</h2>
       <p>Jadwal turnamen mingguan Marvel Hero Rush di Local Game Shop, kini di beberapa kota.
         Klik nama toko atau tombol lokasi untuk membuka Google Maps. Jam main ditulis lengkap dengan
         zona waktunya (WIB / WITA / WIT). Untuk memastikan jadwal, menanyakan format turnamen, atau
@@ -833,7 +834,7 @@
 
     <div id="proxyAdmin"></div>
 
-    <p class="foot-note">Catatan: target ukuran deck dan batas salinan bisa disesuaikan dengan aturan resmi turnamen yang berlaku. Data kartu bersumber dari database resmi marvelherorush.com (bahasa Indonesia). Deck tersimpan otomatis di browser perangkat ini (localStorage) — aman ditutup dan dibuka kembali.</p>
+    <p class="foot-note" data-i18n="panelNote">Catatan: target ukuran deck dan batas salinan bisa disesuaikan dengan aturan resmi turnamen yang berlaku. Data kartu bersumber dari database resmi marvelherorush.com (bahasa Indonesia). Deck tersimpan otomatis di browser perangkat ini (localStorage) — aman ditutup dan dibuka kembali.</p>
   </aside>
 </div>
 
@@ -846,25 +847,25 @@
 <footer>
   <div class="foot-cta" id="footDukung" hidden></div>
   <div class="foot-cta">
-    Dibuat oleh
+    <span data-i18n="footBy">Dibuat oleh</span>
     <a class="foot-tiktok" href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 0 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-1.85-2.48V9.79a5.94 5.94 0 1 0 4.94 5.85V8.9a7 7 0 0 0 4.07 1.3V7.12a4.19 4.19 0 0 1-3.01-1.3z"/></svg> @deteprtm</a>
-    — follow untuk update deck, tips, dan pembahasan Marvel Hero Rush.
+    <span data-i18n="footFollow">— follow untuk update deck, tips, dan pembahasan Marvel Hero Rush.</span>
   </div>
-  MHR Deck Lab adalah alat bantu buatan penggemar (fan-made) dan <b>tidak berafiliasi dengan atau disponsori oleh
+  <span data-i18n="footDisc">MHR Deck Lab adalah alat bantu buatan penggemar (fan-made) dan <b>tidak berafiliasi dengan atau disponsori oleh
   Marvel maupun penerbit Marvel Hero Rush</b>. Seluruh nama kartu, teks efek, serta merek dagang terkait adalah milik
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
-  Alat ini akan diturunkan apabila diminta oleh pemegang hak.
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.1</div>
+  Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.3</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
   <div class="dview-bar">
-    <button class="btn2" id="btnSimClose" style="flex:none;padding:9px 14px">✕ Tutup</button>
+    <button class="btn2" id="btnSimClose" data-i18n="close" style="flex:none;padding:9px 14px">✕ Tutup</button>
   </div>
   <div class="sim-sheet">
-    <h2>Simulasi Draw Awal</h2>
-    <div class="sim-sub">Mensimulasikan 6 kartu pembuka dari deck yang sedang Anda susun.
+    <h2 data-i18n="simHead">Simulasi Draw Awal</h2>
+    <div class="sim-sub" data-i18n="simSub">Mensimulasikan 6 kartu pembuka dari deck yang sedang Anda susun.
       Aturan mulligan: kartu yang ditukar dikembalikan ke <b>bawah</b> deck, lalu diambil
       kartu baru sejumlah yang sama dari <b>atas</b> deck, kemudian deck dikocok ulang.<br>
       <span style="color:#C9CFD8">Catatan: di permainan resmi mulligan hanya boleh dilakukan
@@ -872,20 +873,20 @@
       mencoba banyak kemungkinan pembukaan dari deck yang sama.</span></div>
     <div id="simWarn"></div>
     <div class="sim-bar">
-      <button class="main" id="simDraw">🔀 Kocok &amp; ambil 6 kartu</button>
+      <button class="main" id="simDraw" data-i18n="simDraw">🔀 Kocok &amp; ambil 6 kartu</button>
       <button id="simMull" disabled>♻ Mulligan</button>
       <span class="sim-info" id="simInfo"></span>
     </div>
     <div class="sim-hand" id="simHand"></div>
-    <div class="sim-hint">Klik kartu untuk menandainya akan ditukar. Klik nama kartu di
+    <div class="sim-hint" data-i18n="simHint">Klik kartu untuk menandainya akan ditukar. Klik nama kartu di
       daftar bawah untuk melihat detailnya.</div>
     <div class="sim-cols">
       <div>
-        <div class="sim-sec">Isi tangan saat ini</div>
+        <div class="sim-sec" data-i18n="simHandSec">Isi tangan saat ini</div>
         <div id="simTangan"></div>
       </div>
       <div>
-        <div class="sim-sec">Peluang muncul di 6 kartu pembuka</div>
+        <div class="sim-sec" data-i18n="simOddsSec">Peluang muncul di 6 kartu pembuka</div>
         <div class="sim-tbl" id="simPeluang"></div>
       </div>
     </div>
@@ -901,26 +902,26 @@
 
 <div class="dview" id="deckView" hidden>
   <div class="dview-bar">
-    <select class="hdscale" id="hdScale" title="Resolusi gambar hasil unduhan">
-      <option value="auto" selected>Resolusi: Otomatis</option>
-      <option value="1">1× (resolusi asli kartu)</option>
+    <select class="hdscale" id="hdScale" data-i18n-title="hdTitle" title="Resolusi gambar hasil unduhan">
+      <option value="auto" selected data-i18n="hdAuto">Resolusi: Otomatis</option>
+      <option value="1" data-i18n="hd1">1× (resolusi asli kartu)</option>
       <option value="1.5">1,5×</option>
       <option value="2">2×</option>
-      <option value="3">3× (file sangat besar)</option>
+      <option value="3" data-i18n="hd3">3× (file sangat besar)</option>
     </select>
-    <button class="btn2" id="btnDvHd" style="flex:none;padding:9px 14px;border-color:var(--accent);color:var(--accent);font-weight:700">⬇ Unduh HD</button>
-    <button class="btn2" id="btnDvPng" style="flex:none;padding:9px 14px">⬇ PNG biasa</button>
-    <button class="btn2" id="btnDvClose" style="flex:none;padding:9px 14px">✕ Tutup</button>
+    <button class="btn2" id="btnDvHd" data-i18n="hdBtn" style="flex:none;padding:9px 14px;border-color:var(--accent);color:var(--accent);font-weight:700">⬇ Unduh HD</button>
+    <button class="btn2" id="btnDvPng" data-i18n="pngBtn" style="flex:none;padding:9px 14px">⬇ PNG biasa</button>
+    <button class="btn2" id="btnDvClose" data-i18n="close" style="flex:none;padding:9px 14px">✕ Tutup</button>
   </div>
   <div class="dview-sheet" id="dviewSheet">
     <h2 id="dvTitle"></h2>
     <div class="dv-meta" id="dvMeta"></div>
     <div class="dview-grid" id="dvGrid"></div>
     <div class="dv-foot" style="text-align:left;color:var(--muted);font-family:var(--body);font-size:11.5px;line-height:1.6">
-      💡 Untuk hasil paling tajam: gunakan <b>Unduh HD</b>, lalu kirim di WhatsApp
+      <span data-i18n="dvTip">💡 Untuk hasil paling tajam: gunakan <b>Unduh HD</b>, lalu kirim di WhatsApp
       <b>sebagai Dokumen</b> (ikon 📎 → Document), bukan sebagai foto — kalau dikirim sebagai foto,
-      WhatsApp akan mengompres ulang gambarnya.
-      <span style="float:right;font-family:var(--mono)">Dibuat dengan MHR Deck Lab</span>
+      WhatsApp akan mengompres ulang gambarnya.</span>
+      <span style="float:right;font-family:var(--mono)" data-i18n="tblMade">Dibuat dengan MHR Deck Lab</span>
     </div>
   </div>
 </div>
@@ -933,7 +934,7 @@
   <div class="pxv-bar">
     <div class="h">🖨 Cetak kartu proxy
       <span>mode admin · A4 · kartu 63 × 88 mm · 9 kartu per halaman</span></div>
-    <button class="btn2" id="pxClose" style="flex:none;padding:9px 14px">✕ Tutup</button>
+    <button class="btn2" id="pxClose" data-i18n="close" style="flex:none;padding:9px 14px">✕ Tutup</button>
   </div>
   <div class="pxv-sheet">
     <div class="px-sec">Pengaturan cetak</div>
@@ -1532,6 +1533,73 @@ const T = {
   viewDeckBtn:  ['🖼 Lihat deck — tampilan untuk dibagikan','🖼 View deck — shareable layout'],
   copyLink:     ['🔗 Salin link deck','🔗 Copy deck link'],
   copyTable:    ['Salin tabel','Copy table'],
+  /* --- halaman & panel (v6.2) --- */
+  metaTitle:    ['MHR Deck Lab — Marvel Hero Rush Deck Builder',
+                 'MHR Deck Lab — Marvel Hero Rush Deck Builder (English)'],
+  metaDesc:     ['Deck builder Marvel Hero Rush TCG: 208 kartu lengkap dengan gambar, stat, dan teks efek bahasa Indonesia. Susun deck, bagikan sebagai link atau gambar.',
+                 'Marvel Hero Rush TCG deck builder: 192 cards with official English names, effects, and artwork. Build decks, share them as a link or an image, and export a printable decklist.'],
+  metaHead:     ['Deck Komunitas','Community Decks'],
+  metaIntro:    ['Deck yang sedang banyak dipakai di komunitas MHR Indonesia. Muat salah satunya ke Deck Builder untuk dilihat isinya atau dimodifikasi — deck yang sedang Anda susun tidak tertimpa.',
+                 'Decks that are seeing a lot of play in the Indonesian MHR community. Load one into Deck Builder to inspect or modify it — the deck you are currently building is never overwritten.'],
+  metaLoad:     ['Muat ke Deck Builder','Load into Deck Builder'],
+  metaView:     ['Lihat visual','View cards'],
+  metaNone:     ['Belum ada deck komunitas yang cocok dengan filter ini.','No community deck matches this filter yet.'],
+  metaAvgLv:    ['rata-rata Lv','average Lv'],
+  lgsHead:      ['Weekly Tournament','Weekly Tournament'],
+  close:        ['✕ Tutup','✕ Close'],
+  /* --- simulasi draw --- */
+  simHead:      ['Simulasi Draw Awal','Opening Draw Simulator'],
+  simSub:       ['Mensimulasikan 6 kartu pembuka dari deck yang sedang Anda susun. Aturan mulligan: kartu yang ditukar dikembalikan ke <b>bawah</b> deck, lalu diambil kartu baru sejumlah yang sama dari <b>atas</b> deck, kemudian deck dikocok ulang.<br><span style="color:#C9CFD8">Catatan: di permainan resmi mulligan hanya boleh dilakukan <b>satu kali</b>. Di simulator ini sengaja dibebaskan berulang kali agar Anda bisa mencoba banyak kemungkinan pembukaan dari deck yang sama.</span>',
+                 'Simulates the opening 6 cards from the deck you are building. Mulligan rule: the cards you swap go to the <b>bottom</b> of the deck, you draw the same number from the <b>top</b>, then the deck is shuffled again.<br><span style="color:#C9CFD8">Note: in official play a mulligan is allowed <b>only once</b>. This simulator deliberately lets you repeat it so you can explore many possible openings from the same deck.</span>'],
+  simDraw:      ['🔀 Kocok & ambil 6 kartu','🔀 Shuffle & draw 6'],
+  simMull:      ['♻ Mulligan','♻ Mulligan'],
+  simMullN:     ['♻ Mulligan','♻ Mulligan'],
+  simHint:      ['Klik kartu untuk menandainya akan ditukar. Klik nama kartu di daftar bawah untuk melihat detailnya.',
+                 'Click a card to mark it for swapping. Click a card name in the list below to see its details.'],
+  simHandSec:   ['Isi tangan saat ini','Current hand'],
+  simOddsSec:   ['Peluang muncul di 6 kartu pembuka','Chance of appearing in the opening 6'],
+  simEmptyDeck: ['Deck masih kosong — tambahkan kartu dulu di Deck Builder.','Your deck is empty — add cards in Deck Builder first.'],
+  simTooFew:    ['Deck hanya berisi','The deck holds only'],
+  simTooFew2:   ['kartu, kurang dari 6.','cards, fewer than 6.'],
+  simOffTarget: ['belum sesuai target','does not match the target of'],
+  simOffTarget2:['Peluang di bawah dihitung dari','The odds below are based on the'],
+  simOffTarget3:['kartu yang ada sekarang.','cards currently in the deck.'],
+  simNoCards:   ['Belum ada kartu. Tekan tombol kocok di atas.','No cards yet. Press the shuffle button above.'],
+  simMullDone:  ['kali mulligan','mulligans so far'],
+  /* --- layar lihat deck & ekspor --- */
+  hdTitle:      ['Resolusi gambar hasil unduhan','Resolution of the downloaded image'],
+  hdAuto:       ['Resolusi: Otomatis','Resolution: Automatic'],
+  hd1:          ['1× (resolusi asli kartu)','1× (native card resolution)'],
+  hd3:          ['3× (file sangat besar)','3× (very large file)'],
+  hdBtn:        ['⬇ Unduh HD','⬇ Download HD'],
+  pngBtn:       ['⬇ PNG biasa','⬇ Plain PNG'],
+  dvTip:        ['💡 Untuk hasil paling tajam: gunakan <b>Unduh HD</b>, lalu kirim di WhatsApp <b>sebagai Dokumen</b> (ikon 📎 → Document), bukan sebagai foto — kalau dikirim sebagai foto, WhatsApp akan mengompres ulang gambarnya.',
+                 '💡 For the sharpest result: use <b>Download HD</b>, then send it on WhatsApp <b>as a Document</b> (📎 → Document) rather than as a photo — sent as a photo, WhatsApp re-compresses the image.'],
+  hdLoading:    ['Memuat…','Loading…'],
+  hdBuilding:   ['Menyusun…','Building…'],
+  hdClamped:    ['Resolusi diturunkan otomatis karena jumlah kartu pada skala yang dipilih melebihi batas kemampuan browser ini.',
+                 'The resolution was reduced automatically because this many cards at the chosen scale exceeds what this browser can handle.'],
+  hdClampIOS:   ['iPhone/iPad lebih terbatas.','iPhone and iPad are more limited.'],
+  hdClampTip:   ['Untuk hasil lebih tajam: bagi deck jadi beberapa gambar, atau unduh dari laptop.',
+                 'For a sharper result, split the deck across several images or download from a laptop.'],
+  hdFail:       ['Gagal membuat gambar.','Could not create the image.'],
+  /* --- varian artwork --- */
+  artUsed:      ['dipakai untuk kartu ini di seluruh halaman, termasuk tampilan dan unduhan deck.',
+                 'is used for this card everywhere, including the deck view and downloads.'],
+  artMissing:   ['belum tersedia di koleksi','is not available in the collection yet'],
+  artVersion:   ['Versi','Version'],
+  /* --- link deck dibagikan --- */
+  shShared:     ['Ada deck yang dibagikan:','Someone shared a deck:'],
+  shUnknown:    ['kartu tidak dikenali dan dilewati','cards were not recognised and were skipped'],
+  shSave:       ['Simpan sebagai deck saya','Save as my deck'],
+  shView:       ['Lihat saja','Just view it'],
+  copyManual:   ['Salin manual dari kotak ↓','Copy manually from the box ↓'],
+  /* --- footer --- */
+  footBy:       ['Dibuat oleh','Made by'],
+  footFollow:   ['— follow untuk update deck, tips, dan pembahasan Marvel Hero Rush.',
+                 '— follow for deck updates, tips, and Marvel Hero Rush discussion.'],
+  footDisc:     ['MHR Deck Lab adalah alat bantu buatan penggemar (fan-made) dan <b>tidak berafiliasi dengan atau disponsori oleh Marvel maupun penerbit Marvel Hero Rush</b>. Seluruh nama kartu, teks efek, serta merek dagang terkait adalah milik pemegang haknya masing-masing. Data kartu dirujuk dari <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>. Alat ini akan diturunkan apabila diminta oleh pemegang hak.',
+                 'MHR Deck Lab is a fan-made tool and is <b>not affiliated with or sponsored by Marvel or the publisher of Marvel Hero Rush</b>. All card names, effect text, and related trademarks belong to their respective owners. Card data is referenced from the <a href="https://www.marvelherorush.com/en/cards" target="_blank" rel="noopener">official marvelherorush.com database</a>. This tool will be taken down at the rights holder\'s request.'],
   /* --- lembar decklist PDF (teks) --- */
   dlBtn:        ['📄 Decklist PDF','📄 Decklist PDF'],
   dlBusy:       ['Menyusun…','Building…'],
@@ -1623,8 +1691,37 @@ function cardEff(c){  return (state.lang==='en' && c.e_en)  ? c.e_en  : c.e; }
    Datanya tetap ada di database, jadi begitu gambarnya tersedia tinggal ditampilkan. */
 function cardVisible(c){ return state.lang !== 'en' || !!c.nm_en; }
 
+/* Nama deck komunitas di data.js ditulis dalam Bahasa Indonesia ("Merah - Hijau").
+   Di mode Inggris, kata warnanya saja yang diterjemahkan supaya tetap terbaca
+   ("Red - Green"); kata lain seperti "Budget SD" dibiarkan apa adanya. */
+const WARNA_EN = {Merah:'Red', Kuning:'Yellow', Biru:'Blue', Hijau:'Green'};
+function namaDeckLokal(nm){
+  if(state.lang !== 'en') return nm;
+  return String(nm||'').replace(/\b(Merah|Kuning|Biru|Hijau)\b/g, w => WARNA_EN[w] || w);
+}
+
 function applyLang(){
   document.documentElement.lang = state.lang;
+  /* judul tab dan deskripsi share ikut bahasa aktif */
+  document.title = t('metaTitle');
+  const md = document.querySelector('meta[name="description"]');
+  if(md) md.setAttribute('content', t('metaDesc'));
+  const ogt = document.querySelector('meta[property="og:title"]');
+  if(ogt) ogt.setAttribute('content', t('metaTitle'));
+  const ogd = document.querySelector('meta[property="og:description"]');
+  if(ogd) ogd.setAttribute('content', t('metaDesc'));
+  /* Mode Inggris sengaja dibuat sederhana: hanya Kartu + Deck Builder.
+     Deck Komunitas dan Turnamen isinya konten komunitas Indonesia (nama deck
+     berbahasa Indonesia, jadwal LGS Indonesia), jadi tidak ditampilkan —
+     pengunjung luar negeri langsung fokus ke deck builder.
+     Pengecualian: mode admin (?admin=1) tetap bisa membuka Deck Komunitas
+     supaya pembuat kode deck tidak terkunci saat bahasanya Inggris. */
+  const sembunyi = { lgs:(state.lang === 'en'), meta:(state.lang === 'en' && !isAdmin) };
+  Object.entries(sembunyi).forEach(([p,off])=>{
+    const tab = $(`#navTabs button[data-page="${p}"]`);
+    if(tab) tab.hidden = off;
+  });
+  if(sembunyi[state.page]){ setPage('cards'); return; }
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const k = el.dataset.i18n;
     if(T[k]) el.innerHTML = t(k);
@@ -1722,10 +1819,11 @@ function renderSim(){
   const totalDeck = deckCount();
   const target = parseInt($('#setSize').value)||50;
   $('#simWarn').innerHTML =
-    totalDeck === 0 ? '<div class="sim-warn">Deck masih kosong — tambahkan kartu dulu di Deck Builder.</div>'
-    : totalDeck < UKURAN_TANGAN ? `<div class="sim-warn">Deck hanya berisi ${totalDeck} kartu, kurang dari 6.</div>`
+    totalDeck === 0 ? `<div class="sim-warn">${t('simEmptyDeck')}</div>`
+    : totalDeck < UKURAN_TANGAN ? `<div class="sim-warn">${t('simTooFew')} ${totalDeck} ${t('simTooFew2')}</div>`
     : totalDeck !== target
-      ? `<div class="sim-warn">Deck berisi ${totalDeck} kartu, belum sesuai target ${target}. Peluang di bawah dihitung dari ${totalDeck} kartu yang ada sekarang.</div>`
+      ? `<div class="sim-warn">${totalDeck} ${t('cards')} — ${t('simOffTarget')} ${target}. ` +
+        `${t('simOffTarget2')} ${totalDeck} ${t('simOffTarget3')}</div>`
       : '';
 
   $('#simHand').innerHTML = simTangan.map((no,i)=>{
@@ -1737,17 +1835,20 @@ function renderSim(){
         onload="this.style.display='block';this.nextElementSibling.style.display='none'">
       <div class="sim-ph" style="--sc:${CMAP[c.c]}">
         <div class="lv">${c.l}</div>
-        <div class="nm">${c.nm}</div>
+        <div class="nm">${cardName(c)}</div>
         <div class="bt">${c.no} · R-${c.r} / ${c.p}</div>
       </div>
     </div>`;
-  }).join('') || '<div class="empty" style="grid-column:1/-1">Belum ada kartu. Tekan tombol kocok di atas.</div>';
+  }).join('') || `<div class="empty" style="grid-column:1/-1">${t('simNoCards')}</div>`;
 
   $('#simMull').disabled = simTukar.size === 0;
-  $('#simMull').textContent = simTukar.size ? `♻ Mulligan ${simTukar.size} kartu` : '♻ Mulligan';
+  $('#simMull').textContent = simTukar.size ? `${t('simMull')} ${simTukar.size} ${t('cards')}` : t('simMull');
   $('#simInfo').innerHTML = simTangan.length
-    ? `sisa deck <b>${simDeck.length}</b> · mulligan <b>${simRonde}×</b>` +
-      (simRonde > 1 ? ` <span style="color:var(--merah)">(resmi maks 1×)</span>` : '') : '';
+    ? (state.lang === 'en'
+        ? `deck left <b>${simDeck.length}</b> · mulligans <b>${simRonde}</b>` +
+          (simRonde > 1 ? ` <span style="color:var(--merah)">(official limit: 1)</span>` : '')
+        : `sisa deck <b>${simDeck.length}</b> · mulligan <b>${simRonde}×</b>` +
+          (simRonde > 1 ? ` <span style="color:var(--merah)">(resmi maks 1×)</span>` : '')) : '';
 
   if(!simTangan.length){ $('#simTangan').innerHTML = '<div class="sim-row">—</div>'; }
   else {
@@ -1760,14 +1861,14 @@ function renderSim(){
       const c = DB.find(d=>d.no===no);
       return `<div class="sim-row">
         <span class="kartu" data-zoom="${c.no}" style="cursor:zoom-in">
-          <i style="background:${CMAP[c.c]}"></i><span>${c.nm}</span></span>
+          <i style="background:${CMAP[c.c]}"></i><span>${cardName(c)}</span></span>
         <b>Lv${c.l}</b></div>`;
     }).join('') +
       `<div class="sim-row" style="margin-top:8px;border-top:1px solid var(--line);padding-top:8px">
         <span>Sebaran level</span>
         <b>${Object.keys(lv).sort().map(k=>`Lv${k}×${lv[k]}`).join(' · ')}</b></div>
        <div class="sim-row"><span>Warna</span>
-        <b>${Object.entries(col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]]).map(([k,v])=>`${k} ${v}`).join(' · ')}</b></div>`;
+        <b>${Object.entries(col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]]).map(([k,v])=>`${t(k)} ${v}`).join(' · ')}</b></div>`;
   }
 
   const N = totalDeck;
@@ -1778,7 +1879,7 @@ function renderSim(){
   $('#simPeluang').innerHTML = N
     ? baris.map(({c,q,p})=>`<div class="sim-row">
         <span class="kartu" data-zoom="${c.no}" style="cursor:zoom-in">
-          <i style="background:${CMAP[c.c]}"></i><span>${c.nm}</span></span>
+          <i style="background:${CMAP[c.c]}"></i><span>${cardName(c)}</span></span>
         <b>${q}× · ${(p*100).toFixed(1)}%</b></div>`).join('')
     : '<div class="sim-row">—</div>';
 }
@@ -2181,7 +2282,7 @@ $('#btnRenDeck').addEventListener('click', ()=>{
   if(nama===null) return;
   nama = nama.trim();
   if(!nama || nama===store.active) return;
-  if(store.decks[nama]){ alert('Nama deck sudah dipakai.'); return; }
+  if(store.decks[nama]){ alert(t('mNameUsed')); return; }
   store.decks[nama] = state.deck;
   delete store.decks[store.active];
   store.active = nama;
@@ -2264,12 +2365,12 @@ function pilihVarian(no, rar, tombol){
       b.setAttribute('aria-pressed', String(b.dataset.var === rar)));
     if(msg) msg.textContent = rar === c.ra[0]
       ? t('cUseMain')
-      : `Versi ${rar} dipakai untuk kartu ini di seluruh halaman, termasuk tampilan dan unduhan deck.`;
+      : `${t('artVersion')} ${rar} ${t('artUsed')}`;
     renderCards();
   };
   probe.onerror = ()=>{
     if(tombol) tombol.classList.add('na');
-    if(msg) msg.textContent = `Gambar versi ${rar} belum tersedia di koleksi (${berkas.split('/').pop()}).`;
+    if(msg) msg.textContent = `${t('artVersion')} ${rar} ${t('artMissing')} (${berkas.split('/').pop()}).`;
   };
   probe.src = berkas;
 }
@@ -2329,8 +2430,8 @@ function openDeckView(deckLain, judulLain){
   entries.forEach(({c,q})=>col[c.c]+=q);
   const totalTampil = entries.reduce((a,x)=>a+x.q,0);
   $('#dvTitle').textContent = dvNama;
-  $('#dvMeta').textContent = `${totalTampil} kartu · ` +
-    Object.entries(col).filter(([,n])=>n>0).map(([c,n])=>`${c} ${n}`).join(' · ');
+  $('#dvMeta').textContent = `${totalTampil} ${t('cards')} · ` +
+    Object.entries(col).filter(([,n])=>n>0).map(([c,n])=>`${t(c)} ${n}`).join(' · ');
   $('#dvGrid').innerHTML = entries.map(({c,q})=>{
     const ph = `<div class="dv-ph" style="--dvc:${CMAP[c.c]}">
         <div class="dv-lv">${c.l}</div>
@@ -2405,16 +2506,16 @@ $('#btnDvHd').addEventListener('click', async ()=>{
   const sumber = dvDeck || state.deck;
   const entries = Object.entries(sumber).map(([no,q])=>({c:DB.find(d=>d.no===no),q}))
     .filter(x=>x.c);
-  if(!entries.length){ alert('Deck masih kosong.'); return; }
+  if(!entries.length){ alert(t('mDeckEmpty')); return; }
   entries.sort((a,b)=>CORDER[a.c.c]-CORDER[b.c.c] || a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
-  btn.disabled = true; btn.textContent = 'Memuat gambar…';
+  btn.disabled = true; btn.textContent = t('hdLoading');
 
   // muat semua gambar pada resolusi asli
   const imgs = {};
   for(let i=0;i<entries.length;i++){
     const no = entries[i].c.no;
     if(!(no in imgs)) imgs[no] = await loadCardImgAny(no);
-    btn.textContent = `Memuat… ${i+1}/${entries.length}`;
+    btn.textContent = `${t('hdLoading')} ${i+1}/${entries.length}`;
   }
 
   // ukuran kartu = resolusi gambar terbesar yang ditemukan, dikali skala pilihan
@@ -2458,12 +2559,11 @@ $('#btnDvHd').addEventListener('click', async ()=>{
   const H = PAD + HEAD + rows*CH + (rows-1)*GAP + FOOT;
 
   if(clamped){
-    alert(`Resolusi diturunkan otomatis ke ${SC}× karena ${n} kartu pada skala yang dipilih ` +
-          `melebihi batas kemampuan browser ini` + (isIOS ? ' (iPhone/iPad lebih terbatas).' : '.') +
-          `\n\nUntuk hasil lebih tajam: bagi deck jadi beberapa gambar, atau unduh dari laptop.`);
+    alert(`${t('hdClamped')} (${SC}×)` + (isIOS ? ' ' + t('hdClampIOS') : '') +
+          `\n\n${t('hdClampTip')}`);
   }
 
-  btn.textContent = 'Menyusun…';
+  btn.textContent = t('hdBuilding');
   const cv = document.createElement('canvas');
   cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
@@ -2476,8 +2576,8 @@ $('#btnDvHd').addEventListener('click', async ()=>{
   const col = {Merah:0,Kuning:0,Biru:0,Hijau:0};
   entries.forEach(({c,q})=>col[c.c]+=q);
   const totalHD = entries.reduce((a,x)=>a+x.q,0);
-  const meta = `${totalHD} kartu  ·  ` +
-    Object.entries(col).filter(([,v])=>v>0).map(([k,v])=>`${k} ${v}`).join('  ·  ');
+  const meta = `${totalHD} ${t('cards')}  ·  ` +
+    Object.entries(col).filter(([,v])=>v>0).map(([k,v])=>`${t(k)} ${v}`).join('  ·  ');
 
   ctx.fillStyle = '#EDE7DA';
   ctx.font = `900 ${Math.round(CW*0.20)}px Arial, sans-serif`;
@@ -2542,12 +2642,12 @@ $('#btnDvHd').addEventListener('click', async ()=>{
   // footer
   ctx.fillStyle = '#8B96A5'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
   ctx.font = `${Math.round(CW*0.058)}px "Courier New", monospace`;
-  ctx.fillText('Dibuat dengan MHR Deck Lab  ·  TikTok @deteprtm', W-PAD, H-PAD*0.55);
+  ctx.fillText(`${t('tblMade')}  ·  TikTok @deteprtm`, W-PAD, H-PAD*0.55);
 
   // simpan sebagai JPEG mutu tinggi (ukuran file jauh lebih kecil, ketajaman setara)
   const nama = ((dvNama || store.active).replace(/[^\w\- ]+/g,'').trim() || 'deck');
   cv.toBlob(b=>{
-    if(!b){ alert('Gagal membuat gambar.'); btn.disabled=false; btn.textContent='⬇ Unduh HD'; return; }
+    if(!b){ alert(t('hdFail')); btn.disabled=false; btn.textContent='⬇ Unduh HD'; return; }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(b);
     a.download = `${nama}-HD.jpg`;
@@ -2838,8 +2938,8 @@ $('#btnLink').addEventListener('click', async ()=>{
   }catch(e){
     const box = $('#exportBox');
     box.value = url; box.classList.add('show'); box.select();
-    try{ document.execCommand('copy'); btn.textContent = '✓ Link tersalin'; }
-    catch(e2){ btn.textContent = 'Salin manual dari kotak ↓'; }
+    try{ document.execCommand('copy'); btn.textContent = t('linkCopied'); }
+    catch(e2){ btn.textContent = t('copyManual'); }
   }
   setTimeout(()=>btn.textContent = t('copyLink'), 2200);
 });
@@ -2857,11 +2957,11 @@ function handleSharedLink(){
   const jml = Object.values(res.deck).reduce((a,b)=>a+b,0);
   const box = document.createElement('div');
   box.className = 'share-note';
-  box.innerHTML = `Ada deck yang dibagikan: <b>${res.nama.replace(/</g,'&lt;')}</b> — ${jml} kartu` +
-    (res.unknown ? ` <span style="color:var(--merah)">(${res.unknown} kartu tidak dikenali dan dilewati)</span>` : '') +
+  box.innerHTML = `${t('shShared')} <b>${res.nama.replace(/</g,'&lt;')}</b> — ${jml} ${t('cards')}` +
+    (res.unknown ? ` <span style="color:var(--merah)">(${res.unknown} ${t('shUnknown')})</span>` : '') +
     `<div class="row">
-       <button class="btn2" id="shSave" style="border-color:var(--accent);color:var(--accent);font-weight:700">Simpan sebagai deck saya</button>
-       <button class="btn2" id="shView">Lihat saja</button>
+       <button class="btn2" id="shSave" style="border-color:var(--accent);color:var(--accent);font-weight:700">${t('shSave')}</button>
+       <button class="btn2" id="shView">${t('shView')}</button>
        <button class="btn2" id="shNo" style="flex:none;padding:9px 12px">✕</button>
      </div>`;
   setPage('build', true);
@@ -3022,6 +3122,8 @@ $('#lgsFilter').addEventListener('click', e=>{
 const PAGES = ['cards','build','meta','lgs'];
 function setPage(p, dariHash){
   if(!PAGES.includes(p)) p = 'cards';
+  /* mode Inggris hanya punya Kartu + Deck Builder (lihat applyLang) */
+  if(state.lang === 'en' && (p === 'lgs' || (p === 'meta' && !isAdmin))) p = 'cards';
   state.page = p;
   document.body.className = 'page-' + p;
   [...$('#navTabs').children].forEach(b=>
@@ -3088,22 +3190,22 @@ function renderMeta(){
       <div class="meta-strip">${strip}</div>
       <div class="meta-body">
         <div class="meta-top">
-          <span class="meta-nm">${d.nm}</span>
+          <span class="meta-nm">${namaDeckLokal(d.nm)}</span>
           ${d.cr?`<span class="meta-by">by <b>${d.cr}</b></span>`:''}
         </div>
         <div class="meta-bar">${bar}</div>
         <div class="meta-stat">
-          <span><b>${s.tot}</b> kartu</span>
-          <span>rata-rata Lv <b>${s.avgLv}</b></span>
+          <span><b>${s.tot}</b> ${t('cards')}</span>
+          <span>${t('metaAvgLv')} <b>${s.avgLv}</b></span>
         </div>
         ${d.ds?`<div class="meta-desc">${d.ds}</div>`:''}
         <div class="meta-act">
-          <button class="main" data-meta-load="${idx}">Muat ke Deck Builder</button>
-          <button data-meta-view="${idx}">Lihat visual</button>
+          <button class="main" data-meta-load="${idx}">${t('metaLoad')}</button>
+          <button data-meta-view="${idx}">${t('metaView')}</button>
         </div>
       </div>
     </div>`;
-  }).join('') || '<div class="empty">Belum ada deck komunitas yang cocok dengan filter ini.</div>';
+  }).join('') || `<div class="empty">${t('metaNone')}</div>`;
 }
 
 function metaImgFallback(img,no,warna){
@@ -3556,7 +3658,21 @@ $('#pxPdf').addEventListener('click', async ()=>{
 
 
 /* muat pengaturan tersimpan *//* muat pengaturan tersimpan */
-state.lang = (store.lang === 'en') ? 'en' : 'id';
+/* Urutan penentuan bahasa:
+   1. parameter ?lang=en / ?lang=id  — untuk link yang dibagikan ke komunitas
+      berbahasa Inggris (Singapura, Malaysia, Thailand). Pilihan ini disimpan.
+   2. pilihan yang pernah disimpan pengguna di perangkat ini
+   3. bahasa browser — kalau bukan Bahasa Indonesia, tampilkan versi Inggris */
+(function tentukanBahasa(){
+  const p = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+  if(p === 'en' || p === 'id'){ store.lang = p; }
+  else if(store.lang !== 'en' && store.lang !== 'id'){
+    let bhs = '';
+    try { bhs = (navigator.language || (navigator.languages||[])[0] || '').toLowerCase(); } catch(e){}
+    store.lang = /^(id|in)\b/.test(bhs) ? 'id' : 'en';
+  }
+  state.lang = (store.lang === 'en') ? 'en' : 'id';
+})();
 if(!store.view) store.view = 'grid';      // default tampilan grid
 if(store.view === 'grid'){
   state.view = 'grid';

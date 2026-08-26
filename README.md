@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.1** · 26 Agustus 2026
+**Versi saat ini: v6.3** · 26 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -81,6 +81,47 @@ dan pengaturan. **📂 Restore** memulihkannya di perangkat mana pun.
 Perlu diketahui: ini **menyalin, bukan menyinkronkan**. Setelah restore, kedua
 perangkat berjalan terpisah — perubahan di satu sisi tidak otomatis kembali ke sisi
 lain. Sinkronisasi dua arah butuh backend.
+
+### Versi bahasa Inggris (untuk Singapura / Malaysia / Thailand)
+
+Sejak v6.2 seluruh antarmuka yang dilihat pengunjung sudah dua bahasa penuh.
+
+**Cara bahasa ditentukan**, berurutan:
+
+1. Parameter **`?lang=en`** atau **`?lang=id`** di alamat — pilihan ini ikut tersimpan
+2. Pilihan yang pernah ditekan pengguna di perangkat itu (tombol 🌐 di header)
+3. **Bahasa browser** — kalau bukan Bahasa Indonesia, situs langsung tampil Inggris
+
+Link untuk dibagikan ke komunitas berbahasa Inggris:
+
+```
+https://data2712-code.github.io/mhr-lab-x7k2m9/?lang=en
+```
+
+Bisa juga digabung dengan hash halaman, mis. `?lang=en#build` untuk langsung membuka
+Deck Builder. Untuk link di bio TikTok, pakai versi `?lang=en` kalau audiens yang dituju
+pemain luar negeri.
+
+**Mode Inggris sengaja dibuat sederhana: hanya dua menu — Cards dan Deck Builder.**
+
+| Hal | Perilaku |
+|---|---|
+| Menu | hanya **Cards** dan **Deck Builder**. Tab **Deck Komunitas** dan **Turnamen** tidak ditampilkan, karena isinya konten komunitas Indonesia (nama deck berbahasa Indonesia, jadwal LGS Indonesia) |
+| Alamat `#meta` / `#lgs` | otomatis dialihkan ke halaman Cards, jadi tidak ada halaman kosong |
+| Database | 192 kartu — 16 kartu promo (PB01/EB01/TB01) disembunyikan karena versi Inggrisnya belum terbit |
+| Gambar | dari `images/en/`, otomatis jatuh ke `images/` kalau berkasnya belum ada |
+| Link deck yang dibagikan | tetap berfungsi penuh — langsung membuka Deck Builder beserta kotak "Save as my deck" |
+| Judul tab & preview link | `<title>` dan meta description ikut bahasa aktif |
+| Decklist PDF | seluruh label ikut bahasa aktif |
+
+**Mode admin dikecualikan:** dengan `?admin=1`, tab Deck Komunitas tetap terlihat walau
+bahasanya Inggris — supaya pembuat kode deck tidak terkunci. Kalau nanti Deck Komunitas
+ingin dibuka untuk pengunjung Inggris, cukup ubah satu baris di `applyLang`
+(objek `sembunyi`), dan siapkan nama deck versi Inggris kalau perlu.
+
+**Yang sengaja tetap Bahasa Indonesia:** panel mode admin (pembuat kode deck komunitas
+dan cetak kartu proxy), serta halaman Deck Komunitas dan Turnamen — ketiganya memang
+hanya tampil di mode Indonesia.
 
 ### Cara menambah teks / gambar bahasa Inggris
 
@@ -305,12 +346,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.1.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.3.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.1` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.3` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.1</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.3</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -343,6 +384,36 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.3 — 26 Agustus 2026
+- **Mode Inggris disederhanakan: hanya menu Cards dan Deck Builder.** Tab
+  **Deck Komunitas** ikut disembunyikan (sebelumnya hanya Turnamen), karena isinya
+  konten komunitas Indonesia. Fokusnya sekarang murni ke deck builder
+- Alamat `#meta` dan `#lgs` di mode Inggris otomatis dialihkan ke halaman Cards
+- **Mode admin dikecualikan** — dengan `?admin=1`, tab Deck Komunitas tetap terlihat
+  walau bahasanya Inggris, supaya pembuat kode deck tidak terkunci
+- Link deck yang dibagikan tetap berfungsi penuh di mode Inggris
+
+### v6.2 — 26 Agustus 2026 · versi bahasa Inggris dituntaskan
+Ditujukan agar pemain di Singapura, Malaysia, dan Thailand yang memakai kartu versi
+Inggris bisa memakai Deck Lab sepenuhnya.
+- **Deteksi bahasa otomatis** — pengunjung baru yang browsernya bukan Bahasa Indonesia
+  langsung mendapat tampilan Inggris. Pilihan manual tetap menimpa dan tersimpan
+- **Link `?lang=en` / `?lang=id`** untuk dibagikan langsung ke grup komunitas luar negeri
+- **Judul tab dan deskripsi preview link** ikut bahasa aktif, jadi pratinjau di
+  WhatsApp/Discord tidak berbahasa Indonesia bagi mereka
+- **Tab Turnamen tidak ditampilkan di mode Inggris** (isinya jadwal LGS Indonesia);
+  alamat `#lgs` otomatis dialihkan ke halaman Kartu
+- **±25 teks yang sebelumnya masih Indonesia** kini ikut bahasa aktif: panel simulasi
+  draw beserta seluruh peringatannya, layar Lihat deck dan tip WhatsApp, pilihan
+  resolusi unduhan, pesan ekspor HD, kotak "deck yang dibagikan", tombol di galeri
+  Deck Komunitas, pesan pemilih varian artwork, catatan panel deck, dan footer
+- **Nama warna diterjemahkan di seluruh tampilan** — komposisi warna di panel deck,
+  layar Lihat deck, gambar HD, dan nama deck komunitas ("Merah - Hijau" → "Red - Green")
+- Nama kartu di panel simulasi dan placeholder Lihat deck kini ikut bahasa aktif
+  (sebelumnya selalu Indonesia)
+- 🔧 **Fix:** tombol navigasi yang disembunyikan tetap tampil karena atribut `hidden`
+  kalah dari `display:flex` di CSS
 
 ### Tambahan jadwal — 26 Agustus 2026 *(hanya `data.js`)*
 - **Catnie Hobbies & Games** (Tangerang Selatan) masuk daftar — Minggu 14.00 WIB.
