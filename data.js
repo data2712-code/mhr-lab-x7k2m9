@@ -92,9 +92,6 @@ window.LGS = [
   { nm:'Ogre Gandaria Neverland', kota:'Jakarta', tz:'WIB',
     map:'https://maps.app.goo.gl/7wAqGnKSyeECnt8C6',
     jd:[ {h:1, w:'19.00 - Selesai'}, {h:5, w:'19.00 - Selesai'} ] },
-  { nm:'Invaders Board Game Station', kota:'Jakarta', tz:'WIB',
-    map:'https://maps.app.goo.gl/pWxvL18uXMr5EGBC7',
-    jd:[ {h:4, w:'19.00 - Selesai'} ] },
   { nm:'Global Hobiz Store', kota:'Jakarta', tz:'WIB',
     map:'https://maps.app.goo.gl/8BQJ1EZJQXPyrMqh8',
     jd:[ {h:3, w:'19.30 - Selesai'}, {h:6, w:'13.00 - Selesai'} ] },
@@ -104,6 +101,11 @@ window.LGS = [
   { nm:'ONIC TCG Viridian Vault', kota:'Jakarta', tz:'WIB',
     map:'https://maps.app.goo.gl/yLw8FSPnj6wMfDGTA',
     jd:[ {h:7, w:'15.00 - Selesai'} ] },
+
+  /* ---------- TANGERANG ---------- */
+  { nm:'Invaders Board Game Station', kota:'Tangerang', tz:'WIB',
+    map:'https://maps.app.goo.gl/pWxvL18uXMr5EGBC7',
+    jd:[ {h:4, w:'19.00 - Selesai'} ] },
 
   /* ---------- TANGERANG SELATAN ---------- */
   { nm:'Catnie Hobbies & Games', kota:'Tangerang Selatan', tz:'WIB',
