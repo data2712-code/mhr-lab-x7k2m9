@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.0** · 20 Agustus 2026
+**Versi saat ini: v6.1** · 26 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -229,35 +229,56 @@ karena satu-satunya cara mengubah daftar adalah commit ke repository ini.
 
 ### Cara mengubah jadwal turnamen LGS
 
-Buka `index.html` → Edit → `Ctrl+F` cari `const LGS`. Format tiap toko:
+Semua jadwal ada di **`data.js`** (bukan `index.html`), jadi aman saat aplikasi
+diperbarui. Format tiap toko:
 
 ```javascript
-  { nm:'Nama Toko', map:'https://maps.app.goo.gl/xxxx',
+  { nm:'Nama Toko', kota:'Batam', tz:'WIB',
+    map:'https://maps.app.goo.gl/xxxx',
     hp:'628xxxxxxxxxx',                     // opsional — nomor WhatsApp toko
     wa:'https://chat.whatsapp.com/xxxx',    // opsional — link grup WhatsApp
-    jd:[ {h:1, w:'19.00 - Selesai'} ] },
+    jd:[ {h:1, w:'19.30 - Selesai'} ] },
 ```
 
-Field `hp` dan `wa` boleh dikosongkan atau dihapus — tombol "Chat toko" dan
-"Grup WA" hanya muncul kalau field-nya ada. Nomor `hp` ditulis tanpa tanda `+`
-dan tanpa spasi, contoh `6281234567890`.
+| Field | Keterangan |
+|---|---|
+| `nm` | nama toko |
+| `kota` | kota tempat toko berada — dipakai untuk lencana kota dan baris filter |
+| `tz` | zona waktu: `WIB` (UTC+7), `WITA` (UTC+8), atau `WIT` (UTC+9) |
+| `map` | tautan Google Maps (`maps.app.goo.gl` atau `share.google` sama saja) |
+| `hp`, `wa` | opsional — tombol "Chat toko" dan "Grup WA" muncul kalau diisi |
+| `jd` | daftar jadwal; `h` = hari, `w` = jam main |
 
 `h` adalah hari: 1 Senin, 2 Selasa, 3 Rabu, 4 Kamis, 5 Jumat, 6 Sabtu, 7 Minggu.
 Satu toko boleh punya beberapa jadwal — tambahkan objek lain di dalam `jd`.
 
+**Zona waktu tidak perlu diketik di `w`.** Cukup tulis jamnya (`'19.30 - Selesai'`);
+aplikasi menyisipkan sendiri kode zonanya dari field `tz` sehingga tampil menjadi
+`19.30 WIB - Selesai`. Teks tanpa angka jam (mis. `'On Demand'`) dibiarkan apa adanya.
+
+**Filter kota muncul otomatis** begitu ada lebih dari satu kota di daftar. Kalau semua
+toko berada di satu kota, baris filternya tidak ditampilkan sama sekali.
+
 Jangan lupa ubah `LGS_UPDATE` ke tanggal terakhir jadwal dicek, karena tanggal itu
 ditampilkan ke pengunjung sebagai penanda seberapa baru datanya.
 
-Jadwal saat ini (6 sesi/minggu):
+Jadwal saat ini — **10 toko, 13 sesi/minggu, 3 kota**:
 
-| Hari | LGS | Jam |
-|---|---|---|
-| Senin | Ogre Gandaria Neverland | 19.00 – Selesai |
-| Kamis | Invaders Board Game Station | 19.00 – Selesai |
-| Jumat | Ogre Gandaria Neverland | On Demand |
-| Sabtu | Global Hobiz Store | 13.00 – Selesai |
-| Sabtu | TwoStompas | 15.00 – Selesai |
-| Minggu | ONIC TCG Viridian Vault | 15.00 – Selesai |
+| Hari | LGS | Kota | Jam |
+|---|---|---|---|
+| Senin | Ogre Gandaria Neverland | Jakarta | 19.00 WIB – Selesai |
+| Senin | Gattchaa One Batam Mall | Batam | 19.30 WIB – Selesai |
+| Rabu | Global Hobiz Store | Jakarta | 19.30 WIB – Selesai |
+| Rabu | House of Cards | Batam | 19.00 WIB – Selesai |
+| Kamis | Invaders Board Game Station | Jakarta | 19.00 WIB – Selesai |
+| Jumat | Ogre Gandaria Neverland | Jakarta | 19.00 WIB – Selesai |
+| Jumat | Gale Force Games | Batam | 19.00 WIB – Selesai |
+| Sabtu | Global Hobiz Store | Jakarta | 13.00 WIB – Selesai |
+| Sabtu | TwoStompas | Jakarta | 15.00 WIB – Selesai |
+| Sabtu | Gattchaa Mega Mall Batam Center | Batam | 17.30 WIB – Selesai |
+| Minggu | Catnie Hobbies & Games | Tangerang Selatan | 14.00 WIB – Selesai |
+| Minggu | ONIC TCG Viridian Vault | Jakarta | 15.00 WIB – Selesai |
+| Minggu | Gale Force Games | Batam | 16.00 WIB – Selesai |
 
 ### Statistik pengunjung (Cloudflare Web Analytics)
 
@@ -284,12 +305,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.0.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.1.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.0` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.1` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.0</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.1</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -322,6 +343,30 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### Tambahan jadwal — 26 Agustus 2026 *(hanya `data.js`)*
+- **Catnie Hobbies & Games** (Tangerang Selatan) masuk daftar — Minggu 14.00 WIB.
+  Total kini **10 toko · 13 sesi per minggu · 3 kota**
+- Filter kota otomatis bertambah jadi tiga: Jakarta 5 · Tangerang Selatan 1 · Batam 4
+- `index.html` **tidak berubah** (tetap v6.1) — cukup unggah ulang `data.js`
+
+### v6.1 — 26 Agustus 2026
+- **Jadwal turnamen diperbarui: 4 toko baru di Batam** — Gattchaa One Batam Mall (Senin
+  19.30), House of Cards (Rabu 19.00), Gale Force Games (Jumat 19.00 & Minggu 16.00),
+  dan Gattchaa Mega Mall Batam Center (Sabtu 17.30). Jadwal Jakarta tetap berjalan,
+  jadi totalnya kini **9 toko · 12 sesi per minggu**
+- **Keterangan kota** pada setiap toko — tampil sebagai lencana kecil di panel "Hari ini",
+  kartu per hari, dan daftar toko, sehingga jelas jadwal itu di kota mana
+- **Filter kota** di atas jadwal (Semua kota · Jakarta · Batam) lengkap dengan jumlah
+  tokonya. Filter ini menyaring panel "Hari ini", kartu per hari, dan daftar toko
+  sekaligus, dan **muncul otomatis hanya kalau ada lebih dari satu kota**
+- **Zona waktu ditampilkan di setiap jam main** (`19.30 WIB - Selesai`), diambil dari
+  field `tz` per toko — siap untuk WITA dan WIT saat ada toko di zona lain. Ditambah
+  keterangan di catatan bawah bahwa jam mengikuti zona kota tokonya, bukan zona perangkat
+- 🔧 **Fix:** ikon peta di panel "Hari ini" tampil sangat besar karena belum diberi
+  ukuran di CSS. Ikon pada tombol "Lokasi" juga dirapikan
+- Format `data.js` bertambah dua field: `kota` dan `tz`. Toko lama tanpa kedua field itu
+  tetap tampil normal — lencana dan zona waktunya saja yang tidak muncul
 
 ### v6.0 — 20 Agustus 2026
 - **Decklist PDF dirapikan** sesuai masukan: tulisan "LEMBAR DECKLIST" di kop dihapus
