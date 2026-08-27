@@ -97,10 +97,24 @@ window.LGS = [
     jd:[ {h:3, w:'19.30 - Selesai'}, {h:6, w:'13.00 - Selesai'} ] },
   { nm:'TwoStompas', kota:'Jakarta', tz:'WIB',
     map:'https://maps.app.goo.gl/ss2chXHcrwmUJAnF9',
-    jd:[ {h:6, w:'15.00 - Selesai'} ] },
+    jd:[ {h:4, w:'19.00 - Selesai'}, {h:6, w:'15.00 - Selesai'} ] },
   { nm:'ONIC TCG Viridian Vault', kota:'Jakarta', tz:'WIB',
     map:'https://maps.app.goo.gl/yLw8FSPnj6wMfDGTA',
     jd:[ {h:7, w:'15.00 - Selesai'} ] },
+  { nm:'Sultan Pokebab', kota:'Jakarta', tz:'WIB',
+    map:'https://maps.app.goo.gl/A9TFGEr9SEhDYsmAA',
+    jd:[ {h:5, w:'19.30 - Selesai'} ] },
+
+   /* ---------- BEKASI ---------- */
+  { nm:'Royal Knight Bekasi', kota:'Bekasi', tz:'WIB',
+    map:'https://maps.app.goo.gl/py2NMFJ678jVDMxc9',
+    jd:[ {h:1, w:'19.30 - Selesai'} ] },
+  { nm:'Papa Roger', kota:'Bekasi', tz:'WIB',
+    map:'https://maps.app.goo.gl/XmiEfHf9U5w5VBuw5',
+    jd:[ {h:2, w:'19.30 - Selesai'} ] },
+  { nm:'Monopolis', kota:'Bekasi', tz:'WIB',
+    map:'https://maps.app.goo.gl/UKdWFpaSB1seyZgU7',
+    jd:[ {h:2, w:'19.00 - Selesai'} ] },
 
   /* ---------- TANGERANG ---------- */
   { nm:'Invaders Board Game Station', kota:'Tangerang', tz:'WIB',
@@ -111,6 +125,11 @@ window.LGS = [
   { nm:'Catnie Hobbies & Games', kota:'Tangerang Selatan', tz:'WIB',
     map:'https://maps.app.goo.gl/MDPiU3MRvqSWybW27',
     jd:[ {h:7, w:'14.00 - Selesai'} ] },
+
+   /* ---------- MEDAN ---------- */
+  { nm:'Exordium TCG', kota:'Medan', tz:'WIB',
+    map:'https://maps.app.goo.gl/cm9fCd7vSbVdSzwo9?g_st=ac',
+    jd:[ {h:2, w:'19.00 - Selesai'}, {h:7, w:'14.00 - Selesai'} ] },
 
   /* ---------- BATAM ---------- */
   { nm:'Gattchaa One Batam Mall', kota:'Batam', tz:'WIB',
