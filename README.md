@@ -397,6 +397,15 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ## Riwayat Update
 
+### Tambahan deck komunitas — 27 Agustus 2026 *(hanya `data.js`)*
+- **7 deck baru dari China** masuk galeri Deck Komunitas: Merah Kuning - Ultron,
+  Merah Biru - F4, Biru Hijau - BBM, Biru Hijau - Loki, Merah Hijau - Thunder Ally,
+  Biru Hijau - BBM Control, Merah Biru - Aggro. Total kini **18 deck komunitas**
+- Setiap kode sudah diverifikasi lebih dulu (headless, `decodeDeck` + `cards.js`
+  asli): tepat 50 kartu, maksimal 2 warna, tidak ada yang melebihi 3 salinan per
+  nama karakter, dan tidak ada nomor kartu yang tidak dikenali — semuanya lolos
+- `index.html` **tidak berubah** (tetap v6.6) — cukup unggah ulang `data.js`
+
 ### v6.6 — 27 Agustus 2026 · bisa dipasang & jalan offline (PWA), navigasi popup, sisa i18n
 Masih lanjutan sesi yang sama. Dua permintaan: "beres-beres kecil dulu" dan
 "PWA / bisa dipakai offline" dari daftar rekomendasi yang saya berikan.
