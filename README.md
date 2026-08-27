@@ -303,22 +303,29 @@ toko berada di satu kota, baris filternya tidak ditampilkan sama sekali.
 Jangan lupa ubah `LGS_UPDATE` ke tanggal terakhir jadwal dicek, karena tanggal itu
 ditampilkan ke pengunjung sebagai penanda seberapa baru datanya.
 
-Jadwal saat ini — **10 toko, 13 sesi/minggu, 3 kota**:
+Jadwal saat ini — **15 toko, 20 sesi/minggu, 6 kota**:
 
 | Hari | LGS | Kota | Jam |
 |---|---|---|---|
 | Senin | Ogre Gandaria Neverland | Jakarta | 19.00 WIB – Selesai |
+| Senin | Royal Knight Bekasi | Bekasi | 19.30 WIB – Selesai |
 | Senin | Gattchaa One Batam Mall | Batam | 19.30 WIB – Selesai |
+| Selasa | Papa Roger | Bekasi | 19.30 WIB – Selesai |
+| Selasa | Monopolis | Bekasi | 19.00 WIB – Selesai |
+| Selasa | Exordium TCG | Medan | 19.00 WIB – Selesai |
 | Rabu | Global Hobiz Store | Jakarta | 19.30 WIB – Selesai |
 | Rabu | House of Cards | Batam | 19.00 WIB – Selesai |
-| Kamis | Invaders Board Game Station | Jakarta | 19.00 WIB – Selesai |
+| Kamis | TwoStompas | Jakarta | 19.00 WIB – Selesai |
+| Kamis | Invaders Board Game Station | Tangerang | 19.00 WIB – Selesai |
 | Jumat | Ogre Gandaria Neverland | Jakarta | 19.00 WIB – Selesai |
+| Jumat | Sultan Pokebab | Jakarta | 19.30 WIB – Selesai |
 | Jumat | Gale Force Games | Batam | 19.00 WIB – Selesai |
 | Sabtu | Global Hobiz Store | Jakarta | 13.00 WIB – Selesai |
 | Sabtu | TwoStompas | Jakarta | 15.00 WIB – Selesai |
 | Sabtu | Gattchaa Mega Mall Batam Center | Batam | 17.30 WIB – Selesai |
-| Minggu | Catnie Hobbies & Games | Tangerang Selatan | 14.00 WIB – Selesai |
 | Minggu | ONIC TCG Viridian Vault | Jakarta | 15.00 WIB – Selesai |
+| Minggu | Catnie Hobbies & Games | Tangerang Selatan | 14.00 WIB – Selesai |
+| Minggu | Exordium TCG | Medan | 14.00 WIB – Selesai |
 | Minggu | Gale Force Games | Batam | 16.00 WIB – Selesai |
 
 ### Statistik pengunjung (Cloudflare Web Analytics)
