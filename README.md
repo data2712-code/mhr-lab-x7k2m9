@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.4** · 27 Agustus 2026
+**Versi saat ini: v6.5** · 27 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -353,12 +353,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.4.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.5.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.4` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.5` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.4</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.5</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -391,6 +391,31 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.5 — 27 Agustus 2026 · sisa i18n, filter kota, dan panel deck di Safari iOS
+Lanjutan dari sesi yang sama dengan v6.4 — membereskan beberapa item tertunda
+di catatan serah-terima sesi.
+
+- 🔧 **Sisa kebocoran i18n dibereskan:** tombol "Salin link" di Deck Builder yang
+  masih menampilkan "Deck masih kosong." walau mode Inggris aktif; filter warna di
+  galeri Deck Komunitas ("Semua" belum ikut bahasa aktif); dan nama deck komunitas
+  yang tetap Indonesia ("Merah - Hijau") saat dimuat/dipratinjau di mode Inggris —
+  sekarang ikut diterjemahkan ("Red - Green") seperti yang sudah berlaku di kartu
+  galerinya. Ketiganya hanya kelihatan kalau situs dibuka dengan `?lang=en` (dan,
+  untuk galeri Deck Komunitas, `?admin=1` juga)
+- **Baris filter kota kini bisa digulir ke samping**, bukan turun berbaris-baris,
+  begitu jumlah kota bertambah (sekarang 6 kota + "Semua kota" = 7 chip). Diuji di
+  lebar 375px: baris tetap satu baris dan bisa digeser
+- 🔧 **Panel deck (sidebar & drawer HP) pakai `100dvh`** kalau browsernya mendukung,
+  dengan `100vh` sebagai cadangan. Di Safari iOS, `100vh` terikat ke tinggi viewport
+  saat address bar disembunyikan, jadi panelnya kelihatan "lompat"/kepotong tiap kali
+  address bar muncul-hilang saat scroll — ini salah satu kandidat penyebab isu
+  "Safari iOS ±70% lebih lambat" yang dicatat di sesi sebelumnya. Perbaikan ini
+  berdasarkan audit kode (pola `100vh` + `position:fixed`/`sticky` yang dikenal
+  bermasalah di WebKit), **belum diverifikasi dengan perangkat Safari iOS asli** —
+  laporan Cloudflare berikutnya (±akhir September) akan jadi konfirmasi sebenarnya
+- Tabel jadwal di bagian "Cara mengubah jadwal Weekly Rush LGS" disamakan dengan
+  `data.js`: 10 → **15 toko, 13 → 20 sesi/minggu, 3 → 6 kota**
 
 ### v6.4 — 27 Agustus 2026 · perbaikan performa + ganti nama menu
 Berdasarkan laporan Cloudflare 28 Juli – 27 Agustus (5.240 kunjungan, 76% dari HP).
