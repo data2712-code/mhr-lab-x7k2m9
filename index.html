@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.5  ·  27 Agustus 2026
+     MHR DECK LAB  ·  versi 6.6  ·  27 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,19 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.5">
+<meta name="version" content="6.6">
+<!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
+     Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
+     turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
+     tinggal timpa berkas di folder icons/ (ukurannya harus tetap sama). -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#0E1216">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MHR Deck Lab">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -600,11 +612,22 @@
     letter-spacing:.05em;cursor:pointer}
   .lb-x{position:fixed;top:16px;right:20px;background:var(--panel);border:1px solid var(--line);
     color:var(--paper);border-radius:9px;padding:9px 14px;cursor:pointer;font-size:13px;z-index:61}
+  /* navigasi ◀ ▶ di popup kartu — pindah kartu tanpa nutup-buka popup */
+  .lb-nav{position:fixed;top:50%;transform:translateY(-50%);width:46px;height:46px;
+    background:var(--panel);border:1px solid var(--line);color:var(--paper);border-radius:50%;
+    cursor:pointer;font-size:26px;line-height:1;z-index:61;display:flex;align-items:center;
+    justify-content:center}
+  .lb-nav:hover{border-color:var(--accent);color:var(--accent)}
+  .lb-prev{left:16px}
+  .lb-next{right:16px}
   @media (max-width:760px){
     .lb{padding:12px;overflow-y:auto;align-items:flex-start}
     .lb-inner{flex-direction:column;align-items:center;gap:14px}
     .lb-img{max-width:78vw;max-height:60vh}
     .lb-info{max-width:100%;padding:0 4px 30px}
+    .lb-nav{width:40px;height:40px;font-size:22px}
+    .lb-prev{left:6px}
+    .lb-next{right:6px}
   }
   /* --- halaman tampilan deck --- */
   .dview{position:fixed;inset:0;z-index:50;background:rgba(6,8,11,.94);overflow-y:auto;padding:16px}
@@ -881,7 +904,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.5</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.6</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -921,7 +944,9 @@
 <img class="hoverprev" id="hoverPrev" hidden alt="">
 
 <div class="lb" id="lightbox" hidden>
-  <button class="lb-x" id="lbClose">✕ Tutup</button>
+  <button class="lb-x" id="lbClose" data-i18n="close">✕ Tutup</button>
+  <button class="lb-nav lb-prev" id="lbPrev" data-i18n-title="lbPrev">‹</button>
+  <button class="lb-nav lb-next" id="lbNext" data-i18n-title="lbNext">›</button>
   <div class="lb-inner" id="lbInner"></div>
 </div>
 
@@ -1114,7 +1139,7 @@ function filtered(){
   const s = state.sort;
   if(s==='lv') arr.sort((a,b)=>a.l-b.l || a.no.localeCompare(b.no));
   else if(s==='pw') arr.sort((a,b)=>b.p-a.p || a.no.localeCompare(b.no));
-  else if(s==='nm') arr.sort((a,b)=>a.nm.localeCompare(b.nm));
+  else if(s==='nm') arr.sort((a,b)=>cardName(a).localeCompare(cardName(b)));
   else arr.sort((a,b)=>a.no.localeCompare(b.no));
   return arr;
 }
@@ -1507,6 +1532,9 @@ const T = {
   matchCount:   ['kartu cocok dengan filter','cards match the filter'],
   noMatch:      ['Tidak ada kartu yang cocok. Coba longgarkan filter.','No cards match. Try relaxing the filter.'],
   levelLbl:     ['Level','Level'],
+  simLvSpread:  ['Sebaran level','Level spread'],
+  lbPrev:       ['Kartu sebelumnya','Previous card'],
+  lbNext:       ['Kartu berikutnya','Next card'],
   rangeLbl:     ['Jarak','Range'],
 
   /* --- kartu --- */
@@ -1900,9 +1928,9 @@ function renderSim(){
         <b>Lv${c.l}</b></div>`;
     }).join('') +
       `<div class="sim-row" style="margin-top:8px;border-top:1px solid var(--line);padding-top:8px">
-        <span>Sebaran level</span>
+        <span>${t('simLvSpread')}</span>
         <b>${Object.keys(lv).sort().map(k=>`Lv${k}×${lv[k]}`).join(' · ')}</b></div>
-       <div class="sim-row"><span>Warna</span>
+       <div class="sim-row"><span>${t('cColor')}</span>
         <b>${Object.entries(col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]]).map(([k,v])=>`${t(k)} ${v}`).join(' · ')}</b></div>`;
   }
 
@@ -2345,7 +2373,7 @@ function openLightbox(no){
         onerror="lbImgFallback(this,'${c.no}')">
       <div class="lb-ph" style="--lbc:${CMAP[c.c]};display:none">
         <div class="g-lv">${c.l}</div>
-        <div class="g-nm">${c.nm}</div>
+        <div class="g-nm">${cardName(c)}</div>
         <div class="g-bt">${c.no} · R-${c.r} / ${c.p}</div>
       </div>
     </div>
@@ -2431,12 +2459,28 @@ $('#lightbox').addEventListener('click', e=>{
     e.target.textContent = q ? `${t('cAddDeck')} (${t('cNow')} ×${q})` : t('cAddDeck');
   }
 });
+/* navigasi ◀ ▶ di popup kartu: pindah ke kartu tetangga dalam daftar yang
+   SEDANG tampil (menghormati filter aktif), muter balik di ujung daftar. */
+function lbNeighbor(arah){
+  if(!lbNo) return;
+  const arr = filtered();
+  if(!arr.length) return;
+  const idx = arr.findIndex(c=>c.no===lbNo);
+  if(idx===-1) return;
+  const tuju = (idx + arah + arr.length) % arr.length;
+  openLightbox(arr[tuju].no);
+}
+$('#lbPrev').addEventListener('click', e=>{ e.stopPropagation(); lbNeighbor(-1); });
+$('#lbNext').addEventListener('click', e=>{ e.stopPropagation(); lbNeighbor(1); });
 document.addEventListener('keydown', e=>{
   if(e.key === 'Escape'){
     if(!$('#lightbox').hidden) closeLightbox();
     else if(!$('#proxyView').hidden) closeProxy();
     else if(!$('#simView').hidden){ $('#simView').hidden = true; document.body.style.overflow=''; }
     else if(!$('#deckView').hidden){ $('#deckView').hidden = true; dvDeck=null; dvNama=''; document.body.style.overflow=''; }
+  }
+  else if(!$('#lightbox').hidden && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')){
+    lbNeighbor(e.key === 'ArrowLeft' ? -1 : 1);
   }
 });
 
@@ -3759,6 +3803,21 @@ window.addEventListener('hashchange', ()=>{
   const p = h.replace('#','');
   if(PAGES.includes(p) && p !== state.page) setPage(p, true);
 });
+
+/* --- PWA: daftarkan service worker (lihat sw.js) ---
+   Dibungkus try/catch dan dicek dulu dukungannya — kalau gagal (mis. dibuka
+   dari file:// lokal, atau browser lama), situs tetap jalan normal seperti
+   biasa, cuma tanpa mode offline. sw.js sendiri pakai strategi network-first
+   untuk index.html/data.js/cards.js supaya update selalu kepakai duluan saat
+   online — bukan cache-first, jadi tidak mengulang masalah "cache lama nyangkut"
+   yang pernah terjadi sebelum ada README versi. */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(err=>{
+      console.error('[MHR Deck Lab] service worker gagal didaftarkan:', err);
+    });
+  });
+}
 </script>
 <!-- ===================================================================
      CLOUDFLARE WEB ANALYTICS — aktif
