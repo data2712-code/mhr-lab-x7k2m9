@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.3  ·  26 Agustus 2026
+     MHR DECK LAB  ·  versi 6.4  ·  27 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.3">
+<meta name="version" content="6.4">
 <style>
   :root{
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
@@ -66,6 +66,11 @@
     border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px;
     color:var(--muted);background:var(--panel);
   }
+  /* Angka dipesan lebarnya supaya pill tidak berubah ukuran saat nilainya
+     diisi JavaScript — ini penyumbang CLS terbesar di laporan Cloudflare. */
+  .pill b, nav.tabs .cnt{font-variant-numeric:tabular-nums}
+  .pill b{display:inline-block;min-width:3ch;text-align:right}
+  nav.tabs .cnt{display:inline-block;min-width:3ch;text-align:center}
   .pill b{color:var(--paper);font-family:var(--mono)}
 
   .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:0;align-items:start}
@@ -148,7 +153,10 @@
   .sim-row .kartu i{width:8px;height:8px;border-radius:3px;flex:none}
   .sim-row .kartu span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .sim-tbl{max-height:270px;overflow-y:auto;padding-right:4px}
-  .hoverprev{position:fixed;z-index:70;width:216px;border-radius:10px;
+  /* left/top sengaja dikunci 0 dan pergerakannya memakai transform —
+     memindahkan elemen lewat left/top dihitung browser sebagai layout shift
+     (penyumbang CLS terbesar kedua di laporan Cloudflare). */
+  .hoverprev{position:fixed;left:0;top:0;z-index:70;width:216px;border-radius:10px;
     border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.65);
     pointer-events:none;background:var(--panel)}
   .hoverprev[hidden]{display:none}
@@ -595,8 +603,11 @@
   .dview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px 14px;margin-top:16px}
   @media (max-width:640px){ .dview-grid{grid-template-columns:repeat(3,1fr);gap:16px 10px} }
   .dv-card{position:relative}
-  .dv-card>img{width:100%;aspect-ratio:63/88;object-fit:cover;border-radius:9px;display:block;
-    border:1px solid var(--line)}
+  /* Gambar ditumpuk DI ATAS placeholder, bukan menggantikannya. Placeholder
+     yang tetap di tempat menjaga tinggi kartu, jadi tidak ada pergeseran saat
+     gambar selesai dimuat (penyumbang CLS pada #dvGrid). */
+  .dv-card>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    border-radius:9px;display:block;border:1px solid var(--line);z-index:1}
   .dv-ph{aspect-ratio:63/88;border-radius:9px;border:3px solid var(--dvc);
     background:linear-gradient(165deg,#232B34,#141920);padding:10px;
     display:flex;flex-direction:column;gap:7px}
@@ -604,7 +615,7 @@
     display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:900;font-size:16px}
   .dv-nm{font-family:var(--disp);font-weight:800;font-size:12.5px;line-height:1.3;flex:1;overflow:hidden}
   .dv-bt{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
-  .dv-qty{position:absolute;right:-7px;bottom:-9px;background:#fff;color:#101418;
+  .dv-qty{position:absolute;right:-7px;bottom:-9px;z-index:2;background:#fff;color:#101418;
     font-family:var(--mono);font-weight:800;font-size:17px;min-width:36px;height:36px;
     border-radius:11px;border:3px solid #101418;display:flex;align-items:center;justify-content:center}
   .dv-foot{margin-top:22px;color:var(--muted);font-size:11px;font-family:var(--mono);text-align:right}
@@ -674,8 +685,8 @@
     <p data-i18n="tagline">Marvel Hero Rush TCG Deck Builder · 208 kartu (BP01 · PB01 · PR · SD01–SD04) · Ver. Indonesia</p>
   </div>
   <div class="hdr-stats">
-    <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">0</b></div>
-    <div class="pill"><span data-i18n="statShown">Ditampilkan</span> <b id="hShown">0</b></div>
+    <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">208</b></div>
+    <div class="pill"><span data-i18n="statShown">Ditampilkan</span> <b id="hShown">208</b></div>
     <div class="pill"><span data-i18n="statDeck">Deck</span> <b id="hDeck">0</b></div>
     <a class="dukung" id="btnDukung" target="_blank" rel="noopener" hidden></a>
     <button class="pill" id="btnLang" title="Bahasa / Language" style="cursor:pointer;font-family:var(--mono);font-weight:700">🌐 ID</button>
@@ -688,7 +699,7 @@
   <button data-page="cards" aria-current="true">🃏 <span class="tl" data-i18n="navCards">Kartu</span><span class="ts" data-i18n="navCardsS">Kartu</span> <span class="cnt" id="navCard">208</span></button>
   <button data-page="build" aria-current="false">🛠 <span class="tl" data-i18n="navBuild">Deck Builder</span><span class="ts" data-i18n="navBuildS">Builder</span> <span class="cnt" id="navDeck">0</span></button>
   <button data-page="meta" aria-current="false">🏆 <span class="tl" data-i18n="navMeta">Deck Komunitas</span><span class="ts" data-i18n="navMetaS">Komunitas</span> <span class="cnt" id="navMeta">0</span></button>
-  <button data-page="lgs" aria-current="false">📅 <span class="tl" data-i18n="navLgs">Turnamen</span><span class="ts" data-i18n="navLgsS">Turnamen</span> <span class="cnt" id="navLgs">0</span></button>
+  <button data-page="lgs" aria-current="false">📅 <span class="tl" data-i18n="navLgs">Weekly Rush LGS</span><span class="ts" data-i18n="navLgsS">Rush LGS</span> <span class="cnt" id="navLgs">0</span></button>
 </nav>
 
 <section id="metaPage">
@@ -707,8 +718,8 @@
 <section id="lgsPage">
   <div class="lgs-wrap">
     <div class="lgs-head">
-      <h2 data-i18n="lgsHead">Weekly Tournament</h2>
-      <p>Jadwal turnamen mingguan Marvel Hero Rush di Local Game Shop, kini di beberapa kota.
+      <h2 data-i18n="lgsHead">Weekly Rush LGS</h2>
+      <p>Jadwal main mingguan Marvel Hero Rush di Local Game Shop — santai, mingguan, di beberapa kota.
         Klik nama toko atau tombol lokasi untuk membuka Google Maps. Jam main ditulis lengkap dengan
         zona waktunya (WIB / WITA / WIT). Untuk memastikan jadwal, menanyakan format turnamen, atau
         minta link grup WhatsApp komunitas, hubungi tokonya langsung — keterangan lengkap ada di bawah.</p>
@@ -856,7 +867,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.3</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.4</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1338,7 +1349,15 @@ function renderDeck(){
 function renderAll(){ renderCards(); renderDeck(); persist(); }
 
 /* --- events --- */
-$('#q').addEventListener('input', e=>{ state.q=e.target.value; renderCards(); });
+/* Pencarian diberi jeda 150 ms sebelum menggambar ulang daftar kartu.
+   Tanpa ini, tiap ketukan tombol membangun ulang HTML 208 kartu — penyebab
+   INP 312 ms pada #q di laporan Cloudflare. */
+let qTmr = null;
+function renderCardsNanti(ms){
+  clearTimeout(qTmr);
+  qTmr = setTimeout(()=>{ qTmr = null; renderCards(); }, ms || 150);
+}
+$('#q').addEventListener('input', e=>{ state.q = e.target.value; renderCardsNanti(150); });
 $('#fSeries').addEventListener('change', e=>{ state.series=e.target.value; renderCards(); });
 $('#fLevel').addEventListener('change', e=>{ state.level=e.target.value; renderCards(); });
 $('#fRange').addEventListener('change', e=>{ state.range=e.target.value; renderCards(); });
@@ -1394,6 +1413,7 @@ $('#cbtns').addEventListener('click', e=>{
   renderCards();
 });
 $('#btnReset').addEventListener('click', ()=>{
+  clearTimeout(qTmr); qTmr = null;
   state.q=''; state.series=''; state.level=''; state.range=''; state.rarity=''; state.trait=''; state.sort='no';
   state.mech.clear();
   state.onlyDeck = false;
@@ -1433,8 +1453,8 @@ const T = {
   navBuildS:    ['Builder','Builder'],
   navMeta:      ['Deck Komunitas','Community Decks'],
   navMetaS:     ['Komunitas','Community'],
-  navLgs:       ['Turnamen','Tournaments'],
-  navLgsS:      ['Turnamen','Events'],
+  navLgs:       ['Weekly Rush LGS','Weekly Rush LGS'],
+  navLgsS:      ['Rush LGS','Rush LGS'],
   statUnique:   ['Total kartu','Total cards'],
   statShown:    ['Ditampilkan','Showing'],
   statDeck:     ['Deck','Deck'],
@@ -1545,7 +1565,7 @@ const T = {
   metaView:     ['Lihat visual','View cards'],
   metaNone:     ['Belum ada deck komunitas yang cocok dengan filter ini.','No community deck matches this filter yet.'],
   metaAvgLv:    ['rata-rata Lv','average Lv'],
-  lgsHead:      ['Weekly Tournament','Weekly Tournament'],
+  lgsHead:      ['Weekly Rush LGS','Weekly Rush LGS'],
   close:        ['✕ Tutup','✕ Close'],
   /* --- simulasi draw --- */
   simHead:      ['Simulasi Draw Awal','Opening Draw Simulator'],
@@ -1830,7 +1850,7 @@ function renderSim(){
     const c = DB.find(d=>d.no===no);
     return `<div class="sim-card" data-idx="${i}" data-tukar="${simTukar.has(i)?1:0}">
       <span class="sim-tag">TUKAR</span>
-      <img src="${artFile(no)}" alt="" data-ext="0" style="display:none"
+      <img src="${artFile(no)}" alt="" data-ext="0" decoding="async" style="display:none"
         onerror="simImgFallback(this,'${no}')"
         onload="this.style.display='block';this.nextElementSibling.style.display='none'">
       <div class="sim-ph" style="--sc:${CMAP[c.c]}">
@@ -1944,8 +1964,7 @@ function posisikanPratinjau(x, y){
   if(kiri < m) kiri = Math.min(x + m, window.innerWidth - w - m);
   let atas = y - h/2;
   atas = Math.max(m, Math.min(atas, window.innerHeight - h - m));
-  el.style.left = kiri + 'px';
-  el.style.top  = atas + 'px';
+  el.style.transform = `translate3d(${Math.round(kiri)}px, ${Math.round(atas)}px, 0)`;
 }
 function sembunyikanPratinjau(){
   const el = $('#hoverPrev');
@@ -2307,7 +2326,7 @@ function openLightbox(no){
   const aktif = artOf(no);
   $('#lbInner').innerHTML = `
     <div>
-      <img class="lb-img" alt="${c.nm}" data-ext="0" src="${artFile(c.no)}"
+      <img class="lb-img" alt="${cardName(c)}" data-ext="0" decoding="async" src="${artFile(c.no)}"
         onerror="lbImgFallback(this,'${c.no}')">
       <div class="lb-ph" style="--lbc:${CMAP[c.c]};display:none">
         <div class="g-lv">${c.l}</div>
@@ -2438,9 +2457,9 @@ function openDeckView(deckLain, judulLain){
         <div class="dv-nm">${cardName(c)}</div>
         <div class="dv-bt">${c.no} · R-${c.r} / ${c.p}</div>
       </div>`;
-    const img = `<img src="${artFile(c.no)}" alt="" data-ext="0" style="display:none"
+    const img = `<img src="${artFile(c.no)}" alt="" data-ext="0" decoding="async" style="opacity:0"
            onerror="dvImgFallback(this,'${c.no}')"
-           onload="this.style.display='block';this.nextElementSibling.style.display='none'">`;
+           onload="this.style.opacity='1'">`;
     return `<div class="dv-card" data-zoom="${c.no}">${img}${ph}<div class="dv-qty">${q}</div></div>`;
   }).join('');
   $('#deckView').hidden = false;
@@ -3097,16 +3116,16 @@ function renderLgs(){
   $('#lgsNote').innerHTML =
     `<b style="color:var(--paper)">Konfirmasi dulu sebelum datang.</b> Jadwal dan jam main bisa berubah, ` +
     `dan beberapa sesi bersifat on demand — tergantung jumlah pemain yang hadir. Silakan hubungi ` +
-    `masing-masing toko langsung untuk memastikan turnamen berjalan, menanyakan format dan biaya ikut, ` +
+    `masing-masing toko langsung untuk memastikan sesinya berjalan, menanyakan format dan biaya ikut, ` +
     `atau menanyakan hal lain sebelum berangkat.<br><br>` +
     `<b style="color:var(--paper)">Gabung grup WhatsApp tokonya.</b> Sebagian besar LGS punya grup WhatsApp ` +
-    `komunitas masing-masing — di situ biasanya jadwal terbaru, perubahan jam, dan pengumuman turnamen ` +
+    `komunitas masing-masing — di situ biasanya jadwal terbaru, perubahan jam, dan pengumuman sesi ` +
     `disebarkan lebih dulu. Cara paling mudah: tanyakan link grupnya saat menghubungi toko atau saat ` +
     `datang bermain, atau cek akun media sosial toko yang bersangkutan.<br><br>` +
     `<b style="color:var(--paper)">Perhatikan zona waktunya.</b> Jam yang tertulis memakai zona waktu ` +
     `kota tempat tokonya berada (WIB, WITA, atau WIT), bukan zona waktu perangkat Anda. Selisihnya ` +
     `satu jam antar zona — WITA lebih cepat 1 jam dari WIB, WIT lebih cepat 2 jam.<br><br>` +
-    `Jadwal di halaman ini terakhir diperbarui ${LGS_UPDATE}. Ada LGS lain yang mengadakan turnamen ` +
+    `Jadwal di halaman ini terakhir diperbarui ${LGS_UPDATE}. Ada LGS lain yang mengadakan Weekly Rush ` +
     `mingguan, atau punya nomor kontak dan link grup yang bisa ditampilkan di sini? Kabari lewat TikTok ` +
     `<a href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener">@deteprtm</a>.`;
 }
@@ -3135,9 +3154,11 @@ function setPage(p, dariHash){
   window.scrollTo({top:0});
   if(store){ store.page = p; persist(); }
 }
+/* Render halaman ditunda satu frame supaya browser sempat menggambar respons
+   tombol lebih dulu — menurunkan INP pada #navTabs (sebelumnya 400–500 ms). */
 $('#navTabs').addEventListener('click', e=>{
   const b = e.target.closest('[data-page]'); if(!b) return;
-  setPage(b.dataset.page);
+  requestAnimationFrame(()=>setPage(b.dataset.page));
 });
 
 /* ==================== HALAMAN DECK KOMUNITAS ==================== */
@@ -3239,8 +3260,9 @@ $('#metaGrid').addEventListener('click', e=>{
     store.active = nama;
     state.deck = store.decks[nama];
     renderDeckSelect();
-    setPage('build');
-    renderAll();
+    /* pekerjaan berat (gambar ulang 208 kartu) ditunda satu frame — tombol ini
+       tercatat 392 ms di laporan INP dan paling sering diklik pengunjung */
+    requestAnimationFrame(()=>{ setPage('build'); renderAll(); });
   } else {
     // pratinjau murni: tidak menyentuh deck yang sedang disusun sama sekali
     openDeckView({...r.deck}, d.nm + (d.cr?` — by ${d.cr}`:''));

@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.3** · 26 Agustus 2026
+**Versi saat ini: v6.4** · 27 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -106,7 +106,7 @@ pemain luar negeri.
 
 | Hal | Perilaku |
 |---|---|
-| Menu | hanya **Cards** dan **Deck Builder**. Tab **Deck Komunitas** dan **Turnamen** tidak ditampilkan, karena isinya konten komunitas Indonesia (nama deck berbahasa Indonesia, jadwal LGS Indonesia) |
+| Menu | hanya **Cards** dan **Deck Builder**. Tab **Deck Komunitas** dan **Weekly Rush LGS** tidak ditampilkan, karena isinya konten komunitas Indonesia (nama deck berbahasa Indonesia, jadwal LGS Indonesia) |
 | Alamat `#meta` / `#lgs` | otomatis dialihkan ke halaman Cards, jadi tidak ada halaman kosong |
 | Database | 192 kartu — 16 kartu promo (PB01/EB01/TB01) disembunyikan karena versi Inggrisnya belum terbit |
 | Gambar | dari `images/en/`, otomatis jatuh ke `images/` kalau berkasnya belum ada |
@@ -268,7 +268,7 @@ Panel admin tidak terlihat oleh pengunjung biasa. Ini hanya menyembunyikan dari
 tampilan, bukan pengamanan — tapi tombol itu memang tidak punya kuasa apa pun,
 karena satu-satunya cara mengubah daftar adalah commit ke repository ini.
 
-### Cara mengubah jadwal turnamen LGS
+### Cara mengubah jadwal Weekly Rush LGS
 
 Semua jadwal ada di **`data.js`** (bukan `index.html`), jadi aman saat aplikasi
 diperbarui. Format tiap toko:
@@ -346,12 +346,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.3.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.4.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.3` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.4` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.3</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.4</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -384,6 +384,32 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.4 — 27 Agustus 2026 · perbaikan performa + ganti nama menu
+Berdasarkan laporan Cloudflare 28 Juli – 27 Agustus (5.240 kunjungan, 76% dari HP).
+Yang diperbaiki adalah elemen yang persis disebut di Debug View laporan itu.
+
+- **Menu "Turnamen" jadi "Weekly Rush LGS"** (di HP: "Rush LGS"), termasuk judul
+  halaman. Istilah "turnamen" diganti "sesi" di catatan bawah, karena main mingguan
+  di LGS sifatnya santai — bukan turnamen berhadiah besar
+- ⚡ **Pencarian diberi jeda 150 ms.** Sebelumnya tiap ketukan tombol membangun ulang
+  HTML 208 kartu (INP 312 ms di `#q`). Mengetik "hulk" kini menggambar ulang **1×**,
+  bukan 4×
+- ⚡ **Render berat ditunda satu frame** pada tombol "Muat ke Deck Builder" (392 ms,
+  110 kejadian — interaksi paling sering) dan tab navigasi (sampai 504 ms), sehingga
+  tombolnya merespons lebih dulu sebelum 208 kartu digambar ulang
+- ⚡ **Pratinjau melayang dipindah ke `transform`.** Menggeser elemen lewat `left`/`top`
+  dihitung browser sebagai layout shift — ini penyumbang CLS terbesar kedua
+  (`#hoverPrev`, 50 kejadian). Terukur turun dari ±1 menjadi **0**
+- ⚡ **Lebar angka di pill header dan lencana tab dipesan** (`min-width` + angka
+  tabular), plus nilai awalnya disamakan dengan nilai akhir. Ini menghapus penyumbang
+  CLS terbesar (`div.hdr-stats`, 90 kejadian) yang muncul saat JavaScript mengisi angka
+- ⚡ **Di layar Lihat deck, gambar kini ditumpuk di atas placeholder** alih-alih
+  menggantikannya, jadi tinggi kartu tidak pernah berubah saat gambar selesai dimuat
+  (`#dvGrid>div.dv-card`, 40 kejadian) — terukur **0** pergeseran
+- ⚡ **`decoding="async"` pada gambar kartu** di daftar, popup, dan simulasi — membantu
+  Safari iOS yang di laporan tercatat paling lambat (P75 2.067 ms vs 1.237 ms Chrome
+  Mobile)
 
 ### v6.3 — 26 Agustus 2026
 - **Mode Inggris disederhanakan: hanya menu Cards dan Deck Builder.** Tab
