@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.5** · 27 Agustus 2026
+**Versi saat ini: v6.6** · 27 Agustus 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -26,10 +26,15 @@ Simpan bukti tertulis izinnya beserta nama pemberi dan tanggalnya.
 
 ```
 mhr-lab-x7k2m9/
-├── index.html        ← seluruh aplikasi (HTML + CSS + JS + database 200 kartu)
+├── index.html        ← seluruh aplikasi (HTML + CSS + JS)
+├── cards.js           ← database 208 kartu — diganti tiap ada set kartu baru
+├── data.js             ← deck komunitas, jadwal LGS, dukungan — diedit sendiri pemilik
+├── manifest.json    ← PWA: nama, ikon, warna tema (sejak v6.6)
+├── sw.js                 ← PWA: service worker, cache offline (sejak v6.6)
+├── icons/               ← ikon PWA berbagai ukuran (sejak v6.6)
 ├── og-image.jpg      ← gambar preview saat link dibagikan
 ├── robots.txt        ← kontrol pengindeksan mesin pencari
-└── images/           ← 200 gambar kartu, nama = nomor kartu (BP01-001.jpg)
+└── images/ · images/en/  ← gambar kartu, nama = nomor kartu (BP01-001.jpg)
 ```
 
 Aplikasi ini sepenuhnya statis — tanpa server, tanpa database, tanpa akun.
@@ -353,12 +358,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.5.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.6.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.5` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.6` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.5</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.6</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -391,6 +396,38 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.6 — 27 Agustus 2026 · bisa dipasang & jalan offline (PWA), navigasi popup, sisa i18n
+Masih lanjutan sesi yang sama. Dua permintaan: "beres-beres kecil dulu" dan
+"PWA / bisa dipakai offline" dari daftar rekomendasi yang saya berikan.
+
+- 🆕 **Situsnya sekarang bisa "Add to Home Screen"** di HP (Android & iOS) dan
+  **tetap jalan tanpa internet** — termasuk 208 kartu dan gambarnya, kalau sudah
+  pernah dibuka sekali sebelumnya. Tiga berkas baru: `manifest.json` (nama,
+  ikon, warna tema), `sw.js` (service worker — logikanya ada di komentar
+  berkasnya sendiri), dan folder `icons/`
+- **Strategi cache sengaja network-first untuk `index.html`/`cards.js`/`data.js`**
+  (bukan cache-first) — begitu online, versi terbaru dari server SELALU diambil
+  duluan dan cache-nya diperbarui diam-diam; cache cuma dipakai kalau benar-benar
+  offline. Ini supaya update situs & perubahan jadwal LGS di `data.js` langsung
+  kepakai, bukan mengulang masalah "kok masih versi lama" yang pernah terjadi
+  gara-gara cache browser biasa. Gambar kartu (`images/`) sebaliknya cache-first
+  karena praktis tidak pernah berubah — ini yang bikin mode offline & hemat
+  bandwidth kepakai
+  Sudah diuji: matikan koneksi lewat Playwright setelah kunjungan pertama →
+  situs tetap memuat 208 kartu dengan benar
+- **Ikon PWA dibuat dari palet situs sendiri** (huruf "M" warna accent di atas
+  warna ink) — bukan turunan `og-image.jpg`. Tinggal timpa berkas di `icons/`
+  kalau mau motif lain, ukurannya (16/32/180/192/512 px) jangan diubah
+- 🆕 **Navigasi ◀ ▶ di popup kartu** — tombol di kiri-kanan gambar, atau panah
+  kiri/kanan di keyboard, untuk pindah ke kartu tetangga dalam daftar yang
+  sedang tampil (menghormati filter aktif) tanpa perlu menutup popup dulu
+- 🔧 **Sisa kecil-kecil:** urut "Nama" di halaman Cards sekarang ikut bahasa
+  aktif (sebelumnya tetap urut nama Indonesia walau mode Inggris); placeholder
+  gambar di popup kartu (saat gambar gagal dimuat) ikut bahasa aktif; label
+  "Sebaran level"/"Warna" di panel simulasi draw ikut kamus dua bahasa; tombol
+  "Tutup" di popup kartu disamakan dengan tombol Tutup lain (sebelumnya satu-
+  satunya yang belum pakai kamus)
 
 ### v6.5 — 27 Agustus 2026 · sisa i18n, filter kota, dan panel deck di Safari iOS
 Lanjutan dari sesi yang sama dengan v6.4 — membereskan beberapa item tertunda
