@@ -358,12 +358,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.11.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.12.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.11` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.12` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.11</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.12</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -396,6 +396,28 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.12 — 28 Agustus 2026 · errata resmi V.1 dari tim MHR Indonesia + lencana Errata
+Tim MHR Indonesia merilis daftar errata resmi pertama (V.1) untuk 10 kartu — teks
+efek bahasa Indonesia sejumlah kartu diperbaiki karena tidak lagi cocok dengan
+maksud aslinya. Kartu `SD01-018` (cetak ulang `BP01-026` dengan teks efek identik)
+ikut diperbaiki juga atas konfirmasi pemilik, meski tidak disebut namanya di
+dokumen errata resmi. Teks bahasa Inggris (`e_en`) tidak ada yang diubah — sudah
+lebih dulu cocok dengan versi "Setelah Errata".
+
+Kartu yang direvisi: `BP01-002`, `BP01-026`, `SD01-018`, `BP01-037`, `BP01-043`,
+`BP01-046`, `BP01-052`, `BP01-090`, `SD01-007`, `SD04-002`, `SD04-003`, `SD04-005`.
+
+- `cards.js`: field baru `er` (mis. `"V.1"`) ditambahkan ke 12 kartu di atas —
+  cuma diisi kalau kartu itu pernah direvisi resmi, dirancang supaya errata
+  berikutnya (V.2, dst — pemilik bilang akan ada lagi ke depannya) tinggal
+  menimpa nilai field ini
+- Halaman Kartu: lencana kecil **"Errata"** muncul di kartu yang punya field
+  `er` — tampil di tampilan daftar, grid, dan popup gambar (lightbox), dengan
+  tooltip yang menyebutkan nomor versi errata-nya
+- Diverifikasi (Chromium headless): ke-12 kartu di atas menampilkan lencana +
+  tooltip yang benar di ID & EN, di ketiga tampilan (daftar/grid/lightbox),
+  tidak ada error konsol
 
 ### v6.11 — 28 Agustus 2026 · nama aksi "Penempatan BASE" diganti (rawan salah paham)
 Masukan dari pemilik atas screenshot bagian Action Phase di v6.10: nama
