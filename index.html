@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.8  ·  28 Agustus 2026
+     MHR DECK LAB  ·  versi 6.9  ·  28 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.8">
+<meta name="version" content="6.9">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -962,7 +962,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.8</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.9</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -3284,6 +3284,7 @@ id: `
   <a href="#pd-efek">Jenis Efek</a>
   <a href="#pd-istilah">Istilah Penting</a>
   <a href="#pd-deck">Aturan Deck</a>
+  <a href="#pd-turnamen">Aturan Pertandingan</a>
 </nav>
 
 <div class="pd-sec" id="pd-menang">
@@ -3518,9 +3519,36 @@ id: `
     pelanggaran salah satu aturan di atas, sebelum Anda membagikannya sebagai link atau gambar.</p>
 </div>
 
+<div class="pd-sec" id="pd-turnamen">
+  <h3>Aturan Pertandingan &amp; Turnamen</h3>
+  <p>Ini soal <b>pelaksanaan</b> pertandingan, bukan aturan permainan inti di atas — sebagian belum
+    diatur resmi oleh pihak MHR, jadi tergantung kesepakatan pemain atau ketentuan masing-masing
+    LGS/turnamen setempat:</p>
+  <ul>
+    <li><b>Menentukan siapa jalan duluan</b> — lewat <b>coin toss</b> atau <b>lempar dadu</b>,
+      tergantung kesepakatan kedua pemain.</li>
+    <li><b>Batas waktu pertandingan</b> — belum ada aturan waktu resmi dari pihak MHR. Kalau sebuah
+      LGS atau turnamen menetapkan batas waktunya sendiri, urutan penentuan pemenang begitu waktu
+      habis (dan belum ada yang menang secara wajar):
+      <ol>
+        <li>Yang <b>Rush Point-nya lebih banyak</b> di TIMELINE menang.</li>
+        <li>Kalau sama banyak, yang <b>kartu tersisa di Main Deck-nya lebih banyak</b> menang.</li>
+        <li>Kalau masih sama juga, ditentukan lewat coin toss atau lempar dadu.</li>
+      </ol>
+    </li>
+    <li><b>Format pertandingan</b> — saat ini <b>Best of 1</b> (satu game langsung menentukan), baik
+      di turnamen santai LGS maupun turnamen resmi. Berpotensi berubah di babak-babak tertentu pada
+      turnamen resmi ke depannya (mis. babak penyisihan vs. Top 32/16/8/4), tapi belum ada ketetapan
+      pasti untuk itu.</li>
+  </ul>
+  <div class="pd-box warn">Bagian ini bisa berubah begitu pihak MHR resmi mengeluarkan aturan
+    turnamen tertulis — kalau ragu, konfirmasi langsung ke penyelenggara/TO acara yang Anda ikuti.</div>
+</div>
+
 <p style="color:var(--muted);font-size:11px;margin-top:8px">Sumber: poster rulebook resmi
   "Area Permainan" &amp; "Tata Cara Bermain" Marvel Hero Rush TCG — PT. Jason Entertainment
-  Indonesia (CARDFUN) &amp; Marvel.</p>
+  Indonesia (CARDFUN) &amp; Marvel; bagian Aturan Pertandingan &amp; Turnamen berdasarkan konvensi
+  komunitas/LGS yang berlaku saat ini.</p>
 `,
 en: `
 <h2 class="pd-title">How to Play Marvel Hero Rush</h2>
@@ -3541,6 +3569,7 @@ en: `
   <a href="#pd-efek">Effect Types</a>
   <a href="#pd-istilah">Key Terms</a>
   <a href="#pd-deck">Deck Rules</a>
+  <a href="#pd-turnamen">Match &amp; Tournament Rules</a>
 </nav>
 
 <div class="pd-sec" id="pd-menang">
@@ -3771,9 +3800,34 @@ en: `
     the rules above before you share it as a link or image.</p>
 </div>
 
+<div class="pd-sec" id="pd-turnamen">
+  <h3>Match &amp; Tournament Rules</h3>
+  <p>This is about running a <b>match</b>, not the core game rules above — some of it isn't officially
+    set by MHR yet, so it comes down to player agreement or whatever the local LGS/tournament decides:</p>
+  <ul>
+    <li><b>Deciding who goes first</b> — a <b>coin toss</b> or a <b>dice roll</b>, whichever the two
+      players agree on.</li>
+    <li><b>Match time limit</b> — there's no official time rule from MHR yet. If an LGS or tournament
+      sets its own time limit, here's the order used to decide a winner once time is up (and no one
+      has won outright):
+      <ol>
+        <li>Whoever has <b>more Rush Points</b> in their TIMELINE wins.</li>
+        <li>If tied, whoever has <b>more cards left in their Main Deck</b> wins.</li>
+        <li>If still tied, it's decided by a coin toss or dice roll.</li>
+      </ol>
+    </li>
+    <li><b>Match format</b> — currently <b>Best of 1</b> (a single game decides it), both for casual
+      LGS play and official tournaments. This could change for certain rounds of official tournaments
+      down the line (e.g. the qualifying rounds vs. Top 32/16/8/4), but nothing's fixed for that yet.</li>
+  </ul>
+  <div class="pd-box warn">This section may change as soon as MHR publishes official tournament
+    rules — when in doubt, check with the organizer/TO of the event you're attending.</div>
+</div>
+
 <p style="color:var(--muted);font-size:11px;margin-top:8px">Source: the official "Area Permainan"
   (Field) &amp; "Tata Cara Bermain" (How to Play) rulebook posters for Marvel Hero Rush TCG —
-  PT. Jason Entertainment Indonesia (CARDFUN) &amp; Marvel.</p>
+  PT. Jason Entertainment Indonesia (CARDFUN) &amp; Marvel; the Match &amp; Tournament Rules section
+  is based on current community/LGS convention.</p>
 `
 };
 

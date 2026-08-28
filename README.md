@@ -358,12 +358,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.8.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.9.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.8` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.9` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.8</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.9</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -396,6 +396,28 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.9 — 28 Agustus 2026 · bagian baru: Aturan Pertandingan &amp; Turnamen
+Ditambah section baru di halaman Panduan (dwibahasa ID/EN) soal pelaksanaan
+pertandingan — bukan aturan permainan inti, dan sebagian belum diatur resmi
+oleh pihak MHR, jadi ditulis sesuai info dari pemilik/konvensi komunitas saat
+ini, dengan catatan jelas kalau ini bisa berubah:
+
+- **Penentuan first/second**: coin toss atau lempar dadu, tergantung
+  kesepakatan kedua pemain
+- **Batas waktu pertandingan**: belum ada aturan resmi dari pihak MHR. Kalau
+  LGS/turnamen menetapkan sendiri, urutan penentuan pemenang saat waktu habis:
+  (1) Rush Point terbanyak di TIMELINE, (2) kalau seri, kartu tersisa di Main
+  Deck terbanyak, (3) kalau masih seri, coin toss/lempar dadu
+- **Format pertandingan**: saat ini Best of 1 untuk turnamen LGS maupun
+  turnamen resmi, dengan catatan berpotensi berubah di babak-babak tertentu
+  turnamen resmi ke depannya (penyisihan vs. Top 32/16/8/4) — belum ada
+  ketetapan pasti
+- Bagian ini diberi kotak catatan eksplisit bahwa isinya konvensi
+  komunitas/LGS saat ini, bukan aturan tertulis resmi — supaya tidak dikira
+  seolah-olah sudah baku
+- Diverifikasi ulang (Chromium headless): section baru `pd-turnamen` tampil
+  benar di ID & EN, tautan TOC cocok, tidak ada error konsol
 
 ### v6.8 — 28 Agustus 2026 · koreksi aturan di halaman Panduan (dari pemilik)
 Empat koreksi langsung dari pemilik/pemain, hasil baca ulang v6.7:
