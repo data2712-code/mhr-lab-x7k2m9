@@ -358,12 +358,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.7.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.8.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.7` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.8` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.7</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.8</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -396,6 +396,29 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.8 — 28 Agustus 2026 · koreksi aturan di halaman Panduan (dari pemilik)
+Empat koreksi langsung dari pemilik/pemain, hasil baca ulang v6.7:
+
+- 🆕 **Adjustment Phase** ditambah sebagai fase tersendiri (antara Action Phase
+  dan Battle Phase) — sebelumnya "reposisi hingga 4 karakter" tertulis sebagai
+  langkah pertama Battle Phase, padahal itu fase terpisah. Alur giliran di
+  Panduan sekarang 7 fase: Start → Draw → Action → **Adjustment** → Battle →
+  Counter → End. Diagram area permainan & Battle Phase disesuaikan
+- **Diperbaiki:** penjelasan RETREAT sebelumnya menyiratkan kartu yang *sudah*
+  ada di area RETREAT itulah yang "ditarik kembali" untuk membayar panggilan
+  Level 4+ — kebalik. Yang benar: biaya Level 4+ adalah *memindahkan* kartu
+  dari BATTLE ke RETREAT (aksi retreat), bukan memakai kartu yang sudah lebih
+  dulu ada di sana. Kartu yang sudah di RETREAT normalnya tidak aktif, kecuali
+  ada efek kartu lain yang membawanya balik ke tangan/FIELD/deck
+- **Diperjelas:** kartu di VOID juga bisa kembali ke FIELD kalau ada efek kartu
+  yang mendukungnya — sebelumnya kesan "di-prune" ditulis seolah selalu permanen
+- **Diperjelas:** catatan giliran pertama sekarang menyebutkan detail penuh —
+  pemain pertama hanya boleh menaruh 1 kartu tertutup di BASE, memanggil 1
+  karakter (bukan sampai 3), dan tidak bisa menyerang BATTLE lawan sama sekali
+- Diverifikasi ulang (Chromium headless): 12 bagian dengan `pd-adjust` di
+  posisi baru, seluruh tautan TOC cocok, teks koreksi tampil benar di ID & EN,
+  tidak ada error konsol
 
 ### v6.7 — 28 Agustus 2026 · halaman Panduan Bermain untuk pemain baru
 Permintaan: panduan dan peraturan lengkap untuk pemain yang belum paham aturan
