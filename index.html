@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.7  ·  28 Agustus 2026
+     MHR DECK LAB  ·  versi 6.8  ·  28 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.7">
+<meta name="version" content="6.8">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -962,7 +962,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.7</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.8</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -3278,6 +3278,7 @@ id: `
   <a href="#pd-area">Area Permainan</a>
   <a href="#pd-giliran">Alur Giliran</a>
   <a href="#pd-aksi">Action Phase</a>
+  <a href="#pd-adjust">Adjustment Phase</a>
   <a href="#pd-battle">Battle Phase</a>
   <a href="#pd-kemampuan">Kemampuan Kunci</a>
   <a href="#pd-efek">Jenis Efek</a>
@@ -3338,8 +3339,9 @@ id: `
 <div class="pd-sec" id="pd-area">
   <h3>Area Permainan</h3>
   <p>Setiap pemain punya 4 slot pertarungan yang membentuk formasi berlian — bersama disebut area
-    <b>BATTLE</b>. Anda boleh menukar posisi karakter antar keempat slot ini bebas kapan saja di
-    Action Phase giliran Anda (pertukaran posisi tidak dihitung sebagai "gerakan"):</p>
+    <b>BATTLE</b>. Posisi karakter di keempat slot ini bisa ditukar-tukar bebas di <b>Adjustment
+    Phase</b> (setelah Action Phase, sebelum Battle Phase — lihat bagian di bawah) supaya jarak
+    serangan (R) masing-masing karakter pas sebelum benar-benar menyerang:</p>
   <div class="pd-field">
     <div class="pd-slot front">FRONT</div>
     <div class="pd-slot wl">WING</div>
@@ -3354,11 +3356,12 @@ id: `
     Anda dapat 1 kartu Rush Point.</p>
   <p>Area lain di luar BATTLE/BASE:</p>
   <div class="pd-grid2">
-    <div class="pd-term"><span class="k">Retreat</span><p>Tempat kartu yang kalah bertarung atau
-      dikorbankan/dibuang. Kartu di sini masih bisa "ditarik kembali" untuk membayar biaya panggil
-      karakter Level 4+.</p></div>
+    <div class="pd-term"><span class="k">Retreat</span><p>Tempat kartu yang kalah bertarung,
+      dikorbankan, atau dibuang berakhir. Normalnya kartu di sini tidak aktif — tapi beberapa kartu
+      lain punya efek yang bisa mengembalikannya ke tangan, FIELD, atau bahkan deck.</p></div>
     <div class="pd-term"><span class="k">Void</span><p>Tempat kartu yang sudah <b>di-prune</b>
-      (disingkirkan permanen). Jumlahnya tidak terbatas.</p></div>
+      (disingkirkan dari permainan). Jumlahnya tidak terbatas. Biasanya dianggap "hilang", tapi ada
+      juga kartu tertentu yang efeknya bisa mengembalikan kartu dari VOID ke FIELD.</p></div>
     <div class="pd-term"><span class="k">Deck</span><p>Tumpukan Main Deck Anda. Kalau habis saat
       harus menarik kartu, Anda kalah.</p></div>
     <div class="pd-term"><span class="k">Rush Point Deck</span><p>9 kartu poin Anda. Berpindah satu
@@ -3370,17 +3373,18 @@ id: `
 
 <div class="pd-sec" id="pd-giliran">
   <h3>Alur Satu Giliran</h3>
-  <p>Tiap giliran terdiri dari 6 fase berurutan:</p>
+  <p>Tiap giliran terdiri dari 7 fase berurutan:</p>
   <div class="pd-flow">
     <span><b>1</b>Start Phase</span><span><b>2</b>Draw Phase</span><span><b>3</b>Action Phase</span>
-    <span><b>4</b>Battle Phase</span><span><b>5</b>Counter Phase</span><span><b>6</b>End Phase</span>
+    <span><b>4</b>Adjustment Phase</span><span><b>5</b>Battle Phase</span>
+    <span><b>6</b>Counter Phase</span><span><b>7</b>End Phase</span>
   </div>
   <ul>
     <li><b>Start Phase</b> — efek kartu yang aktif "saat memulai giliran" dijalankan di sini.</li>
     <li><b>Draw Phase</b> — tarik 2 kartu. Batas tangan maksimal 9 kartu (kelebihan harus dibuang di
       End Phase).</li>
-    <li><b>Action Phase &amp; Battle Phase</b> — dijelaskan detail di bagian di bawah, karena ini
-      inti permainan.</li>
+    <li><b>Action Phase, Adjustment Phase &amp; Battle Phase</b> — dijelaskan detail di bagian di
+      bawah, karena ini inti permainan.</li>
     <li><b>Counter Phase</b> — jendela terakhir sebelum giliran berakhir: tiap pemain bergiliran
       (lawan lebih dulu) memilih salah satu dari tiga hal — panggil kartu berkemampuan
       <b>[COUNTER]</b> (maksimal 1 kali per fase ini per giliran), aktifkan efek kartu, atau tidak
@@ -3388,9 +3392,11 @@ id: `
     <li><b>End Phase</b> — buang kelebihan kartu di tangan sampai maksimal 9, lalu giliran berpindah
       ke pemain lain.</li>
   </ul>
-  <div class="pd-box warn"><b>Catatan giliran pertama:</b> pemain yang jalan duluan <b>melewati
-    seluruh Battle Phase</b> pada giliran pertamanya — belum ada yang bisa diserang karena lawan
-    belum sempat memanggil karakter.</div>
+  <div class="pd-box warn"><b>Catatan giliran pertama:</b> pemain yang jalan duluan sangat dibatasi
+    di giliran pertamanya — hanya boleh menaruh <b>1 kartu tertutup</b> di BASE, memanggil
+    <b>1 karakter</b> (bukan sampai 3), dan <b>tidak bisa menyerang</b> BATTLE lawan sama sekali
+    (melewati seluruh Battle Phase) — karena lawan belum sempat memanggil karakter apa pun untuk
+    diserang.</div>
 </div>
 
 <div class="pd-sec" id="pd-aksi">
@@ -3414,16 +3420,23 @@ id: `
   </ul>
 </div>
 
+<div class="pd-sec" id="pd-adjust">
+  <h3>Adjustment Phase — Mengatur Posisi</h3>
+  <p>Fase singkat tapi penting di antara Action Phase dan Battle Phase: di sini Anda boleh menukar
+    posisi karakter yang sudah ada di BATTLE Anda sekaligus, bebas antar keempat slot (FRONT ↔ WING
+    ↔ BACK), sepuasnya. Pertukaran posisi <b>tidak dihitung sebagai "gerakan"</b> dan tidak
+    terbatas jumlahnya.</p>
+  <p>Gunanya: menyesuaikan karakter mana yang berada di FRONT/WING/BACK <b>sebelum</b> Battle Phase
+    dimulai, supaya jarak serangan (R) tiap karakter pas dengan target yang ingin Anda serang atau
+    posisi yang ingin Anda lindungi.</p>
+</div>
+
 <div class="pd-sec" id="pd-battle">
   <h3>Battle Phase — Menyerang</h3>
   <p>Pemain yang mendapat giliran pertama melewati fase ini di giliran pertamanya (lihat catatan di
-    atas). Di giliran lain, fase ini berjalan begini:</p>
-  <ol>
-    <li>Anda boleh menyesuaikan posisi hingga 4 karakter di BATTLE Anda sekaligus (pertukaran posisi
-      bebas, tidak terbatas).</li>
-    <li>Karakter menyerang berurutan: <b>FRONT → WING → WING → BACK</b>. Tiap karakter hanya
-      mendapat 1 kesempatan menyerang per giliran, dan boleh memilih untuk tidak menyerang.</li>
-  </ol>
+    atas). Di giliran lain, karakter menyerang berurutan: <b>FRONT → WING → WING → BACK</b>. Tiap
+    karakter hanya mendapat 1 kesempatan menyerang per giliran, dan boleh memilih untuk tidak
+    menyerang.</p>
   <p>Untuk setiap karakter yang menyerang, ada 3 langkah:</p>
   <ul>
     <li><b>① Target Phase</b> — karakter memilih 1 karakter musuh (atau Weakness) yang berada dalam
@@ -3481,11 +3494,14 @@ id: `
       kalau berhasil diserang memberi 1 Rush Point.</p></div>
     <div class="pd-term"><span class="k">Set Card / Kartu Charge</span><p>Kartu karakter yang
       ditaruh tertutup di BASE. Kehilangan efeknya, dianggap tidak di BATTLE, dan hanya pemiliknya
-      yang boleh melihatnya. Dihitung Level 1 saat dipakai membayar panggilan Level 4+.</p></div>
-    <div class="pd-term"><span class="k">Prune</span><p>Menyingkirkan kartu secara permanen ke VOID.
-      Ini yang membuat sebuah filter mekanik "Prune" ada di halaman Kartu.</p></div>
-    <div class="pd-term"><span class="k">Retreat</span><p>Kartu yang kalah bertarung/dibuang masuk
-      ke sini — masih bisa "ditarik kembali" untuk membayar panggilan Level 4+.</p></div>
+      yang boleh melihatnya. Boleh di-retreat (dianggap Level 1) untuk membantu membayar panggilan
+      Level 4+.</p></div>
+    <div class="pd-term"><span class="k">Prune</span><p>Menyingkirkan kartu ke VOID. Ini yang
+      dicocokkan filter mekanik "Prune" di halaman Kartu.</p></div>
+    <div class="pd-term"><span class="k">Retreat (aksi)</span><p>Tindakan memindahkan kartu dari
+      BATTLE ke area RETREAT — ini yang jadi "biaya" saat memanggil karakter Level 4+. Beda dengan
+      kartu yang <b>sudah</b> berada di area RETREAT (lihat definisi di bagian Area Permainan), yang
+      normalnya tidak otomatis kembali kecuali ada efek kartu lain yang membawanya balik.</p></div>
   </div>
 </div>
 
@@ -3519,6 +3535,7 @@ en: `
   <a href="#pd-area">Field Layout</a>
   <a href="#pd-giliran">Turn Flow</a>
   <a href="#pd-aksi">Action Phase</a>
+  <a href="#pd-adjust">Adjustment Phase</a>
   <a href="#pd-battle">Battle Phase</a>
   <a href="#pd-kemampuan">Key Abilities</a>
   <a href="#pd-efek">Effect Types</a>
@@ -3579,9 +3596,10 @@ en: `
 
 <div class="pd-sec" id="pd-area">
   <h3>Field Layout</h3>
-  <p>Each player has 4 battle slots forming a diamond formation — together called <b>BATTLE</b>. You
-    may freely rearrange characters between these 4 slots any time during your Action Phase
-    (swapping positions doesn't count as a "move"):</p>
+  <p>Each player has 4 battle slots forming a diamond formation — together called <b>BATTLE</b>.
+    Characters in these 4 slots can be freely rearranged during the <b>Adjustment Phase</b> (after
+    Action Phase, before Battle Phase — see below) so each character's attack range (R) lines up
+    before attacking actually begins:</p>
   <div class="pd-field">
     <div class="pd-slot front">FRONT</div>
     <div class="pd-slot wl">WING</div>
@@ -3595,11 +3613,12 @@ en: `
     <b>Weakness</b> — an easy target that, if successfully attacked, earns you 1 Rush Point card.</p>
   <p>Other areas besides BATTLE/BASE:</p>
   <div class="pd-grid2">
-    <div class="pd-term"><span class="k">Retreat</span><p>Where cards that lost a battle, or were
-      sacrificed/discarded, go. Cards here can still be "retreated" to pay the cost of calling a
-      Level 4+ character.</p></div>
+    <div class="pd-term"><span class="k">Retreat</span><p>Where cards that lost a battle, were
+      sacrificed, or were discarded end up. Cards here are normally inactive — but some other cards
+      have effects that bring them back to hand, FIELD, or even the deck.</p></div>
     <div class="pd-term"><span class="k">Void</span><p>Where <b>pruned</b> cards go — removed from
-      the game permanently. No limit on how many can be here.</p></div>
+      play. No limit on how many can be here. Usually treated as gone for good, but certain card
+      effects can bring a card back from VOID to the FIELD.</p></div>
     <div class="pd-term"><span class="k">Deck</span><p>Your Main Deck pile. Running out when you're
       required to draw means you lose.</p></div>
     <div class="pd-term"><span class="k">Rush Point Deck</span><p>Your 9 point cards. Moves one at a
@@ -3611,24 +3630,28 @@ en: `
 
 <div class="pd-sec" id="pd-giliran">
   <h3>Turn Flow</h3>
-  <p>Every turn runs through 6 phases in order:</p>
+  <p>Every turn runs through 7 phases in order:</p>
   <div class="pd-flow">
     <span><b>1</b>Start Phase</span><span><b>2</b>Draw Phase</span><span><b>3</b>Action Phase</span>
-    <span><b>4</b>Battle Phase</span><span><b>5</b>Counter Phase</span><span><b>6</b>End Phase</span>
+    <span><b>4</b>Adjustment Phase</span><span><b>5</b>Battle Phase</span>
+    <span><b>6</b>Counter Phase</span><span><b>7</b>End Phase</span>
   </div>
   <ul>
     <li><b>Start Phase</b> — effects that trigger "at the start of your turn" resolve here.</li>
     <li><b>Draw Phase</b> — draw 2 cards. Hand limit is 9 (discard the excess in End Phase).</li>
-    <li><b>Action Phase &amp; Battle Phase</b> — detailed below, since this is the core of the game.</li>
+    <li><b>Action Phase, Adjustment Phase &amp; Battle Phase</b> — detailed below, since this is the
+      core of the game.</li>
     <li><b>Counter Phase</b> — the last window before the turn ends: each player in turn (opponent
       first) picks one of three things — call a <b>[COUNTER]</b> character (max once per phase per
       turn), activate a card effect, or do nothing. The phase ends once both players pass in a row.</li>
     <li><b>End Phase</b> — discard down to the 9-card hand limit, then the turn passes to the other
       player.</li>
   </ul>
-  <div class="pd-box warn"><b>First-turn note:</b> the player who goes first <b>skips their entire
-    Battle Phase</b> on their very first turn — the opponent hasn't had a chance to call anyone out
-    to attack yet.</div>
+  <div class="pd-box warn"><b>First-turn note:</b> the player who goes first is heavily restricted
+    on their very first turn — they may only place <b>1 face-down card</b> in BASE, call
+    <b>1 character</b> (not up to 3), and <b>can't attack</b> the opponent's BATTLE at all (skipping
+    the entire Battle Phase) — since the opponent hasn't had a chance to call anyone out to attack
+    yet.</div>
 </div>
 
 <div class="pd-sec" id="pd-aksi">
@@ -3652,16 +3675,22 @@ en: `
   </ul>
 </div>
 
+<div class="pd-sec" id="pd-adjust">
+  <h3>Adjustment Phase — Positioning</h3>
+  <p>A short but important phase between Action Phase and Battle Phase: here you may rearrange the
+    characters already in your BATTLE all at once, freely swapping between all 4 slots (FRONT ↔
+    WING ↔ BACK), as much as you like. Swapping positions <b>doesn't count as a "move"</b> and isn't
+    limited in number.</p>
+  <p>The point: line up which character sits at FRONT/WING/BACK <b>before</b> Battle Phase starts, so
+    each character's Range (R) matches whatever you want to attack — or whatever position you want
+    to protect.</p>
+</div>
+
 <div class="pd-sec" id="pd-battle">
   <h3>Battle Phase — Attacking</h3>
   <p>The player going first skips this phase on their first turn (see the note above). On every
-    other turn, it goes like this:</p>
-  <ol>
-    <li>You may rearrange up to 4 characters in your BATTLE at once (swapping positions freely, no
-      limit).</li>
-    <li>Characters attack in order: <b>FRONT → WING → WING → BACK</b>. Each character gets only 1
-      chance to attack per turn, and may choose not to attack.</li>
-  </ol>
+    other turn, characters attack in order: <b>FRONT → WING → WING → BACK</b>. Each character gets
+    only 1 chance to attack per turn, and may choose not to attack.</p>
   <p>For each attacking character, there are 3 steps:</p>
   <ul>
     <li><b>① Target Phase</b> — the character picks 1 enemy character (or a Weakness) within its own
@@ -3719,11 +3748,13 @@ en: `
       successfully attacked, grants 1 Rush Point.</p></div>
     <div class="pd-term"><span class="k">Set Card / Charge Card</span><p>A character card placed
       face-down in BASE. It loses its effect, is treated as not being in BATTLE, and only its owner
-      may look at it. Counts as Level 1 when used to pay for a Level 4+ call.</p></div>
-    <div class="pd-term"><span class="k">Prune</span><p>Removing a card permanently to VOID. This is
-      what the "Prune" mechanic filter on the Cards page is matching for.</p></div>
-    <div class="pd-term"><span class="k">Retreat</span><p>Where cards that lost a battle or were
-      discarded go — they can still be "retreated" again to help pay for a Level 4+ call.</p></div>
+      may look at it. May be retreated (counted as Level 1) to help pay for a Level 4+ call.</p></div>
+    <div class="pd-term"><span class="k">Prune</span><p>Sending a card to VOID. This is what the
+      "Prune" mechanic filter on the Cards page is matching for.</p></div>
+    <div class="pd-term"><span class="k">Retreat (the action)</span><p>Moving a card from BATTLE
+      into the RETREAT area — this is the "cost" paid when calling a Level 4+ character. Not to be
+      confused with a card <b>already sitting</b> in the RETREAT area (see the Field Layout section),
+      which normally doesn't come back on its own unless another card's effect brings it back.</p></div>
   </div>
 </div>
 
