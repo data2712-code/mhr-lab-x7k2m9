@@ -308,7 +308,7 @@ toko berada di satu kota, baris filternya tidak ditampilkan sama sekali.
 Jangan lupa ubah `LGS_UPDATE` ke tanggal terakhir jadwal dicek, karena tanggal itu
 ditampilkan ke pengunjung sebagai penanda seberapa baru datanya.
 
-Jadwal saat ini — **15 toko, 20 sesi/minggu, 6 kota**:
+Jadwal saat ini — **16 toko, 21 sesi/minggu, 6 kota**:
 
 | Hari | LGS | Kota | Jam |
 |---|---|---|---|
@@ -324,6 +324,7 @@ Jadwal saat ini — **15 toko, 20 sesi/minggu, 6 kota**:
 | Kamis | Invaders Board Game Station | Tangerang | 19.00 WIB – Selesai |
 | Jumat | Ogre Gandaria Neverland | Jakarta | 19.00 WIB – Selesai |
 | Jumat | Sultan Pokebab | Jakarta | 19.30 WIB – Selesai |
+| Jumat | Alex Hobby Shop | Tangerang | 20.00 WIB – Selesai |
 | Jumat | Gale Force Games | Batam | 19.00 WIB – Selesai |
 | Sabtu | Global Hobiz Store | Jakarta | 13.00 WIB – Selesai |
 | Sabtu | TwoStompas | Jakarta | 15.00 WIB – Selesai |
@@ -358,12 +359,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.13.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.14.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.13` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.14` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.13</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.14</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -396,6 +397,25 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.14 — 28 Agustus 2026 · fix: tombol ganti bahasa ID/EN hilang di HP
+Laporan dari komunitas: tombol ganti bahasa (🌐 ID/EN) di header sulit
+ditemukan atau tidak muncul sama sekali. Penyebabnya: tombol ini memakai
+class yang sama (`.pill`) dengan tiga penghitung statistik di sebelahnya
+(Total kartu / Ditampilkan / Deck), dan ada aturan CSS yang sengaja
+menyembunyikan semua `.pill` di layar sempit (≤920px, cakupan hampir semua
+HP) karena penghitungnya sudah ditampilkan ulang di navigasi bawah — tapi
+aturan itu ikut menyembunyikan tombol bahasa juga, padahal tombol bahasa
+tidak punya cara akses lain.
+
+- Tombol bahasa dipisah ke class baru (`.langbtn`), jadi tidak lagi ikut
+  aturan penyembunyian `.pill` di HP — sekarang selalu tampil
+- Sekalian dibuat lebih jelas kelihatan bisa diklik: bingkai warna aksen +
+  latar berbeda dari penghitung statistik di sebelahnya (sebelumnya cuma teks
+  abu-abu polos, mirip penghitung, bukan seperti tombol)
+- Diverifikasi (Chromium headless, termasuk lebar layar HP): tombol tampil
+  dan berfungsi di lebar layar berapa pun, penghitung statistik lain tidak
+  terpengaruh
 
 ### v6.13 — 28 Agustus 2026 · teks di gambar 12 kartu errata V.1 ikut diperbaiki
 Lanjutan dari v6.12: setelah teks efek di database (`cards.js`) diperbaiki sesuai
