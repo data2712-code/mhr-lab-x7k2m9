@@ -358,12 +358,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.6.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.7.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.6` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.7` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.6</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.7</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -383,7 +383,7 @@ bersifat case-sensitive.
 | Aturan draw awal | 6 kartu; mulligan = kembalikan ke bawah deck, ambil sejumlah sama dari atas, lalu kocok ulang. Resmi maks 1×, simulator dibebaskan berulang |
 | Penyimpanan deck | localStorage, per browser per perangkat |
 | Format link deck | `#d=1.<nama-base64url>.<kode kartu>` — versi 1 |
-| Navigasi halaman | `#cards` (utama), `#build`, `#meta`, `#lgs`. `#d=` selalu diperiksa lebih dulu agar link deck lama tidak rusak |
+| Navigasi halaman | `#cards` (utama), `#build`, `#meta`, `#lgs`, `#panduan`. `#d=` selalu diperiksa lebih dulu agar link deck lama tidak rusak |
 | Batas GitHub Pages | Situs 1 GB, bandwidth 100 GB/bulan (soft limit) |
 | Rem darurat | Settings → Pages → **Unpublish site** (reversibel) |
 | Nama repository | diacak (`mhr-lab-x7k2m9`) agar link tidak mudah ditemukan; `robots.txt` melarang pengindeksan |
@@ -396,6 +396,32 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.7 — 28 Agustus 2026 · halaman Panduan Bermain untuk pemain baru
+Permintaan: panduan dan peraturan lengkap untuk pemain yang belum paham aturan
+Marvel Hero Rush, ditampilkan langsung di situs.
+
+- 🆕 **Tab navigasi baru "Panduan"** (dwibahasa ID/EN, tampil di kedua bahasa —
+  beda dari Deck Komunitas & Weekly Rush LGS yang sengaja disembunyikan di mode
+  Inggris). Isinya: cara menang, apa yang perlu disiapkan (Main Deck 50 + Rush
+  Point Deck 9), anatomi kartu, diagram area permainan (FRONT/WING/WING/BACK +
+  BASE/RETREAT/VOID/DECK/RUSH DECK/TIMELINE), alur 6 fase satu giliran, detail
+  Action Phase (Penempatan BASE, Panggil Karakter, syarat Level 4+, BATTLE-BASE
+  move), detail Battle Phase (urutan serang, Target Phase, mini-Counter Phase,
+  Langkah Keputusan), enam Kemampuan Kunci (Counter/Block/Double-Attack/Assault/
+  Air Strike/Unique), empat Jenis Efek (Trigger/Automatic/Activate/
+  Counter-Activate), istilah penting lain, dan ringkasan aturan menyusun deck
+- Konten dirangkum dari dua poster rulebook resmi terbitan PT. Jason
+  Entertainment Indonesia (CARDFUN) — "Area Permainan" dan "Tata Cara Bermain" —
+  dicocokkan silang dengan `cards.js` dan aturan yang sudah divalidasi Deck
+  Builder. Istilah kemampuan kunci sengaja memakai penamaan resmi Indonesia
+  (Counter/Block/Double-Attack/Assault/Air Strike/Unique) yang cocok dengan kode
+  di teks kartu — bukan istilah dari terjemahan rulebook tidak resmi lain yang
+  mungkin beredar dengan penamaan berbeda
+- Verifikasi (Chromium headless): tab muncul dan berfungsi di kedua bahasa,
+  konten berganti penuh saat toggle ID/EN, halaman Deck Komunitas & Weekly Rush
+  LGS tetap tersembunyi seperti biasa di mode Inggris, tampilan mobile (5 tab di
+  navigasi bawah) rapi, tidak ada regresi di halaman lain
 
 ### Tambahan deck komunitas — 27 Agustus 2026 *(hanya `data.js`)*
 - **7 deck baru dari China** masuk galeri Deck Komunitas: Merah Kuning - Ultron,

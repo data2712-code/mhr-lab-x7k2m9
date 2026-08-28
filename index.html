@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.6  ·  27 Agustus 2026
+     MHR DECK LAB  ·  versi 6.7  ·  28 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.6">
+<meta name="version" content="6.7">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -495,6 +495,60 @@
   .lgs-store .kota{vertical-align:3px;margin-left:7px}
   .lgs-item .baris{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 
+  /* halaman: PANDUAN */
+  body:not(.page-panduan) #panduanPage{display:none}
+  body.page-panduan .filters, body.page-panduan .cards, body.page-panduan .deck{display:none}
+  body.page-panduan .layout{grid-template-columns:minmax(0,1fr)}
+
+  /* ================= HALAMAN PANDUAN ATURAN ================= */
+  .pd-wrap{padding:22px 20px 90px;max-width:860px;margin:0 auto}
+  .pd-wrap h2.pd-title{font-family:var(--disp);font-size:28px;letter-spacing:.05em;text-transform:uppercase}
+  .pd-wrap>p.pd-lead{color:var(--muted);font-size:12.5px;line-height:1.65;margin:6px 0 20px;max-width:620px}
+  .pd-toc{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px}
+  .pd-toc a{background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    text-decoration:none;border-radius:999px;padding:6px 13px;font-size:12px}
+  .pd-toc a:hover{border-color:var(--accent);color:var(--accent)}
+  .pd-sec{margin:0 0 30px;scroll-margin-top:16px}
+  .pd-sec h3{font-family:var(--disp);font-size:19px;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  .pd-sec h4{font-size:13.5px;font-weight:700;margin:14px 0 5px}
+  .pd-sec p{font-size:13px;line-height:1.7;color:#C9CFD8;margin-bottom:10px}
+  .pd-sec ul,.pd-sec ol{margin:0 0 10px 20px;font-size:13px;line-height:1.7;color:#C9CFD8}
+  .pd-sec li{margin-bottom:4px}
+  .pd-sec b{color:var(--paper)}
+  .pd-box{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:12px 15px;margin:12px 0;font-size:12.5px;line-height:1.65;color:#C9CFD8}
+  .pd-box b{color:var(--paper)}
+  .pd-box.warn{border-color:var(--merah);background:rgba(228,68,46,.08)}
+  .pd-box.warn b{color:var(--merah)}
+  .pd-box.win{border-color:var(--accent);background:rgba(242,176,30,.08)}
+  .pd-flow{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 16px}
+  .pd-flow span{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+    padding:7px 12px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .pd-flow span b{color:var(--accent);font-family:var(--mono);margin-right:5px}
+  .pd-grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin:12px 0}
+  .pd-term{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .pd-term .k{font-family:var(--disp);font-weight:800;font-size:14px;letter-spacing:.03em;
+    text-transform:uppercase;color:var(--accent);display:block;margin-bottom:4px}
+  .pd-term p{font-size:12px;margin:0;color:#C9CFD8}
+  .pd-tags{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+  .pd-tags span{font-family:var(--mono);font-size:11px;background:var(--panel2);
+    border:1px solid var(--line);border-radius:6px;padding:3px 9px;color:var(--paper)}
+  /* diagram area permainan: bentuk berlian FRONT/WING/WING/BACK */
+  .pd-field{max-width:340px;margin:16px auto;display:grid;
+    grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto auto;gap:6px}
+  .pd-slot{background:var(--panel2);border:2px solid var(--line);border-radius:8px;
+    padding:10px 4px;text-align:center;font-family:var(--disp);font-weight:800;
+    letter-spacing:.04em;font-size:13px;position:relative}
+  .pd-slot .num{position:absolute;top:3px;left:5px;font-family:var(--mono);
+    font-size:10px;color:var(--accent);font-weight:700}
+  .pd-slot.front{grid-column:2;grid-row:1;border-color:var(--accent)}
+  .pd-slot.wl{grid-column:1;grid-row:2}
+  .pd-slot.wr{grid-column:3;grid-row:2}
+  .pd-slot.back{grid-column:2;grid-row:3}
+  .pd-base{max-width:340px;margin:0 auto 16px;background:var(--panel);border:1px dashed var(--line);
+    border-radius:8px;text-align:center;padding:9px;font-size:11.5px;color:var(--muted)}
+
   /* ================= MOBILE: navigasi bawah ================= */
   @media (max-width:920px){
     .filters{top:0}
@@ -511,6 +565,7 @@
     .deck{bottom:56px!important}
     body.page-build .cards{padding-bottom:64px}
     .meta-wrap{padding-bottom:80px}
+    .pd-wrap{padding-bottom:80px}
     footer{padding-bottom:74px}
   }
   .bk-row{display:flex;gap:8px;margin-top:8px}
@@ -737,7 +792,10 @@
   <button data-page="build" aria-current="false">🛠 <span class="tl" data-i18n="navBuild">Deck Builder</span><span class="ts" data-i18n="navBuildS">Builder</span> <span class="cnt" id="navDeck">0</span></button>
   <button data-page="meta" aria-current="false">🏆 <span class="tl" data-i18n="navMeta">Deck Komunitas</span><span class="ts" data-i18n="navMetaS">Komunitas</span> <span class="cnt" id="navMeta">0</span></button>
   <button data-page="lgs" aria-current="false">📅 <span class="tl" data-i18n="navLgs">Weekly Rush LGS</span><span class="ts" data-i18n="navLgsS">Rush LGS</span> <span class="cnt" id="navLgs">0</span></button>
+  <button data-page="panduan" aria-current="false">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span></button>
 </nav>
+
+<section id="panduanPage"><div class="pd-wrap" id="panduanWrap"></div></section>
 
 <section id="metaPage">
   <div class="meta-wrap">
@@ -904,7 +962,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.6</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.7</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1494,6 +1552,8 @@ const T = {
   navMetaS:     ['Komunitas','Community'],
   navLgs:       ['Weekly Rush LGS','Weekly Rush LGS'],
   navLgsS:      ['Rush LGS','Rush LGS'],
+  navPanduan:   ['Panduan','Guide'],
+  navPanduanS:  ['Panduan','Guide'],
   statUnique:   ['Total kartu','Total cards'],
   statShown:    ['Ditampilkan','Showing'],
   statDeck:     ['Deck','Deck'],
@@ -1806,6 +1866,7 @@ function applyLang(){
   if(typeof renderDukung === 'function') renderDukung();
   if(state.page === 'meta') renderMeta();
   if(state.page === 'lgs')  renderLgs();
+  if(state.page === 'panduan') renderPanduan();
 }
 
 
@@ -3196,11 +3257,508 @@ $('#lgsFilter').addEventListener('click', e=>{
   renderLgs();
 });
 
+/* ==================== HALAMAN PANDUAN ====================
+   Isi disimpan sebagai dua blok HTML siap-pakai (bukan lewat kamus T satu-
+   satu per kalimat) karena isinya prosa panjang — pola yang sama dipakai
+   DUKUNG.teks di data.js. Sumber: dua poster rulebook resmi terbitan
+   PT. Jason Entertainment Indonesia (CARDFUN) — "Area Permainan" dan
+   "Tata Cara Bermain" — dibandingkan silang dengan cards.js & aturan
+   deck-building yang sudah divalidasi Deck Lab. */
+const GUIDE = {
+id: `
+<h2 class="pd-title">Panduan Bermain Marvel Hero Rush</h2>
+<p class="pd-lead">Untuk pemain baru yang belum familiar dengan aturan Marvel Hero Rush TCG.
+  Dirangkum dari poster rulebook resmi terbitan PT. Jason Entertainment Indonesia (CARDFUN),
+  dicocokkan dengan 208 kartu di Deck Lab.</p>
+
+<nav class="pd-toc">
+  <a href="#pd-menang">Cara Menang</a>
+  <a href="#pd-siap">Yang Disiapkan</a>
+  <a href="#pd-kartu">Anatomi Kartu</a>
+  <a href="#pd-area">Area Permainan</a>
+  <a href="#pd-giliran">Alur Giliran</a>
+  <a href="#pd-aksi">Action Phase</a>
+  <a href="#pd-battle">Battle Phase</a>
+  <a href="#pd-kemampuan">Kemampuan Kunci</a>
+  <a href="#pd-efek">Jenis Efek</a>
+  <a href="#pd-istilah">Istilah Penting</a>
+  <a href="#pd-deck">Aturan Deck</a>
+</nav>
+
+<div class="pd-sec" id="pd-menang">
+  <h3>Cara Menang</h3>
+  <p>Marvel Hero Rush adalah kartu pertarungan 1 lawan 1 antar karakter Marvel. Setiap giliran, kedua
+    pemain memanggil karakter, menyerang, dan mempertahankan diri. Ada dua cara menang:</p>
+  <div class="pd-box win">
+    <b>1. Kumpulkan 9 kartu Rush Point</b> di area TIMELINE Anda — didapat tiap kali karakter Anda
+    berhasil menyerang <b>Weakness</b> lawan (posisi BATTLE lawan yang kosong).<br><br>
+    <b>2. Deck utama lawan habis</b> (tidak bisa menarik kartu lagi saat harus menarik).
+  </div>
+</div>
+
+<div class="pd-sec" id="pd-siap">
+  <h3>Yang Perlu Disiapkan</h3>
+  <ul>
+    <li><b>Main Deck — tepat 50 kartu karakter.</b> Maksimal 2 warna, maksimal 3 kartu dengan nama
+      karakter yang sama (dihitung dari nama, bukan nomor kartu — jadi 3 versi rarity berbeda dari
+      karakter yang sama tetap dianggap satu "nama").</li>
+    <li><b>Rush Point Deck — 9 kartu</b>, terpisah dari Main Deck, tanpa batasan warna/jumlah. Inilah
+      "nyawa" Anda — 9 kartu ini pindah satu per satu ke TIMELINE tiap kali Weakness lawan berhasil
+      diserang.</li>
+  </ul>
+  <p><b>Sebelum mulai:</b> kocok Main Deck, lalu tiap pemain mengambil 6 kartu sebagai tangan awal.
+    Kalau tangan awal dirasa kurang bagus, boleh <b>mulligan</b> satu kali: taruh kartu yang ditukar
+    ke <b>bawah</b> deck, ambil kartu baru sejumlah sama dari atas, lalu kocok ulang deck.</p>
+</div>
+
+<div class="pd-sec" id="pd-kartu">
+  <h3>Anatomi Kartu</h3>
+  <p>Tiap kartu karakter punya info berikut — semuanya bisa difilter di halaman <b>Kartu</b> pada Deck Lab ini:</p>
+  <ul>
+    <li><b>Nama &amp; Seri</b> — nama karakter dan kode set asalnya (mis. BP01, SD01).</li>
+    <li><b>Warna</b> — Merah, Kuning, Biru, atau Hijau. Deck maksimal memakai 2 warna.</li>
+    <li><b>Level (Lv)</b> — biaya panggil. Level 1–3 bisa langsung dipanggil dari tangan; Level 4 ke atas
+      butuh syarat tambahan (lihat "Aturan Inti" di bagian Action Phase).</li>
+    <li><b>Jarak Serangan (R)</b> — seberapa jauh kartu ini bisa menjangkau target di sisi lawan saat
+      menyerang. R-0 berarti kartu tidak bisa menyerang sama sekali; makin besar angka R, makin jauh
+      jangkauannya melintasi FRONT/WING/BACK lawan.</li>
+    <li><b>Power</b> — kekuatan bertarung. Yang lebih besar menang saat berhadapan langsung.</li>
+    <li><b>Trait</b> — golongan/afiliasi karakter (mis. Human/Avengers).</li>
+    <li><b>Rarity</b> — tingkat kelangkaan varian cetakan (tidak memengaruhi aturan main).</li>
+  </ul>
+  <p>Teks efek kartu memakai kode singkat di depan kalimat efeknya:</p>
+  <div class="pd-tags">
+    <span>[TRIG]</span><span>[AUTO]</span><span>[ACTI]</span><span>[COUNTER]</span>
+    <span>[COUNTER-ACTI]</span><span>[UNIQUE]</span><span>[BLOCK]</span><span>[DOUBLE ATTACK]</span>
+  </div>
+  <p>Arti tiap kode dijelaskan di bagian <a href="#pd-efek">Jenis Efek</a> dan
+    <a href="#pd-kemampuan">Kemampuan Kunci</a> di bawah.</p>
+</div>
+
+<div class="pd-sec" id="pd-area">
+  <h3>Area Permainan</h3>
+  <p>Setiap pemain punya 4 slot pertarungan yang membentuk formasi berlian — bersama disebut area
+    <b>BATTLE</b>. Anda boleh menukar posisi karakter antar keempat slot ini bebas kapan saja di
+    Action Phase giliran Anda (pertukaran posisi tidak dihitung sebagai "gerakan"):</p>
+  <div class="pd-field">
+    <div class="pd-slot front">FRONT</div>
+    <div class="pd-slot wl">WING</div>
+    <div class="pd-slot wr">WING</div>
+    <div class="pd-slot back">BACK</div>
+  </div>
+  <div class="pd-base">+ area <b>BASE</b> (di belakang BATTLE) — tempat kartu tertutup/charge, maksimal 6 kartu.
+    BATTLE dan BASE bersama-sama disebut "area permainan" milik satu pemain.</div>
+  <p>Urutan menyerang tiap giliran selalu tetap: <b>FRONT lebih dulu</b>, lalu <b>kedua WING</b>
+    (kalau dua-duanya terisi, Anda yang menentukan urutannya), baru <b>BACK</b> paling akhir.
+    Posisi BATTLE yang kosong disebut <b>Weakness</b> — target empuk yang kalau berhasil diserang,
+    Anda dapat 1 kartu Rush Point.</p>
+  <p>Area lain di luar BATTLE/BASE:</p>
+  <div class="pd-grid2">
+    <div class="pd-term"><span class="k">Retreat</span><p>Tempat kartu yang kalah bertarung atau
+      dikorbankan/dibuang. Kartu di sini masih bisa "ditarik kembali" untuk membayar biaya panggil
+      karakter Level 4+.</p></div>
+    <div class="pd-term"><span class="k">Void</span><p>Tempat kartu yang sudah <b>di-prune</b>
+      (disingkirkan permanen). Jumlahnya tidak terbatas.</p></div>
+    <div class="pd-term"><span class="k">Deck</span><p>Tumpukan Main Deck Anda. Kalau habis saat
+      harus menarik kartu, Anda kalah.</p></div>
+    <div class="pd-term"><span class="k">Rush Point Deck</span><p>9 kartu poin Anda. Berpindah satu
+      per satu ke TIMELINE tiap kali berhasil menyerang Weakness lawan.</p></div>
+    <div class="pd-term"><span class="k">Timeline</span><p>Tempat kartu Rush Point yang sudah didapat.
+      Kalau sudah terkumpul 9 di sini, Anda menang.</p></div>
+  </div>
+</div>
+
+<div class="pd-sec" id="pd-giliran">
+  <h3>Alur Satu Giliran</h3>
+  <p>Tiap giliran terdiri dari 6 fase berurutan:</p>
+  <div class="pd-flow">
+    <span><b>1</b>Start Phase</span><span><b>2</b>Draw Phase</span><span><b>3</b>Action Phase</span>
+    <span><b>4</b>Battle Phase</span><span><b>5</b>Counter Phase</span><span><b>6</b>End Phase</span>
+  </div>
+  <ul>
+    <li><b>Start Phase</b> — efek kartu yang aktif "saat memulai giliran" dijalankan di sini.</li>
+    <li><b>Draw Phase</b> — tarik 2 kartu. Batas tangan maksimal 9 kartu (kelebihan harus dibuang di
+      End Phase).</li>
+    <li><b>Action Phase &amp; Battle Phase</b> — dijelaskan detail di bagian di bawah, karena ini
+      inti permainan.</li>
+    <li><b>Counter Phase</b> — jendela terakhir sebelum giliran berakhir: tiap pemain bergiliran
+      (lawan lebih dulu) memilih salah satu dari tiga hal — panggil kartu berkemampuan
+      <b>[COUNTER]</b> (maksimal 1 kali per fase ini per giliran), aktifkan efek kartu, atau tidak
+      berbuat apa-apa. Fase berakhir kalau kedua pemain berturut-turut memilih tidak berbuat apa-apa.</li>
+    <li><b>End Phase</b> — buang kelebihan kartu di tangan sampai maksimal 9, lalu giliran berpindah
+      ke pemain lain.</li>
+  </ul>
+  <div class="pd-box warn"><b>Catatan giliran pertama:</b> pemain yang jalan duluan <b>melewati
+    seluruh Battle Phase</b> pada giliran pertamanya — belum ada yang bisa diserang karena lawan
+    belum sempat memanggil karakter.</div>
+</div>
+
+<div class="pd-sec" id="pd-aksi">
+  <h3>Action Phase — Memanggil &amp; Mengatur Karakter</h3>
+  <p>Di fase ini Anda boleh melakukan tindakan berikut berulang kali, dalam urutan bebas, selama
+    masih memenuhi batasannya:</p>
+  <ul>
+    <li><b>Penempatan BASE</b> (maks 1× per giliran) — taruh 1 kartu tertutup ke BASE, lalu tarik 1 kartu.</li>
+    <li><b>Panggil Karakter / Call</b> (maks 3× per giliran) — pindahkan 1 kartu karakter dari tangan
+      ke BATTLE (FRONT/WING/BACK yang kosong):
+      <ul>
+        <li>Level 3 ke bawah → panggil langsung, tanpa syarat.</li>
+        <li>Level 4 ke atas → Anda harus lebih dulu <b>me-retreat</b> (memindahkan ke RETREAT) satu
+          atau lebih kartu karakter di BATTLE Anda yang <b>total Level-nya sama persis</b> dengan
+          Level karakter yang dipanggil. Kartu tertutup/charge di BASE juga boleh dipakai untuk
+          "membayar" ini — tiap kartu charge dihitung sebagai Level 1.</li>
+      </ul>
+    </li>
+    <li><b>BATTLE-BASE move</b> — memindahkan kartu karakter antara BATTLE dan BASE milik Anda
+      sendiri (bukan menyerang lawan).</li>
+  </ul>
+</div>
+
+<div class="pd-sec" id="pd-battle">
+  <h3>Battle Phase — Menyerang</h3>
+  <p>Pemain yang mendapat giliran pertama melewati fase ini di giliran pertamanya (lihat catatan di
+    atas). Di giliran lain, fase ini berjalan begini:</p>
+  <ol>
+    <li>Anda boleh menyesuaikan posisi hingga 4 karakter di BATTLE Anda sekaligus (pertukaran posisi
+      bebas, tidak terbatas).</li>
+    <li>Karakter menyerang berurutan: <b>FRONT → WING → WING → BACK</b>. Tiap karakter hanya
+      mendapat 1 kesempatan menyerang per giliran, dan boleh memilih untuk tidak menyerang.</li>
+  </ol>
+  <p>Untuk setiap karakter yang menyerang, ada 3 langkah:</p>
+  <ul>
+    <li><b>① Target Phase</b> — karakter memilih 1 karakter musuh (atau Weakness) yang berada dalam
+      jangkauan R miliknya untuk diserang.</li>
+    <li><b>② Counter Phase (mini)</b> — musuh lebih dulu, lalu Anda, sama-sama boleh memanggil 1
+      kartu [COUNTER] (maksimal sekali per fase ini per giliran), mengaktifkan efek, atau tidak
+      berbuat apa-apa — persis seperti Counter Phase di akhir giliran, tapi khusus untuk pertarungan
+      ini saja.</li>
+    <li><b>③ Langkah Keputusan</b> — power dibandingkan: yang lebih besar menang (yang kalah masuk
+      RETREAT); kalau sama besar, <b>kedua-duanya</b> masuk RETREAT. Kalau targetnya Weakness dan
+      berhasil, Anda dapat 1 kartu Rush Point ke TIMELINE.</li>
+  </ul>
+</div>
+
+<div class="pd-sec" id="pd-kemampuan">
+  <h3>Kemampuan Kunci</h3>
+  <p>Enam kemampuan bernama yang muncul di teks kartu — cocokkan dengan kode di kartu (mis.
+    <span class="pd-tags"><span>[COUNTER]</span></span>), bukan istilah rulebook terjemahan lain
+    yang mungkin beredar, karena penamaan di kartu resmi Indonesia inilah yang dipakai Deck Lab:</p>
+  <div class="pd-grid2">
+    <div class="pd-term"><span class="k">Counter</span><p>Bisa dipanggil sebagai balasan terhadap
+      action, dan bisa melakukan counter terhadap pemanggilan lawan.</p></div>
+    <div class="pd-term"><span class="k">Block</span><p>Mengalihkan target serangan musuh dari kartu
+      lain ke kartu ini. Maksimal 1× per giliran.</p></div>
+    <div class="pd-term"><span class="k">Double-Attack</span><p>Mendapat kesempatan menyerang kedua
+      kalinya di giliran yang sama.</p></div>
+    <div class="pd-term"><span class="k">Assault</span><p>Kalau menang bertarung saat menyerang,
+      serangan itu tetap dihitung sebagai serangan berhasil ke Weakness lawan.</p></div>
+    <div class="pd-term"><span class="k">Air Strike</span><p>Tetap bisa menyerang BATTLE musuh yang
+      terisi kartu, dengan menganggapnya sebagai Weakness.</p></div>
+    <div class="pd-term"><span class="k">Unique</span><p>Tidak boleh ada kartu lain bernama sama di
+      FIELD Anda. Efek ini tidak bisa dihilangkan.</p></div>
+  </div>
+</div>
+
+<div class="pd-sec" id="pd-efek">
+  <h3>Jenis Efek</h3>
+  <div class="pd-grid2">
+    <div class="pd-term"><span class="k">Trigger</span><p>Aktif otomatis begitu syarat/kondisinya
+      terpenuhi (mis. saat kartu masuk FIELD).</p></div>
+    <div class="pd-term"><span class="k">Automatic</span><p>Berlaku terus-menerus selama kartunya
+      ada di area yang sesuai — tidak perlu "dinyalakan".</p></div>
+    <div class="pd-term"><span class="k">Activate</span><p>Bisa Anda aktifkan sendiri, tapi hanya di
+      Action Phase giliran Anda.</p></div>
+    <div class="pd-term"><span class="k">Counter-Activate</span><p>Bisa diaktifkan di Action Phase
+      giliran Anda <b>atau</b> di langkah counter (Counter Phase akhir giliran maupun mini-Counter
+      Phase dalam pertarungan).</p></div>
+  </div>
+</div>
+
+<div class="pd-sec" id="pd-istilah">
+  <h3>Istilah Penting Lainnya</h3>
+  <div class="pd-grid2">
+    <div class="pd-term"><span class="k">Weakness</span><p>Posisi BATTLE yang kosong — target yang
+      kalau berhasil diserang memberi 1 Rush Point.</p></div>
+    <div class="pd-term"><span class="k">Set Card / Kartu Charge</span><p>Kartu karakter yang
+      ditaruh tertutup di BASE. Kehilangan efeknya, dianggap tidak di BATTLE, dan hanya pemiliknya
+      yang boleh melihatnya. Dihitung Level 1 saat dipakai membayar panggilan Level 4+.</p></div>
+    <div class="pd-term"><span class="k">Prune</span><p>Menyingkirkan kartu secara permanen ke VOID.
+      Ini yang membuat sebuah filter mekanik "Prune" ada di halaman Kartu.</p></div>
+    <div class="pd-term"><span class="k">Retreat</span><p>Kartu yang kalah bertarung/dibuang masuk
+      ke sini — masih bisa "ditarik kembali" untuk membayar panggilan Level 4+.</p></div>
+  </div>
+</div>
+
+<div class="pd-sec" id="pd-deck">
+  <h3>Aturan Menyusun Deck</h3>
+  <p>Ringkasan aturan deck-building yang divalidasi otomatis oleh Deck Builder di Deck Lab ini:</p>
+  <ul>
+    <li>Main Deck harus <b>tepat 50 kartu</b>.</li>
+    <li>Maksimal <b>2 warna</b> berbeda dalam satu deck.</li>
+    <li>Maksimal <b>3 kartu per nama karakter</b> — dihitung dari nama, jadi 3 rarity berbeda dari
+      karakter yang sama tetap dihitung satu jatah.</li>
+  </ul>
+  <p>Susun deck Anda di halaman <b>Deck Builder</b> — Deck Lab otomatis memberi tahu kalau ada
+    pelanggaran salah satu aturan di atas, sebelum Anda membagikannya sebagai link atau gambar.</p>
+</div>
+
+<p style="color:var(--muted);font-size:11px;margin-top:8px">Sumber: poster rulebook resmi
+  "Area Permainan" &amp; "Tata Cara Bermain" Marvel Hero Rush TCG — PT. Jason Entertainment
+  Indonesia (CARDFUN) &amp; Marvel.</p>
+`,
+en: `
+<h2 class="pd-title">How to Play Marvel Hero Rush</h2>
+<p class="pd-lead">For new players who aren't familiar with Marvel Hero Rush TCG yet.
+  Summarized from the official rulebook posters published by PT. Jason Entertainment Indonesia
+  (CARDFUN), cross-checked against the 208 cards in Deck Lab.</p>
+
+<nav class="pd-toc">
+  <a href="#pd-menang">How to Win</a>
+  <a href="#pd-siap">What You Need</a>
+  <a href="#pd-kartu">Card Anatomy</a>
+  <a href="#pd-area">Field Layout</a>
+  <a href="#pd-giliran">Turn Flow</a>
+  <a href="#pd-aksi">Action Phase</a>
+  <a href="#pd-battle">Battle Phase</a>
+  <a href="#pd-kemampuan">Key Abilities</a>
+  <a href="#pd-efek">Effect Types</a>
+  <a href="#pd-istilah">Key Terms</a>
+  <a href="#pd-deck">Deck Rules</a>
+</nav>
+
+<div class="pd-sec" id="pd-menang">
+  <h3>How to Win</h3>
+  <p>Marvel Hero Rush is a 1v1 card battle game between Marvel characters. Each turn, both players
+    call characters, attack, and defend. There are two ways to win:</p>
+  <div class="pd-box win">
+    <b>1. Collect 9 Rush Point cards</b> in your TIMELINE — earned whenever your character
+    successfully attacks the opponent's <b>Weakness</b> (an empty BATTLE position).<br><br>
+    <b>2. Your opponent's main deck runs out</b> (they can't draw when required to).
+  </div>
+</div>
+
+<div class="pd-sec" id="pd-siap">
+  <h3>What You Need</h3>
+  <ul>
+    <li><b>Main Deck — exactly 50 character cards.</b> Maximum 2 colors, maximum 3 cards sharing the
+      same character name (counted by name, not card number — so 3 different rarity versions of the
+      same character still count as one "name").</li>
+    <li><b>Rush Point Deck — 9 cards</b>, separate from the Main Deck, with no color/count
+      restriction. This is your "life total" — one of these 9 moves to your TIMELINE each time you
+      successfully attack the opponent's Weakness.</li>
+  </ul>
+  <p><b>Before starting:</b> shuffle your Main Deck, then each player draws 6 cards as their opening
+    hand. If your opening hand isn't great, you may <b>mulligan</b> once: put the cards you're
+    swapping to the <b>bottom</b> of the deck, draw the same number of new cards from the top, then
+    reshuffle the deck.</p>
+</div>
+
+<div class="pd-sec" id="pd-kartu">
+  <h3>Card Anatomy</h3>
+  <p>Every character card carries the following info — all of it is filterable on the <b>Cards</b>
+    page of this Deck Lab:</p>
+  <ul>
+    <li><b>Name &amp; Series</b> — the character's name and the set code it's from (e.g. BP01, SD01).</li>
+    <li><b>Color</b> — Red, Yellow, Blue, or Green. A deck can use at most 2 colors.</li>
+    <li><b>Level (Lv)</b> — its calling cost. Level 1–3 can be called straight from hand; Level 4+
+      needs an extra requirement (see "Core Rule" under Action Phase).</li>
+    <li><b>Range (R)</b> — how far this card can reach into the opponent's side when attacking. R-0
+      means it can't attack at all; a higher R reaches further across the opponent's FRONT/WING/BACK.</li>
+    <li><b>Power</b> — battle strength. The higher one wins a direct clash.</li>
+    <li><b>Trait</b> — the character's affiliation/group (e.g. Human/Avengers).</li>
+    <li><b>Rarity</b> — print variant rarity (doesn't affect the rules).</li>
+  </ul>
+  <p>Card effect text starts with a short tag that identifies the effect type:</p>
+  <div class="pd-tags">
+    <span>[TRIG]</span><span>[AUTO]</span><span>[ACTI]</span><span>[COUNTER]</span>
+    <span>[COUNTER-ACTI]</span><span>[UNIQUE]</span><span>[BLOCK]</span><span>[DOUBLE ATTACK]</span>
+  </div>
+  <p>What each tag means is explained in <a href="#pd-efek">Effect Types</a> and
+    <a href="#pd-kemampuan">Key Abilities</a> below.</p>
+</div>
+
+<div class="pd-sec" id="pd-area">
+  <h3>Field Layout</h3>
+  <p>Each player has 4 battle slots forming a diamond formation — together called <b>BATTLE</b>. You
+    may freely rearrange characters between these 4 slots any time during your Action Phase
+    (swapping positions doesn't count as a "move"):</p>
+  <div class="pd-field">
+    <div class="pd-slot front">FRONT</div>
+    <div class="pd-slot wl">WING</div>
+    <div class="pd-slot wr">WING</div>
+    <div class="pd-slot back">BACK</div>
+  </div>
+  <div class="pd-base">+ a <b>BASE</b> area (behind BATTLE) — for face-down/charge cards, max 6
+    cards. BATTLE and BASE together make up one player's "field".</div>
+  <p>The attack order each turn is always fixed: <b>FRONT first</b>, then <b>both WINGs</b> (if both
+    are filled, you choose the order), then <b>BACK</b> last. An empty BATTLE slot is called a
+    <b>Weakness</b> — an easy target that, if successfully attacked, earns you 1 Rush Point card.</p>
+  <p>Other areas besides BATTLE/BASE:</p>
+  <div class="pd-grid2">
+    <div class="pd-term"><span class="k">Retreat</span><p>Where cards that lost a battle, or were
+      sacrificed/discarded, go. Cards here can still be "retreated" to pay the cost of calling a
+      Level 4+ character.</p></div>
+    <div class="pd-term"><span class="k">Void</span><p>Where <b>pruned</b> cards go — removed from
+      the game permanently. No limit on how many can be here.</p></div>
+    <div class="pd-term"><span class="k">Deck</span><p>Your Main Deck pile. Running out when you're
+      required to draw means you lose.</p></div>
+    <div class="pd-term"><span class="k">Rush Point Deck</span><p>Your 9 point cards. Moves one at a
+      time to your TIMELINE each time you successfully attack the opponent's Weakness.</p></div>
+    <div class="pd-term"><span class="k">Timeline</span><p>Where earned Rush Point cards go. Collect
+      9 here and you win.</p></div>
+  </div>
+</div>
+
+<div class="pd-sec" id="pd-giliran">
+  <h3>Turn Flow</h3>
+  <p>Every turn runs through 6 phases in order:</p>
+  <div class="pd-flow">
+    <span><b>1</b>Start Phase</span><span><b>2</b>Draw Phase</span><span><b>3</b>Action Phase</span>
+    <span><b>4</b>Battle Phase</span><span><b>5</b>Counter Phase</span><span><b>6</b>End Phase</span>
+  </div>
+  <ul>
+    <li><b>Start Phase</b> — effects that trigger "at the start of your turn" resolve here.</li>
+    <li><b>Draw Phase</b> — draw 2 cards. Hand limit is 9 (discard the excess in End Phase).</li>
+    <li><b>Action Phase &amp; Battle Phase</b> — detailed below, since this is the core of the game.</li>
+    <li><b>Counter Phase</b> — the last window before the turn ends: each player in turn (opponent
+      first) picks one of three things — call a <b>[COUNTER]</b> character (max once per phase per
+      turn), activate a card effect, or do nothing. The phase ends once both players pass in a row.</li>
+    <li><b>End Phase</b> — discard down to the 9-card hand limit, then the turn passes to the other
+      player.</li>
+  </ul>
+  <div class="pd-box warn"><b>First-turn note:</b> the player who goes first <b>skips their entire
+    Battle Phase</b> on their very first turn — the opponent hasn't had a chance to call anyone out
+    to attack yet.</div>
+</div>
+
+<div class="pd-sec" id="pd-aksi">
+  <h3>Action Phase — Calling &amp; Arranging Characters</h3>
+  <p>During this phase you may take the following actions repeatedly, in any order, as long as you
+    stay within their limits:</p>
+  <ul>
+    <li><b>Base Placement</b> (max 1× per turn) — place 1 card face-down into BASE, then draw 1 card.</li>
+    <li><b>Call a Character</b> (max 3× per turn) — move 1 character card from your hand into an
+      empty BATTLE slot (FRONT/WING/BACK):
+      <ul>
+        <li>Level 3 or lower → call it directly, no extra cost.</li>
+        <li>Level 4 or higher → you must first <b>retreat</b> one or more character cards from your
+          BATTLE whose <b>combined Level exactly matches</b> the Level of the character being
+          called. Face-down/charge cards in BASE can help pay this too — each charge card counts as
+          Level 1.</li>
+      </ul>
+    </li>
+    <li><b>BATTLE-BASE move</b> — moving a character card between your own BATTLE and BASE (this
+      doesn't target the opponent at all).</li>
+  </ul>
+</div>
+
+<div class="pd-sec" id="pd-battle">
+  <h3>Battle Phase — Attacking</h3>
+  <p>The player going first skips this phase on their first turn (see the note above). On every
+    other turn, it goes like this:</p>
+  <ol>
+    <li>You may rearrange up to 4 characters in your BATTLE at once (swapping positions freely, no
+      limit).</li>
+    <li>Characters attack in order: <b>FRONT → WING → WING → BACK</b>. Each character gets only 1
+      chance to attack per turn, and may choose not to attack.</li>
+  </ol>
+  <p>For each attacking character, there are 3 steps:</p>
+  <ul>
+    <li><b>① Target Phase</b> — the character picks 1 enemy character (or a Weakness) within its own
+      Range (R) to attack.</li>
+    <li><b>② Counter Phase (mini)</b> — the opponent goes first, then you: each may call 1
+      [COUNTER] character (max once per phase per turn), activate an effect, or do nothing — just
+      like the end-of-turn Counter Phase, but scoped to this one battle only.</li>
+    <li><b>③ Decision Step</b> — power is compared: the higher one wins (the loser goes to RETREAT);
+      on a tie, <b>both</b> go to RETREAT. If the target was a Weakness and the attack succeeded,
+      you gain 1 Rush Point card into your TIMELINE.</li>
+  </ul>
+</div>
+
+<div class="pd-sec" id="pd-kemampuan">
+  <h3>Key Abilities</h3>
+  <p>Six named abilities that appear in card text — match them against the tag printed on the card
+    itself (e.g. <span class="pd-tags"><span>[COUNTER]</span></span>), not whatever other rulebook
+    translation's naming might be floating around, since the official card text is what Deck Lab
+    goes by:</p>
+  <div class="pd-grid2">
+    <div class="pd-term"><span class="k">Counter</span><p>Can be called in response to an action, and
+      can counter-call in response to the opponent's calling.</p></div>
+    <div class="pd-term"><span class="k">Block</span><p>Redirects the opponent's attack target from
+      another card to this one. Max once per turn.</p></div>
+    <div class="pd-term"><span class="k">Double-Attack</span><p>Gets a second attack opportunity in
+      the same turn.</p></div>
+    <div class="pd-term"><span class="k">Assault</span><p>If it wins a battle while attacking, that
+      attack still counts as a successful hit on the opponent's Weakness.</p></div>
+    <div class="pd-term"><span class="k">Air Strike</span><p>Can still attack an occupied enemy
+      BATTLE slot by treating it as a Weakness.</p></div>
+    <div class="pd-term"><span class="k">Unique</span><p>No other card with the same name may exist
+      on your FIELD. This effect can't be removed.</p></div>
+  </div>
+</div>
+
+<div class="pd-sec" id="pd-efek">
+  <h3>Effect Types</h3>
+  <div class="pd-grid2">
+    <div class="pd-term"><span class="k">Trigger</span><p>Fires automatically once its condition is
+      met (e.g. when the card enters the field).</p></div>
+    <div class="pd-term"><span class="k">Automatic</span><p>Stays active continuously as long as the
+      card is in the right area — nothing needs to be "switched on".</p></div>
+    <div class="pd-term"><span class="k">Activate</span><p>You choose to activate it yourself, but
+      only during your own Action Phase.</p></div>
+    <div class="pd-term"><span class="k">Counter-Activate</span><p>Can be activated during your
+      Action Phase <b>or</b> during a counter step (the end-of-turn Counter Phase, or the mini
+      Counter Phase inside a battle).</p></div>
+  </div>
+</div>
+
+<div class="pd-sec" id="pd-istilah">
+  <h3>Other Key Terms</h3>
+  <div class="pd-grid2">
+    <div class="pd-term"><span class="k">Weakness</span><p>An empty BATTLE slot — a target that, if
+      successfully attacked, grants 1 Rush Point.</p></div>
+    <div class="pd-term"><span class="k">Set Card / Charge Card</span><p>A character card placed
+      face-down in BASE. It loses its effect, is treated as not being in BATTLE, and only its owner
+      may look at it. Counts as Level 1 when used to pay for a Level 4+ call.</p></div>
+    <div class="pd-term"><span class="k">Prune</span><p>Removing a card permanently to VOID. This is
+      what the "Prune" mechanic filter on the Cards page is matching for.</p></div>
+    <div class="pd-term"><span class="k">Retreat</span><p>Where cards that lost a battle or were
+      discarded go — they can still be "retreated" again to help pay for a Level 4+ call.</p></div>
+  </div>
+</div>
+
+<div class="pd-sec" id="pd-deck">
+  <h3>Deck-Building Rules</h3>
+  <p>Summary of the deck-building rules this Deck Builder validates automatically:</p>
+  <ul>
+    <li>Main Deck must be <b>exactly 50 cards</b>.</li>
+    <li>Maximum <b>2 different colors</b> per deck.</li>
+    <li>Maximum <b>3 cards per character name</b> — counted by name, so 3 different rarities of the
+      same character still share one 3-copy allowance.</li>
+  </ul>
+  <p>Build your deck on the <b>Deck Builder</b> page — Deck Lab automatically flags any violation of
+    the rules above before you share it as a link or image.</p>
+</div>
+
+<p style="color:var(--muted);font-size:11px;margin-top:8px">Source: the official "Area Permainan"
+  (Field) &amp; "Tata Cara Bermain" (How to Play) rulebook posters for Marvel Hero Rush TCG —
+  PT. Jason Entertainment Indonesia (CARDFUN) &amp; Marvel.</p>
+`
+};
+
+function renderPanduan(){
+  const w = $('#panduanWrap');
+  if(!w) return;
+  w.innerHTML = GUIDE[state.lang === 'en' ? 'en' : 'id'];
+}
+
 /* ==================== NAVIGASI HALAMAN ==================== */
-const PAGES = ['cards','build','meta','lgs'];
+const PAGES = ['cards','build','meta','lgs','panduan'];
 function setPage(p, dariHash){
   if(!PAGES.includes(p)) p = 'cards';
-  /* mode Inggris hanya punya Kartu + Deck Builder (lihat applyLang) */
+  /* mode Inggris hanya punya Kartu + Deck Builder (lihat applyLang).
+     Panduan sengaja dikecualikan — dwibahasa penuh, dan justru paling
+     berguna untuk pemain baru berbahasa Inggris. */
   if(state.lang === 'en' && (p === 'lgs' || (p === 'meta' && !isAdmin))) p = 'cards';
   state.page = p;
   document.body.className = 'page-' + p;
@@ -3208,6 +3766,7 @@ function setPage(p, dariHash){
     b.setAttribute('aria-current', String(b.dataset.page === p)));
   if(p === 'meta') renderMeta();
   if(p === 'lgs') renderLgs();
+  if(p === 'panduan') renderPanduan();
   if(p === 'cards' || p === 'build') renderCards();
   if(!dariHash) history.replaceState(null,'','#'+p);
   window.scrollTo({top:0});
