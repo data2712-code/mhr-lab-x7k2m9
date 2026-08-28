@@ -358,12 +358,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.12.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.13.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.12` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.13` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.12</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.13</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -396,6 +396,34 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.13 — 28 Agustus 2026 · teks di gambar 12 kartu errata V.1 ikut diperbaiki
+Lanjutan dari v6.12: setelah teks efek di database (`cards.js`) diperbaiki sesuai
+errata V.1, teks yang tercetak di **gambar kartunya sendiri** (bahasa Indonesia)
+kini juga diedit supaya sama-sama menampilkan versi setelah-errata — jadi gambar
+dan database tidak lagi berbeda redaksi.
+
+Kartu yang gambarnya diedit: `BP01-002`, `BP01-026`, `BP01-037`, `BP01-043`,
+`BP01-046` (kedua versi artwork/`_MR`), `BP01-052`, `BP01-090`, `SD01-007`,
+`SD01-018`, `SD04-002`, `SD04-003`, `SD04-005` — total 13 file gambar untuk
+12 kartu.
+
+- Untuk kartu berkotak teks polos (5 kartu), teks lama dihapus dan teks baru
+  ditulis ulang dengan font sejenis, rapi menyatu dengan kotak aslinya
+- Untuk kartu yang teksnya menempel langsung di atas artwork tanpa kotak polos
+  (7 kartu + 1 versi artwork tambahan), teks lama dihapus dengan teknik
+  rekonstruksi latar (inpainting) sebelum teks baru ditulis ulang di atasnya —
+  gaya lebih sulit disamakan persis dibanding kartu berkotak polos, tapi tetap
+  diusahakan serapi mungkin
+- Lencana kecil, ikon kemampuan ([TRIG], [COUNTER-ACTI], dst.), border warna,
+  dan sisa desain kartu (artwork, watermark SAMPLE, nomor R-x/Power) tidak
+  disentuh sama sekali — cuma paragraf teks efeknya yang diganti
+- Teks bahasa Inggris pada gambar (folder `images/en`) **tidak diubah** —
+  sama seperti di database, versi Inggrisnya sudah lebih dulu cocok dengan
+  bunyi setelah-errata
+- Diverifikasi dengan membandingkan setiap kartu hasil edit terhadap teks
+  "Setelah Errata" resmi dan terhadap gambar aslinya (memastikan tidak ada
+  sisa teks lama yang tertinggal maupun bagian desain lain yang berubah)
 
 ### v6.12 — 28 Agustus 2026 · errata resmi V.1 dari tim MHR Indonesia + lencana Errata
 Tim MHR Indonesia merilis daftar errata resmi pertama (V.1) untuk 10 kartu — teks
