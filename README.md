@@ -358,12 +358,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.9.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.10.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.9` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.10` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.9</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.10</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -396,6 +396,24 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.10 — 28 Agustus 2026 · koreksi Action Phase (dari pemilik) + istilah FIELD/BBM
+Enam koreksi/tambahan langsung dari pemilik soal Action Phase di halaman Panduan:
+
+- **Panggil Karakter** boleh diletakkan di slot BATTLE **atau** BASE, bukan cuma BATTLE — batas 3
+  pemanggilan per giliran tetap berlaku terlepas dari mana kartunya diletakkan
+- Ditambahkan istilah yang biasa dipakai pemain untuk membayar biaya panggilan Level 4+:
+  **"bayar cost/biaya"** dan **"sacrifice"**, berdampingan dengan istilah resmi "retreat"
+- **BATTLE-BASE move** kini disingkat **BBM** di seluruh Panduan (istilah yang lebih umum dipakai
+  pemain) — dan ditambahkan aturan yang sebelumnya belum tercatat: karakter yang **baru dipanggil di
+  giliran yang sama belum bisa BBM**, harus menunggu giliran berikutnya, kecuali ada efek kartu lain
+  yang secara khusus mengizinkannya lebih awal
+- **FIELD** kini didefinisikan eksplisit sebagai gabungan BATTLE + BASE (sebelumnya ditulis lebih
+  longgar sebagai "area permainan") — ditambahkan sebagai istilah baru di daftar Istilah Penting,
+  bersama BBM
+- Penempatan BASE (set card + tarik 1 kartu) dikonfirmasi tetap sama seperti sebelumnya
+- Diverifikasi ulang (Chromium headless): teks FIELD/BBM/sacrifice tampil benar di ID & EN, tidak
+  ada error konsol
 
 ### v6.9 — 28 Agustus 2026 · bagian baru: Aturan Pertandingan &amp; Turnamen
 Ditambah section baru di halaman Panduan (dwibahasa ID/EN) soal pelaksanaan

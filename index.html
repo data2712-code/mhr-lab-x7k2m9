@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.9  ·  28 Agustus 2026
+     MHR DECK LAB  ·  versi 6.10  ·  28 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.9">
+<meta name="version" content="6.10">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -962,7 +962,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.9</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.10</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -3350,7 +3350,8 @@ id: `
     <div class="pd-slot back">BACK</div>
   </div>
   <div class="pd-base">+ area <b>BASE</b> (di belakang BATTLE) — tempat kartu tertutup/charge, maksimal 6 kartu.
-    BATTLE dan BASE bersama-sama disebut "area permainan" milik satu pemain.</div>
+    BATTLE dan BASE bersama-sama disebut <b>FIELD</b> milik satu pemain — ini area yang dimaksud di
+    teks efek seperti [TRIG](FIELD).</div>
   <p>Urutan menyerang tiap giliran selalu tetap: <b>FRONT lebih dulu</b>, lalu <b>kedua WING</b>
     (kalau dua-duanya terisi, Anda yang menentukan urutannya), baru <b>BACK</b> paling akhir.
     Posisi BATTLE yang kosong disebut <b>Weakness</b> — target empuk yang kalau berhasil diserang,
@@ -3405,19 +3406,24 @@ id: `
   <p>Di fase ini Anda boleh melakukan tindakan berikut berulang kali, dalam urutan bebas, selama
     masih memenuhi batasannya:</p>
   <ul>
-    <li><b>Penempatan BASE</b> (maks 1× per giliran) — taruh 1 kartu tertutup ke BASE, lalu tarik 1 kartu.</li>
+    <li><b>Penempatan BASE</b> (maks 1× per giliran) — taruh 1 kartu tertutup (set card) ke BASE,
+      lalu tarik 1 kartu dari deck Anda.</li>
     <li><b>Panggil Karakter / Call</b> (maks 3× per giliran) — pindahkan 1 kartu karakter dari tangan
-      ke BATTLE (FRONT/WING/BACK yang kosong):
+      ke <b>FIELD</b> yang kosong. Boleh diletakkan di slot BATTLE <b>atau</b> di BASE — batas
+      maksimal tetap 3 pemanggilan per giliran, terlepas dari mana kartunya diletakkan:
       <ul>
         <li>Level 3 ke bawah → panggil langsung, tanpa syarat.</li>
-        <li>Level 4 ke atas → Anda harus lebih dulu <b>me-retreat</b> (memindahkan ke RETREAT) satu
-          atau lebih kartu karakter di BATTLE Anda yang <b>total Level-nya sama persis</b> dengan
-          Level karakter yang dipanggil. Kartu tertutup/charge di BASE juga boleh dipakai untuk
-          "membayar" ini — tiap kartu charge dihitung sebagai Level 1.</li>
+        <li>Level 4 ke atas → Anda harus lebih dulu me-retreat (memindahkan ke RETREAT) satu atau
+          lebih kartu karakter di BATTLE Anda yang <b>total Level-nya sama persis</b> dengan Level
+          karakter yang dipanggil. Kartu tertutup/charge di BASE juga boleh dipakai untuk membayar
+          ini — tiap kartu charge dihitung sebagai Level 1. Istilah yang biasa dipakai pemain untuk
+          ini: <b>"bayar cost/biaya"</b> atau <b>"sacrifice"</b> — sama saja dengan retreat.</li>
       </ul>
     </li>
-    <li><b>BATTLE-BASE move</b> — memindahkan kartu karakter antara BATTLE dan BASE milik Anda
-      sendiri (bukan menyerang lawan).</li>
+    <li><b>BATTLE-BASE move (disingkat BBM)</b> — memindahkan kartu karakter antara BATTLE dan BASE
+      milik Anda sendiri (bukan menyerang lawan). Karakter yang <b>baru dipanggil di giliran yang
+      sama</b> belum bisa melakukan BBM — harus menunggu giliran berikutnya, kecuali ada efek kartu
+      lain yang secara khusus mengizinkan BBM lebih awal.</li>
   </ul>
 </div>
 
@@ -3491,6 +3497,10 @@ id: `
 <div class="pd-sec" id="pd-istilah">
   <h3>Istilah Penting Lainnya</h3>
   <div class="pd-grid2">
+    <div class="pd-term"><span class="k">Field</span><p>Gabungan area BATTLE + BASE milik satu
+      pemain. Ini yang dimaksud teks efek seperti [TRIG](FIELD).</p></div>
+    <div class="pd-term"><span class="k">BBM</span><p>Singkatan yang biasa dipakai pemain untuk
+      BATTLE-BASE move — memindahkan kartu karakter sendiri antara BATTLE dan BASE.</p></div>
     <div class="pd-term"><span class="k">Weakness</span><p>Posisi BATTLE yang kosong — target yang
       kalau berhasil diserang memberi 1 Rush Point.</p></div>
     <div class="pd-term"><span class="k">Set Card / Kartu Charge</span><p>Kartu karakter yang
@@ -3636,7 +3646,8 @@ en: `
     <div class="pd-slot back">BACK</div>
   </div>
   <div class="pd-base">+ a <b>BASE</b> area (behind BATTLE) — for face-down/charge cards, max 6
-    cards. BATTLE and BASE together make up one player's "field".</div>
+    cards. BATTLE and BASE together make up one player's <b>FIELD</b> — this is the area meant by
+    effect text like [TRIG](FIELD).</div>
   <p>The attack order each turn is always fixed: <b>FRONT first</b>, then <b>both WINGs</b> (if both
     are filled, you choose the order), then <b>BACK</b> last. An empty BATTLE slot is called a
     <b>Weakness</b> — an easy target that, if successfully attacked, earns you 1 Rush Point card.</p>
@@ -3688,19 +3699,24 @@ en: `
   <p>During this phase you may take the following actions repeatedly, in any order, as long as you
     stay within their limits:</p>
   <ul>
-    <li><b>Base Placement</b> (max 1× per turn) — place 1 card face-down into BASE, then draw 1 card.</li>
+    <li><b>Base Placement</b> (max 1× per turn) — place 1 card face-down (a set card) into BASE,
+      then draw 1 card from your deck.</li>
     <li><b>Call a Character</b> (max 3× per turn) — move 1 character card from your hand into an
-      empty BATTLE slot (FRONT/WING/BACK):
+      empty spot on your <b>FIELD</b>. It can go into a BATTLE slot <b>or</b> into BASE — the max of
+      3 calls per turn applies either way:
       <ul>
         <li>Level 3 or lower → call it directly, no extra cost.</li>
-        <li>Level 4 or higher → you must first <b>retreat</b> one or more character cards from your
-          BATTLE whose <b>combined Level exactly matches</b> the Level of the character being
-          called. Face-down/charge cards in BASE can help pay this too — each charge card counts as
-          Level 1.</li>
+        <li>Level 4 or higher → you must first retreat one or more character cards from your BATTLE
+          whose <b>combined Level exactly matches</b> the Level of the character being called.
+          Face-down/charge cards in BASE can help pay this too — each charge card counts as Level 1.
+          Players commonly call this <b>"paying the cost"</b> or <b>"sacrificing"</b> — same thing as
+          retreating.</li>
       </ul>
     </li>
-    <li><b>BATTLE-BASE move</b> — moving a character card between your own BATTLE and BASE (this
-      doesn't target the opponent at all).</li>
+    <li><b>BATTLE-BASE move (BBM for short)</b> — moving a character card between your own BATTLE
+      and BASE (this doesn't target the opponent at all). A character <b>called this same turn</b>
+      can't perform a BBM yet — it has to wait until your next turn, unless another card's effect
+      specifically allows an earlier BBM.</li>
   </ul>
 </div>
 
@@ -3773,6 +3789,10 @@ en: `
 <div class="pd-sec" id="pd-istilah">
   <h3>Other Key Terms</h3>
   <div class="pd-grid2">
+    <div class="pd-term"><span class="k">Field</span><p>A player's BATTLE + BASE combined. This is
+      the area meant by effect text like [TRIG](FIELD).</p></div>
+    <div class="pd-term"><span class="k">BBM</span><p>Common shorthand players use for BATTLE-BASE
+      move — moving your own character card between BATTLE and BASE.</p></div>
     <div class="pd-term"><span class="k">Weakness</span><p>An empty BATTLE slot — a target that, if
       successfully attacked, grants 1 Rush Point.</p></div>
     <div class="pd-term"><span class="k">Set Card / Charge Card</span><p>A character card placed
