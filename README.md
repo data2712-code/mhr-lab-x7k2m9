@@ -358,12 +358,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.10.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.11.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.10` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.11` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.10</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.11</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -396,6 +396,22 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.11 — 28 Agustus 2026 · nama aksi "Penempatan BASE" diganti (rawan salah paham)
+Masukan dari pemilik atas screenshot bagian Action Phase di v6.10: nama
+"Penempatan BASE" berisiko disalahpahami — seolah menaruh kartu apa pun ke
+BASE dibatasi 1× per giliran, padahal batas 1× itu khusus untuk kartu
+tertutup/set card. Memanggil karakter ke BASE (poin di bawahnya) punya batas
+sendiri (3×), bukan bagian dari batas ini.
+
+- Nama aksi diganti jadi **"Pasang Kartu Tertutup / Set Card"** (ID) /
+  **"Set a Card Face-Down"** (EN) — lebih spesifik, tidak menyebut "BASE" di
+  namanya supaya tidak tertukar dengan pemanggilan karakter ke BASE
+- Ditambahkan catatan silang singkat di kedua poin ("beda dengan memanggil
+  karakter ke BASE — itu tidak termasuk batas 1× ini") supaya hubungan
+  keduanya jelas dari awal
+- Diverifikasi ulang (Chromium headless): nama aksi baru tampil benar di ID &
+  EN, istilah lama tidak tersisa di mana pun, tidak ada error konsol
 
 ### v6.10 — 28 Agustus 2026 · koreksi Action Phase (dari pemilik) + istilah FIELD/BBM
 Enam koreksi/tambahan langsung dari pemilik soal Action Phase di halaman Panduan:

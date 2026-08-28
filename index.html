@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.10  ·  28 Agustus 2026
+     MHR DECK LAB  ·  versi 6.11  ·  28 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.10">
+<meta name="version" content="6.11">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -962,7 +962,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.10</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.11</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -3406,8 +3406,9 @@ id: `
   <p>Di fase ini Anda boleh melakukan tindakan berikut berulang kali, dalam urutan bebas, selama
     masih memenuhi batasannya:</p>
   <ul>
-    <li><b>Penempatan BASE</b> (maks 1× per giliran) — taruh 1 kartu tertutup (set card) ke BASE,
-      lalu tarik 1 kartu dari deck Anda.</li>
+    <li><b>Pasang Kartu Tertutup / Set Card</b> (maks 1× per giliran) — taruh 1 kartu tertutup ke
+      BASE, lalu tarik 1 kartu dari deck Anda. (Beda dengan memanggil karakter ke BASE di poin
+      berikutnya — itu tidak termasuk batas 1× ini.)</li>
     <li><b>Panggil Karakter / Call</b> (maks 3× per giliran) — pindahkan 1 kartu karakter dari tangan
       ke <b>FIELD</b> yang kosong. Boleh diletakkan di slot BATTLE <b>atau</b> di BASE — batas
       maksimal tetap 3 pemanggilan per giliran, terlepas dari mana kartunya diletakkan:
@@ -3699,8 +3700,9 @@ en: `
   <p>During this phase you may take the following actions repeatedly, in any order, as long as you
     stay within their limits:</p>
   <ul>
-    <li><b>Base Placement</b> (max 1× per turn) — place 1 card face-down (a set card) into BASE,
-      then draw 1 card from your deck.</li>
+    <li><b>Set a Card Face-Down</b> (max 1× per turn) — place 1 card face-down into BASE, then draw
+      1 card from your deck. (Different from calling a character into BASE in the next point — that
+      doesn't count against this 1× limit.)</li>
     <li><b>Call a Character</b> (max 3× per turn) — move 1 character card from your hand into an
       empty spot on your <b>FIELD</b>. It can go into a BATTLE slot <b>or</b> into BASE — the max of
       3 calls per turn applies either way:
