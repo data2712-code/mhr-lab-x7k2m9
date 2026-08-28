@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.11  ·  28 Agustus 2026
+     MHR DECK LAB  ·  versi 6.12  ·  28 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.11">
+<meta name="version" content="6.12">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -239,6 +239,9 @@
   }
   .btn-add:hover{filter:brightness(1.1)}
   .in-deck{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:700}
+  /* lencana "Errata" — kartu yang teks efeknya pernah direvisi resmi (field `er`) */
+  .errata{font-family:var(--mono);font-size:10.5px;color:#1A1206;background:var(--accent);
+    border-radius:4px;padding:1px 6px;font-weight:800;cursor:help}
 
   /* ------- deck panel ------- */
   .deck{
@@ -621,6 +624,9 @@
   .cards.grid .btn-add{flex:1;padding:6px 4px;font-size:12px}
   .cards.grid .in-deck{position:absolute;top:6px;right:6px;background:var(--accent);color:#1A1206;
     border-radius:7px;padding:2px 7px;font-family:var(--mono);font-weight:800;font-size:12px;z-index:2}
+  .cards.grid .errata{position:absolute;top:6px;left:6px;background:var(--accent);color:#1A1206;
+    border-radius:7px;padding:2px 7px;font-family:var(--mono);font-weight:800;font-size:10.5px;
+    z-index:2;cursor:help}
   /* --- kartu daftar: gambar bisa diklik --- */
   .card-img{cursor:zoom-in}
   .card-name{cursor:zoom-in}
@@ -962,7 +968,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.11</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.12</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1255,6 +1261,7 @@ function cardListHTML(c,q){
             <span class="card-name" data-zoom="${c.no}">${cardName(c)}</span>
             <span class="card-no">${c.no}</span>
             ${c.ra.map(r=>`<span class="rar${r===artOf(c.no)&&c.ra.length>1?' alt':''}">${r}</span>`).join('')}
+            ${errataBadgeHTML(c)}
           </div>
           <div class="card-stats">
             <span class="stat">${t('cLv')} <b>${c.l}</b></span>
@@ -1279,6 +1286,7 @@ function cardGridHTML(c,q){
   return `<div class="card" style="--cardc:${CMAP[c.c]}" data-no="${c.no}">
       <div class="g-wrap" data-zoom="${c.no}">
         ${q?`<span class="in-deck">×${q}</span>`:''}
+        ${errataBadgeHTML(c)}
         <img class="card-img" alt="" data-ext="0" src="${artFile(c.no)}"
           loading="lazy" decoding="async" width="450" height="629"
           onerror="gridImgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">
@@ -1610,6 +1618,9 @@ const T = {
   cAttack:      ['Jarak serangan','Attack range'],
   cFight:       ['Kekuatan bertarung','Fighting power'],
   cAddDeck:     ['+ Tambah ke deck','+ Add to deck'],
+  errata:       ['Errata','Errata'],
+  errataTip:    ['Teks efek kartu ini pernah direvisi resmi oleh tim MHR Indonesia (Errata {v}).',
+                 "This card's effect text was officially revised by the MHR Indonesia team (Errata {v})."],
   cNow:         ['kini','now'],
   cArtwork:     ['Versi artwork','Artwork version'],
   cMain:        ['utama','main'],
@@ -1813,6 +1824,14 @@ function cardEff(c){  return (state.lang==='en' && c.e_en)  ? c.e_en  : c.e; }
 /* di mode Inggris, 16 kartu promo disembunyikan karena versi Inggrisnya belum terbit.
    Datanya tetap ada di database, jadi begitu gambarnya tersedia tinggal ditampilkan. */
 function cardVisible(c){ return state.lang !== 'en' || !!c.nm_en; }
+
+/* lencana kecil untuk kartu yang teks efeknya pernah direvisi resmi (field `er`
+   di cards.js, mis. "V.1"). cls opsional untuk gaya berbeda di grid/lightbox. */
+function errataBadgeHTML(c, cls){
+  if(!c.er) return '';
+  const tip = t('errataTip').replace('{v}', c.er);
+  return `<span class="${cls||'errata'}" title="${tip}">${t('errata')}</span>`;
+}
 
 /* Nama deck komunitas di data.js ditulis dalam Bahasa Indonesia ("Merah - Hijau").
    Di mode Inggris, kata warnanya saja yang diterjemahkan supaya tetap terbaca
@@ -2440,7 +2459,7 @@ function openLightbox(no){
     </div>
     <div class="lb-info">
       <h3>${cardName(c)}</h3>
-      <div class="no">${c.no} · ${c.s} · ${c.ra.join(' / ')}</div>
+      <div class="no">${c.no} · ${c.s} · ${c.ra.join(' / ')} ${errataBadgeHTML(c)}</div>
       <div class="lb-stats">
         <div>${t('levelLbl')} <b>${c.l}</b></div>
         <div>${t('cAttack')} <b>${c.r}</b></div>
