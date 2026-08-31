@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.15  ·  31 Agustus 2026
+     MHR DECK LAB  ·  versi 6.16  ·  31 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.15">
+<meta name="version" content="6.16">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -427,12 +427,15 @@
     border-radius:999px;padding:6px 13px;font-size:12px;cursor:pointer}
   .meta-filter button[aria-pressed="true"]{background:var(--accent);color:#1A1206;
     border-color:var(--accent);font-weight:700}
-  /* baris filter kota (LGS): kalau kota bertambah, gulir ke samping alih-alih
-     turun berbaris-baris — tetap satu baris di layar sempit */
-  #lgsFilter{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
-    scrollbar-width:none}
-  #lgsFilter::-webkit-scrollbar{display:none}
-  #lgsFilter button{flex:none}
+  /* filter kota (LGS) — dropdown, bukan baris chip: dari v6.16 supaya tidak
+     makin panjang tiap kota baru ditambah (6 kota dan terus bertambah).
+     Dikelompokkan per wilayah (lihat wilayahKota()) lewat <optgroup>. */
+  .lgs-select{
+    background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:8px 10px;font-size:12.5px;outline:none;cursor:pointer;
+    max-width:100%;
+  }
+  .lgs-select:focus{border-color:var(--accent)}
   .meta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
   .meta-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
     overflow:hidden;display:flex;flex-direction:column;transition:.15s}
@@ -603,6 +606,12 @@
     padding:11px 13px;margin-bottom:12px;font-size:12.5px;line-height:1.6}
   .share-note b{color:var(--accent)}
   .share-note .row{display:flex;gap:8px;margin-top:10px}
+  #importPanel .row{display:flex;gap:8px}
+  #importPanel textarea.export{display:block;width:100%;box-sizing:border-box}
+  .imp-note{background:rgba(242,176,30,.1);border:1px solid var(--accent);border-radius:10px;
+    padding:12px 14px;font-size:13px;line-height:1.5;margin-top:8px}
+  .imp-note .row{display:flex;gap:8px;margin-top:10px}
+  .imp-err{color:var(--merah);font-size:12.5px;margin-top:8px}
   .hdscale{background:var(--panel);border:1px solid var(--line);color:var(--paper);
     border-radius:8px;padding:9px 10px;font-size:12.5px;cursor:pointer}
   /* --- pengalih tampilan --- */
@@ -952,7 +961,18 @@
       <button class="btn2" id="btnLink" data-i18n="copyLink">🔗 Salin link deck</button>
       <button class="btn2" id="btnTabel" data-i18n="copyTable">Salin tabel</button>
       <button class="btn2" id="btnDlPdf" data-i18n="dlBtn">📄 Decklist PDF</button>
+      <button class="btn2" id="btnImport" data-i18n="impBtn">📋 Impor dari teks</button>
       <button class="btn2 danger" id="btnClear" data-i18n="clearDeck">Kosongkan</button>
+    </div>
+    <div id="importPanel" hidden style="margin-top:8px">
+      <textarea class="export" id="importBox" data-i18n-ph="impPh"
+        placeholder='Tempel di sini: hasil "Salin tabel", daftar kode kartu (mis. 3x BP01-004), atau link/kode deck yang dibagikan…'
+        style="min-height:90px"></textarea>
+      <div class="row" style="margin-top:6px">
+        <button class="btn2" id="btnImportGo" data-i18n="impApply">Proses teks ini</button>
+        <button class="btn2" id="btnImportCancel" data-i18n="impCancel" style="flex:none;padding:9px 12px">Batal</button>
+      </div>
+      <div id="importResult"></div>
     </div>
     <div class="bk-row">
       <button id="btnBackup" data-i18n="bkSave">💾 Backup semua deck</button>
@@ -986,7 +1006,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.15</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.16</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1708,6 +1728,16 @@ const T = {
   viewDeckBtn:  ['🖼 Lihat deck — tampilan untuk dibagikan','🖼 View deck — shareable layout'],
   copyLink:     ['🔗 Salin link deck','🔗 Copy deck link'],
   copyTable:    ['Salin tabel','Copy table'],
+  impBtn:       ['📋 Impor dari teks','📋 Import from text'],
+  impPh:        ['Tempel di sini: hasil "Salin tabel", daftar kode kartu (mis. 3x BP01-004), atau link/kode deck yang dibagikan…',
+                 'Paste here: "Salin tabel" output, a list of card codes (e.g. 3x BP01-004), or a shared deck link/code…'],
+  impApply:     ['Proses teks ini','Process this text'],
+  impCancel:    ['Batal','Cancel'],
+  impNone:      ['Tidak ada kartu yang dikenali dari teks ini. Pastikan kode kartu seperti BP01-004 ikut tertulis.',
+                 'No cards were recognized in this text. Make sure card codes like BP01-004 are included.'],
+  impFromLink:  ['Terdeteksi sebagai kode/link deck yang dibagikan.','Detected as a shared deck link/code.'],
+  impReplace:   ['Ganti deck aktif','Replace active deck'],
+  impMerge:     ['Tambahkan ke deck aktif','Add to active deck'],
   /* --- halaman & panel (v6.2) --- */
   metaTitle:    ['MHR Deck Lab — Marvel Hero Rush Deck Builder',
                  'MHR Deck Lab — Marvel Hero Rush Deck Builder (English)'],
@@ -1766,6 +1796,8 @@ const T = {
   /* --- link deck dibagikan --- */
   shShared:     ['Ada deck yang dibagikan:','Someone shared a deck:'],
   shUnknown:    ['kartu tidak dikenali dan dilewati','cards were not recognised and were skipped'],
+  impFound:     ['{n} kartu dikenali dari teks ini.','{n} cards recognized from this text.'],
+  impUnknown:   [' {n} kode diabaikan (tidak cocok kartu manapun).',' {n} codes ignored (matched no card).'],
   shSave:       ['Simpan sebagai deck saya','Save as my deck'],
   shView:       ['Lihat saja','Just view it'],
   copyManual:   ['Salin manual dari kotak ↓','Copy manually from the box ↓'],
@@ -2236,6 +2268,56 @@ $('#btnTabel').addEventListener('click', ()=>{
 
 /* Tombol "Salin daftar" dihapus di v5.8 — "Salin tabel" sudah mencakup
    kebutuhannya, dan untuk versi cetak ada tombol Decklist PDF. */
+
+/* ---- Impor deck dari teks (v6.16) — lihat parseDeckText() ---- */
+$('#btnImport').addEventListener('click', ()=>{
+  const panel = $('#importPanel');
+  panel.hidden = !panel.hidden;
+  if(!panel.hidden){ $('#importBox').value = ''; $('#importResult').innerHTML = ''; $('#importBox').focus(); }
+});
+$('#btnImportCancel').addEventListener('click', ()=>{
+  $('#importPanel').hidden = true;
+  $('#importBox').value = '';
+  $('#importResult').innerHTML = '';
+});
+$('#btnImportGo').addEventListener('click', ()=>{
+  const teks = $('#importBox').value;
+  const hasil = $('#importResult');
+  if(!teks.trim()){ hasil.innerHTML = `<div class="imp-err">${t('impNone')}</div>`; return; }
+  const parsed = parseDeckText(teks);
+  if(!parsed.dikenali){ hasil.innerHTML = `<div class="imp-err">${t('impNone')}</div>`; return; }
+
+  const jml = parsed.dikenali;
+  const box = document.createElement('div');
+  box.className = 'imp-note';
+  box.innerHTML =
+    (parsed.lewatLink ? `${t('impFromLink')}<br>` : '') +
+    t('impFound').replace('{n}', jml) +
+    (parsed.takDikenal ? t('impUnknown').replace('{n}', parsed.takDikenal) : '') +
+    `<div class="row">
+       <button class="btn2" id="impReplaceBtn" style="border-color:var(--accent);color:var(--accent);font-weight:700">${t('impReplace')}</button>
+       <button class="btn2" id="impMergeBtn">${t('impMerge')}</button>
+       <button class="btn2" id="impCancelBtn" style="flex:none;padding:9px 12px">✕</button>
+     </div>`;
+  hasil.innerHTML = '';
+  hasil.appendChild(box);
+
+  box.querySelector('#impReplaceBtn').addEventListener('click', ()=>{
+    state.deck = {...parsed.deck};
+    store.decks[store.active] = state.deck;
+    renderAll();
+    $('#importPanel').hidden = true; $('#importBox').value = ''; hasil.innerHTML = '';
+  });
+  box.querySelector('#impMergeBtn').addEventListener('click', ()=>{
+    Object.entries(parsed.deck).forEach(([no,q])=>{
+      state.deck[no] = Math.min(99, (state.deck[no]||0) + q);
+    });
+    store.decks[store.active] = state.deck;
+    renderAll();
+    $('#importPanel').hidden = true; $('#importBox').value = ''; hasil.innerHTML = '';
+  });
+  box.querySelector('#impCancelBtn').addEventListener('click', ()=> hasil.innerHTML = '');
+});
 
 /* ==================== LEMBAR DECKLIST PDF (teks saja) ====================
    Berkas PDF A4 berisi kop, kode deck, blok data pemain yang diisi tangan,
@@ -3148,6 +3230,47 @@ function decodeDeck(code){
   return {nama, deck, unknown};
 }
 
+/* ==================== IMPOR DECK DARI TEKS ====================
+   Menerima tempelan bebas: hasil "Salin tabel", link/kode deck yang
+   dibagikan (lewat decodeDeck di atas), atau sekadar daftar kode kartu yang
+   diketik manual (mis. "3x BP01-004", "BP01-004 x3", atau daftar polos).
+   Sengaja TIDAK mengandalkan format kolom tabelDeck() apa adanya — teks yang
+   sudah lewat aplikasi chat (WhatsApp dst.) sering kehilangan spasi ganda,
+   jadi parsing bebasnya mencari pola kode kartu + angka jumlah di sekitarnya
+   di mana pun posisinya, bukan mem-parse kolom per posisi karakter. */
+function cariKodeDeckDibagikan(teks){
+  const mHash = teks.match(/#d=([^\s&"'<>]+)/);
+  if(mHash) return decodeURIComponent(mHash[1]);
+  const mBare = teks.match(/\b1\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9]{4,}\b/);
+  if(mBare) return mBare[0];
+  return null;
+}
+function parseDeckText(teks){
+  const kodeLink = cariKodeDeckDibagikan(teks);
+  if(kodeLink){
+    const res = decodeDeck(kodeLink);
+    if(res && Object.keys(res.deck).length){
+      return {deck: res.deck, nama: res.nama, dikenali: Object.values(res.deck).reduce((a,b)=>a+b,0),
+        takDikenal: res.unknown, lewatLink: true};
+    }
+  }
+  const deck = {}; let takDikenal = 0;
+  const noRe = /\b([A-Z]{2}\d{2}-\d{3})\b/gi;
+  let m;
+  while((m = noRe.exec(teks))){
+    const no = m[1].toUpperCase();
+    if(!DB.some(d=>d.no===no)){ takDikenal++; continue; }
+    const sebelum = teks.slice(Math.max(0, m.index-12), m.index);
+    const sesudah = teks.slice(noRe.lastIndex, noRe.lastIndex+8);
+    const mSebelum = sebelum.match(/(\d{1,2})\s*[x×]\s*$/i);
+    const mSesudah = !mSebelum && sesudah.match(/^\s*[x×]\s*(\d{1,2})/i);
+    if(mSebelum) deck[no] = Math.max(1, Math.min(99, parseInt(mSebelum[1],10)));
+    else if(mSesudah) deck[no] = Math.max(1, Math.min(99, parseInt(mSesudah[1],10)));
+    else deck[no] = Math.min(99, (deck[no]||0) + 1);
+  }
+  return {deck, nama:null, dikenali: Object.values(deck).reduce((a,b)=>a+b,0), takDikenal, lewatLink:false};
+}
+
 function deckShareURL(){
   const base = location.origin + location.pathname;
   return base + '#d=' + encodeDeck(state.deck, store.active);
@@ -3242,6 +3365,14 @@ function hariIni(){
 function kotaLGS(){
   return [...new Set(LGS.map(t=>t.kota).filter(Boolean))];
 }
+/* Pengelompokan kota jadi wilayah untuk <optgroup> di dropdown filter LGS.
+   Sengaja biner (Jabodetabek / Luar Jabodetabek) alih-alih per provinsi —
+   kota baru yang belum dikenal otomatis masuk "Luar Jabodetabek" tanpa perlu
+   diperbarui di sini dulu. Kalau nanti kelompoknya ingin lebih rinci
+   (mis. per pulau), cukup ubah fungsi ini — data.js tidak perlu disentuh. */
+function wilayahKota(k){
+  return /^(Jakarta|Bekasi|Depok|Tangerang|Bogor)\b/i.test(k) ? 'Jabodetabek' : 'Luar Jabodetabek';
+}
 /* Sisipkan zona waktu tepat setelah jam pertama: "19.30 - Selesai" + WIB
    menjadi "19.30 WIB - Selesai". Teks tanpa jam (mis. "On Demand") dibiarkan. */
 function jamTz(w, tz){
@@ -3263,13 +3394,25 @@ function renderLgs(){
 
   $('#navLgs').textContent = daftar.length;
 
-  // filter kota — hanya ditampilkan kalau memang ada lebih dari satu kota
-  $('#lgsFilter').innerHTML = semuaKota.length > 1
-    ? [['','Semua kota'], ...semuaKota.map(k=>[k,k])].map(([v,label])=>
-        `<button data-kota="${v}" aria-pressed="${lgsFilterKota === v}">${label}` +
-        (v ? ` <span style="opacity:.6">${LGS.filter(t=>t.kota===v).length}</span>` : '') +
-        `</button>`).join('')
-    : '';
+  // filter kota (dropdown, dikelompokkan per wilayah) — hanya ditampilkan
+  // kalau memang ada lebih dari satu kota
+  if(semuaKota.length > 1){
+    const grup = {};
+    semuaKota.forEach(k=>{
+      const w = wilayahKota(k);
+      (grup[w] = grup[w] || []).push(k);
+    });
+    const opsi = w => grup[w].map(k=>
+      `<option value="${k}"${lgsFilterKota===k?' selected':''}>${k} (${LGS.filter(t=>t.kota===k).length})</option>`
+    ).join('');
+    $('#lgsFilter').innerHTML =
+      `<select class="lgs-select" id="lgsFilterSel">` +
+        `<option value=""${lgsFilterKota?'':' selected'}>Semua kota (${LGS.length})</option>` +
+        Object.keys(grup).map(w=>`<optgroup label="${w}">${opsi(w)}</optgroup>`).join('') +
+      `</select>`;
+  } else {
+    $('#lgsFilter').innerHTML = '';
+  }
 
   const lencana = k => k ? `<span class="kota">${k}</span>` : '';
 
@@ -3336,10 +3479,10 @@ function renderLgs(){
     `<a href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener">@deteprtm</a>.`;
 }
 
-$('#lgsFilter').addEventListener('click', e=>{
-  const b = e.target.closest('button[data-kota]');
-  if(!b) return;
-  lgsFilterKota = b.dataset.kota;
+$('#lgsFilter').addEventListener('change', e=>{
+  const sel = e.target.closest('#lgsFilterSel');
+  if(!sel) return;
+  lgsFilterKota = sel.value;
   renderLgs();
 });
 
