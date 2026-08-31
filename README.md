@@ -359,12 +359,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.15.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.16.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.15` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.16` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.15</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.16</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -397,6 +397,37 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.16 — 31 Agustus 2026 · filter kota LGS jadi dropdown + impor deck dari teks
+Dua item berikutnya dari roadmap pengembangan:
+
+- **Filter kota di halaman LGS Weekly Rush diganti dari baris chip
+  scroll-horizontal jadi dropdown `<select>` yang dikelompokkan per wilayah**
+  (Jabodetabek / Luar Jabodetabek, dihitung otomatis dari nama kota — tidak
+  perlu ubah skema `data.js` tiap kali toko baru ditambah). Tiap opsi
+  menampilkan jumlah toko di kota itu, dan "Semua kota" menampilkan totalnya.
+  Ini menggantikan pendekatan chip yang makin sulit dibaca begitu jumlah kota
+  bertambah (sekarang 6 kota, 16 toko).
+- **Impor deck dari teks**: tombol baru "📋 Impor dari teks" di panel deck
+  membuka kotak tempel bebas format. Mendukung tiga bentuk sekaligus: (1)
+  link atau kode deck yang dibagikan (pakai ulang `decodeDeck()` yang sudah
+  teruji), (2) hasil "Salin tabel" apa adanya, dan (3) teks bebas/casual
+  (mis. hasil copy-paste dari WhatsApp yang whitespace-nya sudah berantakan)
+  selama masih memuat nomor kartu resmi (`BP01-004`) dengan penanda jumlah
+  di dekatnya (`3x BP01-004` atau `BP01-004 x3`). Setelah diproses, pengguna
+  memilih **Ganti deck aktif** atau **Gabung ke deck aktif**; kartu dengan
+  nomor yang tidak dikenali (typo, dari game lain, dll.) dilaporkan terpisah
+  dan diabaikan, bukan bikin proses gagal total.
+
+Diverifikasi (Chromium headless, mobile 390×844 & desktop 1280×900):
+dropdown kota menampilkan 2 grup dengan jumlah toko per kota yang benar,
+filter per kota maupun reset ke "Semua kota" bekerja; import diuji dengan
+teks campuran bebas, output "Salin tabel", dan pesan casual berisi link
+deck yang dibagikan — ketiganya terbaca benar. Regresi gabungan kedua fitur
+plus badge Counter/errata dan tombol bahasa: console & page error nihil di
+kedua ukuran layar (di mobile, panel deck perlu dibuka dulu lewat pegangan
+"▲ DECK SAYA" sebelum tombol impor bisa diklik — ini perilaku panel deck
+yang sudah ada sejak dulu, bukan hal baru).
 
 ### v6.15 — 31 Agustus 2026 · pecah filter "Counter" + tuntaskan sisa i18n
 Dua item dari roadmap pengembangan yang paling murah biaya-vs-dampak karena
