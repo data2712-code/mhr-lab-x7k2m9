@@ -359,12 +359,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.14.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.15.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.14` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.15` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.14</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.15</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -397,6 +397,32 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.15 — 31 Agustus 2026 · pecah filter "Counter" + tuntaskan sisa i18n
+Dua item dari roadmap pengembangan yang paling murah biaya-vs-dampak karena
+sudah punya spesifikasi lengkap (lihat riset taksonomi Counter dari pemilik):
+
+- **Filter mekanik "Counter" dipecah jadi dua**: sebelumnya satu filter
+  mencampur dua hal berbeda (23 kartu total). Sekarang **Counter call**
+  (9 kartu ber-`[COUNTER]`/`[UNIQUE COUNTER]` — dipanggil ke BATTLE, badge
+  menunjukkan gratis di Lv1–3 atau bayar RETREAT di Lv6) dan **Counter efek**
+  (14 kartu ber-`[COUNTER-ACTI]` — efek diaktifkan dari HAND/FIELD/BACK/BATTLE,
+  badge menunjukkan zonanya). Lencana baru ini tampil di daftar, grid, dan
+  lightbox kartu; statistik panel deck juga menghitung keduanya terpisah.
+  Sekalian ketemu: regex filter lama (`/\[COUNTER/i`) melewatkan TB01-001
+  karena tag-nya `[UNIQUE COUNTER]` (bukan `[COUNTER]` polos) — sekarang ikut
+  terhitung dengan benar sebagai Counter call.
+- **Sisa kebocoran nama Indonesia di mode EN**: tiga dari empat titik yang
+  pernah dicatat (simulasi draw, lightbox, sort "Nama") ternyata sudah
+  keburu diperbaiki di rilis-rilis sebelumnya. Satu yang masih tertinggal:
+  kartu tanpa gambar di halaman "Lihat deck" (ekspor HD) menuliskan nama
+  placeholder-nya pakai nama Indonesia (`c.nm`) walau lagi mode EN — sudah
+  diganti ke `cardName(c)` supaya ikut bahasa aktif.
+
+Diverifikasi (Chromium headless, `cards.js` asli): jumlah kartu per filter
+cocok persis dengan audit database (9 call / 14 efek / 0 tumpang tindih),
+sebaran zona Counter efek cocok (HAND 3 · FIELD 7 · BACK 1 · BATTLE 3), badge
+tampil di 23 kartu di ketiga tampilan, console bersih di mobile & desktop.
 
 ### v6.14 — 28 Agustus 2026 · fix: tombol ganti bahasa ID/EN hilang di HP
 Laporan dari komunitas: tombol ganti bahasa (🌐 ID/EN) di header sulit
