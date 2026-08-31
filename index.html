@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.14  ·  28 Agustus 2026
+     MHR DECK LAB  ·  versi 6.15  ·  31 Agustus 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.14">
+<meta name="version" content="6.15">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -250,6 +250,9 @@
   .in-deck{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:700}
   /* lencana "Errata" — kartu yang teks efeknya pernah direvisi resmi (field `er`) */
   .errata{font-family:var(--mono);font-size:10.5px;color:#1A1206;background:var(--accent);
+    border-radius:4px;padding:1px 6px;font-weight:800;cursor:help}
+  /* lencana Counter call / Counter efek (lihat counterInfo()) */
+  .ctrbadge{font-family:var(--mono);font-size:10.5px;color:#fff;background:var(--biru);
     border-radius:4px;padding:1px 6px;font-weight:800;cursor:help}
 
   /* ------- deck panel ------- */
@@ -636,6 +639,9 @@
   .cards.grid .errata{position:absolute;top:6px;left:6px;background:var(--accent);color:#1A1206;
     border-radius:7px;padding:2px 7px;font-family:var(--mono);font-weight:800;font-size:10.5px;
     z-index:2;cursor:help}
+  .cards.grid .ctrbadge{position:absolute;bottom:6px;left:6px;right:6px;background:var(--biru);color:#fff;
+    border-radius:7px;padding:2px 7px;font-family:var(--mono);font-weight:800;font-size:9.5px;
+    z-index:2;cursor:help;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
   /* --- kartu daftar: gambar bisa diklik --- */
   .card-img{cursor:zoom-in}
   .card-name{cursor:zoom-in}
@@ -878,7 +884,10 @@
       <div class="mech" id="mechBar">
         <span class="lbl" data-i18n="mech">Mekanik</span>
         <button data-m="prune" aria-pressed="false" data-i18n="mPrune">Prune</button>
-        <button data-m="counter" aria-pressed="false" data-i18n="mCounter">Counter</button>
+        <button data-m="countercall" aria-pressed="false" data-i18n="mCounterCall"
+          data-i18n-title="mCounterCallT" title="Kartu ber-kemampuan [COUNTER] — dipanggil ke BATTLE saat jendela counter">Counter call</button>
+        <button data-m="counteracti" aria-pressed="false" data-i18n="mCounterActi"
+          data-i18n-title="mCounterActiT" title="Kartu ber-[COUNTER-ACTI] — efek diaktifkan dari HAND/FIELD/BACK/BATTLE saat jendela counter">Counter efek</button>
         <button data-m="move" aria-pressed="false" data-i18n="mMove">BATTLE-BASE move</button>
         <button data-m="attach" aria-pressed="false" data-i18n="mAttach">Pasang</button>
         <button data-m="set" aria-pressed="false" data-i18n="mSet">Kartu tertutup</button>
@@ -977,7 +986,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.14</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.15</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1119,7 +1128,11 @@ const CORDER = {Merah:0, Kuning:1, Biru:2, Hijau:3};
 /* pola pencocokan filter mekanik (dicek pada teks efek kartu) */
 const MECH = {
   prune:   /\bPrune\b/i,
-  counter: /\[COUNTER/i,
+  /* Counter dipecah dua (lihat counterInfo()): [COUNTER]/[UNIQUE COUNTER] = kartu
+     "call" yang dipanggil ke BATTLE; [COUNTER-ACTI] = efek yang diaktifkan dari
+     zona tertentu. Sebelum v6.15 keduanya tercampur di satu filter "Counter". */
+  countercall: /\[COUNTER\]|\[UNIQUE COUNTER\]/i,
+  counteracti: /\[COUNTER-ACTI\]/i,
   move:    /BATTLE-BASE move|BATTLE-BASE/i,
   attach:  /\bPasang\b|dipasang|terpasang|[Pp]asangkan/,
   set:     /tertutup/i,
@@ -1271,6 +1284,7 @@ function cardListHTML(c,q){
             <span class="card-no">${c.no}</span>
             ${c.ra.map(r=>`<span class="rar${r===artOf(c.no)&&c.ra.length>1?' alt':''}">${r}</span>`).join('')}
             ${errataBadgeHTML(c)}
+            ${counterBadgeHTML(c)}
           </div>
           <div class="card-stats">
             <span class="stat">${t('cLv')} <b>${c.l}</b></span>
@@ -1296,6 +1310,7 @@ function cardGridHTML(c,q){
       <div class="g-wrap" data-zoom="${c.no}">
         ${q?`<span class="in-deck">×${q}</span>`:''}
         ${errataBadgeHTML(c)}
+        ${counterBadgeHTML(c)}
         <img class="card-img" alt="" data-ext="0" src="${artFile(c.no)}"
           loading="lazy" decoding="async" width="450" height="629"
           onerror="gridImgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">
@@ -1422,17 +1437,22 @@ function renderDeck(){
   const st = $('#stats2');
   if(total === 0){ st.innerHTML = ''; $('#rbar').innerHTML=''; $('#rbarx').innerHTML=''; $('#traits').innerHTML=''; }
   else {
-    let totLv = 0, totPw = 0;
+    let totLv = 0, totPw = 0, ctrCallQ = 0, ctrActiQ = 0;
     const rr = {0:0,1:0,2:0,3:0,4:0,5:0}, tr = {};
     entries.forEach(({c,q})=>{
       totLv += c.l*q; totPw += c.p*q;
       rr[c.r] = (rr[c.r]||0) + q;
       traitsOf(c).forEach(t=>tr[t] = (tr[t]||0) + q);
+      const info = counterInfo(c);
+      if(info && info.type==='call') ctrCallQ += q;
+      else if(info && info.type==='acti') ctrActiQ += q;
     });
     st.innerHTML = `
       <div><span>${t('avgLv')}</span><b>${(totLv/total).toFixed(2)}</b></div>
       <div><span>${t('avgPower')}</span><b>${Math.round(totPw/total)}</b></div>
-      <div><span>${t('totalPower')}</span><b>${totPw.toLocaleString(state.lang==='en'?'en-US':'id-ID')}</b></div>`;
+      <div><span>${t('totalPower')}</span><b>${totPw.toLocaleString(state.lang==='en'?'en-US':'id-ID')}</b></div>
+      <div><span>${t('ctrCall')}</span><b>${ctrCallQ}</b></div>
+      <div><span>${t('ctrActi')}</span><b>${ctrActiQ}</b></div>`;
 
     const maxR = Math.max(1,...Object.values(rr));
     $('#rbar').innerHTML = Object.entries(rr).map(([r,n])=>
@@ -1599,7 +1619,10 @@ const T = {
   filterBtn:    ['⚙ Filter','⚙ Filter'],
   mech:         ['Mekanik','Mechanics'],
   mPrune:       ['Prune','Prune'],
-  mCounter:     ['Counter','Counter'],
+  mCounterCall: ['Counter call','Counter call'],
+  mCounterCallT:['Kartu ber-kemampuan [COUNTER] — dipanggil ke BATTLE saat jendela counter','Cards with the [COUNTER] ability — called into BATTLE during a counter window'],
+  mCounterActi: ['Counter efek','Counter effect'],
+  mCounterActiT:['Kartu ber-[COUNTER-ACTI] — efek diaktifkan dari HAND/FIELD/BACK/BATTLE saat jendela counter','Cards with [COUNTER-ACTI] — effect activated from HAND/FIELD/BACK/BATTLE during a counter window'],
   mMove:        ['BATTLE-BASE move','BATTLE-BASE move'],
   mAttach:      ['Pasang','Attach'],
   mSet:         ['Kartu tertutup','Face-down cards'],
@@ -1630,6 +1653,15 @@ const T = {
   errata:       ['Errata','Errata'],
   errataTip:    ['Teks efek kartu ini pernah direvisi resmi oleh tim MHR Indonesia (Errata {v}).',
                  "This card's effect text was officially revised by the MHR Indonesia team (Errata {v})."],
+  ctrCall:      ['Counter call','Counter call'],
+  ctrActi:      ['Counter efek','Counter effect'],
+  ctrFree:      ['gratis','free'],
+  ctrPay:       ['bayar','pay'],
+  ctrFrom:      ['dari','from'],
+  ctrCallTip:   ['Kemampuan [COUNTER]: bisa dipanggil ke BATTLE saat jendela counter (COUNTER STEP/PHASE), maks. 1× per pemain per jendela. Lv1–3 gratis, Lv4+ perlu RETREAT kartu di FIELD dengan total Lv yang sama.',
+                 '[COUNTER] ability: can be called into BATTLE during a counter window (COUNTER STEP/PHASE), max. 1× per player per window. Lv1–3 are free, Lv4+ require RETREAT of FIELD cards with matching total Lv.'],
+  ctrActiTip:   ['Kemampuan [COUNTER-ACTI]: efeknya diaktifkan langsung dari zona ini saat jendela counter, bukan dipanggil sebagai karakter baru ke BATTLE.',
+                 '[COUNTER-ACTI] ability: the effect activates directly from this zone during a counter window, instead of calling a new character into BATTLE.'],
   cNow:         ['kini','now'],
   cArtwork:     ['Versi artwork','Artwork version'],
   cMain:        ['utama','main'],
@@ -1840,6 +1872,32 @@ function errataBadgeHTML(c, cls){
   if(!c.er) return '';
   const tip = t('errataTip').replace('{v}', c.er);
   return `<span class="${cls||'errata'}" title="${tip}">${t('errata')}</span>`;
+}
+
+/* Deteksi kartu ber-mekanik Counter dari teks efek Indonesia (c.e, selalu ada
+   apa pun bahasa aktif) dan pecah jadi dua kategori (lihat counter-taksonomi):
+   - "call": kemampuan [COUNTER] atau [UNIQUE COUNTER] — dipanggil ke BATTLE
+   - "acti": [COUNTER-ACTI](ZONA) — efek diaktifkan dari ZONA (HAND/FIELD/BACK/BATTLE)
+   Tidak ada kartu yang keduanya sekaligus (0 tumpang tindih, per audit database). */
+function counterInfo(c){
+  const e = c.e || '';
+  if(/\[COUNTER\]|\[UNIQUE COUNTER\]/i.test(e)) return {type:'call', lvl:c.l};
+  const m = e.match(/\[COUNTER-ACTI\]\s*\(([^/)]+)/i);
+  if(m) return {type:'acti', zone:m[1].trim().toUpperCase()};
+  if(/\[COUNTER-ACTI\]/i.test(e)) return {type:'acti', zone:'?'};
+  return null;
+}
+/* lencana kecil di daftar/grid/lightbox untuk kartu ber-mekanik Counter.
+   cls opsional untuk gaya berbeda di grid. */
+function counterBadgeHTML(c, cls){
+  const info = counterInfo(c);
+  if(!info) return '';
+  if(info.type === 'call'){
+    const label = `${t('ctrCall')} · ${info.lvl>=4?t('ctrPay'):t('ctrFree')} (Lv${info.lvl})`;
+    return `<span class="${cls||'ctrbadge'}" title="${t('ctrCallTip')}">${label}</span>`;
+  }
+  const label = `${t('ctrActi')} · ${t('ctrFrom')} ${info.zone}`;
+  return `<span class="${cls||'ctrbadge'}" title="${t('ctrActiTip')}">${label}</span>`;
 }
 
 /* Nama deck komunitas di data.js ditulis dalam Bahasa Indonesia ("Merah - Hijau").
@@ -2468,7 +2526,7 @@ function openLightbox(no){
     </div>
     <div class="lb-info">
       <h3>${cardName(c)}</h3>
-      <div class="no">${c.no} · ${c.s} · ${c.ra.join(' / ')} ${errataBadgeHTML(c)}</div>
+      <div class="no">${c.no} · ${c.s} · ${c.ra.join(' / ')} ${errataBadgeHTML(c)} ${counterBadgeHTML(c)}</div>
       <div class="lb-stats">
         <div>${t('levelLbl')} <b>${c.l}</b></div>
         <div>${t('cAttack')} <b>${c.r}</b></div>
@@ -2781,7 +2839,7 @@ $('#btnDvHd').addEventListener('click', async ()=>{
       ctx.fillText(String(c.l), x+CW*0.15, y+CW*0.155);
       ctx.textAlign='left'; ctx.textBaseline='top';
       ctx.fillStyle = '#EDE7DA'; ctx.font = `bold ${Math.round(CW*0.062)}px Arial, sans-serif`;
-      const words = c.nm.split(' '); let line='', ly = y+CW*0.30;
+      const words = cardName(c).split(' '); let line='', ly = y+CW*0.30;
       for(const w of words){
         const t = line ? line+' '+w : w;
         if(ctx.measureText(t).width > CW*0.82){ ctx.fillText(line, x+CW*0.09, ly); ly += CW*0.075; line = w; }
