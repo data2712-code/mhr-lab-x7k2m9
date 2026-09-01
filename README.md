@@ -308,7 +308,7 @@ toko berada di satu kota, baris filternya tidak ditampilkan sama sekali.
 Jangan lupa ubah `LGS_UPDATE` ke tanggal terakhir jadwal dicek, karena tanggal itu
 ditampilkan ke pengunjung sebagai penanda seberapa baru datanya.
 
-Jadwal saat ini — **16 toko, 21 sesi/minggu, 6 kota**:
+Jadwal saat ini — **17 toko, 23 sesi/minggu, 7 kota**:
 
 | Hari | LGS | Kota | Jam |
 |---|---|---|---|
@@ -326,11 +326,13 @@ Jadwal saat ini — **16 toko, 21 sesi/minggu, 6 kota**:
 | Jumat | Sultan Pokebab | Jakarta | 19.30 WIB – Selesai |
 | Jumat | Alex Hobby Shop | Tangerang | 20.00 WIB – Selesai |
 | Jumat | Gale Force Games | Batam | 19.00 WIB – Selesai |
+| Jumat | Savepoint | Depok | 19.30 WIB – Selesai |
 | Sabtu | Global Hobiz Store | Jakarta | 13.00 WIB – Selesai |
 | Sabtu | TwoStompas | Jakarta | 15.00 WIB – Selesai |
 | Sabtu | Gattchaa Mega Mall Batam Center | Batam | 17.30 WIB – Selesai |
 | Minggu | ONIC TCG Viridian Vault | Jakarta | 15.00 WIB – Selesai |
 | Minggu | Catnie Hobbies & Games | Tangerang Selatan | 14.00 WIB – Selesai |
+| Minggu | Savepoint | Depok | 16.00 WIB – Selesai |
 | Minggu | Exordium TCG | Medan | 14.00 WIB – Selesai |
 | Minggu | Gale Force Games | Batam | 16.00 WIB – Selesai |
 
@@ -397,6 +399,13 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### Tambahan jadwal — 1 September 2026 *(hanya `data.js`)*
+- **Savepoint** (Depok) masuk daftar — Jumat 19.30 WIB & Minggu 16.00 WIB.
+  Total kini **17 toko · 23 sesi per minggu · 7 kota**
+- Kota baru otomatis masuk grup **Jabodetabek** di dropdown filter (tidak perlu ubah
+  `index.html` — `wilayahKota()` sudah mengenali "Depok" sejak v6.16)
+- `index.html` **tidak berubah** (tetap v6.16) — cukup unggah ulang `data.js`
 
 ### v6.16 — 31 Agustus 2026 · filter kota LGS jadi dropdown + impor deck dari teks
 Dua item berikutnya dari roadmap pengembangan:
