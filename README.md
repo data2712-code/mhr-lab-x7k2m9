@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.6** · 27 Agustus 2026
+**Versi saat ini: v6.17** · 2 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -361,12 +361,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.16.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.17.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.16` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.17` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.16</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.17</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -399,6 +399,53 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.17 — 2 September 2026 · perbaikan CLS lanjutan (dari laporan Cloudflare Agustus)
+Laporan Cloudflare bulan penuh (1–31 Agustus) mencatat CLS memburuk dari 7% "poor"
+(sebelum v6.4) jadi **11% "poor"**, dengan elemen bermasalah yang sama persis
+dengan sebelum v6.4: `header>div.hdr-stats` dan `#hoverPrev`. Diselidiki dengan
+Playwright + throttling jaringan/CPU realistis dan pustaka pengukuran resmi
+`web-vitals`, bukan cuma baca kode — akar masalahnya ditemukan dan bukan yang
+diduga semula:
+
+- ⚡ **Tombol "☕ Dukung" di header dan catatan di footer, akar masalah utama.**
+  Keduanya memakai atribut `hidden` lalu dimunculkan JavaScript setelah render
+  pertama — ini membuat browser menyisipkan elemen baru ke tata letak yang sudah
+  tampil, mendorong tombol bahasa dan link TikTok di header (tercatat sebagai
+  `hdr-stats`, penyumbang CLS terbesar, nilai 0.3784 di simulasi "before").
+  Diganti jadi pola: ruang kosongnya **sudah dipesan dari awal** lewat
+  `visibility:hidden` + teks placeholder sepanjang teks asli, dan JavaScript
+  cuma mengganti `visibility` jadi `visible` (bukan menyisipkan elemen baru).
+  Kalau `window.DUKUNG` tidak diisi di `data.js`, elemen tetap tersembunyi
+  seperti sebelumnya — perilaku "boleh dikosongkan" tidak berubah
+- ⚡ **`#hoverPrev` (pratinjau kartu melayang) — nuansa yang terlewat di v6.4.**
+  Perbaikan v6.4 memindah posisinya ke `transform` supaya tidak memicu reflow,
+  tapi ternyata Layout Instability API tetap menghitung pergeseran posisi
+  elemen yang sudah tampil sebagai layout shift, apa pun properti CSS yang
+  dipakai untuk menggesernya — dan `mousemove`/hover tidak dapat pengecualian
+  `hadRecentInput` (hanya klik/tap/keyboard yang dapat). Sekarang, saat kursor
+  berpindah ke kartu lain yang berbeda, pratinjau **disembunyikan dulu,
+  direposisi saat tersembunyi, baru dimunculkan lagi di frame berikutnya** —
+  elemen yang tidak tampil di frame sebelumnya dihitung "baru muncul", bukan
+  "berpindah", jadi tidak disertakan ke skor CLS. Gerakan kursor kecil di baris
+  yang sama (mengikuti kursor terus-menerus) sengaja dibiarkan seperti semula
+  supaya terasa responsif — dampaknya ke CLS kecil dibanding lompatan antar-kartu
+- Diverifikasi dengan Playwright: elemen `hdr-stats`/`#hoverPrev` yang tadinya
+  jadi sumber shift di simulasi "before" **hilang total** di simulasi "after",
+  dan regresi fungsional (versi, lencana errata/counter, tombol bahasa, dropdown
+  kota LGS, impor deck dari teks) tetap bersih di HP maupun desktop
+- **Belum diperbaiki, sengaja ditunda:** `#deckList` (daftar kartu di deck) juga
+  tercatat sebagai penyumbang CLS — placeholder "Deck masih kosong" diganti
+  konten asli begitu pemain dengan deck tersimpan membuka situs. Perbaikan yang
+  benar butuh mengubah urutan pemuatan skrip (`cards.js`/`data.js` dipindah lebih
+  awal) atau membatasi jeda sembunyi/tampilkan hanya ke render pertama kali,
+  bukan ke setiap kali deck diedit (yang terjadi hampir tiap interaksi) — supaya
+  tidak malah bikin edit deck terasa nge-lag. Butuh sesi terpisah yang lebih
+  hati-hati; belum berdampak ke pengalaman inti (isi deck tetap benar, cuma
+  waktu render pertamanya yang tercatat sebagai shift)
+- Konfirmasi nyata baru akan terlihat di laporan Cloudflare berikutnya
+  (±akhir September) — perbaikan ini diverifikasi lewat simulasi, bukan data
+  lapangan langsung
 
 ### Tambahan jadwal — 1 September 2026 *(hanya `data.js`)*
 - **Savepoint** (Depok) masuk daftar — Jumat 19.30 WIB & Minggu 16.00 WIB.
