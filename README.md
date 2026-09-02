@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.18** · 2 September 2026
+**Versi saat ini: v6.19** · 2 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -287,11 +287,13 @@ karena satu-satunya cara mengubah daftar adalah commit ke repository ini.
 pengunjung. Kotak itu memvalidasi deck (harus pas 50 kartu, aturan warna/salinan
 terpenuhi) dan mewajibkan nama pembuat, lalu menghasilkan kode dengan format
 **persis sama** seperti langkah 4–6 di atas. Pengunjung mengirim kode itu lewat
-DM TikTok [@deteprtm](https://tiktok.com/@deteprtm) — dari situ alurnya sama
-seperti deck buatan sendiri: tinjau, lalu tempel manual ke `DECK_KOMUNITAS`
-lewat langkah 5–6. Tidak ada jalur otomatis yang langsung mengubah `data.js` —
-validasi di kotak submission cuma memastikan formatnya benar, bukan menggantikan
-peninjauan pemilik.
+DM TikTok [@deteprtm](https://tiktok.com/@deteprtm) **atau email ke
+`dataanggi2712@yahoo.co.id`** (kanal email ditambahkan di v6.19 — link `mailto:`
+di kotak submission sudah otomatis mengisi subjek & placeholder isi pesan) — dari
+situ alurnya sama seperti deck buatan sendiri: tinjau, lalu tempel manual ke
+`DECK_KOMUNITAS` lewat langkah 5–6. Tidak ada jalur otomatis yang langsung
+mengubah `data.js` — validasi di kotak submission cuma memastikan formatnya
+benar, bukan menggantikan peninjauan pemilik.
 
 ### Cara mengubah jadwal Weekly Rush LGS
 
@@ -381,12 +383,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.18.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.19.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.18` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.19` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.18</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.19</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -419,6 +421,27 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.19 — 2 September 2026 · kanal email di kotak submission deck komunitas
+Permintaan pemilik: tambahkan alamat email sebagai kanal alternatif pengiriman kode
+submission, selain DM TikTok yang sudah ada.
+
+- Kotak submission (tab 🏆 Deck Komunitas) sekarang menyebut **dua** kanal pengiriman:
+  DM TikTok [@deteprtm](https://tiktok.com/@deteprtm) (seperti sebelumnya) ATAU email
+  ke **dataanggi2712@yahoo.co.id** — link email pakai `mailto:` dengan subjek dan
+  placeholder isi pesan sudah terisi otomatis ("Tempel kode deck yang sudah disalin di
+  sini:"), supaya pengunjung tinggal klik lalu tempel kode yang sudah disalin
+- Pesan konfirmasi setelah kode berhasil dibuat (`subOk`) diperbarui jadi "...kirim
+  lewat TikTok atau email untuk ditinjau" (ID & EN)
+- Alur moderasinya **tidak berubah** — dua kanal ini cuma tempat pengunjung mengirim
+  kode yang sudah lolos validasi di browser; pemilik tetap yang meninjau dan menempel
+  manual ke `DECK_KOMUNITAS`, tidak ada jalur otomatis baru ke `data.js`
+- Diverifikasi dengan Playwright di HP & desktop: link email & TikTok tampil
+  bersamaan, teks ID & EN benar (dicek langsung lewat pemanggilan `renderSubmitBox()`
+  di mode EN, karena halaman Deck Komunitas sendiri memang sengaja disembunyikan dari
+  pengunjung mode EN — lihat catatan lama soal ini), alur generate/copy kode tidak
+  regresi. Regresi penuh v6.18 (kartu terkait, duplikat deck, filter kemampuan kunci,
+  taksonomi warna) juga dicek ulang — nol error konsol/halaman
 
 ### v6.18 — 2 September 2026 · kartu terkait di popup, duplikat deck, filter kemampuan kunci, submission deck komunitas
 Enam item diminta pemilik sekaligus. Dua di antaranya ternyata **sudah selesai**
