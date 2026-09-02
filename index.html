@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.18  ·  2 September 2026
+     MHR DECK LAB  ·  versi 6.19  ·  2 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.18">
+<meta name="version" content="6.19">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1050,7 +1050,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.18</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.19</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1953,12 +1953,13 @@ const T = {
   subOutPh:     ['Kode muncul di sini setelah deck lolos pemeriksaan aturan di atas…',
                  'Code appears here once your deck passes the rule check above…'],
   subSendNote:  ['Setelah disalin, kirimkan kodenya lewat DM TikTok ke','After copying, send the code via TikTok DM to'],
+  subSendOr:    ['atau email ke','or email to'],
   subEmpty:     ['Deck aktif masih kosong — susun dulu di Deck Builder.','Your active deck is empty — build it in the Deck Builder first.'],
   subWrongSize: ['Jumlah kartu belum pas dengan target ukuran deck','Card count does not match your deck size target'],
   subTooManyColors: ['Deck memakai lebih dari 2 warna — maksimal 2 warna per deck (101.1.c).','Deck uses more than 2 colors — maximum 2 colors per deck (101.1.c).'],
   subTooManyCopies: ['Ada nama karakter yang salinannya melebihi batas — maksimal 3 salinan per nama karakter (101.1.d).','Some character name exceeds the copy limit — maximum 3 copies per character name (101.1.d).'],
   subNeedCredit:['Isi dulu nama / julukan kamu — kiriman tanpa kredit tidak diproses.','Fill in your name / nickname first — submissions without credit are not processed.'],
-  subOk:        ['Kode berhasil dibuat. Salin lalu kirim lewat TikTok untuk ditinjau.','Code generated. Copy it and send it via TikTok for review.'],
+  subOk:        ['Kode berhasil dibuat. Salin lalu kirim lewat TikTok atau email untuk ditinjau.','Code generated. Copy it and send it via TikTok or email for review.'],
   subGenFirst:  ['Buat kodenya dulu.','Generate the code first.'],
   newDeck:      ['Buat deck baru','New deck'],
   dupDeck:      ['Duplikat deck ini','Duplicate this deck'],
@@ -4438,9 +4439,10 @@ $('#metaGrid').addEventListener('click', e=>{
       3-salinan DAN sudah diisi nama kredit, supaya tidak ada kiriman kosong/asal;
    2) hasilkan kode siap tempel — format PERSIS sama dengan generator admin
       (renderAdminBox) — supaya pemilik cukup satu alur saat menempel ke data.js;
-   3) pengunjung menyalin kode itu dan mengirimkannya SENDIRI lewat TikTok
-      @deteprtm (satu-satunya kanal kontak publik yang sudah dipakai situs ini,
-      lihat bagian LGS "toko belum ada di daftar");
+   3) pengunjung menyalin kode itu dan mengirimkannya SENDIRI lewat DM TikTok
+      @deteprtm (kanal kontak publik yang sudah dipakai situs ini, lihat bagian
+      LGS "toko belum ada di daftar") ATAU email ke dataanggi2712@yahoo.co.id
+      (v6.19 — kanal alternatif buat yang tidak pakai/nyaman lewat TikTok);
    4) pemilik meninjau lalu menempel manual ke DECK_KOMUNITAS — publikasi tetap
       sepenuhnya keputusan & tindakan manual pemilik, tidak ada endpoint publik
       yang bisa menulis ke data.js, jadi tidak ada beban backend atau risiko spam
@@ -4481,7 +4483,7 @@ function renderSubmitBox(){
       </div>
       <div id="subMsg"></div>
       <textarea id="subOut" readonly placeholder="${t('subOutPh')}"></textarea>
-      <p class="desc" style="margin:10px 0 0">${t('subSendNote')} <a href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener">@deteprtm</a>.</p>
+      <p class="desc" style="margin:10px 0 0">${t('subSendNote')} <a href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener">@deteprtm</a> ${t('subSendOr')} <a href="mailto:dataanggi2712@yahoo.co.id?subject=Submission%20Deck%20Komunitas%20MHR%20Deck%20Lab&body=Tempel%20kode%20deck%20yang%20sudah%20disalin%20di%20sini%3A%0A%0A">dataanggi2712@yahoo.co.id</a>.</p>
     </div>`;
 }
 
