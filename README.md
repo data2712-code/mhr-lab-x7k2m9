@@ -33,6 +33,7 @@ mhr-lab-x7k2m9/
 ├── sw.js                 ← PWA: service worker, cache offline (sejak v6.6)
 ├── icons/               ← ikon PWA berbagai ukuran (sejak v6.6)
 ├── og-image.jpg      ← gambar preview saat link dibagikan
+├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
 └── images/ · images/en/  ← gambar kartu, nama = nomor kartu (BP01-001.jpg)
 ```
 
@@ -420,6 +421,26 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### Persiapan domain kustom `mhrdecklab.com` — 2 September 2026 *(hanya berkas `CNAME` baru, tidak ada perubahan kode)*
+Pemilik sudah menyelesaikan pembelian domain `mhrdecklab.com` di Cloudflare Registrar.
+Langkah pertama migrasi: menyiapkan sisi GitHub Pages-nya.
+
+- Berkas baru **`CNAME`** ditambahkan di root repo, isinya cuma `mhrdecklab.com` —
+  ini berkas standar yang dibaca GitHub Pages untuk tahu domain kustom yang dipakai.
+  Biasanya berkas ini otomatis dibuat kalau domain diisi lewat kolom "Custom domain"
+  di `Settings → Pages` GitHub, tapi di sini dibuat langsung sebagai berkas supaya
+  konsisten dengan alur kerja proyek ini (semua perubahan lewat folder klon, bukan
+  lewat website GitHub)
+- **Belum live** — domain baru akan benar-benar berfungsi setelah DNS-nya diarahkan
+  ke GitHub Pages di dashboard Cloudflare (4 A record + opsional CNAME `www`) dan
+  GitHub selesai menerbitkan sertifikat HTTPS untuk domain tersebut. Langkah detail
+  ada di `riset-preseden-fan-tcg-dan-rekomendasi-domain-2-september-2026.md` §
+  "Panduan teknis"
+- URL lama `https://data2712-code.github.io/mhr-lab-x7k2m9/` tetap akan berfungsi
+  sebagai alias/redirect ke domain baru begitu semuanya aktif — perilaku standar
+  GitHub Pages, tidak perlu tindakan tambahan
+- Tidak ada perubahan `index.html` — jadi tidak ada kenaikan nomor versi untuk entri ini
 
 ### `robots.txt` dihapus agar indexing tidak dibatasi — 2 September 2026 *(hanya `robots.txt`, tidak ada perubahan kode)*
 Permintaan pemilik, menjelang rencana domain kustom `mhrdecklab.com` mulai dipakai:
