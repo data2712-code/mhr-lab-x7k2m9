@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.17** · 2 September 2026
+**Versi saat ini: v6.18** · 2 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -46,6 +46,15 @@ Semua data deck tersimpan di browser pengguna (localStorage).
 2. Repository → **Add file → Upload files** → drop file → **Commit changes**
 3. Tunggu 1–2 menit, buka situs dengan `?v=` angka baru untuk melewati cache
 4. Perbarui bagian **Riwayat Update** di README ini
+
+> **Aturan tetap proyek ini — berlaku untuk sesi Claude mana pun, kapan pun:**
+> **setiap** perubahan atau pembaruan, sekecil apa pun — baik `index.html`, `cards.js`,
+> `data.js` saja, atau cuma teks — **wajib** dicatat sebagai entri baru di § **Riwayat
+> Update** di bawah, lengkap dengan tanggal dan apa yang berubah. Ini supaya kalau
+> percakapan dipindah ke sesi/obrolan baru (tanpa akses ke riwayat chat sebelumnya),
+> Claude di sesi itu tetap bisa membaca **seluruh riwayat perubahan proyek ini cukup
+> dari file ini saja**. Jangan pernah melewatkan langkah ini walau perubahannya terasa
+> kecil atau "tidak penting dicatat".
 
 ### Cara menambah set kartu baru
 
@@ -273,6 +282,17 @@ Panel admin tidak terlihat oleh pengunjung biasa. Ini hanya menyembunyikan dari
 tampilan, bukan pengamanan — tapi tombol itu memang tidak punya kuasa apa pun,
 karena satu-satunya cara mengubah daftar adalah commit ke repository ini.
 
+**Kalau kode datang dari pengunjung (fitur submission, sejak v6.18):** tab
+🏆 Deck Komunitas punya kotak "Kirim deck kamu" yang terlihat untuk semua
+pengunjung. Kotak itu memvalidasi deck (harus pas 50 kartu, aturan warna/salinan
+terpenuhi) dan mewajibkan nama pembuat, lalu menghasilkan kode dengan format
+**persis sama** seperti langkah 4–6 di atas. Pengunjung mengirim kode itu lewat
+DM TikTok [@deteprtm](https://tiktok.com/@deteprtm) — dari situ alurnya sama
+seperti deck buatan sendiri: tinjau, lalu tempel manual ke `DECK_KOMUNITAS`
+lewat langkah 5–6. Tidak ada jalur otomatis yang langsung mengubah `data.js` —
+validasi di kotak submission cuma memastikan formatnya benar, bukan menggantikan
+peninjauan pemilik.
+
 ### Cara mengubah jadwal Weekly Rush LGS
 
 Semua jadwal ada di **`data.js`** (bukan `index.html`), jadi aman saat aplikasi
@@ -361,12 +381,12 @@ Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.17.html` |
+| Nama file kiriman | `mhr_deck_lab_public_v6.18.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.17` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.18` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.17</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.18</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -399,6 +419,80 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.18 — 2 September 2026 · kartu terkait di popup, duplikat deck, filter kemampuan kunci, submission deck komunitas
+Enam item diminta pemilik sekaligus. Dua di antaranya ternyata **sudah selesai**
+di versi sebelumnya (dikonfirmasi lewat baca kode + tes Playwright langsung,
+bukan cuma percaya dokumen roadmap yang ternyata sudah usang) — jadi pekerjaan
+difokuskan ke bagian yang benar-benar belum ada:
+
+- ✅ **Sudah ada sebelumnya, dikonfirmasi lewat tes** — navigasi ◀ ▶ dan panah
+  keyboard di popup kartu, serta filter bar yang bisa dilipat di HP (`#btnFilter`).
+  Roadmap lama (bagian di bawah) belum sempat ditandai selesai
+- 🆕 **Kartu terkait di popup** — bagian baru di bawah detail kartu (`.lb-related`),
+  menampilkan sampai 10 kartu lain dengan nama karakter sama (rekan seri) memakai
+  `relatedCards()`/`relatedHTML()`. Klik salah satu kartu terkait langsung
+  berpindah ke popup kartu itu (pakai jalur render yang sama dengan navigasi ◀ ▶)
+- 🆕 **Duplikat deck** — tombol `⧉` di sebelah nama deck aktif. Menyalin seluruh
+  isi deck ke deck baru bernama `<nama asli> (salinan)` (angka bertambah kalau
+  nama sudah dipakai), lalu langsung berpindah ke deck salinan itu — berguna
+  untuk mencoba variasi tanpa kehilangan deck asli
+- 🆕 **Filter kemampuan kunci** — dropdown baru `#fKeyAbil` (BLOCK, DOUBLE ATTACK,
+  ASSAULT, AIR STRIKE, UNIQUE) yang mencocokkan token berkurung di teks efek kartu
+  (mis. `[UNIQUE]`), lengkap dengan hitungan jumlah kartu di tiap opsi seperti
+  dropdown filter lain. Sekalian ditambahkan statistik **biaya Summon** (jumlah
+  kartu Lv1–3 gratis vs Lv4+ berbayar) di panel ringkasan deck — dua item roadmap
+  yang saling terkait (301.19) dikerjakan sekaligus
+- 🆕 **Persiapan warna Orange & Purple** — taksonomi warna dirombak dari 4 warna
+  hardcode (`Merah`/`Kuning`/`Biru`/`Hijau`) jadi `COLORS` yang dihitung otomatis
+  dari warna yang benar-benar ada di `cards.js` (pola yang sama dengan
+  pengelompokan kota LGS). Begitu set kartu dengan warna Orange/Purple terbit dan
+  ditambahkan ke `cards.js`, tombol warna dan filter di halaman deck builder ikut
+  muncul **tanpa perlu ubah kode apa pun**. Sekalian ditemukan dan diperbaiki
+  potensi bug `NaN` di 3 tempat yang sebelumnya mengasumsikan cuma ada 4 warna
+- 🆕 **Submission deck dari komunitas, dengan batasan moderasi** — kotak baru di
+  tab **🏆 Deck Komunitas** (terlihat untuk semua pengunjung, bukan cuma mode
+  admin) yang memvalidasi deck aktif (harus pas 50 kartu, sesuai aturan
+  warna/salinan) dan nama pembuat (wajib diisi), lalu menghasilkan kode
+  siap-tempel dengan format **persis sama** dengan generator admin yang sudah
+  ada. Situs ini statis tanpa backend, jadi "submission" diarahkan ke
+  satu-satunya kanal kontak publik yang sudah ada (DM TikTok
+  [@deteprtm](https://tiktok.com/@deteprtm)) — bukan kanal baru. Moderasinya
+  sepenuhnya manual: pemilik meninjau kode yang dikirim lalu menempelkannya
+  sendiri ke `data.js` seperti biasa (lihat **Cara menambah deck komunitas** di
+  bawah); tidak ada jalur kode apa pun yang memberi pengunjung akses tulis
+  langsung ke data situs
+- 🛡️ Perbaikan pencegahan (belum jadi masalah nyata, tapi jadi relevan sekarang
+  karena `DECK_KOMUNITAS` bisa diisi dari saran publik yang tidak selalu dibaca
+  teliti): nama/kreator/deskripsi deck komunitas di `renderMeta()` sekarang
+  di-escape (`escHtml()`) sebelum ditampilkan, supaya karakter `<`/`>` di
+  input tidak bisa disisipi markup
+- Diverifikasi dengan Playwright di HP dan desktop untuk tiap fitur di atas
+  (termasuk kasus deck kosong dan nama kreator kosong pada fitur submission,
+  yang harus ditolak dengan pesan, bukan menghasilkan kode), plus regresi penuh
+  fitur v6.17 (tombol Dukung, lencana errata/Counter, pratinjau hover kartu di
+  deck list) — nol error konsol/halaman di kedua ukuran layar
+- Nama branding Weekly Rush LGS ("Assemble Night" untuk acara, "Hero Base"
+  untuk toko peserta) dikonfirmasi final oleh pemilik — belum diterapkan ke
+  kode/`data.js`, menunggu perintah eksplisit kapan dipakai
+
+### Dokumentasi — 2 September 2026 *(hanya `README.md`, tidak ada perubahan kode/data)*
+- Ditambahkan aturan tetap proyek: **setiap** perubahan, sekecil apa pun, wajib
+  dicatat sebagai entri baru di bagian ini — supaya sesi Claude baru (tanpa akses ke
+  riwayat percakapan sebelumnya) tetap bisa membaca riwayat lengkap cukup dari file
+  ini
+- Bagian **"Catatan dari rulebook resmi (Comprehensive Rules 1.00)"** yang sudah usang
+  diganti total dengan **"Aturan resmi Marvel Hero Rush (rujukan lengkap untuk Deck
+  Lab)"** — konsolidasi seluruh aturan permainan yang sudah dipelajari sejauh ini dari
+  Comprehensive Rules 1.00 → 1.03, poster cetak resmi CARDFUN/Jason Entertainment, dan
+  taksonomi Counter dari penjelasan pemilik. Mencakup: konstruksi deck, struktur
+  giliran & battlefield, biaya Summon, pemetaan istilah kemampuan kunci, dua jenis
+  Counter, errata resmi, field yang belum diimplementasikan (Environment, rarity
+  GR/R), dan tabel "Riwayat pembaruan aturan" tersendiri untuk melacak kapan tiap
+  temuan aturan masuk. Bagian ini akan terus diperbarui setiap kali ada rulebook
+  resmi baru, errata baru, atau set kartu dengan mekanik baru
+- Daftar "Rencana / ide berikutnya": item "Impor deck dari teks" ditandai selesai
+  (sudah dikerjakan di v6.16)
 
 ### v6.17 — 2 September 2026 · perbaikan CLS lanjutan (dari laporan Cloudflare Agustus)
 Laporan Cloudflare bulan penuh (1–31 Agustus) mencatat CLS memburuk dari 7% "poor"
@@ -1230,36 +1324,188 @@ Ditujukan untuk alur kerja meninjau dan mengganti kartu setelah deck jadi.
 
 ---
 
-## Catatan dari rulebook resmi (Comprehensive Rules 1.00)
+## Aturan resmi Marvel Hero Rush (rujukan lengkap untuk Deck Lab)
 
-Hal-hal yang berpengaruh atau berpotensi berpengaruh ke Deck Lab:
+> Bagian ini kumpulan **seluruh** aturan permainan yang sudah dipelajari dari sumber
+> resmi maupun penjelasan pemilik, supaya sesi Claude mana pun — termasuk percakapan
+> yang benar-benar baru, tanpa riwayat chat sebelumnya — bisa langsung paham konteks
+> aturan cukup dari membaca README ini. **Wajib diperbarui** setiap kali ada rulebook
+> resmi baru, errata baru, set kartu dengan mekanik baru, atau temuan baru dari
+> pemilik — catat perubahannya di tabel "Riwayat pembaruan aturan" di bagian paling
+> bawah bagian ini, jangan cuma menimpa isi tanpa jejak.
 
-- **101.1.d** — batas 3 salinan per **nama karakter**, bukan nomor kartu. Sudah
-  diterapkan di v5.1
-- **201.5.b** — ada **6 warna**: Merah, Kuning, Biru, Hijau, Orange, Purple.
-  Database saat ini baru punya 4; filter warna perlu ditambah saat Orange/Purple terbit
-- **201.14.b** — rarity yang ada juga mencakup **HR** (Hero Rare) dan **LR**
-  (Legend Rare), belum muncul di database
-- **301.19** — Summon Lv1–3 langsung; Lv4+ harus me-RETREAT karakter yang total
-  Level-nya sama dengan Level kartu yang dipanggil. Inilah alasan kurva level penting;
-  kartu Lv rendah berfungsi sebagai "biaya" untuk memanggil kartu Lv tinggi
-- **301.21.g** — kartu tertutup di BASE dihitung sebagai Lv1 saat dipakai membayar Summon
-- **101.2 / 103.1.a** — Rush Deck berisi 9 Rush Card; menaruh 9 Rush Card di Timeline
-  lawan = menang. Tidak ada batasan pilihan Rush Card, jadi bukan keputusan deck-building
-- **303.2.a.2.1** — tiap giliran menarik 2 kartu; **303.2.a.6.1.3** — batas tangan 9 kartu
-- **305** — kemampuan kunci: Response/COUNTER, Intercept/BLOCK, Double Strike,
-  Raid/ASSAULT, Aerial Assault/AIR STRIKE, Unique
+### Sumber & tingkat keotoritatifan
+
+1. **Poster cetak resmi CARDFUN / PT. Jason Entertainment Indonesia** — dua poster A3
+   Bahasa Indonesia ("Area Permainan Marvel Hero Rush" & "Tata Cara Bermain Marvel
+   Hero Rush") yang menyertai produk fisik yang beredar di Indonesia. **Paling
+   otoritatif** untuk istilah dan aturan yang dipakai di pasar Indonesia.
+2. **Comprehensive Rules 1.03 (Inggris, tidak resmi)** — terjemahan pihak ketiga dari
+   rulebook Tiongkok (Google Drive, `kokoh.masyarakat@gmail.com`, update 2026-08-12).
+   Riwayat revisi: 1.00 (16 Jun 2026) → 1.01 (24 Jun) → 1.02 (23 Jul) → 1.03 (12 Agu).
+   Lebih rinci secara nomor pasal, tapi sebagian nama kemampuannya (lihat tabel di
+   bawah) **tidak cocok** dengan poster resmi maupun teks kartu — kalau bertentangan,
+   poster resmi dan teks kartu yang menang.
+3. **Teks kartu itu sendiri** (`cards.js`) — untuk kebutuhan filter/mekanik di kode,
+   selalu cocokkan ke **teks kartu**, bukan ke nama pasal rulebook manapun. Kartu ID
+   memakai kurung siku biasa (`[COUNTER]`, `[UNIQUE]`), kartu EN memakai 【】.
+4. **Penjelasan pemilik dari pengalaman meja langsung** — menutup celah yang tidak
+   dijelaskan rulebook (mis. urutan detail COUNTER STEP, taksonomi Counter call vs
+   Counter efek).
+
+### Konstruksi deck
+
+- Main deck **tepat 50 kartu** karakter
+- Maksimal **2 warna** per deck
+- Maksimal **3 kartu dengan nama karakter yang sama** (per nama, bukan per nomor
+  kartu — varian artwork beda nomor tapi nama sama tetap terhitung satu kelompok)
+- Rush Point Deck: **9 kartu**, tanpa batasan pemilihan — bukan keputusan deck-building
+- 6 warna menurut rulebook: Merah, Kuning, Biru, Hijau, **Orange, Purple** (dua
+  terakhir belum terbit produknya — database baru mendukung 4)
+- Rarity yang **beredar dan terverifikasi ada di database**: UR, MR, SEC, GR, SR, R,
+  ER, PR, TR. Rulebook 1.03 menyebut daftar berbeda (C, SR, UR, MR, SEC, HR, LR, PR,
+  ER, TR) — **GR/R vs C/HR/LR masih pertanyaan terbuka**, kemungkinan istilah cetakan
+  Indonesia berbeda dari rulebook internasional; jangan asumsikan salah satu benar
+  sebelum dicek langsung ke kartu fisik atau API resmi
+- Menang saat: **9 kartu Rush Point berhasil ditaruh di TIMELINE lawan**, ATAU
+  **deck lawan habis** (0 kartu tersisa saat harus menarik)
+
+### Struktur giliran & battlefield
+
+- Tangan awal **6 kartu**; mulligan = kembalikan semua ke **bawah** deck, ambil ulang
+  sejumlah sama, kocok deck. Aturan resmi maksimal 1× mulligan; simulator draw di
+  Deck Lab sengaja membiarkan berulang untuk eksplorasi
+- Tiap giliran: **tarik 2 kartu**; batas tangan **9 kartu**
+- **Base Deployment**: taruh 1 kartu tertutup ke BASE lalu tarik 1 kartu, maksimal
+  **1× per giliran**
+- **Action Summon**: maksimal **3× per giliran**; **giliran pertama pemain pertama
+  hanya 1× Action Summon**, dan **Battle Phase dilewati total** di giliran itu
+  (temuan dari poster resmi — tidak pernah tercatat di Comprehensive Rules)
+- **BASE menampung maksimal 6 kartu** (temuan poster resmi — gabungan karakter +
+  kartu set/tertutup, bukan dua kuota terpisah)
+- **BATTLE**: FRONT (maks 1) + BACK (maks 1) + 2×WING (maks 1 masing-masing) →
+  **maksimal 4 karakter** di BATTLE sekaligus
+- Kalau nilai serangan **R = 0, atau tidak ada target sah dalam jangkauan R**,
+  karakter itu tidak bisa menyerang (direvisi di rulebook 1.03 — sebelumnya cuma
+  disebut "R=0")
+
+### Biaya Summon (kurva level)
+
+- **Level 1–3**: Summon langsung, tanpa biaya tambahan
+- **Level 4+**: harus me-RETREAT (buang) kartu di FIELD sendiri yang **total
+  Level-nya sama persis** dengan Level kartu yang dipanggil
+- Kartu tertutup (Set Card) di BASE dihitung sebagai **Level 1** saat dipakai untuk
+  membayar biaya Summon Lv4+
+- Ini alasan kurva level penting saat menyusun deck — kartu Lv rendah berfungsi
+  sebagai "mata uang" untuk memanggil kartu Lv tinggi (rasio Lv1–3 : Lv4–6 di
+  database saat ini: 128 : 80)
+
+### Kemampuan kunci — pemetaan istilah (kode SELALU ikut teks kartu, bukan tabel ini)
+
+Poster resmi CARDFUN memakai istilah **yang sama persis dengan teks kartu**. Rulebook
+1.03 (terjemahan tidak resmi) memakai nama lain untuk sebagian kemampuan — tabel ini
+cuma referensi silang, jangan dipakai untuk filter/UI:
+
+| Istilah kartu / poster resmi | Rulebook 1.03 (tidak resmi) | Pasal | Definisi ringkas | Jumlah kartu (ID/EN) |
+|---|---|---|---|---|
+| `[COUNTER]` | Respond | 305.1 | Efek berkelanjutan (HAND): kartu boleh **dipanggil** dari tangan saat jendela counter | 23 total (lihat pecahan di bawah) |
+| `[BLOCK]` | Intercept | 305.2 | Respond-Activated (BATTLE, 1×/giliran): alihkan target serangan lawan ke kartu ini | 1/1 |
+| `[DOUBLE ATTACK]` | Combo | 305.3 | Kartu ini punya kesempatan serang kedua | 2/2 |
+| `ASSAULT` | Assault (sama) | 305.4 | Kalau menang bertarung saat menyerang, dianggap berhasil menyerang Weakness | 2/2 |
+| `AIR STRIKE` | Air Raid | 305.5 | Boleh menyerang BATTLE berisi karakter seolah itu Weakness | 1/1 |
+| `UNIQUE` | Unique (sama) | 305.6 | Tidak boleh ada kartu bernama sama di FIELD sendiri; efek ini tidak bisa hilang | 6/4 |
+
+Kemampuan lain berdasar jenis trigger (bukan kemampuan kunci di atas), dihitung dari
+208 kartu (ID/EN): **TRIG 120/111 · AUTO 65/61 · ACTI 42/37**.
+
+### Counter — dua jenis berbeda (jangan disamakan)
+
+Filter "Counter" lama sempat menghitung total 23 kartu yang sebenarnya dua mekanik
+berbeda (sudah dipecah di UI sejak v6.15):
+
+- **Counter call (9 kartu)** — kartu ber-`[COUNTER]`, **dipanggil** ke BATTLE saat
+  jendela counter, ikut aturan biaya Summon biasa (Lv1–3 gratis / Lv4+ RETREAT
+  setara). Batas **1× per pemain per jendela**. Bimodal: Lv1/Lv3 gratis (5 kartu),
+  Lv6 bayar RETREAT total Lv6 (4 kartu) — tidak ada Lv4/Lv5.
+- **Counter efek / `[COUNTER-ACTI]` (14 kartu)** — yang bekerja efeknya, bukan
+  pemanggilan kartu. Zona sumber efek menentukan syaratnya: dari **HAND** (3 kartu,
+  bisa dipakai walau papan kosong), **FIELD** (7, sekali per giliran), **BACK** (1),
+  atau **BATTLE** (3, sekali per giliran — salah satunya `[BLOCK]`).
+- Tidak ada kartu yang punya keduanya sekaligus (0 tumpang tindih)
+- Ada 3 kartu yang masuk BATTLE **tanpa** membayar biaya Summon biasa karena
+  mekanismenya "tukar" (Replace/Exchange, pasal 301.18) bukan Summon: `BP01-061`
+  (tukar dari tangan dengan karakter biru Lv4+ di BATTLE, biaya 2 kartu tertutup
+  RETREAT), `SD04-001` (dipasang/attach ke karakter [Human], tidak masuk sebagai
+  karakter terpisah), `BP01-096` (tukar dirinya dari FIELD dengan kartu di tangan)
+
+**Urutan COUNTER STEP** (dalam satu deklarasi serangan):
+
+1. Penyerang (A) mendeklarasikan serangan dari FRONT/WING/BACK
+2. A mendeklarasikan target ke FRONT/WING/BACK milik lawan (B), sepanjang jarak R
+   terpenuhi
+3. Masuk COUNTER STEP — **B lebih dulu**, baru A. Masing-masing maksimal 1 counter
+   call di jendela ini
+4. Tidak ada counter → pertarungan resolve sesuai efek/hasil
+5. Ada counter dan target jadi tidak sah → **kembali ke langkah 2**, A deklarasi
+   target ulang (aturan ini ditambahkan resmi di rulebook versi 1.02, 23 Juli 2026)
+
+`[BLOCK]` bekerja di jendela ini dengan **mengalihkan** target, bukan membatalkan
+serangan sepenuhnya. Ada juga **COUNTER PHASE** — fase terpisah setelah Battle Phase,
+sebelum Turn End, beda dari COUNTER STEP yang di dalam pertarungan; teks kartu yang
+menyebut "COUNTER PHASE atau COUNTER STEP" memang merujuk ke dua jendela berbeda ini.
+
+### Errata resmi
+
+- **Errata V.1** dari tim MHR Indonesia (diterapkan v6.12–v6.13): 12 kartu bernama +
+  reprint `SD01-018` (13 file gambar total, `BP01-046` punya 2 varian art) direvisi
+  teksnya — baik di database (`cards.js`, field `er:"V.1"`) maupun di **gambar
+  kartunya sendiri** (teks tercetak di gambar ikut diedit ulang, bukan cuma metadata).
+  Ditandai badge "Errata" di UI. Gambar versi Inggris tidak diubah (errata bersumber
+  Bahasa Indonesia).
+
+### Field yang belum diimplementasikan / masih terbuka
+
+- **Environment (pasal 201.8)** — kode format `S+angka` di kiri bawah kartu, dipakai
+  untuk rotasi/legalitas format turnamen. `cards.js` **belum** menyimpan field ini
+  sama sekali. Kalau penerbit mulai memberlakukan rotasi, perlu tambah field `env` +
+  filter/validasi di Deck Lab.
+- **Rarity GR/R vs C/HR/LR** — lihat bagian "Konstruksi deck" di atas, belum
+  diverifikasi ke sumber otoritatif.
+- **Dropdown "Kemampuan kunci"** — filter gabungan untuk Block/Double Attack/Assault/
+  Air Strike/Unique (masing-masing cuma 1–6 kartu, terlalu sedikit untuk tombol
+  sendiri-sendiri) — sudah diusulkan, belum dibangun.
+
+### Riwayat pembaruan aturan (tabel ini sendiri — beda dari § Riwayat Update di atas
+yang mencatat perubahan kode/data)
+
+| Tanggal | Sumber | Yang berubah/ditemukan |
+|---|---|---|
+| 17 Agustus 2026 | Comprehensive Rules 1.00 | Baseline pertama: 50 kartu, 2 warna, 3/nama, kurva level, dll. (diterapkan v5.1) |
+| 26 Agustus 2026 | Comprehensive Rules 1.03 (tidak resmi) | Nama kemampuan kunci berganti (Respond/Intercept/Combo/dst.), field Environment baru, revisi aturan target R=0, rarity resmi beda dari database (belum sinkron) |
+| 26 Agustus 2026 | Penjelasan pemilik + `cards.js` | Taksonomi Counter call (9) vs Counter efek (14), urutan detail COUNTER STEP |
+| 28 Agustus 2026 | Poster cetak resmi CARDFUN/Jason Entertainment | Istilah kemampuan **kartu & poster cocok**, rulebook 1.03 yang menyimpang — kode tetap ikut teks kartu; ditemukan BASE maks 6 kartu, syarat menang eksplisit, Battle Phase dilewati di giliran pertama pemain pertama |
+| 2 September 2026 | Konsolidasi (bukan sumber baru) | Bagian ini pertama kali disusun dari seluruh temuan di atas jadi satu rujukan tunggal di README, supaya sesi baru tidak perlu membaca ulang riwayat percakapan |
+
+> **Untuk pemilik:** kalau ada pembaruan resmi dari MHR Indonesia/CARDFUN (rulebook
+> versi baru, errata baru, set kartu baru dengan mekanik baru), cukup kasih tahu di
+> sesi Claude mana pun — bagian ini akan diperbarui, dicatat di tabel riwayat di
+> atas, dan (kalau berdampak ke kode) tercermin juga di § Riwayat Update seperti biasa.
 
 ## Rencana / ide berikutnya
 
 - [x] ~~Cetak kartu proxy (PDF A4, khusus mode admin)~~ — selesai di v5.7
-- [ ] Impor deck dari teks (pasangan dari "Salin daftar deck")
-- [ ] Navigasi ◀ ▶ / panah keyboard di dalam popup kartu
-- [ ] Duplikat deck untuk mencoba variasi
+- [x] ~~Impor deck dari teks (pasangan dari "Salin daftar deck")~~ — selesai di v6.16
+- [x] ~~Navigasi ◀ ▶ / panah keyboard di dalam popup kartu~~ — sudah ada sebelum
+  v6.18 (baru dikonfirmasi lewat tes); kartu terkait di popup ditambahkan di v6.18
+- [x] ~~Duplikat deck untuk mencoba variasi~~ — selesai di v6.18
+- [x] ~~Filter mekanik untuk kemampuan kunci rulebook (BLOCK, ASSAULT, AIR STRIKE, UNIQUE)~~
+  — selesai di v6.18, sekalian statistik biaya Summon di panel ringkasan deck
+- [x] ~~Siapkan warna Orange & Purple saat setnya terbit~~ — taksonomi warna
+  otomatis selesai di v6.18; tinggal tambah kartunya sendiri ke `cards.js` nanti
+- [x] ~~Filter bar bisa dilipat di HP~~ — sudah ada sebelum v6.18 (dikonfirmasi
+  lewat tes), tidak tercatat di daftar ini sebelumnya
+- [x] ~~Submission deck dari komunitas dengan batasan moderasi~~ — selesai di v6.18
 - [ ] Gambar kartu resolusi lebih tinggi (>450 px) untuk hasil unduhan lebih tajam
 - [ ] Pelacakan koleksi kartu yang dimiliki (pekerjaan besar, perlu dipikirkan matang)
-- [ ] Filter mekanik untuk kemampuan kunci rulebook (BLOCK, ASSAULT, AIR STRIKE, UNIQUE)
-- [ ] Statistik "biaya Summon": rasio kartu Lv1–3 terhadap Lv4–6 (aturan 301.19)
-- [ ] Siapkan warna Orange & Purple saat setnya terbit
 - [ ] Update database saat set kartu baru rilis
 - [ ] Pertimbangkan Cloudflare Pages jika bandwidth mendekati batas

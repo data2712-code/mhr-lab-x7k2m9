@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.17  ·  2 September 2026
+     MHR DECK LAB  ·  versi 6.18  ·  2 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.17">
+<meta name="version" content="6.18">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -34,6 +34,7 @@
     --ink:#0E1216; --panel:#171D24; --panel2:#1F2731; --line:#2C3644;
     --paper:#EDE7DA; --muted:#8B96A5;
     --merah:#E4442E; --kuning:#F2B01E; --biru:#3B87E8; --hijau:#33A45C;
+    --orange:#E8821E; --purple:#8B5CF6;
     --accent:#F2B01E;
     --disp:'Arial Narrow','Helvetica Neue Condensed','Roboto Condensed',Impact,sans-serif;
     --body:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
@@ -120,6 +121,7 @@
   .cbtn[data-on="1"]{opacity:1;border-color:var(--paper)}
   .cbtn.merah{background:var(--merah)} .cbtn.kuning{background:var(--kuning)}
   .cbtn.biru{background:var(--biru)}   .cbtn.hijau{background:var(--hijau)}
+  .cbtn.orange{background:var(--orange)} .cbtn.purple{background:var(--purple)}
   .reset{
     background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;
     padding:8px 12px;font-size:12px;cursor:pointer;
@@ -391,10 +393,19 @@
     background:rgba(242,176,30,.06)}
   .admin-box .t{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);
     margin-bottom:7px;font-weight:700}
-  .admin-box textarea{width:100%;height:88px;background:var(--ink);border:1px solid var(--line);
-    color:var(--paper);border-radius:8px;padding:9px;font-family:var(--mono);font-size:11px;resize:vertical}
-  .admin-box input{width:100%;background:var(--ink);border:1px solid var(--line);color:var(--paper);
-    border-radius:8px;padding:7px 9px;font-size:12.5px;margin-bottom:7px}
+  .admin-box textarea, .submit-box textarea{width:100%;height:88px;background:var(--ink);
+    border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:9px;
+    font-family:var(--mono);font-size:11px;resize:vertical}
+  .admin-box input, .submit-box input, .submit-box textarea.short{width:100%;background:var(--ink);
+    border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:7px 9px;
+    font-size:12.5px;margin-bottom:7px}
+  /* v6.18: kotak submission publik — sengaja beda gaya dari admin-box (dashed
+     accent = "khusus admin") supaya jelas ini fitur untuk semua pengunjung */
+  .submit-box{border:1px solid var(--line);border-radius:10px;padding:14px 15px;margin:18px 0 6px;
+    background:var(--panel)}
+  .submit-box .t{font-family:var(--disp);font-size:16px;letter-spacing:.02em;margin-bottom:4px}
+  .submit-box .desc{font-size:12px;color:#C9CFD8;line-height:1.55;margin-bottom:10px}
+  .submit-box textarea.short{height:auto}
   /* ================= NAVIGASI HALAMAN ================= */
   nav.tabs{display:flex;gap:4px;padding:0 20px;border-bottom:2px solid var(--line);
     background:var(--ink);position:sticky;top:0;z-index:8}
@@ -688,6 +699,17 @@
     border-color:var(--accent);font-weight:700}
   .lb-var button.na{opacity:.4;cursor:not-allowed;text-decoration:line-through}
   .lb-var .msg{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.5;min-height:15px}
+  /* v6.18: kartu terkait (nama karakter sama / trait sama) di dalam popup */
+  .lb-related{margin:14px 0 2px;border-top:1px solid var(--line);padding-top:12px}
+  .lb-related .t{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+    margin-bottom:8px}
+  .lb-related .row{display:flex;gap:8px;flex-wrap:wrap}
+  .lb-related .rc{width:52px;cursor:pointer;text-align:center;background:none;border:none;padding:0}
+  .lb-related .rc img{width:52px;height:72px;object-fit:cover;border-radius:6px;
+    border:1px solid var(--line);display:block;background:var(--panel)}
+  .lb-related .rc:hover img{border-color:var(--accent)}
+  .lb-related .rc span{display:block;font-size:9px;color:var(--muted);margin-top:3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .rar.alt{background:var(--accent);color:#1A1206}
   .twin{font-family:var(--mono);font-size:12px;color:var(--accent);cursor:help;
     border:1px solid var(--line);border-radius:6px;padding:3px 6px}
@@ -846,6 +868,7 @@
     <div class="meta-filter" id="metaFilter"></div>
     <div id="adminBox"></div>
     <div class="meta-grid" id="metaGrid"></div>
+    <div id="submitBox"></div>
   </div>
 </section>
 
@@ -875,17 +898,17 @@
         <span data-i18n="filterBtn">⚙ Filter</span><span class="fbadge" id="fBadge" hidden>0</span>
       </button>
       <div class="fadv" id="fAdv">
-      <div class="cbtns" id="cbtns">
-        <button class="cbtn merah"  data-c="Merah"  data-on="1" title="Merah"></button>
-        <button class="cbtn kuning" data-c="Kuning" data-on="1" title="Kuning"></button>
-        <button class="cbtn biru"   data-c="Biru"   data-on="1" title="Biru"></button>
-        <button class="cbtn hijau"  data-c="Hijau"  data-on="1" title="Hijau"></button>
-      </div>
+      <!-- v6.18: tombol warna dirender lewat JS (renderColorButtons(), lihat dekat COLORS)
+           dari daftar warna yang BENAR-BENAR ada di cards.js — supaya saat set baru MHR
+           terbit dengan warna Orange/Purple, tombolnya otomatis muncul tanpa ubah index.html,
+           persis pola yang sudah dipakai wilayahKota() untuk kota LGS baru. -->
+      <div class="cbtns" id="cbtns"></div>
       <select id="fSeries"><option value="">Semua seri</option></select>
       <select id="fLevel"><option value="">Semua level</option></select>
       <select id="fRange"><option value="">Semua jarak</option></select>
       <select id="fTrait"><option value="">Semua trait</option></select>
       <select id="fRarity"><option value="">Semua rarity</option></select>
+      <select id="fKeyAbil" data-i18n-title="fKeyAbilT"><option value="">Kemampuan kunci</option></select>
       <select id="fSort">
         <option value="no">Urut: Nomor</option>
         <option value="lv">Urut: Level</option>
@@ -926,6 +949,7 @@
     <div class="deckmgr">
       <select id="deckSelect" data-i18n-title="pickDeck"></select>
       <button class="qbtn" id="btnNewDeck" data-i18n-title="newDeck">+</button>
+      <button class="qbtn" id="btnDupDeck" data-i18n-title="dupDeck">⧉</button>
       <button class="qbtn" id="btnRenDeck" data-i18n-title="renDeck">✎</button>
       <button class="qbtn" id="btnDelDeck" data-i18n-title="delDeck">🗑</button>
     </div>
@@ -1026,7 +1050,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.17</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.18</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1162,8 +1186,32 @@ const DB = (typeof window !== 'undefined' && Array.isArray(window.CARDS)) ? wind
 
 
 /* ============================ APLIKASI ============================ */
-const CMAP = {Merah:'var(--merah)', Kuning:'var(--kuning)', Biru:'var(--biru)', Hijau:'var(--hijau)'};
-const CORDER = {Merah:0, Kuning:1, Biru:2, Hijau:3};
+/* v6.18: enam warna resmi (201.5.b) sudah didaftarkan di sini, tapi COLORS
+   (yang benar-benar dipakai UI) hanya memuat warna yang ADA kartunya di
+   cards.js. Begitu set baru MHR menambah kartu Orange/Purple, warna itu
+   otomatis muncul di tombol filter, statistik, dan validasi deck — tidak
+   perlu ubah index.html lagi (pola yang sama dengan wilayahKota() untuk LGS). */
+const CMAP_ALL = {Merah:'var(--merah)', Kuning:'var(--kuning)', Biru:'var(--biru)',
+  Hijau:'var(--hijau)', Orange:'var(--orange)', Purple:'var(--purple)'};
+const CORDER_ALL = {Merah:0, Kuning:1, Biru:2, Hijau:3, Orange:4, Purple:5};
+const HEXC_ALL = {Merah:'#E4442E', Kuning:'#F2B01E', Biru:'#3B87E8', Hijau:'#33A45C',
+  Orange:'#E8821E', Purple:'#8B5CF6'};
+const WARNA_EN = {Merah:'Red', Kuning:'Yellow', Biru:'Blue', Hijau:'Green',
+  Orange:'Orange', Purple:'Purple'};
+const CMAP = CMAP_ALL, CORDER = CORDER_ALL, HEXC = HEXC_ALL;
+const COLORS = Object.keys(CORDER_ALL).sort((a,b)=>CORDER_ALL[a]-CORDER_ALL[b])
+  .filter(w => DB.some(c=>c.c===w));
+/* objek akumulator {warna:0, ...} untuk statistik komposisi warna — dibangun dari
+   COLORS, bukan ditulis literal, supaya tidak diam-diam jadi NaN kalau nanti ada
+   kartu Orange/Purple (col[c.c]+=q pada key yang belum ada = NaN). */
+function zeroCol(){ return Object.fromEntries(COLORS.map(c=>[c,0])); }
+function renderColorButtons(){
+  // dipanggil ulang tiap applyLang() — data-on mengikuti state.colors yang sudah
+  // ada, BUKAN direset ke aktif semua, supaya pilihan filter warna pengguna tidak
+  // hilang saat ganti bahasa
+  $('#cbtns').innerHTML = COLORS.map(c=>
+    `<button class="cbtn ${c.toLowerCase()}" data-c="${c}" data-on="${state.colors.has(c)?'1':'0'}" title="${c}"></button>`).join('');
+}
 
 /* pola pencocokan filter mekanik (dicek pada teks efek kartu) */
 const MECH = {
@@ -1179,7 +1227,16 @@ const MECH = {
   retreat: /(masuk|ditempatkan|dibuang)[^.]{0,40}RETREAT/i,
   draw:    /(ambil|tarik|mengambil|menarik)\s+\d*\s*kartu/i,
   debuff:  /Power -/,
+  /* v6.18: "Kemampuan kunci" — masing-masing cuma 1-6 kartu (lihat rulebook-1.03-
+     vs-1.00.md pasal 305), terlalu sedikit untuk tombol sendiri-sendiri di mechBar,
+     jadi digabung satu dropdown #fKeyAbil (lihat KEY_ABIL + isiDropdown). */
+  block:        /\[BLOCK\]/,
+  doubleattack: /\[DOUBLE ATTACK\]/,
+  assault:      /\[ASSAULT\]/,
+  airstrike:    /\[AIR STRIKE\]/,
+  unique:       /\[UNIQUE\]|\[UNIQUE COUNTER\]/,
 };
+const KEY_ABIL = ['block','doubleattack','assault','airstrike','unique'];
 
 /* daftar trait unik, dipecah dari field trait tiap kartu */
 function traitsOf(c){
@@ -1188,8 +1245,8 @@ function traitsOf(c){
 const $ = s => document.querySelector(s);
 
 const state = {
-  q:'', colors:new Set(['Merah','Kuning','Biru','Hijau']),
-  series:'', level:'', range:'', rarity:'', trait:'', sort:'no', view:'list',
+  q:'', colors:new Set(COLORS),
+  series:'', level:'', range:'', rarity:'', trait:'', keyAbil:'', sort:'no', view:'list',
   mech:new Set(), page:'cards', onlyDeck:false, lang:'id',
   deck:{}  // key: card no -> qty
 };
@@ -1230,12 +1287,13 @@ function renderDeckSelect(){
 /* --- isi dropdown --- */
 function isiDropdown(){
   const uniq = (arr)=>[...new Set(arr)];
-  const simpan = {fSeries:state.series,fLevel:state.level,fRange:state.range,fTrait:state.trait,fRarity:state.rarity,fSort:state.sort};
+  const simpan = {fSeries:state.series,fLevel:state.level,fRange:state.range,fTrait:state.trait,fRarity:state.rarity,fKeyAbil:state.keyAbil,fSort:state.sort};
   $('#fSeries').innerHTML = `<option value="">${t('allSeries')}</option>`;
   $('#fLevel').innerHTML  = `<option value="">${t('allLevel')}</option>`;
   $('#fRange').innerHTML  = `<option value="">${t('allRange')}</option>`;
   $('#fTrait').innerHTML  = `<option value="">${t('allTrait')}</option>`;
   $('#fRarity').innerHTML = `<option value="">${t('allRarity')}</option>`;
+  $('#fKeyAbil').innerHTML = `<option value="">${t('allKeyAbil')}</option>`;
   $('#fSort').innerHTML =
     `<option value="no">${t('sortNo')}</option><option value="lv">${t('sortLv')}</option>` +
     `<option value="pw">${t('sortPw')}</option><option value="nm">${t('sortNm')}</option>`;
@@ -1244,6 +1302,13 @@ function isiDropdown(){
   uniq(DB.map(c=>c.r)).sort((a,b)=>a-b).forEach(v=>$('#fRange').insertAdjacentHTML('beforeend',`<option value="${v}">${t('rangeLbl')} ${v}</option>`));
   uniq(DB.filter(cardVisible).flatMap(c=>c.ra)).sort().forEach(v=>$('#fRarity').insertAdjacentHTML('beforeend',`<option>${v}</option>`));
   uniq(DB.filter(cardVisible).flatMap(traitsOf)).sort().forEach(v=>$('#fTrait').insertAdjacentHTML('beforeend',`<option>${v}</option>`));
+  /* Kemampuan kunci (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE/UNIQUE — masing-
+     masing cuma 1-6 kartu, digabung satu dropdown alih-alih lima tombol mechBar.
+     Kunci yang 0 kartu di database (mis. set baru belum menyentuhnya) tidak
+     ditampilkan sebagai opsi. */
+  KEY_ABIL.map(k=>({k, n: DB.filter(cardVisible).filter(c=>MECH[k].test(c.e)||MECH[k].test(c.e_en||'')).length}))
+    .filter(x=>x.n>0)
+    .forEach(({k,n})=>$('#fKeyAbil').insertAdjacentHTML('beforeend',`<option value="${k}">${t('mk_'+k)} (${n})</option>`));
   Object.entries(simpan).forEach(([id,v])=>{ if(v) $('#'+id).value = v; });
   $('#hTotal').textContent = DB.filter(cardVisible).length;
 }
@@ -1258,6 +1323,7 @@ function filtered(){
     (state.range==='' || String(c.r)===state.range) &&
     (!state.rarity || c.ra.includes(state.rarity)) &&
     (!state.trait || traitsOf(c).includes(state.trait)) &&
+    (!state.keyAbil || (MECH[state.keyAbil] && (MECH[state.keyAbil].test(c.e) || MECH[state.keyAbil].test(c.e_en||'')))) &&
     (!state.onlyDeck || (state.deck[c.no]||0) > 0) &&
     [...state.mech].every(m => MECH[m] && (MECH[m].test(c.e) || MECH[m].test(c.e_en||''))) &&
     (!q || (cardName(c)+' '+cardEff(c)+' '+c.nm+' '+c.e+' '+c.f+' '+c.no).toLowerCase().includes(q))
@@ -1433,7 +1499,7 @@ function renderDeck(){
 
   // kurva level
   const lv = {1:0,2:0,3:0,4:0,5:0,6:0};
-  const col = {Merah:0,Kuning:0,Biru:0,Hijau:0};
+  const col = zeroCol();
   const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q}));
   entries.forEach(({c,q})=>{ lv[c.l]+=q; col[c.c]+=q; });
   const maxLv = Math.max(1,...Object.values(lv));
@@ -1477,7 +1543,7 @@ function renderDeck(){
   const st = $('#stats2');
   if(total === 0){ st.innerHTML = ''; $('#rbar').innerHTML=''; $('#rbarx').innerHTML=''; $('#traits').innerHTML=''; }
   else {
-    let totLv = 0, totPw = 0, ctrCallQ = 0, ctrActiQ = 0;
+    let totLv = 0, totPw = 0, ctrCallQ = 0, ctrActiQ = 0, sumFreeQ = 0, sumPaidQ = 0;
     const rr = {0:0,1:0,2:0,3:0,4:0,5:0}, tr = {};
     entries.forEach(({c,q})=>{
       totLv += c.l*q; totPw += c.p*q;
@@ -1486,13 +1552,16 @@ function renderDeck(){
       const info = counterInfo(c);
       if(info && info.type==='call') ctrCallQ += q;
       else if(info && info.type==='acti') ctrActiQ += q;
+      // biaya Summon (301.19): Lv1-3 langsung, Lv4+ harus RETREAT setara
+      if(c.l<=3) sumFreeQ += q; else sumPaidQ += q;
     });
     st.innerHTML = `
       <div><span>${t('avgLv')}</span><b>${(totLv/total).toFixed(2)}</b></div>
       <div><span>${t('avgPower')}</span><b>${Math.round(totPw/total)}</b></div>
       <div><span>${t('totalPower')}</span><b>${totPw.toLocaleString(state.lang==='en'?'en-US':'id-ID')}</b></div>
       <div><span>${t('ctrCall')}</span><b>${ctrCallQ}</b></div>
-      <div><span>${t('ctrActi')}</span><b>${ctrActiQ}</b></div>`;
+      <div><span>${t('ctrActi')}</span><b>${ctrActiQ}</b></div>
+      <div title="${t('summonCostT')}"><span>${t('summonCost')}</span><b>${sumFreeQ} / ${sumPaidQ}</b></div>`;
 
     const maxR = Math.max(1,...Object.values(rr));
     $('#rbar').innerHTML = Object.entries(rr).map(([r,n])=>
@@ -1537,6 +1606,7 @@ $('#fLevel').addEventListener('change', e=>{ state.level=e.target.value; renderC
 $('#fRange').addEventListener('change', e=>{ state.range=e.target.value; renderCards(); });
 $('#fRarity').addEventListener('change', e=>{ state.rarity=e.target.value; renderCards(); });
 $('#fTrait').addEventListener('change', e=>{ state.trait=e.target.value; renderCards(); });
+$('#fKeyAbil').addEventListener('change', e=>{ state.keyAbil=e.target.value; renderCards(); });
 $('#btnLang').addEventListener('click', ()=>{
   state.lang = state.lang === 'en' ? 'id' : 'en';
   store.lang = state.lang;
@@ -1561,8 +1631,8 @@ $('#btnFilter').addEventListener('click', ()=>{
 /* jumlah filter yang sedang aktif — supaya tetap terlihat walau menu dilipat */
 function updateFilterBadge(){
   let n = 0;
-  if(state.colors.size < 4) n++;
-  ['series','level','range','trait','rarity'].forEach(k=>{ if(state[k]) n++; });
+  if(state.colors.size < COLORS.length) n++;
+  ['series','level','range','trait','rarity','keyAbil'].forEach(k=>{ if(state[k]) n++; });
   n += state.mech.size;
   if(state.onlyDeck) n++;
   const b = $('#fBadge');
@@ -1588,13 +1658,13 @@ $('#cbtns').addEventListener('click', e=>{
 });
 $('#btnReset').addEventListener('click', ()=>{
   clearTimeout(qTmr); qTmr = null;
-  state.q=''; state.series=''; state.level=''; state.range=''; state.rarity=''; state.trait=''; state.sort='no';
+  state.q=''; state.series=''; state.level=''; state.range=''; state.rarity=''; state.trait=''; state.keyAbil=''; state.sort='no';
   state.mech.clear();
   state.onlyDeck = false;
   $('#btnOnlyDeck').setAttribute('aria-pressed','false');
   document.querySelectorAll('#mechBar [data-m]').forEach(b=>b.setAttribute('aria-pressed','false'));
-  state.colors=new Set(['Merah','Kuning','Biru','Hijau']);
-  $('#q').value=''; ['fSeries','fLevel','fRange','fRarity','fTrait'].forEach(id=>$('#'+id).value='');
+  state.colors=new Set(COLORS);
+  $('#q').value=''; ['fSeries','fLevel','fRange','fRarity','fTrait','fKeyAbil'].forEach(id=>$('#'+id).value='');
   $('#fSort').value='no';
   document.querySelectorAll('.cbtn').forEach(b=>b.dataset.on='1');
   renderCards();
@@ -1646,6 +1716,14 @@ const T = {
   allRange:     ['Semua jarak','All ranges'],
   allTrait:     ['Semua trait','All traits'],
   allRarity:    ['Semua rarity','All rarities'],
+  allKeyAbil:   ['Kemampuan kunci','Key ability'],
+  fKeyAbilT:    ['Filter kemampuan kunci (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE/UNIQUE — digabung satu dropdown karena masing-masing cuma 1-6 kartu',
+                 'Key ability filter (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE/UNIQUE — combined into one dropdown since each has only 1-6 cards'],
+  mk_block:        ['BLOCK','BLOCK'],
+  mk_doubleattack: ['DOUBLE ATTACK','DOUBLE ATTACK'],
+  mk_assault:      ['ASSAULT','ASSAULT'],
+  mk_airstrike:    ['AIR STRIKE','AIR STRIKE'],
+  mk_unique:       ['UNIQUE','UNIQUE'],
   metaAll:      ['Semua','All'],
   sortNo:       ['Urut: Nomor','Sort: Number'],
   sortLv:       ['Urut: Level','Sort: Level'],
@@ -1675,6 +1753,7 @@ const T = {
   simLvSpread:  ['Sebaran level','Level spread'],
   lbPrev:       ['Kartu sebelumnya','Previous card'],
   lbNext:       ['Kartu berikutnya','Next card'],
+  lbRelated:    ['Kartu terkait','Related cards'],
   rangeLbl:     ['Jarak','Range'],
 
   /* --- kartu --- */
@@ -1695,6 +1774,9 @@ const T = {
                  "This card's effect text was officially revised by the MHR Indonesia team (Errata {v})."],
   ctrCall:      ['Counter call','Counter call'],
   ctrActi:      ['Counter efek','Counter effect'],
+  summonCost:   ['Biaya Summon (gratis/bayar)','Summon cost (free/paid)'],
+  summonCostT:  ['Lv1-3 = Summon langsung, gratis. Lv4+ = harus RETREAT kartu di FIELD yang total Level-nya sama (301.19)',
+                 'Lv1-3 = summon directly, free. Lv4+ = must RETREAT cards in FIELD with matching total Level (301.19)'],
   ctrFree:      ['gratis','free'],
   ctrPay:       ['bayar','pay'],
   ctrFrom:      ['dari','from'],
@@ -1714,6 +1796,8 @@ const T = {
   Kuning:       ['Kuning','Yellow'],
   Biru:         ['Biru','Blue'],
   Hijau:        ['Hijau','Green'],
+  Orange:       ['Orange','Orange'],
+  Purple:       ['Purple','Purple'],
 
   /* --- panel deck --- */
   myDeck:       ['Deck Saya','My Deck'],
@@ -1857,7 +1941,28 @@ const T = {
   clearDeck:    ['Kosongkan','Clear'],
   linkCopied:   ['✓ Link tersalin','✓ Link copied'],
   copied:       ['Tersalin ✓','Copied ✓'],
+  /* v6.18: kotak submission deck komunitas publik (lihat renderSubmitBox) */
+  subHead:      ['📤 Kirim deck kamu ke Deck Komunitas','📤 Submit your deck to the Community Decks'],
+  subIntro:     ['Deck yang kamu kirim <b>tidak langsung tayang</b> — ditinjau dulu (moderasi) sebelum ditambahkan, supaya daftarnya tetap rapi dan sesuai aturan. Susun dulu deck aktif kamu di Deck Builder, lalu lengkapi formulir ini.',
+                 'Decks you submit are <b>not published immediately</b> — they are reviewed first before being added, to keep the list tidy and rule-compliant. Build your active deck in the Deck Builder first, then fill out this form.'],
+  subNmPh:      ['Nama deck','Deck name'],
+  subCrPh:      ['Nama / julukan kamu (wajib, ditampilkan sebagai pembuat)','Your name / nickname (required, shown as the creator)'],
+  subDsPh:      ['Deskripsi singkat (opsional)','Short description (optional)'],
+  subGenBtn:    ['Buat kode untuk dikirim','Generate code to submit'],
+  subCopyBtn:   ['Salin','Copy'],
+  subOutPh:     ['Kode muncul di sini setelah deck lolos pemeriksaan aturan di atas…',
+                 'Code appears here once your deck passes the rule check above…'],
+  subSendNote:  ['Setelah disalin, kirimkan kodenya lewat DM TikTok ke','After copying, send the code via TikTok DM to'],
+  subEmpty:     ['Deck aktif masih kosong — susun dulu di Deck Builder.','Your active deck is empty — build it in the Deck Builder first.'],
+  subWrongSize: ['Jumlah kartu belum pas dengan target ukuran deck','Card count does not match your deck size target'],
+  subTooManyColors: ['Deck memakai lebih dari 2 warna — maksimal 2 warna per deck (101.1.c).','Deck uses more than 2 colors — maximum 2 colors per deck (101.1.c).'],
+  subTooManyCopies: ['Ada nama karakter yang salinannya melebihi batas — maksimal 3 salinan per nama karakter (101.1.d).','Some character name exceeds the copy limit — maximum 3 copies per character name (101.1.d).'],
+  subNeedCredit:['Isi dulu nama / julukan kamu — kiriman tanpa kredit tidak diproses.','Fill in your name / nickname first — submissions without credit are not processed.'],
+  subOk:        ['Kode berhasil dibuat. Salin lalu kirim lewat TikTok untuk ditinjau.','Code generated. Copy it and send it via TikTok for review.'],
+  subGenFirst:  ['Buat kodenya dulu.','Generate the code first.'],
   newDeck:      ['Buat deck baru','New deck'],
+  dupDeck:      ['Duplikat deck ini','Duplicate this deck'],
+  dupSuffix:    ['(salinan)','(copy)'],
   renDeck:      ['Ganti nama deck ini','Rename this deck'],
   delDeck:      ['Hapus deck ini','Delete this deck'],
   pickDeck:     ['Pilih deck','Select deck'],
@@ -1954,8 +2059,13 @@ function counterBadgeHTML(c, cls){
 
 /* Nama deck komunitas di data.js ditulis dalam Bahasa Indonesia ("Merah - Hijau").
    Di mode Inggris, kata warnanya saja yang diterjemahkan supaya tetap terbaca
-   ("Red - Green"); kata lain seperti "Budget SD" dibiarkan apa adanya. */
-const WARNA_EN = {Merah:'Red', Kuning:'Yellow', Biru:'Blue', Hijau:'Green'};
+   ("Red - Green"); kata lain seperti "Budget SD" dibiarkan apa adanya.
+   (WARNA_EN didefinisikan sekali dekat COLORS, lihat atas.) */
+/* v6.18: dipakai untuk field yang bisa datang dari SUBMISSION PUBLIK (nama/kredit/
+   deskripsi deck komunitas) sebelum ditaruh ke innerHTML — mencegah HTML/script
+   nyelip ke tampilan kalau pemilik lengah saat menempel kode kiriman ke data.js.
+   Bukan sanitasi penuh, cukup untuk memblokir pembentukan tag. */
+function escHtml(s){ return String(s||'').replace(/</g,'&lt;'); }
 function namaDeckLokal(nm){
   if(state.lang !== 'en') return nm;
   return String(nm||'').replace(/\b(Merah|Kuning|Biru|Hijau)\b/g, w => WARNA_EN[w] || w);
@@ -1997,7 +2107,8 @@ function applyLang(){
   });
   const b = $('#btnLang');
   if(b) b.textContent = state.lang === 'en' ? '🌐 EN' : '🌐 ID';
-  // dropdown yang isinya dibuat oleh JavaScript perlu digambar ulang
+  // dropdown & tombol warna yang isinya dibuat oleh JavaScript perlu digambar ulang
+  renderColorButtons();
   isiDropdown();
   renderCards(); renderDeck();
   if(typeof renderBkNote === 'function') renderBkNote();
@@ -2598,6 +2709,20 @@ $('#btnNewDeck').addEventListener('click', ()=>{
   state.deck = store.decks[nama];
   renderDeckSelect(); renderAll();
 });
+/* v6.18: Duplikat deck — salinan persis deck aktif dengan nama baru, supaya
+   pengguna bisa coba variasi (mis. ganti beberapa kartu) tanpa merusak deck
+   asli yang sudah teruji di meja. */
+$('#btnDupDeck').addEventListener('click', ()=>{
+  if(!deckCount()){ alert(t('mDeckEmptyAdd')); return; }
+  store.decks[store.active] = state.deck;
+  const asli = store.active;
+  let i = 2, nama = `${asli} ${t('dupSuffix')}`;
+  while(store.decks[nama]) nama = `${asli} ${t('dupSuffix')} ${i++}`;
+  store.decks[nama] = {...state.deck};
+  store.active = nama;
+  state.deck = store.decks[nama];
+  renderDeckSelect(); renderAll();
+});
 $('#btnDelDeck').addEventListener('click', ()=>{
   if(Object.keys(store.decks).length<=1){ alert(t('mMinOne')); return; }
   if(!confirm(`${t('mDelConfirm')} "${store.active}"?`)) return;
@@ -2630,6 +2755,35 @@ $('#viewTog').addEventListener('click', e=>{
 
 /* --- popup gambar kartu --- */
 let lbNo = null;
+/* v6.18: kartu terkait di popup — nama karakter sama (varian/edisi lain) dulu,
+   baru diisi kartu bertrait sama diurutkan dari yang paling banyak trait
+   cocoknya, supaya eksplorasi sinergi antar 208 kartu lebih mengalir. */
+function relatedCards(c, limit){
+  limit = limit || 10;
+  const namaSama = DB.filter(d=>d.no!==c.no && d.nm===c.nm && cardVisible(d))
+    .sort((a,b)=>a.no.localeCompare(b.no));
+  const myTraits = new Set(traitsOf(c));
+  const traitSama = myTraits.size ? DB
+    .filter(d=>d.no!==c.no && d.nm!==c.nm && cardVisible(d))
+    .map(d=>({d, skor: traitsOf(d).filter(x=>myTraits.has(x)).length}))
+    .filter(x=>x.skor>0)
+    .sort((a,b)=>b.skor-a.skor || a.d.no.localeCompare(b.d.no))
+    .map(x=>x.d) : [];
+  return [...namaSama, ...traitSama].slice(0, limit);
+}
+function relatedHTML(c){
+  const rel = relatedCards(c);
+  if(!rel.length) return '';
+  return `<div class="lb-related">
+    <div class="t">${t('lbRelated')}</div>
+    <div class="row">${rel.map(d=>`
+      <button class="rc" data-zoom="${d.no}" title="${cardName(d)}">
+        <img src="${artFile(d.no)}" alt="" data-ext="0" loading="lazy" decoding="async"
+          onerror="dvImgFallback(this,'${d.no}')">
+        <span>${cardName(d)}</span>
+      </button>`).join('')}</div>
+  </div>`;
+}
 function openLightbox(no){
   const c = DB.find(d=>d.no===no); if(!c) return;
   lbNo = no;
@@ -2656,6 +2810,7 @@ function openLightbox(no){
       </div>
       <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:10px">${c.f}</div>
       <div class="lb-eff">${cardEff(c)}</div>
+      ${relatedHTML(c)}
       ${c.ra.length>1?`
       <div class="lb-var">
         <div class="t">${t('cArtwork')}</div>
@@ -2714,6 +2869,8 @@ function closeLightbox(){
 }
 $('#lbClose').addEventListener('click', closeLightbox);
 $('#lightbox').addEventListener('click', e=>{
+  const rz = e.target.closest('.lb-related [data-zoom]');
+  if(rz){ openLightbox(rz.dataset.zoom); return; }
   const bv = e.target.closest('[data-var]');
   if(bv){
     if(bv.classList.contains('na')) return;
@@ -2772,7 +2929,7 @@ function openDeckView(deckLain, judulLain){
     .filter(x=>x.c);
   if(!entries.length){ alert(t('mDeckEmpty')); return; }
   entries.sort((a,b)=>CORDER[a.c.c]-CORDER[b.c.c] || a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
-  const col={Merah:0,Kuning:0,Biru:0,Hijau:0};
+  const col=zeroCol();
   entries.forEach(({c,q})=>col[c.c]+=q);
   const totalTampil = entries.reduce((a,x)=>a+x.q,0);
   $('#dvTitle').textContent = dvNama;
@@ -2845,7 +3002,7 @@ function roundRect(ctx,x,y,w,h,r){
   ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
 }
 
-const HEXC = {Merah:'#E4442E', Kuning:'#F2B01E', Biru:'#3B87E8', Hijau:'#33A45C'};
+// (HEXC didefinisikan sekali dekat COLORS di atas, lihat HEXC_ALL.)
 
 $('#btnDvHd').addEventListener('click', async ()=>{
   const btn = $('#btnDvHd');
@@ -2919,7 +3076,7 @@ $('#btnDvHd').addEventListener('click', async ()=>{
   ctx.fillStyle = '#12161B'; ctx.fillRect(0,0,W,H);
 
   // judul
-  const col = {Merah:0,Kuning:0,Biru:0,Hijau:0};
+  const col = zeroCol();
   entries.forEach(({c,q})=>col[c.c]+=q);
   const totalHD = entries.reduce((a,x)=>a+x.q,0);
   const meta = `${totalHD} ${t('cards')}  ·  ` +
@@ -4214,15 +4371,15 @@ function renderMeta(){
       <div class="meta-strip">${strip}</div>
       <div class="meta-body">
         <div class="meta-top">
-          <span class="meta-nm">${namaDeckLokal(d.nm)}</span>
-          ${d.cr?`<span class="meta-by">by <b>${d.cr}</b></span>`:''}
+          <span class="meta-nm">${escHtml(namaDeckLokal(d.nm))}</span>
+          ${d.cr?`<span class="meta-by">by <b>${escHtml(d.cr)}</b></span>`:''}
         </div>
         <div class="meta-bar">${bar}</div>
         <div class="meta-stat">
           <span><b>${s.tot}</b> ${t('cards')}</span>
           <span>${t('metaAvgLv')} <b>${s.avgLv}</b></span>
         </div>
-        ${d.ds?`<div class="meta-desc">${d.ds}</div>`:''}
+        ${d.ds?`<div class="meta-desc">${escHtml(d.ds)}</div>`:''}
         <div class="meta-act">
           <button class="main" data-meta-load="${idx}">${t('metaLoad')}</button>
           <button data-meta-view="${idx}">${t('metaView')}</button>
@@ -4230,6 +4387,7 @@ function renderMeta(){
       </div>
     </div>`;
   }).join('') || `<div class="empty">${t('metaNone')}</div>`;
+  renderSubmitBox();
 }
 
 function metaImgFallback(img,no,warna){
@@ -4269,6 +4427,96 @@ $('#metaGrid').addEventListener('click', e=>{
   } else {
     // pratinjau murni: tidak menyentuh deck yang sedang disusun sama sekali
     openDeckView({...r.deck}, namaDeckLokal(d.nm) + (d.cr?` — by ${d.cr}`:''));
+  }
+});
+
+/* ==================== v6.18: SUBMISSION DECK KOMUNITAS (PUBLIK) ====================
+   Situs ini statis (tanpa server/database — lihat README "Struktur file"), jadi
+   submission di sini TIDAK mempublikasikan apa pun secara otomatis. Alurnya:
+   1) validasi ringan aturan deck di BROWSER pengunjung (submitValidasi) — ini
+      "batasan moderasi"-nya: kode baru bisa dibuat kalau deck sudah 50/2-warna/
+      3-salinan DAN sudah diisi nama kredit, supaya tidak ada kiriman kosong/asal;
+   2) hasilkan kode siap tempel — format PERSIS sama dengan generator admin
+      (renderAdminBox) — supaya pemilik cukup satu alur saat menempel ke data.js;
+   3) pengunjung menyalin kode itu dan mengirimkannya SENDIRI lewat TikTok
+      @deteprtm (satu-satunya kanal kontak publik yang sudah dipakai situs ini,
+      lihat bagian LGS "toko belum ada di daftar");
+   4) pemilik meninjau lalu menempel manual ke DECK_KOMUNITAS — publikasi tetap
+      sepenuhnya keputusan & tindakan manual pemilik, tidak ada endpoint publik
+      yang bisa menulis ke data.js, jadi tidak ada beban backend atau risiko spam
+      otomatis. Field cr/ds/nm di-escHtml() saat dirender (lihat renderMeta) untuk
+      berjaga-jaga kalau pemilik menempel kiriman tanpa memeriksa isinya dulu. */
+function submitValidasi(){
+  const target = Math.max(1, parseInt($('#setSize').value)||50);
+  const max = maxCopy();
+  const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no),q})).filter(x=>x.c);
+  const total = entries.reduce((a,x)=>a+x.q,0);
+  const col = zeroCol();
+  entries.forEach(({c,q})=>col[c.c]+=q);
+  const dipakai = Object.entries(col).filter(([,n])=>n>0).map(([c])=>c);
+  const perNama = {};
+  entries.forEach(({c,q})=>{ perNama[c.nm]=(perNama[c.nm]||0)+q; });
+  const lebih = Object.keys(perNama).filter(nm=>perNama[nm]>max);
+  const masalah = [];
+  if(total===0) masalah.push(t('subEmpty'));
+  else if(total!==target) masalah.push(`${t('subWrongSize')} (${total}/${target})`);
+  if(dipakai.length>2) masalah.push(t('subTooManyColors'));
+  if(lebih.length) masalah.push(t('subTooManyCopies'));
+  return masalah;
+}
+
+function renderSubmitBox(){
+  const box = $('#submitBox');
+  if(!box) return;
+  box.innerHTML = `
+    <div class="submit-box">
+      <div class="t">${t('subHead')}</div>
+      <p class="desc">${t('subIntro')}</p>
+      <input id="subNm" maxlength="60" placeholder="${t('subNmPh')}" value="${(store.active||'').replace(/"/g,'&quot;')}">
+      <input id="subCr" maxlength="40" placeholder="${t('subCrPh')}">
+      <textarea id="subDs" class="short" maxlength="160" rows="2" placeholder="${t('subDsPh')}"></textarea>
+      <div style="display:flex;gap:8px;margin:4px 0 8px">
+        <button class="btn2" id="subGen" style="flex:none;padding:8px 12px;border-color:var(--accent);color:var(--accent);font-weight:700">${t('subGenBtn')}</button>
+        <button class="btn2" id="subCopy" style="flex:none;padding:8px 12px">${t('subCopyBtn')}</button>
+      </div>
+      <div id="subMsg"></div>
+      <textarea id="subOut" readonly placeholder="${t('subOutPh')}"></textarea>
+      <p class="desc" style="margin:10px 0 0">${t('subSendNote')} <a href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener">@deteprtm</a>.</p>
+    </div>`;
+}
+
+$('#submitBox').addEventListener('click', e=>{
+  if(e.target.id === 'subGen'){
+    const masalah = submitValidasi();
+    const msg = $('#subMsg');
+    if(masalah.length){
+      msg.innerHTML = `<div class="rule bad"><span>⚠</span><div>${masalah.join('<br>')}</div></div>`;
+      $('#subOut').value = '';
+      return;
+    }
+    const cr = ($('#subCr').value||'').trim();
+    if(!cr){
+      msg.innerHTML = `<div class="rule bad"><span>⚠</span><div>${t('subNeedCredit')}</div></div>`;
+      $('#subOut').value = '';
+      return;
+    }
+    const nm = ($('#subNm').value || store.active).trim().replace(/'/g,"\\'");
+    const crEsc = cr.replace(/'/g,"\\'");
+    const ds = ($('#subDs').value || '').trim().replace(/'/g,"\\'");
+    const cd = encodeDeck(state.deck, nm);
+    msg.innerHTML = `<div class="rule ok"><span>✓</span><div>${t('subOk')}</div></div>`;
+    $('#subOut').value =
+      `  { nm:'${nm}', cr:'${crEsc}',\n` +
+      `    ds:'${ds}',\n` +
+      `    cd:'${cd}' },`;
+  }
+  if(e.target.id === 'subCopy'){
+    const ta = $('#subOut');
+    if(!ta.value){ alert(t('subGenFirst')); return; }
+    ta.select();
+    navigator.clipboard.writeText(ta.value).catch(()=>document.execCommand('copy'));
+    e.target.textContent = t('copied');
+    setTimeout(()=>e.target.textContent = t('subCopyBtn'), 1800);
   }
 });
 
@@ -4723,6 +4971,7 @@ if(!DB.length){
 amanJalankan('bahasa', applyLang);
 amanJalankan('renderDeckSelect', renderDeckSelect);
 amanJalankan('renderAdminBox',   renderAdminBox);
+amanJalankan('renderSubmitBox',  renderSubmitBox);
 amanJalankan('renderProxyAdmin', renderProxyAdmin);
 amanJalankan('renderAll',        renderAll);
 amanJalankan('bkNote', renderBkNote);
