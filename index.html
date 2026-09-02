@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.16  ·  31 Agustus 2026
+     MHR DECK LAB  ·  versi 6.17  ·  2 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://data2712-code.github.io/mhr-lab-x7k2m9/
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.16">
+<meta name="version" content="6.17">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -810,7 +810,16 @@
     <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">208</b></div>
     <div class="pill"><span data-i18n="statShown">Ditampilkan</span> <b id="hShown">208</b></div>
     <div class="pill"><span data-i18n="statDeck">Deck</span> <b id="hDeck">0</b></div>
-    <a class="dukung" id="btnDukung" target="_blank" rel="noopener" hidden></a>
+    <!-- Ruang tombol ini SENGAJA sudah dipesan sejak HTML awal (visibility:hidden,
+         bukan atribut hidden) dengan teks bawaan "☕ Dukung" — supaya renderDukung()
+         di JS (yang baru bisa jalan setelah data.js selesai dimuat, lihat komentar
+         di v6.17 pada renderDukung()) tinggal MENAMPAKKAN tombol yang sudah ada di
+         posisi/ukuran akhirnya, bukan menyisipkan elemen baru ke .hdr-stats.
+         Elemen baru yang muncul belakangan itulah yang menggeser tombol bahasa/TikTok
+         di sebelahnya — penyumbang CLS "header>div.hdr-stats" terbesar di laporan
+         Cloudflare (lihat analitik-agustus-2026.md). -->
+    <a class="dukung" id="btnDukung" target="_blank" rel="noopener"
+      style="visibility:hidden" title="Dukung">☕ Dukung</a>
     <button class="langbtn" id="btnLang" title="Ganti bahasa / Switch language">🌐 ID</button>
     <a class="tiktok" href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener"
       title="Follow @deteprtm di TikTok"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 0 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-1.85-2.48V9.79a5.94 5.94 0 1 0 4.94 5.85V8.9a7 7 0 0 0 4.07 1.3V7.12a4.19 4.19 0 0 1-3.01-1.3z"/></svg> Follow @deteprtm</a>
@@ -995,7 +1004,18 @@
 <script src="data.js"></script>
 
 <footer>
-  <div class="foot-cta" id="footDukung" hidden></div>
+  <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
+       HTML awal (visibility:hidden + teks bawaan dari kamus 'supportNote'),
+       bukan atribut hidden — supaya renderDukung() tinggal menampakkannya di
+       tempat yang sama, tidak mendorong turun "Dibuat oleh @deteprtm" dan
+       disclaimer di bawahnya. Ini penyumbang CLS footer terbesar (lebih besar
+       dari #btnDukung sendiri) di laporan Cloudflare Agustus — lihat
+       analitik-agustus-2026.md. Kalau teks dukungan diganti jadi jauh lebih
+       panjang/pendek dari kalimat bawaan ini, sedikit pergeseran residual bisa
+       muncul lagi (wajar, bukan regresi). -->
+  <div class="foot-cta" id="footDukung" style="visibility:hidden">MHR Deck Lab gratis dan
+    tanpa iklan. Kalau alat ini membantu, dukungan sukarela membantu menutup biaya domain
+    dan pengembangan. <a class="foot-dukung" href="#">☕ Dukung</a></div>
   <div class="foot-cta">
     <span data-i18n="footBy">Dibuat oleh</span>
     <a class="foot-tiktok" href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 0 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-1.85-2.48V9.79a5.94 5.94 0 1 0 4.94 5.85V8.9a7 7 0 0 0 4.07 1.3V7.12a4.19 4.19 0 0 1-3.01-1.3z"/></svg> @deteprtm</a>
@@ -1006,7 +1026,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.16</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.17</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2167,20 +2187,39 @@ $('#simPeluang').addEventListener('click', e=>{
 const adaKursor = typeof window.matchMedia === 'function' &&
                   window.matchMedia('(hover: hover)').matches;
 
+/* v6.17 — fix CLS: #hoverPrev posisinya `position:fixed` (di luar alur dokumen),
+   jadi bergesernya TIDAK menggeser elemen lain — tapi API Layout Instability tetap
+   menghitungnya sebagai "elemen sudah tampil lalu berpindah" setiap kali tooltip
+   yang SEDANG TERLIHAT dipindah ke kartu lain yang jauh (mis. lompat antar baris
+   deck) — memakai `transform` (bukan left/top) hanya menghemat reflow, TIDAK
+   membebaskannya dari skor CLS. Solusinya: saat pindah ke kartu (`no`) yang
+   BERBEDA, sembunyikan dulu → pindahkan posisinya SAAT tersembunyi → baru
+   tampakkan lagi di frame berikutnya. Elemen yang "baru pertama tampil" di
+   posisi barunya (bukan "berpindah" dari yang sudah terlihat) tidak dihitung
+   CLS sama sekali. Gerakan kecil saat mouse bergeser DI baris yang sama sengaja
+   dibiarkan langsung (tanpa sembunyikan dulu) supaya tetap terasa mengikuti
+   kursor secara halus — dampaknya ke CLS kecil karena jaraknya pendek. */
 function tampilkanPratinjau(no, x, y){
   const el = $('#hoverPrev');
   if(!el) return;
   if(el.dataset.no !== no){
+    const gantiKartu = !el.hidden;      // sudah tampil & pindah ke kartu lain?
     el.dataset.no = no;
     el.dataset.ext = '0';
     el.src = artFile(no);
+    if(gantiKartu){
+      el.hidden = true;                 // sembunyikan dulu — supaya kemunculan
+      posisikanPratinjau(x, y, true);   // di posisi baru dihitung "baru", bukan "pindah"
+      requestAnimationFrame(()=>{ el.hidden = false; });
+      return;
+    }
   }
   el.hidden = false;
   posisikanPratinjau(x, y);
 }
-function posisikanPratinjau(x, y){
+function posisikanPratinjau(x, y, paksa){
   const el = $('#hoverPrev');
-  if(!el || el.hidden) return;
+  if(!el || (el.hidden && !paksa)) return;
   const w = 216, h = w * 88/63, m = 12;
   let kiri = x - w - m;                       // utamakan sisi kiri kursor
   if(kiri < m) kiri = Math.min(x + m, window.innerWidth - w - m);
@@ -2993,18 +3032,27 @@ $('#btnDvPng').addEventListener('click', async ()=>{
    Contoh isi di data.js:
      window.DUKUNG = { url:'https://saweria.co/namaanda', label:'Saweria' };
 */
+/* v6.17 — fix CLS: #btnDukung TIDAK lagi dipakai atribut `hidden` (ruang 0px)
+   untuk kasus "dikonfigurasi" (kasus normal/hampir selalu terjadi). HTML awalnya
+   sudah menaruh tombol ini dengan teks "☕ Dukung" dan visibility:hidden — artinya
+   ruangnya sudah dipesan sejak render pertama. Di sini kita cuma menampakkannya
+   (visibility:visible) dan mengoreksi href/teks kalau perlu, jadi tombol bahasa
+   & link TikTok di sebelahnya TIDAK ikut bergeser saat JS ini jalan. Jalur
+   "tidak dikonfigurasi" (jarang, cuma saat pemilik sengaja mematikan di data.js)
+   tetap pakai `hidden` biasa — kasus itu tidak butuh presisi CLS yang sama. */
 function renderDukung(){
   const cfg = (typeof window !== 'undefined' && window.DUKUNG) || null;
   const sah = cfg && typeof cfg.url === 'string' && /^https:\/\//.test(cfg.url);
   const tombol = $('#btnDukung'), kaki = $('#footDukung');
   if(!sah){
-    if(tombol) tombol.hidden = true;
-    if(kaki) kaki.hidden = true;
+    if(tombol){ tombol.hidden = true; tombol.style.visibility = ''; }
+    if(kaki){ kaki.hidden = true; kaki.style.visibility = ''; }
     return;
   }
   const label = cfg.label || t('support');
   if(tombol){
     tombol.hidden = false;
+    tombol.style.visibility = 'visible';
     tombol.href = cfg.url;
     tombol.textContent = `☕ ${t('support')}`;
     tombol.title = label;
@@ -3020,6 +3068,7 @@ function renderDukung(){
         kalimat = cfg.teks[state.lang] || cfg.teks.id || cfg.teks.en || kalimat;
     }
     kaki.hidden = false;
+    kaki.style.visibility = 'visible';
     kaki.innerHTML = `${kalimat} ` +
       `<a class="foot-dukung" href="${cfg.url}" target="_blank" rel="noopener">☕ ${label}</a>`;
   }
