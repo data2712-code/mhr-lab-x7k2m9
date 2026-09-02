@@ -422,6 +422,31 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ## Riwayat Update
 
+### Koreksi efek SD03-003 EN — 2 September 2026 *(hanya `cards.js` + `images/en/SD03-003.jpg`)*
+Permintaan pemilik: kartu 「Urgent Call」Nick Fury (SD03-003) versi Inggris kena
+perubahan efek resmi — teks yang selama ini tampil di situs (dan tercetak di gambar
+kartu versi Inggris) sudah usang.
+
+- `cards.js` — field `e_en` diperbarui: `"...from HAND **into** your BATTLE. If you
+  do, **when the turn ends,** you retreat this card."` → `"...from HAND **onto** your
+  BATTLE. If you do, you retreat this card."` (klausa "pada akhir giliran" untuk
+  RETREAT-nya dihapus — bukan cuma ganti kata, ini perubahan waktu efek beneran).
+  Field `e` (Bahasa Indonesia) **sengaja tidak diubah** — pemilik sedang menunggu
+  daftar errata terbaru khusus Bahasa Indonesia dari sumber resmi; begitu daftar itu
+  ada, field `e` untuk SD03-003 (dan kartu lain yang kena errata yang sama) perlu
+  ditinjau ulang. **Pending** — lihat `status-terkini.md` untuk pengingatnya
+- `images/en/SD03-003.jpg` — awalnya dicoba perbaikan manual (hapus teks lama lewat
+  inpainting OpenCV, tulis ulang teks baru pakai font pengganti), tapi pemilik lalu
+  memberikan gambar kartu resmi versi terbaru langsung (sumber asli, bukan hasil edit)
+  — jadi pendekatannya diganti: gambar itu diproses (dikomposit dari kanal alpha
+  transparan ke latar hitam standar situs, resize ke lebar 450px konsisten dengan
+  gambar lain) dan dipakai apa adanya sebagai pengganti, BUKAN hasil tulis-ulang teks
+  manual. Ini lebih akurat karena bersumber dari cetakan resmi, bukan rekonstruksi font
+- Diverifikasi dengan Playwright: `DB.find` mengembalikan `e_en` yang baru, popup
+  kartu (lightbox) menampilkan teks & gambar yang sudah diperbarui, kartu terkait
+  tetap muncul normal, nol error konsol/halaman
+- Tidak ada perubahan `index.html` — jadi tidak ada kenaikan nomor versi untuk entri ini
+
 ### v6.19 — 2 September 2026 · kanal email di kotak submission deck komunitas
 Permintaan pemilik: tambahkan alamat email sebagai kanal alternatif pengiriman kode
 submission, selain DM TikTok yang sudah ada.
