@@ -33,7 +33,6 @@ mhr-lab-x7k2m9/
 ├── sw.js                 ← PWA: service worker, cache offline (sejak v6.6)
 ├── icons/               ← ikon PWA berbagai ukuran (sejak v6.6)
 ├── og-image.jpg      ← gambar preview saat link dibagikan
-├── robots.txt        ← kontrol pengindeksan mesin pencari
 └── images/ · images/en/  ← gambar kartu, nama = nomor kartu (BP01-001.jpg)
 ```
 
@@ -411,7 +410,7 @@ bersifat case-sensitive.
 | Navigasi halaman | `#cards` (utama), `#build`, `#meta`, `#lgs`, `#panduan`. `#d=` selalu diperiksa lebih dulu agar link deck lama tidak rusak |
 | Batas GitHub Pages | Situs 1 GB, bandwidth 100 GB/bulan (soft limit) |
 | Rem darurat | Settings → Pages → **Unpublish site** (reversibel) |
-| Nama repository | diacak (`mhr-lab-x7k2m9`) — sisa dari fase uji coba awal, sekarang cuma kosmetik karena `robots.txt` sudah mengizinkan pengindeksan (lihat § Riwayat Update 2 September 2026) |
+| Nama repository | diacak (`mhr-lab-x7k2m9`) — sisa dari fase uji coba awal, sekarang cuma kosmetik karena `robots.txt` sudah dihapus (situs boleh diindeks penuh, lihat § Riwayat Update 2 September 2026) |
 
 **Kode link deck:** 1 huruf seri + 3 digit nomor + jumlah (basis36).
 Seri: `A`=BP01, `B`=PB01, `C`=EB01, `D`=TB01, `E`=SD01, `F`=SD02, `G`=SD03, `H`=SD04.
@@ -422,16 +421,22 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ## Riwayat Update
 
-### `robots.txt` dibuka untuk indexing — 2 September 2026 *(hanya `robots.txt`, tidak ada perubahan kode)*
+### `robots.txt` dihapus agar indexing tidak dibatasi — 2 September 2026 *(hanya `robots.txt`, tidak ada perubahan kode)*
 Permintaan pemilik, menjelang rencana domain kustom `mhrdecklab.com` mulai dipakai:
 buka akses crawler mesin pencari yang sebelumnya sengaja diblokir total sejak fase
 uji coba awal proyek.
 
-- `robots.txt` diubah dari `User-agent: * / Disallow: /` (blokir semua crawler) menjadi
-  `User-agent: * / Allow: /` (izinkan semua) — keputusan disengaja karena strategi
-  obscurity (nama repo acak + robots.txt blokir total) sudah tidak relevan lagi begitu
-  domain sendiri dipakai; lihat `evaluasi-obscurity-2-september-2026.md` untuk analisis
-  lengkapnya
+- Awalnya isi `robots.txt` diubah dari `User-agent: * / Disallow: /` (blokir semua
+  crawler) menjadi `User-agent: * / Allow: /` (izinkan semua) lewat sesi Claude —
+  device yang terhubung ke sesi tidak punya kemampuan hapus berkas. Pemilik lalu
+  **menghapus berkasnya secara langsung** di folder klon (File Explorer + commit
+  lewat GitHub Desktop), jadi kondisi akhirnya: **`robots.txt` tidak ada lagi di
+  repo**. Efeknya sama seperti `Allow: /` — GitHub Pages mengembalikan 404 untuk
+  `/robots.txt`, dan semua mesin pencari memperlakukan robots.txt yang hilang/404
+  persis sama seperti "izinkan semua"
+- Keputusan disengaja karena strategi obscurity (nama repo acak + robots.txt blokir
+  total) sudah tidak relevan lagi begitu domain sendiri dipakai; lihat
+  `evaluasi-obscurity-2-september-2026.md` untuk analisis lengkapnya
 - Catatan penting: repo ini satu-satunya sumber yang melayani baik URL GitHub Pages
   lama (`data2712-code.github.io/mhr-lab-x7k2m9`) maupun domain baru nanti — jadi
   perubahan ini otomatis berlaku untuk **keduanya** sejak commit ini, bukan menunggu
