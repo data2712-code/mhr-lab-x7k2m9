@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.24  ·  3 September 2026
+     MHR DECK LAB  ·  versi 6.25  ·  3 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.24">
+<meta name="version" content="6.25">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1084,7 +1084,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.24</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.25</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -3821,9 +3821,11 @@ id: `
       "nyawa" Anda — 9 kartu ini pindah satu per satu ke TIMELINE tiap kali Weakness lawan berhasil
       diserang.</li>
   </ul>
-  <p><b>Sebelum mulai:</b> kocok Main Deck, lalu tiap pemain mengambil 6 kartu sebagai tangan awal.
-    Kalau tangan awal dirasa kurang bagus, boleh <b>mulligan</b> satu kali: taruh kartu yang ditukar
-    ke <b>bawah</b> deck, ambil kartu baru sejumlah sama dari atas, lalu kocok ulang deck.</p>
+  <p><b>Sebelum mulai:</b> kocok Main Deck, lalu tiap pemain mengambil 6 kartu sebagai tangan awal
+    (pemain pertama menentukan lebih dulu, baru pemain kedua). Kalau tangan awal dirasa kurang
+    bagus, boleh <b>mulligan</b> satu kali: taruh <b>seluruh 6 kartu di tangan</b> ke <b>bawah</b>
+    deck (bukan pilih-pilih sebagian — mulligan berarti mengulang semuanya), ambil 6 kartu baru dari
+    atas, lalu kocok ulang deck.</p>
 </div>
 
 <div class="pd-sec" id="pd-kartu">
@@ -3877,8 +3879,10 @@ id: `
     <div class="pd-term"><span class="k">Void</span><p>Tempat kartu yang sudah <b>di-prune</b>
       (disingkirkan dari permainan). Jumlahnya tidak terbatas. Biasanya dianggap "hilang", tapi ada
       juga kartu tertentu yang efeknya bisa mengembalikan kartu dari VOID ke FIELD.</p></div>
-    <div class="pd-term"><span class="k">Deck</span><p>Tumpukan Main Deck Anda. Kalau habis saat
-      harus menarik kartu, Anda kalah.</p></div>
+    <div class="pd-term"><span class="k">Deck</span><p>Tumpukan Main Deck Anda. Begitu mencapai 0
+      kartu, Anda langsung kalah saat itu juga (lihat Cara Menang). Jumlah kartu tersisa di Deck
+      manapun — milik sendiri atau lawan — boleh ditanyakan/dikonfirmasi kapan saja, kartunya sendiri
+      tetap tidak boleh dilihat.</p></div>
     <div class="pd-term"><span class="k">Rush Point Deck</span><p>9 kartu poin Anda. Berpindah satu
       per satu ke TIMELINE tiap kali berhasil menyerang Weakness lawan.</p></div>
     <div class="pd-term"><span class="k">Timeline</span><p>Tempat kartu Rush Point yang sudah didapat.
@@ -3957,7 +3961,9 @@ id: `
   <p>Pemain yang mendapat giliran pertama melewati fase ini di giliran pertamanya (lihat catatan di
     atas). Di giliran lain, karakter menyerang berurutan: <b>FRONT → WING → WING → BACK</b>. Tiap
     karakter hanya mendapat 1 kesempatan menyerang per giliran, dan boleh memilih untuk tidak
-    menyerang.</p>
+    menyerang — tapi begitu urutan bergeser ke slot berikutnya, kesempatan menyerang karakter yang
+    dilewati <b>hilang untuk giliran ini</b>, tidak bisa "balik lagi" belakangan. Begitu sebuah
+    serangan dideklarasikan, prosesnya juga <b>terkunci</b> sampai selesai.</p>
   <p>Untuk setiap karakter yang menyerang, ada 3 langkah:</p>
   <ul>
     <li><b>① Target Phase</b> — karakter memilih 1 karakter musuh (atau Weakness) yang berada dalam
@@ -4006,6 +4012,9 @@ id: `
       giliran Anda <b>atau</b> di langkah counter (Counter Phase akhir giliran maupun mini-Counter
       Phase dalam pertarungan).</p></div>
   </div>
+  <p>Kalau teks efek Trigger mengandung kata <b>"boleh"</b> setelah kalimat penjelas kapan efek itu
+    aktif, efek tersebut <b>opsional</b> — Anda yang memutuskan mau memicunya atau tidak, bukan wajib
+    otomatis.</p>
 </div>
 
 <div class="pd-sec" id="pd-istilah">
@@ -4027,6 +4036,9 @@ id: `
       BATTLE ke area RETREAT — ini yang jadi "biaya" saat memanggil karakter Level 4+. Beda dengan
       kartu yang <b>sudah</b> berada di area RETREAT (lihat definisi di bagian Area Permainan), yang
       normalnya tidak otomatis kembali kecuali ada efek kartu lain yang membawanya balik.</p></div>
+    <div class="pd-term"><span class="k">Power 0 = retreat otomatis</span><p>Kalau power sebuah kartu
+      turun jadi 0 atau kurang akibat efek kartu, kartu itu <b>otomatis di-retreat</b> — tidak perlu
+      menunggu pertarungan.</p></div>
   </div>
 </div>
 
@@ -4121,9 +4133,10 @@ en: `
       successfully attack the opponent's Weakness.</li>
   </ul>
   <p><b>Before starting:</b> shuffle your Main Deck, then each player draws 6 cards as their opening
-    hand. If your opening hand isn't great, you may <b>mulligan</b> once: put the cards you're
-    swapping to the <b>bottom</b> of the deck, draw the same number of new cards from the top, then
-    reshuffle the deck.</p>
+    hand (the first player decides first, then the second player). If your opening hand isn't great,
+    you may <b>mulligan</b> once: put your <b>entire 6-card hand</b> to the <b>bottom</b> of the deck
+    (not a partial swap — mulligan means redoing your whole hand), draw 6 new cards from the top,
+    then reshuffle the deck.</p>
 </div>
 
 <div class="pd-sec" id="pd-kartu">
@@ -4176,8 +4189,9 @@ en: `
     <div class="pd-term"><span class="k">Void</span><p>Where <b>pruned</b> cards go — removed from
       play. No limit on how many can be here. Usually treated as gone for good, but certain card
       effects can bring a card back from VOID to the FIELD.</p></div>
-    <div class="pd-term"><span class="k">Deck</span><p>Your Main Deck pile. Running out when you're
-      required to draw means you lose.</p></div>
+    <div class="pd-term"><span class="k">Deck</span><p>Your Main Deck pile. The moment it reaches 0
+      cards, you immediately lose (see How to Win). The card count of either Deck — yours or your
+      opponent's — may be confirmed at any time; the cards themselves still can't be looked at.</p></div>
     <div class="pd-term"><span class="k">Rush Point Deck</span><p>Your 9 point cards. Moves one at a
       time to your TIMELINE each time you successfully attack the opponent's Weakness.</p></div>
     <div class="pd-term"><span class="k">Timeline</span><p>Where earned Rush Point cards go. Collect
@@ -4253,7 +4267,9 @@ en: `
   <h3>Battle Phase — Attacking</h3>
   <p>The player going first skips this phase on their first turn (see the note above). On every
     other turn, characters attack in order: <b>FRONT → WING → WING → BACK</b>. Each character gets
-    only 1 chance to attack per turn, and may choose not to attack.</p>
+    only 1 chance to attack per turn, and may choose not to attack — but once the order moves past a
+    slot, that character's attack chance is <b>lost for the turn</b>, you can't come back to it
+    later. Once an attack is declared, its procedure is also <b>locked in</b> until it finishes.</p>
   <p>For each attacking character, there are 3 steps:</p>
   <ul>
     <li><b>① Target Phase</b> — the character picks 1 enemy character (or a Weakness) within its own
@@ -4302,6 +4318,8 @@ en: `
       Action Phase <b>or</b> during a counter step (the end-of-turn Counter Phase, or the mini
       Counter Phase inside a battle).</p></div>
   </div>
+  <p>If a Trigger effect's text contains the word <b>"may"</b> after the clause explaining when it
+    fires, that effect is <b>optional</b> — you decide whether to trigger it, it isn't automatic.</p>
 </div>
 
 <div class="pd-sec" id="pd-istilah">
@@ -4322,6 +4340,8 @@ en: `
       into the RETREAT area — this is the "cost" paid when calling a Level 4+ character. Not to be
       confused with a card <b>already sitting</b> in the RETREAT area (see the Field Layout section),
       which normally doesn't come back on its own unless another card's effect brings it back.</p></div>
+    <div class="pd-term"><span class="k">Power 0 = auto-retreat</span><p>If a card's power drops to
+      0 or below because of an effect, that card is <b>automatically retreated</b> — no battle needed.</p></div>
   </div>
 </div>
 
