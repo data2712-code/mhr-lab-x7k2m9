@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.21  ·  3 September 2026
+     MHR DECK LAB  ·  versi 6.22  ·  3 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.21">
+<meta name="version" content="6.22">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1084,7 +1084,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.21</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.22</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -5022,18 +5022,20 @@ $('#pxPdf').addEventListener('click', async ()=>{
 
 
 /* muat pengaturan tersimpan *//* muat pengaturan tersimpan */
-/* Urutan penentuan bahasa:
+/* Urutan penentuan bahasa (v6.22 — deteksi bahasa browser DIHAPUS sesuai
+   permintaan eksplisit pemilik: EN cuma alternatif, default HARUS selalu ID
+   buat semua pengunjung apa pun bahasa perangkatnya. Laporan lapangan: beberapa
+   pengunjung mobile masuk ke versi EN duluan karena bahasa/region perangkat
+   mereka bukan Indonesia — itu bug dari sudut pandang produk, bukan fitur):
    1. parameter ?lang=en / ?lang=id  — untuk link yang dibagikan ke komunitas
       berbahasa Inggris (Singapura, Malaysia, Thailand). Pilihan ini disimpan.
    2. pilihan yang pernah disimpan pengguna di perangkat ini
-   3. bahasa browser — kalau bukan Bahasa Indonesia, tampilkan versi Inggris */
+   3. default: ID — SELALU, tidak peduli bahasa/region browser atau perangkat */
 (function tentukanBahasa(){
   const p = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
   if(p === 'en' || p === 'id'){ store.lang = p; }
   else if(store.lang !== 'en' && store.lang !== 'id'){
-    let bhs = '';
-    try { bhs = (navigator.language || (navigator.languages||[])[0] || '').toLowerCase(); } catch(e){}
-    store.lang = /^(id|in)\b/.test(bhs) ? 'id' : 'en';
+    store.lang = 'id';
   }
   state.lang = (store.lang === 'en') ? 'en' : 'id';
 })();

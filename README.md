@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.21** · 3 September 2026
+**Versi saat ini: v6.22** · 3 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -432,6 +432,35 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ## Riwayat Update
 
+### v6.22 — perbaikan bug: default bahasa mobile masuk EN, seharusnya ID — 3 September 2026
+Laporan lapangan dari pemilik: beberapa pengunjung yang mengakses
+`mhrdecklab.com` lewat mobile device malah masuk ke versi **EN** duluan,
+padahal versi EN cuma dimaksudkan sebagai alternatif opsional untuk saat
+ini — semua pengunjung, apa pun bahasa/region perangkatnya, seharusnya
+default masuk ke versi **ID**.
+
+**Penyebab:** fungsi `tentukanBahasa()` (dieksekusi sekali saat halaman
+dimuat) punya tiga tingkat penentuan bahasa: (1) parameter URL `?lang=`,
+(2) preferensi yang pernah disimpan pengguna di perangkat itu, (3) — ini
+biang masalahnya — kalau dua di atas tidak ada, situs mendeteksi bahasa
+browser (`navigator.language`) dan otomatis menampilkan EN kalau bahasa
+perangkat bukan Indonesia. Banyak HP dengan region/bahasa sistem bukan
+"Indonesia" (walau penggunanya orang Indonesia) jadi otomatis kena EN di
+kunjungan pertama.
+
+**Perbaikan:** langkah deteksi bahasa browser (poin 3 di atas) dihapus
+total. Sekarang kalau tidak ada `?lang=` di URL dan belum ada preferensi
+tersimpan di perangkat, situs **selalu** default ke ID — tidak peduli
+bahasa/region browser atau perangkat. Dua jalur lain tetap dipertahankan
+apa adanya:
+- Link berbagi eksplisit `?lang=en` (untuk komunitas berbahasa Inggris di
+  Singapura, Malaysia, Thailand dll) tetap berfungsi seperti biasa.
+- Kalau pengguna sendiri pernah memilih EN di perangkatnya sebelumnya,
+  pilihan itu tetap diingat (tidak dipaksa balik ke ID).
+
+Perubahan hanya di satu fungsi (`tentukanBahasa()`), tidak menyentuh logika
+render/terjemahan lain yang sudah bergantung pada `state.lang`.
+
 ### v6.21 — infrastruktur Cloudflare + SEO — 3 September 2026
 Lanjutan permintaan eksplisit pemilik ("infrastruktur cloudflare" + "SEO").
 
@@ -488,18 +517,19 @@ pemilik, lihat catatan penting di bawah):**
   your DNS account on Cloudflare.com" yang ditawarkan Search Console (itu
   memberi akses API penuh ke akun Cloudflare, di luar izin yang diminta)
 - Percobaan submit `sitemap.xml` ke Search Console sempat gagal ("Invalid
-  sitemap address") — dicek, ternyata `https://mhrdecklab.com/sitemap.xml`
-  masih 404. **Penyebabnya BUKAN bug**: sesi ini menulis `index.html` (JSON-LD),
-  `sitemap.xml`, dan `robots.txt` ke folder repo di komputer pemilik, tapi sesi
-  ini tidak punya akses shell di komputer itu untuk menjalankan `git add` /
-  `git commit` / `git push` — jadi ketiga perubahan itu baru ada di working
-  copy lokal, belum live di GitHub Pages.
-
-> ⚠️ **Tindakan yang masih perlu dilakukan pemilik:** jalankan `git add`,
-> `git commit`, `git push` seperti biasa dari folder repo supaya v6.21
-> (termasuk `sitemap.xml` dan `robots.txt`) benar-benar live. Setelah itu boleh
-> submit ulang `sitemap.xml` di Search Console (Indexing → Sitemaps), walau
-> sebenarnya tidak wajib — Google akan menemukannya sendiri lewat `robots.txt`.
+  sitemap address") karena `git push`-nya belum dilakukan pemilik saat itu.
+  **Update: sudah dikonfirmasi beres.** Pemilik sudah `git push`, v6.21
+  (termasuk `sitemap.xml` dan `robots.txt`) sudah terkonfirmasi live di
+  `mhrdecklab.com` (dicek langsung lewat fetch tanpa cache). Sempat ada
+  `sitemap.xml` masih 404 walau sudah live di origin — ternyata Cloudflare
+  edge cache masih menyimpan respons 404 lama; sudah diperbaiki dengan purge
+  cache lewat API (`POST zones/{zone}/purge_cache`) untuk `sitemap.xml` dan
+  `robots.txt`, dan dikonfirmasi 200 + isi XML benar sesudahnya. Submit ulang
+  manual ke Search Console masih gagal ("Invalid sitemap address") walau file
+  sudah terbukti live — kemungkinan cache/negative-result di sisi Google,
+  di luar kendali sesi ini. Tidak fatal: `robots.txt` sudah merujuk ke
+  sitemap, jadi Google akan menemukannya sendiri lewat crawling normal;
+  boleh dicoba submit manual lagi beberapa hari ke depan kalau masih mau.
 
 ### v6.20 — branding Hero Base + perbaikan performa (CLS/INP/render kartu) — 3 September 2026
 Permintaan eksplisit pemilik: terapkan nama branding yang sudah dikonfirmasi
