@@ -1,11 +1,13 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.19** · 2 September 2026
+**Versi saat ini: v6.20** · 3 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
 
-🔗 **Live:** https://data2712-code.github.io/mhr-lab-x7k2m9/
+🔗 **Live:** https://mhrdecklab.com/ *(domain kustom, aktif sejak 2 September 2026 —
+URL GitHub Pages lama `https://data2712-code.github.io/mhr-lab-x7k2m9/` otomatis
+redirect ke domain ini, dikonfirmasi)*
 📱 **TikTok:** [@deteprtm](https://www.tiktok.com/@deteprtm)
 
 > Fan-made, tidak berafiliasi dengan atau disponsori oleh Marvel maupun penerbit
@@ -207,7 +209,13 @@ Sama seperti cetak proxy, library **jsPDF** dimuat dari CDN hanya saat tombolnya
 ### Cetak kartu proxy (khusus mode admin)
 
 Fitur ini **hanya ada di mode admin** — pengunjung biasa tidak melihat tombol
-maupun panelnya.
+maupun panelnya. **Ini keputusan bisnis pemilik yang disengaja, bukan batasan
+teknis sementara** (dikonfirmasi ulang 3 September 2026): membuka akses cetak
+proxy ke semua pengunjung berisiko membuat orang berhenti membeli booster pack
+Marvel Hero Rush resmi, yang bisa jadi sentimen negatif ke distributor. Pemilik
+bilang suatu saat mungkin dibuka ke publik, tapi belum tahu kapan — jangan
+diusulkan atau didorong sebagai "pekerjaan tertunda" kecuali pemilik sendiri
+yang mengangkat topiknya lagi.
 
 1. Buka situs dengan `?admin=1`, misal
    `https://data2712-code.github.io/mhr-lab-x7k2m9/?admin=1`
@@ -421,6 +429,142 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.20 — branding Hero Base + perbaikan performa (CLS/INP/render kartu) — 3 September 2026
+Permintaan eksplisit pemilik: terapkan nama branding yang sudah dikonfirmasi
+sebelumnya, dan kerjakan tiga item performa yang sempat ditunda dari laporan
+Cloudflare Agustus (`analitik-agustus-2026.md`).
+
+- **Branding "Hero Base"** diterapkan ke judul tab navigasi & judul halaman (H2)
+  Weekly Rush LGS — cuma nama/label halaman, teks isi (body paragraf) sengaja TIDAK
+  diubah sesuai instruksi eksplisit pemilik ("cuma nama halaman, teks isi tetap apa
+  adanya")
+- **Fix CLS `#deckList`** (penyumbang CLS terbesar yang tersisa, sengaja ditunda dari
+  v6.17): placeholder statis "Deck masih kosong" sekarang diberi `visibility:hidden`
+  sejak HTML awal (ruang tetap dipesan, sama polanya dengan fix `#btnDukung`/
+  `#footDukung` di v6.17), dan `renderDeck()` cuma menampakkannya (`visibility:visible`)
+  di render PERTAMA kali halaman dibuka (flag `renderPertamaDeckList`) — render
+  berikutnya (tiap kartu ditambah/dikurangi, yang jalan hampir di setiap edit) TIDAK
+  dibalut teknik ini lagi supaya tetap terasa instan, sesuai opsi (b) yang sudah
+  dianalisis sebelumnya di `analitik-agustus-2026.md`. Diverifikasi Playwright untuk
+  kasus deck kosong (pengunjung baru) maupun deck tersimpan di localStorage
+  (pengunjung lama, kasus yang sebenarnya memicu pergeseran) — keduanya tampil benar,
+  nol error console
+- **Fix INP `#navTabs>button` (424ms) dan `#metaGrid` tombol "muat deck" (360ms)**:
+  `requestAnimationFrame` (dipakai sejak v6.4, terbukti tidak cukup menurunkan angka
+  di laporan Agustus) diganti `setTimeout(fn, 0)` — rAF berjalan TEPAT sebelum browser
+  mengecat, jadi kalau isi callback-nya berat ia tetap menahan cat yang sama; `setTimeout(0)`
+  memberi browser kesempatan nyata mengecat dulu sebelum kerja berat (render halaman/
+  deck) jalan di giliran berikutnya. Ditambah: highlight tab aktif (`aria-current`)
+  sekarang dipindah SEGERA saat diklik (sebelum kerja berat ditunda), jadi ada umpan
+  balik visual instan
+- **Mitigasi Safari iOS lebih lambat dari Chrome Mobile (±68% gap, `decoding="async"`
+  di v6.4 terbukti tidak cukup)**: root cause paling mungkin yang ditemukan — `renderCards()`
+  sebelumnya membangun sampai 208 elemen kartu sekaligus lewat satu `innerHTML`, satu
+  "long task" yang menahan thread utama (WebKit/Safari dikenal lebih berat untuk reflow
+  besar dibanding Chromium). Sekarang dicicil: 24 kartu pertama (cukup mengisi 2 layar
+  HP) digambar segera, sisanya per 40 kartu lewat `requestAnimationFrame` supaya browser
+  sempat bernapas di antara batch — dilindungi token render supaya render lama otomatis
+  berhenti kalau filter diganti sebelum selesai. **Belum dikerjakan**: ukuran file
+  gambar kartu asli (±80-90KB, didekode penuh walau ditampilkan sebagai thumbnail
+  78×109px di tampilan daftar) — butuh pipeline resize terpisah untuk ~250 gambar
+  kartu, ditunda ke sesi lain karena risikonya lebih besar dan efeknya baru bisa
+  dikonfirmasi dari laporan Cloudflare berikutnya, bukan dari tes di sesi ini (tidak
+  ada mesin render Safari asli yang bisa dipakai untuk verifikasi langsung)
+- Diverifikasi menyeluruh lewat Playwright (server tes lokal + viewport mobile
+  390×844): sintaks JS bersih (`node --check`), branding "Hero Base" tampil di tab
+  nav & H2, `#deckList` ter-reveal dengan benar untuk deck kosong maupun deck terisi
+  (3 baris kartu, localStorage), render 208→192 kartu (mode EN) tuntas dalam ~1 detik
+  lewat batching, klik tab memperbarui `aria-current` seketika — nol error JavaScript
+  halaman, console error yang muncul cuma 404 aset gambar yang memang sengaja tidak
+  ikut disalin ke server tes
+
+### DNSSEC + proxy Cloudflare (CDN/DDoS) diaktifkan — 2 September 2026 *(pengaturan Cloudflare, tidak ada perubahan kode)*
+Permintaan eksplisit pemilik setelah pengecekan ulang menyeluruh (lihat entri di
+bawah) menemukan dua item opsional ini belum aktif.
+
+- **DNSSEC** diaktifkan lewat `Domain Registration → Settings` — status "Pending",
+  aktif penuh dalam ±24 jam (Cloudflare otomatis pasang DS record karena registrar
+  & DNS-nya sama-sama Cloudflare, tidak ada langkah manual tambahan)
+- **Proxy Cloudflare** (awan oranye) diaktifkan untuk **kelima** DNS record (4× A +
+  1× CNAME `www`) — sebelumnya semua "DNS only". Cek mode SSL/TLS zone dulu sebelum
+  mengaktifkan: ternyata **sudah "Full"** (bukan "Flexible"), jadi aman diaktifkan
+  langsung tanpa risiko redirect loop
+- **Diverifikasi langsung setelah aktivasi**: `https://mhrdecklab.com`,
+  `http://mhrdecklab.com` (redirect ke https tetap jalan), dan
+  `https://www.mhrdecklab.com` semuanya memuat situs dengan benar, header response
+  sekarang menunjukkan `server: cloudflare` + `cf-ray` (traffic resmi lewat edge
+  Cloudflare Singapura), nol error console
+- Efeknya buat pengunjung: proteksi DDoS otomatis di level edge Cloudflare, caching
+  tambahan (berpotensi mempercepat loading terutama untuk pengunjung Indonesia),
+  alamat IP asli GitHub Pages jadi tersembunyi dari publik. Pola cache-busting
+  `?v=angka` yang situs ini pakai untuk update tetap berfungsi normal lewat proxy
+- Tidak ada perubahan `index.html`/kode — murni pengaturan akun Cloudflare
+
+### Pengecekan ulang menyeluruh Cloudflare + GitHub Pages — 2 September 2026 *(cuma komentar dokumentasi di `index.html`, tidak ada perubahan fungsi)*
+Diminta pemilik ("cek ulang lagi semua setting... agar semua fitur berjalan dengan
+baik dan bisa optimize") sesaat setelah domain live. Seluruh konfigurasi diperiksa
+ulang satu per satu langsung di dashboard:
+
+- **DNS Cloudflare**: dikonfirmasi 5/5 record benar — 4× A (`108`/`109`/`110`/
+  `111.153`) + 1× CNAME `www`, semuanya masih "DNS only" sesuai rencana
+- **GitHub Pages**: custom domain `mhrdecklab.com`, "DNS check successful", "Enforce
+  HTTPS" tercentang — situs terkonfirmasi live
+- **Redirect URL lama** — dites langsung: `https://data2712-code.github.io/mhr-lab-x7k2m9/`
+  ternyata **otomatis redirect (301)** ke `https://mhrdecklab.com/`, bukan cuma
+  "tetap jalan berdampingan" seperti dugaan awal — jadi tidak ada risiko duplicate
+  content untuk SEO, satu URL kanonik saja yang terindeks
+- **Redirect http→https** — sudah berfungsi penuh (`http://mhrdecklab.com` otomatis
+  ke `https://`), kekhawatiran sebelumnya soal propagasi sudah tidak relevan
+- **Meta tag `og:url`/`canonical`** — dicek langsung ke kode: **tidak pernah ada**
+  tag itu di `index.html` sejak awal (dugaan sebelumnya salah), jadi tidak ada yang
+  perlu diperbaiki di situ. `og:image` pakai path relatif (`og-image.jpg`) sehingga
+  otomatis ikut resolve ke domain baru saat link dibagikan
+- **PWA** (`manifest.json`, `sw.js`) — `start_url`/`scope` dan seluruh
+  `STATIC_ASSETS` sudah pakai path relatif dari awal, tidak ada hardcode domain,
+  jadi tidak perlu perubahan apa pun untuk domain baru
+- **Cloudflare Web Analytics** — beacon script + token masih terpasang dan termuat
+  tanpa error di domain baru
+- Satu komentar dokumentasi di baris atas `index.html` (bukan kode fungsional,
+  cuma penanda "Live: ...") masih menunjuk URL GitHub Pages lama — diperbarui ke
+  `mhrdecklab.com`
+- **Console browser**: nol error di halaman live
+
+**Dua temuan untuk perhatian pemilik (bukan bug, tapi perlu keputusan/tindakan
+pemilik sendiri karena masuk kategori "ubah pengaturan akun"):**
+1. ⚠️ **Auto-renew domain OFF** di Cloudflare Registrar (expired: 2 September 2027).
+   Kalau tidak diaktifkan/diingat manual, domain bisa hilang setelah masa aktifnya
+   habis. Disarankan pemilik aktifkan sendiri lewat toggle di halaman
+   `Domain Registration → Registrations`
+2. DNSSEC belum diaktifkan untuk zone `mhrdecklab.com` — opsional, pengaman
+   tambahan terhadap DNS spoofing, satu klik "Enable DNSSEC" di
+   `mhrdecklab.com → Settings` (bukan zone DNS biasa, tapi halaman Domain
+   Registration → Settings)
+
+### Domain kustom `mhrdecklab.com` resmi LIVE — 2 September 2026 *(hanya `README.md`, tidak ada perubahan kode)*
+Migrasi domain tuntas di hari yang sama dengan pembelian. Pemilik membuka Cloudflare
+dan GitHub sekaligus di browser lalu minta bantuan langsung mengeksekusi sisa
+langkahnya.
+
+- 4 **A record** (`@` → `185.199.108.153`/`.109.153`/`.110.153`/`.111.153`) dan 1
+  **CNAME record** (`www` → `data2712-code.github.io`) ditambahkan di dashboard DNS
+  Cloudflare, semuanya mode **DNS only** (bukan proxied) supaya GitHub bisa
+  menerbitkan sertifikatnya sendiri
+- DNS check di `Settings → Pages` GitHub langsung sukses (propagasi Cloudflare
+  cepat), sertifikat HTTPS terbit tidak lama setelahnya — **"Enforce HTTPS"**
+  diaktifkan di hari yang sama, tidak perlu menunggu sampai 24 jam seperti perkiraan
+  awal
+- Diverifikasi langsung: `http://mhrdecklab.com` dan `https://mhrdecklab.com`
+  keduanya memuat situs dengan benar, gembok HTTPS valid
+- Baris "🔗 Live:" di atas diperbarui ke `https://mhrdecklab.com/` — URL GitHub Pages
+  lama tetap jalan sebagai alias, tidak ada tindakan tambahan yang diperlukan untuk
+  itu
+- Redirect otomatis `http://` → `https://` (efek dari "Enforce HTTPS") mungkin perlu
+  beberapa saat untuk mulai berlaku sepenuhnya di sisi GitHub — bukan tanda ada yang
+  salah kalau belum langsung redirect di menit-menit pertama
+- Tidak ada perubahan `index.html` — jadi tidak ada kenaikan nomor versi untuk entri
+  ini. Rujukan URL lama di meta tag (`og:url` dsb.) di `index.html` **belum dicek/
+  diperbarui** — jadi item terpisah untuk sesi berikutnya kalau relevan
 
 ### Persiapan domain kustom `mhrdecklab.com` — 2 September 2026 *(hanya berkas `CNAME` baru, tidak ada perubahan kode)*
 Pemilik sudah menyelesaikan pembelian domain `mhrdecklab.com` di Cloudflare Registrar.
