@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.23  ·  3 September 2026
+     MHR DECK LAB  ·  versi 6.24  ·  3 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.23">
+<meta name="version" content="6.24">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1084,7 +1084,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.23</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.24</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -3800,12 +3800,14 @@ id: `
 <div class="pd-sec" id="pd-menang">
   <h3>Cara Menang</h3>
   <p>Marvel Hero Rush adalah kartu pertarungan 1 lawan 1 antar karakter Marvel. Setiap giliran, kedua
-    pemain memanggil karakter, menyerang, dan mempertahankan diri. Ada dua cara menang:</p>
+    pemain memanggil karakter, menyerang, dan mempertahankan diri. Ada tiga cara menang:</p>
   <div class="pd-box win">
     <b>1. Kumpulkan 9 kartu Rush Point</b> di area TIMELINE Anda — didapat tiap kali karakter Anda
     berhasil menyerang <b>Weakness</b> lawan (posisi BATTLE lawan yang kosong).<br><br>
-    <b>2. Deck utama lawan habis</b> — saat lawan mengambil kartu dan ternyata deck-nya sudah
-    habis/tidak ada kartu tersisa sama sekali, ia langsung dinyatakan kalah.
+    <b>2. Deck utama lawan habis (0 kartu tersisa)</b> — begitu kondisi ini terjadi, apa pun
+    penyebabnya (kartu terakhir ditarik, atau deck dikosongkan lewat efek kartu), lawan langsung
+    dinyatakan kalah saat itu juga.<br><br>
+    <b>3. Efek sebuah kartu langsung menyatakan seorang pemain sebagai pemenang.</b>
   </div>
 </div>
 
@@ -4097,12 +4099,14 @@ en: `
 <div class="pd-sec" id="pd-menang">
   <h3>How to Win</h3>
   <p>Marvel Hero Rush is a 1v1 card battle game between Marvel characters. Each turn, both players
-    call characters, attack, and defend. There are two ways to win:</p>
+    call characters, attack, and defend. There are three ways to win:</p>
   <div class="pd-box win">
     <b>1. Collect 9 Rush Point cards</b> in your TIMELINE — earned whenever your character
     successfully attacks the opponent's <b>Weakness</b> (an empty BATTLE position).<br><br>
-    <b>2. Your opponent's main deck runs out</b> — when your opponent draws a card and their deck
-    turns out to have no cards left at all, they are immediately declared the loser.
+    <b>2. Your opponent's main deck reaches 0 cards</b> — the moment this happens, regardless of the
+    cause (their last card was drawn, or the deck was emptied by a card effect), they are
+    immediately declared the loser.<br><br>
+    <b>3. A card's effect directly declares a player the winner.</b>
   </div>
 </div>
 

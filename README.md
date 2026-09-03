@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.23** · 3 September 2026
+**Versi saat ini: v6.24** · 3 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -431,6 +431,47 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.24 — kondisi menang dikoreksi jadi state-based + ditambah kondisi #3 (efek kartu) — 3 September 2026
+Permintaan pemilik: baca ulang langsung § **103. Winning the Game** di
+**Comprehensive Rules 1.03** (Google Docs yang dibuka pemilik di browser Claude) untuk
+verifikasi kalimat "Cara Menang" yang baru direvisi di v6.23. Teks rulebook persis:
+
+> 103.1. If a player satisfies any one of the following conditions, that player wins
+> the game and the game ends immediately.
+> 103.1.a. There are 9 Rush Point Cards in the player's Timeline.
+> 103.1.b. The opposing player's main deck has 0 cards.
+> 103.1.c. As the result of resolving a card effect, a player is declared the winner
+> of the game.
+
+**Dua temuan dari pembacaan langsung ini:**
+1. **103.1.b bersifat state-based (dicek terus-menerus), BUKAN dipicu oleh aksi
+   menarik kartu.** Kalimat v6.23 ("saat lawan **mengambil kartu** dan ternyata
+   deck-nya sudah habis") menyiratkan pemicunya adalah aksi menariknya — padahal
+   rulebook cuma bilang "deck lawan punya 0 kartu", tanpa syarat harus ada usaha
+   menarik. Begitu deck lawan mencapai 0 kartu — baik karena kartu terakhirnya baru
+   ditarik, ATAU dikosongkan lewat efek kartu tanpa proses menarik sama sekali —
+   game langsung berakhir saat itu juga.
+2. **103.1.c adalah kondisi menang ketiga yang belum pernah tercatat** di README
+   atau halaman Cara Menang sebelumnya: seorang pemain bisa dinyatakan menang
+   langsung sebagai efek dari sebuah kartu.
+
+Dikonfirmasi ke pemilik lewat pertanyaan eksplisit sebelum diterapkan (bukan
+rulebook 1.03 langsung dipakai mentah-mentah, mengingat konvensi proyek: poster
+resmi CARDFUN > rulebook 1.03 kalau bertentangan) — pemilik memilih memakai framing
+state-based sesuai rulebook, dan menambahkan kondisi #3 ke tampilan publik.
+
+**Perubahan (ID & EN, `index.html` § `pd-menang`, sekarang "tiga cara menang"):**
+- ID poin 2: → "Deck utama lawan habis (0 kartu tersisa) — begitu kondisi ini
+  terjadi, apa pun penyebabnya (kartu terakhir ditarik, atau deck dikosongkan lewat
+  efek kartu), lawan langsung dinyatakan kalah saat itu juga."
+- ID poin 3 (baru): "Efek sebuah kartu langsung menyatakan seorang pemain sebagai
+  pemenang."
+- EN setara untuk kedua poin.
+
+Juga diperbarui: bagian "Aturan resmi Marvel Hero Rush" § Konstruksi deck di README
+ini (baris syarat menang, sekarang mencantumkan ketiga kondisi + rujukan sumber),
+dan tabel "Riwayat pembaruan aturan" di bagian bawah README.
 
 ### v6.23 — klarifikasi teks aturan: kondisi menang saat deck lawan habis — 3 September 2026
 Permintaan pemilik: di halaman Panduan Bermain § "Cara Menang", poin nomor 2 (deck
@@ -1731,10 +1772,15 @@ Ditujukan untuk alur kerja meninjau dan mengganti kartu setelah deck jadi.
   ER, TR) — **GR/R vs C/HR/LR masih pertanyaan terbuka**, kemungkinan istilah cetakan
   Indonesia berbeda dari rulebook internasional; jangan asumsikan salah satu benar
   sebelum dicek langsung ke kartu fisik atau API resmi
-- Menang saat: **9 kartu Rush Point berhasil dikumpulkan di TIMELINE Anda sendiri**
-  (didapat tiap kali karakter Anda berhasil menyerang Weakness lawan), ATAU **deck
-  utama lawan habis** — saat lawan mengambil kartu dan ternyata deck-nya sudah
-  habis/tidak ada kartu tersisa sama sekali, ia langsung dinyatakan kalah
+- Menang saat (rujukan: poster resmi + Comprehensive Rules 1.03 § 103): **(1)** 9
+  kartu Rush Point berhasil dikumpulkan di **TIMELINE Anda sendiri** (didapat tiap
+  kali karakter Anda berhasil menyerang Weakness lawan), **(2)** deck utama lawan
+  mencapai **0 kartu** — kondisi ini bersifat langsung (state-based) begitu deck
+  lawan 0 kartu, apa pun penyebabnya (kartu terakhir ditarik ATAU deck dikosongkan
+  lewat efek kartu, bukan cuma dipicu saat lawan mencoba menarik), ia langsung
+  dinyatakan kalah saat itu juga, **(3)** efek sebuah kartu langsung menyatakan
+  seorang pemain sebagai pemenang (belum ada kartu di database yang memakai efek
+  ini per 3 September 2026, tapi kondisinya tercantum eksplisit di rulebook)
 
 ### Struktur giliran & battlefield
 
@@ -1851,7 +1897,8 @@ yang mencatat perubahan kode/data)
 | 26 Agustus 2026 | Penjelasan pemilik + `cards.js` | Taksonomi Counter call (9) vs Counter efek (14), urutan detail COUNTER STEP |
 | 28 Agustus 2026 | Poster cetak resmi CARDFUN/Jason Entertainment | Istilah kemampuan **kartu & poster cocok**, rulebook 1.03 yang menyimpang — kode tetap ikut teks kartu; ditemukan BASE maks 6 kartu, syarat menang eksplisit, Battle Phase dilewati di giliran pertama pemain pertama |
 | 2 September 2026 | Konsolidasi (bukan sumber baru) | Bagian ini pertama kali disusun dari seluruh temuan di atas jadi satu rujukan tunggal di README, supaya sesi baru tidak perlu membaca ulang riwayat percakapan |
-| 3 September 2026 | Klarifikasi pemilik (bukan aturan baru, cuma perjelas teks) | Halaman Panduan Bermain § "Cara Menang" (ID & EN) dan bagian "Konstruksi deck" di atas diperjelas: kondisi menang #2 (deck utama lawan habis) sekarang eksplisit menyebut lawan **langsung dinyatakan kalah** saat itu juga, bukan cuma "tidak bisa menarik kartu". Sekalian dikoreksi typo di README: baris "9 kartu Rush Point ditaruh di TIMELINE **lawan**" seharusnya TIMELINE **sendiri** (sudah benar di teks Panduan Bermain, README yang salah ketik) |
+| 3 September 2026 (v6.23) | Klarifikasi pemilik (bukan aturan baru, cuma perjelas teks) | Halaman Panduan Bermain § "Cara Menang" (ID & EN) dan bagian "Konstruksi deck" di atas diperjelas: kondisi menang #2 (deck utama lawan habis) sekarang eksplisit menyebut lawan **langsung dinyatakan kalah** saat itu juga, bukan cuma "tidak bisa menarik kartu". Sekalian dikoreksi typo di README: baris "9 kartu Rush Point ditaruh di TIMELINE **lawan**" seharusnya TIMELINE **sendiri** (sudah benar di teks Panduan Bermain, README yang salah ketik) |
+| 3 September 2026 (v6.24) | Comprehensive Rules 1.03 § 103 "Winning the Game" (dibaca langsung dari Google Docs, bukan cuma diingat dari riset 26 Agustus) | Kondisi menang #2 dikoreksi jadi **state-based** — rulebook cuma bilang "deck lawan punya 0 kartu", bukan "dipicu saat lawan mencoba menarik" seperti kalimat v6.23 sebelumnya; berlaku baik kartu terakhir baru ditarik maupun deck dikosongkan via efek kartu. Ditambahkan **kondisi menang #3**: efek kartu bisa langsung menyatakan pemenang (103.1.c) — belum ada kartu di database yang memakainya per hari ini, tapi kondisinya tercantum eksplisit di rulebook. Pemilik dikonfirmasi lebih dulu sebelum diterapkan (poster resmi tetap lebih otoritatif dari rulebook 1.03 kalau suatu saat bertentangan) |
 
 > **Untuk pemilik:** kalau ada pembaruan resmi dari MHR Indonesia/CARDFUN (rulebook
 > versi baru, errata baru, set kartu baru dengan mekanik baru), cukup kasih tahu di
