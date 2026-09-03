@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.22** · 3 September 2026
+**Versi saat ini: v6.23** · 3 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -431,6 +431,31 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.23 — klarifikasi teks aturan: kondisi menang saat deck lawan habis — 3 September 2026
+Permintaan pemilik: di halaman Panduan Bermain § "Cara Menang", poin nomor 2 (deck
+utama lawan habis) sebelumnya cuma berbunyi "(tidak bisa menarik kartu lagi saat
+harus menarik)" — tidak eksplisit menyebut bahwa itu berarti **lawan langsung
+dinyatakan kalah saat itu juga**. Bukan perubahan aturan, cuma memperjelas kalimat
+supaya tidak ambigu buat pembaca baru.
+
+**Perubahan (ID & EN, `index.html` § `pd-menang`):**
+- ID: "Deck utama lawan habis (tidak bisa menarik kartu lagi saat harus menarik)."
+  → "Deck utama lawan habis — saat lawan mengambil kartu dan ternyata deck-nya
+  sudah habis/tidak ada kartu tersisa sama sekali, ia langsung dinyatakan kalah."
+  (kalimat direvisi sekali lagi atas masukan pemilik supaya urutannya pas: yang
+  memicu kekalahan adalah momen lawan mengambil kartu dan mendapati deck-nya
+  kosong, bukan cuma "diharuskan menarik".)
+- EN: setara, "Your opponent's main deck runs out (they can't draw when required
+  to)." → "...when your opponent draws a card and their deck turns out to have no
+  cards left at all, they are immediately declared the loser."
+
+**Sekalian dikoreksi** di bagian "Aturan resmi Marvel Hero Rush" § Konstruksi deck
+di README ini: baris syarat menang tertulis "9 kartu Rush Point berhasil ditaruh di
+TIMELINE **lawan**" — ini typo, seharusnya TIMELINE **sendiri** (Rush Point didapat
+ke timeline milik pemain yang menyerang, bukan timeline lawan; teks Panduan Bermain
+sendiri sudah benar dari awal, cuma ringkasan di README yang salah ketik). Dicatat
+juga di tabel "Riwayat pembaruan aturan" di bagian bawah README.
 
 ### v6.22 — perbaikan bug: default bahasa mobile masuk EN, seharusnya ID — 3 September 2026
 Laporan lapangan dari pemilik: beberapa pengunjung yang mengakses
@@ -1706,8 +1731,10 @@ Ditujukan untuk alur kerja meninjau dan mengganti kartu setelah deck jadi.
   ER, TR) — **GR/R vs C/HR/LR masih pertanyaan terbuka**, kemungkinan istilah cetakan
   Indonesia berbeda dari rulebook internasional; jangan asumsikan salah satu benar
   sebelum dicek langsung ke kartu fisik atau API resmi
-- Menang saat: **9 kartu Rush Point berhasil ditaruh di TIMELINE lawan**, ATAU
-  **deck lawan habis** (0 kartu tersisa saat harus menarik)
+- Menang saat: **9 kartu Rush Point berhasil dikumpulkan di TIMELINE Anda sendiri**
+  (didapat tiap kali karakter Anda berhasil menyerang Weakness lawan), ATAU **deck
+  utama lawan habis** — saat lawan mengambil kartu dan ternyata deck-nya sudah
+  habis/tidak ada kartu tersisa sama sekali, ia langsung dinyatakan kalah
 
 ### Struktur giliran & battlefield
 
@@ -1824,6 +1851,7 @@ yang mencatat perubahan kode/data)
 | 26 Agustus 2026 | Penjelasan pemilik + `cards.js` | Taksonomi Counter call (9) vs Counter efek (14), urutan detail COUNTER STEP |
 | 28 Agustus 2026 | Poster cetak resmi CARDFUN/Jason Entertainment | Istilah kemampuan **kartu & poster cocok**, rulebook 1.03 yang menyimpang — kode tetap ikut teks kartu; ditemukan BASE maks 6 kartu, syarat menang eksplisit, Battle Phase dilewati di giliran pertama pemain pertama |
 | 2 September 2026 | Konsolidasi (bukan sumber baru) | Bagian ini pertama kali disusun dari seluruh temuan di atas jadi satu rujukan tunggal di README, supaya sesi baru tidak perlu membaca ulang riwayat percakapan |
+| 3 September 2026 | Klarifikasi pemilik (bukan aturan baru, cuma perjelas teks) | Halaman Panduan Bermain § "Cara Menang" (ID & EN) dan bagian "Konstruksi deck" di atas diperjelas: kondisi menang #2 (deck utama lawan habis) sekarang eksplisit menyebut lawan **langsung dinyatakan kalah** saat itu juga, bukan cuma "tidak bisa menarik kartu". Sekalian dikoreksi typo di README: baris "9 kartu Rush Point ditaruh di TIMELINE **lawan**" seharusnya TIMELINE **sendiri** (sudah benar di teks Panduan Bermain, README yang salah ketik) |
 
 > **Untuk pemilik:** kalau ada pembaruan resmi dari MHR Indonesia/CARDFUN (rulebook
 > versi baru, errata baru, set kartu baru dengan mekanik baru), cukup kasih tahu di
