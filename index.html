@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.20  ·  3 September 2026
+     MHR DECK LAB  ·  versi 6.21  ·  3 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.20">
+<meta name="version" content="6.21">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -820,6 +820,28 @@
     .px-list{max-height:38vh}
   }
 </style>
+<!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "MHR Deck Lab",
+  "alternateName": "Marvel Hero Rush Deck Builder",
+  "description": "Deck builder Marvel Hero Rush TCG (fan-made, tidak berafiliasi resmi): 208 kartu lengkap dengan gambar, stat, dan teks efek bahasa Indonesia. Susun deck, bagikan sebagai link atau gambar.",
+  "url": "https://mhrdecklab.com/",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Any (berbasis web browser)",
+  "browserRequirements": "Membutuhkan JavaScript",
+  "inLanguage": "id",
+  "isAccessibleForFree": true,
+  "image": "https://mhrdecklab.com/og-image.jpg",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "IDR"
+  }
+}
+</script>
 </head>
 <body>
 
@@ -1062,7 +1084,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.20</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.21</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
