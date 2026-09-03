@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.24** · 3 September 2026
+**Versi saat ini: v6.25** · 3 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -431,6 +431,58 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.25 — Panduan Bermain diperkaya dari studi lengkap Comprehensive Rules 1.03 — 3 September 2026
+Permintaan pemilik: pelajari dan simpan Comprehensive Rules 1.03 secara menyeluruh
+(bukan cuma § 103 seperti v6.24) sebagai acuan proyek ke depan, lalu cek apakah ada
+konten Panduan Bermain yang bisa ditambah/diperbarui supaya pemain baru maupun lama
+bisa memahami Marvel Hero Rush lebih dalam. Seluruh 15 halaman dokumen dibaca
+section-by-section langsung dari Google Docs (bukan cuma dari catatan lama 26
+Agustus) — catatan lengkapnya disimpan sebagai project doc terpisah
+(`rulebook-1.03-lengkap.md`) supaya sesi mendatang tidak perlu mengulang.
+
+**Enam penambahan/perbaikan diterapkan ke halaman Panduan Bermain (ID & EN),
+semuanya melengkapi/memperjelas, tidak ada yang bertentangan dengan konten yang
+sudah ada:**
+1. **Klarifikasi mulligan** (§ Yang Perlu Disiapkan) — kalimat lama ("taruh kartu
+   yang ditukar ke bawah deck") berpotensi dibaca sebagai mulligan sebagian
+   (pilih-pilih kartu). Rulebook 1.03 (303.1.e) menegaskan ini **all-or-nothing**:
+   seluruh 6 kartu tangan awal ditaruh ke bawah deck, bukan sebagian. Kalimat
+   diperjelas ("seluruh 6 kartu di tangan ... bukan pilih-pilih sebagian").
+2. **Efek "boleh" = opsional** (§ Jenis Efek) — ditambahkan penjelasan: kalau teks
+   efek Trigger mengandung kata "boleh" setelah kalimat kapan efek aktif, efek itu
+   opsional (304.1.a — istilah rulebook: "[May]"), bukan wajib otomatis.
+3. **Retreat otomatis saat power 0** (§ Istilah Penting) — entri baru: kartu yang
+   power-nya turun jadi 0 atau kurang akibat efek langsung di-retreat otomatis,
+   tanpa perlu bertarung (301.16.a.1, 301.16.b).
+4. **Transparansi jumlah kartu Deck** (§ Area Permainan, entri "Deck") — ditambah:
+   jumlah kartu di Deck manapun (sendiri/lawan) boleh dikonfirmasi kapan saja
+   (302.11.d) — relevan langsung dengan kondisi menang #2 (v6.24) karena pemain
+   bisa memantau seberapa dekat lawan dengan kondisi deck habis. Kalimat lama di
+   entri ini ("kalau habis saat menarik, Anda kalah") juga disamakan dengan
+   kalimat state-based v6.24.
+5. **Kesempatan menyerang hilang kalau dilewati** (§ Battle Phase) — ditambahkan:
+   begitu urutan serang bergeser ke slot berikutnya (FRONT→WING→WING→BACK),
+   kesempatan menyerang karakter yang dilewati hilang untuk giliran itu, tidak
+   bisa kembali lagi belakangan (303.2.a.4.7–4.10).
+6. **Serangan yang sudah dideklarasikan terkunci** (§ Battle Phase) — ditambahkan
+   satu kalimat: begitu serangan dideklarasikan, prosesnya terkunci sampai selesai
+   (303.2.a.4.5).
+
+**Dua temuan LAIN yang SENGAJA belum diterapkan** — dicatat sebagai pertanyaan
+terbuka di `rulebook-1.03-lengkap.md` § "Pertanyaan terbuka", menunggu konfirmasi
+pemilik karena berpotensi bersinggungan dengan istilah/poster resmi yang sudah
+mapan di Deck Lab:
+- **BBM (BATTLE↔BASE move)** — rulebook 1.03 ternyata cuma mencantumkan
+  "Battle-Zone Movement" (301.23, reposisi ANTAR slot BATTLE saja) sebagai aksi
+  resmi Action Phase, TIDAK ada "Base Movement" (301.24, BATTLE↔BASE) sebagai aksi
+  tersendiri — padahal istilah "BBM" yang dipakai Deck Lab justru cocok dengan
+  301.24. Karena BBM adalah istilah komunitas/observasi meja langsung (bukan dari
+  rulebook terjemahan tidak resmi ini), tidak diubah sepihak.
+- **Struktur giliran 6 vs 7 fase** — rulebook menempatkan "Adjustment" sebagai
+  step di dalam Battle Phase, bukan fase tersendiri seperti di halaman Deck Lab
+  saat ini (7 fase). Kemungkinan besar cuma beda cara penyajian (bukan beda
+  mekanik), jadi tidak diubah tanpa konfirmasi poster resmi CARDFUN.
 
 ### v6.24 — kondisi menang dikoreksi jadi state-based + ditambah kondisi #3 (efek kartu) — 3 September 2026
 Permintaan pemilik: baca ulang langsung § **103. Winning the Game** di
