@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.20** · 3 September 2026
+**Versi saat ini: v6.21** · 3 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -36,6 +36,8 @@ mhr-lab-x7k2m9/
 ├── icons/               ← ikon PWA berbagai ukuran (sejak v6.6)
 ├── og-image.jpg      ← gambar preview saat link dibagikan
 ├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
+├── sitemap.xml           ← SEO: sitemap untuk Google Search Console (sejak v6.21)
+├── robots.txt            ← SEO: izinkan semua crawler + rujuk ke sitemap.xml (sejak v6.21)
 └── images/ · images/en/  ← gambar kartu, nama = nomor kartu (BP01-001.jpg)
 ```
 
@@ -429,6 +431,75 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.21 — infrastruktur Cloudflare + SEO — 3 September 2026
+Lanjutan permintaan eksplisit pemilik ("infrastruktur cloudflare" + "SEO").
+
+**Cloudflare — Cache Rules (selesai, aktif):** aset statis (`/images/*`, `cards.js`,
+`data.js`) sekarang dicache di edge Cloudflare dengan Edge TTL 4 jam (dipilih
+konservatif, bukan lebih lama, karena berkas-berkas ini kadang ditimpa langsung
+oleh pemilik tanpa parameter cache-busting). Dikonfirmasi live lewat dashboard
+(Caching → Cache Rules → 1 active).
+
+**Cloudflare — Auto Minify + Brotli (tidak perlu tindakan, sudah dicek langsung
+lewat API):**
+- **Brotli**: dicek lewat `zones/settings/brotli` — nilainya sudah `"on"` secara
+  default, tidak ada yang perlu diaktifkan.
+- **Auto Minify**: toggle-nya sudah hilang dari dashboard Speed → Optimization
+  (halaman itu sekarang cuma menampilkan Speed Brain, Cloudflare Fonts, Early
+  Hints, Rocket Loader, dll — tidak ada Auto Minify sama sekali). Dicoba langsung
+  lewat API `PATCH zones/settings/minify` untuk memastikan: request-nya sukses
+  (`200 success:true`) tapi nilainya **tidak benar-benar berubah** (`modified_on`
+  tetap `null`, tetap `{css:off,html:off,js:off}`) — jadi API-nya juga sudah
+  dinonaktifkan diam-diam. Sejalan dengan pengumuman resmi Cloudflare yang
+  men-deprecate Auto Minify (Agustus 2024, komunitas Cloudflare) tanpa pengganti
+  langsung. Kesimpulan: fitur ini memang sudah tidak bisa dikonfigurasi lagi,
+  bukan kesalahan konfigurasi — tidak perlu dicoba lagi ke depannya.
+
+**Cloudflare — Bot Fight Mode (tidak tersedia lagi untuk zone ini, dicek langsung
+lewat API):** kartu pengaturannya di Security → Settings tidak pernah selesai
+render di dashboard (lazy-load kosong terus). Dicek langsung lewat API
+`GET zones/settings/bot_fight_mode` → error `"Undefined zone setting:
+bot_fight_mode"` (code 1003) — settingan ini memang sudah tidak ada lagi di
+skema zone Cloudflare untuk akun ini. Sama seperti Auto Minify, ini bukan
+sesuatu yang bisa/perlu diperbaiki lagi lewat cara lama.
+
+**Cloudflare — MX/SPF/DKIM/DMARC (belum dikerjakan, perlu keputusan pemilik):**
+dicek lewat DNS records — domain ini saat ini **tidak punya email sama sekali**
+(tidak ada MX record). Menambahkan SPF/DMARC tanpa penyedia email yang jelas
+tidak ada gunanya. Kalau ke depannya pemilik ingin pakai email @mhrdecklab.com
+(lewat Google Workspace, Zoho, dll), kabari dulu penyedianya baru catatan DNS-nya
+bisa disiapkan.
+
+**SEO — structured data, sitemap, robots.txt (selesai):**
+- JSON-LD `WebApplication` ditambahkan di `<head>` `index.html` (nama, deskripsi,
+  kategori, bahasa `id`, gratis, dengan penegasan "fan-made, tidak berafiliasi
+  resmi" supaya tidak menyesatkan soal status resmi)
+- `sitemap.xml` dan `robots.txt` baru dibuat di root repo (situs cuma satu
+  halaman, jadi sitemap-nya cuma berisi `https://mhrdecklab.com/`)
+
+**SEO — Google Search Console (selesai — ⚠️ butuh satu langkah manual dari
+pemilik, lihat catatan penting di bawah):**
+- `mhrdecklab.com` didaftarkan sebagai Domain property di akun
+  `dataanggi2712@gmail.com` (akun Google yang sama dipakai untuk Cloudflare)
+- Diverifikasi lewat DNS TXT record (`google-site-verification=...`) yang
+  ditambahkan langsung ke DNS Cloudflare — **status: Ownership verified** ✅.
+  Sengaja pakai cara TXT record manual, BUKAN opsi "authorize Google to access
+  your DNS account on Cloudflare.com" yang ditawarkan Search Console (itu
+  memberi akses API penuh ke akun Cloudflare, di luar izin yang diminta)
+- Percobaan submit `sitemap.xml` ke Search Console sempat gagal ("Invalid
+  sitemap address") — dicek, ternyata `https://mhrdecklab.com/sitemap.xml`
+  masih 404. **Penyebabnya BUKAN bug**: sesi ini menulis `index.html` (JSON-LD),
+  `sitemap.xml`, dan `robots.txt` ke folder repo di komputer pemilik, tapi sesi
+  ini tidak punya akses shell di komputer itu untuk menjalankan `git add` /
+  `git commit` / `git push` — jadi ketiga perubahan itu baru ada di working
+  copy lokal, belum live di GitHub Pages.
+
+> ⚠️ **Tindakan yang masih perlu dilakukan pemilik:** jalankan `git add`,
+> `git commit`, `git push` seperti biasa dari folder repo supaya v6.21
+> (termasuk `sitemap.xml` dan `robots.txt`) benar-benar live. Setelah itu boleh
+> submit ulang `sitemap.xml` di Search Console (Indexing → Sitemaps), walau
+> sebenarnya tidak wajib — Google akan menemukannya sendiri lewat `robots.txt`.
 
 ### v6.20 — branding Hero Base + perbaikan performa (CLS/INP/render kartu) — 3 September 2026
 Permintaan eksplisit pemilik: terapkan nama branding yang sudah dikonfirmasi
