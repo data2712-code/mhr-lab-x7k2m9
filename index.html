@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.22  ·  3 September 2026
+     MHR DECK LAB  ·  versi 6.23  ·  3 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.22">
+<meta name="version" content="6.23">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1084,7 +1084,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.22</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.23</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -3804,7 +3804,8 @@ id: `
   <div class="pd-box win">
     <b>1. Kumpulkan 9 kartu Rush Point</b> di area TIMELINE Anda — didapat tiap kali karakter Anda
     berhasil menyerang <b>Weakness</b> lawan (posisi BATTLE lawan yang kosong).<br><br>
-    <b>2. Deck utama lawan habis</b> (tidak bisa menarik kartu lagi saat harus menarik).
+    <b>2. Deck utama lawan habis</b> — saat lawan mengambil kartu dan ternyata deck-nya sudah
+    habis/tidak ada kartu tersisa sama sekali, ia langsung dinyatakan kalah.
   </div>
 </div>
 
@@ -4100,7 +4101,8 @@ en: `
   <div class="pd-box win">
     <b>1. Collect 9 Rush Point cards</b> in your TIMELINE — earned whenever your character
     successfully attacks the opponent's <b>Weakness</b> (an empty BATTLE position).<br><br>
-    <b>2. Your opponent's main deck runs out</b> (they can't draw when required to).
+    <b>2. Your opponent's main deck runs out</b> — when your opponent draws a card and their deck
+    turns out to have no cards left at all, they are immediately declared the loser.
   </div>
 </div>
 
