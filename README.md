@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.25** · 3 September 2026
+**Versi saat ini: v6.26** · 4 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -30,7 +30,7 @@ Simpan bukti tertulis izinnya beserta nama pemberi dan tanggalnya.
 mhr-lab-x7k2m9/
 ├── index.html        ← seluruh aplikasi (HTML + CSS + JS)
 ├── cards.js           ← database 208 kartu — diganti tiap ada set kartu baru
-├── data.js             ← deck komunitas, jadwal LGS, dukungan — diedit sendiri pemilik
+├── data.js             ← deck komunitas, hasil turnamen (sejak v6.26), jadwal LGS, dukungan — diedit sendiri pemilik
 ├── manifest.json    ← PWA: nama, ikon, warna tema (sejak v6.6)
 ├── sw.js                 ← PWA: service worker, cache offline (sejak v6.6)
 ├── icons/               ← ikon PWA berbagai ukuran (sejak v6.6)
@@ -124,22 +124,25 @@ pemain luar negeri.
 
 | Hal | Perilaku |
 |---|---|
-| Menu | hanya **Cards** dan **Deck Builder**. Tab **Deck Komunitas** dan **Weekly Rush LGS** tidak ditampilkan, karena isinya konten komunitas Indonesia (nama deck berbahasa Indonesia, jadwal LGS Indonesia) |
-| Alamat `#meta` / `#lgs` | otomatis dialihkan ke halaman Cards, jadi tidak ada halaman kosong |
+| Menu | hanya **Cards** dan **Deck Builder**. Tab **Community Deck**, **Tournaments** (sejak v6.26), dan **Hero Base** tidak ditampilkan, karena isinya konten komunitas Indonesia (nama deck berbahasa Indonesia, label peringkat turnamen, jadwal LGS Indonesia) |
+| Alamat `#meta` / `#tourney` / `#lgs` | otomatis dialihkan ke halaman Cards, jadi tidak ada halaman kosong |
 | Database | 192 kartu — 16 kartu promo (PB01/EB01/TB01) disembunyikan karena versi Inggrisnya belum terbit |
 | Gambar | dari `images/en/`, otomatis jatuh ke `images/` kalau berkasnya belum ada |
 | Link deck yang dibagikan | tetap berfungsi penuh — langsung membuka Deck Builder beserta kotak "Save as my deck" |
 | Judul tab & preview link | `<title>` dan meta description ikut bahasa aktif |
 | Decklist PDF | seluruh label ikut bahasa aktif |
 
-**Mode admin dikecualikan:** dengan `?admin=1`, tab Deck Komunitas tetap terlihat walau
-bahasanya Inggris — supaya pembuat kode deck tidak terkunci. Kalau nanti Deck Komunitas
+**Mode admin dikecualikan:** dengan `?admin=1`, tab Community Deck tetap terlihat walau
+bahasanya Inggris — supaya pembuat kode deck tidak terkunci. Kalau nanti Community Deck
 ingin dibuka untuk pengunjung Inggris, cukup ubah satu baris di `applyLang`
-(objek `sembunyi`), dan siapkan nama deck versi Inggris kalau perlu.
+(objek `sembunyi`), dan siapkan nama deck versi Inggris kalau perlu. Tab **Tournaments**
+(sejak v6.26) **tidak** punya pengecualian admin ini — halaman itu tidak punya panel
+admin/generator kode sama sekali (isinya cuma ditempel manual pemilik ke `data.js`,
+sama seperti Hero Base), jadi selalu ikut aturan yang sama dengan Hero Base.
 
 **Yang sengaja tetap Bahasa Indonesia:** panel mode admin (pembuat kode deck komunitas
-dan cetak kartu proxy), serta halaman Deck Komunitas dan Turnamen — ketiganya memang
-hanya tampil di mode Indonesia.
+dan cetak kartu proxy), serta halaman Community Deck, Tournaments, dan Hero Base —
+keempatnya memang hanya tampil di mode Indonesia (Community Deck: kecuali mode admin).
 
 ### Cara menambah teks / gambar bahasa Inggris
 
@@ -271,7 +274,7 @@ menyusun PDF dari gambar yang memang sudah publik di folder `images/`.
 2. Buka situs dengan `?admin=1` di belakang alamat, misal
    `https://data2712-code.github.io/mhr-lab-x7k2m9/?admin=1`
    (simpan sebagai bookmark agar tidak perlu mengetik ulang)
-3. Buka tab **🏆 Deck Komunitas** → panel admin muncul di atas galeri deck
+3. Buka tab **🏆 Community Deck** → panel admin muncul di atas galeri deck
 4. Isi nama dan deskripsi singkat → **Buat kode dari deck aktif** → **Salin**
 5. Di GitHub: buka `index.html` → ikon **pensil** (Edit) → `Ctrl+F` cari `DECK_CONTOH`
 6. Tempel kode yang disalin ke dalam daftar → **Commit changes**
@@ -293,7 +296,7 @@ tampilan, bukan pengamanan — tapi tombol itu memang tidak punya kuasa apa pun,
 karena satu-satunya cara mengubah daftar adalah commit ke repository ini.
 
 **Kalau kode datang dari pengunjung (fitur submission, sejak v6.18):** tab
-🏆 Deck Komunitas punya kotak "Kirim deck kamu" yang terlihat untuk semua
+🏆 Community Deck punya kotak "Kirim deck kamu" yang terlihat untuk semua
 pengunjung. Kotak itu memvalidasi deck (harus pas 50 kartu, aturan warna/salinan
 terpenuhi) dan mewajibkan nama pembuat, lalu menghasilkan kode dengan format
 **persis sama** seperti langkah 4–6 di atas. Pengunjung mengirim kode itu lewat
@@ -304,6 +307,46 @@ situ alurnya sama seperti deck buatan sendiri: tinjau, lalu tempel manual ke
 `DECK_KOMUNITAS` lewat langkah 5–6. Tidak ada jalur otomatis yang langsung
 mengubah `data.js` — validasi di kotak submission cuma memastikan formatnya
 benar, bukan menggantikan peninjauan pemilik.
+
+### Cara menambah hasil turnamen (Tournaments, sejak v6.26)
+
+Beda dengan Community Deck, tab **🥇 Tournaments** **tidak punya panel admin atau
+kotak submission** — isinya turnamen resmi saja, jadi selalu ditempel manual oleh
+pemilik ke `window.TOURNAMENTS` di `data.js`.
+
+1. Susun tiap deck Top-N di aplikasi seperti biasa (mode `?admin=1` untuk membuat
+   kodenya lewat tab Community Deck — langkah "Buat kode dari deck aktif" yang
+   sama seperti menambah deck komunitas di atas, kodenya format persis sama)
+2. Di GitHub: buka `data.js` → ikon **pensil** (Edit)
+3. Kalau turnamennya baru (belum ada event-nya), tambah satu objek baru di dalam
+   `window.TOURNAMENTS`; kalau menambah deck ke turnamen yang sudah ada, cukup
+   sisipkan entri baru di dalam `top[]`-nya
+
+Format satu event turnamen:
+
+```javascript
+{
+  nama: 'Nama Turnamen',
+  tanggal: '30 Agustus 2026',
+  lokasi: 'Kota / tempat venue',
+  penyelenggara: 'Nama panitia/toko/komunitas penyelenggara',
+  sumber: 'https://...',   // link postingan resmi hasil turnamen (opsional)
+  top: [
+    { pk:'Juara 1', nm:'Merah - Hijau', cr:'', ds:'', cd:'1.<kode dari link deck>' },
+    { pk:'Juara 2', nm:'Kuning - Biru', cr:'', ds:'', cd:'1.<kode dari link deck>' },
+  ]
+}
+```
+
+`pk` = label peringkat yang tampil sebagai lencana kecil di kartu deck — teks
+bebas ("Juara 1", "Runner-up", "Semifinalis", dst). `cr` = nama pemain/pembuat
+**kalau** diketahui dari sumber resmi — kosongkan (`''`) kalau tidak ada
+datanya, jangan ditebak. `sumber` boleh dikosongkan (`''` atau dihapus
+barisnya) kalau tidak ada link post resmi — link "Sumber" otomatis tidak
+ditampilkan.
+
+Menghapus satu deck: hapus entrinya di dalam `top[]`. Menghapus satu turnamen:
+hapus satu objek event-nya. Commit changes seperti biasa.
 
 ### Cara mengubah jadwal Weekly Rush LGS
 
@@ -419,7 +462,7 @@ bersifat case-sensitive.
 | Aturan draw awal | 6 kartu; mulligan = kembalikan ke bawah deck, ambil sejumlah sama dari atas, lalu kocok ulang. Resmi maks 1×, simulator dibebaskan berulang |
 | Penyimpanan deck | localStorage, per browser per perangkat |
 | Format link deck | `#d=1.<nama-base64url>.<kode kartu>` — versi 1 |
-| Navigasi halaman | `#cards` (utama), `#build`, `#meta`, `#lgs`, `#panduan`. `#d=` selalu diperiksa lebih dulu agar link deck lama tidak rusak |
+| Navigasi halaman | `#cards` (utama), `#build`, `#meta`, `#tourney` (sejak v6.26), `#lgs`, `#panduan`. `#d=` selalu diperiksa lebih dulu agar link deck lama tidak rusak |
 | Batas GitHub Pages | Situs 1 GB, bandwidth 100 GB/bulan (soft limit) |
 | Rem darurat | Settings → Pages → **Unpublish site** (reversibel) |
 | Nama repository | diacak (`mhr-lab-x7k2m9`) — sisa dari fase uji coba awal, sekarang cuma kosmetik karena `robots.txt` sudah dihapus (situs boleh diindeks penuh, lihat § Riwayat Update 2 September 2026) |
@@ -432,6 +475,66 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.26 — menu baru Tournaments + Deck Komunitas berganti nama jadi Community Deck — 4 September 2026
+Dua permintaan pemilik sekaligus:
+
+1. **Rename menu "Deck Komunitas" → "Community Deck"** — label tab navigasi,
+   judul halaman (`<h2>`), dan teks kotak submission diganti ke nama baru,
+   dipakai identik di ID maupun EN (pola yang sama dengan branding **Hero
+   Base** — nama tetap Inggris di kedua bahasa, bukan diterjemahkan berbeda).
+   Variabel data `DECK_KOMUNITAS` di `data.js`/`index.html`, komentar kode,
+   dan panel admin (Bahasa Indonesia, `?admin=1` saja) **sengaja tidak
+   disentuh** — itu detail teknis internal, bukan nama yang tampil ke
+   pengunjung, dan mengubahnya menambah risiko tanpa manfaat tampilan.
+
+2. **Menu baru "Tournaments"** — halaman baru yang menampilkan deck-deck dari
+   babak Top-N turnamen **resmi** Marvel Hero Rush (beda dengan Community
+   Deck yang isinya deck buatan komunitas biasa). Tab baru ditaruh di antara
+   Community Deck dan Hero Base di navigasi.
+   - **Sumber data**: `window.TOURNAMENTS` array baru di `data.js` (pola
+     persis sama dengan `DECK_KOMUNITAS`/`LGS` — dikelola manual oleh pemilik
+     lewat editor GitHub, bukan lewat submission publik). Satu event turnamen
+     berisi `nama`/`tanggal`/`lokasi`/`penyelenggara`/`sumber` (link post
+     resmi) + daftar `top[]`, tiap deck di dalamnya punya `pk` (label
+     peringkat, mis. "Juara 1"/"Semifinalis" — teks bebas), `nm`/`cr`/`ds`,
+     dan `cd` (kode deck — format **persis sama** dengan tombol "Salin link
+     deck" yang sudah dipakai Community Deck, jadi dipakai ulang
+     `encodeDeck()`/`decodeDeck()` yang sama, tidak ada parser baru).
+   - **Tampilan**: memakai ulang gaya kartu `.meta-*` (Community Deck) supaya
+     visual konsisten se-situs — cuma menambah pembungkus per-event (nama
+     turnamen, tanggal, lokasi, penyelenggara, link sumber) dan lencana kecil
+     peringkat (`.tny-rank`) di tiap kartu deck. Tombol "Muat ke Deck
+     Builder" dan "Lihat visual" bekerja sama persis dengan Community Deck
+     (deck aktif yang sedang disusun pengunjung tidak pernah tertimpa).
+   - **Dwibahasa**: halaman ini **selalu disembunyikan di mode EN** (tidak
+     ada pengecualian admin seperti Community Deck), karena isinya konten
+     komunitas Indonesia sepenuhnya (nama deck, label peringkat) dan tidak
+     ada panel admin/submission di halaman ini yang perlu tetap bisa dibuka
+     saat bahasanya Inggris — pola yang sama dengan Hero Base.
+   - **Isi pertama**: turnamen **Multiverse Battle** (AZLN x CARDFUN x Marvel
+     Hero Rush Indonesia, Gramedia Matraman, 30 Agustus 2026) dengan 4 deck
+     Top 4 — Juara 1 (Merah-Hijau), Juara 2 (Kuning-Biru), dan dua Semifinalis
+     (Merah-Biru, Merah-Hijau). Decklist ditranskripsi dari postingan
+     Instagram resmi `@marvelherorush.id`, setiap kartu dicocokkan satu-per-
+     satu ke `cards.js` (nama, kode cetak, level, rarity, power) — bukan
+     tebakan OCR — dan tiap deck diverifikasi tepat 50 kartu tanpa pelanggaran
+     maks-3-salinan. Detail metodologi lengkap + tabel per-kartu ada di
+     project doc `2026-09-04-analisis-top4-gramedia-matraman-30-agustus-2026.md`
+     (bukan bagian repo situs, cuma catatan riset). Dua nama kartu
+     (`[MK44-The Brawler] Hulk Buster`, `[Freedom Watch/Watcher] New Captain
+     America`) punya dua cetakan berstat identik di database — cetakan
+     persisnya tidak bisa dipastikan dari foto sumber, dipilih salah satu
+     yang stat-nya sama persis (tidak memengaruhi cara main deck).
+   - **Verifikasi**: diuji headless (Playwright Chromium, harness yang sama
+     dipakai sesi-sesi sebelumnya) — 4 kartu deck tampil dengan lencana
+     peringkat & total 50 kartu benar, tombol "Muat ke Deck Builder" dan
+     "Lihat visual" bekerja dan menampilkan isi deck yang cocok persis dengan
+     decklist sumber, tab Tournaments+Community Deck+Hero Base sama-sama
+     tersembunyi di mode EN, halaman Community Deck yang sudah ada (18 deck)
+     tidak terpengaruh. Console bersih dari error JS (404 gambar kartu di
+     lingkungan uji lokal itu wajar — folder `images/` tidak ikut diuji,
+     bukan indikasi bug).
 
 ### Tambahan jadwal — 4 September 2026 *(hanya `data.js`)*
 - **Arnando Garage** (Bali) masuk daftar — Minggu 18.00 WITA – Selesai. Ini toko

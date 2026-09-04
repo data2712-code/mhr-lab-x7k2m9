@@ -1,8 +1,8 @@
 /* ===================================================================
    MHR DECK LAB — DATA KOMUNITAS
    ===================================================================
-   Berkas ini berisi data yang Anda kelola sendiri: daftar deck komunitas
-   dan jadwal turnamen LGS.
+   Berkas ini berisi data yang Anda kelola sendiri: daftar deck komunitas,
+   hasil Top-N turnamen resmi (v6.26), dan jadwal main mingguan LGS.
 
    PENTING: berkas ini TIDAK ikut diganti saat index.html diperbarui.
    Jadi deck dan jadwal yang Anda tambahkan di sini aman, tidak akan hilang
@@ -72,6 +72,61 @@ window.DECK_KOMUNITAS = [
   { nm:'Merah Biru - Aggro', cr:'China',
     ds:'',
     cd:'1.TWVyYWggQmlydSAtIEFnZ3JvIChDaGluYSk.A0643A0773G0013G0043A0833G0163G0183G0063G0133G0083G0113A0023A0113A0263A0013A0052A0663' },
+];
+
+/* ========== TOURNAMENTS (v6.26) ==========
+   Deck Top-N dari turnamen RESMI Marvel Hero Rush (bukan deck komunitas biasa —
+   ini hasil pertandingan sungguhan, dikelompokkan per event). Beda dengan
+   DECK_KOMUNITAS, bagian ini TIDAK punya jalur submission publik — isinya
+   murni ditempel manual oleh pemilik dari hasil resmi (mis. postingan
+   Instagram panitia), sama seperti LGS di atas.
+
+   Tambah turnamen baru dengan menyisipkan satu objek event baru di dalam
+   daftar window.TOURNAMENTS:
+     {
+       nama: 'Nama Turnamen',
+       tanggal: '30 Agustus 2026',
+       lokasi: 'Kota / tempat venue',
+       penyelenggara: 'Nama panitia/toko/komunitas penyelenggara',
+       sumber: 'https://...',   // link postingan resmi hasil turnamen (opsional)
+       top: [
+         { pk:'Juara 1', nm:'Merah - Hijau', cr:'', ds:'', cd:'1.<kode>' },
+         { pk:'Juara 2', nm:'Kuning - Biru', cr:'', ds:'', cd:'1.<kode>' },
+         ...
+       ]
+     }
+
+   Tiap entri deck di dalam `top` memakai format `cd` PERSIS SAMA dengan
+   Community Deck di atas (kode dari tombol "Salin link deck" / mode admin) —
+   jadi cara menambah deck baru pun sama: susun deck di Deck Builder, salin
+   kodenya, tempel ke `cd`. `pk` = label peringkat (bebas teks: "Juara 1",
+   "Semifinalis", "Runner-up", dst — tampil sebagai lencana kecil di kartu
+   deck). `cr` = nama pemain/pembuat KALAU diketahui dari sumber resmi —
+   kosongkan (`''`) kalau tidak ada datanya, JANGAN ditebak/dikarang nama.
+   `nm` sengaja ditulis format warna yang sama dengan Community Deck
+   ('Merah - Hijau' dst, urutan CORDER) supaya namaDeckLokal() ikut
+   menerjemahkan otomatis kalau suatu saat halaman ini dibuka mode admin.
+
+   Hapus turnamen: hapus satu objek event-nya. Hapus satu deck saja: hapus
+   satu entri di dalam `top`-nya. Ubah urutan: pindahkan objeknya. */
+window.TOURNAMENTS = [
+  {
+    nama: 'Multiverse Battle',
+    tanggal: '30 Agustus 2026',
+    lokasi: 'Gramedia Matraman, Jakarta',
+    penyelenggara: 'AZLN x CARDFUN x Marvel Hero Rush Indonesia',
+    sumber: 'https://www.instagram.com/marvelherorush.id/',
+    top: [
+      { pk:'Juara 1', nm:'Merah - Hijau', cr:'', ds:'',
+        cd:'1.TWVyYWggLSBIaWphdQ.A0221A0022A0052A0113A0271A0941A0293A0131A0011A0151A1002A1041A1063A0973A0993A1073A1081H0013H0032H0093H0103H0123A0931H0023' },
+      { pk:'Juara 2', nm:'Kuning - Biru', cr:'', ds:'',
+        cd:'1.S3VuaW5nIC0gQmlydQ.F0133F0043F0123A0332F0032G0012A0671A0701A0773A0833A0902G0022G0043G0113G0133A0622A0632A0643A0663G0062A0612' },
+      { pk:'Semifinalis', nm:'Merah - Biru', cr:'', ds:'',
+        cd:'1.TWVyYWggLSBCaXJ1.A0081A0223A0232A0023A0113G0012E0062A0013A0152A0672A0773A0833G0043G0113G0133A0621A0632A0643A0663G0061A0612' },
+      { pk:'Semifinalis', nm:'Merah - Hijau', cr:'', ds:'',
+        cd:'1.TWVyYWggLSBIaWphdQ.A0222A0232A0023A0113A0012H0013A0032A0151E0021A1003A1063H0022B0061A0973A0992A1071A1083H0092H0103H0123A0933A0942' },
+    ]
+  },
 ];
 
 /* ========== DUKUNGAN SUKARELA ==========
