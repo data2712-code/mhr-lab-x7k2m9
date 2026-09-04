@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.26** · 4 September 2026
+**Versi saat ini: v6.27** · 4 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -475,6 +475,65 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.27 — analisis "Kartu paling sering dipakai" di halaman Tournaments — 4 September 2026
+Permintaan pemilik: tampilkan analisis persentase kartu apa saja yang paling
+sering/banyak dipakai dari deck-deck Top turnamen, ditampilkan langsung di
+bagian turnamen terkait.
+
+- **Dihitung otomatis, BUKAN data yang ditulis manual.** Fungsi baru
+  `tourneyCardUsage(ev)` menghitung ulang setiap kali `renderTourney()` jalan:
+  untuk tiap event, semua deck di `ev.top` di-decode lewat `decodeDeck()` yang
+  sama (tidak ada parser baru), lalu dihitung `deckCount` (berapa deck yang
+  memakai kartu itu) dan `copies` (total salinan dijumlah semua deck). Karena
+  ini turunan murni dari `event.top[].cd` yang sudah ada, **pemilik tidak
+  perlu menulis apa pun tambahan** ke `data.js` — kalau suatu saat menambah
+  atau mengurangi deck Top di satu event, angka analisisnya otomatis ikut
+  berubah di kunjungan berikutnya, tidak perlu dihitung ulang manual.
+- **Tampilan**: kartu panel baru (`.tny-analysis`) muncul di bawah grid deck
+  tiap event, judul "📊 Kartu paling sering dipakai", berisi sampai 10 baris
+  teratas — tiap baris: peringkat, thumbnail kecil kartu, nama kartu, bar
+  persentase (warna sesuai warna kartu), dan teks "X/Y deck (Z%) · N salinan".
+  Diurutkan: paling banyak deck memakainya dulu, lalu paling banyak salinan,
+  lalu abjad. Kalau suatu event cuma punya kurang dari 2 deck valid, panel ini
+  otomatis disembunyikan (persentase dari 1 deck tidak bermakna).
+- **Untuk turnamen Multiverse Battle** (4 deck Top 4): 5 kartu teratas
+  sama-sama dipakai di 3 dari 4 deck (75%) — 「Thunder Speed」Thor,
+  「Covert Ops」Black Widow, 「Antimatter」Iron Man, 「Top Agent」Black Widow,
+  「Disintegration Ray」Vision — tidak ada satu pun kartu yang dipakai di
+  keempat deck sekaligus (0% pada 4/4), mencerminkan variasi warna deck Top 4
+  yang cukup beragam (Merah-Hijau, Kuning-Biru, Merah-Biru).
+- Fallback gambar khusus `tnyUsageImgFallback()` ditambahkan (beda dari
+  `metaImgFallback()` yang ada) karena elemen pengganti saat gambar gagal
+  dimuat bukan flex-item di dalam `.meta-strip`, jadi butuh ukuran tetap
+  sendiri (32×32px, kelas `.tny-usage-thumb`).
+- i18n baru: `tourneyUsageHead`/`tourneyUsageSub`/`tourneyUsageDeck`/
+  `tourneyUsageCopy` di kamus `T` (ID & EN, walau halaman Tournaments sendiri
+  tetap selalu disembunyikan di mode EN — ditambahkan untuk konsistensi
+  dengan pola i18n yang sudah ada di seluruh kamus).
+- **Verifikasi**: `node --check` pada blok `<script>` inline (lolos) + tes
+  fungsional Playwright (render panel, 10 baris, persentase & jumlah salinan
+  dicocokkan manual lewat perhitungan Python independen — hasilnya sama
+  persis, nol console error asli).
+
+### Revisi kecil Tournaments + insiden cache Cloudflare #2 — 4 September 2026 *(hanya `data.js`, tanpa naik versi kode)*
+Tepat setelah v6.26 di-push pemilik:
+
+- Pemilik minta field `penyelenggara` event Multiverse Battle disederhanakan
+  dari "AZLN x CARDFUN x Marvel Hero Rush Indonesia" jadi cukup **"Marvel
+  Hero Rush Indonesia"** — diubah langsung di `data.js`.
+- Pemilik lapor menu Tournaments kosong ("belum muncul konten") di situs
+  live. Diagnosis: `index.html` sudah benar v6.26 (menu Tournaments muncul),
+  tapi `data.js` di edge Cloudflare masih versi lama (Edge TTL 4 jam) —
+  fetch dengan cache-buster ke URL yang sama membuktikan datanya sudah benar
+  di origin. Ini insiden cache Cloudflare basi **kedua** dengan pola persis
+  sama seperti kejadian Arnando Garage (lihat entri "Tambahan jadwal — 4
+  September 2026" di bawah) — bukan bug kode, bukan berarti push gagal.
+  **Diperbaiki** dengan purge cache Cloudflare manual (teknik yang sama,
+  lewat browser bawaan Claude dengan izin eksplisit pemilik) untuk `/`,
+  `/index.html`, `/data.js`, `/cards.js`, `/manifest.json` — dikonfirmasi
+  fixed lewat tes langsung di situs live (menu Tournaments menampilkan 1
+  event, 4 deck, badge hitung "4", semua benar).
 
 ### v6.26 — menu baru Tournaments + Deck Komunitas berganti nama jadi Community Deck — 4 September 2026
 Dua permintaan pemilik sekaligus:

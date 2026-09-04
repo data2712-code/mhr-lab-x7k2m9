@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.26  ·  4 September 2026
+     MHR DECK LAB  ·  versi 6.27  ·  4 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.26">
+<meta name="version" content="6.27">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -492,6 +492,26 @@
   .tny-rank{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10.5px;
     letter-spacing:.04em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);
     border-radius:6px;padding:2px 8px;white-space:nowrap}
+
+  /* v6.27: analisis "kartu paling sering dipakai" — dihitung otomatis dari
+     deck-deck event.top (decodeDeck() yang sama, tidak ada data tambahan yang
+     perlu ditulis pemilik) tiap kali renderTourney() jalan, jadi selalu sinkron
+     kalau pemilik menambah/mengurangi deck di data.js. */
+  .tny-analysis{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:16px 18px 6px;margin:14px 0 26px}
+  .tny-analysis h4{font-family:var(--disp);font-size:14px;letter-spacing:.05em;text-transform:uppercase}
+  .tny-analysis .sub{font-size:11px;color:var(--muted);margin:3px 0 12px}
+  .tny-usage-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .tny-usage-row:last-child{border-bottom:none}
+  .tny-usage-rank{font-family:var(--mono);font-size:11px;color:var(--muted);width:16px;flex:none;text-align:right}
+  .tny-usage-thumb{width:32px;height:32px;border-radius:6px;object-fit:cover;object-position:50% 22%;
+    flex:none;background:var(--ink)}
+  .tny-usage-nm{flex:1;min-width:0;font-size:12.5px;font-weight:600;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  .tny-usage-bar-wrap{flex:none;width:64px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+  .tny-usage-bar{height:100%}
+  .tny-usage-meta{font-family:var(--mono);font-size:10.5px;color:var(--muted);white-space:nowrap;flex:none;
+    width:98px;text-align:right}
 
   /* ================= HALAMAN TURNAMEN LGS ================= */
   body:not(.page-lgs) #lgsPage{display:none}
@@ -1119,7 +1139,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.26</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.27</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1972,6 +1992,12 @@ const T = {
                  'Decks from the Top placements of official Marvel Hero Rush tournaments. Load one into Deck Builder to inspect it — the deck you are currently building is never overwritten.'],
   tourneyNone:  ['Belum ada data turnamen.','No tournament data yet.'],
   tourneySrc:   ['Sumber','Source'],
+  /* v6.27: analisis kartu paling sering dipakai (dihitung otomatis dari deck.top) */
+  tourneyUsageHead: ['📊 Kartu paling sering dipakai','📊 Most frequently used cards'],
+  tourneyUsageSub:  ['Dihitung otomatis dari deck-deck Top di atas — persentase menunjukkan berapa deck yang memakai kartu ini.',
+                      'Calculated automatically from the Top decks above — the percentage shows how many decks played this card.'],
+  tourneyUsageDeck: ['deck','decks'],
+  tourneyUsageCopy: ['salinan','copies'],
   close:        ['✕ Tutup','✕ Close'],
   /* --- simulasi draw --- */
   simHead:      ['Simulasi Draw Awal','Opening Draw Simulator'],
@@ -4563,6 +4589,15 @@ function metaImgFallback(img,no,warna){
   if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
   else { img.onerror=null; img.outerHTML = `<div class="ph" style="--phc:${warna}"></div>`; }
 }
+/* v6.27: fallback thumbnail 32px untuk baris analisis Tournaments — beda dari
+   metaImgFallback() karena elemen penggantinya bukan flex item di dalam
+   .meta-strip, jadi butuh ukuran tetap sendiri (.tny-usage-thumb). */
+function tnyUsageImgFallback(img,no,warna){
+  const exts=['jpg','png','webp'];
+  let i=parseInt(img.dataset.ext)+1;
+  if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
+  else { img.onerror=null; img.outerHTML = `<div class="tny-usage-thumb" style="background:${warna}"></div>`; }
+}
 
 $('#metaFilter').addEventListener('click', e=>{
   const b = e.target.closest('[data-mf]'); if(!b) return;
@@ -4618,6 +4653,43 @@ const TOURNAMENTS = (typeof window !== 'undefined' && Array.isArray(window.TOURN
 
 let TOURNEY_FLAT = [];   // diisi ulang tiap renderTourney(); {ev, d} datar untuk handler klik
 
+/* v6.27: analisis "kartu paling sering dipakai" per event. SENGAJA dihitung
+   otomatis di sini dari deck-deck event.top (decodeDeck() yang sama seperti
+   di atas) — BUKAN angka yang ditulis manual di data.js — supaya hasilnya
+   selalu ikut berubah kalau pemilik menambah/mengurangi deck Top suatu
+   turnamen, tanpa perlu hitung ulang manual. deckCount = jumlah deck (dari
+   deck valid di event ini) yang memakai kartu tsb, pct = persentasenya,
+   copies = total salinan kartu itu dijumlah semua deck. Diurutkan: paling
+   banyak deck dulu, lalu paling banyak salinan, lalu abjad. Kalau event cuma
+   punya <2 deck valid, persentase tidak bermakna — kembalikan rows kosong
+   (bagian analisis disembunyikan di renderTourney()). */
+function tourneyCardUsage(ev){
+  const tally = {};   // no -> {deckCount, copies}
+  let n = 0;
+  (ev.top||[]).forEach(d=>{
+    const r = decodeDeck(d.cd);
+    if(!r || !Object.keys(r.deck).length) return;
+    n++;
+    Object.entries(r.deck).forEach(([no,q])=>{
+      const t = tally[no] || (tally[no] = {deckCount:0, copies:0});
+      t.deckCount++;
+      t.copies += q;
+    });
+  });
+  if(n < 2) return {n, rows:[]};
+  const rows = Object.keys(tally).map(no=>{
+    const c = DB.find(x=>x.no===no);
+    if(!c) return null;
+    const tl = tally[no];
+    return {no, c, deckCount:tl.deckCount, pct:Math.round(tl.deckCount/n*100), copies:tl.copies};
+  }).filter(Boolean).sort((a,b)=>
+    b.deckCount - a.deckCount || b.copies - a.copies ||
+    (state.lang === 'en' ? (a.c.nm_en||a.c.nm).localeCompare(b.c.nm_en||b.c.nm)
+                          : a.c.nm.localeCompare(b.c.nm))
+  ).slice(0, 10);   // top 10 cukup untuk gambaran, tidak memenuhi layar
+  return {n, rows};
+}
+
 function renderTourney(){
   TOURNEY_FLAT = [];
   if(!TOURNAMENTS.length){
@@ -4659,6 +4731,19 @@ function renderTourney(){
       </div>`;
     }).join('');
     const meta = [ev.tanggal, ev.lokasi, ev.penyelenggara].filter(Boolean).join(' · ');
+    const usage = tourneyCardUsage(ev);
+    const usageHtml = usage.rows.length ? `<div class="tny-analysis">
+      <h4>${t('tourneyUsageHead')}</h4>
+      <div class="sub">${t('tourneyUsageSub')}</div>
+      ${usage.rows.map((r,i)=>`<div class="tny-usage-row">
+        <span class="tny-usage-rank">${i+1}</span>
+        <img class="tny-usage-thumb" alt="" data-ext="0" src="images/${r.no}.jpg" loading="lazy"
+          onerror="tnyUsageImgFallback(this,'${r.no}','${CMAP[r.c.c]}')">
+        <span class="tny-usage-nm">${escHtml(state.lang==='en' ? (r.c.nm_en||r.c.nm) : r.c.nm)}</span>
+        <span class="tny-usage-bar-wrap"><div class="tny-usage-bar" style="width:${r.pct}%;background:${CMAP[r.c.c]}"></div></span>
+        <span class="tny-usage-meta">${r.deckCount}/${usage.n} ${t('tourneyUsageDeck')} (${r.pct}%) · ${r.copies} ${t('tourneyUsageCopy')}</span>
+      </div>`).join('')}
+    </div>` : '';
     return `<div class="tny-event">
       <div class="tny-event-head">
         <div class="tny-event-nm">${escHtml(ev.nama)}</div>
@@ -4666,6 +4751,7 @@ function renderTourney(){
         ${ev.sumber?`<div class="tny-event-src">${t('tourneySrc')}: <a href="${escHtml(ev.sumber)}" target="_blank" rel="noopener">Instagram</a></div>`:''}
       </div>
       <div class="tny-grid">${kartu}</div>
+      ${usageHtml}
     </div>`;
   }).join('');
   $('#navTourney').textContent = TOURNEY_FLAT.length;
