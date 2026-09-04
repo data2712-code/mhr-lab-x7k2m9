@@ -515,6 +515,20 @@ bagian turnamen terkait.
   fungsional Playwright (render panel, 10 baris, persentase & jumlah salinan
   dicocokkan manual lewat perhitungan Python independen — hasilnya sama
   persis, nol console error asli).
+- **Perbaikan tampilan (masih di v6.27, sebelum sempat di-push)**: pemilik
+  lapor lewat screenshot — teks keterangan di sisi kanan tiap baris ("X/Y deck
+  (Z%) · N salinan") tumpah keluar dari border panel. Penyebabnya:
+  `.tny-usage-meta` diberi lebar tetap 98px + `white-space:nowrap` tanpa
+  `overflow:hidden`, padahal teks aslinya butuh sampai ±164px — jadi teks
+  digambar melewati batas kotaknya sendiri (dibuktikan lewat pengukuran
+  `getBoundingClientRect()`/`scrollWidth` langsung di DOM, bukan sekadar
+  tebakan dari CSS). **Diperbaiki**: lebar tetap pada `.tny-usage-meta`
+  dibuang (menyesuaikan isi), bar-persentase dan teks keterangan dibungkus
+  satu grup baru `.tny-usage-right` supaya keduanya pindah baris bersamaan
+  kalau ruang sempit, `.tny-usage-row` diberi `flex-wrap:wrap`, dan di layar
+  ≤640px (HP) `.tny-usage-right` otomatis turun ke barisnya sendiri. Diuji
+  ulang dengan Playwright di 5 lebar layar (1502/1280/768/414/375px) — tidak
+  ada lagi teks yang melewati tepi panel di lebar manapun.
 
 ### Revisi kecil Tournaments + insiden cache Cloudflare #2 — 4 September 2026 *(hanya `data.js`, tanpa naik versi kode)*
 Tepat setelah v6.26 di-push pemilik:
