@@ -501,17 +501,27 @@
     padding:16px 18px 6px;margin:14px 0 26px}
   .tny-analysis h4{font-family:var(--disp);font-size:14px;letter-spacing:.05em;text-transform:uppercase}
   .tny-analysis .sub{font-size:11px;color:var(--muted);margin:3px 0 12px}
-  .tny-usage-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .tny-usage-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);
+    flex-wrap:wrap;row-gap:5px}
   .tny-usage-row:last-child{border-bottom:none}
   .tny-usage-rank{font-family:var(--mono);font-size:11px;color:var(--muted);width:16px;flex:none;text-align:right}
   .tny-usage-thumb{width:32px;height:32px;border-radius:6px;object-fit:cover;object-position:50% 22%;
     flex:none;background:var(--ink)}
-  .tny-usage-nm{flex:1;min-width:0;font-size:12.5px;font-weight:600;overflow:hidden;
+  .tny-usage-nm{flex:1 1 160px;min-width:0;font-size:12.5px;font-weight:600;overflow:hidden;
     text-overflow:ellipsis;white-space:nowrap}
+  /* v6.27 fix: bar + keterangan dibungkus satu grup (.tny-usage-right) supaya
+     kalau ruang sempit (HP), keduanya pindah ke baris baru BERSAMAAN, sejajar
+     di bawah nama kartu — bukan meta text sendirian yang malah dipaksa masuk
+     ke lebar tetap yang keterangannya sendiri tidak pernah cukup (bug yang
+     bikin teks tumpah keluar panel: lebar 98px lama sengaja dibuang, ganti
+     jadi menyesuaikan isi + fleksibel lewat .tny-usage-right). */
+  .tny-usage-right{display:flex;align-items:center;gap:10px;flex:none;margin-left:auto}
   .tny-usage-bar-wrap{flex:none;width:64px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
   .tny-usage-bar{height:100%}
-  .tny-usage-meta{font-family:var(--mono);font-size:10.5px;color:var(--muted);white-space:nowrap;flex:none;
-    width:98px;text-align:right}
+  .tny-usage-meta{font-family:var(--mono);font-size:10.5px;color:var(--muted);white-space:nowrap;flex:none}
+  @media (max-width:640px){
+    .tny-usage-right{flex-basis:100%;margin-left:58px}
+  }
 
   /* ================= HALAMAN TURNAMEN LGS ================= */
   body:not(.page-lgs) #lgsPage{display:none}
@@ -4740,8 +4750,10 @@ function renderTourney(){
         <img class="tny-usage-thumb" alt="" data-ext="0" src="images/${r.no}.jpg" loading="lazy"
           onerror="tnyUsageImgFallback(this,'${r.no}','${CMAP[r.c.c]}')">
         <span class="tny-usage-nm">${escHtml(state.lang==='en' ? (r.c.nm_en||r.c.nm) : r.c.nm)}</span>
-        <span class="tny-usage-bar-wrap"><div class="tny-usage-bar" style="width:${r.pct}%;background:${CMAP[r.c.c]}"></div></span>
-        <span class="tny-usage-meta">${r.deckCount}/${usage.n} ${t('tourneyUsageDeck')} (${r.pct}%) · ${r.copies} ${t('tourneyUsageCopy')}</span>
+        <span class="tny-usage-right">
+          <span class="tny-usage-bar-wrap"><div class="tny-usage-bar" style="width:${r.pct}%;background:${CMAP[r.c.c]}"></div></span>
+          <span class="tny-usage-meta">${r.deckCount}/${usage.n} ${t('tourneyUsageDeck')} (${r.pct}%) · ${r.copies} ${t('tourneyUsageCopy')}</span>
+        </span>
       </div>`).join('')}
     </div>` : '';
     return `<div class="tny-event">
