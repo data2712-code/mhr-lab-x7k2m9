@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.25  ·  3 September 2026
+     MHR DECK LAB  ·  versi 6.26  ·  4 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.25">
+<meta name="version" content="6.26">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -470,6 +470,29 @@
   .meta-act button.main{background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:700}
   .meta-act button:hover{border-color:var(--accent)}
 
+  /* ================= HALAMAN TOURNAMENTS (v6.26) =================
+     Menampilkan Top-N deck dari turnamen resmi Marvel Hero Rush, dikelompokkan
+     per event. Kartu deck memakai ulang gaya .meta-* (Community Deck) supaya
+     visual konsisten — cuma menambah pembungkus event + lencana peringkat. */
+  body:not(.page-tourney) #tourneyPage{display:none}
+  body.page-tourney .filters, body.page-tourney .cards, body.page-tourney .deck{display:none}
+  body.page-tourney .layout{grid-template-columns:minmax(0,1fr)}
+  .tourney-wrap{padding:22px 20px 90px;max-width:1180px;margin:0 auto}
+  .tourney-head h2{font-family:var(--disp);font-size:26px;letter-spacing:.05em;text-transform:uppercase}
+  .tourney-head p{color:var(--muted);font-size:12.5px;line-height:1.6;margin:5px 0 16px;max-width:640px}
+  .tny-event{margin-bottom:34px}
+  .tny-event-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px;
+    border-bottom:1px solid var(--line);padding-bottom:10px}
+  .tny-event-nm{font-family:var(--disp);font-weight:800;font-size:19px;letter-spacing:.02em}
+  .tny-event-meta{font-size:12px;color:var(--muted)}
+  .tny-event-src{font-size:11px;color:var(--muted)}
+  .tny-event-src a{color:var(--muted);text-decoration:underline}
+  .tny-event-src a:hover{color:var(--accent)}
+  .tny-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;margin-top:16px}
+  .tny-rank{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.04em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);
+    border-radius:6px;padding:2px 8px;white-space:nowrap}
+
   /* ================= HALAMAN TURNAMEN LGS ================= */
   body:not(.page-lgs) #lgsPage{display:none}
   body.page-lgs .filters, body.page-lgs .cards, body.page-lgs .deck{display:none}
@@ -873,7 +896,8 @@
 <nav class="tabs" id="navTabs">
   <button data-page="cards" aria-current="true">🃏 <span class="tl" data-i18n="navCards">Kartu</span><span class="ts" data-i18n="navCardsS">Kartu</span> <span class="cnt" id="navCard">208</span></button>
   <button data-page="build" aria-current="false">🛠 <span class="tl" data-i18n="navBuild">Deck Builder</span><span class="ts" data-i18n="navBuildS">Builder</span> <span class="cnt" id="navDeck">0</span></button>
-  <button data-page="meta" aria-current="false">🏆 <span class="tl" data-i18n="navMeta">Deck Komunitas</span><span class="ts" data-i18n="navMetaS">Komunitas</span> <span class="cnt" id="navMeta">0</span></button>
+  <button data-page="meta" aria-current="false">🏆 <span class="tl" data-i18n="navMeta">Community Deck</span><span class="ts" data-i18n="navMetaS">Community Deck</span> <span class="cnt" id="navMeta">0</span></button>
+  <button data-page="tourney" aria-current="false">🥇 <span class="tl" data-i18n="navTourney">Tournaments</span><span class="ts" data-i18n="navTourneyS">Tournaments</span> <span class="cnt" id="navTourney">0</span></button>
   <button data-page="lgs" aria-current="false">📅 <span class="tl" data-i18n="navLgs">Hero Base</span><span class="ts" data-i18n="navLgsS">Hero Base</span> <span class="cnt" id="navLgs">0</span></button>
   <button data-page="panduan" aria-current="false">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span></button>
 </nav>
@@ -883,7 +907,7 @@
 <section id="metaPage">
   <div class="meta-wrap">
     <div class="meta-head">
-      <h2 data-i18n="metaHead">Deck Komunitas</h2>
+      <h2 data-i18n="metaHead">Community Deck</h2>
       <p data-i18n="metaIntro">Deck yang sedang banyak dipakai di komunitas MHR Indonesia. Muat salah satunya ke
         Deck Builder untuk dilihat isinya atau dimodifikasi — deck yang sedang Anda susun tidak tertimpa.</p>
     </div>
@@ -891,6 +915,17 @@
     <div id="adminBox"></div>
     <div class="meta-grid" id="metaGrid"></div>
     <div id="submitBox"></div>
+  </div>
+</section>
+
+<section id="tourneyPage">
+  <div class="tourney-wrap">
+    <div class="tourney-head">
+      <h2 data-i18n="tourneyHead">Tournaments</h2>
+      <p data-i18n="tourneyIntro">Deck-deck dari babak Top di turnamen resmi Marvel Hero Rush. Muat salah satunya ke
+        Deck Builder untuk dilihat isinya — deck yang sedang Anda susun tidak tertimpa.</p>
+    </div>
+    <div id="tourneyList"></div>
   </div>
 </section>
 
@@ -1084,7 +1119,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.25</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.26</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1769,8 +1804,10 @@ const T = {
   navCardsS:    ['Kartu','Cards'],
   navBuild:     ['Deck Builder','Deck Builder'],
   navBuildS:    ['Builder','Builder'],
-  navMeta:      ['Deck Komunitas','Community Decks'],
-  navMetaS:     ['Komunitas','Community'],
+  navMeta:      ['Community Deck','Community Deck'],
+  navMetaS:     ['Community Deck','Community Deck'],
+  navTourney:   ['Tournaments','Tournaments'],
+  navTourneyS:  ['Tournaments','Tournaments'],
   navLgs:       ['Hero Base','Hero Base'],
   navLgsS:      ['Hero Base','Hero Base'],
   navPanduan:   ['Panduan','Guide'],
@@ -1921,7 +1958,7 @@ const T = {
                  'MHR Deck Lab — Marvel Hero Rush Deck Builder (English)'],
   metaDesc:     ['Deck builder Marvel Hero Rush TCG: 208 kartu lengkap dengan gambar, stat, dan teks efek bahasa Indonesia. Susun deck, bagikan sebagai link atau gambar.',
                  'Marvel Hero Rush TCG deck builder: 192 cards with official English names, effects, and artwork. Build decks, share them as a link or an image, and export a printable decklist.'],
-  metaHead:     ['Deck Komunitas','Community Decks'],
+  metaHead:     ['Community Deck','Community Deck'],
   metaIntro:    ['Deck yang sedang banyak dipakai di komunitas MHR Indonesia. Muat salah satunya ke Deck Builder untuk dilihat isinya atau dimodifikasi — deck yang sedang Anda susun tidak tertimpa.',
                  'Decks that are seeing a lot of play in the Indonesian MHR community. Load one into Deck Builder to inspect or modify it — the deck you are currently building is never overwritten.'],
   metaLoad:     ['Muat ke Deck Builder','Load into Deck Builder'],
@@ -1929,6 +1966,12 @@ const T = {
   metaNone:     ['Belum ada deck komunitas yang cocok dengan filter ini.','No community deck matches this filter yet.'],
   metaAvgLv:    ['rata-rata Lv','average Lv'],
   lgsHead:      ['Hero Base','Hero Base'],
+  /* v6.26: halaman Tournaments — deck Top-N dari turnamen resmi Marvel Hero Rush */
+  tourneyHead:  ['Tournaments','Tournaments'],
+  tourneyIntro: ['Deck-deck dari babak Top di turnamen resmi Marvel Hero Rush. Muat salah satunya ke Deck Builder untuk dilihat isinya — deck yang sedang Anda susun tidak tertimpa.',
+                 'Decks from the Top placements of official Marvel Hero Rush tournaments. Load one into Deck Builder to inspect it — the deck you are currently building is never overwritten.'],
+  tourneyNone:  ['Belum ada data turnamen.','No tournament data yet.'],
+  tourneySrc:   ['Sumber','Source'],
   close:        ['✕ Tutup','✕ Close'],
   /* --- simulasi draw --- */
   simHead:      ['Simulasi Draw Awal','Opening Draw Simulator'],
@@ -2016,7 +2059,7 @@ const T = {
   linkCopied:   ['✓ Link tersalin','✓ Link copied'],
   copied:       ['Tersalin ✓','Copied ✓'],
   /* v6.18: kotak submission deck komunitas publik (lihat renderSubmitBox) */
-  subHead:      ['📤 Kirim deck kamu ke Deck Komunitas','📤 Submit your deck to the Community Decks'],
+  subHead:      ['📤 Kirim deck kamu ke Community Deck','📤 Submit your deck to Community Deck'],
   subIntro:     ['Deck yang kamu kirim <b>tidak langsung tayang</b> — ditinjau dulu (moderasi) sebelum ditambahkan, supaya daftarnya tetap rapi dan sesuai aturan. Susun dulu deck aktif kamu di Deck Builder, lalu lengkapi formulir ini.',
                  'Decks you submit are <b>not published immediately</b> — they are reviewed first before being added, to keep the list tidy and rule-compliant. Build your active deck in the Deck Builder first, then fill out this form.'],
   subNmPh:      ['Nama deck','Deck name'],
@@ -2157,12 +2200,18 @@ function applyLang(){
   const ogd = document.querySelector('meta[property="og:description"]');
   if(ogd) ogd.setAttribute('content', t('metaDesc'));
   /* Mode Inggris sengaja dibuat sederhana: hanya Kartu + Deck Builder.
-     Deck Komunitas dan Turnamen isinya konten komunitas Indonesia (nama deck
-     berbahasa Indonesia, jadwal LGS Indonesia), jadi tidak ditampilkan —
-     pengunjung luar negeri langsung fokus ke deck builder.
-     Pengecualian: mode admin (?admin=1) tetap bisa membuka Deck Komunitas
-     supaya pembuat kode deck tidak terkunci saat bahasanya Inggris. */
-  const sembunyi = { lgs:(state.lang === 'en'), meta:(state.lang === 'en' && !isAdmin) };
+     Community Deck, Tournaments, dan Hero Base isinya konten komunitas
+     Indonesia (nama deck berbahasa Indonesia, label peringkat turnamen,
+     jadwal LGS Indonesia), jadi tidak ditampilkan — pengunjung luar negeri
+     langsung fokus ke deck builder.
+     Pengecualian: mode admin (?admin=1) tetap bisa membuka Community Deck
+     supaya pembuat kode deck tidak terkunci saat bahasanya Inggris. Halaman
+     Tournaments (v6.26) TIDAK punya panel admin (beda dengan Community Deck —
+     tidak ada submission publik/generator kode di sini, isinya cuma murni
+     ditempel pemilik ke data.js seperti LGS), jadi tidak perlu pengecualian
+     admin — selalu ikut aturan yang sama dengan Hero Base. */
+  const sembunyi = { lgs:(state.lang === 'en'), tourney:(state.lang === 'en'),
+    meta:(state.lang === 'en' && !isAdmin) };
   Object.entries(sembunyi).forEach(([p,off])=>{
     const tab = $(`#navTabs button[data-page="${p}"]`);
     if(tab) tab.hidden = off;
@@ -2189,6 +2238,7 @@ function applyLang(){
   if(typeof renderBkNote === 'function') renderBkNote();
   if(typeof renderDukung === 'function') renderDukung();
   if(state.page === 'meta') renderMeta();
+  if(state.page === 'tourney') renderTourney();
   if(state.page === 'lgs')  renderLgs();
   if(state.page === 'panduan') renderPanduan();
 }
@@ -4396,18 +4446,22 @@ function renderPanduan(){
 }
 
 /* ==================== NAVIGASI HALAMAN ==================== */
-const PAGES = ['cards','build','meta','lgs','panduan'];
+const PAGES = ['cards','build','meta','tourney','lgs','panduan'];
 function setPage(p, dariHash){
   if(!PAGES.includes(p)) p = 'cards';
   /* mode Inggris hanya punya Kartu + Deck Builder (lihat applyLang).
      Panduan sengaja dikecualikan — dwibahasa penuh, dan justru paling
-     berguna untuk pemain baru berbahasa Inggris. */
-  if(state.lang === 'en' && (p === 'lgs' || (p === 'meta' && !isAdmin))) p = 'cards';
+     berguna untuk pemain baru berbahasa Inggris. Tournaments (v6.26) ikut
+     aturan yang sama dengan Hero Base — nama deck & label peringkat konten
+     komunitas Indonesia, tidak ada pengecualian admin (tidak ada panel admin
+     di halaman ini, beda dengan Community Deck). */
+  if(state.lang === 'en' && (p === 'lgs' || p === 'tourney' || (p === 'meta' && !isAdmin))) p = 'cards';
   state.page = p;
   document.body.className = 'page-' + p;
   [...$('#navTabs').children].forEach(b=>
     b.setAttribute('aria-current', String(b.dataset.page === p)));
   if(p === 'meta') renderMeta();
+  if(p === 'tourney') renderTourney();
   if(p === 'lgs') renderLgs();
   if(p === 'panduan') renderPanduan();
   if(p === 'cards' || p === 'build') renderCards();
@@ -4543,6 +4597,104 @@ $('#metaGrid').addEventListener('click', e=>{
   } else {
     // pratinjau murni: tidak menyentuh deck yang sedang disusun sama sekali
     openDeckView({...r.deck}, namaDeckLokal(d.nm) + (d.cr?` — by ${d.cr}`:''));
+  }
+});
+
+/* ==================== v6.26: HALAMAN TOURNAMENTS ====================
+   Deck Top-N dari turnamen resmi Marvel Hero Rush. Datanya window.TOURNAMENTS
+   di data.js (dikelola pemilik sendiri lewat editor GitHub, sama seperti
+   DECK_KOMUNITAS/LGS — bukan hasil submission publik, jadi tidak ada panel
+   admin/generator kode di halaman ini). Tiap deck di dalam event.top memakai
+   field `cd` dengan format PERSIS SAMA dengan encodeDeck()/decodeDeck() yang
+   sudah dipakai Community Deck, supaya bisa langsung dimuat ke Deck Builder
+   atau dilihat visual lewat jalur (openDeckView) yang sama — tidak ada kode
+   baru untuk decode/render kartu. Struktur satu entri di event.top:
+     { pk:'Juara 1', nm:'Merah - Hijau', cr:'', ds:'', cd:'1.....' }
+   pk = label peringkat (badge, bebas teks — "Juara 1", "Semifinalis", dst),
+   cr = nama pembuat/pemain kalau diketahui (opsional, kosongkan kalau tidak
+   ada data resmi — JANGAN ditebak/dikarang). */
+const TOURNAMENTS = (typeof window !== 'undefined' && Array.isArray(window.TOURNAMENTS))
+  ? window.TOURNAMENTS : [];
+
+let TOURNEY_FLAT = [];   // diisi ulang tiap renderTourney(); {ev, d} datar untuk handler klik
+
+function renderTourney(){
+  TOURNEY_FLAT = [];
+  if(!TOURNAMENTS.length){
+    $('#tourneyList').innerHTML = `<div class="empty">${t('tourneyNone')}</div>`;
+    $('#navTourney').textContent = 0;
+    return;
+  }
+  $('#tourneyList').innerHTML = TOURNAMENTS.map(ev=>{
+    const kartu = (ev.top||[]).map(d=>{
+      const r = decodeDeck(d.cd);
+      if(!r || !Object.keys(r.deck).length) return '';
+      const s = deckStats(r.deck);
+      const idx = TOURNEY_FLAT.push({ev, d}) - 1;
+      const strip = previewCards(r.deck, 4).map(c=>
+        `<img alt="" data-ext="0" src="images/${c.no}.jpg" loading="lazy"
+          onerror="metaImgFallback(this,'${c.no}','${CMAP[c.c]}')">`).join('') ||
+        `<div class="ph"></div>`;
+      const bar = Object.entries(s.col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]])
+        .map(([c,n])=>`<div style="width:${n/s.tot*100}%;background:${CMAP[c]}" title="${c}: ${n}"></div>`).join('');
+      return `<div class="meta-card">
+        <div class="meta-strip">${strip}</div>
+        <div class="meta-body">
+          <div class="meta-top">
+            ${d.pk?`<span class="tny-rank">${escHtml(d.pk)}</span>`:''}
+            <span class="meta-nm">${escHtml(namaDeckLokal(d.nm))}</span>
+            ${d.cr?`<span class="meta-by">by <b>${escHtml(d.cr)}</b></span>`:''}
+          </div>
+          <div class="meta-bar">${bar}</div>
+          <div class="meta-stat">
+            <span><b>${s.tot}</b> ${t('cards')}</span>
+            <span>${t('metaAvgLv')} <b>${s.avgLv}</b></span>
+          </div>
+          ${d.ds?`<div class="meta-desc">${escHtml(d.ds)}</div>`:''}
+          <div class="meta-act">
+            <button class="main" data-tny-load="${idx}">${t('metaLoad')}</button>
+            <button data-tny-view="${idx}">${t('metaView')}</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    const meta = [ev.tanggal, ev.lokasi, ev.penyelenggara].filter(Boolean).join(' · ');
+    return `<div class="tny-event">
+      <div class="tny-event-head">
+        <div class="tny-event-nm">${escHtml(ev.nama)}</div>
+        ${meta?`<div class="tny-event-meta">${escHtml(meta)}</div>`:''}
+        ${ev.sumber?`<div class="tny-event-src">${t('tourneySrc')}: <a href="${escHtml(ev.sumber)}" target="_blank" rel="noopener">Instagram</a></div>`:''}
+      </div>
+      <div class="tny-grid">${kartu}</div>
+    </div>`;
+  }).join('');
+  $('#navTourney').textContent = TOURNEY_FLAT.length;
+}
+
+$('#tourneyList').addEventListener('click', e=>{
+  const bl = e.target.closest('[data-tny-load]');
+  const bv = e.target.closest('[data-tny-view]');
+  if(!bl && !bv) return;
+  const item = TOURNEY_FLAT[parseInt(bl ? bl.dataset.tnyLoad : bv.dataset.tnyView)];
+  if(!item) return;
+  const d = item.d;
+  const r = decodeDeck(d.cd);
+  if(!r || !Object.keys(r.deck).length){ alert(t('mBadCode')); return; }
+
+  if(bl){
+    let nama = namaDeckLokal(d.nm) + (d.pk?` (${d.pk})`:'');
+    const asli = nama; let i = 2;
+    while(store.decks[nama]) nama = `${asli} ${i++}`;
+    store.decks[store.active] = state.deck;      // amankan deck yang sedang dibuka
+    store.decks[nama] = {...r.deck};
+    store.active = nama;
+    state.deck = store.decks[nama];
+    renderDeckSelect();
+    /* sama seperti #metaGrid: setTimeout(0) supaya browser sempat mengecat
+       dulu sebelum kerja berat (gambar ulang ratusan kartu) jalan. */
+    setTimeout(()=>{ setPage('build'); renderAll(); }, 0);
+  } else {
+    openDeckView({...r.deck}, namaDeckLokal(d.nm) + (d.pk?` — ${d.pk}`:''));
   }
 });
 
