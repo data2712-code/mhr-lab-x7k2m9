@@ -340,7 +340,7 @@ toko berada di satu kota, baris filternya tidak ditampilkan sama sekali.
 Jangan lupa ubah `LGS_UPDATE` ke tanggal terakhir jadwal dicek, karena tanggal itu
 ditampilkan ke pengunjung sebagai penanda seberapa baru datanya.
 
-Jadwal saat ini — **17 toko, 23 sesi/minggu, 7 kota**:
+Jadwal saat ini — **18 toko, 24 sesi/minggu, 8 kota**:
 
 | Hari | LGS | Kota | Jam |
 |---|---|---|---|
@@ -367,6 +367,7 @@ Jadwal saat ini — **17 toko, 23 sesi/minggu, 7 kota**:
 | Minggu | Savepoint | Depok | 16.00 WIB – Selesai |
 | Minggu | Exordium TCG | Medan | 14.00 WIB – Selesai |
 | Minggu | Gale Force Games | Batam | 16.00 WIB – Selesai |
+| Minggu | Arnando Garage | Bali | 18.00 WITA – Selesai |
 
 ### Statistik pengunjung (Cloudflare Web Analytics)
 
@@ -431,6 +432,18 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### Tambahan jadwal — 4 September 2026 *(hanya `data.js`)*
+- **Arnando Garage** (Bali) masuk daftar — Minggu 18.00 WITA – Selesai. Ini toko
+  LGS **pertama di luar zona WIB** yang terdaftar, jadi field `tz:'WITA'`
+  dipakai untuk toko ini (field ini sudah ada sejak awal di skema `LGS`, tinggal
+  dipakai — tidak perlu perubahan kode)
+- Total kini **18 toko · 24 sesi per minggu · 8 kota**
+- Kota baru (**Bali**) otomatis masuk grup **Luar Jabodetabek** di dropdown filter
+  (tidak perlu ubah `index.html` — `wilayahKota()` sudah menangani kota di luar
+  Jabodetabek secara default sejak v6.16, cukup nama kotanya belum terdaftar di
+  grup Jabodetabek)
+- `index.html` **tidak berubah** (tetap v6.25) — cukup unggah ulang `data.js`
 
 ### v6.25 — Panduan Bermain diperkaya dari studi lengkap Comprehensive Rules 1.03 — 3 September 2026
 Permintaan pemilik: pelajari dan simpan Comprehensive Rules 1.03 secara menyeluruh
