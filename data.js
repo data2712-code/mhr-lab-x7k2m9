@@ -114,7 +114,7 @@ window.TOURNAMENTS = [
     nama: 'Multiverse Battle',
     tanggal: '30 Agustus 2026',
     lokasi: 'Gramedia Matraman, Jakarta',
-    penyelenggara: 'AZLN x CARDFUN x Marvel Hero Rush Indonesia',
+    penyelenggara: 'Marvel Hero Rush Indonesia',
     sumber: 'https://www.instagram.com/marvelherorush.id/',
     top: [
       { pk:'Juara 1', nm:'Merah - Hijau', cr:'', ds:'',
