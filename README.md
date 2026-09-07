@@ -383,7 +383,7 @@ toko berada di satu kota, baris filternya tidak ditampilkan sama sekali.
 Jangan lupa ubah `LGS_UPDATE` ke tanggal terakhir jadwal dicek, karena tanggal itu
 ditampilkan ke pengunjung sebagai penanda seberapa baru datanya.
 
-Jadwal saat ini — **18 toko, 24 sesi/minggu, 8 kota**:
+Jadwal saat ini — **19 toko, 25 sesi/minggu, 9 kota**:
 
 | Hari | LGS | Kota | Jam |
 |---|---|---|---|
@@ -402,6 +402,7 @@ Jadwal saat ini — **18 toko, 24 sesi/minggu, 8 kota**:
 | Jumat | Alex Hobby Shop | Tangerang | 20.00 WIB – Selesai |
 | Jumat | Gale Force Games | Batam | 19.00 WIB – Selesai |
 | Jumat | Savepoint | Depok | 19.30 WIB – Selesai |
+| Jumat | Sekte Figure | Tanjung Pinang | 19.00 WIB – Selesai |
 | Sabtu | Global Hobiz Store | Jakarta | 13.00 WIB – Selesai |
 | Sabtu | TwoStompas | Jakarta | 15.00 WIB – Selesai |
 | Sabtu | Gattchaa Mega Mall Batam Center | Batam | 17.30 WIB – Selesai |
@@ -475,6 +476,18 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### Jadwal LGS baru — 7 September 2026 *(hanya `data.js`)*
+Toko baru ditambahkan ke Weekly Rush LGS: **Sekte Figure** (Tanjung Pinang),
+Jumat 19.00 WIB – Selesai. Kota **Tanjung Pinang** baru pertama kali muncul di
+daftar — otomatis dikelompokkan ke grup filter "Luar Jabodetabek" oleh
+`wilayahKota()` tanpa perlu ubah kode apa pun (regex kota-nya cuma mengenali
+Jakarta/Bekasi/Depok/Tangerang/Bogor sebagai Jabodetabek, sisanya otomatis masuk
+grup luar). `LGS_UPDATE` diperbarui ke 7 September 2026. Total sekarang **19
+toko · 25 sesi/minggu · 9 kota**. Diverifikasi lewat `node --check` (lolos) +
+tes fungsional Playwright (toko & kota baru muncul di render, badge hitung
+filter kota jadi "Tanjung Pinang (1)", link peta & label hari benar, total
+`window.LGS.length` = 19).
 
 ### v6.27 — analisis "Kartu paling sering dipakai" di halaman Tournaments — 4 September 2026
 Permintaan pemilik: tampilkan analisis persentase kartu apa saja yang paling
