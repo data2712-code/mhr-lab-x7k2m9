@@ -537,6 +537,16 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
 
 ## Riwayat Update
 
+### Kalimat keterangan halaman Dukung diubah — 8 September 2026 *(hanya `data.js`)*
+Permintaan pemilik: ganti kalimat di `DUKUNG.teks.id` (tampil di footer & subjudul
+halaman "Dukung Kami") jadi "MHR Deck Lab dibuat dan dirawat sendiri untuk
+teman - teman komunitas Marvel Hero Rush, Dukungan sukarela kamu akan dipakai
+untuk biaya domain, hosting dan fitur lainnya." Tidak ada perubahan struktur
+data atau kode lain. Diverifikasi lokal via Playwright (teks baru tampil benar
+di footer & halaman `#dukung`) sebelum deploy 1 commit ke `main` lewat Chrome;
+cache Cloudflare di-purge (Purge Everything) dan situs live dikonfirmasi
+menampilkan teks baru.
+
 ### Tombol share per kartu + halaman statis `cards/<no>.html` untuk preview WhatsApp — 8 September 2026
 
 Permintaan pemilik: tambahkan tombol share di setiap gambar kartu supaya
