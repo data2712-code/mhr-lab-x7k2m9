@@ -70,7 +70,13 @@ self.addEventListener('fetch', e=>{
       const hit = await cache.match(req);
       if(hit) return hit;
       try{
-        const res = await fetch(req);
+        /* cache:'reload' di sini penting: kalau tidak, saat cache gambar
+           kosong (mis. setelah CACHE_VERSION dinaikkan) fetch() ini masih
+           bisa "ditangkap" duluan oleh HTTP cache biasa browser yang
+           kebetulan masih menyimpan versi gambar lama dari sebelum
+           perbaikan/penggantian file di server -- sama persis alasan
+           kenapa fetch untuk aset statis di bawah juga pakai opsi ini. */
+        const res = await fetch(req, {cache: 'reload'});
         if(res && res.ok) cache.put(req, res.clone());
         return res;
       }catch(err){
