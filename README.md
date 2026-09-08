@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.27** · 4 September 2026
+**Versi saat ini: v6.28** · 8 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -29,7 +29,7 @@ Simpan bukti tertulis izinnya beserta nama pemberi dan tanggalnya.
 ```
 mhr-lab-x7k2m9/
 ├── index.html        ← seluruh aplikasi (HTML + CSS + JS)
-├── cards.js           ← database 208 kartu — diganti tiap ada set kartu baru
+├── cards.js           ← database 288 kartu — diganti tiap ada set kartu baru
 ├── data.js             ← deck komunitas, hasil turnamen (sejak v6.26), jadwal LGS, dukungan — diedit sendiri pemilik
 ├── manifest.json    ← PWA: nama, ikon, warna tema (sejak v6.6)
 ├── sw.js                 ← PWA: service worker, cache offline (sejak v6.6)
@@ -454,9 +454,9 @@ bersifat case-sensitive.
 
 | Hal | Keterangan |
 |---|---|
-| Sumber data kartu | API resmi `server.marvelherorush.com/marvel/card/list` (200 kartu) + 8 kartu Hero File SD01–SD04 dari scan kartu = **208 kartu** |
-| Ukuran gambar kartu | lebar 450 px, ber-watermark SAMPLE, ±80–90 KB per file |
-| Varian artwork | 40 berkas alternate art, penamaan `NOMOR_RARITY.jpg` (mis. `BP01-001_MR.jpg`) |
+| Sumber data kartu | API resmi `server.marvelherorush.com/marvel/card/list` (200 kartu) + 8 kartu Hero File SD01–SD04 dari scan kartu + 80 kartu SP01 dari API resmi `en/cards` (versi Inggris, belum ada cetakan ID — lihat § v6.28) = **288 kartu** |
+| Ukuran gambar kartu | lebar 450 px (SP01: ~568×784, belum di-resize seragam — lihat § v6.28), ber-watermark SAMPLE, ±80–90 KB per file (SP01: ±170 KB, screenshot resolusi lebih tinggi) |
+| Varian artwork | ~76 berkas alternate art, penamaan `NOMOR_RARITY.jpg` (mis. `BP01-001_MR.jpg`) |
 | Aturan deck | 50 kartu, maksimal 3 salinan **per nama karakter**, maksimal 2 warna (101.1) |
 | Rush Deck | 9 Rush Card, tanpa batasan pilihan (101.2) — tidak dikelola di Deck Lab |
 | Warna yang ada | Merah, Kuning, Biru, Hijau, **Orange, Purple** (201.5.b) — dua terakhir belum terbit |
@@ -469,13 +469,86 @@ bersifat case-sensitive.
 | Nama repository | diacak (`mhr-lab-x7k2m9`) — sisa dari fase uji coba awal, sekarang cuma kosmetik karena `robots.txt` sudah dihapus (situs boleh diindeks penuh, lihat § Riwayat Update 2 September 2026) |
 
 **Kode link deck:** 1 huruf seri + 3 digit nomor + jumlah (basis36).
-Seri: `A`=BP01, `B`=PB01, `C`=EB01, `D`=TB01, `E`=SD01, `F`=SD02, `G`=SD03, `H`=SD04.
+Seri: `A`=BP01, `B`=PB01, `C`=EB01, `D`=TB01, `E`=SD01, `F`=SD02, `G`=SD03, `H`=SD04, `I`=SP01.
 Angka versi di depan wajib dipertahankan — kalau format berubah, naikkan ke 2
 dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ---
 
 ## Riwayat Update
+
+### v6.28 — set baru **SP01** ditambahkan (80 kartu karakter) — 8 September 2026
+Permintaan pemilik: ekstrak seluruh data & gambar kartu product series **SP01**
+yang sudah rilis versi Bahasa Inggris di situs resmi (`marvelherorush.com/en/cards`),
+lalu integrasikan ke Deck Lab sebagai seri terbaru. Repo tidak bisa disambungkan
+lewat device bridge di sesi ini (pemilik memakai komputer berbeda dari yang
+biasa terhubung), jadi seluruh perubahan dilakukan **langsung ke GitHub lewat
+browser (Claude in Chrome), commit langsung ke `main`** — bukan lewat GitHub
+Desktop pemilik seperti biasa. Sesi ini juga tidak punya akses `git`/API GitHub
+terautentikasi dari sandbox cloud-nya (dicoba, ditolak), jadi jalur browser
+memang satu-satunya opsi yang tersedia untuk device/sesi ini.
+
+- **Sumber data**: API resmi `server.marvelherorush.com/marvel/card/list?product_id=<SP01>&language=en`
+  (bukan scraping HTML) — 152 baris data mentah (100 nomor kartu unik × varian
+  rarity), dicocokkan ke 152 gambar kartu resmi (juga dari server resmi,
+  ditangkap lewat screenshot browser karena unduhan langsung dari sandbox
+  cloud diblokir kebijakan jaringan org).
+- **20 dari 100 nomor kartu (SP01-081 s/d SP01-100) adalah kartu "RUSH POINT"** —
+  tipe `impact`, tanpa nama/teks efek/level/power sama sekali (penanda cetak
+  fisik, bukan kartu karakter yang bisa dipakai deck). **Kartu-kartu ini
+  SENGAJA TIDAK dimasukkan ke `cards.js`** (skema database saat ini cuma
+  mendukung kartu karakter) — gambarnya juga tidak diproses. Kalau pemilik
+  suatu saat ingin menampilkannya juga (mis. sebagai referensi), perlu skema
+  baru dulu.
+- **80 kartu karakter (SP01-001 s/d SP01-080)** diterjemahkan penuh ke Bahasa
+  Indonesia (field `nm`/`e`) mengikuti terminologi yang sudah baku di 208
+  kartu lain (istilah zona FIELD/BATTLE/HAND/dst. dipertahankan Inggris, kata
+  kerja RETREAT/Prune dipertahankan sebagai kata pinjaman, dll.) — **ini
+  terjemahan buatan sesi Claude, BUKAN terjemahan resmi tim MHR Indonesia**,
+  jadi kalau tim resmi merilis terjemahan sendiri untuk SP01 nanti, field `e`
+  perlu ditinjau ulang/diganti.
+- **Kemampuan kunci baru**: SP01 memperkenalkan rarity **`HR`** yang belum
+  pernah ada di 208 kartu sebelumnya (asumsi sementara: diurutkan setelah
+  `SEC` di array `ra`, belum ada konfirmasi resmi urutan rarity-nya — cek
+  ulang kalau pemilik dapat info resmi). Kemampuan **`[BLOCK]`** dan
+  **`AIR STRIKE`** (sudah ada presedennya di `SD04-004`/`SD04-005`) dipakai
+  lagi dengan definisi identik. **3 kartu** (SP01-021/022/063) punya **2
+  gambar rarity `HR` berbeda** (kemungkinan varian serial/parallel print
+  berbeda) — cuma 1 yang dipakai per kartu, yang satunya tidak disertakan
+  sama sekali (bukan cuma tidak dipakai di `cards.js`, filenya memang tidak
+  diupload) — perlu keputusan pemilik kalau kedua varian itu memang perlu
+  ditampilkan terpisah.
+- **Gambar**: ditempatkan di `images/en/` (asli) **DAN** disalin sama persis
+  ke `images/` root (dipakai mode Bahasa Indonesia) — **keputusan sepihak
+  sesi ini** karena SP01 belum punya cetakan resmi Bahasa Indonesia sama
+  sekali (beda dari SD01–SD04 yang gambar `images/`-nya adalah cetakan ID
+  resmi, bukan salinan versi Inggris) — kalau tidak disalin, seluruh 80 kartu
+  SP01 akan tampil gambar kosong/rusak di mode ID (`artFile()` tidak pernah
+  fallback antar-folder bahasa). **Ganti gambar `images/` root dengan cetakan
+  ID resmi begitu tersedia.** Semua gambar sudah ber-watermark SAMPLE resmi
+  dari situs sumbernya sendiri (bukan ditambah sesi ini), jadi sudah
+  memenuhi syarat izin penggunaan gambar yang tercatat di bagian atas
+  dokumen ini.
+- **Resolusi gambar tidak seragam** dengan set lain: gambar SP01 ditangkap
+  lewat screenshot browser (~568×784px sebelum crop, ±170KB/file) karena
+  unduhan langsung URL gambar diblokir, beda dari pipeline resize-450px yang
+  dipakai set-set sebelumnya — kualitas visual tetap baik, cuma ukuran file
+  lebih besar dari biasanya.
+- **Kode seri baru**: `SP01` diberi huruf **`I`** di `SER2L`/`L2SER` (huruf
+  `A`–`H` sudah dipakai BP01/PB01/EB01/TB01/SD01–SD04) — dipakai untuk format
+  kode link deck & Community Deck.
+- Tagline & `#hTotal` diperbarui dari 208→**288 kartu** (mode ID) dan
+  192→**272 kartu** (mode EN, SP01 punya `nm_en`/`e_en` penuh jadi semua 80
+  kartu ikut terhitung).
+- **Verifikasi**: `cards.js` gabungan (288 entri) divalidasi lewat Node —
+  parse berhasil, 288 nomor kartu semuanya unik, field wajib (`no`/`nm`/`s`/
+  `c`/`l`/`r`/`p`/`ra`) lengkap di semua entri. Blok `<script>` inline
+  `index.html` lolos `node --check` setelah seluruh edit (tagline, `SER2L`,
+  nomor versi). **BELUM** ada tes fungsional Playwright end-to-end di sesi
+  ini (mis. render kartu SP01 di grid, filter per-seri, popup detail) —
+  disarankan untuk sesi berikutnya sebagai pengecekan visual tambahan.
+- Data mentah, mapping gambar, dan dokumentasi metodologi ekstraksi lengkap
+  ada di project doc `2026-09-08-ekstraksi-data-kartu-sp01-inggris.md`.
 
 ### Jadwal LGS baru — 7 September 2026 *(hanya `data.js`)*
 Toko baru ditambahkan ke Weekly Rush LGS: **Sekte Figure** (Tanjung Pinang),
