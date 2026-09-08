@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.27  ·  4 September 2026
+     MHR DECK LAB  ·  versi 6.28  ·  8 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -901,10 +901,10 @@
 <header>
   <div class="brand">
     <h1>MHR <span class="stripe">DECK LAB</span></h1>
-    <p data-i18n="tagline">Marvel Hero Rush TCG Deck Builder · 208 kartu (BP01 · PB01 · PR · SD01–SD04) · Ver. Indonesia</p>
+    <p data-i18n="tagline">Marvel Hero Rush TCG Deck Builder · 288 kartu (BP01 · PB01 · PR · SD01–SD04 · SP01) · Ver. Indonesia</p>
   </div>
   <div class="hdr-stats">
-    <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">208</b></div>
+    <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">288</b></div>
     <div class="pill"><span data-i18n="statShown">Ditampilkan</span> <b id="hShown">208</b></div>
     <div class="pill"><span data-i18n="statDeck">Deck</span> <b id="hDeck">0</b></div>
     <!-- Ruang tombol ini SENGAJA sudah dipesan sejak HTML awal (visibility:hidden,
@@ -1149,7 +1149,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.27</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.28</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1828,8 +1828,8 @@ $('#deckList').addEventListener('click', e=>{
    t('kunci') di JavaScript, atau data-i18n="kunci" pada elemen HTML statis. */
 const T = {
   /* --- navigasi & kepala halaman --- */
-  tagline:      ['Marvel Hero Rush TCG Deck Builder · 208 kartu (BP01 · PB01 · PR · SD01–SD04) · Ver. Indonesia',
-                 'Marvel Hero Rush TCG Deck Builder · 192 cards (BP01 · SD01–SD04) · English Ver.'],
+  tagline:      ['Marvel Hero Rush TCG Deck Builder · 288 kartu (BP01 · PB01 · PR · SD01–SD04 · SP01) · Ver. Indonesia',
+                 'Marvel Hero Rush TCG Deck Builder · 272 cards (BP01 · SD01–SD04 · SP01) · English Ver.'],
   navCards:     ['Kartu','Cards'],
   navCardsS:    ['Kartu','Cards'],
   navBuild:     ['Deck Builder','Deck Builder'],
@@ -3556,7 +3556,7 @@ function renderBkNote(){
    Kode kartu: 1 huruf seri + 3 digit nomor + jumlah (basis36, 1 karakter).
    Angka "1" di depan adalah versi format — jangan diubah artinya; kalau nanti
    formatnya berganti, naikkan jadi 2 dan tetap dukung pembacaan versi 1. */
-const SER2L = {BP01:'A', PB01:'B', EB01:'C', TB01:'D', SD01:'E', SD02:'F', SD03:'G', SD04:'H'};
+const SER2L = {BP01:'A', PB01:'B', EB01:'C', TB01:'D', SD01:'E', SD02:'F', SD03:'G', SD04:'H', SP01:'I'};
 const L2SER = Object.fromEntries(Object.entries(SER2L).map(([k,v])=>[v,k]));
 
 function b64urlEncode(str){
