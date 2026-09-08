@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.28** · 8 September 2026
+**Versi saat ini: v6.29** · 8 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -29,7 +29,7 @@ Simpan bukti tertulis izinnya beserta nama pemberi dan tanggalnya.
 ```
 mhr-lab-x7k2m9/
 ├── index.html        ← seluruh aplikasi (HTML + CSS + JS)
-├── cards.js           ← database 288 kartu — diganti tiap ada set kartu baru
+├── cards.js           ← database 288 kartu (80 SP01 disembunyikan sementara di mode ID — lihat § v6.29) — diganti tiap ada set kartu baru
 ├── data.js             ← deck komunitas, hasil turnamen (sejak v6.26), jadwal LGS, dukungan — diedit sendiri pemilik
 ├── manifest.json    ← PWA: nama, ikon, warna tema (sejak v6.6)
 ├── sw.js                 ← PWA: service worker, cache offline (sejak v6.6)
@@ -454,7 +454,7 @@ bersifat case-sensitive.
 
 | Hal | Keterangan |
 |---|---|
-| Sumber data kartu | API resmi `server.marvelherorush.com/marvel/card/list` (200 kartu) + 8 kartu Hero File SD01–SD04 dari scan kartu + 80 kartu SP01 dari API resmi `en/cards` (versi Inggris, belum ada cetakan ID — lihat § v6.28) = **288 kartu** |
+| Sumber data kartu | API resmi `server.marvelherorush.com/marvel/card/list` (200 kartu) + 8 kartu Hero File SD01–SD04 dari scan kartu + 80 kartu SP01 dari API resmi `en/cards` (versi Inggris, belum ada cetakan/terjemahan ID resmi — **disembunyikan di mode ID sejak v6.29**, lihat § v6.29) = **288 kartu di database, 208 tampil di mode ID / 272 di mode EN** |
 | Ukuran gambar kartu | lebar 450 px (SP01: ~568×784, belum di-resize seragam — lihat § v6.28), ber-watermark SAMPLE, ±80–90 KB per file (SP01: ±170 KB, screenshot resolusi lebih tinggi) |
 | Varian artwork | ~76 berkas alternate art, penamaan `NOMOR_RARITY.jpg` (mis. `BP01-001_MR.jpg`) |
 | Aturan deck | 50 kartu, maksimal 3 salinan **per nama karakter**, maksimal 2 warna (101.1) |
@@ -476,6 +476,77 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 ---
 
 ## Riwayat Update
+
+### v6.29 — SP01 disembunyikan dari mode Indonesia (belum ada terjemahan resmi) — 8 September 2026
+
+Permintaan pemilik segera setelah v6.28: karena SP01 baru rilis versi Bahasa
+Inggris resmi, dan terjemahan Indonesia di `cards.js` untuk set ini masih
+fan-translation buatan sesi Claude (BUKAN resmi tim MHR Indonesia), pemilik
+minta seluruh 80 kartu SP01 **disembunyikan dari versi Indonesia** situs
+supaya tidak ada risiko salah informasi terjemahan sampai terjemahan resmi
+tersedia. SP01 **tetap tampil penuh di versi Inggris** (datanya memang sumber
+resmi di sana).
+
+- **Mekanisme**: konstanta baru `const ID_PENDING_SETS = ['SP01'];` + fungsi
+  `cardVisible(c)` diperluas — kartu dari seri manapun yang tercantum di
+  array ini disembunyikan total kalau `state.lang !== 'en'` (mode ID),
+  terlepas dari field `nm_en`. Ini memakai ulang gerbang visibilitas yang
+  sama dengan mekanisme lama "sembunyikan di mode EN kalau `nm_en` kosong" —
+  cuma dibalik arah bahasanya. **Cara membatalkan begitu terjemahan resmi
+  ID tersedia**: cukup hapus `'SP01'` dari array `ID_PENDING_SETS` (satu
+  baris), tidak perlu ubah `cards.js` sama sekali.
+- Karena `cardVisible()` adalah gerbang tunggal yang sudah dipakai di semua
+  tempat (grid utama `filtered()`, dropdown filter seri/rarity/trait,
+  hitungan kemampuan kunci, `#hTotal`, kartu terkait di popup), **SP01
+  otomatis hilang dari seluruh permukaan situs mode ID** tanpa perlu
+  disentuh satu per satu — termasuk `#hTotal` yang dihitung dinamis
+  (`DB.filter(cardVisible).length`, dipanggil ulang tiap `applyLang()`).
+  Satu tempat yang TIDAK memakai `cardVisible()` sebelumnya ditemukan dan
+  diperbaiki sekalian: kotak pencarian cetak proxy (`#pxSearch`, admin-only)
+  — ditambah `cardVisible(c) &&` supaya SP01 juga tidak muncul di sana saat
+  mode ID.
+- **Ditemukan sekalian & diperbaiki**: `<meta name="version" content="...">`
+  di `<head>` ternyata masih tertulis `6.27` sejak sesi v6.28 kemarin (luput
+  tidak ikut dinaikkan waktu itu, padahal header comment & footer sudah
+  benar v6.28) — sekarang disinkronkan ke v6.29 bersama dua tempat lainnya.
+- **Tagline & `#hTotal` mode ID dikembalikan** dari 288→**208 kartu** (persis
+  sama seperti sebelum SP01 ditambahkan, karena SP01 kini tidak terhitung di
+  mode ini) dan teks tagline ID tidak lagi menyebut "· SP01". **Mode EN TIDAK
+  berubah** — tetap 272 kartu, tetap menyebut "· SP01" di tagline, karena
+  SP01 tetap sepenuhnya tampil di sana.
+- **Data `cards.js` TIDAK dihapus/diubah sama sekali** — 80 kartu SP01 dan
+  terjemahannya tetap ada persis seperti v6.28, cuma disembunyikan dari
+  tampilan mode ID. Ini sengaja: begitu terjemahan resmi tersedia, sesi
+  mendatang tinggal (1) ganti field `e`/`nm` dengan teks resmi, (2) hapus
+  `'SP01'` dari `ID_PENDING_SETS` — tidak perlu menulis ulang data dari nol.
+- **Gambar `images/` root** (duplikat dari `images/en/`, keputusan interim
+  v6.28) **TIDAK dihapus** — filenya tetap ada di repo tapi sekarang benar-
+  benar tidak pernah diakses (kartu induknya disembunyikan di mode ID yang
+  memakai folder itu). Tidak berbahaya dibiarkan begitu saja; boleh diganti
+  langsung dengan cetakan ID resmi begitu tersedia (lebih efisien daripada
+  dihapus dulu baru diisi ulang).
+- **Edge case yang belum ditangani (dicatat, bukan diperbaiki)**: kalau ada
+  yang membangun deck berisi kartu SP01 saat mode EN (satu-satunya cara
+  menambahkannya ke deck sejak v6.29, karena mode ID tidak bisa mengaksesnya
+  sama sekali), lalu berpindah ke mode ID, panel deck (`#deckPanel`) masih
+  akan menampilkan kartu SP01 itu apa adanya (nama fan-translation ID-nya)
+  karena panel deck memakai `DB.find()` langsung, bukan lewat `filtered()`/
+  `cardVisible()`. Risiko rendah (butuh langkah sengaja: tambah di EN, lalu
+  pindah ke ID) dan bukan jalur normal pengunjung menemukan kartu ini —
+  kalau pemilik ingin ini juga ditutup rapat, perlu sesi terpisah untuk audit
+  seluruh pemanggilan `DB.find()` yang merender kartu dari deck tersimpan.
+- **Verifikasi**: `node --check` pada blok `<script>` inline (lolos, sebelum
+  & sesudah edit). Logika `cardVisible()` baru diuji terpisah lewat Node
+  (replikasi persis fungsinya di luar browser): DB 288 kartu → 208 tampil di
+  simulasi mode ID (SP01 tidak ada satupun) vs 272 di simulasi mode EN (SP01
+  lengkap 80) — hasilnya cocok persis dengan angka tagline yang ditulis
+  manual. **BELUM ada tes fungsional Playwright** (klik toggle bahasa di
+  browser nyata, cek grid/dropdown/popup benar-benar kosong dari SP01 di
+  mode ID) — sama seperti gap yang dicatat di v6.28, disarankan untuk sesi
+  berikutnya.
+- Sama seperti v6.28, sesi ini dikerjakan **langsung ke `main` lewat Chrome**
+  (device tanpa folder klon terhubung) — cuma 1 commit (`index.html` +
+  `README.md`, jauh di bawah batas ~99 file jadi tidak perlu dipecah).
 
 ### v6.28 — set baru **SP01** ditambahkan (80 kartu karakter) — 8 September 2026
 Permintaan pemilik: ekstrak seluruh data & gambar kartu product series **SP01**
