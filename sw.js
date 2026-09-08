@@ -26,7 +26,7 @@
    supaya versi baru langsung dipakai tanpa perlu semua tab ditutup dulu.
    =================================================================== */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_STATIC = `mhr-shell-${CACHE_VERSION}`;
 const CACHE_IMAGES = `mhr-images-${CACHE_VERSION}`;
 
