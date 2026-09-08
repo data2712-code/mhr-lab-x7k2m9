@@ -635,6 +635,40 @@
   .pd-base{max-width:340px;margin:0 auto 16px;background:var(--panel);border:1px dashed var(--line);
     border-radius:8px;text-align:center;padding:9px;font-size:11.5px;color:var(--muted)}
 
+  /* halaman: DUKUNG */
+  body:not(.page-dukung) #dukungPage{display:none}
+  body.page-dukung .filters, body.page-dukung .cards, body.page-dukung .deck{display:none}
+  body.page-dukung .layout{grid-template-columns:minmax(0,1fr)}
+
+  /* ================= HALAMAN DUKUNG KAMI ================= */
+  .dk-wrap{padding:22px 20px 90px;max-width:480px;margin:0 auto}
+  .dk-wrap h2.dk-title{font-family:var(--disp);font-size:26px;letter-spacing:.05em;
+    text-transform:uppercase;text-align:center}
+  .dk-wrap>p.dk-lead{color:var(--muted);font-size:12.5px;line-height:1.65;margin:8px 0 0;
+    text-align:center}
+  .dk-wrap>p.dk-nama{color:var(--paper);font-size:13px;text-align:center;margin:10px 0 22px}
+  .dk-wrap>p.dk-nama b{font-family:var(--disp);letter-spacing:.02em}
+  .dk-list{display:flex;flex-direction:column;gap:10px;margin:22px 0 26px}
+  .dk-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:13px 15px;display:flex;align-items:center;gap:12px}
+  .dk-icon{width:38px;height:38px;border-radius:10px;flex:none;display:flex;align-items:center;
+    justify-content:center;font-size:18px;background:var(--panel2);border:1px solid var(--line)}
+  .dk-info{flex:1;min-width:0}
+  .dk-info .dklb{display:block;font-family:var(--disp);font-weight:800;font-size:13.5px;
+    letter-spacing:.03em;text-transform:uppercase;color:var(--paper)}
+  .dk-info .no{display:block;font-family:var(--mono);font-size:13px;color:var(--muted);
+    margin-top:2px;word-break:break-all}
+  .dk-copy{flex:none;background:var(--panel2);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer;
+    white-space:nowrap;transition:.15s}
+  .dk-copy:hover{border-color:var(--accent);color:var(--accent)}
+  .dk-cta{display:flex;justify-content:center}
+  .dk-cta a{display:inline-flex;align-items:center;gap:8px;background:var(--accent);
+    color:#1A1206;text-decoration:none;border-radius:999px;padding:11px 24px;
+    font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.03em;
+    text-transform:uppercase;transition:.15s}
+  .dk-cta a:hover{opacity:.88}
+
   /* ================= MOBILE: navigasi bawah ================= */
   @media (max-width:920px){
     .filters{top:0}
@@ -652,6 +686,7 @@
     body.page-build .cards{padding-bottom:64px}
     .meta-wrap{padding-bottom:80px}
     .pd-wrap{padding-bottom:80px}
+    .dk-wrap{padding-bottom:80px}
     footer{padding-bottom:74px}
   }
   .bk-row{display:flex;gap:8px;margin-top:8px}
@@ -928,7 +963,7 @@
          Elemen baru yang muncul belakangan itulah yang menggeser tombol bahasa/TikTok
          di sebelahnya — penyumbang CLS "header>div.hdr-stats" terbesar di laporan
          Cloudflare (lihat analitik-agustus-2026.md). -->
-    <a class="dukung" id="btnDukung" target="_blank" rel="noopener"
+    <a class="dukung" id="btnDukung" href="#dukung"
       style="visibility:hidden" title="Dukung">☕ Dukung</a>
     <button class="langbtn" id="btnLang" title="Ganti bahasa / Switch language">🌐 ID</button>
     <a class="tiktok" href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener"
@@ -946,6 +981,8 @@
 </nav>
 
 <section id="panduanPage"><div class="pd-wrap" id="panduanWrap"></div></section>
+
+<section id="dukungPage"><div class="dk-wrap" id="dukungWrap"></div></section>
 
 <section id="metaPage">
   <div class="meta-wrap">
@@ -1151,7 +1188,7 @@
        muncul lagi (wajar, bukan regresi). -->
   <div class="foot-cta" id="footDukung" style="visibility:hidden">MHR Deck Lab gratis dan
     tanpa iklan. Kalau alat ini membantu, dukungan sukarela membantu menutup biaya domain
-    dan pengembangan. <a class="foot-dukung" href="#">☕ Dukung</a></div>
+    dan pengembangan. <a class="foot-dukung" href="#dukung">☕ Dukung</a></div>
   <div class="foot-cta">
     <span data-i18n="footBy">Dibuat oleh</span>
     <a class="foot-tiktok" href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 0 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-1.85-2.48V9.79a5.94 5.94 0 1 0 4.94 5.85V8.9a7 7 0 0 0 4.07 1.3V7.12a4.19 4.19 0 0 1-3.01-1.3z"/></svg> @deteprtm</a>
@@ -1913,6 +1950,12 @@ const T = {
   support:      ['Dukung','Support'],
   supportNote:  ['MHR Deck Lab gratis dan tanpa iklan. Kalau alat ini membantu, dukungan sukarela membantu menutup biaya domain dan pengembangan.',
                  'MHR Deck Lab is free and ad-free. If it helps you, a voluntary contribution helps cover domain and development costs.'],
+  dkTitle:      ['Dukung Kami','Support Us'],
+  dkAtasNama:   ['a.n.','on behalf of'],
+  dkCta:        ['Kirim Saran/Komentar','Send Suggestions/Comments'],
+  dkCtaSubjek:  ['Saran/Komentar MHR Deck Lab','MHR Deck Lab Suggestion/Comment'],
+  dkCtaBadan:   ['Tulis saran atau komentar Anda di sini:\n\n','Write your suggestion or comment here:\n\n'],
+  dkKosong:     ['Metode dukungan belum diisi.','Support methods are not configured yet.'],
 
   /* --- filter --- */
   searchPh:     ['Cari nama, efek, atau trait…','Search name, effect, or trait…'],
@@ -2352,6 +2395,7 @@ function applyLang(){
   if(state.page === 'tourney') renderTourney();
   if(state.page === 'lgs')  renderLgs();
   if(state.page === 'panduan') renderPanduan();
+  if(state.page === 'dukung') renderDukungPage();
 }
 
 
@@ -3418,42 +3462,49 @@ $('#btnDvPng').addEventListener('click', async ()=>{
 
 
 /* ==================== DUKUNGAN SUKARELA ====================
-   Tautan donasi diatur di data.js — berkas yang Anda kelola sendiri — supaya
-   pembaruan index.html tidak pernah menimpanya. Kalau window.DUKUNG tidak
-   diisi, tombolnya tidak ditampilkan sama sekali.
+   Metode & nomor pembayaran diatur di data.js (window.DUKUNG.metode) —
+   berkas yang Anda kelola sendiri — supaya pembaruan index.html tidak
+   pernah menimpanya. Kalau window.DUKUNG kosong atau `metode` tidak diisi,
+   tombol & halaman Dukung tidak ditampilkan sama sekali.
+
+   Sejak v6.30, tombol header/footer bukan lagi link eksternal (dulu ke
+   Saweria) — keduanya sudah berupa <a href="#dukung"> statis di HTML yang
+   membuka halaman "Dukung Kami" di dalam app sendiri (lihat #dukungPage
+   & renderDukungPage()), jadi fungsi ini murni menampakkan/menyembunyikan
+   ruang yang sudah dipesan dan menyesuaikan teksnya ke bahasa aktif — tidak
+   ada lagi href yang perlu diisi lewat JS.
 
    Contoh isi di data.js:
-     window.DUKUNG = { url:'https://saweria.co/namaanda', label:'Saweria' };
+     window.DUKUNG = { nama:'...', metode:[{jenis:'gopay',label:'GoPay',nomor:'...'}], emailSaran:'...' };
 */
 /* v6.17 — fix CLS: #btnDukung TIDAK lagi dipakai atribut `hidden` (ruang 0px)
    untuk kasus "dikonfigurasi" (kasus normal/hampir selalu terjadi). HTML awalnya
    sudah menaruh tombol ini dengan teks "☕ Dukung" dan visibility:hidden — artinya
    ruangnya sudah dipesan sejak render pertama. Di sini kita cuma menampakkannya
-   (visibility:visible) dan mengoreksi href/teks kalau perlu, jadi tombol bahasa
+   (visibility:visible) dan mengoreksi teksnya kalau perlu, jadi tombol bahasa
    & link TikTok di sebelahnya TIDAK ikut bergeser saat JS ini jalan. Jalur
    "tidak dikonfigurasi" (jarang, cuma saat pemilik sengaja mematikan di data.js)
    tetap pakai `hidden` biasa — kasus itu tidak butuh presisi CLS yang sama. */
 function renderDukung(){
   const cfg = (typeof window !== 'undefined' && window.DUKUNG) || null;
-  const sah = cfg && typeof cfg.url === 'string' && /^https:\/\//.test(cfg.url);
+  const sah = cfg && Array.isArray(cfg.metode) && cfg.metode.length > 0;
   const tombol = $('#btnDukung'), kaki = $('#footDukung');
   if(!sah){
     if(tombol){ tombol.hidden = true; tombol.style.visibility = ''; }
     if(kaki){ kaki.hidden = true; kaki.style.visibility = ''; }
     return;
   }
-  const label = cfg.label || t('support');
   if(tombol){
     tombol.hidden = false;
     tombol.style.visibility = 'visible';
-    tombol.href = cfg.url;
     tombol.textContent = `☕ ${t('support')}`;
-    tombol.title = label;
+    tombol.title = t('support');
   }
   if(kaki){
     // Kalimat bisa diatur dari data.js (cfg.teks). Boleh berupa teks biasa,
     // atau objek {id, en} agar mengikuti bahasa aktif. Kalau tidak diisi,
-    // dipakai kalimat bawaan dari kamus.
+    // dipakai kalimat bawaan dari kamus. Kalimat yang sama juga dipakai
+    // sebagai subjudul halaman Dukung sendiri, lihat renderDukungPage().
     let kalimat = t('supportNote');
     if(cfg.teks){
       if(typeof cfg.teks === 'string') kalimat = cfg.teks;
@@ -3463,8 +3514,70 @@ function renderDukung(){
     kaki.hidden = false;
     kaki.style.visibility = 'visible';
     kaki.innerHTML = `${kalimat} ` +
-      `<a class="foot-dukung" href="${cfg.url}" target="_blank" rel="noopener">☕ ${label}</a>`;
+      `<a class="foot-dukung" href="#dukung">☕ ${t('support')}</a>`;
   }
+}
+
+/* ==================== HALAMAN DUKUNG KAMI ====================
+   Halaman internal (bukan redirect eksternal) yang menampilkan tiap metode
+   di window.DUKUNG.metode sebagai kartu dengan tombol salin nomor, plus CTA
+   email untuk saran/komentar (window.DUKUNG.emailSaran). Ikon per metode
+   dipetakan lewat DUKUNG_ICON di bawah — jenis yang tidak dikenal otomatis
+   jatuh ke ikon generik 💳, jadi menambah metode baru di data.js (mis. OVO,
+   DANA) tidak butuh perubahan di sini. */
+const DUKUNG_ICON = { gopay:'📱', ovo:'📱', dana:'📱', shopeepay:'🛍️',
+  mandiri:'🏦', bca:'🏦', bni:'🏦', bri:'🏦' };
+function mailtoDukung(cfg){
+  const email = (cfg && cfg.emailSaran) || '';
+  if(!email) return '';
+  const subjek = encodeURIComponent(t('dkCtaSubjek'));
+  const badan = encodeURIComponent(t('dkCtaBadan'));
+  return `mailto:${email}?subject=${subjek}&body=${badan}`;
+}
+function renderDukungPage(){
+  const wrap = $('#dukungWrap');
+  if(!wrap) return;
+  const cfg = (typeof window !== 'undefined' && window.DUKUNG) || null;
+  const metode = (cfg && Array.isArray(cfg.metode)) ? cfg.metode : [];
+  if(!metode.length){
+    wrap.innerHTML = `<h2 class="dk-title">${t('dkTitle')}</h2><p class="dk-lead">${t('dkKosong')}</p>`;
+    return;
+  }
+  let kalimat = t('supportNote');
+  if(cfg.teks){
+    if(typeof cfg.teks === 'string') kalimat = cfg.teks;
+    else if(typeof cfg.teks === 'object')
+      kalimat = cfg.teks[state.lang] || cfg.teks.id || cfg.teks.en || kalimat;
+  }
+  const nama = cfg.nama ? escHtml(cfg.nama) : '';
+  const linkMail = mailtoDukung(cfg);
+  wrap.innerHTML = `
+    <h2 class="dk-title">${t('dkTitle')}</h2>
+    <p class="dk-lead">${kalimat}</p>
+    ${nama ? `<p class="dk-nama">${t('dkAtasNama')} <b>${nama}</b></p>` : ''}
+    <div class="dk-list">
+      ${metode.map((m,i)=>`
+        <div class="dk-item">
+          <div class="dk-icon">${DUKUNG_ICON[m.jenis] || '💳'}</div>
+          <div class="dk-info">
+            <span class="dklb">${escHtml(m.label || m.jenis || '')}</span>
+            <span class="no">${escHtml(m.nomor || '')}</span>
+          </div>
+          <button class="dk-copy" type="button" data-idx="${i}">${t('subCopyBtn')}</button>
+        </div>`).join('')}
+    </div>
+    ${linkMail ? `<div class="dk-cta"><a href="${linkMail}">✉ ${t('dkCta')}</a></div>` : ''}`;
+  wrap.querySelectorAll('.dk-copy').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const m = metode[btn.dataset.idx];
+      const teks = m && m.nomor;
+      if(!teks) return;
+      navigator.clipboard.writeText(teks)
+        .then(()=>{ btn.textContent = t('copied'); })
+        .catch(()=>{ try{ document.execCommand('copy'); btn.textContent = t('copied'); }catch(e){} });
+      setTimeout(()=>btn.textContent = t('subCopyBtn'), 1800);
+    });
+  });
 }
 
 /* ==================== BACKUP & RESTORE ====================
@@ -4572,7 +4685,7 @@ function renderPanduan(){
 }
 
 /* ==================== NAVIGASI HALAMAN ==================== */
-const PAGES = ['cards','build','meta','tourney','lgs','panduan'];
+const PAGES = ['cards','build','meta','tourney','lgs','panduan','dukung'];
 function setPage(p, dariHash){
   if(!PAGES.includes(p)) p = 'cards';
   /* mode Inggris hanya punya Kartu + Deck Builder (lihat applyLang).
@@ -4590,6 +4703,7 @@ function setPage(p, dariHash){
   if(p === 'tourney') renderTourney();
   if(p === 'lgs') renderLgs();
   if(p === 'panduan') renderPanduan();
+  if(p === 'dukung') renderDukungPage();
   if(p === 'cards' || p === 'build') renderCards();
   if(!dariHash) history.replaceState(null,'','#'+p);
   window.scrollTo({top:0});

@@ -130,15 +130,25 @@ window.TOURNAMENTS = [
 ];
 
 /* ========== DUKUNGAN SUKARELA ==========
-   Tombol "☕ Dukung" di header dan keterangan di footer hanya muncul kalau
-   bagian ini ada dan url-nya diawali https://. Untuk mematikannya sementara,
-   cukup beri // di depan tiap barisnya.
+   Tombol "☕ Dukung" di header dan tautan di footer hanya muncul kalau bagian
+   ini ada dan minimal satu metode terisi di `metode`. Untuk mematikannya
+   sementara, cukup beri // di depan tiap barisnya.
 
-   teks: kalimat yang tampil di footer — silakan diubah kapan saja.
-         id = Bahasa Indonesia, en = English. */
+   nama       : nama pemilik rekening/akun, tampil sebagai "a.n. <nama>".
+   metode     : daftar metode pembayaran, tiap metode = { jenis, label, nomor }.
+                jenis dipakai untuk memilih ikon (lihat DUKUNG_ICON di index.html);
+                boleh tambah/kurangi metode kapan saja.
+   emailSaran : alamat email tujuan tombol "Kirim saran/komentar" di halaman Dukung.
+   teks       : kalimat yang tampil di footer & sebagai subjudul halaman Dukung —
+                silakan diubah kapan saja. id = Bahasa Indonesia, en = English. */
 window.DUKUNG = {
-  url:   'https://saweria.co/data2712',
-  label: 'Saweria',
+  nama: 'Data Anggi Pratama',
+  metode: [
+    { jenis: 'gopay',   label: 'GoPay',   nomor: '081384279992' },
+    { jenis: 'mandiri', label: 'Mandiri', nomor: '1370021339789' },
+    { jenis: 'bca',     label: 'BCA',     nomor: '1280141719' },
+  ],
+  emailSaran: 'dataanggi2712@yahoo.co.id',
   teks: {
     id: 'MHR Deck Lab dibuat dan dirawat sendiri untuk komunitas, gratis dan tanpa iklan. ' +
         'Dukungan sukarela Anda akan dipakai untuk biaya pengembangan fitur selanjutnya.',
