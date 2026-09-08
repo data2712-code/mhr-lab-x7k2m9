@@ -150,8 +150,8 @@ window.DUKUNG = {
   ],
   emailSaran: 'dataanggi2712@yahoo.co.id',
   teks: {
-    id: 'MHR Deck Lab dibuat dan dirawat sendiri untuk komunitas, gratis dan tanpa iklan. ' +
-        'Dukungan sukarela Anda akan dipakai untuk biaya pengembangan fitur selanjutnya.',
+    id: 'MHR Deck Lab dibuat dan dirawat sendiri untuk teman - teman komunitas Marvel Hero Rush, ' +
+        'Dukungan sukarela kamu akan dipakai untuk biaya domain, hosting dan fitur lainnya.',
     en: 'MHR Deck Lab is built and maintained for the community — free and ad-free. ' +
         'Your voluntary support will go toward developing the next features.'
   }
