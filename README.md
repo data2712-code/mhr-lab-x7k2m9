@@ -66,14 +66,23 @@ Sejak v5.2 data kartu ada di `cards.js`, terpisah dari aplikasi. Untuk menambah 
 ganti `cards.js` saja — `index.html` tidak perlu disentuh. Format tiap entri
 dijelaskan di komentar kepala berkas itu.
 
-### Dukungan sukarela (Saweria / Trakteer / Ko-fi)
+### Dukungan sukarela (halaman "Dukung Kami" di dalam app)
 
-Tambahkan satu baris ini di `data.js` — bukan di `index.html`:
+**Sejak v6.30**, tombol "☕ Dukung" di header/footer TIDAK LAGI mendirect keluar
+ke Saweria — sekarang membuka halaman internal `#dukung` ("Dukung Kami") yang
+menampilkan daftar metode pembayaran (GoPay/Mandiri/BCA, dsb) dengan tombol
+salin nomor, plus tombol email untuk kirim saran/komentar. Atur semuanya lewat
+`data.js` — bukan di `index.html`:
 
 ```javascript
 window.DUKUNG = {
-  url:   'https://saweria.co/data2712',
-  label: 'Saweria',
+  nama: 'Nama Pemilik Rekening',
+  metode: [
+    { jenis:'gopay',   label:'GoPay',   nomor:'08xxxxxxxxxx' },
+    { jenis:'mandiri', label:'Mandiri', nomor:'xxxxxxxxxxx' },
+    { jenis:'bca',     label:'BCA',     nomor:'xxxxxxxxxxx' },
+  ],
+  emailSaran: 'email-tujuan-saran@contoh.com',
   teks: {
     id: 'Kalimat ajakan dalam Bahasa Indonesia…',
     en: 'The English version of the message…'
@@ -81,14 +90,21 @@ window.DUKUNG = {
 };
 ```
 
-Field `teks` opsional. Kalau dikosongkan, dipakai kalimat bawaan. Boleh juga
-berupa teks biasa (satu bahasa saja).
+- `metode` — daftar metode pembayaran, bebas ditambah/kurangi kapan saja. `jenis`
+  dipetakan ke ikon lewat `DUKUNG_ICON` di `index.html` (jenis tidak dikenal jatuh
+  ke ikon generik 💳, jadi menambah metode baru tidak butuh ubah kode).
+- `emailSaran` — dipakai tombol CTA "Kirim Saran/Komentar" di bagian bawah
+  halaman Dukung (link `mailto:`).
+- `teks` opsional, sama seperti sebelumnya — dipakai untuk kalimat footer
+  **dan** subjudul halaman Dukung. Kalau dikosongkan, dipakai kalimat bawaan.
+  Boleh juga berupa teks biasa (satu bahasa saja).
 
-Tombol "☕ Dukung" akan muncul di header dan keterangan di footer. Kalau baris ini
-tidak ada atau URL-nya bukan `https://`, tombolnya tidak ditampilkan sama sekali —
-jadi aman dibiarkan kosong sampai akunnya siap.
+Tombol "☕ Dukung" muncul di header dan keterangan di footer kalau `metode` diisi
+minimal satu. Kalau `window.DUKUNG` tidak ada atau `metode` kosong, tombol & halaman
+Dukung tidak ditampilkan sama sekali — jadi aman dibiarkan kosong sampai akunnya siap.
 
-Untuk mematikan sementara, cukup beri komentar pada barisnya (`// window.DUKUNG = ...`).
+Untuk mematikan sementara, cukup beri komentar pada seluruh blok
+(`// window.DUKUNG = ...`).
 
 ### Backup & Restore
 
@@ -474,6 +490,50 @@ Angka versi di depan wajib dipertahankan — kalau format berubah, naikkan ke 2
 dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ---
+
+### Halaman "Dukung Kami" di dalam app — ganti total redirect Saweria — 8 September 2026 *(`index.html` + `data.js`)*
+
+Permintaan pemilik: ganti halaman Dukung yang sebelumnya cuma mendirect ke
+Saweria, jadi halaman sendiri di dalam app (mirip referensi desain yang
+dikirim pemilik), menampilkan GoPay, rekening Mandiri, dan rekening BCA. Untuk
+saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
+
+- **Klarifikasi sebelum eksekusi (lewat AskUserQuestion + pesan langsung)**:
+  email tujuan saran/komentar = `dataanggi2712@yahoo.co.id` (email yang sama
+  dipakai untuk submission deck komunitas sejak v6.19); bentuk halaman =
+  **halaman baru di dalam app** (bukan modal/popup), serupa Kartu/Build/Panduan;
+  Saweria **diganti total** (bukan ditambah di samping) — hanya GoPay/Mandiri/BCA
+  yang tampil. Nomor rekening & nama pemilik akun diberikan langsung oleh pemilik.
+- **`data.js`**: `window.DUKUNG` diubah total dari `{url, label, teks}` (link
+  Saweria) jadi `{nama, metode:[{jenis,label,nomor}], emailSaran, teks}` — lihat
+  format lengkap & contoh di bagian **Dukungan sukarela** di atas.
+- **`index.html`**: `'dukung'` ditambahkan ke `PAGES` (hash routing generik yang
+  sudah ada otomatis mendukungnya, tidak perlu listener baru) — section baru
+  `#dukungPage` + fungsi `renderDukungPage()` menyusun kartu tiap metode
+  (ikon via `DUKUNG_ICON`, nomor rekening, tombol salin — memakai ulang pola
+  copy-to-clipboard dari tombol `#btnTabel`) dan tombol CTA `mailto:` ke
+  `emailSaran`. Tombol header `#btnDukung` & link footer `.foot-dukung` diubah
+  dari `target="_blank"` ke `href="#dukung"` (anchor internal statis, tidak lagi
+  di-set lewat JS). `renderDukung()` disederhanakan: validasi berdasarkan
+  `cfg.metode.length > 0`, bukan cek URL. CSS halaman baru (`.dk-wrap`,
+  `.dk-item`, dst.) mengikuti pola halaman Panduan (`.pd-wrap`) & token desain
+  yang sudah ada.
+- **Bug ditemukan & diperbaiki sebelum deploy**: label metode sempat memakai
+  class `"lb"` yang ternyata sudah dipakai global untuk lightbox kartu
+  (`.lb{position:fixed;inset:0;z-index:60;...}`) — menyebabkan tiap label metode
+  menutupi seluruh layar (ketemu lewat verifikasi Playwright screenshot, bukan
+  cuma cek DOM/computed style). Diganti jadi class unik `dklb`.
+- **Verifikasi**: `node --check` lolos untuk kedua berkas; diuji penuh secara
+  lokal (`python3 -m http.server` + Playwright headless, viewport desktop &
+  mobile) — halaman Dukung tampil benar di ID & EN, tombol salin bekerja
+  (`navigator.clipboard`), link `mailto:` terbentuk benar, tidak ada error
+  konsol JS. Deploy 1 commit ke `main` lewat Chrome (`index.html` + `data.js`).
+  Setelah deploy: cek langsung `raw.githubusercontent.com` mengonfirmasi kedua
+  berkas live dan benar, lalu ditemukan **Cloudflare edge cache masih
+  menyajikan `data.js` versi lama** (`cf-cache-status: HIT`, `Browser Cache
+  TTL`/edge TTL 4 jam) meski origin GitHub sudah baru — **Purge Everything**
+  dijalankan dari dashboard Cloudflare, dikonfirmasi `cf-cache-status: MISS`
+  lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
 
