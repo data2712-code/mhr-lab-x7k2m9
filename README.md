@@ -477,6 +477,136 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ## Riwayat Update
 
+### Tombol share per kartu + halaman statis `cards/<no>.html` untuk preview WhatsApp — 8 September 2026
+
+Permintaan pemilik: tambahkan tombol share di setiap gambar kartu supaya
+orang-orang bisa share gambar kartu tersebut ke grup WhatsApp — salah satu
+fitur yang paling diminta komunitas. Rencana eksekusi dijelaskan dulu ke
+pemilik sebelum mulai (diminta eksplisit), lalu dua keputusan dikonfirmasi
+lewat AskUserQuestion: fallback untuk perangkat/browser tanpa dukungan Web
+Share API = kirim link halaman kartu via `wa.me` (bukan cuma salin teks),
+posisi tombol = ikon kecil di pojok kartu.
+
+- **Pertanyaan susulan pemilik sebelum eksekusi lanjut**: apakah lebih baik
+  tiap gambar kartu punya alamat halaman sendiri? Dijelaskan alasan
+  teknisnya — crawler preview-link WhatsApp/Telegram membaca tag
+  `<meta property="og:...">` STATIS dari HTML mentah tanpa pernah menjalankan
+  JavaScript, dan fragment URL (`#...`) tidak pernah dikirim ke server sama
+  sekali — jadi deep-link berbasis hash murni di satu `index.html` yang sama
+  untuk semua kartu **tidak akan pernah bisa** menghasilkan preview WhatsApp
+  yang spesifik per kartu. Dua opsi diajukan (halaman statis pre-generate vs
+  Cloudflare Worker dinamis); pemilik memilih **halaman statis** lewat
+  AskUserQuestion.
+- **`index.html`**: tombol share baru di tiap kartu (grid & list view) — ikon
+  Material generik `SHARE_ICON` (bukan logo WhatsApp, karena Web Share API
+  bisa membagikan ke aplikasi apa pun), 28×28px di list (`.btn-share`) dan
+  24×24px di grid (`.btn-share-grid`, dibungkus bareng badge "×N in deck" di
+  wrapper baru `.g-top-right`). Terjemahan baru `cShare` ditambahkan ke dict
+  `T`. Fungsi baru `shareCard(no)`: coba **Web Share API** dengan lampiran
+  file gambar dulu (`fetch()`→`Blob`→`File`, cek `navigator.canShare`) supaya
+  pengguna dapat native share sheet OS — kalau tidak didukung/gagal, jatuh ke
+  fallback **`wa.me`** berisi nama kartu + link halaman statis kartu itu.
+  Handler klik `#cards` diubah urutannya: cek `data-act="share"` LEBIH DULU
+  sebelum `data-zoom` (tombol share grid nested di dalam elemen yang juga
+  punya atribut `data-zoom`). Deep-link baru **`#c=<no>`** (pola sama seperti
+  `#d=` deck-share) lewat fungsi baru `handleCardLink()` — memakai ulang
+  `openLightbox(no)` yang sudah ada.
+- **`tools/generate_card_pages.py` (berkas baru)** — generator 288 halaman
+  statis dari `cards.js`, dijalankan dengan benar-benar mengeksekusi
+  `cards.js` lewat subprocess Node (bukan regex JS→JSON yang sempat dicoba
+  dulu dan gagal). Tiap halaman `cards/<no>.html` berisi
+  `og:title`/`og:description`/`og:image`/`og:url` sendiri-sendiri + redirect
+  otomatis (`meta refresh` + JS) balik ke `index.html#c=<no>`. Skrip yang
+  sama sekaligus menulis ulang `sitemap.xml` penuh (289 URL). **Wajib
+  dijalankan ulang tiap kali `cards.js` berubah** (kartu baru, rarity
+  diperbaiki, dsb) — didokumentasikan di header comment skrip.
+- **Kenapa flat `cards/<no>.html`, bukan `cards/<no>/index.html`**: satu-
+  satunya jalur deploy yang berfungsi di lingkungan Claude untuk repo ini
+  adalah halaman web GitHub "Upload files" (`git push` ditolak dari sandbox),
+  dan tool upload otomasinya cuma mengisi `<input type="file">` lewat path
+  absolut satu per satu — TIDAK membawa metadata struktur folder seperti
+  drag-drop asli sebuah folder. Ditemukan lewat pengujian langsung SEBELUM
+  288 file digenerate dalam skema folder-per-kartu, jadi keputusan pindah ke
+  flat naming diambil di awal, bukan setelah kerja terbuang.
+- **Deploy**: dipecah beberapa batch/commit sesuai izin eksplisit pemilik — 5
+  commit terpisah langsung ke `main` (`index.html`+`sitemap.xml`;
+  `tools/generate_card_pages.py`; lalu 288 halaman `cards/*.html` dipecah 3
+  batch @96 file, di bawah batas aman ~99 file/commit).
+- **Verifikasi**: diuji penuh secara lokal dulu (`python3 -m http.server` +
+  Playwright headless) sebelum menyentuh production — tombol share tidak
+  bertabrakan visual dengan badge lain, klik tombol tidak trigger lightbox,
+  `#c=<no>` membuka lightbox kartu yang benar, `node --check` lolos. Setelah
+  deploy: fetch cache-busted mengonfirmasi seluruh berkas baru ter-serve
+  benar, dan **tes end-to-end** — navigasi langsung ke
+  `https://mhrdecklab.com/cards/SP01-002.html` mengonfirmasi redirect
+  otomatis berjalan dan lightbox SP01-002 terbuka menampilkan artwork
+  Mysterio yang benar (sekaligus konfirmasi independen bahwa perbaikan
+  gambar SP01 & fix cache service worker dari sesi-sesi sebelumnya masih
+  bertahan). Cache Cloudflare di-purge setelah seluruh commit selesai.
+- **Tidak ada perubahan ke `cards.js`, `sw.js`, atau data kartu apa pun** —
+  murni fitur UI baru + berkas baru (`cards/`, `tools/generate_card_pages.py`)
+  + `sitemap.xml` yang diperbarui. Nomor versi `index.html` tidak dinaikkan
+  secara eksplisit di sesi ini (di atas v6.29 tanpa bump baru).
+
+### Perbaikan cache service worker (`CACHE_VERSION` v1→v2) + rarity tambahan SP01 dipangkas sementara — 8 September 2026 *(`sw.js` + `cards.js`)*
+
+Konteks: setelah 69 file gambar SP01 diperbaiki (lihat entri di bawah) dan
+cache Cloudflare di-purge, pemilik lapor kartu SP01-002 di situs live MASIH
+menampilkan gambar salah. Investigasi menemukan akar masalah sebenarnya:
+**`sw.js` (service worker PWA situs) meng-cache gambar dengan strategi
+cache-first PERMANEN**, dinamespace pakai konstanta `CACHE_VERSION`. Setiap
+browser pengunjung yang pernah membuka situs SEBELUM perbaikan gambar,
+terus menyajikan gambar lama dari cache lokalnya sendiri SELAMANYA — sama
+sekali tidak terpengaruh purge Cloudflare (lapisan cache yang sama sekali
+berbeda dari cache edge Cloudflare yang sudah dikenal sebelumnya).
+
+- **Perbaikan #1**: `CACHE_VERSION` di `sw.js` dinaikkan `'v1'`→`'v2'` —
+  membuat service worker versi baru otomatis membuang semua cache lama lewat
+  handler `activate` yang sudah ada, lalu mengisi ulang cache gambar dari nol
+  dengan file yang sudah benar.
+- **Perbaikan #2**: `fetch(req)` di handler gambar `sw.js` diubah jadi
+  `fetch(req, {cache:'reload'})` — tanpa ini, proses pengisian ulang cache
+  gambar bisa "terkontaminasi ulang" oleh HTTP cache biasa milik browser yang
+  masih menyimpan respons lama.
+- **Perbaikan #3 (permintaan eksplisit pemilik)**: `ra[]` untuk 30 kartu SP01
+  yang punya lebih dari satu rarity (MR/HR/SEC selain rarity dasarnya)
+  dipangkas jadi cuma elemen pertama (rarity dasar R/SR/GR/UR saja) di
+  `cards.js` — supaya pemilik bisa fokus verifikasi gambar dasar dulu satu
+  per satu. **Tidak ada data yang dihapus permanen**, cuma memangkas array
+  yang menentukan rarity mana yang ditampilkan/dipilih di UI. Data rarity
+  asli lengkap tetap ada di riwayat commit `cards.js` sebelum perubahan ini.
+- **Verifikasi**: fetch cache-busted mengonfirmasi `CACHE_VERSION='v2'` dan 0
+  kartu SP01 tersisa dengan >1 rarity. Verifikasi visual di UI live (setelah
+  `unregister()` semua service worker lama + `caches.delete()` semua cache
+  lama + reload dua kali) mengonfirmasi kartu SP01-002 (Mysterio) dan
+  SP01-003 (Jean Grey) menampilkan artwork yang benar.
+- Committed langsung ke `main` lewat Chrome (2 commit terpisah, `sw.js`
+  disentuh dua kali berturut-turut sesi ini).
+
+### Audit ketelitian gambar SP01 (English): 62 file tertukar posisi diperbaiki + 7 gambar hilang diambil ulang — 8 September 2026 *(`images/` + `images/en/`, tidak ada perubahan `cards.js`)*
+
+Permintaan pemilik: cek ulang semua kartu SP01 versi English secara teliti
+karena banyak yang tidak sesuai antara keterangan kartu dengan gambarnya,
+termasuk kartu dengan rarity lebih dari satu.
+
+- **Temuan**: audit satu-per-satu seluruh 80 kartu karakter SP01 menemukan
+  rentang SP01-002 s/d SP01-049 mengalami pergeseran/shift sistematis — file
+  gambar berisi konten kartu LAIN (biasanya kartu 1-2 nomor sebelumnya).
+  Rentang SP01-050 s/d SP01-080 dikonfirmasi bersih.
+- **Hasil**: 47 file sudah benar, 62 file salah tempat diperbaiki lewat
+  reorganisasi/rename file lokal (kontennya masih ada di file lain, cuma
+  ketuker nama), dan 7 slot yang benar-benar hilang secara lokal (SP01-002
+  rarity MR, SP01-019, SP01-020, SP01-021 rarity SEC, SP01-022 rarity SEC,
+  SP01-048, SP01-049) diambil ulang langsung dari `marvelherorush.com/en/cards`.
+- **Klarifikasi rarity SEC**: terkonfirmasi rarity asli yang sah (bukan
+  kesalahan pemahaman `ra[]`) — untuk SP01-021/022 gambar SEC memang hilang
+  total dari ekstraksi awal, sudah diambil ulang dari sumber resmi.
+- Total **69 file unik** (62 hasil rename + 7 baru) di-commit langsung ke
+  `main` lewat Chrome, 2 commit terpisah (`images/en/` dan `images/` root).
+- Verifikasi awal (fetch ke origin) sempat terlihat cukup, tapi **ternyata
+  belum menyingkap masalah cache service worker** — lihat entri di atas untuk
+  perbaikan lanjutannya.
+
 ### v6.29 — SP01 disembunyikan dari mode Indonesia (belum ada terjemahan resmi) — 8 September 2026
 
 Permintaan pemilik segera setelah v6.28: karena SP01 baru rilis versi Bahasa
