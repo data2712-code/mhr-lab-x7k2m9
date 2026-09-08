@@ -249,6 +249,10 @@
     letter-spacing:.05em;
   }
   .btn-add:hover{filter:brightness(1.1)}
+  .btn-share{width:28px;height:28px;flex:none;display:flex;align-items:center;justify-content:center;
+    border-radius:50%;border:1px solid var(--line);background:var(--panel2);color:var(--muted);
+    cursor:pointer;padding:0}
+  .btn-share:hover{border-color:var(--accent);color:var(--accent)}
   .in-deck{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:700}
   /* lencana "Errata" — kartu yang teks efeknya pernah direvisi resmi (field `er`) */
   .errata{font-family:var(--mono);font-size:10.5px;color:#1A1206;background:var(--accent);
@@ -707,8 +711,17 @@
   .cards.grid .g-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px}
   .cards.grid .card-actions{position:static;display:flex;gap:6px;margin-top:7px}
   .cards.grid .btn-add{flex:1;padding:6px 4px;font-size:12px}
-  .cards.grid .in-deck{position:absolute;top:6px;right:6px;background:var(--accent);color:#1A1206;
-    border-radius:7px;padding:2px 7px;font-family:var(--mono);font-weight:800;font-size:12px;z-index:2}
+  /* .g-top-right membungkus lencana "×N di deck" + tombol share supaya
+     keduanya berbagi satu pojok tanpa bertabrakan (dulu in-deck sendirian
+     posisinya absolute di pojok ini). */
+  .cards.grid .g-top-right{position:absolute;top:6px;right:6px;z-index:2;
+    display:flex;align-items:center;gap:5px}
+  .cards.grid .in-deck{background:var(--accent);color:#1A1206;
+    border-radius:7px;padding:2px 7px;font-family:var(--mono);font-weight:800;font-size:12px}
+  .cards.grid .btn-share-grid{width:24px;height:24px;flex:none;display:flex;align-items:center;
+    justify-content:center;border-radius:50%;border:none;background:rgba(14,18,22,.72);
+    color:#fff;cursor:pointer;padding:0}
+  .cards.grid .btn-share-grid:hover{background:var(--accent);color:#1A1206}
   .cards.grid .errata{position:absolute;top:6px;left:6px;background:var(--accent);color:#1A1206;
     border-radius:7px;padding:2px 7px;font-family:var(--mono);font-weight:800;font-size:10.5px;
     z-index:2;cursor:help}
@@ -1477,6 +1490,11 @@ function penuh(c){
   return n >= max;
 }
 
+/* ikon share generik (bukan logo WhatsApp) -- dipakai di tombol "Bagikan
+   kartu ini" karena tombolnya bisa memicu share-sheet asli HP (WhatsApp
+   cuma salah satu opsi di situ), bukan cuma buka WhatsApp secara khusus. */
+const SHARE_ICON = '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>';
+
 function cardListHTML(c,q){
   return `<div class="card" style="--cardc:${CMAP[c.c]}" data-no="${c.no}">
       <div class="card-body">
@@ -1505,6 +1523,7 @@ function cardListHTML(c,q){
       <div class="card-actions">
         ${q?`<span class="in-deck">×${q}</span>`:''}
         ${kembar(c) ? `<span class="twin" title="${t('cSameName')}">⇄</span>` : ''}
+        <button class="btn-share" data-act="share" title="${t('cShare')}" aria-label="${t('cShare')}">${SHARE_ICON}</button>
         <button class="btn-add" data-act="add"${penuh(c)?' disabled':''}>${penuh(c)?t('cFull'):t('cAdd')}</button>
       </div>
     </div>`;
@@ -1513,7 +1532,10 @@ function cardListHTML(c,q){
 function cardGridHTML(c,q){
   return `<div class="card" style="--cardc:${CMAP[c.c]}" data-no="${c.no}">
       <div class="g-wrap" data-zoom="${c.no}">
-        ${q?`<span class="in-deck">×${q}</span>`:''}
+        <div class="g-top-right">
+          ${q?`<span class="in-deck">×${q}</span>`:''}
+          <button class="btn-share-grid" data-act="share" title="${t('cShare')}" aria-label="${t('cShare')}">${SHARE_ICON}</button>
+        </div>
         ${errataBadgeHTML(c)}
         ${counterBadgeHTML(c)}
         <img class="card-img" alt="" data-ext="0" src="${artFile(c.no)}"
@@ -1808,8 +1830,50 @@ $('#btnReset').addEventListener('click', ()=>{
   document.querySelectorAll('.cbtn').forEach(b=>b.dataset.on='1');
   renderCards();
 });
+/* ==================== BAGIKAN SATU KARTU ====================
+   Dipicu tombol share di tiap kartu (grid & daftar). Dua jalur:
+   1) Web Share API dengan FILE gambar -- ini yang bikin share-sheet asli
+      HP muncul (Android/iOS), WhatsApp otomatis jadi salah satu opsi, dan
+      gambarnya langsung ter-attach (bukan cuma link). Didukung mayoritas
+      browser HP modern; TIDAK didukung di desktop / sebagian in-app browser.
+   2) Fallback: buka wa.me dengan teks berisi nama kartu + link ke halaman
+      statis kartu itu (cards/<no>.html, lihat tools/generate_card_pages.py) --
+      halaman itu yang punya preview og:image/og:title sendiri per kartu,
+      supaya link yang dikirim tetap muncul dengan gambar kartunya di WA,
+      bukan cuma teks polos. */
+async function shareCard(no){
+  const c = DB.find(d=>d.no===no); if(!c) return;
+  const nama = cardName(c);
+  const teks = `${nama} (${no}) — MHR Deck Lab`;
+  const pageUrl = `https://mhrdecklab.com/cards/${no}.html`;
+
+  try{
+    if(navigator.canShare){
+      const res = await fetch(artFile(no));
+      if(res.ok){
+        const blob = await res.blob();
+        const file = new File([blob], `${no}.jpg`, {type: blob.type || 'image/jpeg'});
+        if(navigator.canShare({files:[file]})){
+          await navigator.share({files:[file], title: teks, text: teks});
+          return;
+        }
+      }
+    }
+  }catch(err){
+    if(err && err.name === 'AbortError') return;   // pengguna batal share dari share-sheet, jangan lanjut
+  }
+
+  const waText = encodeURIComponent(`${teks}\n${pageUrl}`);
+  window.open(`https://wa.me/?text=${waText}`, '_blank', 'noopener');
+}
+
 $('#cards').addEventListener('click', e=>{
   const card=e.target.closest('.card'); if(!card) return;
+  /* tombol share dicek LEBIH DULU: di mode grid ia bersarang di dalam
+     .g-wrap yang punya data-zoom di dirinya sendiri, jadi kalau urutan
+     dibalik, klik tombol share akan salah kena delegasi zoom juga. */
+  const shareBtn = e.target.closest('[data-act="share"]');
+  if(shareBtn){ shareCard(card.dataset.no); return; }
   const z = e.target.closest('[data-zoom]');
   if(z){ openLightbox(z.dataset.zoom); return; }
   if(e.target.dataset.act==='add') addCard(card.dataset.no);
@@ -1904,6 +1968,7 @@ const T = {
   cColor:       ['Warna','Color'],
   cAdd:         ['+ Deck','+ Deck'],
   cFull:        ['Kuota penuh','Quota full'],
+  cShare:       ['Bagikan kartu ini','Share this card'],
   cSameName:    ['Nama sama dicetak ulang di seri lain — kuota salinan digabung',
                  'Same name reprinted in another set — copy quota is shared'],
   cOfficial:    ['lihat kartu di situs resmi ↗','view on official site ↗'],
@@ -3713,6 +3778,21 @@ function handleSharedLink(){
   $('#shNo').addEventListener('click', ()=>box.remove());
 }
 
+/* --- baca link kartu satuan (dibuat oleh tombol share di tiap kartu) ---
+   Format: #c=<NOMOR-KARTU>, mis. #c=SP01-002 — juga dipakai sebagai tujuan
+   redirect dari halaman statis per-kartu di cards/<no>.html (lihat
+   tools/generate_card_pages.py), yang menyediakan preview og:image/og:title
+   khusus per kartu untuk WhatsApp dkk. sebelum melempar balik kemari. */
+function handleCardLink(){
+  const h = location.hash;
+  if(!h.startsWith('#c=')) return;
+  const no = decodeURIComponent(h.slice(3)).toUpperCase();
+  history.replaceState(null,'',location.pathname);   // bersihkan agar tidak terbaca ulang
+  if(!DB.some(d=>d.no===no)) return;                 // nomor tidak dikenal -> diam saja
+  setPage('cards', true);
+  openLightbox(no);
+}
+
 
 /* ==================== DATA DARI data.js ====================
    Daftar deck komunitas dan jadwal LGS TIDAK lagi ditulis di berkas ini,
@@ -5357,12 +5437,15 @@ amanJalankan('bkNote', renderBkNote);
 amanJalankan('dukung', renderDukung);
 amanJalankan('navLgs',           ()=>{ $('#navLgs').textContent = LGS.length; });
 
-/* Urutan penting: link deck (#d=) diperiksa LEBIH DULU agar link lama yang
-   sudah tersebar di komunitas tetap berfungsi, baru navigasi halaman. */
+/* Urutan penting: link deck (#d=) & link kartu satuan (#c=) diperiksa LEBIH
+   DULU agar link lama yang sudah tersebar di komunitas tetap berfungsi, baru
+   navigasi halaman biasa. */
 const hashAwal = location.hash;
 if(hashAwal.startsWith('#d=')){
   setPage('build', true);
   handleSharedLink();
+} else if(hashAwal.startsWith('#c=')){
+  handleCardLink();
 } else {
   const p = hashAwal.replace('#','');
   setPage(PAGES.includes(p) ? p : (store.page || 'cards'), true);
@@ -5372,6 +5455,7 @@ if(hashAwal.startsWith('#d=')){
 window.addEventListener('hashchange', ()=>{
   const h = location.hash;
   if(h.startsWith('#d=')){ setPage('build', true); handleSharedLink(); return; }
+  if(h.startsWith('#c=')){ handleCardLink(); return; }
   const p = h.replace('#','');
   if(PAGES.includes(p) && p !== state.page) setPage(p, true);
 });
