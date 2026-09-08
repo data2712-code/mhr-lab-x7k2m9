@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.28  ·  8 September 2026
+     MHR DECK LAB  ·  versi 6.29  ·  8 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.27">
+<meta name="version" content="6.29">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -901,10 +901,10 @@
 <header>
   <div class="brand">
     <h1>MHR <span class="stripe">DECK LAB</span></h1>
-    <p data-i18n="tagline">Marvel Hero Rush TCG Deck Builder · 288 kartu (BP01 · PB01 · PR · SD01–SD04 · SP01) · Ver. Indonesia</p>
+    <p data-i18n="tagline">Marvel Hero Rush TCG Deck Builder · 208 kartu (BP01 · PB01 · PR · SD01–SD04) · Ver. Indonesia</p>
   </div>
   <div class="hdr-stats">
-    <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">288</b></div>
+    <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">208</b></div>
     <div class="pill"><span data-i18n="statShown">Ditampilkan</span> <b id="hShown">208</b></div>
     <div class="pill"><span data-i18n="statDeck">Deck</span> <b id="hDeck">0</b></div>
     <!-- Ruang tombol ini SENGAJA sudah dipesan sejak HTML awal (visibility:hidden,
@@ -1149,7 +1149,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.28</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.29</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1828,7 +1828,7 @@ $('#deckList').addEventListener('click', e=>{
    t('kunci') di JavaScript, atau data-i18n="kunci" pada elemen HTML statis. */
 const T = {
   /* --- navigasi & kepala halaman --- */
-  tagline:      ['Marvel Hero Rush TCG Deck Builder · 288 kartu (BP01 · PB01 · PR · SD01–SD04 · SP01) · Ver. Indonesia',
+  tagline:      ['Marvel Hero Rush TCG Deck Builder · 208 kartu (BP01 · PB01 · PR · SD01–SD04) · Ver. Indonesia',
                  'Marvel Hero Rush TCG Deck Builder · 272 cards (BP01 · SD01–SD04 · SP01) · English Ver.'],
   navCards:     ['Kartu','Cards'],
   navCardsS:    ['Kartu','Cards'],
@@ -2175,7 +2175,17 @@ function cardName(c){ return (state.lang==='en' && c.nm_en) ? c.nm_en : c.nm; }
 function cardEff(c){  return (state.lang==='en' && c.e_en)  ? c.e_en  : c.e; }
 /* di mode Inggris, 16 kartu promo disembunyikan karena versi Inggrisnya belum terbit.
    Datanya tetap ada di database, jadi begitu gambarnya tersedia tinggal ditampilkan. */
-function cardVisible(c){ return state.lang !== 'en' || !!c.nm_en; }
+/* Kode seri yang BELUM punya terjemahan resmi Bahasa Indonesia (masih fan-
+   translation buatan sesi Claude) — disembunyikan total di mode ID supaya
+   tidak ada salah informasi terjemahan, tapi TETAP tampil penuh di mode
+   Inggris (datanya sudah lengkap, sumbernya resmi). Begitu tim MHR Indonesia
+   merilis terjemahan resmi untuk seri ini, cukup hapus kodenya dari array ini
+   (lihat README.md § v6.29). */
+const ID_PENDING_SETS = ['SP01'];
+function cardVisible(c){
+  if(state.lang !== 'en' && ID_PENDING_SETS.includes(c.s)) return false;
+  return state.lang !== 'en' || !!c.nm_en;
+}
 
 /* lencana kecil untuk kartu yang teks efeknya pernah direvisi resmi (field `er`
    di cards.js, mis. "V.1"). cls opsional untuk gaya berbeda di grid/lightbox. */
@@ -5047,9 +5057,9 @@ $('#pxList').addEventListener('click', e=>{
 $('#pxSearch').addEventListener('input', ()=>{
   const q = $('#pxSearch').value.trim().toLowerCase();
   if(q.length < 2){ $('#pxSug').innerHTML = ''; return; }
-  const hit = DB.filter(c => cardName(c).toLowerCase().includes(q) ||
+  const hit = DB.filter(c => cardVisible(c) && (cardName(c).toLowerCase().includes(q) ||
                              c.nm.toLowerCase().includes(q) ||
-                             c.no.toLowerCase().includes(q)).slice(0,12);
+                             c.no.toLowerCase().includes(q))).slice(0,12);
   $('#pxSug').innerHTML = hit.length
     ? hit.map(c=>`<button data-add="${c.no}">+ ${c.no} · ${cardName(c).replace(/</g,'&lt;')}</button>`).join('')
     : `<span style="font-size:12px;color:var(--muted)">Tidak ada kartu yang cocok.</span>`;
