@@ -537,6 +537,34 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
 
 ## Riwayat Update
 
+### Perbaikan gambar SP01-021 (masih salah tampil SP01-019) — 9 September 2026 *(`images/SP01-021.jpg` + `images/en/SP01-021.jpg`)*
+Laporan pemilik: di web, kartu `「The Web of Destiny」Spider-Man` (SP01-021)
+masih menampilkan artwork Silver Sable (SP01-019) — lolos dari audit gambar
+SP01 sebelumnya (lihat entri "Audit ketelitian gambar SP01" di bawah, yang
+fokus pada rentang SP01-002 s/d SP01-049 tapi rupanya belum menyisir seluruh
+file rarity dasar). Pemilik melampirkan gambar kartu yang benar langsung di
+chat, dipakai sebagai sumber perbaikan (di-resize ke 568×784 mengikuti standar
+file kartu lain di repo).
+- File `images/SP01-021.jpg` dan `images/en/SP01-021.jpg` (identik, sesuai
+  konvensi SP01 yang belum punya versi Indonesia) diganti dengan artwork yang
+  benar.
+- **Temuan tambahan (belum diperbaiki, tidak berdampak ke situs saat ini)**:
+  `SP01-021_MR.jpg` (EN & ID) ternyata berisi artwork SP01-020 (Tarantula),
+  bukan varian MR Spider-Man. Dibiarkan apa adanya karena `ra[]` kartu ini
+  sudah dipangkas jadi cuma `["UR"]` sejak perbaikan cache service worker
+  sebelumnya, jadi file ini tidak pernah diserve ke pengguna — dicatat di sini
+  supaya tidak terlupakan kalau rarity tambahan SP01 suatu saat dikembalikan.
+- **Verifikasi**: diuji lokal lewat Playwright (`#c=SP01-021` menampilkan kartu
+  yang benar) sebelum deploy 2 commit terpisah ke `main` lewat Chrome (EN lalu
+  ID). Setelah deploy: cek `raw.githubusercontent.com` mengonfirmasi kedua file
+  origin sudah benar (checksum sama), tapi situs live masih menampilkan gambar
+  lama dari **dua lapis cache sekaligus** — Cloudflare edge (`Purge Everything`
+  dijalankan) DAN cache gambar permanen service worker (`sw.js`, cache-first)
+  yang sempat menyimpan gambar lama dari kunjungan sebelumnya di sesi ini.
+  Diperbaiki dengan `navigator.serviceWorker.getRegistrations()`→`unregister()`
+  + `caches.keys()`→`caches.delete()` lewat console, lalu reload — situs live
+  dikonfirmasi menampilkan artwork yang benar.
+
 ### Kalimat keterangan halaman Dukung diubah — 8 September 2026 *(hanya `data.js`)*
 Permintaan pemilik: ganti kalimat di `DUKUNG.teks.id` (tampil di footer & subjudul
 halaman "Dukung Kami") jadi "MHR Deck Lab dibuat dan dirawat sendiri untuk
