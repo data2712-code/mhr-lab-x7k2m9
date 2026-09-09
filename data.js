@@ -72,6 +72,9 @@ window.DECK_KOMUNITAS = [
   { nm:'Merah Biru - Aggro', cr:'China',
     ds:'',
     cd:'1.TWVyYWggQmlydSAtIEFnZ3JvIChDaGluYSk.A0643A0773G0013G0043A0833G0163G0183G0063G0133G0083G0113A0023A0113A0263A0013A0052A0663' },
+  { nm:'Ultron', cr:'Rob',
+    ds:'Personal Grudge Hulk bisa tukar Ultron Army, Pulse Uninstall War Machine, Disintegration Vision',
+    cd:'1.VWx0cm9u.A0012A0313A0343A0023A0072A0142A0203A0221A0232A0263A0352A0372A0403A0423A0432A0492A0522A0542F0043F0053F0132' },
 ];
 
 /* ========== TOURNAMENTS (v6.26) ==========
