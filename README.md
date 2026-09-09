@@ -537,6 +537,19 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
 
 ## Riwayat Update
 
+### Deck komunitas baru: "Ultron" oleh Rob — 9 September 2026 *(hanya `data.js`)*
+Pemilik meneruskan kiriman deck dari komunitas untuk ditambahkan ke Community
+Deck: `{ nm:'Ultron', cr:'Rob', ds:'Personal Grudge Hulk bisa tukar Ultron Army,
+Pulse Uninstall War Machine, Disintegration Vision', cd:'1.VWx0cm9u...' }`.
+Sebelum ditambahkan, kode deck diverifikasi dulu (didekode manual memakai logika
+`decodeDeck()`/tabel `SER2L` di `index.html`, dicocokkan ke `cards.js`): 50 kartu
+persis, seluruh 21 kode kartu valid (0 unknown), 2 warna (Merah + Kuning), tidak
+ada nama kartu >3 salinan. Entri ditambahkan ke akhir array
+`window.DECK_KOMUNITAS`. Diverifikasi lokal lewat Playwright — kartu muncul di
+tab Community Deck (total naik ke 19), dan saat dimuat ke Deck Builder tampil
+"✓ Deck sah: 50 kartu, 2 warna (Merah + Kuning)" tanpa error konsol. Deploy 1
+commit ke `main` lewat Chrome.
+
 ### Perbaikan gambar SP01-021 (masih salah tampil SP01-019) — 9 September 2026 *(`images/SP01-021.jpg` + `images/en/SP01-021.jpg`)*
 Laporan pemilik: di web, kartu `「The Web of Destiny」Spider-Man` (SP01-021)
 masih menampilkan artwork Silver Sable (SP01-019) — lolos dari audit gambar
