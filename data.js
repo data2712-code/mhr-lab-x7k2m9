@@ -175,7 +175,7 @@ window.DUKUNG = {
    Field hp (nomor WhatsApp toko) dan wa (link grup WhatsApp) opsional —
    tombolnya otomatis tidak tampil kalau dikosongkan.
    Nomor hp tanpa tanda + dan tanpa spasi, contoh: 6281234567890 */
-window.LGS_UPDATE = '7 September 2026';
+window.LGS_UPDATE = '11 September 2026';
 window.LGS = [
   /* ---------- JAKARTA ---------- */
   { nm:'Ogre Gandaria Neverland', kota:'Jakarta', tz:'WIB',
@@ -212,6 +212,9 @@ window.LGS = [
   { nm:'Alex Hobby Shop', kota:'Tangerang', tz:'WIB',
     map:'https://maps.app.goo.gl/PLSf5L1EnhnhsGQt8',
     jd:[ {h:5, w:'20.00 - Selesai'} ] },
+  { nm:'Gamba Card Store', kota:'Tangerang', tz:'WIB',
+    map:'https://share.google/aURhCxax8lMfIc7hW',
+    jd:[ {h:5, w:'19.00 - Selesai'}, {h:7, w:'19.00 - Selesai'} ] },
 
   /* ---------- TANGERANG SELATAN ---------- */
   { nm:'Catnie Hobbies & Games', kota:'Tangerang Selatan', tz:'WIB',
