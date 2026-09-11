@@ -537,6 +537,36 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
 
 ## Riwayat Update
 
+### Tombol Follow Instagram di header & footer + perbaikan ikon TikTok footer — 11 September 2026 *(`index.html`)*
+Permintaan pemilik: tambahkan handle Instagram `@deteprtm` di samping TikTok
+yang sudah ada, supaya pengunjung juga bisa follow di Instagram.
+- **Header**: tombol baru `<a class="tiktok">` (memakai ulang class pil yang
+  sama persis dengan tombol TikTok, cuma beda ikon & href) ke
+  `https://www.instagram.com/deteprtm/`, diletakkan tepat di sebelah kanan
+  tombol Follow TikTok.
+- **Footer**: link `<a class="foot-tiktok">` senada ditambahkan di baris
+  "Dibuat oleh", di sebelah link TikTok yang sudah ada.
+- **Bug lama ditemukan & diperbaiki sekalian**: link TikTok di footer
+  (`.foot-tiktok`) ternyata ikonnya **tidak pernah tampil** sejak awal — SVG di
+  situ cuma punya `viewBox` tanpa `width`/`height`, dan tidak ada aturan CSS
+  `.foot-tiktok svg{...}` (beda dengan `.tiktok svg{width:15px;height:15px}` di
+  header yang sudah ada). Tanpa intrinsic size, browser menghitung ukuran SVG
+  itu 0×0 di dalam flex container — ketemu lewat `getBoundingClientRect()` saat
+  mengecek kenapa ikon Instagram yang baru ditambah juga tidak terlihat di
+  footer. Ditambahkan `.foot-tiktok svg{width:14px;height:14px;flex:none}`,
+  jadi ikon TikTok **dan** Instagram sekarang sama-sama tampil di footer.
+- **Verifikasi**: diuji lokal (`python3 -m http.server` + Playwright headless,
+  viewport desktop 1280px & mobile 390px) — kedua tombol/link tampil benar,
+  ikon terlihat proporsional di header maupun footer, tidak ada pergeseran tata
+  letak header (elemen baru statis sejak render awal, bukan disisipkan JS
+  setelah load — beda kasus dari catatan CLS tombol Dukung), tidak ada error
+  konsol JS baru (dua warning jaringan yang muncul berasal dari CDN jsPDF/
+  html2canvas yang memang diblokir di sandbox pengujian, tidak terkait
+  perubahan ini). Nomor versi `index.html` tidak dinaikkan (murni tombol
+  sosial + perbaikan CSS kecil, mengikuti preseden fitur share kartu di atas
+  yang juga tanpa bump). Deploy 1 commit ke `main` lewat Chrome, lalu
+  Cloudflare `Purge Everything`.
+
 ### Audit menyeluruh gambar SP01 (80 kartu) + akar masalah gambar lama masih muncul di HP — 11 September 2026 *(`sw.js`)*
 Laporan pemilik: SP01-021 (sudah diperbaiki 9 September, lihat entri di bawah)
 masih tampil dengan artwork lama di HP, dan minta dicek apakah kartu SP01 lain
