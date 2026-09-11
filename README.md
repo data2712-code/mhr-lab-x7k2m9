@@ -535,7 +535,55 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   dijalankan dari dashboard Cloudflare, dikonfirmasi `cf-cache-status: MISS`
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
-## Riwayat Update
+### Audit menyeluruh gambar SP01 (80 kartu) + akar masalah gambar lama masih muncul di HP — 11 September 2026 *(`sw.js`)*
+Laporan pemilik: SP01-021 (sudah diperbaiki 9 September, lihat entri di bawah)
+masih tampil dengan artwork lama di HP, dan minta dicek apakah kartu SP01 lain
+juga masih salah gambar.
+- **Audit visual seluruh 80 gambar dasar SP01** (`images/en/SP01-001.jpg` s/d
+  `SP01-080.jpg`): dibuat 4 lembar "contact sheet" (grid thumbnail + caption
+  nomor kartu & nama Inggris dari `cards.js`) untuk dibandingkan satu-satu.
+  4 kartu yang sempat terlihat mencurigakan di ukuran thumbnail kecil
+  (SP01-016 Luke Cage, SP01-020 Tarantula, SP01-043 Kingpin, SP01-058
+  Tombstone) dicek ulang di resolusi penuh — semuanya **ternyata benar**
+  (salah lihat karena komposisi artwork ramai/gelap di ukuran kecil). Cek juga
+  dikonfirmasi tidak ada lagi kartu SP01 dengan rarity ganda aktif (`ra[]`
+  seluruh 80 kartu SP01 sudah 1 rarity saja sejak perbaikan cache sebelumnya),
+  jadi tidak ada file varian MR/HR/SEC yang perlu ikut diaudit. **Kesimpulan:
+  tidak ditemukan kartu lain yang salah gambar — SP01-021 murni kasus
+  tersendiri, dan perbaikannya (9 September) sudah benar di server.**
+- **Akar masalah kenapa masih tampil salah di HP**: gambar kartu di-cache
+  `sw.js` dengan strategi **cache-first permanen** (komentar di kepala berkas:
+  "gambar kartu praktis tidak pernah berubah setelah diunggah") — begitu HP
+  pengguna pernah membuka kartu SP01-021 sebelum tanggal 9 September, gambar
+  lamanya tersimpan selamanya di cache tersebut dan **tidak pernah dicek ulang
+  ke server**, walau file di server sudah benar dan Cloudflare sudah di-purge.
+  Sesi sebelumnya cuma membersihkan cache ini di satu profil browser
+  (Claude-in-Chrome) untuk verifikasi — bukan solusi untuk pengguna lain.
+  Satu-satunya cara memaksa semua HP/browser yang pernah mengunjungi situs
+  untuk mengambil ulang seluruh gambar (termasuk yang sudah diperbaiki) adalah
+  menaikkan `CACHE_VERSION` di `sw.js`, karena `activate` event-nya menghapus
+  semua cache lama yang namanya tidak cocok dengan versi baru. **Dinaikkan
+  dari `v2` ke `v3`** (sebelumnya dinaikkan dari v1→v2 tanggal 8 September
+  untuk alasan lain, lihat entri di bawah). Efeknya: kunjungan pertama tiap
+  pengguna setelah update ini akan mengunduh ulang seluruh gambar sekali
+  (bukan cuma SP01-021), lalu cache permanen lagi seperti biasa.
+- **Verifikasi**: `node --check sw.js` lolos; diuji lokal via Playwright
+  (halaman Hero Base & Deck Builder tetap jalan tanpa error konsol baru)
+  sebelum deploy 1 commit ke `main` lewat Chrome, lalu Cloudflare
+  `Purge Everything`.
+
+### Jadwal Weekly Rush baru: Gamba Card Store (Tangerang) — 11 September 2026 *(hanya `data.js`)*
+Pemilik meneruskan info LGS baru: **Gamba Card Store**, Gading Serpong,
+Tangerang — Jumat 19.00-Selesai & Minggu 19.00-Selesai, link peta
+`https://share.google/aURhCxax8lMfIc7hW`. Ditambahkan ke `window.LGS` di
+grup kota "Tangerang" (setelah Alex Hobby Shop); `window.LGS_UPDATE` diubah
+jadi "11 September 2026". Diverifikasi lokal via Playwright: entri muncul
+benar di tab Hero Base pada baris hari Jumat & Minggu, di grup kota Tangerang
+yang sama dengan Alex Hobby Shop, dan tautan peta mengarah ke link yang
+benar. Deploy 1 commit ke `main` lewat Chrome, lalu Cloudflare
+`Purge Everything`.
+
+
 
 ### Deck komunitas baru: "Ultron" oleh Rob — 9 September 2026 *(hanya `data.js`)*
 Pemilik meneruskan kiriman deck dari komunitas untuk ditambahkan ke Community
