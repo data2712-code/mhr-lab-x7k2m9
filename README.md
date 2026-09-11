@@ -535,6 +535,8 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   dijalankan dari dashboard Cloudflare, dikonfirmasi `cf-cache-status: MISS`
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
+## Riwayat Update
+
 ### Audit menyeluruh gambar SP01 (80 kartu) + akar masalah gambar lama masih muncul di HP — 11 September 2026 *(`sw.js`)*
 Laporan pemilik: SP01-021 (sudah diperbaiki 9 September, lihat entri di bawah)
 masih tampil dengan artwork lama di HP, dan minta dicek apakah kartu SP01 lain
