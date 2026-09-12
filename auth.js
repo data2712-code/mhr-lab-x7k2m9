@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR DECK LAB — auth.js (Phase 1: login / signup / logout)
+   MHR DECK LAB — auth.js (login / signup / logout + status admin)
    ===================================================================
    Tipis di atas Supabase JS SDK (dimuat lewat <script> CDN di index.html
    SEBELUM berkas ini). Berkas ini TIDAK menyentuh DOM sama sekali — cuma
@@ -12,6 +12,13 @@
    akses sesungguhnya diatur lewat Row Level Security di database, bukan
    dengan menyembunyikan key ini). JANGAN PERNAH taruh service_role key di
    sini atau di berkas manapun yang dikirim ke browser.
+
+   v6.31 — login Google DICABUT (pemilik memilih email/password saja, tidak
+   mau mengurus proses OAuth consent Google). isAdmin() ditambahkan: cek
+   tabel admin_users di Supabase — tabel itu TIDAK punya kebijakan insert/
+   update/delete untuk peran manapun, jadi status admin cuma bisa diberikan
+   lewat SQL Editor Supabase langsung oleh pemilik, tidak pernah lewat situs
+   ini sendiri (mencegah siapa pun menaikkan hak aksesnya sendiri).
    =================================================================== */
 
 (function(){
@@ -26,8 +33,8 @@
       onAuthChange: ()=>{},
       signUp: async ()=>({error:{message:'Supabase SDK tidak termuat'}}),
       signIn: async ()=>({error:{message:'Supabase SDK tidak termuat'}}),
-      signInWithGoogle: async ()=>({error:{message:'Supabase SDK tidak termuat'}}),
       signOut: async ()=>{},
+      isAdmin: async ()=>false,
     };
     return;
   }
@@ -91,20 +98,30 @@
       return { data, error };
     },
 
-    async signInWithGoogle(){
-      /* redirect kembali ke halaman yang sama persis (termasuk query/hash asal
-         dibuang browser saat redirect OAuth, jadi cukup origin+pathname) */
-      const redirectTo = window.location.origin + window.location.pathname;
-      const { data, error } = await client.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo }
-      });
-      return { data, error };
-    },
-
     async signOut(){
       const { error } = await client.auth.signOut();
       return { error };
+    },
+
+    /* true kalau akun yang sedang login ada di tabel admin_users. Tabel itu
+       cuma punya kebijakan SELECT "auth.uid() = user_id" (baca status diri
+       sendiri) — tidak ada insert/update/delete untuk peran manapun, jadi
+       ini murni membaca, tidak pernah bisa dipakai untuk menaikkan hak
+       akses. Dipanggil dari refreshAccountUI() di index.html tiap kali
+       status login berubah. */
+    async isAdmin(session){
+      if(!session || !session.user) return false;
+      try{
+        const { data, error } = await client
+          .from('admin_users')
+          .select('user_id')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+        if(error || !data) return false;
+        return true;
+      }catch(e){
+        return false;
+      }
     },
   };
 })();

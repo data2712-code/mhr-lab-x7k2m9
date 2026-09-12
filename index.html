@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.30  ·  12 September 2026
+     MHR DECK LAB  ·  versi 6.31  ·  13 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.30">
+<meta name="version" content="6.31">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -948,8 +948,6 @@
     color:var(--muted);border-radius:8px;padding:8px 6px;cursor:pointer;
     font-size:12.5px;font-weight:700}
   .auth-tab[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
-  .auth-google{width:100%;margin-bottom:12px}
-  .auth-or{text-align:center;color:var(--muted);font-size:11px;margin-bottom:12px}
   #authFormLogin,#authFormSignup{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
   #authFormLogin label,#authFormSignup label{font-size:11.5px;color:var(--muted);margin-top:4px}
   #authFormLogin input,#authFormSignup input{background:var(--ink);border:1px solid var(--line);
@@ -1228,9 +1226,6 @@
         <button class="auth-tab" id="authTabSignup" type="button" aria-pressed="false" data-i18n="acctSignup">Daftar</button>
       </div>
 
-      <button class="btn2 auth-google" id="authGoogle" type="button" data-i18n="acctGoogle">🔵 Lanjut dengan Google</button>
-      <div class="auth-or"><span data-i18n="acctOr">atau</span></div>
-
       <form id="authFormLogin">
         <label data-i18n="acctEmail">Email</label>
         <input type="email" id="authLoginEmail" required autocomplete="email">
@@ -1294,7 +1289,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.30</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.31</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1366,10 +1361,11 @@
   </div>
 </div>
 
-<!-- ========== CETAK KARTU PROXY — hanya mode admin (?admin=1) ==========
-     Dipicu dari panel admin di tab Deck Komunitas. Teksnya sengaja hanya
-     Bahasa Indonesia (sama seperti panel admin lain) karena tidak pernah
-     dilihat pengunjung; nama kartu tetap ikut bahasa aktif. -->
+<!-- ========== CETAK KARTU PROXY — hanya akun admin (v6.31) ==========
+     Dipicu dari panel deck (Deck Builder), hanya tampil kalau akun yang
+     login ada di tabel admin_users (lihat isAccountAdmin). Teksnya sengaja
+     hanya Bahasa Indonesia (sama seperti panel admin lain) karena tidak
+     pernah dilihat pengunjung biasa; nama kartu tetap ikut bahasa aktif. -->
 <div class="pxv" id="proxyView" hidden>
   <div class="pxv-bar">
     <div class="h">🖨 Cetak kartu proxy
@@ -1416,7 +1412,7 @@
       Inggris atau variannya belum ada, otomatis dipakai gambar Indonesia versi utama.
       Semua gambar ber-watermark <b>SAMPLE</b>. Kartu proxy hanya untuk latihan dan uji coba
       deck pribadi — bukan kartu resmi, tidak sah untuk turnamen, dan tidak untuk dijual.
-      Panel ini hanya muncul di mode admin (<code>?admin=1</code>).
+      Panel ini hanya muncul untuk akun admin.
     </p>
   </div>
 </div>
@@ -2371,8 +2367,6 @@ const T = {
   acctSignup:       ['Daftar','Sign up'],
   acctLoginCta:     ['Masuk','Log in'],
   acctSignupCta:    ['Buat akun','Create account'],
-  acctGoogle:       ['🔵 Lanjut dengan Google','🔵 Continue with Google'],
-  acctOr:           ['atau','or'],
   acctEmail:        ['Email','Email'],
   acctPassword:     ['Kata sandi','Password'],
   acctDisplayName:  ['Nama tampilan','Display name'],
@@ -4033,8 +4027,19 @@ const LGS = (typeof window !== 'undefined' && Array.isArray(window.LGS))
   ? window.LGS : [];
 const LGS_UPDATE = (typeof window !== 'undefined' && window.LGS_UPDATE) || '-';
 
-/* Mode admin: aktif hanya bila alamat memuat ?admin=1 */
+/* Mode admin (lama): aktif hanya bila alamat memuat ?admin=1 — MASIH dipakai
+   untuk panel Deck Komunitas (pembuat kode deck komunitas, tab Community
+   Deck) apa adanya, TIDAK diubah oleh v6.31. */
 const isAdmin = new URLSearchParams(location.search).get('admin') === '1';
+
+/* v6.31 — admin akun (BARU, terpisah dari isAdmin di atas): true kalau
+   akun yang sedang login ada di tabel admin_users (Supabase). Diperbarui
+   secara async lewat cek isAdmin() di auth.js, dipanggil dari refreshAccountUI()
+   setiap kali status login berubah (lihat blok AUTH UI di akhir file).
+   Dipakai HANYA untuk panel cetak proxy (renderProxyAdmin/openProxy),
+   menggantikan ?admin=1 untuk panel itu — akses proxy sekarang ikut akun,
+   bukan lagi bookmark URL. */
+let isAccountAdmin = false;
 
 const HARI = {1:'Senin',2:'Selasa',3:'Rabu',4:'Kamis',5:'Jumat',6:'Sabtu',7:'Minggu'};
 const PIN = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
@@ -5222,22 +5227,24 @@ function renderAdminBox(){
     </div>`;
 }
 
-/* Pemicu cetak kartu proxy — di panel deck (Deck Builder), hanya mode admin. */
+/* Pemicu cetak kartu proxy — di panel deck (Deck Builder), hanya akun admin.
+   v6.31: dipindah dari ?admin=1 ke isAccountAdmin (akun login + tabel
+   admin_users) — lihat catatan di definisi isAccountAdmin di atas. */
 function renderProxyAdmin(){
   const box = $('#proxyAdmin');
   if(!box) return;
-  box.innerHTML = !isAdmin ? '' : `
+  box.innerHTML = !isAccountAdmin ? '' : `
     <div class="admin-box" style="margin-top:14px;margin-bottom:0">
       <div class="t">Mode admin — cetak kartu proxy</div>
       <p style="font-size:12px;color:#C9CFD8;line-height:1.55;margin-bottom:9px">
         Menyusun berkas PDF A4 berisi kartu ukuran 63 × 88 mm, 9 kartu per halaman,
         siap dipotong. Daftar cetak otomatis terisi dari deck aktif dan masih bisa
-        disesuaikan di dalam panelnya. Tombol ini hanya muncul dengan <code>?admin=1</code>.</p>
+        disesuaikan di dalam panelnya. Tombol ini hanya muncul untuk akun admin.</p>
       <button class="btn2" id="btnProxy"
         style="width:100%;border-color:var(--accent);color:var(--accent);font-weight:700">
         🖨 Cetak kartu proxy (PDF)</button>
     </div>`;
-  if(isAdmin) $('#btnProxy').addEventListener('click', openProxy);
+  if(isAccountAdmin) $('#btnProxy').addEventListener('click', openProxy);
 }
 
 $('#adminBox').addEventListener('click', e=>{
@@ -5262,11 +5269,15 @@ $('#adminBox').addEventListener('click', e=>{
   }
 });
 
-/* ==================== CETAK KARTU PROXY (MODE ADMIN) ====================
-   Dipicu dari panel admin di tab Deck Komunitas, jadi hanya ada saat situs
-   dibuka dengan ?admin=1. Ini menyembunyikan dari tampilan, bukan pengamanan —
-   dan itu memadai, karena panel ini tidak punya kuasa apa pun atas situs:
-   dia hanya menyusun PDF dari gambar yang sudah publik di folder images/.
+/* ==================== CETAK KARTU PROXY (AKUN ADMIN) ====================
+   v6.31: gatenya sekarang isAccountAdmin (akun admin, cek tabel admin_users
+   di Supabase), bukan lagi ?admin=1. Ini tetap cuma menyembunyikan dari
+   tampilan orang yang tidak berkepentingan, bukan pengamanan berlapis —
+   dan itu tetap memadai, karena panel ini tidak punya kuasa apa pun atas
+   situs: dia hanya menyusun PDF dari gambar yang sudah publik di folder
+   images/. Bedanya dengan ?admin=1: sekarang perlu login sungguhan sebagai
+   akun yang memang terdaftar sebagai admin di database, bukan cuma menebak
+   parameter URL.
 
    Tata letak: A4 210 × 297 mm, kartu 63 × 88 mm (ukuran standar TCG),
    3 × 3 = 9 kartu per halaman, otomatis terpusat.
@@ -5279,7 +5290,7 @@ const pxImgCache = {};          // kunci berkas -> {url,fmt} | null
 function pxTotal(){ return Object.values(pxSel).reduce((a,b)=>a+b,0); }
 
 function openProxy(){
-  if(!isAdmin) return;
+  if(!isAccountAdmin) return;
   if(!pxTotal()) pxLoadFromDeck(false);
   renderPxList();
   $('#pxSug').innerHTML = '';
@@ -5724,6 +5735,12 @@ window.addEventListener('hashchange', ()=>{
     }
     if(loggedInBlock) loggedInBlock.hidden = !loggedIn;
     if(loggedOutBlock) loggedOutBlock.hidden = loggedIn;
+
+    /* v6.31 — cek status admin akun (tabel admin_users di Supabase) tiap
+       kali sesi berubah (login/logout/refresh token), lalu render ulang
+       panel cetak proxy supaya muncul/hilang langsung tanpa reload halaman. */
+    isAccountAdmin = loggedIn && await window.MHRAuth.isAdmin(session);
+    if(typeof renderProxyAdmin === 'function') renderProxyAdmin();
   }
 
   if(btnAccount) btnAccount.addEventListener('click', openAuthModal);
@@ -5769,15 +5786,6 @@ window.addEventListener('hashchange', ()=>{
     if(submitBtn) submitBtn.disabled = false;
     if(error){ showAuthMsg(error.message || t('acctErrGeneric'), 'err'); return; }
     showAuthMsg(t('acctSignupOk'), 'ok');
-  });
-
-  const googleBtn = $('#authGoogle');
-  if(googleBtn) googleBtn.addEventListener('click', async ()=>{
-    clearAuthMsg();
-    const { error } = await window.MHRAuth.signInWithGoogle();
-    /* kalau sukses, browser langsung dialihkan ke halaman login Google —
-       tidak ada state lanjutan yang perlu diurus di sini */
-    if(error) showAuthMsg(error.message || t('acctErrGeneric'), 'err');
   });
 
   const logoutBtn = $('#authLogout');
