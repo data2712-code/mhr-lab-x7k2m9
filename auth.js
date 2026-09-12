@@ -36,6 +36,21 @@
    supaya orang tidak bisa "memanen" alamat email cuma dengan menebak-nebak
    username satu per satu. Kalau salah (username ATAU kata sandi), pesan
    errornya sama-sama generik.
+
+   v6.34 — fitur "Lupa kata sandi?". Ini SATU-SATUNYA tempat di seluruh
+   sistem akun yang tetap minta EMAIL (bukan username) — karena itu memang
+   cara resetPasswordForEmail() Supabase bekerja (mengirim link ke email),
+   dan berbeda dari signIn/verify_login di atas, di sini TIDAK ada password
+   yang bisa dipakai untuk "menjaga" apakah suatu email/username terdaftar,
+   jadi kita sengaja TIDAK membuat fungsi "cari email dari username" untuk
+   fitur ini (itu akan jadi celah panen-email tanpa penjagaan password sama
+   sekali). Supabase sendiri juga tidak membocorkan apakah suatu email
+   terdaftar atau tidak lewat resetPasswordForEmail() — pesan yang
+   ditampilkan ke pengguna sama saja di kedua kasus. Setelah pengguna
+   mengklik link di email itu, Supabase mengarahkan balik ke situs ini
+   dengan sesi "pemulihan" sementara (event PASSWORD_RECOVERY) — lihat
+   onPasswordRecovery() di bawah — lalu updatePassword() dipanggil untuk
+   menyimpan kata sandi baru.
    =================================================================== */
 
 (function(){
@@ -48,9 +63,12 @@
       ready: false,
       getSession: async ()=>null,
       onAuthChange: ()=>{},
+      onPasswordRecovery: ()=>{},
       signUp: async ()=>({error:{message:'Supabase SDK tidak termuat'}}),
       signIn: async ()=>({error:{message:'Supabase SDK tidak termuat'}}),
       signOut: async ()=>{},
+      resetPassword: async ()=>({error:{message:'Supabase SDK tidak termuat'}}),
+      updatePassword: async ()=>({error:{message:'Supabase SDK tidak termuat'}}),
       isAdmin: async ()=>false,
     };
     return;
@@ -62,7 +80,17 @@
      (dipanggil dengan (session) — null kalau logout) */
   const listeners = [];
 
-  client.auth.onAuthStateChange((_event, session)=>{
+  /* v6.34 — daftar listener terpisah, khusus event PASSWORD_RECOVERY (klik
+     link "lupa kata sandi" dari email). Dipisah dari `listeners` di atas
+     supaya index.html bisa membedakan "orang baru saja login biasa" dari
+     "orang baru saja klik link reset kata sandi", tanpa mengubah bentuk
+     callback (session) yang sudah dipakai onAuthChange() sejak v6.30. */
+  const recoveryListeners = [];
+
+  client.auth.onAuthStateChange((event, session)=>{
+    if(event === 'PASSWORD_RECOVERY'){
+      recoveryListeners.forEach(fn=>{ try{ fn(session); }catch(e){ console.error(e); } });
+    }
     listeners.forEach(fn=>{ try{ fn(session); }catch(e){ console.error(e); } });
   });
 
@@ -103,6 +131,12 @@
 
     /* daftarkan callback yang dipanggil tiap kali status auth berubah */
     onAuthChange(fn){ listeners.push(fn); },
+
+    /* v6.34 — daftarkan callback yang HANYA dipanggil saat orang mendarat di
+       situs ini lewat link reset kata sandi dari email (lihat komentar
+       v6.34 di atas berkas ini). index.html memakainya untuk otomatis
+       membuka form "simpan kata sandi baru". */
+    onPasswordRecovery(fn){ recoveryListeners.push(fn); },
 
     /* v6.32 — username WAJIB unik (3-20 karakter, huruf/angka/underscore).
        Dicek dulu ke tabel profiles (public-read, jadi anon key boleh baca)
@@ -162,6 +196,38 @@
     async signOut(){
       const { error } = await client.auth.signOut();
       return { error };
+    },
+
+    /* v6.34 — kirim link reset kata sandi ke EMAIL (bukan username — lihat
+       komentar v6.34 di atas berkas ini untuk alasannya). redirectTo
+       diarahkan balik ke halaman ini sendiri (origin + path saat ini),
+       supaya sesudah diklik, pengguna kembali ke situs ini juga (bukan ke
+       domain lama data2712-code.github.io kalau kebetulan itu yang lagi
+       dibuka). */
+    async resetPassword(email){
+      const addr = (email || '').trim();
+      if(!addr) return { error:{ message:'INVALID_EMAIL' } };
+      try{
+        const { error } = await client.auth.resetPasswordForEmail(addr, {
+          redirectTo: window.location.origin + window.location.pathname,
+        });
+        return { error };
+      }catch(e){
+        return { error:{ message:'RESET_FAILED' } };
+      }
+    },
+
+    /* v6.34 — simpan kata sandi baru. HANYA berhasil kalau sesi saat ini
+       adalah sesi "pemulihan" dari link reset (event PASSWORD_RECOVERY) —
+       itu aturan Supabase Auth sendiri, bukan sesuatu yang perlu dicek lagi
+       di sini. Dipanggil dari form yang muncul lewat onPasswordRecovery(). */
+    async updatePassword(newPassword){
+      try{
+        const { data, error } = await client.auth.updateUser({ password: newPassword });
+        return { data, error };
+      }catch(e){
+        return { data:null, error:{ message:'UPDATE_FAILED' } };
+      }
     },
 
     /* true kalau akun yang sedang login ada di tabel admin_users. Tabel itu
