@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.32  ·  13 September 2026
+     MHR DECK LAB  ·  versi 6.33  ·  13 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.32">
+<meta name="version" content="6.33">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -949,6 +949,14 @@
     font-size:12.5px;font-weight:700}
   .auth-tab[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
   #authFormLogin,#authFormSignup{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+  /* v6.33 fix — tanpa baris ini, atribut [hidden] pada form login/signup
+     KALAH oleh aturan display:flex di atas (yang berlaku ke keduanya tanpa
+     syarat), jadi form Daftar tetap kelihatan walau atribut hidden-nya
+     sudah benar dan tab yang dipencet "Masuk" — makanya dulu kedua form
+     muncul bersamaan. Aturan attribute-selector ini spesifisitasnya lebih
+     tinggi dari aturan ID biasa di atas, jadi menang dan benar-benar
+     menyembunyikan form yang sedang tidak aktif. */
+  #authFormLogin[hidden],#authFormSignup[hidden]{display:none}
   #authFormLogin label,#authFormSignup label{font-size:11.5px;color:var(--muted);margin-top:4px}
   #authFormLogin input,#authFormSignup input{background:var(--ink);border:1px solid var(--line);
     color:var(--paper);border-radius:8px;padding:9px 10px;font-size:13px;font-family:var(--body)}
@@ -1227,8 +1235,8 @@
       </div>
 
       <form id="authFormLogin">
-        <label data-i18n="acctEmail">Email</label>
-        <input type="email" id="authLoginEmail" required autocomplete="email">
+        <label data-i18n="acctUsername">Username</label>
+        <input type="text" id="authLoginUsername" required autocomplete="username">
         <label data-i18n="acctPassword">Kata sandi</label>
         <input type="password" id="authLoginPassword" required autocomplete="current-password">
         <button class="btn2 main" type="submit" data-i18n="acctLoginCta">Masuk</button>
@@ -1291,7 +1299,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.32</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.33</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2380,7 +2388,7 @@ const T = {
   acctLoginTitle:   ['Masuk / Daftar','Log in / Sign up'],
   acctModalTitleLogin: ['Masuk ke akun','Log in to your account'],
   acctErrGeneric:   ['Terjadi kesalahan. Coba lagi.','Something went wrong. Please try again.'],
-  acctErrInvalid:   ['Email/kata sandi salah.','Incorrect email or password.'],
+  acctErrInvalid:   ['Username/kata sandi salah.','Incorrect username or password.'],
   acctSignupOk:     ['Akun dibuat! Cek email Anda untuk verifikasi sebelum masuk.','Account created! Check your email to verify before logging in.'],
   acctErrUsernameFormat: ['Username harus 3-20 karakter: huruf, angka, atau garis bawah saja (tanpa spasi).',
                           'Username must be 3-20 characters: letters, numbers, or underscore only (no spaces).'],
@@ -5770,11 +5778,11 @@ window.addEventListener('hashchange', ()=>{
   if(formLogin) formLogin.addEventListener('submit', async e=>{
     e.preventDefault();
     clearAuthMsg();
-    const email = $('#authLoginEmail').value.trim();
+    const uname = $('#authLoginUsername').value.trim();
     const pass = $('#authLoginPassword').value;
     const submitBtn = formLogin.querySelector('button[type="submit"]');
     if(submitBtn) submitBtn.disabled = true;
-    const { error } = await window.MHRAuth.signIn(email, pass);
+    const { error } = await window.MHRAuth.signIn(uname, pass);
     if(submitBtn) submitBtn.disabled = false;
     if(error){ showAuthMsg(t('acctErrInvalid'), 'err'); return; }
     closeAuthModal();
