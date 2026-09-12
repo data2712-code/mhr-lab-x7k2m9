@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.33** · 13 September 2026
+**Versi saat ini: v6.34** · 13 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -536,6 +536,43 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
+
+### v6.34 — fitur "Lupa kata sandi?" — 13 September 2026 *(`index.html`, `auth.js`)*
+
+Permintaan pemilik: tambahkan fitur ganti kata sandi buat orang yang lupa,
+plus akun `data2712` (email `dataanggi2712@gmail.com`) dinaikkan jadi admin
+lewat SQL Editor Supabase langsung (tidak lewat situs — lihat catatan
+`isAdmin()` di v6.31).
+
+- Tab **Masuk** sekarang punya tautan "Lupa kata sandi?" di bawah tombol
+  Masuk. Diklik → muncul form baru yang minta **email** (satu-satunya
+  tempat di seluruh sistem akun yang minta email, bukan username — lihat
+  di bawah kenapa) lalu mengirim link reset lewat
+  `resetPasswordForEmail()` bawaan Supabase.
+- Kenapa email, bukan username, khusus di form ini: alur login (v6.33)
+  bisa aman "menerjemahkan" username→email karena ada kata sandi yang
+  dipakai sebagai penjaga (`verify_login` cuma mengembalikan email kalau
+  password-nya juga benar). Di form lupa-kata-sandi tidak ada kata sandi
+  sama sekali yang bisa dipakai sebagai penjaga seperti itu — jadi sengaja
+  **tidak** dibuat fungsi database "cari email dari username" untuk fitur
+  ini, karena itu akan jadi celah memanen alamat email nyata tanpa
+  penjagaan apa pun. Supabase sendiri juga tidak membocorkan lewat pesan
+  yang ditampilkan apakah suatu email terdaftar atau tidak — pesan yang
+  muncul di situs ini sama saja di kedua kasus.
+- Sesudah pengguna mengklik link di emailnya, Supabase mengarahkan balik
+  ke situs ini dengan sesi "pemulihan" sementara (event `PASSWORD_RECOVERY`
+  dari Supabase Auth). Situs mendeteksi ini lewat `onPasswordRecovery()`
+  baru di `auth.js`, lalu **memaksa** modal akun terbuka langsung ke form
+  "Simpan kata sandi baru" (form `#authFormReset`) — bukan tampilan
+  "sudah masuk seperti biasa" yang normalnya muncul kalau ada sesi aktif.
+  Kata sandi baru disimpan lewat `updateUser({password})` bawaan Supabase.
+- Perubahan UI tab Masuk/Daftar diperluas dari 2 tampilan jadi 4
+  (login/signup/forgot/reset) lewat fungsi `setAuthView()` (dulu
+  `setAuthTab()`), memakai pola perbaikan CSS `[hidden]` yang sama seperti
+  yang sudah diperbaiki di v6.33 supaya tidak ada form yang "nyangkut"
+  tampil berbarengan.
+- `node --check` lolos untuk `auth.js` dan blok `<script>` inline
+  `index.html`.
 
 ### v6.33 — login pakai username (bukan email lagi) + perbaikan tab Masuk/Daftar — 13 September 2026 *(`index.html`, `auth.js`)*
 

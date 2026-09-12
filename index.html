@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.33  ·  13 September 2026
+     MHR DECK LAB  ·  versi 6.34  ·  13 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.33">
+<meta name="version" content="6.34">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -948,19 +948,27 @@
     color:var(--muted);border-radius:8px;padding:8px 6px;cursor:pointer;
     font-size:12.5px;font-weight:700}
   .auth-tab[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
-  #authFormLogin,#authFormSignup{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+  #authFormLogin,#authFormSignup,#authFormForgot,#authFormReset{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
   /* v6.33 fix — tanpa baris ini, atribut [hidden] pada form login/signup
      KALAH oleh aturan display:flex di atas (yang berlaku ke keduanya tanpa
      syarat), jadi form Daftar tetap kelihatan walau atribut hidden-nya
      sudah benar dan tab yang dipencet "Masuk" — makanya dulu kedua form
      muncul bersamaan. Aturan attribute-selector ini spesifisitasnya lebih
      tinggi dari aturan ID biasa di atas, jadi menang dan benar-benar
-     menyembunyikan form yang sedang tidak aktif. */
-  #authFormLogin[hidden],#authFormSignup[hidden]{display:none}
-  #authFormLogin label,#authFormSignup label{font-size:11.5px;color:var(--muted);margin-top:4px}
-  #authFormLogin input,#authFormSignup input{background:var(--ink);border:1px solid var(--line);
+     menyembunyikan form yang sedang tidak aktif. v6.34 menambahkan dua form
+     baru (forgot/reset) ke aturan yang sama supaya tidak mengulang bug yang
+     sama. */
+  #authFormLogin[hidden],#authFormSignup[hidden],#authFormForgot[hidden],#authFormReset[hidden]{display:none}
+  #authFormLogin label,#authFormSignup label,#authFormForgot label,#authFormReset label{font-size:11.5px;color:var(--muted);margin-top:4px}
+  #authFormLogin input,#authFormSignup input,#authFormForgot input,#authFormReset input{background:var(--ink);border:1px solid var(--line);
     color:var(--paper);border-radius:8px;padding:9px 10px;font-size:13px;font-family:var(--body)}
-  #authFormLogin input:focus,#authFormSignup input:focus{border-color:var(--accent);outline:none}
+  #authFormLogin input:focus,#authFormSignup input:focus,#authFormForgot input:focus,#authFormReset input:focus{border-color:var(--accent);outline:none}
+  /* v6.34 — tombol bergaya link teks, dipakai untuk "Lupa kata sandi?" dan
+     "Kembali ke Masuk" di dalam form forgot. */
+  .auth-link{background:none;border:none;color:var(--accent);font-size:12px;
+    text-align:left;cursor:pointer;padding:0;margin-top:2px;margin-bottom:10px;
+    text-decoration:underline;font-family:var(--body)}
+  .auth-link[hidden]{display:none}
   .auth-msg{font-size:12px;padding:8px 10px;border-radius:8px;margin:8px 0;line-height:1.4}
   .auth-msg.err{background:rgba(228,68,46,.15);color:#FF8A75;border:1px solid rgba(228,68,46,.4)}
   .auth-msg.ok{background:rgba(51,164,92,.15);color:#7CE0A2;border:1px solid rgba(51,164,92,.4)}
@@ -1241,6 +1249,9 @@
         <input type="password" id="authLoginPassword" required autocomplete="current-password">
         <button class="btn2 main" type="submit" data-i18n="acctLoginCta">Masuk</button>
       </form>
+      <!-- v6.34 — hanya terlihat di tab Masuk (disembunyikan/ditampilkan
+           bareng formLogin lewat setAuthView(), bukan diatur sendiri). -->
+      <button class="auth-link" id="authForgotLink" type="button" data-i18n="acctForgotLink">Lupa kata sandi?</button>
 
       <form id="authFormSignup" hidden>
         <label data-i18n="acctUsername">Username</label>
@@ -1254,9 +1265,38 @@
         <button class="btn2 main" type="submit" data-i18n="acctSignupCta">Buat akun</button>
       </form>
 
-      <p class="auth-msg" id="authMsg" hidden></p>
-      <p class="auth-note" data-i18n="acctNote">Akun dipakai untuk menyimpan &amp; membagikan deck, dan melacak koleksi kartu Anda (segera hadir).</p>
+      <!-- v6.34 — "Lupa kata sandi?": SATU-SATUNYA form di seluruh modal ini
+           yang minta EMAIL, bukan username (lihat komentar v6.34 di auth.js
+           untuk alasannya — reset kata sandi memang begitu cara kerjanya di
+           Supabase, dan di sini sengaja tidak ada penjagaan password seperti
+           di verify_login, jadi tidak dibuatkan fungsi "cari email dari
+           username" untuk form ini). -->
+      <form id="authFormForgot" hidden>
+        <p class="auth-note" data-i18n="acctForgotNote">Masukkan email yang Anda pakai saat mendaftar. Kalau email itu terdaftar, kami akan mengirim link untuk membuat kata sandi baru.</p>
+        <label data-i18n="acctEmail">Email</label>
+        <input type="email" id="authForgotEmail" required autocomplete="email">
+        <button class="btn2 main" type="submit" data-i18n="acctForgotCta">Kirim link reset</button>
+        <button class="auth-link" id="authForgotBack" type="button" data-i18n="acctForgotBack">← Kembali ke Masuk</button>
+      </form>
+
+      <p class="auth-note" id="authNoteDefault" data-i18n="acctNote">Akun dipakai untuk menyimpan &amp; membagikan deck, dan melacak koleksi kartu Anda (segera hadir).</p>
     </div>
+
+    <!-- v6.34 — form "kata sandi baru", muncul otomatis lewat
+         onPasswordRecovery() (auth.js) saat orang mendarat di situs ini dari
+         link email "lupa kata sandi". Sengaja DILUAR #authLoggedOut supaya
+         tidak ikut disembunyikan/ditampilkan oleh logika loggedIn/loggedOut
+         biasa di refreshAccountUI() — sesi "pemulihan" Supabase tetap
+         dianggap sesi aktif (loggedIn true), padahal yang harus tampil di
+         sini adalah form ganti kata sandi, bukan tampilan "sudah masuk". -->
+    <form id="authFormReset" hidden>
+      <p class="auth-note" data-i18n="acctResetNote">Masukkan kata sandi baru untuk akun Anda.</p>
+      <label data-i18n="acctNewPassword">Kata sandi baru</label>
+      <input type="password" id="authResetPassword" required minlength="6" autocomplete="new-password">
+      <button class="btn2 main" type="submit" data-i18n="acctResetCta">Simpan kata sandi baru</button>
+    </form>
+
+    <p class="auth-msg" id="authMsg" hidden></p>
 
     <div class="auth-loggedin" id="authLoggedIn" hidden>
       <p class="auth-hi"><span data-i18n="acctHi">Masuk sebagai</span> <b id="authWhoAmI"></b></p>
@@ -1299,7 +1339,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.33</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.34</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2393,6 +2433,20 @@ const T = {
   acctErrUsernameFormat: ['Username harus 3-20 karakter: huruf, angka, atau garis bawah saja (tanpa spasi).',
                           'Username must be 3-20 characters: letters, numbers, or underscore only (no spaces).'],
   acctErrUsernameTaken:  ['Username itu sudah dipakai — coba yang lain.','That username is already taken — try another.'],
+  acctForgotLink:   ['Lupa kata sandi?','Forgot your password?'],
+  acctForgotNote:   ['Masukkan email yang Anda pakai saat mendaftar. Kalau email itu terdaftar, kami akan mengirim link untuk membuat kata sandi baru.',
+                      'Enter the email you used to sign up. If that email is registered, we’ll send a link to set a new password.'],
+  acctForgotCta:    ['Kirim link reset','Send reset link'],
+  acctForgotBack:   ['← Kembali ke Masuk','← Back to log in'],
+  acctForgotSentOk: ['Kalau email itu terdaftar, link reset sudah dikirim — cek inbox (dan folder spam).',
+                      'If that email is registered, a reset link has been sent — check your inbox (and spam folder).'],
+  acctErrResetFailed: ['Gagal mengirim link reset. Coba lagi sebentar lagi.','Couldn’t send the reset link. Please try again shortly.'],
+  acctResetNote:    ['Masukkan kata sandi baru untuk akun Anda.','Enter a new password for your account.'],
+  acctNewPassword:  ['Kata sandi baru','New password'],
+  acctResetCta:     ['Simpan kata sandi baru','Save new password'],
+  acctResetOk:      ['Kata sandi berhasil diperbarui.','Password updated successfully.'],
+  acctErrUpdateFailed: ['Gagal menyimpan kata sandi baru. Coba minta link reset baru.',
+                        'Couldn’t save the new password. Try requesting a new reset link.'],
 };
 
 const LANGS = ['id','en'];
@@ -5723,6 +5777,14 @@ window.addEventListener('hashchange', ()=>{
   const authView = $('#authView');
   const authMsg = $('#authMsg');
 
+  /* v6.34 — true selama sesi "pemulihan kata sandi" (klik link dari email
+     lupa kata sandi) sedang berlangsung. Selama true, refreshAccountUI()
+     SENGAJA tidak menyentuh tampilan loggedIn/loggedOut sama sekali — lihat
+     komentar panjang di HTML #authFormReset untuk alasannya (sesi pemulihan
+     Supabase tetap dihitung "loggedIn", padahal yang harus tampil adalah
+     form ganti kata sandi, bukan tampilan "sudah masuk seperti biasa"). */
+  let inPasswordRecovery = false;
+
   function showAuthMsg(text, kind){
     if(!authMsg) return;
     authMsg.textContent = text;
@@ -5734,6 +5796,7 @@ window.addEventListener('hashchange', ()=>{
   function closeAuthModal(){ if(authView) authView.hidden = true; }
 
   async function refreshAccountUI(session){
+    if(inPasswordRecovery) return; // lihat komentar di deklarasi inPasswordRecovery di atas
     const loggedIn = !!(session && session.user);
     const loggedInBlock = $('#authLoggedIn');
     const loggedOutBlock = $('#authLoggedOut');
@@ -5764,16 +5827,35 @@ window.addEventListener('hashchange', ()=>{
 
   const tabLogin = $('#authTabLogin'), tabSignup = $('#authTabSignup');
   const formLogin = $('#authFormLogin'), formSignup = $('#authFormSignup');
-  function setAuthTab(which){
+  const formForgot = $('#authFormForgot'), formReset = $('#authFormReset');
+  const forgotLink = $('#authForgotLink');
+  const authTabsEl = $('.auth-tabs');
+  const authNoteDefault = $('#authNoteDefault');
+
+  /* v6.34 — dulu bernama setAuthTab(), cuma menukar formLogin<->formSignup.
+     Diperluas jadi 4 tampilan (login/signup/forgot/reset) supaya "Lupa kata
+     sandi?" dan form gantinya bisa ikut memakai mekanisme show/hide yang
+     sama — tanpa itu, gampang lupa menyembunyikan salah satu form lagi
+     (persis bug CSS v6.33 yang sudah diperbaiki di atas). */
+  function setAuthView(which){
     clearAuthMsg();
-    const isLogin = which === 'login';
+    const isLogin = which === 'login', isSignup = which === 'signup',
+          isForgot = which === 'forgot', isReset = which === 'reset';
     if(tabLogin) tabLogin.setAttribute('aria-pressed', String(isLogin));
-    if(tabSignup) tabSignup.setAttribute('aria-pressed', String(!isLogin));
+    if(tabSignup) tabSignup.setAttribute('aria-pressed', String(isSignup));
+    if(authTabsEl) authTabsEl.hidden = isForgot || isReset;
     if(formLogin) formLogin.hidden = !isLogin;
-    if(formSignup) formSignup.hidden = isLogin;
+    if(forgotLink) forgotLink.hidden = !isLogin;
+    if(formSignup) formSignup.hidden = !isSignup;
+    if(formForgot) formForgot.hidden = !isForgot;
+    if(formReset) formReset.hidden = !isReset;
+    if(authNoteDefault) authNoteDefault.hidden = isReset;
   }
-  if(tabLogin) tabLogin.addEventListener('click', ()=>setAuthTab('login'));
-  if(tabSignup) tabSignup.addEventListener('click', ()=>setAuthTab('signup'));
+  if(tabLogin) tabLogin.addEventListener('click', ()=>setAuthView('login'));
+  if(tabSignup) tabSignup.addEventListener('click', ()=>setAuthView('signup'));
+  if(forgotLink) forgotLink.addEventListener('click', ()=>setAuthView('forgot'));
+  const authForgotBackBtn = $('#authForgotBack');
+  if(authForgotBackBtn) authForgotBackBtn.addEventListener('click', ()=>setAuthView('login'));
 
   if(formLogin) formLogin.addEventListener('submit', async e=>{
     e.preventDefault();
@@ -5812,6 +5894,43 @@ window.addEventListener('hashchange', ()=>{
     showAuthMsg(t('acctSignupOk'), 'ok');
   });
 
+  /* v6.34 — "Lupa kata sandi?": kirim email (bukan username, lihat komentar
+     panjang di HTML form ini). Pesannya SENGAJA sama persis baik email itu
+     terdaftar maupun tidak (mengikuti perilaku resetPasswordForEmail()
+     Supabase sendiri) — supaya form ini tidak jadi cara mengecek "email siapa
+     saja yang punya akun di sini". */
+  if(formForgot) formForgot.addEventListener('submit', async e=>{
+    e.preventDefault();
+    clearAuthMsg();
+    const email = $('#authForgotEmail').value.trim();
+    const submitBtn = formForgot.querySelector('button[type="submit"]');
+    if(submitBtn) submitBtn.disabled = true;
+    const { error } = await window.MHRAuth.resetPassword(email);
+    if(submitBtn) submitBtn.disabled = false;
+    if(error){ showAuthMsg(t('acctErrResetFailed'), 'err'); return; }
+    showAuthMsg(t('acctForgotSentOk'), 'ok');
+  });
+
+  /* v6.34 — form ganti kata sandi baru, muncul lewat onPasswordRecovery()
+     di bawah (BUKAN lewat tombol biasa). Sesudah berhasil, keluar dari mode
+     "pemulihan" dan biarkan refreshAccountUI() jalan normal lagi supaya
+     tampilan langsung berpindah ke "sudah masuk sebagai <username>". */
+  if(formReset) formReset.addEventListener('submit', async e=>{
+    e.preventDefault();
+    clearAuthMsg();
+    const newPass = $('#authResetPassword').value;
+    const submitBtn = formReset.querySelector('button[type="submit"]');
+    if(submitBtn) submitBtn.disabled = true;
+    const { error } = await window.MHRAuth.updatePassword(newPass);
+    if(submitBtn) submitBtn.disabled = false;
+    if(error){ showAuthMsg(t('acctErrUpdateFailed'), 'err'); return; }
+    showAuthMsg(t('acctResetOk'), 'ok');
+    inPasswordRecovery = false;
+    if(formReset) formReset.hidden = true;
+    const session = await window.MHRAuth.getSession();
+    await refreshAccountUI(session);
+  });
+
   const logoutBtn = $('#authLogout');
   if(logoutBtn) logoutBtn.addEventListener('click', async ()=>{
     await window.MHRAuth.signOut();
@@ -5823,6 +5942,18 @@ window.addEventListener('hashchange', ()=>{
   if(window.MHRAuth && window.MHRAuth.ready){
     window.MHRAuth.getSession().then(refreshAccountUI);
     window.MHRAuth.onAuthChange(refreshAccountUI);
+    /* v6.34 — orang baru saja klik link "lupa kata sandi" dari email dan
+       mendarat kembali di situs ini. Paksa buka modal langsung ke form ganti
+       kata sandi, apa pun tab/halaman yang lagi dibuka. */
+    window.MHRAuth.onPasswordRecovery(()=>{
+      inPasswordRecovery = true;
+      const loggedInBlock = $('#authLoggedIn');
+      const loggedOutBlock = $('#authLoggedOut');
+      if(loggedInBlock) loggedInBlock.hidden = true;
+      if(loggedOutBlock) loggedOutBlock.hidden = true;
+      setAuthView('reset');
+      if(authView) authView.hidden = false;
+    });
   } else if(btnAccount){
     /* Supabase SDK gagal termuat (offline, diblokir adblocker, dst.) —
        sembunyikan tombol akun total daripada menampilkan fitur yang tidak jalan */
