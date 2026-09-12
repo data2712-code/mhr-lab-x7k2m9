@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.34** · 13 September 2026
+**Versi saat ini: v6.35** · 13 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -536,6 +536,53 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
+
+### v6.35 — "Deck Saya (Akun)": simpan/muat/hapus deck lewat akun (Phase 2) — 13 September 2026 *(`index.html`, `decks.js` BARU, `sw.js`)*
+
+Permintaan pemilik: lanjut ke Phase 2 dari rencana akun — pengguna yang login
+bisa menyimpan deck ke akunnya (selain penyimpanan localStorage yang sudah
+ada sejak awal), lalu memuatnya lagi dari perangkat lain.
+
+- **Tidak ada migrasi database sama sekali** — skema `public.decks` (kolom
+  `id`, `owner_id`, `name`, `deck_code`, `playstyle`, `is_public`,
+  `created_at`, `updated_at`) beserta kebijakan RLS-nya (pemilik boleh
+  insert/update/delete deck miliknya sendiri, deck `is_public=true` bisa
+  dibaca siapa saja, admin bisa moderasi) sudah dibangun sejak Phase 0
+  (12 September) — dicek ulang lewat SQL Editor sebelum mulai membangun,
+  dan memang sudah lengkap untuk fitur ini.
+- **Format penyimpanan deck di akun memakai kode yang SAMA PERSIS** dengan
+  `encodeDeck()`/`decodeDeck()` yang sudah ada (dipakai untuk "Salin link
+  deck" dan daftar Deck Komunitas) — bukan format JSON baru. Artinya satu
+  deck yang sama bisa dibaca ulang lewat jalur mana pun (link berbagi,
+  impor teks, deck komunitas, atau akun) tanpa konversi apa pun.
+- **`decks.js` (berkas baru)**: pembungkus tipis di atas Supabase, meminjam
+  koneksi (`client`) dari `auth.js` alih-alih membuat koneksi baru sendiri —
+  `auth.js` memang sudah mengekspos `window.MHRAuth.client` sejak v6.30
+  khusus untuk keperluan ini. Menyediakan `window.MHRDecks.listMine()`,
+  `.save({id, name, deckCode})` (insert kalau `id` kosong, update kalau
+  ada), `.importMany(list)` (untuk impor sekali-jalan, lihat di bawah), dan
+  `.remove(id)`.
+- **UI baru di panel "Deck Saya"**: bagian "☁️ Deck Saya (Akun)" —
+  tersembunyi/tampil otomatis mengikuti status login. Kalau login: tombol
+  "Simpan deck aktif ke akun" (meng-update baris yang sama di akun kalau
+  deck ini sudah pernah disimpan sebelumnya, dilacak lewat `store.cloudLink`
+  di localStorage — supaya tidak bikin duplikat tiap kali dipencet ulang),
+  serta daftar deck tersimpan di akun dengan tombol Muat (📥, jadi deck
+  lokal baru) dan Hapus (🗑, cuma dari akun, salinan lokal kalau ada tidak
+  ikut terhapus).
+- **Tawaran impor satu kali**: begitu login pertama kali di perangkat/
+  browser yang punya deck localStorage tapi akunnya masih kosong, muncul
+  tawaran "impor semua deck browser ini ke akun sekaligus" — cuma
+  ditawarkan SEKALI (baik dijawab Impor maupun Lewati, tidak muncul lagi
+  sesudahnya), dan tidak pernah ditawarkan kalau akun itu ternyata sudah
+  punya deck sendiri (mis. dari perangkat lain).
+- Penyimpanan localStorage yang sudah ada dari awal **sama sekali tidak
+  diubah** — akun cuma penyimpanan KEDUA yang sifatnya pilihan.
+- `sw.js`: `decks.js` ditambahkan ke `STATIC_ASSETS`, `CACHE_VERSION`
+  dinaikkan v4→v5 (baru pertama kali berubah sejak v6.31 — lihat catatan
+  di berkasnya soal kapan versi ini perlu dinaikkan).
+- `node --check` lolos untuk `decks.js` dan blok `<script>` inline
+  `index.html`.
 
 ### v6.34 — fitur "Lupa kata sandi?" — 13 September 2026 *(`index.html`, `auth.js`)*
 

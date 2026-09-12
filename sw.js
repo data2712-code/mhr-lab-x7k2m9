@@ -26,7 +26,7 @@
    supaya versi baru langsung dipakai tanpa perlu semua tab ditutup dulu.
    =================================================================== */
 
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 const CACHE_STATIC = `mhr-shell-${CACHE_VERSION}`;
 const CACHE_IMAGES = `mhr-images-${CACHE_VERSION}`;
 
@@ -37,6 +37,7 @@ const STATIC_ASSETS = [
   './data.js',
   './manifest.json',
   './auth.js', // servis login/signup/logout + status admin (lihat window.MHRAuth)
+  './decks.js', // v6.35 — servis simpan/muat/hapus deck ke akun (lihat window.MHRDecks)
 ];
 
 self.addEventListener('install', e=>{
