@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.32** · 13 September 2026
+**Versi saat ini: v6.33** · 13 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -536,6 +536,52 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
+
+### v6.33 — login pakai username (bukan email lagi) + perbaikan tab Masuk/Daftar — 13 September 2026 *(`index.html`, `auth.js`)*
+
+Permintaan pemilik: orang login pakai **username**, bukan email — dan tab
+"Masuk" seharusnya cuma menampilkan Username + Kata sandi saja, bukan
+tercampur dengan field pembuatan akun (Daftar).
+
+- **Bug ditemukan & diperbaiki**: field form Daftar (Username, Email, Kata
+  sandi kedua, tombol "Buat akun") ternyata tetap tampil berbarengan dengan
+  form Masuk apa pun tab yang dipencet. Sebabnya: CSS
+  `#authFormLogin,#authFormSignup{display:flex;...}` berlaku tanpa syarat ke
+  kedua form, jadi mengalahkan atribut `hidden` yang seharusnya
+  menyembunyikan form yang sedang tidak aktif (atribut HTML `hidden` cuma
+  `display:none` lewat stylesheet browser bawaan — kalah kalau ada aturan
+  CSS penulis situs sendiri yang menimpanya tanpa pengecualian). Ditambahkan
+  aturan `#authFormLogin[hidden],#authFormSignup[hidden]{display:none}` yang
+  spesifisitasnya lebih tinggi, jadi sekarang benar-benar cuma satu form
+  yang tampil sesuai tab yang aktif.
+- **Login sekarang pakai username + kata sandi** (field Email di form Masuk
+  diganti jadi Username). Supabase Auth sendiri cuma mengerti login lewat
+  email, jadi ditambahkan satu fungsi database baru, `verify_login(username,
+  password)` (lihat `mhr_decklab_username_login_migration.sql`) — fungsi ini
+  MENERJEMAHKAN username jadi email, tapi HANYA kalau kata sandinya juga
+  benar (dicek di database pakai hash bcrypt yang sama seperti Supabase
+  sendiri, lewat ekstensi `pgcrypto` yang sudah aktif di project ini).
+  Kenapa harus begitu (bukan sekadar "cari email dari username"): supaya
+  tidak ada yang bisa memanen daftar alamat email nyata cuma dengan
+  menebak-nebak username satu per satu — tebakan salah (username ATAU kata
+  sandi) sama-sama cuma dapat pesan generik "Username/kata sandi salah",
+  persis seperti login berbasis email yang normal. Login sungguhannya
+  (pembuatan sesi) tetap 100% dilakukan oleh `signInWithPassword` asli
+  Supabase Auth sesudah fungsi ini mengembalikan email — jadi kata sandi
+  tetap diverifikasi dua kali (oleh fungsi database, lalu oleh Supabase Auth
+  sendiri), bukan cuma dipercaya begitu saja dari hasil fungsi database.
+- Username tetap **unik** (case-insensitive) sejak v6.32 — tidak ada
+  perubahan di sisi itu, cuma ditegaskan lagi karena pemilik menanyakannya
+  ulang.
+- `node --check` lolos untuk `auth.js` dan blok `<script>` inline
+  `index.html`; digrep bersih untuk memastikan tidak ada sisa referensi
+  `authLoginEmail`.
+
+**Status per 13 September: kode sudah ditulis ke folder repo lokal + fungsi
+`verify_login` sudah dijalankan langsung di Supabase (lewat browser
+otomatis), TAPI perubahan v6.31/v6.32/v6.33 di repo lokal belum di-push ke
+GitHub oleh pemilik — situs live masih menjalankan versi lama sampai itu
+di-push.**
 
 ### v6.32 — username (unik) menggantikan nama tampilan bebas — 13 September 2026 *(`index.html`, `auth.js`)*
 

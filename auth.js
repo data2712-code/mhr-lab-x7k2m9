@@ -25,6 +25,17 @@
    USERNAME_RE) supaya orang bisa dikenali dengan nama pilihan sendiri,
    bukan cuma nama tampilan bebas yang boleh sama antar akun. Dicek
    ketersediaannya sebelum signUp() asli dipanggil.
+
+   v6.33 — login sekarang pakai USERNAME + kata sandi, bukan email lagi.
+   Supabase Auth sendiri cuma bisa login pakai email, jadi signIn() di
+   bawah menerjemahkan username -> email dulu lewat fungsi database
+   `verify_login` (lihat mhr_decklab_username_login_migration.sql) SEBELUM
+   memanggil signInWithPassword asli. Fungsi itu sengaja HANYA
+   mengembalikan email kalau kata sandinya juga benar (dicek di database
+   pakai hash bcrypt yang sama seperti Supabase sendiri, lewat pgcrypto) —
+   supaya orang tidak bisa "memanen" alamat email cuma dengan menebak-nebak
+   username satu per satu. Kalau salah (username ATAU kata sandi), pesan
+   errornya sama-sama generik.
    =================================================================== */
 
 (function(){
@@ -124,9 +135,28 @@
       return { data, error };
     },
 
-    async signIn(email, password){
-      const { data, error } = await client.auth.signInWithPassword({ email, password });
-      return { data, error };
+    /* v6.33 — login pakai username, bukan email. `verify_login` di database
+       yang menerjemahkan username -> email (HANYA kalau kata sandinya juga
+       cocok — lihat komentar v6.33 di atas). Sesudah dapat email itu,
+       signInWithPassword ASLI tetap yang menentukan sesi login (jadi kata
+       sandi tetap diverifikasi ganda oleh Supabase Auth sendiri, bukan cuma
+       oleh fungsi database ini). */
+    async signIn(username, password){
+      const uname = (username || '').trim();
+      if(!uname) return { data:null, error:{ message:'INVALID_LOGIN' } };
+      try{
+        const { data: email, error: rpcErr } = await client.rpc('verify_login', {
+          p_username: uname,
+          p_password: password,
+        });
+        if(rpcErr || !email){
+          return { data:null, error:{ message:'INVALID_LOGIN' } };
+        }
+        const { data, error } = await client.auth.signInWithPassword({ email, password });
+        return { data, error };
+      }catch(e){
+        return { data:null, error:{ message:'INVALID_LOGIN' } };
+      }
     },
 
     async signOut(){
