@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.29** · 8 September 2026
+**Versi saat ini: v6.31** · 13 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -536,6 +536,91 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
+
+### v6.31 — login Google dicabut + fondasi akun admin (moderasi & cetak proxy) — 13 September 2026 *(`index.html`, `auth.js`, `sw.js`)*
+
+Dua permintaan pemilik setelah mereview v6.30: (1) login Google dicabut —
+pemilik tidak mau mengurus proses OAuth consent Google (App masih berstatus
+"Testing" di Google Cloud dan macet saat dicoba dipublikasikan, tanpa sempat
+diselidiki lebih jauh karena pemilik memutuskan email/password saja sudah
+cukup); (2) akun admin — akun pemilik sendiri harus punya wewenang tertinggi
+dan bisa mengakses fitur yang masih disembunyikan dari pengunjung biasa.
+Rencana dijelaskan dulu ke pemilik lewat AskUserQuestion sebelum eksekusi
+(fitur mana yang pindah ke gerbang akun-admin, dan apakah menggantikan atau
+mendampingi `?admin=1` yang lama), dikonfirmasi: **panel cetak proxy** pindah
+ke gerbang akun-admin (menggantikan `?admin=1` untuk panel itu saja), **panel
+pembuat kode Deck Komunitas tetap** di `?admin=1` seperti semula (tidak
+disentuh), dan **moderasi deck publik + tulisan playstyle/opini** (fitur
+belum ada UI-nya — menunggu tahap 3, penyimpanan & pembagian deck) disiapkan
+fondasi basis datanya sekarang supaya tinggal pakai begitu tahap 3 dibangun.
+
+**Login Google dicabut**:
+- `index.html`: tombol "Lanjut dengan Google" + pembatas "atau" dihapus dari
+  modal akun, begitu juga CSS `.auth-google`/`.auth-or` dan 2 string i18n
+  (`acctGoogle`/`acctOr`) yang jadi tidak terpakai.
+- `auth.js`: fungsi `signInWithGoogle` dihapus total (juga dari objek
+  fallback saat SDK gagal termuat).
+- Supabase: provider Google di Authentication → Providers dinonaktifkan.
+- Google Cloud: seluruh project (`mhr-deck-lab`, berikut OAuth client &
+  consent screen di dalamnya) **dihapus permanen** atas permintaan eksplisit
+  pemilik — tidak ada lagi jejak Google OAuth yang perlu dirawat.
+- Login email/password sama sekali tidak terpengaruh.
+
+**Fondasi akun admin (BARU, terpisah dari `?admin=1` yang lama)**:
+- Tabel baru `admin_users` di Supabase (`user_id` saja, mengacu ke
+  `auth.users`) — sengaja dibuat **tanpa kebijakan insert/update/delete
+  untuk peran manapun**, cuma kebijakan SELECT "baca status diri sendiri".
+  Artinya menambah/mencabut admin **HANYA** bisa lewat SQL Editor Supabase
+  langsung oleh pemilik — tidak ada jalur di situs (bahkan akun admin yang
+  sedang login) yang bisa menaikkan hak akses siapa pun, termasuk dirinya
+  sendiri. Ini sengaja dipisah dari kolom di tabel `profiles` (yang memang
+  bisa diedit pemiliknya sendiri lewat situs) supaya tidak ada celah eskalasi
+  hak akses.
+- `auth.js`: fungsi baru `isAdmin(session)` — query `admin_users`, murni
+  baca, dipanggil dari `index.html`.
+- `index.html`: variabel baru `isAccountAdmin` (terpisah dari `isAdmin` lama
+  yang berbasis `?admin=1` — nama sengaja dibedakan supaya tidak tertukar).
+  Diperbarui tiap kali status login berubah (dipanggil dari `refreshAccountUI`,
+  yang sudah ada sejak v6.30 untuk update tombol akun di header) — cek admin
+  lalu render ulang panel proxy, jadi panel proxy muncul/hilang langsung saat
+  login/logout tanpa reload halaman.
+- **Panel cetak proxy** (`renderProxyAdmin`/`openProxy`) dipindah dari
+  `isAdmin` (`?admin=1`) ke `isAccountAdmin` — sekarang perlu login sungguhan
+  sebagai akun yang terdaftar di `admin_users`, bukan lagi cuma menebak
+  parameter URL. Teks di panelnya disesuaikan (tidak lagi menyebut `?admin=1`).
+- **Panel pembuat kode Deck Komunitas** (`renderAdminBox`, tab Community
+  Deck) **TIDAK diubah** — tetap `isAdmin` / `?admin=1` seperti semula, sesuai
+  pilihan eksplisit pemilik.
+- **Moderasi deck publik + playstyle/opini** (permintaan pemilik: bisa
+  menyembunyikan/menghapus deck orang lain kalau perlu dimoderasi) — fitur
+  ini belum punya UI di situs sama sekali (tabel `decks` dari skema tahap 0
+  belum dipakai UI manapun, menunggu tahap 3). Yang disiapkan sekarang cuma
+  **fondasi basis datanya**: dua kebijakan RLS tambahan di tabel `decks`
+  (`admins can update any deck`, `admins can delete any deck`) yang mengizinkan
+  akun di `admin_users` mengubah/menghapus deck publik siapa pun, di ATAS
+  kebijakan pemilik-saja yang sudah ada dari tahap 0 (Postgres menggabungkan
+  kebijakan permissive dengan OR, jadi pemilik deck tetap bisa kelola deck
+  sendiri seperti biasa). Tombol "Sembunyikan"/"Hapus" yang sesungguhnya baru
+  akan dibangun bersamaan dengan tahap 3 (belum ada galeri deck publik untuk
+  ditempeli tombol itu).
+- SQL migrasi (`admin_users` + kebijakan `decks`, plus perintah satu-kali
+  untuk menjadikan akun pemilik sendiri admin) dikirim sebagai berkas
+  terpisah — pemilik jalankan sendiri di SQL Editor Supabase, sama seperti
+  skema tahap 0.
+
+**Verifikasi**: `node --check` pada `auth.js`, blok `<script>` inline
+`index.html` (ekstraksi baris demi baris via `sed`, hati-hati batas
+`</script>` seperti sudah didokumentasikan), dan `sw.js` — ketiganya lolos;
+grep manual memastikan tidak ada sisa rujukan Google (`authGoogle`,
+`signInWithGoogle`, `acctGoogle`, `acctOr`, `.auth-google`, `.auth-or`) dan
+memastikan `isAdmin` (lama) vs `isAccountAdmin` (baru) tidak saling tertukar
+di seluruh file. **Belum ada tes fungsional end-to-end** (login email/password,
+status admin, tombol cetak proxy) di situs live — perlu dilakukan pemilik
+setelah deploy dan setelah menjalankan SQL migrasi di atas.
+
+`CACHE_VERSION` di `sw.js` **TIDAK dinaikkan** sesi ini — daftar
+`STATIC_ASSETS` tidak berubah (masih file yang sama), cuma isi `auth.js` yang
+berubah, dan itu sudah dilayani network-first oleh strategi cache yang ada.
 
 ### v6.30 — Login / akun pengguna (Supabase), tahap 1: masuk, daftar, keluar — 12 September 2026 *(`index.html`, `auth.js` BARU, `sw.js`)*
 

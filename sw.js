@@ -36,7 +36,7 @@ const STATIC_ASSETS = [
   './cards.js',
   './data.js',
   './manifest.json',
-  './auth.js', // v6.30 — servis login/signup/logout (lihat window.MHRAuth)
+  './auth.js', // servis login/signup/logout + status admin (lihat window.MHRAuth)
 ];
 
 self.addEventListener('install', e=>{
