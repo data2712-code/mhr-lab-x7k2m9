@@ -26,7 +26,7 @@
    supaya versi baru langsung dipakai tanpa perlu semua tab ditutup dulu.
    =================================================================== */
 
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const CACHE_STATIC = `mhr-shell-${CACHE_VERSION}`;
 const CACHE_IMAGES = `mhr-images-${CACHE_VERSION}`;
 
@@ -36,6 +36,7 @@ const STATIC_ASSETS = [
   './cards.js',
   './data.js',
   './manifest.json',
+  './auth.js', // v6.30 — servis login/signup/logout (lihat window.MHRAuth)
 ];
 
 self.addEventListener('install', e=>{
