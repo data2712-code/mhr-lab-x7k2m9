@@ -19,6 +19,12 @@
    update/delete untuk peran manapun, jadi status admin cuma bisa diberikan
    lewat SQL Editor Supabase langsung oleh pemilik, tidak pernah lewat situs
    ini sendiri (mencegah siapa pun menaikkan hak aksesnya sendiri).
+
+   v6.32 — kolom `display_name` di tabel profiles diganti jadi `username`
+   (unik, case-insensitive, 3-20 karakter huruf/angka/underscore — lihat
+   USERNAME_RE) supaya orang bisa dikenali dengan nama pilihan sendiri,
+   bukan cuma nama tampilan bebas yang boleh sama antar akun. Dicek
+   ketersediaannya sebelum signUp() asli dipanggil.
    =================================================================== */
 
 (function(){
@@ -49,15 +55,17 @@
     listeners.forEach(fn=>{ try{ fn(session); }catch(e){ console.error(e); } });
   });
 
-  async function getDisplayName(userId, fallback){
+  const USERNAME_RE = /^[A-Za-z0-9_]{3,20}$/;
+
+  async function getUsername(userId, fallback){
     try{
       const { data, error } = await client
         .from('profiles')
-        .select('display_name')
+        .select('username')
         .eq('id', userId)
         .maybeSingle();
       if(error || !data) return fallback;
-      return data.display_name || fallback;
+      return data.username || fallback;
     }catch(e){
       return fallback;
     }
@@ -74,21 +82,44 @@
       return data.session || null;
     },
 
-    /* nama tampilan pengguna yang sedang login (dari tabel profiles),
+    /* username pengguna yang sedang login (dari tabel profiles),
        fallback ke bagian sebelum @ di email kalau profil belum sempat kebaca */
-    async getDisplayName(session){
+    async getUsername(session){
       if(!session || !session.user) return null;
       const fallback = (session.user.email || '').split('@')[0] || 'Player';
-      return getDisplayName(session.user.id, fallback);
+      return getUsername(session.user.id, fallback);
     },
 
     /* daftarkan callback yang dipanggil tiap kali status auth berubah */
     onAuthChange(fn){ listeners.push(fn); },
 
-    async signUp(email, password, displayName){
+    /* v6.32 — username WAJIB unik (3-20 karakter, huruf/angka/underscore).
+       Dicek dulu ke tabel profiles (public-read, jadi anon key boleh baca)
+       SEBELUM signUp asli dipanggil, supaya orang dapat pesan error yang jelas
+       ("username sudah dipakai") alih-alih error database yang generik.
+       Race condition (dua orang daftar username sama nyaris bersamaan) tetap
+       aman lewat unique index case-insensitive di database — kalau sampai
+       lolos pengecekan ini tapi tetap bentrok, signUp asli di bawah akan
+       gagal dan pesannya dipetakan lagi di index.html. */
+    async signUp(email, password, username){
+      const uname = (username || '').trim();
+      if(!USERNAME_RE.test(uname)){
+        return { data:null, error:{ message:'INVALID_USERNAME' } };
+      }
+      try{
+        const { data: existing, error: checkErr } = await client
+          .from('profiles')
+          .select('id')
+          .ilike('username', uname)
+          .maybeSingle();
+        if(!checkErr && existing){
+          return { data:null, error:{ message:'USERNAME_TAKEN' } };
+        }
+      }catch(e){ /* cek gagal (mis. offline) — lanjut saja, constraint di
+                    database tetap jadi jaring pengaman terakhir */ }
       const { data, error } = await client.auth.signUp({
         email, password,
-        options: { data: { display_name: (displayName || '').trim() || 'Player' } }
+        options: { data: { username: uname } }
       });
       return { data, error };
     },

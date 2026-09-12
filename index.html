@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.31  ·  13 September 2026
+     MHR DECK LAB  ·  versi 6.32  ·  13 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.31">
+<meta name="version" content="6.32">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1235,8 +1235,10 @@
       </form>
 
       <form id="authFormSignup" hidden>
-        <label data-i18n="acctDisplayName">Nama tampilan</label>
-        <input type="text" id="authSignupName" required maxlength="40" autocomplete="nickname">
+        <label data-i18n="acctUsername">Username</label>
+        <input type="text" id="authSignupUsername" required minlength="3" maxlength="20"
+          pattern="[A-Za-z0-9_]{3,20}" autocomplete="nickname" data-i18n-ph="acctUsernamePh"
+          placeholder="3-20 karakter: huruf, angka, _ (tanpa spasi)">
         <label data-i18n="acctEmail">Email</label>
         <input type="email" id="authSignupEmail" required autocomplete="email">
         <label data-i18n="acctPassword">Kata sandi</label>
@@ -1289,7 +1291,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.31</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.32</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2369,7 +2371,8 @@ const T = {
   acctSignupCta:    ['Buat akun','Create account'],
   acctEmail:        ['Email','Email'],
   acctPassword:     ['Kata sandi','Password'],
-  acctDisplayName:  ['Nama tampilan','Display name'],
+  acctUsername:     ['Username','Username'],
+  acctUsernamePh:   ['3-20 karakter: huruf, angka, _ (tanpa spasi)','3-20 characters: letters, numbers, _ (no spaces)'],
   acctNote:         ['Akun dipakai untuk menyimpan & membagikan deck, dan melacak koleksi kartu Anda (segera hadir).',
                       'Your account is used to save & share decks, and track your card collection (coming soon).'],
   acctHi:           ['Masuk sebagai','Logged in as'],
@@ -2379,6 +2382,9 @@ const T = {
   acctErrGeneric:   ['Terjadi kesalahan. Coba lagi.','Something went wrong. Please try again.'],
   acctErrInvalid:   ['Email/kata sandi salah.','Incorrect email or password.'],
   acctSignupOk:     ['Akun dibuat! Cek email Anda untuk verifikasi sebelum masuk.','Account created! Check your email to verify before logging in.'],
+  acctErrUsernameFormat: ['Username harus 3-20 karakter: huruf, angka, atau garis bawah saja (tanpa spasi).',
+                          'Username must be 3-20 characters: letters, numbers, or underscore only (no spaces).'],
+  acctErrUsernameTaken:  ['Username itu sudah dipakai — coba yang lain.','That username is already taken — try another.'],
 };
 
 const LANGS = ['id','en'];
@@ -5726,7 +5732,7 @@ window.addEventListener('hashchange', ()=>{
     if(btnAccount){
       btnAccount.style.visibility = 'visible';
       if(loggedIn){
-        const name = await window.MHRAuth.getDisplayName(session);
+        const name = await window.MHRAuth.getUsername(session);
         btnAccount.innerHTML = '👤 ' + escHtml(name || 'Player');
         const who = $('#authWhoAmI'); if(who) who.textContent = name || 'Player';
       } else {
@@ -5777,14 +5783,24 @@ window.addEventListener('hashchange', ()=>{
   if(formSignup) formSignup.addEventListener('submit', async e=>{
     e.preventDefault();
     clearAuthMsg();
-    const name = $('#authSignupName').value.trim();
+    const uname = $('#authSignupUsername').value.trim();
     const email = $('#authSignupEmail').value.trim();
     const pass = $('#authSignupPassword').value;
     const submitBtn = formSignup.querySelector('button[type="submit"]');
     if(submitBtn) submitBtn.disabled = true;
-    const { error } = await window.MHRAuth.signUp(email, pass, name);
+    const { error } = await window.MHRAuth.signUp(email, pass, uname);
     if(submitBtn) submitBtn.disabled = false;
-    if(error){ showAuthMsg(error.message || t('acctErrGeneric'), 'err'); return; }
+    if(error){
+      /* v6.32 — kode error dari auth.js dipetakan ke pesan berbahasa yang
+         sesuai; "Database error saving new user" adalah pesan generik
+         Supabase kalau trigger handle_new_user() gagal karena race condition
+         username (jarang — pengecekan di auth.js sudah menangkap kasus umum). */
+      let msg = error.message || t('acctErrGeneric');
+      if(msg === 'INVALID_USERNAME') msg = t('acctErrUsernameFormat');
+      else if(msg === 'USERNAME_TAKEN' || /database error saving new user/i.test(msg)) msg = t('acctErrUsernameTaken');
+      showAuthMsg(msg, 'err');
+      return;
+    }
     showAuthMsg(t('acctSignupOk'), 'ok');
   });
 
