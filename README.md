@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.31** · 13 September 2026
+**Versi saat ini: v6.32** · 13 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -536,6 +536,82 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
+
+### v6.32 — username (unik) menggantikan nama tampilan bebas — 13 September 2026 *(`index.html`, `auth.js`)*
+
+Permintaan pemilik: username ditampilkan di situs (bukan email), dan sekalian
+mengubah akun pemilik sendiri jadi admin (lihat catatan kredensial di bawah).
+Sempat ditanyakan dulu lewat AskUserQuestion apakah username perlu unik
+(seperti username sungguhan) atau boleh sama antar akun (seperti nama
+panggilan) — dipilih **unik**.
+
+**Kenapa ada perubahan besar padahal kelihatannya fitur ini sudah ada sejak
+v6.30**: sejak v6.30 sebenarnya sudah ada field "nama tampilan" yang memang
+sudah tampil menggantikan email — tapi itu teks bebas, boleh sama antar
+akun, tanpa pengecekan ketersediaan. Sesi ini mengubahnya jadi username
+sungguhan: unik, format dibatasi, dicek ketersediaannya sebelum akun dibuat.
+
+**Skema database (kolom `profiles.display_name` → `profiles.username`)**:
+- Kolom di-rename (bukan ditambah kolom baru) — data lama (kalau ada) ikut
+  pindah.
+- Constraint format: `username ~ '^[A-Za-z0-9_]{3,20}$'` (3-20 karakter,
+  huruf/angka/underscore saja, tanpa spasi/emoji).
+- Index unik case-insensitive (`lower(username)`) — "Data2712" dan
+  "data2712" tidak bisa dua-duanya ada, mencegah kebingungan identitas yang
+  tidak akan terjadi dengan constraint unik biasa.
+- Trigger `handle_new_user()` diperbarui: baca `username` dari metadata
+  signup (dulu `display_name`); fallback (kalau sampai ada yang mendaftar
+  lewat API langsung tanpa lewat form situs) sekarang acak per pengguna
+  (`player_` + 8 karakter dari UUID) supaya tidak mungkin bentrok dengan
+  constraint unik di atas.
+- SQL migrasi dikirim sebagai `mhr_decklab_username_migration.sql` — pemilik
+  jalankan sendiri di SQL Editor Supabase, sama seperti skema-skema
+  sebelumnya.
+
+**`auth.js`**: `getDisplayName` di-rename `getUsername`. `signUp()` sekarang
+menerima & memvalidasi username: format dicek dulu (regex sama seperti di
+atas), lalu ketersediaannya dicek ke tabel `profiles` (public-read, jadi
+aman dipakai anon key) SEBELUM `client.auth.signUp()` asli dipanggil —
+supaya orang dapat pesan yang jelas ("username sudah dipakai") alih-alih
+error database generik. Race condition (dua orang mendaftar username yang
+sama nyaris bersamaan, lolos dari pengecekan ini) tetap aman secara data
+lewat index unik di database — kalau sampai terjadi, `signUp()` asli akan
+gagal dan pesannya dipetakan ke pesan yang sama di `index.html`.
+
+**`index.html`**:
+- Form daftar: label "Nama tampilan" → "Username", id `authSignupName` →
+  `authSignupUsername`, ditambah `pattern`/`minlength`/`maxlength` HTML
+  (validasi browser tambahan di atas validasi JS) dan placeholder yang
+  menjelaskan aturan formatnya.
+- 2 string i18n baru (`acctUsername`, `acctUsernamePh`), `acctDisplayName`
+  lama dihapus; 2 pesan error baru (`acctErrUsernameFormat`,
+  `acctErrUsernameTaken`).
+- Handler submit form daftar memetakan kode error dari `auth.js`
+  (`INVALID_USERNAME`/`USERNAME_TAKEN`, plus deteksi pesan generik Supabase
+  "Database error saving new user" untuk kasus race condition) ke pesan
+  berbahasa yang sesuai.
+- `refreshAccountUI()`: pemanggilan `getDisplayName` → `getUsername`.
+
+**Kredensial akun pemilik (username `data2712`, email
+`dataanggi2712@gmail.com`) — TIDAK dibuatkan lewat sesi ini**: pemilik
+mengirim password langsung di chat dan meminta akunnya sekalian dijadikan
+admin. Kata sandi TIDAK PERNAH diketikkan ke form manapun oleh Claude
+(kebijakan tetap, berlaku walau diminta & diberi langsung) — pemilik perlu
+mendaftar sendiri di situs live dengan kredensial itu. Setelah akun itu ada,
+menjadikannya admin hanya perlu emailnya (baris `INSERT` di
+`mhr_decklab_admin_schema.sql` yang sudah dikirim sesi sebelumnya) — tidak
+perlu kata sandi sama sekali.
+
+**Verifikasi**: `node --check` pada `auth.js` dan blok `<script>` inline
+`index.html` (ekstraksi baris demi baris via `sed`); grep memastikan tidak
+ada sisa rujukan ke `authSignupName`/`acctDisplayName`/`getDisplayName`/
+`display_name` di kedua berkas. **Belum ada tes fungsional end-to-end**
+(daftar dengan username, cek pesan "sudah dipakai", login) — perlu dilakukan
+pemilik setelah migrasi SQL dijalankan dan berkas ini di-deploy.
+
+`CACHE_VERSION` di `sw.js` **TIDAK dinaikkan** — tidak ada berkas baru yang
+ditambah/dihapus dari `STATIC_ASSETS`, `sw.js` sendiri tidak disentuh sesi
+ini.
 
 ### v6.31 — login Google dicabut + fondasi akun admin (moderasi & cetak proxy) — 13 September 2026 *(`index.html`, `auth.js`, `sw.js`)*
 
