@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.34  ·  13 September 2026
+     MHR DECK LAB  ·  versi 6.35  ·  13 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.34">
+<meta name="version" content="6.35">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -975,6 +975,17 @@
   .auth-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}
   .auth-loggedin{text-align:center;padding:6px 0}
   .auth-hi{font-size:13.5px;margin-bottom:14px}
+
+  /* v6.35 — "Deck Saya (Akun)" (Phase 2): daftar deck tersimpan di akun,
+     dan kotak tawaran impor deck localStorage -> akun. */
+  #cloudImportBox .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .cloud-deck-row{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:8px 0;border-bottom:1px solid var(--line)}
+  .cloud-deck-row:last-child{border-bottom:none}
+  .cloud-deck-info{min-width:0;overflow:hidden}
+  .cloud-deck-info b{display:block;font-size:12.5px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+  .cloud-deck-meta{display:block;font-size:10.5px;color:var(--muted);margin-top:2px}
+  .cloud-deck-actions{display:flex;gap:6px;flex:none}
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -1222,6 +1233,20 @@
     <div id="bkNote"></div>
     <textarea class="export" id="exportBox" readonly></textarea>
 
+    <!-- v6.35 — "Deck Saya (Akun)": simpan/muat/hapus deck lewat akun (Phase 2),
+         terpisah sepenuhnya dari penyimpanan localStorage di atas (yang tetap
+         jalan seperti biasa dipakai atau tidak fitur ini). Isinya digambar ulang
+         oleh renderCloudBox() tiap kali status login berubah — lihat blok
+         "DECK SAYA (AKUN)" di bawah, dekat kode auth UI. -->
+    <div class="deck-sec-title" data-i18n="cloudTitle">☁️ Deck Saya (Akun)</div>
+    <div id="cloudBox">
+      <p class="auth-note" id="cloudHint" data-i18n="cloudHintLoggedOut">Masuk ke akun untuk menyimpan deck supaya bisa dibuka lagi dari perangkat mana pun.</p>
+      <button class="btn2 main" id="btnCloudSave" hidden style="width:100%" data-i18n="cloudSaveBtn">☁️ Simpan deck aktif ke akun</button>
+      <div id="cloudNote" class="savenote"></div>
+      <div id="cloudImportBox" hidden></div>
+      <div id="cloudList"></div>
+    </div>
+
     <div id="proxyAdmin"></div>
 
     <p class="foot-note" data-i18n="panelNote">Catatan: target ukuran deck dan batas salinan bisa disesuaikan dengan aturan resmi turnamen yang berlaku. Data kartu bersumber dari database resmi marvelherorush.com (bahasa Indonesia). Deck tersimpan otomatis di browser perangkat ini (localStorage) — aman ditutup dan dibuka kembali.</p>
@@ -1314,6 +1339,7 @@
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
 <script src="auth.js"></script>
+<script src="decks.js"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -1339,7 +1365,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.34</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.35</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2447,6 +2473,32 @@ const T = {
   acctResetOk:      ['Kata sandi berhasil diperbarui.','Password updated successfully.'],
   acctErrUpdateFailed: ['Gagal menyimpan kata sandi baru. Coba minta link reset baru.',
                         'Couldn’t save the new password. Try requesting a new reset link.'],
+
+  /* --- v6.35: Deck Saya (Akun) — simpan/muat/hapus deck ke akun (Phase 2) --- */
+  cloudTitle:        ['☁️ Deck Saya (Akun)','☁️ My Decks (Account)'],
+  cloudHintLoggedOut: ['Masuk ke akun untuk menyimpan deck supaya bisa dibuka lagi dari perangkat mana pun.',
+                       'Log in to save decks so you can open them again from any device.'],
+  cloudSaveBtn:      ['☁️ Simpan deck aktif ke akun','☁️ Save active deck to account'],
+  cloudSaving:       ['Menyimpan…','Saving…'],
+  cloudSaveOk:       ['Tersimpan ke akun.','Saved to your account.'],
+  cloudSaveErr:      ['Gagal menyimpan ke akun. Coba lagi.','Couldn’t save to your account. Please try again.'],
+  cloudEmpty:        ['Belum ada deck tersimpan di akun ini.','No decks saved to this account yet.'],
+  cloudLoadingList:  ['Memuat deck akun…','Loading account decks…'],
+  cloudListErr:      ['Gagal memuat daftar deck akun.','Couldn’t load your account decks.'],
+  cloudLoadBtn:      ['Muat','Load'],
+  cloudDeleteBtn:    ['Hapus','Delete'],
+  cloudDeleteConfirm: ['Hapus deck ini dari akun? Salinan di browser ini (kalau ada) tidak ikut terhapus.',
+                       'Delete this deck from your account? Any local copy in this browser is not affected.'],
+  cloudDeleteErr:    ['Gagal menghapus deck ini.','Couldn’t delete this deck.'],
+  cloudLoadOk:       ['Dimuat sebagai deck lokal baru.','Loaded as a new local deck.'],
+  cloudUpdatedLbl:   ['Diperbarui','Updated'],
+  cloudImportQuestion: ['Kamu punya {n} deck di browser ini yang belum ada di akun ini. Impor sekarang supaya bisa dibuka dari perangkat lain juga?',
+                        'You have {n} deck(s) in this browser not yet in this account. Import them now so you can open them from other devices too?'],
+  cloudImportYes:    ['Impor semua','Import all'],
+  cloudImportNo:     ['Lewati','Skip'],
+  cloudImportOk:     ['Berhasil diimpor ke akun.','Imported to your account.'],
+  cloudImportErr:    ['Gagal mengimpor. Coba lagi lewat tombol "Simpan deck aktif ke akun" satu per satu.',
+                      'Import failed. Try the "Save active deck to account" button one deck at a time instead.'],
 };
 
 const LANGS = ['id','en'];
@@ -5958,6 +6010,167 @@ window.addEventListener('hashchange', ()=>{
     /* Supabase SDK gagal termuat (offline, diblokir adblocker, dst.) —
        sembunyikan tombol akun total daripada menampilkan fitur yang tidak jalan */
     btnAccount.hidden = true;
+  }
+})();
+
+/* ================= v6.35 — DECK SAYA (AKUN): simpan/muat/hapus deck lewat
+   akun (Phase 2). IIFE terpisah dari auth UI di atas (kalau salah satu
+   berhenti karena error, yang lain tetap jalan), tapi memakai sinyal login
+   yang SAMA (window.MHRAuth.onAuthChange) supaya kotak ini otomatis
+   tampil/sembunyi begitu status masuk berubah. Penyimpanan localStorage
+   yang sudah ada (STORE_KEY, deckmgr di atas) SAMA SEKALI tidak diubah oleh
+   blok ini — akun cuma menambah tempat penyimpanan KEDUA yang sifatnya
+   pilihan, dipakai atau tidak, deck di browser tetap jalan seperti biasa. */
+(function(){
+  if(!window.MHRDecks || !window.MHRDecks.ready) return; // decks.js gagal termuat
+
+  const cloudHint = $('#cloudHint');
+  const btnCloudSave = $('#btnCloudSave');
+  const cloudNote = $('#cloudNote');
+  const cloudImportBox = $('#cloudImportBox');
+  const cloudListEl = $('#cloudList');
+
+  let cloudNoteTmr = null;
+  function showCloudNote(text){
+    if(!cloudNote) return;
+    cloudNote.textContent = text;
+    clearTimeout(cloudNoteTmr);
+    cloudNoteTmr = setTimeout(()=>{ cloudNote.textContent=''; }, 2600);
+  }
+
+  /* deck lokal mana sudah "terhubung" ke baris mana di akun, supaya tombol
+     "Simpan ke akun" meng-UPDATE deck yang sama alih-alih membuat duplikat
+     tiap kali dipencet berulang. Disimpan lewat `store` yang sudah ada
+     (persist() menulis ulang SELURUH `store` ke localStorage tiap dipanggil,
+     jadi field baru ini otomatis ikut tersimpan tanpa perlu ubah persist()).
+     CATATAN: tautan ini berdasarkan NAMA deck lokal saat disimpan pertama
+     kali — kalau deck itu di-rename sesudahnya, tautan lama tidak nyambung
+     lagi dan "Simpan ke akun" berikutnya akan membuat baris baru di akun,
+     bukan meng-update yang lama (bukan bug fatal, deck lama itu masih bisa
+     dihapus manual dari daftar akun). */
+  store.cloudLink = store.cloudLink || {};
+
+  function deckIsEmpty(d){ return !d || !Object.keys(d).length; }
+
+  async function renderCloudList(){
+    if(!cloudListEl) return;
+    cloudListEl.innerHTML = `<p class="auth-note">${t('cloudLoadingList')}</p>`;
+    const { data, error } = await window.MHRDecks.listMine();
+    if(error){ cloudListEl.innerHTML = `<p class="auth-note" style="color:var(--merah)">${t('cloudListErr')}</p>`; return; }
+    if(!data.length){ cloudListEl.innerHTML = `<p class="auth-note">${t('cloudEmpty')}</p>`; return; }
+    cloudListEl.innerHTML = data.map(row=>`
+      <div class="cloud-deck-row" data-id="${row.id}">
+        <div class="cloud-deck-info">
+          <b>${escHtml(row.name)}</b>
+          <span class="cloud-deck-meta">${t('cloudUpdatedLbl')} ${tanggalRingkas(row.updated_at)}</span>
+        </div>
+        <div class="cloud-deck-actions">
+          <button class="qbtn" data-act="load" title="${t('cloudLoadBtn')}" aria-label="${t('cloudLoadBtn')}">📥</button>
+          <button class="qbtn" data-act="del" title="${t('cloudDeleteBtn')}" aria-label="${t('cloudDeleteBtn')}">🗑</button>
+        </div>
+      </div>`).join('');
+  }
+
+  if(cloudListEl) cloudListEl.addEventListener('click', async e=>{
+    const btn = e.target.closest('button[data-act]'); if(!btn) return;
+    const row = btn.closest('.cloud-deck-row'); const id = row && row.dataset.id;
+    if(!id) return;
+    if(btn.dataset.act === 'load'){
+      const { data, error } = await window.MHRDecks.listMine();
+      const deckRow = !error && data.find(d=>d.id===id);
+      if(!deckRow) return;
+      const res = decodeDeck(deckRow.deck_code);
+      if(!res){ showCloudNote(t('cloudListErr')); return; }
+      store.decks[store.active] = state.deck;
+      const asli = deckRow.name || res.nama || 'Deck';
+      let nama = asli, i = 2;
+      while(store.decks[nama]) nama = `${asli} ${i++}`;
+      store.decks[nama] = res.deck;
+      store.active = nama;
+      store.cloudLink[nama] = deckRow.id;
+      state.deck = store.decks[nama];
+      renderDeckSelect(); renderAll();
+      showCloudNote(t('cloudLoadOk'));
+    } else if(btn.dataset.act === 'del'){
+      if(!confirm(t('cloudDeleteConfirm'))) return;
+      const { error } = await window.MHRDecks.remove(id);
+      if(error){ showCloudNote(t('cloudDeleteErr')); return; }
+      for(const [nm,cid] of Object.entries(store.cloudLink)){ if(cid===id) delete store.cloudLink[nm]; }
+      persist();
+      renderCloudList();
+    }
+  });
+
+  if(btnCloudSave) btnCloudSave.addEventListener('click', async ()=>{
+    if(!deckCount()){ alert(t('mDeckEmpty')); return; }
+    btnCloudSave.disabled = true;
+    showCloudNote(t('cloudSaving'));
+    const nama = store.active;
+    const kode = encodeDeck(state.deck, nama);
+    const id = store.cloudLink[nama] || null;
+    const { data, error } = await window.MHRDecks.save({ id, name: nama, deckCode: kode });
+    btnCloudSave.disabled = false;
+    if(error || !data){ showCloudNote(t('cloudSaveErr')); return; }
+    store.cloudLink[nama] = data.id;
+    persist();
+    showCloudNote(t('cloudSaveOk'));
+    renderCloudList();
+  });
+
+  /* Tawaran impor SEKALI SAJA (per browser, lewat store.importOffered) — kalau
+     browser ini punya deck berisi kartu dan akun yang baru login belum punya
+     deck sama sekali, tawarkan pindahkan semuanya sekaligus. Tidak pernah
+     menawarkan ulang sesudah dijawab (Ya ATAU Lewati keduanya menandai sudah
+     ditawarkan), dan tidak pernah menawarkan kalau akun sudah punya deck
+     sendiri (supaya tidak mengganggu pengguna yang memang sudah lama pakai
+     akunnya di perangkat lain). */
+  async function offerImportIfNeeded(){
+    if(store.importOffered) return;
+    const isian = Object.entries(store.decks).filter(([,d])=>!deckIsEmpty(d));
+    if(!isian.length){ store.importOffered = true; persist(); return; }
+    const { data, error } = await window.MHRDecks.listMine();
+    if(error) return; // coba lagi di kesempatan login berikutnya
+    store.importOffered = true; persist();
+    if(data.length) return; // akun sudah punya deck sendiri, jangan tawarkan
+    if(!cloudImportBox) return;
+    cloudImportBox.hidden = false;
+    cloudImportBox.innerHTML = `
+      <p class="auth-note">${t('cloudImportQuestion').replace('{n}', isian.length)}</p>
+      <div class="row">
+        <button class="btn2 main" id="btnCloudImportYes">${t('cloudImportYes')}</button>
+        <button class="btn2" id="btnCloudImportNo" style="flex:none;padding:9px 12px">${t('cloudImportNo')}</button>
+      </div>`;
+    const yesBtn = $('#btnCloudImportYes'), noBtn = $('#btnCloudImportNo');
+    if(yesBtn) yesBtn.addEventListener('click', async ()=>{
+      yesBtn.disabled = true;
+      const decksToImport = isian.map(([nama,d])=>({ name:nama, deckCode: encodeDeck(d, nama) }));
+      const { data: saved, error: err2 } = await window.MHRDecks.importMany(decksToImport);
+      if(err2 || !saved){ showCloudNote(t('cloudImportErr')); yesBtn.disabled = false; return; }
+      saved.forEach(row=>{ store.cloudLink[row.name] = row.id; });
+      persist();
+      cloudImportBox.hidden = true;
+      showCloudNote(t('cloudImportOk'));
+      renderCloudList();
+    });
+    if(noBtn) noBtn.addEventListener('click', ()=>{ cloudImportBox.hidden = true; });
+  }
+
+  async function renderCloudBox(session){
+    const loggedIn = !!(session && session.user);
+    if(cloudHint) cloudHint.hidden = loggedIn;
+    if(btnCloudSave) btnCloudSave.hidden = !loggedIn;
+    if(!loggedIn){
+      if(cloudListEl) cloudListEl.innerHTML = '';
+      if(cloudImportBox) cloudImportBox.hidden = true;
+      return;
+    }
+    await renderCloudList();
+    await offerImportIfNeeded();
+  }
+
+  if(window.MHRAuth && window.MHRAuth.ready){
+    window.MHRAuth.getSession().then(renderCloudBox);
+    window.MHRAuth.onAuthChange(renderCloudBox);
   }
 })();
 
