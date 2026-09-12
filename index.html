@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.29  ·  8 September 2026
+     MHR DECK LAB  ·  versi 6.30  ·  12 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.29">
+<meta name="version" content="6.30">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -926,6 +926,41 @@
     .pxv-sheet{padding:15px 13px 14px}
     .px-list{max-height:38vh}
   }
+
+  /* ===== v6.30 — akun pengguna (login/signup), tahap 1 ===== */
+  .acctbtn{display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+    border:1.5px solid var(--line);border-radius:999px;background:var(--panel);
+    color:var(--paper);font-family:var(--mono);font-weight:700;font-size:12.5px;
+    padding:7px 14px;transition:.15s;white-space:nowrap;max-width:180px;
+    overflow:hidden;text-overflow:ellipsis}
+  .acctbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .authview{position:fixed;inset:0;z-index:200;background:rgba(6,8,11,.94);
+    overflow-y:auto;padding:16px;display:flex;align-items:flex-start;justify-content:center}
+  .authview[hidden]{display:none}
+  .auth-sheet{background:#12161B;border:1px solid var(--line);border-radius:16px;
+    padding:22px;max-width:380px;width:100%;margin-top:40px}
+  .auth-top{display:flex;align-items:center;justify-content:space-between;
+    gap:10px;margin-bottom:14px}
+  .auth-top h2{font-family:var(--disp);font-size:19px;letter-spacing:.04em;
+    text-transform:uppercase}
+  .auth-tabs{display:flex;gap:8px;margin-bottom:14px}
+  .auth-tab{flex:1;background:var(--panel);border:1px solid var(--line);
+    color:var(--muted);border-radius:8px;padding:8px 6px;cursor:pointer;
+    font-size:12.5px;font-weight:700}
+  .auth-tab[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+  .auth-google{width:100%;margin-bottom:12px}
+  .auth-or{text-align:center;color:var(--muted);font-size:11px;margin-bottom:12px}
+  #authFormLogin,#authFormSignup{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+  #authFormLogin label,#authFormSignup label{font-size:11.5px;color:var(--muted);margin-top:4px}
+  #authFormLogin input,#authFormSignup input{background:var(--ink);border:1px solid var(--line);
+    color:var(--paper);border-radius:8px;padding:9px 10px;font-size:13px;font-family:var(--body)}
+  #authFormLogin input:focus,#authFormSignup input:focus{border-color:var(--accent);outline:none}
+  .auth-msg{font-size:12px;padding:8px 10px;border-radius:8px;margin:8px 0;line-height:1.4}
+  .auth-msg.err{background:rgba(228,68,46,.15);color:#FF8A75;border:1px solid rgba(228,68,46,.4)}
+  .auth-msg.ok{background:rgba(51,164,92,.15);color:#7CE0A2;border:1px solid rgba(51,164,92,.4)}
+  .auth-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}
+  .auth-loggedin{text-align:center;padding:6px 0}
+  .auth-hi{font-size:13.5px;margin-bottom:14px}
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -976,6 +1011,7 @@
       title="Follow @deteprtm di TikTok"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 0 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-1.85-2.48V9.79a5.94 5.94 0 1 0 4.94 5.85V8.9a7 7 0 0 0 4.07 1.3V7.12a4.19 4.19 0 0 1-3.01-1.3z"/></svg> Follow @deteprtm</a>
     <a class="tiktok" href="https://www.instagram.com/deteprtm/" target="_blank" rel="noopener"
       title="Follow @deteprtm di Instagram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg> Follow @deteprtm</a>
+    <button class="acctbtn" id="btnAccount" style="visibility:hidden" data-i18n-title="acctLoginTitle" title="Masuk / Daftar">👤 <span id="acctBtnLabel" data-i18n="acctLogin">Masuk</span></button>
   </div>
 </header>
 
@@ -1178,11 +1214,61 @@
   </aside>
 </div>
 
+<!-- ===== v6.30 — modal akun (login/signup/logout), tahap 1 ===== -->
+<div class="authview" id="authView" hidden>
+  <div class="auth-sheet">
+    <div class="auth-top">
+      <h2 data-i18n="acctModalTitleLogin">Masuk ke akun</h2>
+      <button class="btn2" id="authClose" type="button" style="flex:none;padding:9px 14px" data-i18n="close">✕ Tutup</button>
+    </div>
+
+    <div id="authLoggedOut">
+      <div class="auth-tabs">
+        <button class="auth-tab" id="authTabLogin" type="button" aria-pressed="true" data-i18n="acctLogin">Masuk</button>
+        <button class="auth-tab" id="authTabSignup" type="button" aria-pressed="false" data-i18n="acctSignup">Daftar</button>
+      </div>
+
+      <button class="btn2 auth-google" id="authGoogle" type="button" data-i18n="acctGoogle">🔵 Lanjut dengan Google</button>
+      <div class="auth-or"><span data-i18n="acctOr">atau</span></div>
+
+      <form id="authFormLogin">
+        <label data-i18n="acctEmail">Email</label>
+        <input type="email" id="authLoginEmail" required autocomplete="email">
+        <label data-i18n="acctPassword">Kata sandi</label>
+        <input type="password" id="authLoginPassword" required autocomplete="current-password">
+        <button class="btn2 main" type="submit" data-i18n="acctLoginCta">Masuk</button>
+      </form>
+
+      <form id="authFormSignup" hidden>
+        <label data-i18n="acctDisplayName">Nama tampilan</label>
+        <input type="text" id="authSignupName" required maxlength="40" autocomplete="nickname">
+        <label data-i18n="acctEmail">Email</label>
+        <input type="email" id="authSignupEmail" required autocomplete="email">
+        <label data-i18n="acctPassword">Kata sandi</label>
+        <input type="password" id="authSignupPassword" required minlength="6" autocomplete="new-password">
+        <button class="btn2 main" type="submit" data-i18n="acctSignupCta">Buat akun</button>
+      </form>
+
+      <p class="auth-msg" id="authMsg" hidden></p>
+      <p class="auth-note" data-i18n="acctNote">Akun dipakai untuk menyimpan &amp; membagikan deck, dan melacak koleksi kartu Anda (segera hadir).</p>
+    </div>
+
+    <div class="auth-loggedin" id="authLoggedIn" hidden>
+      <p class="auth-hi"><span data-i18n="acctHi">Masuk sebagai</span> <b id="authWhoAmI"></b></p>
+      <button class="btn2 danger" id="authLogout" type="button" data-i18n="acctLogout">Keluar</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <!-- Data yang Anda kelola sendiri: deck komunitas + jadwal turnamen LGS.
      Sengaja dipisah agar TIDAK ikut tertimpa saat index.html diperbarui. -->
 <script src="cards.js"></script>
 <script src="data.js"></script>
+<!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
+     supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
+<script src="auth.js"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -1208,7 +1294,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.29</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.30</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2279,6 +2365,26 @@ const T = {
   mBadCode:     ['Kode deck tidak dapat dibaca.','This deck code could not be read.'],
   mNoImgLib:    ['Library unduh PNG belum termuat (butuh internet). Silakan screenshot manual.','The PNG export library has not loaded (internet required). Please take a screenshot instead.'],
   mPngFail:     ['Gagal membuat PNG — silakan screenshot manual.','Could not create the PNG — please take a screenshot instead.'],
+
+  /* --- v6.30: akun pengguna (login/signup/logout) --- */
+  acctLogin:        ['Masuk','Login'],
+  acctSignup:       ['Daftar','Sign up'],
+  acctLoginCta:     ['Masuk','Log in'],
+  acctSignupCta:    ['Buat akun','Create account'],
+  acctGoogle:       ['🔵 Lanjut dengan Google','🔵 Continue with Google'],
+  acctOr:           ['atau','or'],
+  acctEmail:        ['Email','Email'],
+  acctPassword:     ['Kata sandi','Password'],
+  acctDisplayName:  ['Nama tampilan','Display name'],
+  acctNote:         ['Akun dipakai untuk menyimpan & membagikan deck, dan melacak koleksi kartu Anda (segera hadir).',
+                      'Your account is used to save & share decks, and track your card collection (coming soon).'],
+  acctHi:           ['Masuk sebagai','Logged in as'],
+  acctLogout:       ['Keluar','Log out'],
+  acctLoginTitle:   ['Masuk / Daftar','Log in / Sign up'],
+  acctModalTitleLogin: ['Masuk ke akun','Log in to your account'],
+  acctErrGeneric:   ['Terjadi kesalahan. Coba lagi.','Something went wrong. Please try again.'],
+  acctErrInvalid:   ['Email/kata sandi salah.','Incorrect email or password.'],
+  acctSignupOk:     ['Akun dibuat! Cek email Anda untuk verifikasi sebelum masuk.','Account created! Check your email to verify before logging in.'],
 };
 
 const LANGS = ['id','en'];
@@ -5582,6 +5688,115 @@ window.addEventListener('hashchange', ()=>{
   const p = h.replace('#','');
   if(PAGES.includes(p) && p !== state.page) setPage(p, true);
 });
+
+/* ================= v6.30 — AUTH UI (login/signup/logout, tahap 1) =================
+   Servis Supabase murni ada di auth.js (window.MHRAuth) — blok ini cuma
+   nge-wire tombol header + modal ke API itu, pola sama seperti bagian lain
+   file ini yang memisahkan servis/data dari markup+wiring. */
+(function(){
+  const btnAccount = $('#btnAccount');
+  const authView = $('#authView');
+  const authMsg = $('#authMsg');
+
+  function showAuthMsg(text, kind){
+    if(!authMsg) return;
+    authMsg.textContent = text;
+    authMsg.className = 'auth-msg ' + (kind || 'err');
+    authMsg.hidden = false;
+  }
+  function clearAuthMsg(){ if(authMsg){ authMsg.hidden = true; authMsg.textContent = ''; } }
+  function openAuthModal(){ clearAuthMsg(); if(authView) authView.hidden = false; }
+  function closeAuthModal(){ if(authView) authView.hidden = true; }
+
+  async function refreshAccountUI(session){
+    const loggedIn = !!(session && session.user);
+    const loggedInBlock = $('#authLoggedIn');
+    const loggedOutBlock = $('#authLoggedOut');
+    if(btnAccount){
+      btnAccount.style.visibility = 'visible';
+      if(loggedIn){
+        const name = await window.MHRAuth.getDisplayName(session);
+        btnAccount.innerHTML = '👤 ' + escHtml(name || 'Player');
+        const who = $('#authWhoAmI'); if(who) who.textContent = name || 'Player';
+      } else {
+        btnAccount.innerHTML = '👤 <span id="acctBtnLabel" data-i18n="acctLogin">' + t('acctLogin') + '</span>';
+      }
+    }
+    if(loggedInBlock) loggedInBlock.hidden = !loggedIn;
+    if(loggedOutBlock) loggedOutBlock.hidden = loggedIn;
+  }
+
+  if(btnAccount) btnAccount.addEventListener('click', openAuthModal);
+  const authCloseBtn = $('#authClose');
+  if(authCloseBtn) authCloseBtn.addEventListener('click', closeAuthModal);
+  if(authView) authView.addEventListener('click', e=>{ if(e.target === authView) closeAuthModal(); });
+
+  const tabLogin = $('#authTabLogin'), tabSignup = $('#authTabSignup');
+  const formLogin = $('#authFormLogin'), formSignup = $('#authFormSignup');
+  function setAuthTab(which){
+    clearAuthMsg();
+    const isLogin = which === 'login';
+    if(tabLogin) tabLogin.setAttribute('aria-pressed', String(isLogin));
+    if(tabSignup) tabSignup.setAttribute('aria-pressed', String(!isLogin));
+    if(formLogin) formLogin.hidden = !isLogin;
+    if(formSignup) formSignup.hidden = isLogin;
+  }
+  if(tabLogin) tabLogin.addEventListener('click', ()=>setAuthTab('login'));
+  if(tabSignup) tabSignup.addEventListener('click', ()=>setAuthTab('signup'));
+
+  if(formLogin) formLogin.addEventListener('submit', async e=>{
+    e.preventDefault();
+    clearAuthMsg();
+    const email = $('#authLoginEmail').value.trim();
+    const pass = $('#authLoginPassword').value;
+    const submitBtn = formLogin.querySelector('button[type="submit"]');
+    if(submitBtn) submitBtn.disabled = true;
+    const { error } = await window.MHRAuth.signIn(email, pass);
+    if(submitBtn) submitBtn.disabled = false;
+    if(error){ showAuthMsg(t('acctErrInvalid'), 'err'); return; }
+    closeAuthModal();
+  });
+
+  if(formSignup) formSignup.addEventListener('submit', async e=>{
+    e.preventDefault();
+    clearAuthMsg();
+    const name = $('#authSignupName').value.trim();
+    const email = $('#authSignupEmail').value.trim();
+    const pass = $('#authSignupPassword').value;
+    const submitBtn = formSignup.querySelector('button[type="submit"]');
+    if(submitBtn) submitBtn.disabled = true;
+    const { error } = await window.MHRAuth.signUp(email, pass, name);
+    if(submitBtn) submitBtn.disabled = false;
+    if(error){ showAuthMsg(error.message || t('acctErrGeneric'), 'err'); return; }
+    showAuthMsg(t('acctSignupOk'), 'ok');
+  });
+
+  const googleBtn = $('#authGoogle');
+  if(googleBtn) googleBtn.addEventListener('click', async ()=>{
+    clearAuthMsg();
+    const { error } = await window.MHRAuth.signInWithGoogle();
+    /* kalau sukses, browser langsung dialihkan ke halaman login Google —
+       tidak ada state lanjutan yang perlu diurus di sini */
+    if(error) showAuthMsg(error.message || t('acctErrGeneric'), 'err');
+  });
+
+  const logoutBtn = $('#authLogout');
+  if(logoutBtn) logoutBtn.addEventListener('click', async ()=>{
+    await window.MHRAuth.signOut();
+    closeAuthModal();
+  });
+
+  /* cek sesi begitu halaman siap, lalu dengarkan tiap perubahan (login/logout
+     dari tab lain, token refresh, redirect balik dari Google OAuth, dst.) */
+  if(window.MHRAuth && window.MHRAuth.ready){
+    window.MHRAuth.getSession().then(refreshAccountUI);
+    window.MHRAuth.onAuthChange(refreshAccountUI);
+  } else if(btnAccount){
+    /* Supabase SDK gagal termuat (offline, diblokir adblocker, dst.) —
+       sembunyikan tombol akun total daripada menampilkan fitur yang tidak jalan */
+    btnAccount.hidden = true;
+  }
+})();
 
 /* --- PWA: daftarkan service worker (lihat sw.js) ---
    Dibungkus try/catch dan dicek dulu dukungannya — kalau gagal (mis. dibuka

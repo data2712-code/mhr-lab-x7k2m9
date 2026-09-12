@@ -537,6 +537,100 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
 
 ## Riwayat Update
 
+### v6.30 — Login / akun pengguna (Supabase), tahap 1: masuk, daftar, keluar — 12 September 2026 *(`index.html`, `auth.js` BARU, `sw.js`)*
+
+Permintaan pemilik: fitur akun pengguna supaya orang bisa membagikan deck build
+sekaligus playstyle/opini mereka, plus pelacak koleksi kartu — item "Tier C"
+yang sudah lama ada di roadmap. Rencana lengkap (arsitektur backend, fase
+pengerjaan) dijelaskan dulu ke pemilik lewat AskUserQuestion sebelum eksekusi
+(sesuai permintaan eksplisit), dikonfirmasi: backend **Supabase**, metode login
+**email/password + Google**, dan pacing **bangun tahap 1 (login) dulu, baru
+jeda untuk direview** sebelum lanjut ke penyimpanan/pembagian deck & pelacak
+koleksi.
+
+**Arsitektur**: situs tetap 100% statis di GitHub Pages, tidak ada perpindahan
+hosting — Supabase (Postgres + Auth + Row Level Security, tier gratis)
+dipanggil langsung dari browser lewat SDK, persis seperti CDN html2canvas yang
+sudah ada. Kredensial (project URL + anon key — anon key memang didesain aman
+ditaruh di kode klien, akses sesungguhnya diatur RLS) disimpan di berkas baru
+`auth.js`, terpisah dari `index.html` (pola sama seperti cards.js/data.js:
+servis/data terpisah dari markup).
+
+**Skema database (tahap 0, diterapkan pemilik sendiri lewat SQL Editor
+Supabase)**: tiga tabel — `profiles` (nama tampilan, dibuat otomatis saat
+signup), `decks` (untuk tahap 3 nanti — deck-code MEMAKAI ULANG format yang
+sudah ada di situs, tidak ada encoding baru), `collection` (untuk tahap 4
+nanti — peta JSON nomor-kartu→jumlah). Semua diberi Row Level Security: orang
+cuma bisa mengubah barisnya sendiri, deck publik satu-satunya yang bisa dibaca
+orang lain.
+
+**Yang dibangun tahap ini (`index.html`)**:
+- Tombol akun baru di header (`#btnAccount`, pola `visibility:hidden` yang sama
+  seperti `#btnDukung` untuk mencegah CLS — ruang dipesan sejak HTML awal, JS
+  baru menampakkannya setelah cek sesi selesai).
+- Modal `#authView` (dipola dari `.dview` yang sudah ada, class BARU
+  `.authview`/`.auth-*` — bukan `.lb`/nama generik lain, supaya tidak
+  mengulang insiden tabrakan class `.lb` di halaman Dukung Kami 8 September):
+  tab Masuk/Daftar, tombol "Lanjut dengan Google", form email+kata sandi,
+  pesan error/sukses.
+- 17 string i18n baru di kamus `T` (ID & EN penuh, ikut mekanisme
+  `applyLang()`/`data-i18n` yang sudah ada — tidak ada mekanisme terjemahan
+  baru).
+- Wiring JS di akhir blok `<script>` inline: buka/tutup modal, ganti tab,
+  submit form (`signUp`/`signIn`/`signInWithGoogle`/`signOut` lewat
+  `window.MHRAuth`), dan listener `onAuthChange` yang otomatis memperbarui
+  tombol header (nama tampilan kalau login, "Masuk" kalau tidak) — termasuk
+  kalau sesi berubah dari tab lain atau token di-refresh otomatis.
+- Nama tampilan pengguna login lewat `escHtml()` sebelum masuk ke `innerHTML`
+  (defense-in-depth yang sama seperti submission deck komunitas).
+
+**`auth.js` (berkas baru)** — tipis di atas Supabase JS SDK, tidak menyentuh
+DOM sama sekali: `signUp`/`signIn`/`signInWithGoogle`/`signOut`/`getSession`/
+`getDisplayName`/`onAuthChange`, diekspos sebagai `window.MHRAuth`. Kalau SDK
+gagal termuat (offline/adblocker), berkas ini tetap mendefinisikan
+`window.MHRAuth` dengan `ready:false` supaya wiring di `index.html` bisa
+menyembunyikan tombol akun dengan aman alih-alih error.
+
+**`sw.js`**: `./auth.js` ditambahkan ke `STATIC_ASSETS`, `CACHE_VERSION`
+dinaikkan v3→v4 (konsisten dengan aturan sendiri: naik kalau daftar
+STATIC_ASSETS berubah).
+
+**Supabase SDK dimuat dari CDN jsdelivr, VERSI DIPIN** (`@2.116.0`, dicek ke
+npm registry 12 September — bukan `@2` mengambang) supaya perilaku situs tidak
+bisa berubah diam-diam kalau ada rilis baru Supabase.
+
+**Verifikasi yang dilakukan**: `node --check` pada `auth.js` dan pada blok
+`<script>` inline `index.html` (lolos keduanya, sebelum & sesudah seluruh
+edit) + `node --check` pada `sw.js`; dicek manual seluruh id/class baru unik
+di file (tidak menabrak apa pun yang sudah ada, termasuk keluarga class
+`.lb-*` yang sempat jadi sumber bug 8 September). **BELUM ada tes fungsional
+end-to-end dengan Supabase asli** — sandbox sesi ini tidak bisa mengakses
+`supabase.co`/`jsdelivr.net` langsung (kebijakan jaringan sandbox), jadi
+verifikasi jalur signup/login/Google sungguhan perlu dilakukan pemilik sendiri
+di situs live (atau lewat browser bawaan Claude/Chrome yang jalan di device
+pemilik, yang punya akses internet normal) setelah deploy.
+
+**Prasyarat sebelum fitur ini benar-benar jalan (belum tuntas di sesi ini,
+tanggung jawab pemilik)**:
+1. Jalankan skema SQL tahap 0 (`mhr_decklab_phase0_schema.sql`, sudah dikirim
+   ke pemilik) di SQL Editor Supabase — signup akan gagal total kalau tabel
+   `profiles` belum ada (trigger `handle_new_user` akan error).
+2. Buat OAuth client Google di Google Cloud Console + aktifkan provider
+   Google di Supabase Authentication → Providers, isi Client ID/Secret, dan
+   set Site URL + Redirect URL ke `https://mhrdecklab.com` di Supabase
+   Authentication → URL Configuration — tanpa ini tombol "Lanjut dengan
+   Google" akan gagal dengan error dari Supabase (bukan bug di kode situs).
+3. Review diff di GitHub Desktop lalu commit & push seperti biasa (device
+   bridge dipakai untuk menulis ke working copy, BUKAN untuk push — lihat
+   bagian "Cara kerja" di project doc `status-terkini.md`).
+
+**Belum dikerjakan (sengaja, sesuai pacing yang pemilik pilih)**: penyimpanan
+deck ke akun ("My Decks"), galeri Community Deck yang bisa diisi publik +
+catatan playstyle/opini, dan pelacak koleksi kartu — semua itu tahap 2-4,
+menunggu pemilik menguji tahap 1 ini dulu di situs live. Detail rencana
+lengkap & kredensial Supabase ada di project doc
+`login-deck-sharing-card-tracker-plan.md`.
+
 ### Tombol Follow Instagram di header & footer + perbaikan ikon TikTok footer — 11 September 2026 *(`index.html`)*
 Permintaan pemilik: tambahkan handle Instagram `@deteprtm` di samping TikTok
 yang sudah ada, supaya pengunjung juga bisa follow di Instagram.
