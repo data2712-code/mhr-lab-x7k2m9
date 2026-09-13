@@ -15,15 +15,19 @@
    sama sekali, cuma memakai apa yang sudah ada.
 
    Format `cards`: objek datar {[nomor kartu]: jumlah salinan dimiliki},
-   mis. {"BP01-001": 2, "TB03-014": 3}. Kartu yang jumlahnya 0 SENGAJA tidak
-   disimpan sebagai key sama sekali (bukan disimpan sebagai 0) — supaya
-   ukuran JSON tidak membengkak seiring database kartu terus bertambah
-   (sudah 200+ kartu per Phase 3, akan terus tumbuh). Jumlah dibatasi 0-3 di
-   sisi UI (lihat renderCollectionGrid() di index.html) karena itu batas
-   salinan maksimum yang berarti untuk keperluan deck builder (aturan
-   101.1.d) — kalau ada pemain yang secara fisik punya lebih dari 3 salinan
-   kartu yang sama, kelebihannya memang tidak tercatat, tapi itu tidak
-   pernah relevan untuk fitur "kartu apa yang belum kupunya".
+   mis. {"BP01-001": 2, "TB03-014": 47}. Kartu yang jumlahnya 0 SENGAJA
+   tidak disimpan sebagai key sama sekali (bukan disimpan sebagai 0) —
+   supaya ukuran JSON tidak membengkak seiring database kartu terus
+   bertambah (sudah 200+ kartu per Phase 3, akan terus tumbuh).
+
+   v6.38 — batas jumlah dinaikkan dari 0-3 ke 0-1000 (lihat COLL_MAX di
+   index.html), dan sekarang bisa diketik langsung lewat <input type=number>
+   di halaman Dashboard, bukan cuma diklik +/- satu-satu. Batas 3 yang lama
+   memang meniru batas salinan legal deck builder (aturan 101.1.d) — tapi
+   koleksi ini soal berapa banyak kartu FISIK yang benar-benar dimiliki
+   pemain (mis. untuk keperluan trading di komunitas), yang sengaja
+   dipisah dari berapa salinan boleh dipakai dalam satu deck. 1000 murni
+   batas praktis di sisi UI, bukan aturan permainan apa pun.
 
    Desain baca/tulis: get() mengembalikan SELURUH map sekali (satu baris
    per akun, bukan satu baris per kartu — jauh lebih murah), UI menyimpannya

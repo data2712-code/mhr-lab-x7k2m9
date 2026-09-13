@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.37">
+<meta name="version" content="6.38">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1019,8 +1019,14 @@
   .pub-comment-form button{flex:none}
 
   /* v6.37 — halaman "Dashboard Saya" (Phase 4/5): deck tersimpan (dipindah
-     dari panel Deck Builder) + koleksi kartu. */
-  .dash-wrap{max-width:960px;margin:0 auto;padding:20px}
+     dari panel Deck Builder) + koleksi kartu.
+     v6.38 — halaman diperlebar (960px → 1180px, samakan dengan .meta-wrap
+     galeri Community Deck) dan bagian koleksi dirombak dari daftar sempit
+     jadi GRID kartu besar ala galeri (lihat .coll-list/.coll-card di bawah)
+     supaya terasa seperti "halaman koleksi kartu" sungguhan, bukan cuma
+     kotak kecil — klik gambar/nama kartu membuka lightbox detail yang sama
+     dengan halaman Kartu (lihat data-zoom di collRowHTML()). */
+  .dash-wrap{max-width:1180px;margin:0 auto;padding:22px 20px 90px}
   .dash-head h2{font-family:var(--disp);font-size:26px;letter-spacing:.03em}
   .dash-head p{color:var(--muted);font-size:12.5px;margin-top:6px}
   .dash-sec{margin-top:26px;background:var(--panel);border:1px solid var(--line);
@@ -1035,15 +1041,31 @@
     white-space:nowrap;cursor:pointer}
   .coll-progress{font-size:12.5px;color:var(--muted);margin-bottom:10px}
   .coll-progress b{color:var(--paper)}
-  .coll-list{max-height:520px;overflow-y:auto}
-  .coll-row{display:flex;align-items:center;gap:10px;padding:7px 4px;border-bottom:1px solid var(--line)}
-  .coll-row:last-child{border-bottom:none}
-  .coll-img{width:34px;height:48px;object-fit:cover;border-radius:4px;flex:none;
-    background:var(--panel2);border:1px solid var(--line)}
-  .coll-info{flex:1;min-width:0}
-  .coll-nm{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .coll-sub{display:block;font-size:10.5px;color:var(--muted);margin-top:1px}
-  .coll-stepper{display:flex;align-items:center;gap:6px;flex:none}
+  .coll-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+  @media (max-width:640px){ .coll-list{grid-template-columns:repeat(2,1fr);gap:10px} }
+  .coll-card{display:flex;flex-direction:column;background:var(--panel2);
+    border:1px solid var(--line);border-radius:10px;padding:8px}
+  .coll-card-img{position:relative;border-radius:8px;overflow:hidden;cursor:zoom-in;
+    aspect-ratio:63/88;background:var(--panel)}
+  .coll-card-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .coll-card-img img.failed{display:none}
+  .coll-owned-badge{position:absolute;top:6px;right:6px;background:var(--accent);color:#1A1206;
+    font-family:var(--mono);font-weight:800;font-size:11px;padding:2px 6px;border-radius:6px;
+    line-height:1.4}
+  .coll-cap{font-size:12.5px;font-weight:600;margin-top:7px;cursor:zoom-in;line-height:1.3;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .coll-sub{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:1px}
+  .coll-stepper{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px}
+  .coll-qty-input{width:54px;text-align:center;background:var(--ink);border:1px solid var(--line);
+    color:var(--paper);border-radius:6px;padding:3px 2px;font-family:var(--mono);font-size:12.5px}
+  .coll-qty-input:focus{border-color:var(--accent);outline:none}
+  /* Sembunyikan panah spinner bawaan browser -- dengan tombol +/- di
+     sebelahnya sebagai penyesuaian cepat, dan mengetik langsung tetap bisa
+     lewat keyboard tanpa panah itu (perlu sampai 1000, panah spinner cuma
+     berguna untuk angka kecil). */
+  .coll-qty-input::-webkit-outer-spin-button,.coll-qty-input::-webkit-inner-spin-button{
+    -webkit-appearance:none;margin:0}
+  .coll-qty-input{-moz-appearance:textfield}
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -1133,10 +1155,10 @@
       </div>
       <div class="dash-sec">
         <h3 data-i18n="dashCollHead">🎴 Koleksi Kartu Saya</h3>
-        <p class="auth-note" data-i18n="dashCollIntro">Catat berapa salinan tiap kartu yang sudah kamu punya (0-3 salinan) — datanya tersimpan ke akun, bukan cuma di perangkat ini.</p>
+        <p class="auth-note" data-i18n="dashCollIntro">Catat berapa salinan tiap kartu yang sudah kamu punya (ketik langsung atau pakai tombol +/-, sampai 1000 salinan) — datanya tersimpan ke akun, bukan cuma di perangkat ini. Klik gambar atau nama kartu untuk lihat detail lengkapnya.</p>
         <div class="coll-toolbar">
           <input type="text" id="collQ" data-i18n-ph="dashCollSearchPh" placeholder="Cari nama/nomor kartu...">
-          <label class="coll-check"><input type="checkbox" id="collOnlyMissing"> <span data-i18n="dashCollOnlyMissing">Hanya yang belum lengkap</span></label>
+          <label class="coll-check"><input type="checkbox" id="collOnlyMissing"> <span data-i18n="dashCollOnlyMissing">Hanya yang belum punya</span></label>
         </div>
         <div class="coll-progress" id="collProgress"></div>
         <div class="coll-list" id="collList"></div>
@@ -1477,7 +1499,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.37</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.38</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2641,10 +2663,10 @@ const T = {
   dashLoginBtn: ['👤 Masuk / Daftar','👤 Sign in / Sign up'],
   dashDeckHead: ['☁️ Deck Saya','☁️ My Decks'],
   dashCollHead: ['🎴 Koleksi Kartu Saya','🎴 My Card Collection'],
-  dashCollIntro: ['Catat berapa salinan tiap kartu yang sudah kamu punya (0-3 salinan) — datanya tersimpan ke akun, bukan cuma di perangkat ini.',
-                  'Track how many copies of each card you own (0-3) — saved to your account, not just this device.'],
+  dashCollIntro: ['Catat berapa salinan tiap kartu yang sudah kamu punya (ketik langsung atau pakai tombol +/-, sampai 1000 salinan) — datanya tersimpan ke akun, bukan cuma di perangkat ini. Klik gambar atau nama kartu untuk lihat detail lengkapnya.',
+                  'Track how many copies of each card you own (type a number directly or use the +/- buttons, up to 1000) — saved to your account, not just this device. Click a card’s image or name to see its full detail.'],
   dashCollSearchPh: ['Cari nama/nomor kartu...','Search card name/number...'],
-  dashCollOnlyMissing: ['Hanya yang belum lengkap','Only incomplete'],
+  dashCollOnlyMissing: ['Hanya yang belum punya','Only cards I don’t own yet'],
   dashCollProgressLbl: ['kartu dengan minimal 1 salinan','cards with at least 1 copy'],
   dashCollNone: ['Tidak ada kartu yang cocok.','No matching cards.'],
 
@@ -5426,40 +5448,62 @@ if(window.MHRAuth && window.MHRAuth.ready){
 }
 
 /* ==================== v6.37 (Phase 4) — KOLEKSI KARTU SAYA ====================
-   Peta {[nomor kartu]: jumlah salinan dimiliki (0-3)} milik akun yang
-   sedang login — lihat catatan desain lengkap di collection.js. Dimuat
-   SEKALI tiap kali Dashboard dibuka (renderCollectionGrid()), lalu disimpan
-   ulang ke server tiap ada perubahan lewat collQueueSave() (dengan jeda
-   singkat, supaya klik +/- berturut-turut tidak jadi satu permintaan
-   jaringan per klik). Filter (pencarian teks + "hanya yang belum lengkap")
-   murni di sisi klien, state terpisah dari `state` global (filter kartu
-   biasa) supaya tidak saling ganggu. */
+   Peta {[nomor kartu]: jumlah salinan dimiliki} milik akun yang sedang
+   login — lihat catatan desain lengkap di collection.js. Dimuat SEKALI
+   tiap kali Dashboard dibuka (renderCollectionGrid()), lalu disimpan ulang
+   ke server tiap ada perubahan lewat collQueueSave() (dengan jeda singkat,
+   supaya klik +/- berturut-turut tidak jadi satu permintaan jaringan per
+   klik). Filter (pencarian teks + "hanya yang belum punya") murni di sisi
+   klien, state terpisah dari `state` global (filter kartu biasa) supaya
+   tidak saling ganggu.
+
+   v6.38 — dirombak dari daftar sempit (baris kecil, batas 0-3) jadi GRID
+   kartu besar (mirip tampilan grid di halaman Kartu) dengan dua perubahan:
+   (1) tiap kartu bisa diklik gambar/namanya (data-zoom) untuk membuka
+   openLightbox() yang SAMA PERSIS dengan halaman Kartu/Deck Builder —
+   detail lengkap (gambar besar, stat, teks efek, kartu terkait) tanpa
+   perlu bikin viewer detail terpisah; dan (2) batas jumlah dinaikkan dari
+   3 ke 1000, DAN sekarang bisa diketik langsung lewat <input type=number>
+   (bukan cuma diklik +/- satu-satu — 1000 kali klik tidak masuk akal).
+   1000 ini murni batas praktis UI (jaga supaya angkanya tidak diketik
+   ugal-ugalan / kepencet), SAMA SEKALI TIDAK berkaitan dengan batas
+   salinan legal deck builder (maxCopy(), tetap 3 sesuai aturan 101.1.d
+   resmi) — koleksi ini soal berapa banyak kartu FISIK yang benar-benar
+   dimiliki pemain, dua hal yang sengaja dipisah. */
 let collMap = {};
 let collQ = '';
 let collOnlyMissing = false;
+const COLL_MAX = 1000;
 
 function collFiltered(){
   const q = collQ.trim().toLowerCase();
   return DB.filter(cardVisible).filter(c=>{
-    if(collOnlyMissing && (collMap[c.no]||0) >= 3) return false;
+    if(collOnlyMissing && (collMap[c.no]||0) > 0) return false;
     if(!q) return true;
     return c.no.toLowerCase().includes(q) || cardName(c).toLowerCase().includes(q);
   });
 }
 
+/* data-zoom di gambar & nama (persis pola cardGridHTML()) supaya delegasi
+   klik yang sudah ada di #cards TIDAK dipakai di sini — #collList punya
+   listener klik sendiri (di bawah), yang sengaja mengecek [data-coll-inc]/
+   [data-coll-dec] LEBIH DULU sebelum jatuh ke data-zoom, supaya tombol
+   stepper tidak ikut kebuka lightbox-nya. */
 function collRowHTML(c){
   const qty = collMap[c.no]||0;
-  return `<div class="coll-row" data-no="${c.no}">
-    <img class="coll-img" alt="" data-ext="0" src="${artFile(c.no)}" loading="lazy" decoding="async"
-      onerror="imgFallback(this,'${c.no}')">
-    <div class="coll-info">
-      <span class="coll-nm">${cardName(c)}</span>
-      <span class="coll-sub">${c.no} · L${c.l} · ${t(c.c)}</span>
+  return `<div class="coll-card" data-no="${c.no}">
+    <div class="coll-card-img" data-zoom="${c.no}">
+      <img alt="" data-ext="0" src="${artFile(c.no)}" loading="lazy" decoding="async"
+        onerror="imgFallback(this,'${c.no}')">
+      ${qty>0?`<span class="coll-owned-badge">×${qty}</span>`:''}
     </div>
+    <div class="coll-cap" data-zoom="${c.no}" title="${cardName(c)}">${cardName(c)}</div>
+    <div class="coll-sub">${c.no} · L${c.l} · ${t(c.c)}</div>
     <div class="coll-stepper">
       <button class="qbtn" data-coll-dec="${c.no}"${qty<=0?' disabled':''}>−</button>
-      <span class="qty">${qty}</span>
-      <button class="qbtn" data-coll-inc="${c.no}"${qty>=3?' disabled':''}>+</button>
+      <input class="coll-qty-input" type="number" inputmode="numeric" min="0" max="${COLL_MAX}"
+        data-coll-input="${c.no}" value="${qty}">
+      <button class="qbtn" data-coll-inc="${c.no}"${qty>=COLL_MAX?' disabled':''}>+</button>
     </div>
   </div>`;
 }
@@ -5492,19 +5536,33 @@ function collQueueSave(){
   collSaveTmr = setTimeout(()=>{ if(window.MHRCollection) window.MHRCollection.save(collMap); }, 500);
 }
 
+/* Terapkan satu nilai baru (dari +/- ATAU dari mengetik langsung di
+   input) ke collMap, lalu re-render cuma satu kartu itu + progress bar —
+   dipakai bersama oleh listener 'click' dan 'change' di bawah supaya
+   logikanya tidak dobel. */
+function collSetQty(no, v){
+  v = Math.max(0, Math.min(COLL_MAX, Math.round(v)||0));
+  if(v <= 0) delete collMap[no]; else collMap[no] = v;
+  renderCollectionProgress();
+  const card = $(`.coll-card[data-no="${no}"]`);
+  const c = DB.find(d=>d.no===no);
+  if(card && c) card.outerHTML = collRowHTML(c);
+  collQueueSave();
+}
+
 if($('#collList')) $('#collList').addEventListener('click', e=>{
   const inc = e.target.closest('[data-coll-inc]');
   const dec = e.target.closest('[data-coll-dec]');
-  const no = inc ? inc.dataset.collInc : (dec ? dec.dataset.collDec : null);
-  if(!no) return;
-  const cur = collMap[no] || 0;
-  if(inc){ if(cur >= 3) return; collMap[no] = cur + 1; }
-  else if(dec){ if(cur <= 0) return; if(cur - 1 <= 0) delete collMap[no]; else collMap[no] = cur - 1; }
-  renderCollectionProgress();
-  const row = e.target.closest('.coll-row');
-  const c = DB.find(d=>d.no===no);
-  if(row && c) row.outerHTML = collRowHTML(c);
-  collQueueSave();
+  if(inc){ collSetQty(inc.dataset.collInc, (collMap[inc.dataset.collInc]||0) + 1); return; }
+  if(dec){ collSetQty(dec.dataset.collDec, (collMap[dec.dataset.collDec]||0) - 1); return; }
+  const z = e.target.closest('[data-zoom]');
+  if(z){ openLightbox(z.dataset.zoom); }
+});
+/* 'change' (bukan 'input') dipakai supaya tidak menyimpan tiap ketukan
+   tombol sementara angka masih diketik — cuma saat selesai (blur/Enter). */
+if($('#collList')) $('#collList').addEventListener('change', e=>{
+  const inp = e.target.closest('[data-coll-input]'); if(!inp) return;
+  collSetQty(inp.dataset.collInput, parseInt(inp.value, 10));
 });
 if($('#collQ')) $('#collQ').addEventListener('input', ()=>{ collQ = $('#collQ').value; renderCollectionList(); });
 if($('#collOnlyMissing')) $('#collOnlyMissing').addEventListener('change', ()=>{
