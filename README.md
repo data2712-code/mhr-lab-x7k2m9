@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.37** · 13 September 2026
+**Versi saat ini: v6.38** · 13 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -536,6 +536,45 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
+
+### v6.38 — Koleksi Kartu Saya jadi halaman galeri besar + batas salinan 0-1000 — 13 September 2026 *(`index.html`, `collection.js`)*
+
+Permintaan pemilik (lanjutan Phase 4): halaman "Koleksi Kartu Saya" di
+Dashboard dirasa terlalu kecil/sempit untuk fitur sebesar itu — diminta
+dibuat lebih besar, mirip halaman koleksi kartu sungguhan di mana kartu
+bisa dilihat detail keterangannya, dan batas jumlah salinan dinaikkan dari
+3 ke maksimal 1000.
+
+- **Halaman Dashboard diperlebar**: `.dash-wrap` dari 960px → 1180px (disamakan
+  dengan `.meta-wrap` galeri Community Deck) supaya seluruh halaman Dashboard,
+  bukan cuma bagian koleksi, terasa lebih lega.
+- **Bagian Koleksi Kartu Saya dirombak dari daftar baris sempit (scroll box
+  520px) jadi GRID kartu besar** (`.coll-list`/`.coll-card`, kolom otomatis
+  menyesuaikan lebar layar, mirip grid di halaman Kartu) — tiap kartu
+  menampilkan gambarnya sendiri, bukan thumbnail kecil 34×48px seperti
+  sebelumnya.
+- **Lihat detail kartu**: klik gambar atau nama kartu di grid koleksi
+  sekarang membuka `openLightbox()` — popup detail LENGKAP yang sama persis
+  dengan yang dipakai halaman Kartu/Deck Builder (gambar besar, level/attack/
+  fight/warna, teks efek, kartu terkait, pemilihan varian artwork kalau ada).
+  Tidak perlu bikin viewer detail terpisah — dipakai ulang apa adanya.
+- **Batas jumlah salinan naik dari 3 ke 1000** (`COLL_MAX` di `index.html`),
+  dan sekarang bisa **diketik langsung** lewat kotak angka (`<input
+  type=number>`) di tiap kartu, bukan cuma diklik tombol +/- satu-satu (1000
+  klik tidak masuk akal). Tombol +/- tetap ada untuk penyesuaian cepat ±1.
+  **Penting**: batas 1000 ini murni teknis di sisi UI, SAMA SEKALI TIDAK
+  berkaitan dengan batas salinan legal deck builder (`maxCopy()`, tetap 3
+  sesuai aturan resmi 101.1.d) — koleksi mencatat berapa banyak kartu FISIK
+  yang benar-benar dimiliki pemain (mis. untuk trading di komunitas), dua hal
+  yang sengaja dipisah sejak awal.
+- **Filter "hanya yang belum lengkap" diganti jadi "hanya yang belum
+  punya"**: dengan batas naik ke 1000, makna "lengkap" (dulu = sudah 3)
+  jadi tidak relevan lagi — filter sekarang menyembunyikan kartu yang
+  jumlahnya di atas 0, bukan yang di bawah batas maksimum.
+- Diverifikasi: `node --check` lolos untuk `collection.js` dan blok
+  `<script>` inline `index.html`. Grep sanity pass memastikan tidak ada
+  sisa referensi ke class CSS lama (`.coll-row`, `.coll-img`, `.coll-info`)
+  yang sudah diganti — bersih.
 
 ### v6.37 — Galeri komunitas + like/komentar (Phase 5), dan Dashboard Saya + koleksi kartu (Phase 4) — 13 September 2026 *(`index.html`, `social.js` BARU, `collection.js` BARU, `sw.js`)*
 
@@ -3125,7 +3164,8 @@ yang mencatat perubahan kode/data)
   lewat tes), tidak tercatat di daftar ini sebelumnya
 - [x] ~~Submission deck dari komunitas dengan batasan moderasi~~ — selesai di v6.18
 - [x] ~~Pelacakan koleksi kartu yang dimiliki~~ — selesai di v6.37 (Phase 4),
-  halaman "Dashboard Saya" § Koleksi Kartu Saya, mencatat 0-3 salinan per kartu
+  halaman "Dashboard Saya" § Koleksi Kartu Saya; dirombak jadi grid galeri besar
+  + batas salinan dinaikkan ke 1000 (dari 3) di v6.38
 - [x] ~~Galeri deck komunitas dengan like + komentar~~ — selesai di v6.37 (Phase 5)
 - [ ] Deck builder menyorot kartu yang belum dimiliki (stretch dari Phase 4,
   sekarang lebih mudah karena data koleksi sudah ada)
