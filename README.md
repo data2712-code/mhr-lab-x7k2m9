@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.36** · 13 September 2026
+**Versi saat ini: v6.37** · 13 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -536,6 +536,65 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
+
+### v6.37 — Galeri komunitas + like/komentar (Phase 5), dan Dashboard Saya + koleksi kartu (Phase 4) — 13 September 2026 *(`index.html`, `social.js` BARU, `collection.js` BARU, `sw.js`)*
+
+Permintaan pemilik: revamp menu Community Deck jadi galeri sungguhan (bisa
+dikomentari dan diberi like), sekaligus dashboard anggota berisi deck
+tersimpan + pelacak koleksi kartu (Phase 4 dari roadmap lama).
+
+- **Tabel database baru** (migrasi dijalankan langsung lewat SQL Editor,
+  bukan cuma disiapkan): `public.deck_comments` (id, deck_id, user_id, body,
+  created_at) dan `public.deck_likes` (deck_id, user_id, created_at — PK
+  gabungan deck_id+user_id, jadi "like" = insert satu baris, "batal like" =
+  hapus baris itu, tidak perlu kolom penghitung terpisah). RLS kedua tabel:
+  siapa saja boleh baca baris yang deck-nya `is_public=true`; **wajib login**
+  untuk insert (like/komentar baru) — keputusan pemilik; hapus komentar
+  boleh oleh pemilik komentarnya sendiri ATAU admin (moderasi teks tanpa
+  perlu hapus seluruh deck); hapus like cuma oleh pemiliknya sendiri.
+  `public.collection` (Phase 0) dipakai apa adanya, tidak ada migrasi baru
+  untuk itu.
+- **Moderasi komentar: auto-post + reaktif** (sama seperti model publikasi
+  deck di Phase 3) — komentar langsung tayang, admin cuma menghapus
+  SESUDAHNYA kalau bermasalah, bukan antrean review dulu.
+- **`social.js` (berkas baru)**: `window.MHRSocial` — `engagementFor(ids)`
+  (jumlah like+komentar+status like akun sendiri untuk sekumpulan deck
+  sekaligus, dipakai galeri), `toggleLike()`, `listComments()`,
+  `addComment()`, `deleteComment()` (tanpa filter pemilik, sama pola dengan
+  `decks.js`.`remove()` — RLS yang menjaga keamanan sebenarnya).
+- **Galeri "🌐 Dari Pengguna" di Community Deck**: tiap kartu deck sekarang
+  punya tombol 🤍/❤️ (like, dengan hitungan) dan 💬 (buka panel komentar,
+  dimuat malas saat pertama dibuka). Panel komentar berisi daftar komentar
+  (username + waktu + isi, di-escape sebelum dirender) dan kotak kirim
+  komentar baru (kalau sudah login). Klik like/kirim komentar saat belum
+  login otomatis membuka modal Masuk/Daftar. Admin dapat tombol hapus per
+  komentar (bukan cuma per-deck seperti sebelumnya).
+- **Halaman baru "🗂 Dashboard Saya"** (tab navigasi baru, login-gated):
+  - **Deck Saya** — daftar deck tersimpan di akun (load/hapus/publikasikan)
+    **dipindah ke sini** dari kotak kecil di panel Deck Builder (`#cloudBox`
+    di panel kanan sekarang cuma berisi tombol "Simpan deck aktif ke akun" +
+    tautan ke Dashboard). Fungsi `renderCloudList()` di IIFE "Deck Saya
+    (Akun)" TIDAK diubah logikanya sama sekali, cuma target elemennya
+    (`#cloudList` → `#dashCloudList`).
+  - **Koleksi Kartu Saya (Phase 4, BARU)**: `collection.js` (berkas baru,
+    `window.MHRCollection` — `get()`/`save()`, memakai tabel `collection`
+    yang sudah siap sejak Phase 0). UI: satu baris per kartu dengan stepper
+    0-3 salinan (sesuai keputusan pemilik — mencatat JUMLAH salinan, bukan
+    cuma centang punya/tidak), pencarian nama/nomor, filter "hanya yang
+    belum lengkap", dan ringkasan "X / Y kartu dengan minimal 1 salinan".
+    Perubahan disimpan ke akun dengan jeda singkat (debounce) per klik.
+- **Perbaikan bug ketemu saat verifikasi (bukan disengaja, warisan v6.36)**:
+  tombol "Salin" di halaman Dukung (nomor rekening/e-wallet) ternyata ikut
+  memakai key i18n `subCopyBtn` yang sama dengan kotak submission manual
+  lama — waktu v6.36 menghapus 16 key `sub*` itu, tombol Dukung ikut
+  kebobolan (tampil sebagai teks mentah "subCopyBtn"). Diberi key sendiri
+  sekarang (`dkCopyBtn`).
+- `sw.js`: `social.js` dan `collection.js` ditambahkan ke `STATIC_ASSETS`,
+  `CACHE_VERSION` dinaikkan v5→v6.
+- Diverifikasi: `node --check` lolos untuk `social.js`, `collection.js`, dan
+  blok `<script>` inline `index.html` (2 kali, sebelum dan sesudah
+  perbaikan bug `dkCopyBtn`). Grep sanity pass untuk referensi bootstrap
+  yang rusak (pelajaran dari bug `renderSubmitBox` di v6.36) — bersih.
 
 ### v6.36 — Publikasikan deck ke Community Deck lewat akun (Phase 3) — 13 September 2026 *(`index.html`, `decks.js`)*
 
@@ -3065,7 +3124,11 @@ yang mencatat perubahan kode/data)
 - [x] ~~Filter bar bisa dilipat di HP~~ — sudah ada sebelum v6.18 (dikonfirmasi
   lewat tes), tidak tercatat di daftar ini sebelumnya
 - [x] ~~Submission deck dari komunitas dengan batasan moderasi~~ — selesai di v6.18
+- [x] ~~Pelacakan koleksi kartu yang dimiliki~~ — selesai di v6.37 (Phase 4),
+  halaman "Dashboard Saya" § Koleksi Kartu Saya, mencatat 0-3 salinan per kartu
+- [x] ~~Galeri deck komunitas dengan like + komentar~~ — selesai di v6.37 (Phase 5)
+- [ ] Deck builder menyorot kartu yang belum dimiliki (stretch dari Phase 4,
+  sekarang lebih mudah karena data koleksi sudah ada)
 - [ ] Gambar kartu resolusi lebih tinggi (>450 px) untuk hasil unduhan lebih tajam
-- [ ] Pelacakan koleksi kartu yang dimiliki (pekerjaan besar, perlu dipikirkan matang)
 - [ ] Update database saat set kartu baru rilis
 - [ ] Pertimbangkan Cloudflare Pages jika bandwidth mendekati batas

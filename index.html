@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.36">
+<meta name="version" content="6.37">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -650,6 +650,11 @@
   body.page-dukung .filters, body.page-dukung .cards, body.page-dukung .deck{display:none}
   body.page-dukung .layout{grid-template-columns:minmax(0,1fr)}
 
+  /* halaman: DASHBOARD SAYA (v6.37) */
+  body:not(.page-dashboard) #dashboardPage{display:none}
+  body.page-dashboard .filters, body.page-dashboard .cards, body.page-dashboard .deck{display:none}
+  body.page-dashboard .layout{grid-template-columns:minmax(0,1fr)}
+
   /* ================= HALAMAN DUKUNG KAMI ================= */
   .dk-wrap{padding:22px 20px 90px;max-width:480px;margin:0 auto}
   .dk-wrap h2.dk-title{font-family:var(--disp);font-size:26px;letter-spacing:.05em;
@@ -990,6 +995,55 @@
   .cloud-deck-info b{display:block;font-size:12.5px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
   .cloud-deck-meta{display:block;font-size:10.5px;color:var(--muted);margin-top:2px}
   .cloud-deck-actions{display:flex;gap:6px;flex:none}
+
+  /* v6.37 — revamp galeri "Dari Pengguna" (Phase 5): like + komentar. */
+  .pub-engage{display:flex;gap:8px;margin-top:8px}
+  .like-btn,.cmt-toggle{background:none;border:1px solid var(--line);color:var(--paper);
+    border-radius:999px;padding:5px 12px;font-size:12.5px;cursor:pointer;display:inline-flex;
+    align-items:center;gap:5px}
+  .like-btn:hover,.cmt-toggle:hover{border-color:var(--accent)}
+  .like-btn[aria-pressed="true"]{border-color:var(--merah);color:#FF8A75}
+  .pub-comments{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  .pub-comment-row{display:flex;gap:8px;justify-content:space-between;padding:6px 0;
+    border-bottom:1px solid var(--line);align-items:flex-start}
+  .pub-comment-row:last-of-type{border-bottom:none}
+  .pub-comment-body{min-width:0;flex:1}
+  .pub-comment-body b{font-size:12px}
+  .pub-comment-date{font-size:10.5px;color:var(--muted);margin-left:6px}
+  .pub-comment-body p{font-size:12.5px;margin-top:2px;line-height:1.5;word-break:break-word}
+  .pub-comment-form{display:flex;gap:8px;margin-top:8px;align-items:flex-start}
+  .pub-comment-form textarea{flex:1;background:var(--ink);border:1px solid var(--line);
+    color:var(--paper);border-radius:8px;padding:8px 10px;font-size:12.5px;font-family:var(--body);
+    resize:vertical;min-height:38px}
+  .pub-comment-form textarea:focus{border-color:var(--accent);outline:none}
+  .pub-comment-form button{flex:none}
+
+  /* v6.37 — halaman "Dashboard Saya" (Phase 4/5): deck tersimpan (dipindah
+     dari panel Deck Builder) + koleksi kartu. */
+  .dash-wrap{max-width:960px;margin:0 auto;padding:20px}
+  .dash-head h2{font-family:var(--disp);font-size:26px;letter-spacing:.03em}
+  .dash-head p{color:var(--muted);font-size:12.5px;margin-top:6px}
+  .dash-sec{margin-top:26px;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:16px}
+  .dash-sec h3{font-family:var(--disp);font-size:17px;letter-spacing:.02em;margin-bottom:4px}
+  .coll-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+  .coll-toolbar input[type=text]{flex:1 1 220px;min-width:180px;background:var(--ink);
+    border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:8px 12px;
+    font-size:13px;outline:none}
+  .coll-toolbar input[type=text]:focus{border-color:var(--accent)}
+  .coll-check{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);
+    white-space:nowrap;cursor:pointer}
+  .coll-progress{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+  .coll-progress b{color:var(--paper)}
+  .coll-list{max-height:520px;overflow-y:auto}
+  .coll-row{display:flex;align-items:center;gap:10px;padding:7px 4px;border-bottom:1px solid var(--line)}
+  .coll-row:last-child{border-bottom:none}
+  .coll-img{width:34px;height:48px;object-fit:cover;border-radius:4px;flex:none;
+    background:var(--panel2);border:1px solid var(--line)}
+  .coll-info{flex:1;min-width:0}
+  .coll-nm{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .coll-sub{display:block;font-size:10.5px;color:var(--muted);margin-top:1px}
+  .coll-stepper{display:flex;align-items:center;gap:6px;flex:none}
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -1051,11 +1105,45 @@
   <button data-page="tourney" aria-current="false">🥇 <span class="tl" data-i18n="navTourney">Tournaments</span><span class="ts" data-i18n="navTourneyS">Tournaments</span> <span class="cnt" id="navTourney">0</span></button>
   <button data-page="lgs" aria-current="false">📅 <span class="tl" data-i18n="navLgs">Hero Base</span><span class="ts" data-i18n="navLgsS">Hero Base</span> <span class="cnt" id="navLgs">0</span></button>
   <button data-page="panduan" aria-current="false">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span></button>
+  <button data-page="dashboard" aria-current="false">🗂 <span class="tl" data-i18n="navDashboard">Dashboard Saya</span><span class="ts" data-i18n="navDashboardS">Dashboard</span></button>
 </nav>
 
 <section id="panduanPage"><div class="pd-wrap" id="panduanWrap"></div></section>
 
 <section id="dukungPage"><div class="dk-wrap" id="dukungWrap"></div></section>
+
+<!-- v6.37 — halaman "Dashboard Saya" (Phase 4/5): daftar deck tersimpan di
+     akun (dipindah dari box kecil di panel Deck Builder — lihat #cloudBox)
+     + koleksi kartu pribadi (BARU, Phase 4). Login-gated: #dashLoginHint
+     tampil kalau belum masuk, #dashLoggedIn tampil kalau sudah — diatur oleh
+     renderDashboardPage(), dipanggil dari setPage('dashboard') dan dari
+     window.MHRAuth.onAuthChange (lihat dekat akhir berkas). -->
+<section id="dashboardPage">
+  <div class="dash-wrap">
+    <div class="dash-head">
+      <h2 data-i18n="dashHead">🗂 Dashboard Saya</h2>
+      <p data-i18n="dashIntro">Deck yang tersimpan di akunmu, dan koleksi kartu yang sudah kamu punya.</p>
+    </div>
+    <p class="auth-note" id="dashLoginHint" data-i18n="dashLoginHint">Masuk ke akun untuk melihat deck tersimpan dan koleksi kartumu.</p>
+    <button class="btn2 main" id="dashLoginBtn" style="max-width:220px" data-i18n="dashLoginBtn">👤 Masuk / Daftar</button>
+    <div id="dashLoggedIn" hidden>
+      <div class="dash-sec">
+        <h3 data-i18n="dashDeckHead">☁️ Deck Saya</h3>
+        <div id="dashCloudList"></div>
+      </div>
+      <div class="dash-sec">
+        <h3 data-i18n="dashCollHead">🎴 Koleksi Kartu Saya</h3>
+        <p class="auth-note" data-i18n="dashCollIntro">Catat berapa salinan tiap kartu yang sudah kamu punya (0-3 salinan) — datanya tersimpan ke akun, bukan cuma di perangkat ini.</p>
+        <div class="coll-toolbar">
+          <input type="text" id="collQ" data-i18n-ph="dashCollSearchPh" placeholder="Cari nama/nomor kartu...">
+          <label class="coll-check"><input type="checkbox" id="collOnlyMissing"> <span data-i18n="dashCollOnlyMissing">Hanya yang belum lengkap</span></label>
+        </div>
+        <div class="coll-progress" id="collProgress"></div>
+        <div class="coll-list" id="collList"></div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section id="metaPage">
   <div class="meta-wrap">
@@ -1253,14 +1341,19 @@
          terpisah sepenuhnya dari penyimpanan localStorage di atas (yang tetap
          jalan seperti biasa dipakai atau tidak fitur ini). Isinya digambar ulang
          oleh renderCloudBox() tiap kali status login berubah — lihat blok
-         "DECK SAYA (AKUN)" di bawah, dekat kode auth UI. -->
+         "DECK SAYA (AKUN)" di bawah, dekat kode auth UI.
+         v6.37 — daftar deck tersimpan (yang dulu tampil di sini lewat
+         #cloudList) DIPINDAH ke halaman "Dashboard Saya" (#dashCloudList,
+         elemen JS-nya sama persis, cuma id-nya beda) supaya panel Deck
+         Builder ini tetap ringkas — cuma tombol simpan yang tersisa di
+         sini, ditambah tautan ke Dashboard. -->
     <div class="deck-sec-title" data-i18n="cloudTitle">☁️ Deck Saya (Akun)</div>
     <div id="cloudBox">
       <p class="auth-note" id="cloudHint" data-i18n="cloudHintLoggedOut">Masuk ke akun untuk menyimpan deck supaya bisa dibuka lagi dari perangkat mana pun.</p>
       <button class="btn2 main" id="btnCloudSave" hidden style="width:100%" data-i18n="cloudSaveBtn">☁️ Simpan deck aktif ke akun</button>
       <div id="cloudNote" class="savenote"></div>
       <div id="cloudImportBox" hidden></div>
-      <div id="cloudList"></div>
+      <p class="auth-note" id="cloudDashHint" hidden data-i18n="cloudDashHint">Lihat, muat, atau hapus deck tersimpan di halaman <a href="#dashboard">🗂 Dashboard Saya</a>.</p>
     </div>
 
     <div id="proxyAdmin"></div>
@@ -1356,6 +1449,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
 <script src="auth.js"></script>
 <script src="decks.js"></script>
+<!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
+<script src="social.js"></script>
+<script src="collection.js"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -1381,7 +1477,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.36</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.37</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2517,6 +2613,49 @@ const T = {
   cloudImportOk:     ['Berhasil diimpor ke akun.','Imported to your account.'],
   cloudImportErr:    ['Gagal mengimpor. Coba lagi lewat tombol "Simpan deck aktif ke akun" satu per satu.',
                       'Import failed. Try the "Save active deck to account" button one deck at a time instead.'],
+  cloudDashHint: ['Lihat, muat, atau hapus deck tersimpan di halaman <a href="#dashboard">🗂 Dashboard Saya</a>.',
+                  'View, load, or delete saved decks on the <a href="#dashboard">🗂 My Dashboard</a> page.'],
+
+  /* v6.37 — revamp galeri "Dari Pengguna": like + komentar */
+  pubLikeTitle:      ['Suka','Like'],
+  pubCommentsTitle:  ['Lihat komentar','View comments'],
+  pubCommentsLoading:['Memuat komentar…','Loading comments…'],
+  pubCommentsErr:    ['Gagal memuat komentar.','Couldn’t load comments.'],
+  pubCommentsEmpty:  ['Belum ada komentar. Jadilah yang pertama!','No comments yet. Be the first!'],
+  pubCommentPh:      ['Tulis komentar…','Write a comment…'],
+  pubCommentSend:    ['Kirim','Send'],
+  pubCommentLoginHint: ['Masuk ke akun untuk ikut berkomentar.','Sign in to join the conversation.'],
+  pubCommentPostErr:  ['Gagal mengirim komentar. Coba lagi.','Couldn’t post your comment. Try again.'],
+  pubCommentDeleteBtn:['Hapus komentar','Delete comment'],
+  pubCommentDeleteConfirm: ['Hapus komentar ini? Tidak bisa dibatalkan.','Delete this comment? This can’t be undone.'],
+  pubCommentDeleteErr: ['Gagal menghapus komentar.','Couldn’t delete this comment.'],
+
+  /* v6.37 — halaman Dashboard Saya (Phase 4/5) */
+  navDashboard:  ['Dashboard Saya','My Dashboard'],
+  navDashboardS: ['Dashboard','Dashboard'],
+  dashHead: ['🗂 Dashboard Saya','🗂 My Dashboard'],
+  dashIntro: ['Deck yang tersimpan di akunmu, dan koleksi kartu yang sudah kamu punya.',
+              'Decks saved to your account, and the cards you already own.'],
+  dashLoginHint: ['Masuk ke akun untuk melihat deck tersimpan dan koleksi kartumu.',
+                  'Sign in to see your saved decks and card collection.'],
+  dashLoginBtn: ['👤 Masuk / Daftar','👤 Sign in / Sign up'],
+  dashDeckHead: ['☁️ Deck Saya','☁️ My Decks'],
+  dashCollHead: ['🎴 Koleksi Kartu Saya','🎴 My Card Collection'],
+  dashCollIntro: ['Catat berapa salinan tiap kartu yang sudah kamu punya (0-3 salinan) — datanya tersimpan ke akun, bukan cuma di perangkat ini.',
+                  'Track how many copies of each card you own (0-3) — saved to your account, not just this device.'],
+  dashCollSearchPh: ['Cari nama/nomor kartu...','Search card name/number...'],
+  dashCollOnlyMissing: ['Hanya yang belum lengkap','Only incomplete'],
+  dashCollProgressLbl: ['kartu dengan minimal 1 salinan','cards with at least 1 copy'],
+  dashCollNone: ['Tidak ada kartu yang cocok.','No matching cards.'],
+
+  /* v6.37 — perbaikan bug ketemu saat verifikasi: tombol "Salin" di halaman
+     Dukung (nomor rekening/e-wallet) TERNYATA ikut memakai key `subCopyBtn`
+     yang sama dengan punya kotak submission manual lama — waktu v6.36
+     menghapus 16 key `subXxx` (termasuk `subCopyBtn`) untuk kotak yang
+     dihapus itu, tombol Dukung ini ikut kebobolan (tampil sebagai teks
+     mentah "subCopyBtn" alih-alih "Salin"/"Copy"). Diberi key SENDIRI di
+     sini (`dkCopyBtn`, bukan dipakai bersama lagi) supaya tidak terulang. */
+  dkCopyBtn: ['Salin','Copy'],
 };
 
 const LANGS = ['id','en'];
@@ -3810,7 +3949,7 @@ function renderDukungPage(){
             <span class="dklb">${escHtml(m.label || m.jenis || '')}</span>
             <span class="no">${escHtml(m.nomor || '')}</span>
           </div>
-          <button class="dk-copy" type="button" data-idx="${i}">${t('subCopyBtn')}</button>
+          <button class="dk-copy" type="button" data-idx="${i}">${t('dkCopyBtn')}</button>
         </div>`).join('')}
     </div>
     ${linkMail ? `<div class="dk-cta"><a href="${linkMail}">✉ ${t('dkCta')}</a></div>` : ''}`;
@@ -3822,7 +3961,7 @@ function renderDukungPage(){
       navigator.clipboard.writeText(teks)
         .then(()=>{ btn.textContent = t('copied'); })
         .catch(()=>{ try{ document.execCommand('copy'); btn.textContent = t('copied'); }catch(e){} });
-      setTimeout(()=>btn.textContent = t('subCopyBtn'), 1800);
+      setTimeout(()=>btn.textContent = t('dkCopyBtn'), 1800);
     });
   });
 }
@@ -4943,7 +5082,7 @@ function renderPanduan(){
 }
 
 /* ==================== NAVIGASI HALAMAN ==================== */
-const PAGES = ['cards','build','meta','tourney','lgs','panduan','dukung'];
+const PAGES = ['cards','build','meta','tourney','lgs','panduan','dukung','dashboard'];
 function setPage(p, dariHash){
   if(!PAGES.includes(p)) p = 'cards';
   /* mode Inggris hanya punya Kartu + Deck Builder (lihat applyLang).
@@ -4962,6 +5101,7 @@ function setPage(p, dariHash){
   if(p === 'lgs') renderLgs();
   if(p === 'panduan') renderPanduan();
   if(p === 'dukung') renderDukungPage();
+  if(p === 'dashboard') renderDashboardPage();
   if(p === 'cards' || p === 'build') renderCards();
   if(!dariHash) history.replaceState(null,'','#'+p);
   window.scrollTo({top:0});
@@ -5065,6 +5205,12 @@ function renderMeta(){
    pemiliknya, langsung muncul di sini untuk SEMUA pengunjung (termasuk yang
    belum login), admin cuma menyembunyikan/menghapus SESUDAHNYA kalau perlu. */
 let PUB_FLAT = [];   // diisi ulang tiap renderPubGrid(); dipakai handler klik cari berdasar id
+/* v6.37 (revamp galeri) — {[deckId]: {likes, comments, likedByMe}}, diisi
+   ulang bareng PUB_FLAT lewat window.MHRSocial.engagementFor(). Dipakai
+   renderPubGrid() untuk gambar tombol like/komentar, dan diperbarui secara
+   OPTIMIS di klien (tanpa render ulang seluruh galeri) tiap like/komentar
+   baru supaya terasa instan — lihat handler 'like'/'cmtSend'/'cmtDel'. */
+let PUB_ENGAGE = {};
 
 async function renderPubGrid(){
   const grid = $('#pubGrid');
@@ -5074,10 +5220,16 @@ async function renderPubGrid(){
   if(error){ grid.innerHTML = `<div class="empty">${t('pubListErr')}</div>`; return; }
   PUB_FLAT = data;
   if(!data.length){ grid.innerHTML = `<div class="empty">${t('pubNone')}</div>`; return; }
+  PUB_ENGAGE = {};
+  if(window.MHRSocial && window.MHRSocial.ready){
+    const { data: eng } = await window.MHRSocial.engagementFor(data.map(r=>r.id));
+    PUB_ENGAGE = eng || {};
+  }
   grid.innerHTML = data.map(row=>{
     const res = decodeDeck(row.deck_code);
     if(!res || !Object.keys(res.deck).length) return '';
     const s = deckStats(res.deck);
+    const eng = PUB_ENGAGE[row.id] || { likes:0, comments:0, likedByMe:false };
     const strip = previewCards(res.deck, 4).map(c=>
       `<img alt="" data-ext="0" src="images/${c.no}.jpg" loading="lazy"
         onerror="metaImgFallback(this,'${c.no}','${CMAP[c.c]}')">`).join('') ||
@@ -5097,6 +5249,11 @@ async function renderPubGrid(){
           <span>${t('metaAvgLv')} <b>${s.avgLv}</b></span>
         </div>
         ${row.playstyle?`<div class="meta-desc">${escHtml(row.playstyle)}</div>`:''}
+        <div class="pub-engage">
+          <button class="like-btn" data-act="like" data-id="${row.id}" aria-pressed="${eng.likedByMe?'true':'false'}" title="${t('pubLikeTitle')}">${eng.likedByMe?'❤️':'🤍'} <span>${eng.likes}</span></button>
+          <button class="cmt-toggle" data-act="cmts" data-id="${row.id}" title="${t('pubCommentsTitle')}">💬 <span class="cmt-count">${eng.comments}</span></button>
+        </div>
+        <div class="pub-comments" id="pubComments-${row.id}" hidden></div>
         <div class="meta-act">
           <button class="main" data-act="load" data-id="${row.id}">${t('metaLoad')}</button>
           <button data-act="view" data-id="${row.id}">${t('metaView')}</button>
@@ -5108,6 +5265,35 @@ async function renderPubGrid(){
       </div>
     </div>`;
   }).join('') || `<div class="empty">${t('pubNone')}</div>`;
+}
+
+/* Panel komentar SATU deck — dimuat malas (lazy), cuma dipanggil saat
+   tombol 💬 dibuka pertama kali atau sesudah kirim/hapus komentar. Tidak
+   dipanggil di muka untuk semua kartu galeri sekaligus (lihat
+   window.MHRSocial.engagementFor() untuk hitungan ringkas yang memang
+   dipanggil di muka). */
+async function renderPubCommentPanel(deckId){
+  const panel = document.getElementById('pubComments-' + deckId);
+  if(!panel) return;
+  panel.innerHTML = `<p class="auth-note">${t('pubCommentsLoading')}</p>`;
+  const { data, error } = await window.MHRSocial.listComments(deckId);
+  if(error){ panel.innerHTML = `<p class="auth-note" style="color:var(--merah)">${t('pubCommentsErr')}</p>`; return; }
+  const session = (window.MHRAuth && window.MHRAuth.ready) ? await window.MHRAuth.getSession() : null;
+  const myUid = (session && session.user) ? session.user.id : null;
+  const list = data.length ? data.map(cm=>`
+    <div class="pub-comment-row">
+      <div class="pub-comment-body">
+        <b>${escHtml(cm.username || '???')}</b><span class="pub-comment-date">${tanggalRingkas(cm.created_at)}</span>
+        <p>${escHtml(cm.body)}</p>
+      </div>
+      ${(myUid===cm.user_id || isAccountAdmin)?`<button class="qbtn" data-act="cmtDel" data-id="${deckId}" data-cid="${cm.id}" title="${t('pubCommentDeleteBtn')}">🗑</button>`:''}
+    </div>`).join('') : `<p class="auth-note">${t('pubCommentsEmpty')}</p>`;
+  const formHTML = myUid ? `
+    <div class="pub-comment-form">
+      <textarea rows="2" maxlength="500" data-i18n-ph="pubCommentPh" placeholder="${t('pubCommentPh')}"></textarea>
+      <button class="btn2 main" data-act="cmtSend" data-id="${deckId}">${t('pubCommentSend')}</button>
+    </div>` : `<p class="auth-note">${t('pubCommentLoginHint')}</p>`;
+  panel.innerHTML = list + formHTML;
 }
 
 $('#pubGrid').addEventListener('click', async e=>{
@@ -5140,6 +5326,57 @@ $('#pubGrid').addEventListener('click', async e=>{
     const { error } = await window.MHRDecks.remove(id);
     if(error){ alert(t('pubModErr')); return; }
     renderPubGrid();
+  } else if(btn.dataset.act === 'like'){
+    /* v6.37 — wajib login (keputusan pemilik): kalau belum masuk, buka
+       modal akun alih-alih diam-diam gagal (RLS akan menolak insert-nya
+       kalau tetap dipaksa lewat). window.MHRUI.openAuthModal() diekspos
+       oleh IIFE "AUTH UI" dekat akhir berkas — lihat komentarnya di sana. */
+    const session = (window.MHRAuth && window.MHRAuth.ready) ? await window.MHRAuth.getSession() : null;
+    if(!session || !session.user){
+      if(window.MHRUI && window.MHRUI.openAuthModal) window.MHRUI.openAuthModal();
+      return;
+    }
+    const eng = PUB_ENGAGE[id] || { likes:0, comments:0, likedByMe:false };
+    const wasLiked = eng.likedByMe;
+    const { error } = await window.MHRSocial.toggleLike(id, wasLiked);
+    if(error) return;
+    eng.likedByMe = !wasLiked;
+    eng.likes = Math.max(0, eng.likes + (eng.likedByMe ? 1 : -1));
+    PUB_ENGAGE[id] = eng;
+    btn.setAttribute('aria-pressed', String(eng.likedByMe));
+    btn.innerHTML = `${eng.likedByMe?'❤️':'🤍'} <span>${eng.likes}</span>`;
+  } else if(btn.dataset.act === 'cmts'){
+    const panel = document.getElementById('pubComments-' + id);
+    if(!panel) return;
+    if(!panel.hidden){ panel.hidden = true; return; }
+    panel.hidden = false;
+    await renderPubCommentPanel(id);
+  } else if(btn.dataset.act === 'cmtSend'){
+    const panel = document.getElementById('pubComments-' + id);
+    const ta = panel && panel.querySelector('textarea');
+    const body = ta ? ta.value : '';
+    if(!body.trim()) return;
+    btn.disabled = true;
+    const { error } = await window.MHRSocial.addComment(id, body);
+    btn.disabled = false;
+    if(error){ alert(t('pubCommentPostErr')); return; }
+    const eng = PUB_ENGAGE[id] || { likes:0, comments:0, likedByMe:false };
+    eng.comments += 1;
+    PUB_ENGAGE[id] = eng;
+    await renderPubCommentPanel(id);
+    const countEl = document.querySelector(`#pubGrid [data-act="cmts"][data-id="${id}"] .cmt-count`);
+    if(countEl) countEl.textContent = eng.comments;
+  } else if(btn.dataset.act === 'cmtDel'){
+    if(!confirm(t('pubCommentDeleteConfirm'))) return;
+    const cid = btn.dataset.cid;
+    const { error } = await window.MHRSocial.deleteComment(cid);
+    if(error){ alert(t('pubCommentDeleteErr')); return; }
+    const eng = PUB_ENGAGE[id] || { likes:0, comments:0, likedByMe:false };
+    eng.comments = Math.max(0, eng.comments - 1);
+    PUB_ENGAGE[id] = eng;
+    await renderPubCommentPanel(id);
+    const countEl = document.querySelector(`#pubGrid [data-act="cmts"][data-id="${id}"] .cmt-count`);
+    if(countEl) countEl.textContent = eng.comments;
   }
 });
 
@@ -5158,6 +5395,121 @@ function tnyUsageImgFallback(img,no,warna){
   if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
   else { img.onerror=null; img.outerHTML = `<div class="tny-usage-thumb" style="background:${warna}"></div>`; }
 }
+
+/* ==================== v6.37 (Phase 4/5) — DASHBOARD SAYA ====================
+   Halaman baru login-gated, gabungan dua hal: (1) daftar deck tersimpan di
+   akun — dulu tampil sebagai kotak kecil di panel Deck Builder (#cloudList),
+   sekarang dipindah ke sini sebagai #dashCloudList (elemen JS-nya, yaitu
+   renderCloudList() di IIFE "DECK SAYA (AKUN)" dekat akhir berkas, TIDAK
+   diubah sama sekali — cuma id target elemennya yang beda); dan (2) koleksi
+   kartu pribadi (BARU, Phase 4), lihat blok KOLEKSI KARTU di bawah. */
+async function renderDashboardPage(){
+  const loginHint = $('#dashLoginHint'), loginBtn = $('#dashLoginBtn'), body = $('#dashLoggedIn');
+  const session = (window.MHRAuth && window.MHRAuth.ready) ? await window.MHRAuth.getSession() : null;
+  const loggedIn = !!(session && session.user);
+  if(loginHint) loginHint.hidden = loggedIn;
+  if(loginBtn) loginBtn.hidden = loggedIn;
+  if(body) body.hidden = !loggedIn;
+  if(!loggedIn) return;
+  if(window.MHRUI && window.MHRUI.renderCloudList) window.MHRUI.renderCloudList();
+  renderCollectionGrid();
+}
+if($('#dashLoginBtn')) $('#dashLoginBtn').addEventListener('click', ()=>{
+  if(window.MHRUI && window.MHRUI.openAuthModal) window.MHRUI.openAuthModal();
+});
+/* Refresh otomatis kalau status login berubah SAAT halaman Dashboard sedang
+   terbuka (mis. login dari tab lain, atau token refresh) — tanpa ini,
+   pengguna harus pindah halaman lalu balik lagi untuk melihat kontennya
+   muncul sesudah login. */
+if(window.MHRAuth && window.MHRAuth.ready){
+  window.MHRAuth.onAuthChange(()=>{ if(state.page === 'dashboard') renderDashboardPage(); });
+}
+
+/* ==================== v6.37 (Phase 4) — KOLEKSI KARTU SAYA ====================
+   Peta {[nomor kartu]: jumlah salinan dimiliki (0-3)} milik akun yang
+   sedang login — lihat catatan desain lengkap di collection.js. Dimuat
+   SEKALI tiap kali Dashboard dibuka (renderCollectionGrid()), lalu disimpan
+   ulang ke server tiap ada perubahan lewat collQueueSave() (dengan jeda
+   singkat, supaya klik +/- berturut-turut tidak jadi satu permintaan
+   jaringan per klik). Filter (pencarian teks + "hanya yang belum lengkap")
+   murni di sisi klien, state terpisah dari `state` global (filter kartu
+   biasa) supaya tidak saling ganggu. */
+let collMap = {};
+let collQ = '';
+let collOnlyMissing = false;
+
+function collFiltered(){
+  const q = collQ.trim().toLowerCase();
+  return DB.filter(cardVisible).filter(c=>{
+    if(collOnlyMissing && (collMap[c.no]||0) >= 3) return false;
+    if(!q) return true;
+    return c.no.toLowerCase().includes(q) || cardName(c).toLowerCase().includes(q);
+  });
+}
+
+function collRowHTML(c){
+  const qty = collMap[c.no]||0;
+  return `<div class="coll-row" data-no="${c.no}">
+    <img class="coll-img" alt="" data-ext="0" src="${artFile(c.no)}" loading="lazy" decoding="async"
+      onerror="imgFallback(this,'${c.no}')">
+    <div class="coll-info">
+      <span class="coll-nm">${cardName(c)}</span>
+      <span class="coll-sub">${c.no} · L${c.l} · ${t(c.c)}</span>
+    </div>
+    <div class="coll-stepper">
+      <button class="qbtn" data-coll-dec="${c.no}"${qty<=0?' disabled':''}>−</button>
+      <span class="qty">${qty}</span>
+      <button class="qbtn" data-coll-inc="${c.no}"${qty>=3?' disabled':''}>+</button>
+    </div>
+  </div>`;
+}
+
+function renderCollectionProgress(){
+  const el = $('#collProgress'); if(!el) return;
+  const visible = DB.filter(cardVisible);
+  const owned = visible.filter(c=>(collMap[c.no]||0) > 0).length;
+  el.innerHTML = `<b>${owned}</b> / ${visible.length} ${t('dashCollProgressLbl')}`;
+}
+
+function renderCollectionList(){
+  const grid = $('#collList'); if(!grid) return;
+  const arr = collFiltered();
+  grid.innerHTML = arr.length ? arr.map(collRowHTML).join('') : `<div class="empty">${t('dashCollNone')}</div>`;
+}
+
+async function renderCollectionGrid(){
+  const grid = $('#collList'); if(!grid) return;
+  if(!window.MHRCollection || !window.MHRCollection.ready){ grid.innerHTML=''; return; }
+  const { data } = await window.MHRCollection.get();
+  collMap = data || {};
+  renderCollectionProgress();
+  renderCollectionList();
+}
+
+let collSaveTmr = null;
+function collQueueSave(){
+  clearTimeout(collSaveTmr);
+  collSaveTmr = setTimeout(()=>{ if(window.MHRCollection) window.MHRCollection.save(collMap); }, 500);
+}
+
+if($('#collList')) $('#collList').addEventListener('click', e=>{
+  const inc = e.target.closest('[data-coll-inc]');
+  const dec = e.target.closest('[data-coll-dec]');
+  const no = inc ? inc.dataset.collInc : (dec ? dec.dataset.collDec : null);
+  if(!no) return;
+  const cur = collMap[no] || 0;
+  if(inc){ if(cur >= 3) return; collMap[no] = cur + 1; }
+  else if(dec){ if(cur <= 0) return; if(cur - 1 <= 0) delete collMap[no]; else collMap[no] = cur - 1; }
+  renderCollectionProgress();
+  const row = e.target.closest('.coll-row');
+  const c = DB.find(d=>d.no===no);
+  if(row && c) row.outerHTML = collRowHTML(c);
+  collQueueSave();
+});
+if($('#collQ')) $('#collQ').addEventListener('input', ()=>{ collQ = $('#collQ').value; renderCollectionList(); });
+if($('#collOnlyMissing')) $('#collOnlyMissing').addEventListener('change', ()=>{
+  collOnlyMissing = $('#collOnlyMissing').checked; renderCollectionList();
+});
 
 $('#metaFilter').addEventListener('click', e=>{
   const b = e.target.closest('[data-mf]'); if(!b) return;
@@ -5869,6 +6221,11 @@ window.addEventListener('hashchange', ()=>{
   function clearAuthMsg(){ if(authMsg){ authMsg.hidden = true; authMsg.textContent = ''; } }
   function openAuthModal(){ clearAuthMsg(); if(authView) authView.hidden = false; }
   function closeAuthModal(){ if(authView) authView.hidden = true; }
+  /* v6.37 — diekspos supaya kode LUAR IIFE ini (tombol "Masuk / Daftar" di
+     halaman Dashboard Saya, dan tombol like galeri publik saat belum login)
+     bisa membuka modal akun yang sama, tanpa perlu menduplikasi modalnya. */
+  window.MHRUI = window.MHRUI || {};
+  window.MHRUI.openAuthModal = openAuthModal;
 
   async function refreshAccountUI(session){
     if(inPasswordRecovery) return; // lihat komentar di deklarasi inPasswordRecovery di atas
@@ -6051,7 +6408,12 @@ window.addEventListener('hashchange', ()=>{
   const btnCloudSave = $('#btnCloudSave');
   const cloudNote = $('#cloudNote');
   const cloudImportBox = $('#cloudImportBox');
-  const cloudListEl = $('#cloudList');
+  /* v6.37 — daftar deck tersimpan dipindah ke halaman Dashboard Saya
+     (#dashCloudList), keluar dari panel Deck Builder (dulu #cloudList) —
+     lihat catatan di HTML #cloudBox. Fungsi renderCloudList() di bawah
+     TIDAK berubah sama sekali, cuma target elemennya. */
+  const cloudListEl = $('#dashCloudList');
+  const cloudDashHint = $('#cloudDashHint');
 
   let cloudNoteTmr = null;
   function showCloudNote(text){
@@ -6206,6 +6568,7 @@ window.addEventListener('hashchange', ()=>{
     const loggedIn = !!(session && session.user);
     if(cloudHint) cloudHint.hidden = loggedIn;
     if(btnCloudSave) btnCloudSave.hidden = !loggedIn;
+    if(cloudDashHint) cloudDashHint.hidden = !loggedIn;
     if(!loggedIn){
       if(cloudListEl) cloudListEl.innerHTML = '';
       if(cloudImportBox) cloudImportBox.hidden = true;
@@ -6214,6 +6577,11 @@ window.addEventListener('hashchange', ()=>{
     await renderCloudList();
     await offerImportIfNeeded();
   }
+  /* v6.37 — diekspos supaya renderDashboardPage() (di luar IIFE ini) bisa
+     menyegarkan daftar deck tersimpan saat halaman Dashboard dibuka, tanpa
+     menunggu event login/logout berikutnya. */
+  window.MHRUI = window.MHRUI || {};
+  window.MHRUI.renderCloudList = renderCloudList;
 
   if(window.MHRAuth && window.MHRAuth.ready){
     window.MHRAuth.getSession().then(renderCloudBox);
