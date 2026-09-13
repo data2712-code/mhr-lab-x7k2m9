@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.35** · 13 September 2026
+**Versi saat ini: v6.36** · 13 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -536,6 +536,48 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
+
+### v6.36 — Publikasikan deck ke Community Deck lewat akun (Phase 3) — 13 September 2026 *(`index.html`, `decks.js`)*
+
+Permintaan pemilik: lanjut ke Phase 3 — publikasi deck **auto-publish dengan
+moderasi reaktif** (langsung tayang begitu di-toggle, admin cuma
+menyembunyikan/menghapus sesudahnya kalau bermasalah, bukan antrean review),
+dan kotak submission manual (DM TikTok/email) yang sudah ada sejak v6.18
+**dihapus** karena sudah tergantikan sepenuhnya.
+
+- **Tidak ada migrasi database** — kolom `is_public` dan `playstyle` di
+  `decks` serta kebijakan RLS-nya (siapa saja boleh baca deck `is_public`,
+  admin boleh update/delete deck siapa pun) sudah ada sejak Phase 0.
+- **18 deck lama di Deck Komunitas (data.js) SENGAJA dibiarkan terpisah** —
+  bukan dipindah ke tabel `decks`. Tetap tampil seperti biasa di bagian
+  "⭐ Pilihan Pemilik", sekarang di halaman yang sama dengan bagian baru
+  "🌐 Dari Pengguna" (deck dari akun). Dua sumber data yang berbeda,
+  ditampilkan berdampingan di satu halaman Community Deck.
+- **Kotak submission publik manual (v6.18) DIHAPUS sepenuhnya** —
+  `renderSubmitBox()`, `submitValidasi()`, `#submitBox`, dan semua string
+  `sub*` terkait dibuang. Kode generator **admin** (`renderAdminBox`,
+  gerbang `?admin=1`, dipakai pemilik sendiri untuk menyusun data.js) TETAP
+  ada, tidak disentuh — itu perkakas terpisah, bukan bagian dari alur
+  submission publik yang dihapus.
+- **"Deck Saya (Akun)"** (panel Deck Saya) dapat tombol publikasi baru per
+  deck: 📢 (belum publik) / 🌐 (sudah publik). Mempublikasikan menampilkan
+  prompt opsional untuk catatan gaya bermain (kolom `playstyle`, teks bebas —
+  sesuai keputusan pemilik, tidak ada kategori/tag tambahan).
+- **Galeri publik baru** di halaman Community Deck, bagian "🌐 Dari
+  Pengguna": daftar semua deck `is_public=true` dari SIAPA PUN, digabung
+  dengan username pemiliknya (dua query terpisah — `decks.owner_id` mengacu
+  ke `auth.users`, bukan `profiles`, jadi tidak bisa di-embed lewat FK).
+  Tombol Muat/Lihat sama seperti daftar kurasi manual di bawahnya; untuk
+  akun admin, muncul tambahan tombol Sembunyikan (set `is_public=false`,
+  deck tetap ada di akun pemiliknya) dan Hapus (permanen, pakai kebijakan
+  RLS "admin boleh hapus deck siapa pun" dari v6.31).
+- `decks.js`: fungsi baru `listPublic()` dan `setPublic()`; `remove()`
+  diubah supaya TIDAK lagi memfilter berdasarkan pemilik (supaya admin bisa
+  menghapus deck orang lain untuk moderasi) — keamanannya tetap 100%
+  dijaga oleh RLS di database, bukan oleh kode klien.
+- `node --check` lolos untuk `decks.js` dan blok `<script>` inline
+  `index.html`. `sw.js` **tidak perlu** dinaikkan versinya — tidak ada
+  berkas baru yang ditambahkan ke `STATIC_ASSETS` di rilis ini.
 
 ### v6.35 — "Deck Saya (Akun)": simpan/muat/hapus deck lewat akun (Phase 2) — 13 September 2026 *(`index.html`, `decks.js` BARU, `sw.js`)*
 
