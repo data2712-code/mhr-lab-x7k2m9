@@ -1477,7 +1477,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.39</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.40</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2750,7 +2750,6 @@ function applyLang(){
   renderColorButtons();
   isiDropdown();
   renderCards(); renderDeck();
-  if(typeof renderBkNote === 'function') renderBkNote();
   if(typeof renderDukung === 'function') renderDukung();
   if(state.page === 'meta') renderMeta();
   if(state.page === 'tourney') renderTourney();
@@ -3949,146 +3948,6 @@ function tanggalRingkas(iso){
   const b = (state.lang==='en'?bulanEN:bulanID)[d.getMonth()];
   const jam = String(d.getHours()).padStart(2,'0') + '.' + String(d.getMinutes()).padStart(2,'0');
   return `${d.getDate()} ${b} ${d.getFullYear()}, ${jam}`;
-}
-
-$('#btnBackup').addEventListener('click', ()=>{
-  persist();
-  const isiDeck = Object.entries(store.decks).filter(([,d])=>Object.keys(d).length);
-  if(!isiDeck.length){ alert(t('bkNothing')); return; }
-
-  const data = {
-    app: BK_APP,
-    format: 1,                       // versi format berkas — jangan diubah artinya
-    appVersion: (document.querySelector('meta[name="version"]')||{}).content || '',
-    savedAt: new Date().toISOString(),
-    decks: store.decks,
-    art: store.art || {},
-    size: store.size || 50,
-    max: store.max || 3,
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const d = new Date();
-  const nama = `mhr-deck-lab-backup-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = nama;
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
-
-  store.lastBackup = data.savedAt;
-  persist();
-  renderBkNote();
-});
-
-$('#btnRestore').addEventListener('click', ()=>$('#bkFile').click());
-
-$('#bkFile').addEventListener('change', e=>{
-  const f = e.target.files[0];
-  e.target.value = '';
-  if(!f) return;
-  const fr = new FileReader();
-  fr.onload = ()=>{
-    let data;
-    try { data = JSON.parse(fr.result); } catch(err){ alert(t('bkBadFile')); return; }
-    if(!data || data.app !== BK_APP || !data.decks || typeof data.decks !== 'object'){
-      alert(t('bkBadFile')); return;
-    }
-    tampilkanKotakRestore(data);
-  };
-  fr.onerror = ()=>alert(t('bkBadFile'));
-  fr.readAsText(f);
-});
-
-function tampilkanKotakRestore(data){
-  const jml = Object.keys(data.decks).length;
-  const kartu = Object.values(data.decks)
-    .reduce((a,d)=>a + Object.values(d).reduce((x,y)=>x+y,0), 0);
-  let banding = '';
-  if(store.lastBackup && data.savedAt){
-    const lebihBaru = new Date(data.savedAt) > new Date(store.lastBackup);
-    banding = `<div style="color:${lebihBaru?'var(--hijau)':'var(--merah)'};font-size:11.5px;margin-bottom:8px">`
-      + (lebihBaru ? t('bkNewer') : t('bkOlder')) + `</div>`;
-  }
-  const lama = $('#bkNote').querySelector('.bk-box');
-  if(lama) lama.remove();
-  const box = document.createElement('div');
-  box.className = 'bk-box';
-  box.innerHTML = `<b>${t('bkFound')}</b>
-    <div class="meta">${t('bkMadeOn')} ${tanggalRingkas(data.savedAt)} · ${t('bkContains')} ${jml} ${t('bkDecks')}, ${kartu} ${t('cards')}</div>
-    ${banding}
-    <div class="row">
-      <button class="main" id="bkMerge">${t('bkMerge')}</button>
-      <button id="bkReplace">${t('bkReplace')}</button>
-      <button id="bkCancel">${t('bkCancel')}</button>
-    </div>`;
-  $('#bkNote').prepend(box);
-
-  $('#bkMerge').addEventListener('click', ()=>{ terapkanRestore(data, false); box.remove(); });
-  $('#bkReplace').addEventListener('click', ()=>{
-    if(!confirm(t('bkReplaceAsk'))) return;
-    terapkanRestore(data, true); box.remove();
-  });
-  $('#bkCancel').addEventListener('click', ()=>box.remove());
-}
-
-function terapkanRestore(data, timpa){
-  persist();                                   // amankan kondisi sekarang lebih dulu
-  let dilewati = 0, masuk = 0;
-  const bersih = {};
-  const daftarDeck = Object.entries(data.decks).slice(0, BK_MAKS_DECK);
-  for(const [nama, isi] of daftarDeck){
-    const deck = {};
-    for(const [no, q] of Object.entries(isi||{})){
-      const n = parseInt(q);
-      // Batas kewajaran: berkas yang rusak atau diedit manual bisa memuat angka
-      // ekstrem, dan menggambar ratusan salinan akan membuat browser tersendat.
-      if(DB.some(c=>c.no===no) && n > 0) deck[no] = Math.min(n, BK_MAKS_SALINAN);
-      else dilewati++;
-    }
-    if(Object.keys(deck).length) bersih[nama] = deck;
-  }
-
-  if(timpa){
-    store.decks = {};
-  }
-  for(const [nama, deck] of Object.entries(bersih)){
-    let n = nama;
-    if(!timpa){
-      const asli = nama; let i = 2;
-      while(store.decks[n]) n = `${asli} (${i++})`;
-    }
-    store.decks[n] = deck;
-    masuk++;
-  }
-  if(data.art) store.art = Object.assign(timpa ? {} : (store.art||{}), data.art);
-  if(data.size) { store.size = data.size; $('#setSize').value = data.size; }
-  if(data.max)  { store.max  = data.max;  $('#setMax').value  = data.max;  }
-  // bahasa & mode tampilan sengaja TIDAK ikut dipulihkan — itu preferensi per perangkat
-
-  if(!store.decks[store.active]) store.active = Object.keys(store.decks)[0] || 'Deck 1';
-  if(!store.decks[store.active]) store.decks[store.active] = {};
-  state.deck = store.decks[store.active];
-
-  renderDeckSelect(); renderAll(); renderBkNote();
-  alert(`${masuk} ${t('bkDone')}` + (dilewati ? `\n${dilewati} ${t('bkSkipped')}` : ''));
-}
-
-/* pengingat halus kalau belum pernah backup */
-function renderBkNote(){
-  const el = $('#bkNote');
-  if(!el) return;
-  const kotak = el.querySelector('.bk-box');
-  const isi = Object.values(store.decks).reduce((a,d)=>a+Object.keys(d).length, 0);
-  let html = '';
-  if(store.lastBackup){
-    html = `<div class="bk-hint">${t('bkLast')}: ${tanggalRingkas(store.lastBackup)}</div>`;
-  } else if(isi > 0){
-    html = `<div class="bk-warn">${t('bkNever')}</div>`;
-  } else {
-    html = `<div class="bk-hint">${t('bkHint')}</div>`;
-  }
-  el.innerHTML = html;
-  if(kotak) el.prepend(kotak);
 }
 
 /* ==================== BAGIKAN DECK SEBAGAI LINK ==================== */
@@ -6190,7 +6049,6 @@ amanJalankan('renderDeckSelect', renderDeckSelect);
 amanJalankan('renderAdminBox',   renderAdminBox);
 amanJalankan('renderProxyBox', renderProxyBox);
 amanJalankan('renderAll',        renderAll);
-amanJalankan('bkNote', renderBkNote);
 amanJalankan('dukung', renderDukung);
 amanJalankan('navLgs',           ()=>{ $('#navLgs').textContent = LGS.length; });
 
