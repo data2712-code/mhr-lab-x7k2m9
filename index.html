@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.36  ·  13 September 2026
+     MHR DECK LAB  ·  versi 6.40  ·  14 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.39">
+<meta name="version" content="6.40">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -704,22 +704,6 @@
     .dk-wrap{padding-bottom:80px}
     footer{padding-bottom:74px}
   }
-  .bk-row{display:flex;gap:8px;margin-top:8px}
-  .bk-row button{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--paper);
-    border-radius:8px;padding:8px 6px;font-size:12.5px;cursor:pointer}
-  .bk-row button:hover{border-color:var(--accent)}
-  .bk-hint{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.5}
-  .bk-warn{background:rgba(242,176,30,.1);border:1px solid var(--accent);border-radius:8px;
-    padding:8px 10px;font-size:11.5px;line-height:1.5;margin-top:8px;color:#F0DFB4}
-  .bk-box{background:rgba(242,176,30,.1);border:1px solid var(--accent);border-radius:10px;
-    padding:11px 13px;margin-bottom:11px;font-size:12.5px;line-height:1.6}
-  .bk-box b{color:var(--accent)}
-  .bk-box .meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin:5px 0 9px}
-  .bk-box .row{display:flex;gap:7px;flex-wrap:wrap}
-  .bk-box button{background:var(--panel);border:1px solid var(--line);color:var(--paper);
-    border-radius:8px;padding:8px 11px;font-size:12px;cursor:pointer}
-  .bk-box button.main{background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:700}
-  .bk-box button:hover{border-color:var(--accent)}
   .share-note{background:rgba(242,176,30,.1);border:1px solid var(--accent);border-radius:10px;
     padding:11px 13px;margin-bottom:12px;font-size:12.5px;line-height:1.6}
   .share-note b{color:var(--accent)}
@@ -1351,12 +1335,6 @@
       </div>
       <div id="importResult"></div>
     </div>
-    <div class="bk-row">
-      <button id="btnBackup" data-i18n="bkSave">💾 Backup semua deck</button>
-      <button id="btnRestore" data-i18n="bkLoad">📂 Restore</button>
-    </div>
-    <input type="file" id="bkFile" accept=".json,application/json" hidden>
-    <div id="bkNote"></div>
     <textarea class="export" id="exportBox" readonly></textarea>
 
     <!-- v6.35 — "Deck Saya (Akun)": simpan/muat/hapus deck lewat akun (Phase 2),
@@ -1721,7 +1699,6 @@ function persist(){
   store.view = state.view;
   store.art  = store.art || {};
   store.lang = state.lang;
-  store.lastBackup = store.lastBackup || null;
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(store));
     const n=$('#saveNote'); if(n){ n.textContent=t('savedAuto');
@@ -2537,31 +2514,6 @@ const T = {
                  'Note: target deck size and copy limit can be adjusted to match the tournament rules in effect. Card data comes from the official marvelherorush.com database. Decks are saved automatically in this device\'s browser (localStorage) — safe to close and reopen.'],
 
   /* --- pesan --- */
-  bkSave:       ['💾 Backup semua deck','💾 Back up all decks'],
-  bkLoad:       ['📂 Restore','📂 Restore'],
-  bkHint:       ['Backup menyalin semua deck ke satu berkas. Pindahkan berkasnya ke perangkat lain, lalu tekan Restore di sana.',
-                 'A backup copies all your decks into one file. Move that file to another device, then press Restore there.'],
-  bkNever:      ['Deck Anda belum pernah di-backup. Deck hanya tersimpan di browser perangkat ini dan akan hilang jika data browser dibersihkan.',
-                 'You have never backed up. Decks live only in this device\'s browser and will be lost if browser data is cleared.'],
-  bkLast:       ['Backup terakhir','Last backup'],
-  bkFound:      ['Berkas backup ditemukan','Backup file found'],
-  bkMadeOn:     ['dibuat','created'],
-  bkContains:   ['berisi','contains'],
-  bkDecks:      ['deck','decks'],
-  bkMerge:      ['Gabungkan dengan deck saya','Merge with my decks'],
-  bkReplace:    ['Timpa semua','Replace everything'],
-  bkCancel:     ['Batal','Cancel'],
-  bkOlder:      ['Berkas ini lebih lama dari backup terakhir Anda di perangkat ini.',
-                 'This file is older than your last backup on this device.'],
-  bkNewer:      ['Berkas ini lebih baru dari backup terakhir Anda di perangkat ini.',
-                 'This file is newer than your last backup on this device.'],
-  bkDone:       ['deck dipulihkan','decks restored'],
-  bkSkipped:    ['kartu dilewati karena tidak dikenali','cards skipped as unrecognised'],
-  bkBadFile:    ['Berkas ini bukan backup MHR Deck Lab, atau isinya rusak.',
-                 'This is not an MHR Deck Lab backup file, or its contents are damaged.'],
-  bkNothing:    ['Belum ada deck untuk di-backup.','There are no decks to back up yet.'],
-  bkReplaceAsk: ['Timpa semua deck di perangkat ini? Deck yang ada sekarang akan hilang.',
-                 'Replace all decks on this device? Your current decks will be lost.'],
   mDeckEmpty:   ['Deck masih kosong.','Your deck is empty.'],
   mDeckEmptyAdd:['Deck aktif masih kosong. Susun dulu di Deck Builder.','The active deck is empty. Build one in Deck Builder first.'],
   mNameUsed:    ['Nama deck sudah dipakai.','That deck name is already in use.'],
@@ -3988,15 +3940,6 @@ function renderDukungPage(){
     });
   });
 }
-
-/* ==================== BACKUP & RESTORE ====================
-   Menyalin seluruh deck ke satu berkas JSON, dan memulihkannya di perangkat
-   lain. Tidak ada server: berkasnya berpindah langsung lewat penyimpanan
-   pengguna sendiri. Catatan: ini menyalin, bukan menyinkronkan — perubahan
-   setelah restore tidak otomatis kembali ke perangkat asal. */
-const BK_APP = 'MHR Deck Lab';
-const BK_MAKS_SALINAN = 99;   // batas aman salinan per kartu dari berkas backup
-const BK_MAKS_DECK    = 200;  // batas aman jumlah deck dari berkas backup
 
 function tanggalRingkas(iso){
   const d = new Date(iso);
