@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.40  ·  14 September 2026
+     MHR DECK LAB  ·  versi 6.41  ·  14 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.40">
+<meta name="version" content="6.41">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1109,7 +1109,7 @@
   <button data-page="build" aria-current="false">🛠 <span class="tl" data-i18n="navBuild">Deck Builder</span><span class="ts" data-i18n="navBuildS">Builder</span> <span class="cnt" id="navDeck">0</span></button>
   <button data-page="meta" aria-current="false">🏆 <span class="tl" data-i18n="navMeta">Community Deck</span><span class="ts" data-i18n="navMetaS">Community Deck</span> <span class="cnt" id="navMeta">0</span></button>
   <button data-page="tourney" aria-current="false">🥇 <span class="tl" data-i18n="navTourney">Tournaments</span><span class="ts" data-i18n="navTourneyS">Tournaments</span> <span class="cnt" id="navTourney">0</span></button>
-  <button data-page="lgs" aria-current="false">📅 <span class="tl" data-i18n="navLgs">Hero Base</span><span class="ts" data-i18n="navLgsS">Hero Base</span> <span class="cnt" id="navLgs">0</span></button>
+  <button data-page="lgs" aria-current="false">📅 <span class="tl" data-i18n="navLgs">Weekly Rush LGS</span><span class="ts" data-i18n="navLgsS">Weekly Rush LGS</span> <span class="cnt" id="navLgs">0</span></button>
   <button data-page="panduan" aria-current="false">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span></button>
   <button data-page="dashboard" aria-current="false">🗂 <span class="tl" data-i18n="navDashboard">Dashboard Saya</span><span class="ts" data-i18n="navDashboardS">Dashboard</span></button>
 </nav>
@@ -1477,7 +1477,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.40</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.41</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2218,8 +2218,8 @@ const T = {
   navMetaS:     ['Community Deck','Community Deck'],
   navTourney:   ['Tournaments','Tournaments'],
   navTourneyS:  ['Tournaments','Tournaments'],
-  navLgs:       ['Hero Base','Hero Base'],
-  navLgsS:      ['Hero Base','Hero Base'],
+  navLgs:       ['Weekly Rush LGS','Weekly Rush LGS'],
+  navLgsS:      ['Weekly Rush LGS','Weekly Rush LGS'],
   navPanduan:   ['Panduan','Guide'],
   navPanduanS:  ['Panduan','Guide'],
   statUnique:   ['Total kartu','Total cards'],
@@ -2715,7 +2715,7 @@ function applyLang(){
   const ogd = document.querySelector('meta[property="og:description"]');
   if(ogd) ogd.setAttribute('content', t('metaDesc'));
   /* Mode Inggris sengaja dibuat sederhana: hanya Kartu + Deck Builder.
-     Community Deck, Tournaments, dan Hero Base isinya konten komunitas
+     Community Deck, Tournaments, dan Weekly Rush LGS isinya konten komunitas
      Indonesia (nama deck berbahasa Indonesia, label peringkat turnamen,
      jadwal LGS Indonesia), jadi tidak ditampilkan — pengunjung luar negeri
      langsung fokus ke deck builder.
@@ -2724,7 +2724,7 @@ function applyLang(){
      Tournaments (v6.26) TIDAK punya panel admin (beda dengan Community Deck —
      tidak ada submission publik/generator kode di sini, isinya cuma murni
      ditempel pemilik ke data.js seperti LGS), jadi tidak perlu pengecualian
-     admin — selalu ikut aturan yang sama dengan Hero Base. */
+     admin — selalu ikut aturan yang sama dengan Weekly Rush LGS. */
   const sembunyi = { lgs:(state.lang === 'en'), tourney:(state.lang === 'en'),
     meta:(state.lang === 'en' && !isAdmin) };
   Object.entries(sembunyi).forEach(([p,off])=>{
@@ -4924,7 +4924,7 @@ function setPage(p, dariHash){
   /* mode Inggris hanya punya Kartu + Deck Builder (lihat applyLang).
      Panduan sengaja dikecualikan — dwibahasa penuh, dan justru paling
      berguna untuk pemain baru berbahasa Inggris. Tournaments (v6.26) ikut
-     aturan yang sama dengan Hero Base — nama deck & label peringkat konten
+     aturan yang sama dengan Weekly Rush LGS — nama deck & label peringkat konten
      komunitas Indonesia, tidak ada pengecualian admin (tidak ada panel admin
      di halaman ini, beda dengan Community Deck). */
   if(state.lang === 'en' && (p === 'lgs' || p === 'tourney' || (p === 'meta' && !isAdmin))) p = 'cards';

@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.40** · 14 September 2026
+**Versi saat ini: v6.41** · 14 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -130,7 +130,7 @@ pemain luar negeri.
 
 | Hal | Perilaku |
 |---|---|
-| Menu | hanya **Cards** dan **Deck Builder**. Tab **Community Deck**, **Tournaments** (sejak v6.26), dan **Hero Base** tidak ditampilkan, karena isinya konten komunitas Indonesia (nama deck berbahasa Indonesia, label peringkat turnamen, jadwal LGS Indonesia) |
+| Menu | hanya **Cards** dan **Deck Builder**. Tab **Community Deck**, **Tournaments** (sejak v6.26), dan **Weekly Rush LGS** (nama tab sejak v6.41 — judul halaman (H2) di dalamnya tetap "Hero Base") tidak ditampilkan, karena isinya konten komunitas Indonesia (nama deck berbahasa Indonesia, label peringkat turnamen, jadwal LGS Indonesia) |
 | Alamat `#meta` / `#tourney` / `#lgs` | otomatis dialihkan ke halaman Cards, jadi tidak ada halaman kosong |
 | Database | 192 kartu — 16 kartu promo (PB01/EB01/TB01) disembunyikan karena versi Inggrisnya belum terbit |
 | Gambar | dari `images/en/`, otomatis jatuh ke `images/` kalau berkasnya belum ada |
@@ -144,10 +144,10 @@ ingin dibuka untuk pengunjung Inggris, cukup ubah satu baris di `applyLang`
 (objek `sembunyi`), dan siapkan nama deck versi Inggris kalau perlu. Tab **Tournaments**
 (sejak v6.26) **tidak** punya pengecualian admin ini — halaman itu tidak punya panel
 admin/generator kode sama sekali (isinya cuma ditempel manual pemilik ke `data.js`,
-sama seperti Hero Base), jadi selalu ikut aturan yang sama dengan Hero Base.
+sama seperti Weekly Rush LGS), jadi selalu ikut aturan yang sama dengan Weekly Rush LGS.
 
 **Yang sengaja tetap Bahasa Indonesia:** panel mode admin (pembuat kode deck komunitas
-dan cetak kartu proxy), serta halaman Community Deck, Tournaments, dan Hero Base —
+dan cetak kartu proxy), serta halaman Community Deck, Tournaments, dan Weekly Rush LGS —
 keempatnya memang hanya tampil di mode Indonesia (Community Deck: kecuali mode admin).
 
 ### Cara menambah teks / gambar bahasa Inggris
@@ -234,7 +234,7 @@ cuma untuk akun yang sudah daftar dan login.
 
 1. Masuk (login) ke akun — daftar dulu kalau belum punya
 2. Susun deck di tab **🛠 Deck Builder** seperti biasa
-3. Di **panel deck**, paling bawah, muncul kotak
+3. Di **panel deck**, paling bawah (di bawah tombol Backup/Restore), muncul kotak
    **🖨 Cetak kartu proxy** → klik **🖨 Cetak kartu proxy (PDF)**
 4. Daftar cetak otomatis terisi dari deck aktif. Bisa disesuaikan: **+ / − / ✕** per
    kartu, cari kartu lain di kolom pencarian, atau **↺ Muat dari deck aktif**
@@ -484,6 +484,42 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ---
 
+### v6.41 — Menu "Hero Base" diganti nama jadi "Weekly Rush LGS" (judul halaman tetap "Hero Base") — 14 September 2026 *(`index.html`)*
+
+Permintaan eksplisit pemilik: nama tab navigasi & badge menu untuk halaman jadwal LGS
+mingguan diganti dari "Hero Base" kembali ke "Weekly Rush LGS" — nama program yang
+sebelumnya sudah dikonfirmasi pemilik (lihat catatan naming lama di § Riwayat Update),
+sebelum v6.20 menerapkan "Hero Base" ke tab & judul sekaligus. Judul halaman (H2) di
+dalamnya **sengaja tetap "Hero Base"**, sesuai instruksi eksplisit — hanya nama
+tab/menu yang berubah.
+
+- **`navLgs`/`navLgsS`** (label panjang & pendek tombol nav, `index.html`) dan span
+  `.tl`/`.ts` di markup tombol `data-page="lgs"` diganti ke `"Weekly Rush LGS"` untuk
+  kedua bahasa (ID/EN) — pola yang sama dengan entri i18n lain yang memang sengaja
+  identik di kedua bahasa (nama branding, bukan teks yang diterjemahkan).
+- **`lgsHead`** (judul H2 di dalam halaman `#lgsPage`) **tidak diubah** — tetap
+  `"Hero Base"`, sesuai instruksi.
+- Referensi ke tab ini di bagian **Versi bahasa Inggris** (tabel menu yang
+  disembunyikan mode EN, dan catatan halaman yang selalu Bahasa Indonesia) diperbarui
+  menyebut "Weekly Rush LGS" sebagai nama tab saat ini — bagian riwayat/changelog lama
+  (mis. § v6.20, § v6.26) **tidak disentuh**, karena itu catatan historis tentang nama
+  tab pada saat itu ditulis (memang "Hero Base" saat itu).
+
+### v6.40 — Hilangkan fitur Backup & Restore deck dari Deck Builder — 14 September 2026 *(`index.html`, dikerjakan sesi sebelumnya)*
+
+Dicatat di sini sebagai entri susulan — perubahan ini sudah dikerjakan & dikomit ke
+`main` di sesi sebelumnya (lewat GitHub web editor), tapi entri changelog-nya belum
+sempat masuk ke salinan `README.md` ini. Menghapus total fitur backup manual
+(unduh JSON semua deck) dan restore (pulihkan dari JSON) dari panel deck — tombol
+**💾 Backup**/**📂 Restore**, handler, fungsi terkait (`renderBkNote`, dst.), dan
+konstanta `BK_APP`/`BK_MAKS` semuanya dihapus dari `index.html`; `tanggalRingkas()`
+(dipakai fitur lain) sengaja dipertahankan. Bagian how-to **"### Backup & Restore"**
+di README ini (dokumentasi fitur yang sudah tidak ada) turut dihapus sekarang sebagai
+bagian dari entri susulan ini.
+- Diverifikasi (sesi sebelumnya): fetch raw file dari GitHub + `node --check` pada
+  blok `<script>` inline, dan grep gabungan (`backup|btnRestore|bkFile|bkNote|
+  BK_MAKS|BK_APP|tampilkanKotakRestore|terapkanRestore|\.bk-`) — nol sisa referensi.
+
 ### Halaman "Dukung Kami" di dalam app — ganti total redirect Saweria — 8 September 2026 *(`index.html` + `data.js`)*
 
 Permintaan pemilik: ganti halaman Dukung yang sebelumnya cuma mendirect ke
@@ -529,48 +565,6 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
-
-### v6.40 — Hilangkan fitur Backup & Restore deck (JSON manual) — 14 September 2026 *(`index.html`, `README.md`)*
-
-Permintaan pemilik: hapus tombol **💾 Backup semua deck** dan **📂 Restore** dari
-panel Deck Builder. Fitur ini (mengekspor semua deck ke satu berkas `.json` dan
-memuatnya kembali di perangkat lain secara manual) sudah digantikan oleh
-**"Deck Saya (Akun)"** — simpan/muat deck lewat akun, yang sudah berjalan
-sejak v6.35 dan lebih praktis (tidak perlu urus berkas, otomatis bisa dibuka
-lagi selama login ke akun yang sama di perangkat mana pun).
-
-- Dihapus dari `index.html`: tombol `#btnBackup` dan `#btnRestore` beserta
-  baris `.bk-row`-nya, input berkas tersembunyi `#bkFile`, kotak catatan
-  `#bkNote` (termasuk pesan pengingat "belum pernah backup" dan kotak
-  konfirmasi restore/gabung/timpa), fungsi `tampilkanKotakRestore()` dan
-  `terapkanRestore()`, seluruh event listener klik/berkasnya, serta kelas CSS
-  pendukung (`.bk-row`, `.bk-hint`, `.bk-warn`, `.bk-box` dan turunannya).
-- `tanggalRingkas()` **dipertahankan apa adanya** — dipakai bersama oleh fitur
-  lain (format tanggal komentar galeri komunitas & "terakhir diperbarui" di
-  Deck Saya Akun), cuma dipindah keluar dari blok komentar "BACKUP & RESTORE"
-  yang sudah dihapus.
-- `store.lastBackup` (penanda waktu backup terakhir di localStorage) dan
-  `renderBkNote()` (termasuk baris `amanJalankan('bkNote', ...)` serta
-  pemanggilannya di `applyLang()`) ikut dibersihkan karena sudah tidak dipakai
-  di mana pun lagi.
-- Textarea `#exportBox` (dipakai bersama tombol **Salin tabel**) **tidak**
-  ikut terhapus — cuma baris tombol Backup/Restore dan `#bkFile`/`#bkNote` di
-  atasnya yang dibuang.
-- `README.md`: bagian dokumentasi "### Backup & Restore" dihapus, dan langkah
-  cetak kartu proxy diperbarui — sebelumnya menyebut posisi kotaknya "di
-  bawah tombol Backup/Restore", sekarang disederhanakan jadi "paling bawah"
-  (posisi sebenarnya sekarang, setelah "Deck Saya (Akun)"). Entri riwayat
-  lama yang mendokumentasikan kapan fitur ini pertama kali dibuat **tidak**
-  diubah/dihapus — dibiarkan sebagai catatan sejarah.
-- **Verifikasi**: `node --check` lolos untuk blok `<script>` inline; grep
-  sanity pass memastikan tidak ada sisa referensi ke
-  `btnBackup`/`btnRestore`/`bkFile`/`bkNote`/`renderBkNote`/`store.lastBackup`/
-  kelas `.bk-*` di seluruh `index.html`. Diuji juga lewat Playwright headless
-  (screenshot panel Deck Builder) — tidak ada celah di bekas posisi tombol,
-  tombol Salin tabel & Deck Saya (Akun) di sekitarnya tetap tampil dan
-  berfungsi normal, tidak ada error konsol JS baru (satu error jaringan yang
-  muncul berasal dari SDK Supabase yang memang diblokir di sandbox pengujian,
-  tidak terkait perubahan ini).
 
 ### v6.39 — Cetak kartu proxy dibuka untuk semua anggota login (sebelumnya admin-only) — 14 September 2026 *(`index.html`)*
 
