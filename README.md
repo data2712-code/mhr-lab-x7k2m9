@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.38** · 13 September 2026
+**Versi saat ini: v6.39** · 14 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -227,22 +227,25 @@ Sama seperti cetak proxy, library **jsPDF** dimuat dari CDN hanya saat tombolnya
 > Tombol **Salin daftar** dihapus di v5.8 — **Salin tabel** sudah mencakup kebutuhannya,
 > dan untuk versi cetak kini ada Decklist PDF.
 
-### Cetak kartu proxy (khusus mode admin)
+### Cetak kartu proxy (semua anggota yang sudah login)
 
-Fitur ini **hanya ada di mode admin** — pengunjung biasa tidak melihat tombol
-maupun panelnya. **Ini keputusan bisnis pemilik yang disengaja, bukan batasan
-teknis sementara** (dikonfirmasi ulang 3 September 2026): membuka akses cetak
-proxy ke semua pengunjung berisiko membuat orang berhenti membeli booster pack
-Marvel Hero Rush resmi, yang bisa jadi sentimen negatif ke distributor. Pemilik
-bilang suatu saat mungkin dibuka ke publik, tapi belum tahu kapan — jangan
-diusulkan atau didorong sebagai "pekerjaan tertunda" kecuali pemilik sendiri
-yang mengangkat topiknya lagi.
+**Sejak v6.39, fitur ini terbuka untuk semua anggota yang punya akun dan
+sudah login** — bukan admin-only lagi. Sebelumnya (v6.31–v6.38) fitur ini
+sengaja dibatasi hanya untuk akun admin, sebagai keputusan bisnis pemilik
+(dikonfirmasi 3 September 2026) supaya tidak membuat orang berhenti membeli
+booster pack Marvel Hero Rush resmi. **Keputusan itu sudah dibalik secara
+eksplisit oleh pemilik sendiri pada 14 September 2026** — kalau ada sesi
+Claude di masa depan yang menemukan catatan lama soal "admin-only forever",
+catatan itu sudah tidak berlaku, versi terkini di bagian ini yang jadi acuan.
 
-1. Buka situs dengan `?admin=1`, misal
-   `https://data2712-code.github.io/mhr-lab-x7k2m9/?admin=1`
+Pengunjung yang **belum login** tidak melihat panelnya (cuma hint singkat
+mengajak masuk akun) — jadi tidak ada perubahan untuk pengunjung anonim,
+cuma untuk akun yang sudah daftar dan login.
+
+1. Masuk (login) ke akun — daftar dulu kalau belum punya
 2. Susun deck di tab **🛠 Deck Builder** seperti biasa
 3. Di **panel deck**, paling bawah (di bawah tombol Backup/Restore), muncul kotak
-   **Mode admin — cetak kartu proxy** → klik **🖨 Cetak kartu proxy (PDF)**
+   **🖨 Cetak kartu proxy** → klik **🖨 Cetak kartu proxy (PDF)**
 4. Daftar cetak otomatis terisi dari deck aktif. Bisa disesuaikan: **+ / − / ✕** per
    kartu, cari kartu lain di kolom pencarian, atau **↺ Muat dari deck aktif**
 5. Klik **⬇ Buat PDF** → berkas `proxy-<nama deck>.pdf` terunduh
@@ -536,6 +539,43 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
+
+### v6.39 — Cetak kartu proxy dibuka untuk semua anggota login (sebelumnya admin-only) — 14 September 2026 *(`index.html`)*
+
+Permintaan eksplisit pemilik: fitur cetak kartu proxy (PDF, di panel Deck
+Builder) sebelumnya **cuma tampil untuk akun admin** (`isAccountAdmin`, cek
+tabel `admin_users` di Supabase) — sejak versi ini dibuka untuk **semua
+anggota yang sudah login dan punya akun**, bukan admin saja. Ini membalik
+keputusan bisnis yang sebelumnya sudah didokumentasikan (§ status proyek)
+bahwa fitur ini akan tetap admin-only untuk waktu yang lama — pemilik sudah
+secara eksplisit meminta perubahan ini.
+
+- **Gate akses diturunkan** dari `isAccountAdmin` (akun admin saja) ke
+  variabel baru `isLoggedIn` (akun mana pun yang sedang login) — dicek di
+  `openProxy()` dan dipakai untuk merender kotak pemicunya.
+- **`renderProxyAdmin()` → `renderProxyBox()`**, elemen `#proxyAdmin` →
+  `#proxyBox`: kalau belum login, tampil hint singkat ("🖨 Masuk ke akun
+  untuk mencetak kartu proxy (PDF)"), pola yang sama seperti hint login di
+  fitur lain (`#cloudHint`) — bukan cuma hilang tanpa jejak seperti perilaku
+  admin-only lama.
+- **Teks UI dibersihkan** dari bahasa "mode admin"/"khusus admin" — kotak
+  pemicu sekarang berjudul "🖨 Cetak kartu proxy" (bukan "Mode admin — cetak
+  kartu proxy") dengan catatan "Tersedia untuk semua anggota yang sudah
+  login."; subjudul di modal cetak (`#proxyView`) juga dibersihkan dari kata
+  "mode admin". Komentar kode di sekitar fitur ini diperbarui semua supaya
+  sesi Claude berikutnya tidak bingung membaca sisa komentar lama.
+- **Tidak ada risiko keamanan tambahan**: panel ini cuma menyusun PDF dari
+  gambar kartu yang sudah publik (sama seperti gambar di halaman Kartu),
+  jadi membuka akses ke semua anggota login tidak membuka data atau aksi
+  baru yang sensitif.
+- `?admin=1` (mode admin lama, untuk pembuat kode deck komunitas) dan
+  `isAccountAdmin` (dipakai untuk moderasi galeri komunitas — hapus
+  komentar/deck orang lain) **tidak disentuh sama sekali** — keduanya tetap
+  jalan seperti biasa, cuma tidak lagi dipakai untuk gate proxy print.
+- Diverifikasi: `node --check` lolos untuk blok `<script>` inline
+  `index.html` (dua kali, sebelum dan sesudah bump versi). Grep sanity pass
+  memastikan tidak ada sisa teks/komentar "mode admin" yang masih merujuk
+  ke fitur proxy print (satu komentar CSS basi ditemukan dan diperbaiki).
 
 ### v6.38 — Koleksi Kartu Saya jadi halaman galeri besar + batas salinan 0-1000 — 13 September 2026 *(`index.html`, `collection.js`)*
 
