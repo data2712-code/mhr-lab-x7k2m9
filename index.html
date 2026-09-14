@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.38">
+<meta name="version" content="6.39">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -881,7 +881,7 @@
   .dv-foot{margin-top:22px;color:var(--muted);font-size:11px;font-family:var(--mono);text-align:right}
   .foot-note{color:var(--muted);font-size:11px;line-height:1.5;margin-top:16px}
 
-  /* --- cetak kartu proxy (hanya mode admin, dipicu dari panel admin) --- */
+  /* --- cetak kartu proxy (semua anggota login, dipicu dari panel deck; v6.39) --- */
   .px-launch{margin-top:10px;border-top:1px dashed rgba(242,176,30,.35);padding-top:11px}
   .px-launch p{font-size:12px;color:#C9CFD8;line-height:1.55;margin-bottom:9px}
   .pxv{position:fixed;inset:0;z-index:58;background:rgba(6,8,11,.95);overflow-y:auto;padding:16px}
@@ -1378,7 +1378,7 @@
       <p class="auth-note" id="cloudDashHint" hidden data-i18n="cloudDashHint">Lihat, muat, atau hapus deck tersimpan di halaman <a href="#dashboard">🗂 Dashboard Saya</a>.</p>
     </div>
 
-    <div id="proxyAdmin"></div>
+    <div id="proxyBox"></div>
 
     <p class="foot-note" data-i18n="panelNote">Catatan: target ukuran deck dan batas salinan bisa disesuaikan dengan aturan resmi turnamen yang berlaku. Data kartu bersumber dari database resmi marvelherorush.com (bahasa Indonesia). Deck tersimpan otomatis di browser perangkat ini (localStorage) — aman ditutup dan dibuka kembali.</p>
   </aside>
@@ -1499,7 +1499,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.38</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.39</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1571,15 +1571,16 @@
   </div>
 </div>
 
-<!-- ========== CETAK KARTU PROXY — hanya akun admin (v6.31) ==========
-     Dipicu dari panel deck (Deck Builder), hanya tampil kalau akun yang
-     login ada di tabel admin_users (lihat isAccountAdmin). Teksnya sengaja
-     hanya Bahasa Indonesia (sama seperti panel admin lain) karena tidak
-     pernah dilihat pengunjung biasa; nama kartu tetap ikut bahasa aktif. -->
+<!-- ========== CETAK KARTU PROXY — semua anggota login (v6.31, dibuka v6.39) ==========
+     Dipicu dari panel deck (Deck Builder), hanya tampil kalau ada akun yang
+     sedang login (lihat isLoggedIn) — sejak v6.39 BUKAN lagi khusus akun
+     admin (isAccountAdmin), atas permintaan pemilik. Teksnya sengaja hanya
+     Bahasa Indonesia (belum dilokalkan ke EN) — nama kartu tetap ikut
+     bahasa aktif. -->
 <div class="pxv" id="proxyView" hidden>
   <div class="pxv-bar">
     <div class="h">🖨 Cetak kartu proxy
-      <span>mode admin · A4 · kartu 63 × 88 mm · 9 kartu per halaman</span></div>
+      <span>A4 · kartu 63 × 88 mm · 9 kartu per halaman</span></div>
     <button class="btn2" id="pxClose" data-i18n="close" style="flex:none;padding:9px 14px">✕ Tutup</button>
   </div>
   <div class="pxv-sheet">
@@ -4335,10 +4336,21 @@ const isAdmin = new URLSearchParams(location.search).get('admin') === '1';
    akun yang sedang login ada di tabel admin_users (Supabase). Diperbarui
    secara async lewat cek isAdmin() di auth.js, dipanggil dari refreshAccountUI()
    setiap kali status login berubah (lihat blok AUTH UI di akhir file).
-   Dipakai HANYA untuk panel cetak proxy (renderProxyAdmin/openProxy),
-   menggantikan ?admin=1 untuk panel itu — akses proxy sekarang ikut akun,
-   bukan lagi bookmark URL. */
+   Dipakai untuk moderasi galeri komunitas (hapus deck/komentar orang lain).
+   TIDAK lagi dipakai untuk panel cetak proxy sejak v6.39, lihat isLoggedIn
+   di bawah — permintaan pemilik: fitur cetak proxy dibuka untuk semua akun
+   yang sudah login, bukan admin saja lagi. */
 let isAccountAdmin = false;
+
+/* v6.39 — status login (BARU, terpisah dari isAccountAdmin di atas): true
+   kalau ADA akun yang sedang login, admin atau bukan. Diperbarui bareng
+   isAccountAdmin di refreshAccountUI() tiap kali sesi berubah. Dipakai buat
+   panel cetak proxy (renderProxyBox/openProxy) — permintaan pemilik: fitur
+   ini dibuka untuk semua anggota yang sudah login & punya akun, BUKAN lagi
+   admin-only (v6.31–v6.38). Ini membalik keputusan bisnis lama yang tadinya
+   didokumentasikan sebagai "admin-only untuk waktu tidak ditentukan" — lihat
+   project doc login-deck-sharing-card-tracker-plan.md § v6.39. */
+let isLoggedIn = false;
 
 const HARI = {1:'Senin',2:'Selasa',3:'Rabu',4:'Kamis',5:'Jumat',6:'Sabtu',7:'Minggu'};
 const PIN = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
@@ -5781,24 +5793,32 @@ function renderAdminBox(){
     </div>`;
 }
 
-/* Pemicu cetak kartu proxy — di panel deck (Deck Builder), hanya akun admin.
+/* Pemicu cetak kartu proxy — di panel deck (Deck Builder).
    v6.31: dipindah dari ?admin=1 ke isAccountAdmin (akun login + tabel
-   admin_users) — lihat catatan di definisi isAccountAdmin di atas. */
-function renderProxyAdmin(){
-  const box = $('#proxyAdmin');
+   admin_users), jadi admin-only.
+   v6.39: permintaan pemilik — dibuka untuk SEMUA anggota yang sudah login
+   & punya akun (gate sekarang isLoggedIn, BUKAN lagi isAccountAdmin; admin
+   tetap tidak istimewa di sini, cuma anggota biasa juga boleh). Kalau belum
+   login, tampil hint singkat (pola sama seperti #cloudHint) supaya orang
+   tahu fiturnya ada dan diarahkan login, bukan cuma hilang tanpa jejak
+   seperti perilaku admin-only lama. */
+function renderProxyBox(){
+  const box = $('#proxyBox');
   if(!box) return;
-  box.innerHTML = !isAccountAdmin ? '' : `
+  box.innerHTML = !isLoggedIn
+    ? `<p class="auth-note" id="proxyHint" style="margin-top:14px">🖨 Masuk ke akun untuk mencetak kartu proxy (PDF).</p>`
+    : `
     <div class="admin-box" style="margin-top:14px;margin-bottom:0">
-      <div class="t">Mode admin — cetak kartu proxy</div>
+      <div class="t">🖨 Cetak kartu proxy</div>
       <p style="font-size:12px;color:#C9CFD8;line-height:1.55;margin-bottom:9px">
         Menyusun berkas PDF A4 berisi kartu ukuran 63 × 88 mm, 9 kartu per halaman,
         siap dipotong. Daftar cetak otomatis terisi dari deck aktif dan masih bisa
-        disesuaikan di dalam panelnya. Tombol ini hanya muncul untuk akun admin.</p>
+        disesuaikan di dalam panelnya. Tersedia untuk semua anggota yang sudah login.</p>
       <button class="btn2" id="btnProxy"
         style="width:100%;border-color:var(--accent);color:var(--accent);font-weight:700">
         🖨 Cetak kartu proxy (PDF)</button>
     </div>`;
-  if(isAccountAdmin) $('#btnProxy').addEventListener('click', openProxy);
+  if(isLoggedIn) $('#btnProxy').addEventListener('click', openProxy);
 }
 
 $('#adminBox').addEventListener('click', e=>{
@@ -5823,15 +5843,16 @@ $('#adminBox').addEventListener('click', e=>{
   }
 });
 
-/* ==================== CETAK KARTU PROXY (AKUN ADMIN) ====================
-   v6.31: gatenya sekarang isAccountAdmin (akun admin, cek tabel admin_users
-   di Supabase), bukan lagi ?admin=1. Ini tetap cuma menyembunyikan dari
-   tampilan orang yang tidak berkepentingan, bukan pengamanan berlapis —
-   dan itu tetap memadai, karena panel ini tidak punya kuasa apa pun atas
-   situs: dia hanya menyusun PDF dari gambar yang sudah publik di folder
-   images/. Bedanya dengan ?admin=1: sekarang perlu login sungguhan sebagai
-   akun yang memang terdaftar sebagai admin di database, bukan cuma menebak
-   parameter URL.
+/* ==================== CETAK KARTU PROXY (ANGGOTA LOGIN) ====================
+   v6.31: gatenya isAccountAdmin (akun admin, cek tabel admin_users di
+   Supabase), bukan lagi ?admin=1.
+   v6.39: gate diturunkan jadi isLoggedIn (akun apa pun yang sudah login) —
+   permintaan eksplisit pemilik untuk membuka fitur ini ke semua anggota,
+   bukan admin saja. Ini tetap cuma menyembunyikan dari pengunjung yang
+   belum login, bukan pengamanan berlapis — dan itu tetap memadai, karena
+   panel ini tidak punya kuasa apa pun atas situs: dia hanya menyusun PDF
+   dari gambar yang sudah publik di folder images/, jadi membuka akses ke
+   semua anggota login tidak membuka data atau aksi baru yang sensitif.
 
    Tata letak: A4 210 × 297 mm, kartu 63 × 88 mm (ukuran standar TCG),
    3 × 3 = 9 kartu per halaman, otomatis terpusat.
@@ -5844,7 +5865,7 @@ const pxImgCache = {};          // kunci berkas -> {url,fmt} | null
 function pxTotal(){ return Object.values(pxSel).reduce((a,b)=>a+b,0); }
 
 function openProxy(){
-  if(!isAccountAdmin) return;
+  if(!isLoggedIn) return;
   if(!pxTotal()) pxLoadFromDeck(false);
   renderPxList();
   $('#pxSug').innerHTML = '';
@@ -6224,7 +6245,7 @@ if(!DB.length){
 amanJalankan('bahasa', applyLang);
 amanJalankan('renderDeckSelect', renderDeckSelect);
 amanJalankan('renderAdminBox',   renderAdminBox);
-amanJalankan('renderProxyAdmin', renderProxyAdmin);
+amanJalankan('renderProxyBox', renderProxyBox);
 amanJalankan('renderAll',        renderAll);
 amanJalankan('bkNote', renderBkNote);
 amanJalankan('dukung', renderDukung);
@@ -6304,10 +6325,12 @@ window.addEventListener('hashchange', ()=>{
     if(loggedOutBlock) loggedOutBlock.hidden = loggedIn;
 
     /* v6.31 — cek status admin akun (tabel admin_users di Supabase) tiap
-       kali sesi berubah (login/logout/refresh token), lalu render ulang
-       panel cetak proxy supaya muncul/hilang langsung tanpa reload halaman. */
+       kali sesi berubah (login/logout/refresh token). v6.39 — isLoggedIn
+       (dipakai gate cetak proxy) diperbarui bareng, lalu render ulang panel
+       proxy supaya muncul/hilang langsung tanpa reload halaman. */
     isAccountAdmin = loggedIn && await window.MHRAuth.isAdmin(session);
-    if(typeof renderProxyAdmin === 'function') renderProxyAdmin();
+    isLoggedIn = loggedIn;
+    if(typeof renderProxyBox === 'function') renderProxyBox();
   }
 
   if(btnAccount) btnAccount.addEventListener('click', openAuthModal);
