@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.39** · 14 September 2026
+**Versi saat ini: v6.40** · 14 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -105,16 +105,6 @@ Dukung tidak ditampilkan sama sekali — jadi aman dibiarkan kosong sampai akunn
 
 Untuk mematikan sementara, cukup beri komentar pada seluruh blok
 (`// window.DUKUNG = ...`).
-
-### Backup & Restore
-
-Tombol **💾 Backup** di panel deck mengunduh berkas
-`mhr-deck-lab-backup-YYYY-MM-DD.json` berisi semua deck, pilihan varian artwork,
-dan pengaturan. **📂 Restore** memulihkannya di perangkat mana pun.
-
-Perlu diketahui: ini **menyalin, bukan menyinkronkan**. Setelah restore, kedua
-perangkat berjalan terpisah — perubahan di satu sisi tidak otomatis kembali ke sisi
-lain. Sinkronisasi dua arah butuh backend.
 
 ### Versi bahasa Inggris (untuk Singapura / Malaysia / Thailand)
 
@@ -244,7 +234,7 @@ cuma untuk akun yang sudah daftar dan login.
 
 1. Masuk (login) ke akun — daftar dulu kalau belum punya
 2. Susun deck di tab **🛠 Deck Builder** seperti biasa
-3. Di **panel deck**, paling bawah (di bawah tombol Backup/Restore), muncul kotak
+3. Di **panel deck**, paling bawah, muncul kotak
    **🖨 Cetak kartu proxy** → klik **🖨 Cetak kartu proxy (PDF)**
 4. Daftar cetak otomatis terisi dari deck aktif. Bisa disesuaikan: **+ / − / ✕** per
    kartu, cari kartu lain di kolom pencarian, atau **↺ Muat dari deck aktif**
@@ -539,6 +529,48 @@ saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
   lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ## Riwayat Update
+
+### v6.40 — Hilangkan fitur Backup & Restore deck (JSON manual) — 14 September 2026 *(`index.html`, `README.md`)*
+
+Permintaan pemilik: hapus tombol **💾 Backup semua deck** dan **📂 Restore** dari
+panel Deck Builder. Fitur ini (mengekspor semua deck ke satu berkas `.json` dan
+memuatnya kembali di perangkat lain secara manual) sudah digantikan oleh
+**"Deck Saya (Akun)"** — simpan/muat deck lewat akun, yang sudah berjalan
+sejak v6.35 dan lebih praktis (tidak perlu urus berkas, otomatis bisa dibuka
+lagi selama login ke akun yang sama di perangkat mana pun).
+
+- Dihapus dari `index.html`: tombol `#btnBackup` dan `#btnRestore` beserta
+  baris `.bk-row`-nya, input berkas tersembunyi `#bkFile`, kotak catatan
+  `#bkNote` (termasuk pesan pengingat "belum pernah backup" dan kotak
+  konfirmasi restore/gabung/timpa), fungsi `tampilkanKotakRestore()` dan
+  `terapkanRestore()`, seluruh event listener klik/berkasnya, serta kelas CSS
+  pendukung (`.bk-row`, `.bk-hint`, `.bk-warn`, `.bk-box` dan turunannya).
+- `tanggalRingkas()` **dipertahankan apa adanya** — dipakai bersama oleh fitur
+  lain (format tanggal komentar galeri komunitas & "terakhir diperbarui" di
+  Deck Saya Akun), cuma dipindah keluar dari blok komentar "BACKUP & RESTORE"
+  yang sudah dihapus.
+- `store.lastBackup` (penanda waktu backup terakhir di localStorage) dan
+  `renderBkNote()` (termasuk baris `amanJalankan('bkNote', ...)` serta
+  pemanggilannya di `applyLang()`) ikut dibersihkan karena sudah tidak dipakai
+  di mana pun lagi.
+- Textarea `#exportBox` (dipakai bersama tombol **Salin tabel**) **tidak**
+  ikut terhapus — cuma baris tombol Backup/Restore dan `#bkFile`/`#bkNote` di
+  atasnya yang dibuang.
+- `README.md`: bagian dokumentasi "### Backup & Restore" dihapus, dan langkah
+  cetak kartu proxy diperbarui — sebelumnya menyebut posisi kotaknya "di
+  bawah tombol Backup/Restore", sekarang disederhanakan jadi "paling bawah"
+  (posisi sebenarnya sekarang, setelah "Deck Saya (Akun)"). Entri riwayat
+  lama yang mendokumentasikan kapan fitur ini pertama kali dibuat **tidak**
+  diubah/dihapus — dibiarkan sebagai catatan sejarah.
+- **Verifikasi**: `node --check` lolos untuk blok `<script>` inline; grep
+  sanity pass memastikan tidak ada sisa referensi ke
+  `btnBackup`/`btnRestore`/`bkFile`/`bkNote`/`renderBkNote`/`store.lastBackup`/
+  kelas `.bk-*` di seluruh `index.html`. Diuji juga lewat Playwright headless
+  (screenshot panel Deck Builder) — tidak ada celah di bekas posisi tombol,
+  tombol Salin tabel & Deck Saya (Akun) di sekitarnya tetap tampil dan
+  berfungsi normal, tidak ada error konsol JS baru (satu error jaringan yang
+  muncul berasal dari SDK Supabase yang memang diblokir di sandbox pengujian,
+  tidak terkait perubahan ini).
 
 ### v6.39 — Cetak kartu proxy dibuka untuk semua anggota login (sebelumnya admin-only) — 14 September 2026 *(`index.html`)*
 
