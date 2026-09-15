@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.41** · 14 September 2026
+**Versi saat ini: v6.42** · 15 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -130,7 +130,7 @@ pemain luar negeri.
 
 | Hal | Perilaku |
 |---|---|
-| Menu | hanya **Cards** dan **Deck Builder**. Tab **Community Deck**, **Tournaments** (sejak v6.26), dan **Weekly Rush LGS** (nama tab sejak v6.41 — judul halaman (H2) di dalamnya tetap "Hero Base") tidak ditampilkan, karena isinya konten komunitas Indonesia (nama deck berbahasa Indonesia, label peringkat turnamen, jadwal LGS Indonesia) |
+| Menu | hanya **Cards** dan **Deck Builder**. Tab **Community Deck**, **Tournaments Deck** (halaman sejak v6.26, nama tab "Tournaments Deck" sejak v6.42 — sebelumnya "Tournaments"), dan **Weekly Rush LGS** (nama tab sejak v6.41 — judul halaman (H2) di dalamnya tetap "Hero Base") tidak ditampilkan, karena isinya konten komunitas Indonesia (nama deck berbahasa Indonesia, label peringkat turnamen, jadwal LGS Indonesia) |
 | Alamat `#meta` / `#tourney` / `#lgs` | otomatis dialihkan ke halaman Cards, jadi tidak ada halaman kosong |
 | Database | 192 kartu — 16 kartu promo (PB01/EB01/TB01) disembunyikan karena versi Inggrisnya belum terbit |
 | Gambar | dari `images/en/`, otomatis jatuh ke `images/` kalau berkasnya belum ada |
@@ -141,14 +141,16 @@ pemain luar negeri.
 **Mode admin dikecualikan:** dengan `?admin=1`, tab Community Deck tetap terlihat walau
 bahasanya Inggris — supaya pembuat kode deck tidak terkunci. Kalau nanti Community Deck
 ingin dibuka untuk pengunjung Inggris, cukup ubah satu baris di `applyLang`
-(objek `sembunyi`), dan siapkan nama deck versi Inggris kalau perlu. Tab **Tournaments**
-(sejak v6.26) **tidak** punya pengecualian admin ini — halaman itu tidak punya panel
-admin/generator kode sama sekali (isinya cuma ditempel manual pemilik ke `data.js`,
-sama seperti Weekly Rush LGS), jadi selalu ikut aturan yang sama dengan Weekly Rush LGS.
+(objek `sembunyi`), dan siapkan nama deck versi Inggris kalau perlu. Tab **Tournaments
+Deck** (sejak v6.26) **tidak** punya pengecualian admin ini — halaman itu tidak punya
+panel admin/generator kode sama sekali (isinya cuma ditempel manual pemilik ke
+`data.js`, sama seperti Weekly Rush LGS), jadi selalu ikut aturan yang sama dengan
+Weekly Rush LGS.
 
 **Yang sengaja tetap Bahasa Indonesia:** panel mode admin (pembuat kode deck komunitas
-dan cetak kartu proxy), serta halaman Community Deck, Tournaments, dan Weekly Rush LGS —
-keempatnya memang hanya tampil di mode Indonesia (Community Deck: kecuali mode admin).
+dan cetak kartu proxy), serta halaman Community Deck, Tournaments Deck, dan Weekly
+Rush LGS — keempatnya memang hanya tampil di mode Indonesia (Community Deck: kecuali
+mode admin).
 
 ### Cara menambah teks / gambar bahasa Inggris
 
@@ -317,11 +319,11 @@ situ alurnya sama seperti deck buatan sendiri: tinjau, lalu tempel manual ke
 mengubah `data.js` — validasi di kotak submission cuma memastikan formatnya
 benar, bukan menggantikan peninjauan pemilik.
 
-### Cara menambah hasil turnamen (Tournaments, sejak v6.26)
+### Cara menambah hasil turnamen (Tournaments Deck, halaman sejak v6.26)
 
-Beda dengan Community Deck, tab **🥇 Tournaments** **tidak punya panel admin atau
-kotak submission** — isinya turnamen resmi saja, jadi selalu ditempel manual oleh
-pemilik ke `window.TOURNAMENTS` di `data.js`.
+Beda dengan Community Deck, tab **🥇 Tournaments Deck** **tidak punya panel admin
+atau kotak submission** — isinya turnamen resmi saja, jadi selalu ditempel manual
+oleh pemilik ke `window.TOURNAMENTS` di `data.js`.
 
 1. Susun tiap deck Top-N di aplikasi seperti biasa (mode `?admin=1` untuk membuat
    kodenya lewat tab Community Deck — langkah "Buat kode dari deck aktif" yang
@@ -483,6 +485,39 @@ Angka versi di depan wajib dipertahankan — kalau format berubah, naikkan ke 2
 dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ---
+
+### v6.42 — Menu "Tournaments" diganti nama jadi "Tournaments Deck" — 15 September 2026 *(`index.html`)*
+
+Permintaan pemilik: nama tab navigasi & judul halaman turnamen diganti dari
+"Tournaments" jadi "Tournaments Deck", karena halaman ini akan diisi informasi
+deck yang dipakai di perlombaan/turnamen yang sudah diselenggarakan — beda dengan
+kasus Weekly Rush LGS (§ v6.41), di sini **tidak ada instruksi untuk membedakan**
+nama tab vs judul halaman, jadi keduanya diganti sekaligus supaya konsisten.
+
+- **`navTourney`/`navTourneyS`** (label panjang & pendek tombol nav) dan kedua
+  span `.tl`/`.ts` di markup tombol `data-page="tourney"` diganti ke
+  `"Tournaments Deck"` (ID & EN — nama tab, bukan teks yang diterjemahkan).
+- **`tourneyHead`** (judul H2 di dalam halaman `#tourneyPage`) ikut diganti ke
+  `"Tournaments Deck"` — cocok dengan teks pengantar halaman (`tourneyIntro`)
+  yang memang sudah menjelaskan isinya sebagai "Deck-deck dari babak Top di
+  turnamen resmi Marvel Hero Rush".
+- Komentar kode yang menyebut nama tab ini (di `applyLang()`, `setPage()`, dan
+  komentar `tourneyHead`/fallback thumbnail analisis kartu) ikut diperbarui ke
+  "Tournaments Deck" supaya konsisten dengan nama tab yang sekarang tampil.
+- Referensi ke tab ini di README bagian **Versi bahasa Inggris** (tabel menu
+  tersembunyi + catatan halaman yang tetap Bahasa Indonesia) dan bagian
+  **"Cara menambah hasil turnamen"** diperbarui menyebut "Tournaments Deck" —
+  entri changelog LAMA (§ v6.26, § v6.27, § "Revisi kecil Tournaments...", dan
+  catatan verifikasi 4 September) **tidak disentuh**, karena itu catatan
+  historis tentang nama tab pada saat entri itu ditulis (memang "Tournaments"
+  saat itu). Nama variabel data `window.TOURNAMENTS` di `data.js` juga tidak
+  diubah — itu nama internal, bukan label yang tampil ke pengunjung.
+
+**Verifikasi**: `node --check` pada blok `<script>` inline `index.html` — lolos.
+Grep `Tournaments` di `index.html` sesudah edit — seluruh referensi ke tab/
+halaman yang menjelaskan perilaku SAAT INI sudah "Tournaments Deck"; satu
+sisa "Tournaments" tanpa "Deck" adalah nama variabel `window.TOURNAMENTS` di
+komentar (bukan bagian dari label yang tampil).
 
 ### v6.41 — Menu "Hero Base" diganti nama jadi "Weekly Rush LGS" (judul halaman tetap "Hero Base") — 14 September 2026 *(`index.html`)*
 
