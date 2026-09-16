@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.42  ·  15 September 2026
+     MHR DECK LAB  ·  versi 6.43  ·  16 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.42">
+<meta name="version" content="6.43">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -978,7 +978,17 @@
   .cloud-deck-info{min-width:0;overflow:hidden}
   .cloud-deck-info b{display:block;font-size:12.5px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
   .cloud-deck-meta{display:block;font-size:10.5px;color:var(--muted);margin-top:2px}
-  .cloud-deck-actions{display:flex;gap:6px;flex:none}
+  .cloud-deck-actions{display:flex;gap:4px;flex:none}
+  /* v6.43: tombol aksi Deck Saya (publikasikan/muat/hapus) diperbesar + diberi
+     label teks kecil di bawah icon — icon kecil polos (22px) dinilai pemilik
+     kurang jelas fungsinya. Cuma memengaruhi baris #dashCloudList, TIDAK
+     mengubah .qbtn dasar yang dipakai tombol lain (komentar, deckmgr, dst.). */
+  .cloud-deck-actions .qbtn{width:auto;height:auto;min-width:44px;
+    padding:5px 4px 4px;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:2px;font-size:17px;line-height:1}
+  .cloud-deck-actions .qbtn .qlbl{font-size:8.5px;font-weight:600;
+    letter-spacing:.01em;color:var(--muted);white-space:nowrap;line-height:1}
+  .cloud-deck-actions .qbtn:hover .qlbl{color:var(--accent)}
 
   /* v6.37 — revamp galeri "Dari Pengguna" (Phase 5): like + komentar. */
   .pub-engage{display:flex;gap:8px;margin-top:8px}
@@ -1477,7 +1487,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.42</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.43</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2577,6 +2587,12 @@ const T = {
   cloudListErr:      ['Gagal memuat daftar deck akun.','Couldn’t load your account decks.'],
   cloudLoadBtn:      ['Muat','Load'],
   cloudDeleteBtn:    ['Hapus','Delete'],
+  /* v6.43: label teks kecil di bawah icon tombol Deck Saya (beda dari title/
+     aria-label di atas yang dipakai untuk tooltip lengkap) */
+  cloudPubLbl:       ['Publikasikan','Publish'],
+  cloudUnpubLbl:     ['Batalkan','Unpublish'],
+  cloudLoadLbl:      ['Muat','Load'],
+  cloudDelLbl:       ['Hapus','Delete'],
   cloudDeleteConfirm: ['Hapus deck ini dari akun? Salinan di browser ini (kalau ada) tidak ikut terhapus.',
                        'Delete this deck from your account? Any local copy in this browser is not affected.'],
   cloudDeleteErr:    ['Gagal menghapus deck ini.','Couldn’t delete this deck.'],
@@ -6333,9 +6349,9 @@ window.addEventListener('hashchange', ()=>{
           <span class="cloud-deck-meta">${t('cloudUpdatedLbl')} ${tanggalRingkas(row.updated_at)}${row.is_public?` · 🌐`:''}</span>
         </div>
         <div class="cloud-deck-actions">
-          <button class="qbtn" data-act="pub" title="${t(row.is_public?'pubUnpublishBtn':'pubPublishBtn')}" aria-label="${t(row.is_public?'pubUnpublishBtn':'pubPublishBtn')}">${row.is_public?'🌐':'📢'}</button>
-          <button class="qbtn" data-act="load" title="${t('cloudLoadBtn')}" aria-label="${t('cloudLoadBtn')}">📥</button>
-          <button class="qbtn" data-act="del" title="${t('cloudDeleteBtn')}" aria-label="${t('cloudDeleteBtn')}">🗑</button>
+          <button class="qbtn" data-act="pub" title="${t(row.is_public?'pubUnpublishBtn':'pubPublishBtn')}" aria-label="${t(row.is_public?'pubUnpublishBtn':'pubPublishBtn')}">${row.is_public?'🌐':'📢'}<span class="qlbl">${t(row.is_public?'cloudUnpubLbl':'cloudPubLbl')}</span></button>
+          <button class="qbtn" data-act="load" title="${t('cloudLoadBtn')}" aria-label="${t('cloudLoadBtn')}">📥<span class="qlbl">${t('cloudLoadLbl')}</span></button>
+          <button class="qbtn" data-act="del" title="${t('cloudDeleteBtn')}" aria-label="${t('cloudDeleteBtn')}">🗑<span class="qlbl">${t('cloudDelLbl')}</span></button>
         </div>
       </div>`).join('');
   }
