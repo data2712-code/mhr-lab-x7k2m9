@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.43  ·  16 September 2026
+     MHR DECK LAB  ·  versi 6.44  ·  16 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.43">
+<meta name="version" content="6.44">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1031,8 +1031,15 @@
     border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:8px 12px;
     font-size:13px;outline:none}
   .coll-toolbar input[type=text]:focus{border-color:var(--accent)}
-  .coll-check{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);
-    white-space:nowrap;cursor:pointer}
+  /* v6.44: checkbox "hanya yang belum punya" diganti dropdown 3-state (semua/
+     sudah/belum dimiliki) — permintaan pemilik menambah filter "sudah dimiliki"
+     yang sebelumnya tidak ada sama sekali (cuma ada kebalikannya). Dropdown
+     dipilih drpd 2 checkbox terpisah supaya tidak ada kondisi kedua checkbox
+     tercentang bersamaan yang saling bertentangan. */
+  .coll-toolbar select{background:var(--ink);border:1px solid var(--line);
+    color:var(--paper);border-radius:8px;padding:8px 10px;font-size:12.5px;
+    outline:none;cursor:pointer;flex:none}
+  .coll-toolbar select:focus{border-color:var(--accent)}
   .coll-progress{font-size:12.5px;color:var(--muted);margin-bottom:10px}
   .coll-progress b{color:var(--paper)}
   .coll-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
@@ -1152,7 +1159,11 @@
         <p class="auth-note" data-i18n="dashCollIntro">Catat berapa salinan tiap kartu yang sudah kamu punya (ketik langsung atau pakai tombol +/-, sampai 1000 salinan) — datanya tersimpan ke akun, bukan cuma di perangkat ini. Klik gambar atau nama kartu untuk lihat detail lengkapnya.</p>
         <div class="coll-toolbar">
           <input type="text" id="collQ" data-i18n-ph="dashCollSearchPh" placeholder="Cari nama/nomor kartu...">
-          <label class="coll-check"><input type="checkbox" id="collOnlyMissing"> <span data-i18n="dashCollOnlyMissing">Hanya yang belum punya</span></label>
+          <select id="collOwnFilter">
+            <option value="all" data-i18n="dashCollFilterAll">Semua kartu</option>
+            <option value="owned" data-i18n="dashCollFilterOwned">Sudah dimiliki</option>
+            <option value="missing" data-i18n="dashCollFilterMissing">Belum dimiliki</option>
+          </select>
         </div>
         <div class="coll-progress" id="collProgress"></div>
         <div class="coll-list" id="collList"></div>
@@ -1487,7 +1498,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.43</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.44</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2636,7 +2647,10 @@ const T = {
   dashCollIntro: ['Catat berapa salinan tiap kartu yang sudah kamu punya (ketik langsung atau pakai tombol +/-, sampai 1000 salinan) — datanya tersimpan ke akun, bukan cuma di perangkat ini. Klik gambar atau nama kartu untuk lihat detail lengkapnya.',
                   'Track how many copies of each card you own (type a number directly or use the +/- buttons, up to 1000) — saved to your account, not just this device. Click a card’s image or name to see its full detail.'],
   dashCollSearchPh: ['Cari nama/nomor kartu...','Search card name/number...'],
-  dashCollOnlyMissing: ['Hanya yang belum punya','Only cards I don’t own yet'],
+  /* v6.44: dropdown 3-state (ganti checkbox "hanya belum punya" tunggal) */
+  dashCollFilterAll:     ['Semua kartu','All cards'],
+  dashCollFilterOwned:   ['Sudah dimiliki','Already owned'],
+  dashCollFilterMissing: ['Belum dimiliki','Not owned yet'],
   dashCollProgressLbl: ['kartu dengan minimal 1 salinan','cards with at least 1 copy'],
   dashCollNone: ['Tidak ada kartu yang cocok.','No matching cards.'],
 
@@ -5284,9 +5298,10 @@ if(window.MHRAuth && window.MHRAuth.ready){
    tiap kali Dashboard dibuka (renderCollectionGrid()), lalu disimpan ulang
    ke server tiap ada perubahan lewat collQueueSave() (dengan jeda singkat,
    supaya klik +/- berturut-turut tidak jadi satu permintaan jaringan per
-   klik). Filter (pencarian teks + "hanya yang belum punya") murni di sisi
-   klien, state terpisah dari `state` global (filter kartu biasa) supaya
-   tidak saling ganggu.
+   klik). Filter (pencarian teks + dropdown status kepemilikan — v6.44:
+   semua/sudah/belum dimiliki, sebelumnya cuma checkbox "belum punya") murni
+   di sisi klien, state terpisah dari `state` global (filter kartu biasa)
+   supaya tidak saling ganggu.
 
    v6.38 — dirombak dari daftar sempit (baris kecil, batas 0-3) jadi GRID
    kartu besar (mirip tampilan grid di halaman Kartu) dengan dua perubahan:
@@ -5303,13 +5318,15 @@ if(window.MHRAuth && window.MHRAuth.ready){
    dimiliki pemain, dua hal yang sengaja dipisah. */
 let collMap = {};
 let collQ = '';
-let collOnlyMissing = false;
+let collOwnFilter = 'all'; /* v6.44: 'all' | 'owned' | 'missing' */
 const COLL_MAX = 1000;
 
 function collFiltered(){
   const q = collQ.trim().toLowerCase();
   return DB.filter(cardVisible).filter(c=>{
-    if(collOnlyMissing && (collMap[c.no]||0) > 0) return false;
+    const qty = collMap[c.no]||0;
+    if(collOwnFilter === 'owned' && qty <= 0) return false;
+    if(collOwnFilter === 'missing' && qty > 0) return false;
     if(!q) return true;
     return c.no.toLowerCase().includes(q) || cardName(c).toLowerCase().includes(q);
   });
@@ -5396,8 +5413,8 @@ if($('#collList')) $('#collList').addEventListener('change', e=>{
   collSetQty(inp.dataset.collInput, parseInt(inp.value, 10));
 });
 if($('#collQ')) $('#collQ').addEventListener('input', ()=>{ collQ = $('#collQ').value; renderCollectionList(); });
-if($('#collOnlyMissing')) $('#collOnlyMissing').addEventListener('change', ()=>{
-  collOnlyMissing = $('#collOnlyMissing').checked; renderCollectionList();
+if($('#collOwnFilter')) $('#collOwnFilter').addEventListener('change', ()=>{
+  collOwnFilter = $('#collOwnFilter').value; renderCollectionList();
 });
 
 $('#metaFilter').addEventListener('click', e=>{

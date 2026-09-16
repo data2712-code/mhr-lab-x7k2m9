@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.43** · 16 September 2026
+**Versi saat ini: v6.44** · 16 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -485,6 +485,32 @@ Angka versi di depan wajib dipertahankan — kalau format berubah, naikkan ke 2
 dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ---
+
+### v6.44 — Tambah filter "sudah dimiliki" di Koleksi Kartu Saya — 16 September 2026 *(`index.html`)*
+
+Permintaan pemilik: fitur Koleksi Kartu (Dashboard Saya) sebelumnya cuma punya
+checkbox **"Hanya yang belum punya"** (v6.37) — tidak ada cara untuk menyaring
+KHUSUS kartu yang SUDAH dimiliki. Checkbox tunggal diganti **dropdown 3-state**
+(bukan menambah checkbox kedua di sampingnya, supaya tidak ada kondisi kedua
+checkbox tercentang bersamaan yang saling bertentangan):
+
+- **`#collOwnFilter`** (menggantikan `#collOnlyMissing`): "Semua kartu" (`all`,
+  default) / "Sudah dimiliki" (`owned`) / "Belum dimiliki" (`missing`).
+- **`collFiltered()`**: logika `collOnlyMissing` (boolean) diganti
+  `collOwnFilter` (string) — `owned` menyaring kartu dengan `qty <= 0`, `missing`
+  menyaring kartu dengan `qty > 0`; tetap bisa dikombinasikan dengan kotak
+  pencarian teks yang sudah ada (mis. "sudah dimiliki" + ketik "iron" =
+  kartu Iron Man yang sudah dipunya saja).
+- 3 i18n key baru (`dashCollFilterAll`/`Owned`/`Missing`, ID & EN) menggantikan
+  `dashCollOnlyMissing` yang dihapus. CSS `.coll-toolbar select` ditambahkan
+  (gaya sama seperti dropdown filter kartu utama), `.coll-check` (khusus
+  checkbox lama) dihapus karena sudah tidak dipakai di mana pun.
+- **Verifikasi**: `node --check` pada blok `<script>` inline — lolos. Logika
+  `collFiltered()` diuji terpisah dengan data tiruan (kartu berstatus sudah
+  dimiliki/belum/sama sekali tidak ada di peta) untuk ketiga state filter +
+  kombinasi dengan pencarian — semua sesuai ekspektasi. Tampilan dropdown
+  diuji visual lewat Playwright headless (desktop & mobile 375px) — sejajar
+  rapi dengan kotak pencarian, membungkus ke baris baru di layar sempit.
 
 ### v6.43 — Tombol publikasikan/muat/hapus di panel "Deck Saya" diperbesar + diberi label teks — 16 September 2026 *(`index.html`)*
 
