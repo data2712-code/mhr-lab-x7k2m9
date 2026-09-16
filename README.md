@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.42** · 15 September 2026
+**Versi saat ini: v6.43** · 16 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -485,6 +485,30 @@ Angka versi di depan wajib dipertahankan — kalau format berubah, naikkan ke 2
 dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ---
+
+### v6.43 — Tombol publikasikan/muat/hapus di panel "Deck Saya" diperbesar + diberi label teks — 16 September 2026 *(`index.html`)*
+
+Permintaan pemilik: icon publikasikan (📢/🌐), muat (📥), dan hapus (🗑) di panel
+"☁️ Deck Saya" (Dashboard Saya → daftar deck akun) dinilai terlalu kecil dan
+kurang menjelaskan fungsinya. Ditanyakan ke pemilik dua opsi yang disebutkan
+(ganti jadi teks murni, atau icon diperbesar) plus opsi gabungan — **pemilik
+memilih icon diperbesar + label teks kecil di bawahnya**.
+
+- **CSS baru, scoped ke `.cloud-deck-actions .qbtn` saja** (tidak mengubah
+  `.qbtn` dasar yang dipakai tombol lain — hapus komentar, tombol deckmgr,
+  dst.): tombol jadi kolom (icon di atas, label 8.5px di bawah), lebar
+  otomatis menyesuaikan (`min-width:44px`), font icon naik ke 17px (dari
+  ~13px sebelumnya di dalam tombol 22×22px).
+- **Markup** `renderCloudList()`: tiap tombol sekarang punya
+  `<span class="qlbl">` berisi label pendek — 4 i18n key baru (`cloudPubLbl`,
+  `cloudUnpubLbl`, `cloudLoadLbl`, `cloudDelLbl`, ID & EN) — terpisah dari
+  `title`/`aria-label` yang sudah ada (tooltip tetap teks lengkap seperti
+  sebelumnya, mis. "Batalkan publikasi").
+- **Verifikasi**: `node --check` pada blok `<script>` inline — lolos.
+  Diuji visual lewat Playwright headless (viewport 420px, 375px, dan 360px
+  dengan nama deck sengaja dibuat panjang) memakai markup+CSS yang sama persis
+  — label terbaca jelas, tombol tetap ringkas, nama deck tetap terpotong rapi
+  dengan ellipsis di lebar sempit, tidak ada elemen yang tumpang tindih.
 
 ### v6.42 — Menu "Tournaments" diganti nama jadi "Tournaments Deck" — 15 September 2026 *(`index.html`)*
 
