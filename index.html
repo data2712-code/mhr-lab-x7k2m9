@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.44  ·  16 September 2026
+     MHR DECK LAB  ·  versi 6.46  ·  18 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -10,13 +10,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MHR Deck Lab — Marvel Hero Rush Deck Builder</title>
-<meta name="description" content="Deck builder Marvel Hero Rush TCG: 208 kartu lengkap dengan gambar, stat, dan teks efek bahasa Indonesia. Susun deck, bagikan sebagai link atau gambar.">
+<meta name="description" content="Deck builder Marvel Hero Rush TCG: 288 kartu lengkap dengan gambar, stat, dan teks efek — tersedia dalam Bahasa Indonesia dan Inggris. Susun deck, bagikan sebagai link atau gambar.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="MHR Deck Lab — Marvel Hero Rush Deck Builder">
-<meta property="og:description" content="Susun deck Marvel Hero Rush: 208 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
+<meta property="og:description" content="Susun deck Marvel Hero Rush: 288 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.44">
+<meta name="version" content="6.46">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -266,6 +266,20 @@
   /* lencana Counter call / Counter efek (lihat counterInfo()) */
   .ctrbadge{font-family:var(--mono);font-size:10.5px;color:#fff;background:var(--biru);
     border-radius:4px;padding:1px 6px;font-weight:800;cursor:help}
+  /* v6.45 — lencana bahasa TERSEDIA untuk kartu (lihat cardLangBadgeHTML()).
+     Tag teks, bukan bendera — dipilih lebih jelas dibaca di ukuran kecil
+     dibanding ikon bendera 🇮🇩/🇬🇧. Warna beda per kasus supaya cepat dipindai:
+     abu-abu netral kalau kartu punya keduanya, aksen kalau cuma satu bahasa
+     (menandai perlu perhatian — teks yang tampil mungkin hasil fallback). */
+  .langtag{font-family:var(--mono);font-size:10.5px;border-radius:4px;padding:1px 6px;
+    font-weight:800;cursor:help}
+  .langtag.both{color:var(--muted);background:var(--panel2);border:1px solid var(--line)}
+  /* v6.45 — varian "ID*+EN": teks ID-nya fan-translation, belum resmi (lihat
+     FAN_TRANSLATED_ID_SETS) — border putus-putus warna merah supaya beda
+     jelas dari ID+EN biasa tanpa perlu warna solid yang terlalu mencolok */
+  .langtag.both.fan{border:1px dashed var(--merah);color:var(--merah)}
+  .langtag.id{color:#1A1206;background:var(--accent)}
+  .langtag.en{color:#fff;background:var(--biru)}
 
   /* ------- deck panel ------- */
   .deck{
@@ -762,6 +776,10 @@
   .cards.grid .ctrbadge{position:absolute;bottom:6px;left:6px;right:6px;background:var(--biru);color:#fff;
     border-radius:7px;padding:2px 7px;font-family:var(--mono);font-weight:800;font-size:9.5px;
     z-index:2;cursor:help;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+  /* v6.45 — lencana bahasa di mode grid: pojok kanan atas (kiri sudah dipakai
+     .errata), di bawah tombol share supaya tidak tumpang tindih */
+  .cards.grid .langtag{position:absolute;top:32px;right:6px;border-radius:7px;padding:2px 7px;
+    font-family:var(--mono);font-weight:800;font-size:10px;z-index:2;cursor:help}
   /* --- kartu daftar: gambar bisa diklik --- */
   .card-img{cursor:zoom-in}
   .card-name{cursor:zoom-in}
@@ -1075,7 +1093,7 @@
   "@type": "WebApplication",
   "name": "MHR Deck Lab",
   "alternateName": "Marvel Hero Rush Deck Builder",
-  "description": "Deck builder Marvel Hero Rush TCG (fan-made, tidak berafiliasi resmi): 208 kartu lengkap dengan gambar, stat, dan teks efek bahasa Indonesia. Susun deck, bagikan sebagai link atau gambar.",
+  "description": "Deck builder Marvel Hero Rush TCG (fan-made, tidak berafiliasi resmi): 288 kartu lengkap dengan gambar, stat, dan teks efek — tersedia dalam Bahasa Indonesia dan Inggris. Susun deck, bagikan sebagai link atau gambar.",
   "url": "https://mhrdecklab.com/",
   "applicationCategory": "GameApplication",
   "operatingSystem": "Any (berbasis web browser)",
@@ -1096,10 +1114,10 @@
 <header>
   <div class="brand">
     <h1>MHR <span class="stripe">DECK LAB</span></h1>
-    <p data-i18n="tagline">Marvel Hero Rush TCG Deck Builder · 208 kartu (BP01 · PB01 · PR · SD01–SD04) · Ver. Indonesia</p>
+    <p data-i18n="tagline">Marvel Hero Rush TCG Deck Builder · 288 kartu (BP01 · PB01 · PR · SD01–SD04 · SP01)</p>
   </div>
   <div class="hdr-stats">
-    <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">208</b></div>
+    <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">288</b></div>
     <div class="pill"><span data-i18n="statShown">Ditampilkan</span> <b id="hShown">208</b></div>
     <div class="pill"><span data-i18n="statDeck">Deck</span> <b id="hDeck">0</b></div>
     <!-- Ruang tombol ini SENGAJA sudah dipesan sejak HTML awal (visibility:hidden,
@@ -1112,7 +1130,6 @@
          Cloudflare (lihat analitik-agustus-2026.md). -->
     <a class="dukung" id="btnDukung" href="#dukung"
       style="visibility:hidden" title="Dukung">☕ Dukung</a>
-    <button class="langbtn" id="btnLang" title="Ganti bahasa / Switch language">🌐 ID</button>
     <a class="tiktok" href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener"
       title="Follow @deteprtm di TikTok"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 0 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-1.85-2.48V9.79a5.94 5.94 0 1 0 4.94 5.85V8.9a7 7 0 0 0 4.07 1.3V7.12a4.19 4.19 0 0 1-3.01-1.3z"/></svg> Follow @deteprtm</a>
     <a class="tiktok" href="https://www.instagram.com/deteprtm/" target="_blank" rel="noopener"
@@ -1246,6 +1263,13 @@
       <select id="fTrait"><option value="">Semua trait</option></select>
       <select id="fRarity"><option value="">Semua rarity</option></select>
       <select id="fKeyAbil" data-i18n-title="fKeyAbilT"><option value="">Kemampuan kunci</option></select>
+      <!-- v6.45 — preferensi bahasa teks kartu (state.cardLang), dipindah ke bar filter
+           ini sesuai permintaan pemilik 18 September 2026. BUKAN filter yang menyembunyikan
+           kartu — lihat cardLangInfo()/fCardLangT. -->
+      <select id="fCardLang" data-i18n-title="fCardLangT">
+        <option value="id" data-i18n="cardLangIdOpt">🇮🇩 Kartu: Indonesia</option>
+        <option value="en" data-i18n="cardLangEnOpt">🇬🇧 Kartu: Inggris</option>
+      </select>
       <select id="fSort">
         <option value="no">Urut: Nomor</option>
         <option value="lv">Urut: Level</option>
@@ -1498,7 +1522,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.44</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.46</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1656,9 +1680,8 @@ const COLORS = Object.keys(CORDER_ALL).sort((a,b)=>CORDER_ALL[a]-CORDER_ALL[b])
    kartu Orange/Purple (col[c.c]+=q pada key yang belum ada = NaN). */
 function zeroCol(){ return Object.fromEntries(COLORS.map(c=>[c,0])); }
 function renderColorButtons(){
-  // dipanggil ulang tiap applyLang() — data-on mengikuti state.colors yang sudah
-  // ada, BUKAN direset ke aktif semua, supaya pilihan filter warna pengguna tidak
-  // hilang saat ganti bahasa
+  // dipanggil dari applyText() saat init — data-on mengikuti state.colors yang
+  // sudah ada, BUKAN direset ke aktif semua
   $('#cbtns').innerHTML = COLORS.map(c=>
     `<button class="cbtn ${c.toLowerCase()}" data-c="${c}" data-on="${state.colors.has(c)?'1':'0'}" title="${c}"></button>`).join('');
 }
@@ -1697,7 +1720,13 @@ const $ = s => document.querySelector(s);
 const state = {
   q:'', colors:new Set(COLORS),
   series:'', level:'', range:'', rarity:'', trait:'', keyAbil:'', sort:'no', view:'list',
-  mech:new Set(), page:'cards', onlyDeck:false, lang:'id',
+  mech:new Set(), page:'cards', onlyDeck:false,
+  /* v6.46 — bahasa TEKS kartu (nama & efek + gambar). state.lang (toggle bahasa
+     chrome UI ID/EN) DIHAPUS TOTAL di v6.46 — teks UI sekarang satu set string
+     dwibahasa tunggal (lihat kamus T), bukan lagi dua varian yang dipilih lewat
+     tombol. cardLang tetap ada sendiri — cuma preferensi bahasa kartu, dipilih
+     lewat filter bar, disimpan di store.cardLang. */
+  cardLang:'id',
   deck:{}  // key: card no -> qty
 };
 
@@ -1719,7 +1748,7 @@ function persist(){
   store.max  = parseInt($('#setMax').value)||3;
   store.view = state.view;
   store.art  = store.art || {};
-  store.lang = state.lang;
+  store.cardLang = state.cardLang;
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(store));
     const n=$('#saveNote'); if(n){ n.textContent=t('savedAuto');
@@ -1798,19 +1827,44 @@ function artOf(no){
   const pilih = (store.art||{})[no];
   return (pilih && c.ra.includes(pilih)) ? pilih : c.ra[0];
 }
-function artDir(){ return state.lang === 'en' ? 'images/en/' : 'images/'; }
+/* v6.45 — gambar kartu sekarang ikut cardLangInfo() per kartu (bukan lagi
+   state.cardLang, BUKAN lagi state.lang yang sudah dihapus): images/ = printing Indonesia (termasuk teks Errata V.1
+   yang sudah dibakar ke pixel untuk beberapa kartu), images/en/ = printing
+   Inggris asli. Beberapa seri (PB01/EB01/TB01) cuma punya satu printing —
+   images/en/ tidak punya berkasnya sama sekali — makanya imgFallback() di
+   bawah mencoba direktori LAIN dulu sebelum menyerah ke ekstensi lain. */
+function artDir(c){
+  const lang = c ? cardLangInfo(c).shown : state.cardLang;
+  return lang === 'en' ? 'images/en/' : 'images/';
+}
 function artFile(no, rar){
   const c = DB.find(d=>d.no===no);
-  const d = artDir();
+  const d = artDir(c);
   if(!c) return `${d}${no}.jpg`;
   const r = rar || artOf(no);
   return (r === c.ra[0]) ? `${d}${no}.jpg` : `${d}${no}_${r}.jpg`;
 }
+/* Berkas yang sama tapi di direktori SEBALIKNYA dari yang baru gagal dimuat —
+   dipakai imgFallback()/gridImgFallback()/lbImgFallback() sebagai langkah
+   pertama, sebelum coba ekstensi lain. */
+function altArtFile(no){
+  const c = DB.find(d=>d.no===no);
+  if(!c) return null;
+  const curDir = artDir(c);
+  const altDir = curDir === 'images/en/' ? 'images/' : 'images/en/';
+  const r = artOf(no);
+  return (r === c.ra[0]) ? `${altDir}${no}.jpg` : `${altDir}${no}_${r}.jpg`;
+}
 
 function imgFallback(img,no){
   const exts=['jpg','png','webp'];
+  if(!img.dataset.dirFallback){
+    img.dataset.dirFallback = '1';
+    const alt = altArtFile(no);
+    if(alt){ img.dataset.ext = '0'; img.src = alt; return; }
+  }
   let i=parseInt(img.dataset.ext)+1;
-  if(i<exts.length){ img.dataset.ext=i; img.src=`${artDir()}${no}.${exts[i]}`; }
+  if(i<exts.length){ img.dataset.ext=i; img.src=`${artDir(DB.find(d=>d.no===no))}${no}.${exts[i]}`; }
   else { img.onerror=null; img.classList.add('failed'); }
 }
 
@@ -1845,6 +1899,7 @@ function cardListHTML(c,q){
             ${c.ra.map(r=>`<span class="rar${r===artOf(c.no)&&c.ra.length>1?' alt':''}">${r}</span>`).join('')}
             ${errataBadgeHTML(c)}
             ${counterBadgeHTML(c)}
+            ${cardLangBadgeHTML(c)}
           </div>
           <div class="card-stats">
             <span class="stat">${t('cLv')} <b>${c.l}</b></span>
@@ -1875,6 +1930,7 @@ function cardGridHTML(c,q){
         </div>
         ${errataBadgeHTML(c)}
         ${counterBadgeHTML(c)}
+        ${cardLangBadgeHTML(c)}
         <img class="card-img" alt="" data-ext="0" src="${artFile(c.no)}"
           loading="lazy" decoding="async" width="450" height="629"
           onerror="gridImgFallback(this,'${c.no}')" onload="this.classList.add('loaded')">
@@ -1894,8 +1950,13 @@ function cardGridHTML(c,q){
 
 function gridImgFallback(img,no){
   const exts=['jpg','png','webp'];
+  if(!img.dataset.dirFallback){
+    img.dataset.dirFallback = '1';
+    const alt = altArtFile(no);
+    if(alt){ img.dataset.ext = '0'; img.src = alt; return; }
+  }
   let i=parseInt(img.dataset.ext)+1;
-  if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
+  if(i<exts.length){ img.dataset.ext=i; img.src=`${artDir(DB.find(d=>d.no===no))}${no}.${exts[i]}`; }
   else { img.onerror=null; img.classList.add('failed');
          const ph=img.nextElementSibling; if(ph) ph.style.display='flex'; }
 }
@@ -2012,7 +2073,7 @@ function renderDeck(){
     if(c) perNama[c.nm] = (perNama[c.nm]||0) + q;
   });
   const lebih = Object.entries(perNama).filter(([,q])=>q > maxCopy())
-    .map(([nm,q])=>`${state.lang==='en' ? (DB.find(d=>d.nm===nm)||{}).nm_en || nm : nm} ×${q}`);
+    .map(([nm,q])=>`${cardName(DB.find(d=>d.nm===nm)||{nm})} ×${q}`);
   const masalah = [];
   if(dipakai.length > 2)
     masalah.push(`${t('ruleColors')} <b>${dipakai.length} ${t('ruleColors2')}</b> (${dipakai.map(x=>t(x)).join(', ')}) — ${t('ruleMax2')}`);
@@ -2049,7 +2110,7 @@ function renderDeck(){
     st.innerHTML = `
       <div><span>${t('avgLv')}</span><b>${(totLv/total).toFixed(2)}</b></div>
       <div><span>${t('avgPower')}</span><b>${Math.round(totPw/total)}</b></div>
-      <div><span>${t('totalPower')}</span><b>${totPw.toLocaleString(state.lang==='en'?'en-US':'id-ID')}</b></div>
+      <div><span>${t('totalPower')}</span><b>${totPw.toLocaleString('id-ID')}</b></div>
       <div><span>${t('ctrCall')}</span><b>${ctrCallQ}</b></div>
       <div><span>${t('ctrActi')}</span><b>${ctrActiQ}</b></div>
       <div title="${t('summonCostT')}"><span>${t('summonCost')}</span><b>${sumFreeQ} / ${sumPaidQ}</b></div>`;
@@ -2105,13 +2166,14 @@ $('#fRange').addEventListener('change', e=>{ state.range=e.target.value; renderC
 $('#fRarity').addEventListener('change', e=>{ state.rarity=e.target.value; renderCards(); });
 $('#fTrait').addEventListener('change', e=>{ state.trait=e.target.value; renderCards(); });
 $('#fKeyAbil').addEventListener('change', e=>{ state.keyAbil=e.target.value; renderCards(); });
-$('#btnLang').addEventListener('click', ()=>{
-  state.lang = state.lang === 'en' ? 'id' : 'en';
-  store.lang = state.lang;
+/* v6.45 — preferensi bahasa kartu: BUKAN filter yang menyempitkan hasil, jadi
+   sengaja tidak masuk hitungan updateFilterBadge(). Perlu renderDeck() juga
+   (bukan cuma renderCards()) karena panel deck ikut menampilkan nama kartu. */
+$('#fCardLang').addEventListener('change', e=>{
+  state.cardLang = e.target.value;
   persist();
-  applyLang();
+  renderCards(); renderDeck();
 });
-
 $('#btnOnlyDeck').addEventListener('click', ()=>{
   state.onlyDeck = !state.onlyDeck;
   $('#btnOnlyDeck').setAttribute('aria-pressed', String(state.onlyDeck));
@@ -2229,430 +2291,403 @@ $('#deckList').addEventListener('click', e=>{
    t('kunci') di JavaScript, atau data-i18n="kunci" pada elemen HTML statis. */
 const T = {
   /* --- navigasi & kepala halaman --- */
-  tagline:      ['Marvel Hero Rush TCG Deck Builder · 208 kartu (BP01 · PB01 · PR · SD01–SD04) · Ver. Indonesia',
-                 'Marvel Hero Rush TCG Deck Builder · 272 cards (BP01 · SD01–SD04 · SP01) · English Ver.'],
-  navCards:     ['Kartu','Cards'],
-  navCardsS:    ['Kartu','Cards'],
-  navBuild:     ['Deck Builder','Deck Builder'],
-  navBuildS:    ['Builder','Builder'],
-  navMeta:      ['Community Deck','Community Deck'],
-  navMetaS:     ['Community Deck','Community Deck'],
-  navTourney:   ['Tournaments Deck','Tournaments Deck'],
-  navTourneyS:  ['Tournaments Deck','Tournaments Deck'],
-  navLgs:       ['Weekly Rush LGS','Weekly Rush LGS'],
-  navLgsS:      ['Weekly Rush LGS','Weekly Rush LGS'],
-  navPanduan:   ['Panduan','Guide'],
-  navPanduanS:  ['Panduan','Guide'],
-  statUnique:   ['Total kartu','Total cards'],
-  statShown:    ['Ditampilkan','Showing'],
-  statDeck:     ['Deck','Deck'],
-  follow:       ['Follow @deteprtm','Follow @deteprtm'],
-  support:      ['Dukung','Support'],
-  supportNote:  ['MHR Deck Lab gratis dan tanpa iklan. Kalau alat ini membantu, dukungan sukarela membantu menutup biaya domain dan pengembangan.',
-                 'MHR Deck Lab is free and ad-free. If it helps you, a voluntary contribution helps cover domain and development costs.'],
-  dkTitle:      ['Dukung Kami','Support Us'],
-  dkAtasNama:   ['a.n.','on behalf of'],
-  dkCta:        ['Kirim Saran/Komentar','Send Suggestions/Comments'],
-  dkCtaSubjek:  ['Saran/Komentar MHR Deck Lab','MHR Deck Lab Suggestion/Comment'],
-  dkCtaBadan:   ['Tulis saran atau komentar Anda di sini:\n\n','Write your suggestion or comment here:\n\n'],
-  dkKosong:     ['Metode dukungan belum diisi.','Support methods are not configured yet.'],
+  /* v6.45 — jumlah kartu disamakan di kedua bahasa (288, semua seri) karena
+     cardVisible() tidak lagi menyembunyikan kartu berdasarkan bahasa aktif
+     (lihat catatan di cardVisible()). Kualifier "Ver. Indonesia"/"English Ver."
+     dihapus — sudah tidak akurat, keduanya sekarang menampilkan database yang
+     sama persis. */
+  tagline: 'Marvel Hero Rush TCG Deck Builder · 288 kartu (BP01 · PB01 · PR · SD01–SD04 · SP01)',
+  navCards: 'Kartu',
+  navCardsS: 'Kartu',
+  navBuild: 'Deck Builder',
+  navBuildS: 'Builder',
+  navMeta: 'Community Deck',
+  navMetaS: 'Community Deck',
+  navTourney: 'Tournaments Deck',
+  navTourneyS: 'Tournaments Deck',
+  navLgs: 'Weekly Rush LGS',
+  navLgsS: 'Weekly Rush LGS',
+  navPanduan: 'Panduan',
+  navPanduanS: 'Panduan',
+  statUnique: 'Total kartu',
+  statShown: 'Ditampilkan',
+  statDeck: 'Deck',
+  follow: 'Follow @deteprtm',
+  support: 'Dukung',
+  supportNote: 'MHR Deck Lab gratis dan tanpa iklan. Kalau alat ini membantu, dukungan sukarela membantu menutup biaya domain dan pengembangan.',
+  dkTitle: 'Dukung Kami',
+  dkAtasNama: 'a.n.',
+  dkCta: 'Kirim Saran/Komentar',
+  dkCtaSubjek: 'Saran/Komentar MHR Deck Lab',
+  dkCtaBadan: 'Tulis saran atau komentar Anda di sini:\n\n',
+  dkKosong: 'Metode dukungan belum diisi.',
 
   /* --- filter --- */
-  searchPh:     ['Cari nama, efek, atau trait…','Search name, effect, or trait…'],
-  allSeries:    ['Semua seri','All series'],
-  allLevel:     ['Semua level','All levels'],
-  allRange:     ['Semua jarak','All ranges'],
-  allTrait:     ['Semua trait','All traits'],
-  allRarity:    ['Semua rarity','All rarities'],
-  allKeyAbil:   ['Kemampuan kunci','Key ability'],
-  fKeyAbilT:    ['Filter kemampuan kunci (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE/UNIQUE — digabung satu dropdown karena masing-masing cuma 1-6 kartu',
-                 'Key ability filter (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE/UNIQUE — combined into one dropdown since each has only 1-6 cards'],
-  mk_block:        ['BLOCK','BLOCK'],
-  mk_doubleattack: ['DOUBLE ATTACK','DOUBLE ATTACK'],
-  mk_assault:      ['ASSAULT','ASSAULT'],
-  mk_airstrike:    ['AIR STRIKE','AIR STRIKE'],
-  mk_unique:       ['UNIQUE','UNIQUE'],
-  metaAll:      ['Semua','All'],
-  sortNo:       ['Urut: Nomor','Sort: Number'],
-  sortLv:       ['Urut: Level','Sort: Level'],
-  sortPw:       ['Urut: Power','Sort: Power'],
-  sortNm:       ['Urut: Nama','Sort: Name'],
-  viewList:     ['☰ Daftar','☰ List'],
-  viewGrid:     ['▦ Grid','▦ Grid'],
-  onlyDeck:     ['★ Di deck','★ In deck'],
-  onlyDeckT:    ['Tampilkan hanya kartu yang sudah masuk deck','Show only cards already in your deck'],
-  reset:        ['Reset','Reset'],
-  filterBtn:    ['⚙ Filter','⚙ Filter'],
-  mech:         ['Mekanik','Mechanics'],
-  mPrune:       ['Prune','Prune'],
-  mCounterCall: ['Counter call','Counter call'],
-  mCounterCallT:['Kartu ber-kemampuan [COUNTER] — dipanggil ke BATTLE saat jendela counter','Cards with the [COUNTER] ability — called into BATTLE during a counter window'],
-  mCounterActi: ['Counter efek','Counter effect'],
-  mCounterActiT:['Kartu ber-[COUNTER-ACTI] — efek diaktifkan dari HAND/FIELD/BACK/BATTLE saat jendela counter','Cards with [COUNTER-ACTI] — effect activated from HAND/FIELD/BACK/BATTLE during a counter window'],
-  mMove:        ['BATTLE-BASE move','BATTLE-BASE move'],
-  mAttach:      ['Pasang','Attach'],
-  mSet:         ['Kartu tertutup','Face-down cards'],
-  mRetreat:     ['Trigger RETREAT','RETREAT trigger'],
-  mDraw:        ['Tarik kartu','Draw cards'],
-  mDebuff:      ['Turunkan Power','Power reduction'],
-  matchCount:   ['kartu cocok dengan filter','cards match the filter'],
-  noMatch:      ['Tidak ada kartu yang cocok. Coba longgarkan filter.','No cards match. Try relaxing the filter.'],
-  levelLbl:     ['Level','Level'],
-  simLvSpread:  ['Sebaran level','Level spread'],
-  lbPrev:       ['Kartu sebelumnya','Previous card'],
-  lbNext:       ['Kartu berikutnya','Next card'],
-  lbRelated:    ['Kartu terkait','Related cards'],
-  rangeLbl:     ['Jarak','Range'],
+  searchPh: 'Cari nama, efek, atau trait…',
+  allSeries: 'Semua seri',
+  allLevel: 'Semua level',
+  allRange: 'Semua jarak',
+  allTrait: 'Semua trait',
+  allRarity: 'Semua rarity',
+  allKeyAbil: 'Kemampuan kunci',
+  fKeyAbilT: 'Filter kemampuan kunci (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE/UNIQUE — digabung satu dropdown karena masing-masing cuma 1-6 kartu',
+  mk_block: 'BLOCK',
+  mk_doubleattack: 'DOUBLE ATTACK',
+  mk_assault: 'ASSAULT',
+  mk_airstrike: 'AIR STRIKE',
+  mk_unique: 'UNIQUE',
+  /* v6.45 — filter/preferensi bahasa teks kartu (state.cardLang), lihat
+     cardLangInfo(). Terpisah dari filter lain: tidak menyembunyikan kartu,
+     cuma menentukan bahasa nama/efek/gambar yang ditampilkan. */
+  fCardLangT: 'Bahasa nama & efek kartu yang ditampilkan. Kalau kartu tertentu belum punya salah satu bahasa, otomatis tampil pakai yang tersedia.',
+  cardLangIdOpt: '🇮🇩 Kartu: Indonesia',
+  cardLangEnOpt: '🇬🇧 Kartu: Inggris',
+  langBothTip: 'Tersedia dalam Bahasa Indonesia & Inggris',
+  langBothFanTip: 'Teks Indonesia kartu ini masih terjemahan fan-made (BELUM resmi dari MHR Indonesia/CARDFUN) — teks Inggrisnya resmi.',
+  langFanNote: '⚠ Teks Indonesia di atas masih terjemahan fan-made, belum resmi dari MHR Indonesia/CARDFUN.',
+  langEnOnlyTip: 'Kartu ini baru tersedia dalam Bahasa Inggris',
+  langIdOnlyTip: 'Kartu ini baru tersedia dalam Bahasa Indonesia',
+  metaAll: 'Semua',
+  sortNo: 'Urut: Nomor',
+  sortLv: 'Urut: Level',
+  sortPw: 'Urut: Power',
+  sortNm: 'Urut: Nama',
+  viewList: '☰ Daftar',
+  viewGrid: '▦ Grid',
+  onlyDeck: '★ Di deck',
+  onlyDeckT: 'Tampilkan hanya kartu yang sudah masuk deck',
+  reset: 'Reset',
+  filterBtn: '⚙ Filter',
+  mech: 'Mekanik',
+  mPrune: 'Prune',
+  mCounterCall: 'Counter call',
+  mCounterCallT: 'Kartu ber-kemampuan [COUNTER] — dipanggil ke BATTLE saat jendela counter',
+  mCounterActi: 'Counter efek',
+  mCounterActiT: 'Kartu ber-[COUNTER-ACTI] — efek diaktifkan dari HAND/FIELD/BACK/BATTLE saat jendela counter',
+  mMove: 'BATTLE-BASE move',
+  mAttach: 'Pasang',
+  mSet: 'Kartu tertutup',
+  mRetreat: 'Trigger RETREAT',
+  mDraw: 'Tarik kartu',
+  mDebuff: 'Turunkan Power',
+  matchCount: 'kartu cocok dengan filter',
+  noMatch: 'Tidak ada kartu yang cocok. Coba longgarkan filter.',
+  levelLbl: 'Level',
+  simLvSpread: 'Sebaran level',
+  lbPrev: 'Kartu sebelumnya',
+  lbNext: 'Kartu berikutnya',
+  lbRelated: 'Kartu terkait',
+  rangeLbl: 'Jarak',
 
   /* --- kartu --- */
-  cLv:          ['Lv','Lv'],
-  cRange:       ['Jarak','Range'],
-  cPower:       ['Power','Power'],
-  cColor:       ['Warna','Color'],
-  cAdd:         ['+ Deck','+ Deck'],
-  cFull:        ['Kuota penuh','Quota full'],
-  cShare:       ['Bagikan kartu ini','Share this card'],
-  cSameName:    ['Nama sama dicetak ulang di seri lain — kuota salinan digabung',
-                 'Same name reprinted in another set — copy quota is shared'],
-  cOfficial:    ['lihat kartu di situs resmi ↗','view on official site ↗'],
-  cAttack:      ['Jarak serangan','Attack range'],
-  cFight:       ['Kekuatan bertarung','Fighting power'],
-  cAddDeck:     ['+ Tambah ke deck','+ Add to deck'],
-  errata:       ['Errata','Errata'],
-  errataTip:    ['Teks efek kartu ini pernah direvisi resmi oleh tim MHR Indonesia (Errata {v}).',
-                 "This card's effect text was officially revised by the MHR Indonesia team (Errata {v})."],
-  ctrCall:      ['Counter call','Counter call'],
-  ctrActi:      ['Counter efek','Counter effect'],
-  summonCost:   ['Biaya Summon (gratis/bayar)','Summon cost (free/paid)'],
-  summonCostT:  ['Lv1-3 = Summon langsung, gratis. Lv4+ = harus RETREAT kartu di FIELD yang total Level-nya sama (301.19)',
-                 'Lv1-3 = summon directly, free. Lv4+ = must RETREAT cards in FIELD with matching total Level (301.19)'],
-  ctrFree:      ['gratis','free'],
-  ctrPay:       ['bayar','pay'],
-  ctrFrom:      ['dari','from'],
-  ctrCallTip:   ['Kemampuan [COUNTER]: bisa dipanggil ke BATTLE saat jendela counter (COUNTER STEP/PHASE), maks. 1× per pemain per jendela. Lv1–3 gratis, Lv4+ perlu RETREAT kartu di FIELD dengan total Lv yang sama.',
-                 '[COUNTER] ability: can be called into BATTLE during a counter window (COUNTER STEP/PHASE), max. 1× per player per window. Lv1–3 are free, Lv4+ require RETREAT of FIELD cards with matching total Lv.'],
-  ctrActiTip:   ['Kemampuan [COUNTER-ACTI]: efeknya diaktifkan langsung dari zona ini saat jendela counter, bukan dipanggil sebagai karakter baru ke BATTLE.',
-                 '[COUNTER-ACTI] ability: the effect activates directly from this zone during a counter window, instead of calling a new character into BATTLE.'],
-  cNow:         ['kini','now'],
-  cArtwork:     ['Versi artwork','Artwork version'],
-  cMain:        ['utama','main'],
-  cChecking:    ['Memeriksa gambar…','Checking image…'],
-  cUseMain:     ['Memakai versi utama.','Using the main version.'],
-  cClose:       ['✕ Tutup','✕ Close'],
+  cLv: 'Lv',
+  cRange: 'Jarak',
+  cPower: 'Power',
+  cColor: 'Warna',
+  cAdd: '+ Deck',
+  cFull: 'Kuota penuh',
+  cShare: 'Bagikan kartu ini',
+  cSameName: 'Nama sama dicetak ulang di seri lain — kuota salinan digabung',
+  cOfficial: 'lihat kartu di situs resmi ↗',
+  cAttack: 'Jarak serangan',
+  cFight: 'Kekuatan bertarung',
+  cAddDeck: '+ Tambah ke deck',
+  errata: 'Errata',
+  errataTip: 'Teks efek kartu ini pernah direvisi resmi oleh tim MHR Indonesia (Errata {v}).',
+  ctrCall: 'Counter call',
+  ctrActi: 'Counter efek',
+  summonCost: 'Biaya Summon (gratis/bayar)',
+  summonCostT: 'Lv1-3 = Summon langsung, gratis. Lv4+ = harus RETREAT kartu di FIELD yang total Level-nya sama (301.19)',
+  ctrFree: 'gratis',
+  ctrPay: 'bayar',
+  ctrFrom: 'dari',
+  ctrCallTip: 'Kemampuan [COUNTER]: bisa dipanggil ke BATTLE saat jendela counter (COUNTER STEP/PHASE), maks. 1× per pemain per jendela. Lv1–3 gratis, Lv4+ perlu RETREAT kartu di FIELD dengan total Lv yang sama.',
+  ctrActiTip: 'Kemampuan [COUNTER-ACTI]: efeknya diaktifkan langsung dari zona ini saat jendela counter, bukan dipanggil sebagai karakter baru ke BATTLE.',
+  cNow: 'kini',
+  cArtwork: 'Versi artwork',
+  cMain: 'utama',
+  cChecking: 'Memeriksa gambar…',
+  cUseMain: 'Memakai versi utama.',
+  cClose: '✕ Tutup',
 
   /* --- warna --- */
-  Merah:        ['Merah','Red'],
-  Kuning:       ['Kuning','Yellow'],
-  Biru:         ['Biru','Blue'],
-  Hijau:        ['Hijau','Green'],
-  Orange:       ['Orange','Orange'],
-  Purple:       ['Purple','Purple'],
+  Merah: 'Merah',
+  Kuning: 'Kuning',
+  Biru: 'Biru',
+  Hijau: 'Hijau',
+  Orange: 'Orange',
+  Purple: 'Purple',
 
   /* --- panel deck --- */
-  myDeck:       ['Deck Saya','My Deck'],
-  cards:        ['kartu','cards'],
-  onTarget:     ['pas dengan target','matches target'],
-  short:        ['kurang','short by'],
-  over:         ['lebih','over by'],
-  targetSize:   ['Target ukuran deck','Target deck size'],
-  maxCopies:    ['Maks. salinan per kartu','Max copies per card'],
-  statistics:   ['Statistik','Statistics'],
-  avgLv:        ['Rata-rata Lv','Average Lv'],
-  avgPower:     ['Rata-rata Power','Average Power'],
-  totalPower:   ['Total Power','Total Power'],
-  levelCurve:   ['Kurva level','Level curve'],
-  colorComp:    ['Komposisi warna','Color composition'],
-  rangeSpread:  ['Sebaran jarak serangan (R)','Attack range spread (R)'],
-  topTraits:    ['Trait terbanyak','Most common traits'],
-  cardList:     ['Daftar kartu','Card list'],
-  deckEmpty:    ['Deck masih kosong.','Your deck is empty.'],
-  deckEmptyHint:['Klik <b>+ Deck</b> pada kartu untuk menambahkan.','Click <b>+ Deck</b> on a card to add it.'],
-  ruleColors:   ['Deck memakai','Deck uses'],
-  ruleColors2:  ['warna','colors'],
-  ruleMax2:     ['maksimal 2 warna.','maximum 2 colors.'],
-  ruleCopies:   ['Ada nama karakter yang melebihi','Some character names exceed'],
-  ruleCopies2:  ['salinan — batas dihitung per nama karakter:','copies — the limit counts per character name:'],
-  ruleOver:     ['Jumlah kartu melebihi target','Card count exceeds target'],
-  ruleOk:       ['Deck sah:','Deck is valid:'],
-  ruleOkColors: ['warna','colors'],
-  rulePartial:  ['Aturan warna & salinan terpenuhi','Color and copy rules met'],
-  ruleStillNeed:['Masih kurang','Still need'],
-  simBtn:       ['🎴 Simulasi draw 6 kartu','🎴 Simulate opening 6 cards'],
-  viewDeckBtn:  ['🖼 Lihat deck — tampilan untuk dibagikan','🖼 View deck — shareable layout'],
-  copyLink:     ['🔗 Salin link deck','🔗 Copy deck link'],
-  copyTable:    ['Salin tabel','Copy table'],
-  impBtn:       ['📋 Impor dari teks','📋 Import from text'],
-  impPh:        ['Tempel di sini: hasil "Salin tabel", daftar kode kartu (mis. 3x BP01-004), atau link/kode deck yang dibagikan…',
-                 'Paste here: "Salin tabel" output, a list of card codes (e.g. 3x BP01-004), or a shared deck link/code…'],
-  impApply:     ['Proses teks ini','Process this text'],
-  impCancel:    ['Batal','Cancel'],
-  impNone:      ['Tidak ada kartu yang dikenali dari teks ini. Pastikan kode kartu seperti BP01-004 ikut tertulis.',
-                 'No cards were recognized in this text. Make sure card codes like BP01-004 are included.'],
-  impFromLink:  ['Terdeteksi sebagai kode/link deck yang dibagikan.','Detected as a shared deck link/code.'],
-  impReplace:   ['Ganti deck aktif','Replace active deck'],
-  impMerge:     ['Tambahkan ke deck aktif','Add to active deck'],
+  myDeck: 'Deck Saya',
+  cards: 'kartu',
+  onTarget: 'pas dengan target',
+  short: 'kurang',
+  over: 'lebih',
+  targetSize: 'Target ukuran deck',
+  maxCopies: 'Maks. salinan per kartu',
+  statistics: 'Statistik',
+  avgLv: 'Rata-rata Lv',
+  avgPower: 'Rata-rata Power',
+  totalPower: 'Total Power',
+  levelCurve: 'Kurva level',
+  colorComp: 'Komposisi warna',
+  rangeSpread: 'Sebaran jarak serangan (R)',
+  topTraits: 'Trait terbanyak',
+  cardList: 'Daftar kartu',
+  deckEmpty: 'Deck masih kosong.',
+  deckEmptyHint: 'Klik <b>+ Deck</b> pada kartu untuk menambahkan.',
+  ruleColors: 'Deck memakai',
+  ruleColors2: 'warna',
+  ruleMax2: 'maksimal 2 warna.',
+  ruleCopies: 'Ada nama karakter yang melebihi',
+  ruleCopies2: 'salinan — batas dihitung per nama karakter:',
+  ruleOver: 'Jumlah kartu melebihi target',
+  ruleOk: 'Deck sah:',
+  ruleOkColors: 'warna',
+  rulePartial: 'Aturan warna & salinan terpenuhi',
+  ruleStillNeed: 'Masih kurang',
+  simBtn: '🎴 Simulasi draw 6 kartu',
+  viewDeckBtn: '🖼 Lihat deck — tampilan untuk dibagikan',
+  copyLink: '🔗 Salin link deck',
+  copyTable: 'Salin tabel',
+  impBtn: '📋 Impor dari teks',
+  impPh: 'Tempel di sini: hasil "Salin tabel", daftar kode kartu (mis. 3x BP01-004), atau link/kode deck yang dibagikan…',
+  impApply: 'Proses teks ini',
+  impCancel: 'Batal',
+  impNone: 'Tidak ada kartu yang dikenali dari teks ini. Pastikan kode kartu seperti BP01-004 ikut tertulis.',
+  impFromLink: 'Terdeteksi sebagai kode/link deck yang dibagikan.',
+  impReplace: 'Ganti deck aktif',
+  impMerge: 'Tambahkan ke deck aktif',
   /* --- halaman & panel (v6.2) --- */
-  metaTitle:    ['MHR Deck Lab — Marvel Hero Rush Deck Builder',
-                 'MHR Deck Lab — Marvel Hero Rush Deck Builder (English)'],
-  metaDesc:     ['Deck builder Marvel Hero Rush TCG: 208 kartu lengkap dengan gambar, stat, dan teks efek bahasa Indonesia. Susun deck, bagikan sebagai link atau gambar.',
-                 'Marvel Hero Rush TCG deck builder: 192 cards with official English names, effects, and artwork. Build decks, share them as a link or an image, and export a printable decklist.'],
-  metaHead:     ['Community Deck','Community Deck'],
-  metaIntro:    ['Deck yang sedang banyak dipakai di komunitas MHR Indonesia. Muat salah satunya ke Deck Builder untuk dilihat isinya atau dimodifikasi — deck yang sedang Anda susun tidak tertimpa.',
-                 'Decks that are seeing a lot of play in the Indonesian MHR community. Load one into Deck Builder to inspect or modify it — the deck you are currently building is never overwritten.'],
-  metaLoad:     ['Muat ke Deck Builder','Load into Deck Builder'],
-  metaView:     ['Lihat visual','View cards'],
-  metaNone:     ['Belum ada deck komunitas yang cocok dengan filter ini.','No community deck matches this filter yet.'],
-  metaAvgLv:    ['rata-rata Lv','average Lv'],
+  metaTitle: 'MHR Deck Lab — Marvel Hero Rush Deck Builder',
+  metaDesc: 'Deck builder Marvel Hero Rush TCG: 288 kartu lengkap dengan gambar, stat, dan teks efek — tersedia dalam Bahasa Indonesia dan Inggris. Susun deck, bagikan sebagai link atau gambar.',
+  metaHead: 'Community Deck',
+  metaIntro: 'Deck yang sedang banyak dipakai di komunitas MHR Indonesia. Muat salah satunya ke Deck Builder untuk dilihat isinya atau dimodifikasi — deck yang sedang Anda susun tidak tertimpa.',
+  metaLoad: 'Muat ke Deck Builder',
+  metaView: 'Lihat visual',
+  metaNone: 'Belum ada deck komunitas yang cocok dengan filter ini.',
+  metaAvgLv: 'rata-rata Lv',
 
   /* --- v6.36: galeri publik "Dari Pengguna" (Phase 3) --- */
-  pubHead:      ['🌐 Dari Pengguna','🌐 From Players'],
-  pubSub:       ['Dipublikasikan langsung oleh pemain lewat akun mereka masing-masing.',
-                 'Published straight from players’ own accounts.'],
-  curatedHead:  ['⭐ Pilihan Pemilik','⭐ Owner’s Picks'],
-  pubNone:      ['Belum ada deck yang dipublikasikan pengguna.','No player has published a deck yet.'],
-  pubListErr:   ['Gagal memuat galeri publik.','Couldn’t load the public gallery.'],
-  pubPublishBtn:   ['🌐 Publikasikan','🌐 Publish'],
-  pubUnpublishBtn: ['Batalkan publikasi','Unpublish'],
-  pubPlaystylePrompt: ['Catatan gaya bermain untuk ditampilkan di galeri publik (opsional, boleh dikosongkan):',
-                       'Playstyle notes to show in the public gallery (optional, leave blank to skip):'],
-  pubPublishOk:    ['Dipublikasikan ke Community Deck.','Published to Community Deck.'],
-  pubUnpublishOk:  ['Publikasi dibatalkan.','Unpublished.'],
-  pubErr:          ['Gagal memperbarui status publikasi. Coba lagi.','Couldn’t update publish status. Please try again.'],
-  pubModHide:      ['Sembunyikan','Hide'],
-  pubModDelete:    ['Hapus','Delete'],
-  pubModConfirmHide: ['Sembunyikan deck ini dari galeri publik? Pemiliknya masih menyimpannya di akun, cuma tidak tampil lagi di sini.',
-                      'Hide this deck from the public gallery? The owner still has it in their account — it just stops showing up here.'],
-  pubModConfirmDelete: ['Hapus deck ini secara permanen (termasuk dari akun pemiliknya)? Tindakan ini tidak bisa dibatalkan.',
-                        'Permanently delete this deck (including from the owner’s account)? This cannot be undone.'],
-  pubModErr:       ['Gagal menjalankan tindakan moderasi.','Couldn’t complete the moderation action.'],
-  lgsHead:      ['Hero Base','Hero Base'],
+  pubHead: '🌐 Dari Pengguna',
+  pubSub: 'Dipublikasikan langsung oleh pemain lewat akun mereka masing-masing.',
+  curatedHead: '⭐ Pilihan Pemilik',
+  pubNone: 'Belum ada deck yang dipublikasikan pengguna.',
+  pubListErr: 'Gagal memuat galeri publik.',
+  pubPublishBtn: '🌐 Publikasikan',
+  pubUnpublishBtn: 'Batalkan publikasi',
+  pubPlaystylePrompt: 'Catatan gaya bermain untuk ditampilkan di galeri publik (opsional, boleh dikosongkan):',
+  pubPublishOk: 'Dipublikasikan ke Community Deck.',
+  pubUnpublishOk: 'Publikasi dibatalkan.',
+  pubErr: 'Gagal memperbarui status publikasi. Coba lagi.',
+  pubModHide: 'Sembunyikan',
+  pubModDelete: 'Hapus',
+  pubModConfirmHide: 'Sembunyikan deck ini dari galeri publik? Pemiliknya masih menyimpannya di akun, cuma tidak tampil lagi di sini.',
+  pubModConfirmDelete: 'Hapus deck ini secara permanen (termasuk dari akun pemiliknya)? Tindakan ini tidak bisa dibatalkan.',
+  pubModErr: 'Gagal menjalankan tindakan moderasi.',
+  lgsHead: 'Hero Base',
   /* v6.26: halaman Tournaments Deck — deck Top-N dari turnamen resmi Marvel Hero Rush
      (nama tab & judul halaman diganti dari "Tournaments" jadi "Tournaments Deck" di v6.42) */
-  tourneyHead:  ['Tournaments Deck','Tournaments Deck'],
-  tourneyIntro: ['Deck-deck dari babak Top di turnamen resmi Marvel Hero Rush. Muat salah satunya ke Deck Builder untuk dilihat isinya — deck yang sedang Anda susun tidak tertimpa.',
-                 'Decks from the Top placements of official Marvel Hero Rush tournaments. Load one into Deck Builder to inspect it — the deck you are currently building is never overwritten.'],
-  tourneyNone:  ['Belum ada data turnamen.','No tournament data yet.'],
-  tourneySrc:   ['Sumber','Source'],
+  tourneyHead: 'Tournaments Deck',
+  tourneyIntro: 'Deck-deck dari babak Top di turnamen resmi Marvel Hero Rush. Muat salah satunya ke Deck Builder untuk dilihat isinya — deck yang sedang Anda susun tidak tertimpa.',
+  tourneyNone: 'Belum ada data turnamen.',
+  tourneySrc: 'Sumber',
   /* v6.27: analisis kartu paling sering dipakai (dihitung otomatis dari deck.top) */
-  tourneyUsageHead: ['📊 Kartu paling sering dipakai','📊 Most frequently used cards'],
-  tourneyUsageSub:  ['Dihitung otomatis dari deck-deck Top di atas — persentase menunjukkan berapa deck yang memakai kartu ini.',
-                      'Calculated automatically from the Top decks above — the percentage shows how many decks played this card.'],
-  tourneyUsageDeck: ['deck','decks'],
-  tourneyUsageCopy: ['salinan','copies'],
-  close:        ['✕ Tutup','✕ Close'],
+  tourneyUsageHead: '📊 Kartu paling sering dipakai',
+  tourneyUsageSub: 'Dihitung otomatis dari deck-deck Top di atas — persentase menunjukkan berapa deck yang memakai kartu ini.',
+  tourneyUsageDeck: 'deck',
+  tourneyUsageCopy: 'salinan',
+  close: '✕ Tutup',
   /* --- simulasi draw --- */
-  simHead:      ['Simulasi Draw Awal','Opening Draw Simulator'],
-  simSub:       ['Mensimulasikan 6 kartu pembuka dari deck yang sedang Anda susun. Aturan mulligan: kartu yang ditukar dikembalikan ke <b>bawah</b> deck, lalu diambil kartu baru sejumlah yang sama dari <b>atas</b> deck, kemudian deck dikocok ulang.<br><span style="color:#C9CFD8">Catatan: di permainan resmi mulligan hanya boleh dilakukan <b>satu kali</b>. Di simulator ini sengaja dibebaskan berulang kali agar Anda bisa mencoba banyak kemungkinan pembukaan dari deck yang sama.</span>',
-                 'Simulates the opening 6 cards from the deck you are building. Mulligan rule: the cards you swap go to the <b>bottom</b> of the deck, you draw the same number from the <b>top</b>, then the deck is shuffled again.<br><span style="color:#C9CFD8">Note: in official play a mulligan is allowed <b>only once</b>. This simulator deliberately lets you repeat it so you can explore many possible openings from the same deck.</span>'],
-  simDraw:      ['🔀 Kocok & ambil 6 kartu','🔀 Shuffle & draw 6'],
-  simMull:      ['♻ Mulligan','♻ Mulligan'],
-  simMullN:     ['♻ Mulligan','♻ Mulligan'],
-  simHint:      ['Klik kartu untuk menandainya akan ditukar. Klik nama kartu di daftar bawah untuk melihat detailnya.',
-                 'Click a card to mark it for swapping. Click a card name in the list below to see its details.'],
-  simHandSec:   ['Isi tangan saat ini','Current hand'],
-  simOddsSec:   ['Peluang muncul di 6 kartu pembuka','Chance of appearing in the opening 6'],
-  simEmptyDeck: ['Deck masih kosong — tambahkan kartu dulu di Deck Builder.','Your deck is empty — add cards in Deck Builder first.'],
-  simTooFew:    ['Deck hanya berisi','The deck holds only'],
-  simTooFew2:   ['kartu, kurang dari 6.','cards, fewer than 6.'],
-  simOffTarget: ['belum sesuai target','does not match the target of'],
-  simOffTarget2:['Peluang di bawah dihitung dari','The odds below are based on the'],
-  simOffTarget3:['kartu yang ada sekarang.','cards currently in the deck.'],
-  simNoCards:   ['Belum ada kartu. Tekan tombol kocok di atas.','No cards yet. Press the shuffle button above.'],
-  simMullDone:  ['kali mulligan','mulligans so far'],
+  simHead: 'Simulasi Draw Awal',
+  simSub: 'Mensimulasikan 6 kartu pembuka dari deck yang sedang Anda susun. Aturan mulligan: kartu yang ditukar dikembalikan ke <b>bawah</b> deck, lalu diambil kartu baru sejumlah yang sama dari <b>atas</b> deck, kemudian deck dikocok ulang.<br><span style="color:#C9CFD8">Catatan: di permainan resmi mulligan hanya boleh dilakukan <b>satu kali</b>. Di simulator ini sengaja dibebaskan berulang kali agar Anda bisa mencoba banyak kemungkinan pembukaan dari deck yang sama.</span>',
+  simDraw: '🔀 Kocok & ambil 6 kartu',
+  simMull: '♻ Mulligan',
+  simMullN: '♻ Mulligan',
+  simHint: 'Klik kartu untuk menandainya akan ditukar. Klik nama kartu di daftar bawah untuk melihat detailnya.',
+  simHandSec: 'Isi tangan saat ini',
+  simOddsSec: 'Peluang muncul di 6 kartu pembuka',
+  simEmptyDeck: 'Deck masih kosong — tambahkan kartu dulu di Deck Builder.',
+  simTooFew: 'Deck hanya berisi',
+  simTooFew2: 'kartu, kurang dari 6.',
+  simOffTarget: 'belum sesuai target',
+  simOffTarget2: 'Peluang di bawah dihitung dari',
+  simOffTarget3: 'kartu yang ada sekarang.',
+  simNoCards: 'Belum ada kartu. Tekan tombol kocok di atas.',
+  simMullDone: 'kali mulligan',
   /* --- layar lihat deck & ekspor --- */
-  hdTitle:      ['Resolusi gambar hasil unduhan','Resolution of the downloaded image'],
-  hdAuto:       ['Resolusi: Otomatis','Resolution: Automatic'],
-  hd1:          ['1× (resolusi asli kartu)','1× (native card resolution)'],
-  hd3:          ['3× (file sangat besar)','3× (very large file)'],
-  hdBtn:        ['⬇ Unduh HD','⬇ Download HD'],
-  pngBtn:       ['⬇ PNG biasa','⬇ Plain PNG'],
-  dvTip:        ['💡 Untuk hasil paling tajam: gunakan <b>Unduh HD</b>, lalu kirim di WhatsApp <b>sebagai Dokumen</b> (ikon 📎 → Document), bukan sebagai foto — kalau dikirim sebagai foto, WhatsApp akan mengompres ulang gambarnya.',
-                 '💡 For the sharpest result: use <b>Download HD</b>, then send it on WhatsApp <b>as a Document</b> (📎 → Document) rather than as a photo — sent as a photo, WhatsApp re-compresses the image.'],
-  hdLoading:    ['Memuat…','Loading…'],
-  hdBuilding:   ['Menyusun…','Building…'],
-  hdClamped:    ['Resolusi diturunkan otomatis karena jumlah kartu pada skala yang dipilih melebihi batas kemampuan browser ini.',
-                 'The resolution was reduced automatically because this many cards at the chosen scale exceeds what this browser can handle.'],
-  hdClampIOS:   ['iPhone/iPad lebih terbatas.','iPhone and iPad are more limited.'],
-  hdClampTip:   ['Untuk hasil lebih tajam: bagi deck jadi beberapa gambar, atau unduh dari laptop.',
-                 'For a sharper result, split the deck across several images or download from a laptop.'],
-  hdFail:       ['Gagal membuat gambar.','Could not create the image.'],
+  hdTitle: 'Resolusi gambar hasil unduhan',
+  hdAuto: 'Resolusi: Otomatis',
+  hd1: '1× (resolusi asli kartu)',
+  hd3: '3× (file sangat besar)',
+  hdBtn: '⬇ Unduh HD',
+  pngBtn: '⬇ PNG biasa',
+  dvTip: '💡 Untuk hasil paling tajam: gunakan <b>Unduh HD</b>, lalu kirim di WhatsApp <b>sebagai Dokumen</b> (ikon 📎 → Document), bukan sebagai foto — kalau dikirim sebagai foto, WhatsApp akan mengompres ulang gambarnya.',
+  hdLoading: 'Memuat…',
+  hdBuilding: 'Menyusun…',
+  hdClamped: 'Resolusi diturunkan otomatis karena jumlah kartu pada skala yang dipilih melebihi batas kemampuan browser ini.',
+  hdClampIOS: 'iPhone/iPad lebih terbatas.',
+  hdClampTip: 'Untuk hasil lebih tajam: bagi deck jadi beberapa gambar, atau unduh dari laptop.',
+  hdFail: 'Gagal membuat gambar.',
   /* --- varian artwork --- */
-  artUsed:      ['dipakai untuk kartu ini di seluruh halaman, termasuk tampilan dan unduhan deck.',
-                 'is used for this card everywhere, including the deck view and downloads.'],
-  artMissing:   ['belum tersedia di koleksi','is not available in the collection yet'],
-  artVersion:   ['Versi','Version'],
+  artUsed: 'dipakai untuk kartu ini di seluruh halaman, termasuk tampilan dan unduhan deck.',
+  artMissing: 'belum tersedia di koleksi',
+  artVersion: 'Versi',
   /* --- link deck dibagikan --- */
-  shShared:     ['Ada deck yang dibagikan:','Someone shared a deck:'],
-  shUnknown:    ['kartu tidak dikenali dan dilewati','cards were not recognised and were skipped'],
-  impFound:     ['{n} kartu dikenali dari teks ini.','{n} cards recognized from this text.'],
-  impUnknown:   [' {n} kode diabaikan (tidak cocok kartu manapun).',' {n} codes ignored (matched no card).'],
-  shSave:       ['Simpan sebagai deck saya','Save as my deck'],
-  shView:       ['Lihat saja','Just view it'],
-  copyManual:   ['Salin manual dari kotak ↓','Copy manually from the box ↓'],
+  shShared: 'Ada deck yang dibagikan:',
+  shUnknown: 'kartu tidak dikenali dan dilewati',
+  impFound: '{n} kartu dikenali dari teks ini.',
+  impUnknown: ' {n} kode diabaikan (tidak cocok kartu manapun).',
+  shSave: 'Simpan sebagai deck saya',
+  shView: 'Lihat saja',
+  copyManual: 'Salin manual dari kotak ↓',
   /* --- footer --- */
-  footBy:       ['Dibuat oleh','Made by'],
-  footFollow:   ['— follow untuk update deck, tips, dan pembahasan Marvel Hero Rush.',
-                 '— follow for deck updates, tips, and Marvel Hero Rush discussion.'],
-  footDisc:     ['MHR Deck Lab adalah alat bantu buatan penggemar (fan-made) dan <b>tidak berafiliasi dengan atau disponsori oleh Marvel maupun penerbit Marvel Hero Rush</b>. Seluruh nama kartu, teks efek, serta merek dagang terkait adalah milik pemegang haknya masing-masing. Data kartu dirujuk dari <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>. Alat ini akan diturunkan apabila diminta oleh pemegang hak.',
-                 'MHR Deck Lab is a fan-made tool and is <b>not affiliated with or sponsored by Marvel or the publisher of Marvel Hero Rush</b>. All card names, effect text, and related trademarks belong to their respective owners. Card data is referenced from the <a href="https://www.marvelherorush.com/en/cards" target="_blank" rel="noopener">official marvelherorush.com database</a>. This tool will be taken down at the rights holder\'s request.'],
+  footBy: 'Dibuat oleh',
+  footFollow: '— follow untuk update deck, tips, dan pembahasan Marvel Hero Rush.',
+  footDisc: 'MHR Deck Lab adalah alat bantu buatan penggemar (fan-made) dan <b>tidak berafiliasi dengan atau disponsori oleh Marvel maupun penerbit Marvel Hero Rush</b>. Seluruh nama kartu, teks efek, serta merek dagang terkait adalah milik pemegang haknya masing-masing. Data kartu dirujuk dari <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>. Alat ini akan diturunkan apabila diminta oleh pemegang hak.',
   /* --- lembar decklist PDF (teks) --- */
-  dlBtn:        ['📄 Decklist PDF','📄 Decklist PDF'],
-  dlBusy:       ['Menyusun…','Building…'],
-  dlCode:       ['Kode Deck','Deck Code'],
-  dlPlayer:     ['Data Pemain — silakan diisi dengan tulisan tangan',
-                 'Player Details — please fill in by hand'],
-  dlPName:      ['Nama Pemain','Player Name'],
-  dlPContact:   ['Kontak / WhatsApp','Contact / WhatsApp'],
-  dlPEvent:     ['Nama Event','Event Name'],
-  dlPDate:      ['Tanggal','Date'],
-  dlPStore:     ['LGS / Tempat','Store / Venue'],
-  dlPSign:      ['Tanda Tangan','Signature'],
-  dlSeries:     ['SERI','SET'],
-  dlSub:        ['Subtotal','Subtotal'],
-  dlTargetOk:   ['sesuai target','matches target'],
-  dlTargetNo:   ['belum sesuai target','does not match target'],
-  dlPage:       ['hal.','page'],
-  dlNoLib:      ['Library pembuat PDF gagal dimuat — butuh koneksi internet. Coba lagi setelah tersambung.',
-                 'The PDF library failed to load — an internet connection is required. Please try again once connected.'],
-  tblDeck:      ['Deck','Deck'],
-  tblTotal:     ['Total','Total'],
-  tblAvgLv:     ['Rata-rata Lv','Average Lv'],
-  tblQty:       ['JML','QTY'],
-  tblNo:        ['NOMOR','NUMBER'],
-  tblLv:        ['LV','LV'],
-  tblName:      ['NAMA KARTU','CARD NAME'],
-  tblMade:      ['Dibuat dengan MHR Deck Lab','Made with MHR Deck Lab'],
-  clearDeck:    ['Kosongkan','Clear'],
-  linkCopied:   ['✓ Link tersalin','✓ Link copied'],
-  copied:       ['Tersalin ✓','Copied ✓'],
-  newDeck:      ['Buat deck baru','New deck'],
-  dupDeck:      ['Duplikat deck ini','Duplicate this deck'],
-  dupSuffix:    ['(salinan)','(copy)'],
-  renDeck:      ['Ganti nama deck ini','Rename this deck'],
-  delDeck:      ['Hapus deck ini','Delete this deck'],
-  pickDeck:     ['Pilih deck','Select deck'],
-  savedAuto:    ['✓ tersimpan otomatis','✓ saved automatically'],
-  panelNote:    ['Catatan: target ukuran deck dan batas salinan bisa disesuaikan dengan aturan resmi turnamen yang berlaku. Data kartu bersumber dari database resmi marvelherorush.com. Deck tersimpan otomatis di browser perangkat ini (localStorage) — aman ditutup dan dibuka kembali.',
-                 'Note: target deck size and copy limit can be adjusted to match the tournament rules in effect. Card data comes from the official marvelherorush.com database. Decks are saved automatically in this device\'s browser (localStorage) — safe to close and reopen.'],
+  dlBtn: '📄 Decklist PDF',
+  dlBusy: 'Menyusun…',
+  dlCode: 'Kode Deck',
+  dlPlayer: 'Data Pemain — silakan diisi dengan tulisan tangan',
+  dlPName: 'Nama Pemain',
+  dlPContact: 'Kontak / WhatsApp',
+  dlPEvent: 'Nama Event',
+  dlPDate: 'Tanggal',
+  dlPStore: 'LGS / Tempat',
+  dlPSign: 'Tanda Tangan',
+  dlSeries: 'SERI',
+  dlSub: 'Subtotal',
+  dlTargetOk: 'sesuai target',
+  dlTargetNo: 'belum sesuai target',
+  dlPage: 'hal.',
+  dlNoLib: 'Library pembuat PDF gagal dimuat — butuh koneksi internet. Coba lagi setelah tersambung.',
+  tblDeck: 'Deck',
+  tblTotal: 'Total',
+  tblAvgLv: 'Rata-rata Lv',
+  tblQty: 'JML',
+  tblNo: 'NOMOR',
+  tblLv: 'LV',
+  tblName: 'NAMA KARTU',
+  tblMade: 'Dibuat dengan MHR Deck Lab',
+  clearDeck: 'Kosongkan',
+  linkCopied: '✓ Link tersalin',
+  copied: 'Tersalin ✓',
+  newDeck: 'Buat deck baru',
+  dupDeck: 'Duplikat deck ini',
+  dupSuffix: '(salinan)',
+  renDeck: 'Ganti nama deck ini',
+  delDeck: 'Hapus deck ini',
+  pickDeck: 'Pilih deck',
+  savedAuto: '✓ tersimpan otomatis',
+  panelNote: 'Catatan: target ukuran deck dan batas salinan bisa disesuaikan dengan aturan resmi turnamen yang berlaku. Data kartu bersumber dari database resmi marvelherorush.com. Deck tersimpan otomatis di browser perangkat ini (localStorage) — aman ditutup dan dibuka kembali.',
 
   /* --- pesan --- */
-  mDeckEmpty:   ['Deck masih kosong.','Your deck is empty.'],
-  mDeckEmptyAdd:['Deck aktif masih kosong. Susun dulu di Deck Builder.','The active deck is empty. Build one in Deck Builder first.'],
-  mNameUsed:    ['Nama deck sudah dipakai.','That deck name is already in use.'],
-  mMinOne:      ['Minimal harus ada 1 deck.','You must keep at least 1 deck.'],
-  mDelConfirm:  ['Hapus deck','Delete deck'],
-  mNewName:     ['Nama deck baru:','New deck name:'],
-  mRenName:     ['Nama baru untuk deck ini:','New name for this deck:'],
-  mClearAll:    ['Kosongkan seluruh deck?','Clear the entire deck?'],
-  mBadLink:     ['Link deck tidak dapat dibaca — mungkin dibuat dengan versi yang berbeda.','This deck link could not be read — it may come from a different version.'],
-  mBadCode:     ['Kode deck tidak dapat dibaca.','This deck code could not be read.'],
-  mNoImgLib:    ['Library unduh PNG belum termuat (butuh internet). Silakan screenshot manual.','The PNG export library has not loaded (internet required). Please take a screenshot instead.'],
-  mPngFail:     ['Gagal membuat PNG — silakan screenshot manual.','Could not create the PNG — please take a screenshot instead.'],
+  mDeckEmpty: 'Deck masih kosong.',
+  mDeckEmptyAdd: 'Deck aktif masih kosong. Susun dulu di Deck Builder.',
+  mNameUsed: 'Nama deck sudah dipakai.',
+  mMinOne: 'Minimal harus ada 1 deck.',
+  mDelConfirm: 'Hapus deck',
+  mNewName: 'Nama deck baru:',
+  mRenName: 'Nama baru untuk deck ini:',
+  mClearAll: 'Kosongkan seluruh deck?',
+  mBadLink: 'Link deck tidak dapat dibaca — mungkin dibuat dengan versi yang berbeda.',
+  mBadCode: 'Kode deck tidak dapat dibaca.',
+  mNoImgLib: 'Library unduh PNG belum termuat (butuh internet). Silakan screenshot manual.',
+  mPngFail: 'Gagal membuat PNG — silakan screenshot manual.',
 
   /* --- v6.30: akun pengguna (login/signup/logout) --- */
-  acctLogin:        ['Masuk','Login'],
-  acctSignup:       ['Daftar','Sign up'],
-  acctLoginCta:     ['Masuk','Log in'],
-  acctSignupCta:    ['Buat akun','Create account'],
-  acctEmail:        ['Email','Email'],
-  acctPassword:     ['Kata sandi','Password'],
-  acctUsername:     ['Username','Username'],
-  acctUsernamePh:   ['3-20 karakter: huruf, angka, _ (tanpa spasi)','3-20 characters: letters, numbers, _ (no spaces)'],
-  acctNote:         ['Akun dipakai untuk menyimpan & membagikan deck, dan melacak koleksi kartu Anda (segera hadir).',
-                      'Your account is used to save & share decks, and track your card collection (coming soon).'],
-  acctHi:           ['Masuk sebagai','Logged in as'],
-  acctLogout:       ['Keluar','Log out'],
-  acctLoginTitle:   ['Masuk / Daftar','Log in / Sign up'],
-  acctModalTitleLogin: ['Masuk ke akun','Log in to your account'],
-  acctErrGeneric:   ['Terjadi kesalahan. Coba lagi.','Something went wrong. Please try again.'],
-  acctErrInvalid:   ['Username/kata sandi salah.','Incorrect username or password.'],
-  acctSignupOk:     ['Akun dibuat! Cek email Anda untuk verifikasi sebelum masuk.','Account created! Check your email to verify before logging in.'],
-  acctErrUsernameFormat: ['Username harus 3-20 karakter: huruf, angka, atau garis bawah saja (tanpa spasi).',
-                          'Username must be 3-20 characters: letters, numbers, or underscore only (no spaces).'],
-  acctErrUsernameTaken:  ['Username itu sudah dipakai — coba yang lain.','That username is already taken — try another.'],
-  acctForgotLink:   ['Lupa kata sandi?','Forgot your password?'],
-  acctForgotNote:   ['Masukkan email yang Anda pakai saat mendaftar. Kalau email itu terdaftar, kami akan mengirim link untuk membuat kata sandi baru.',
-                      'Enter the email you used to sign up. If that email is registered, we’ll send a link to set a new password.'],
-  acctForgotCta:    ['Kirim link reset','Send reset link'],
-  acctForgotBack:   ['← Kembali ke Masuk','← Back to log in'],
-  acctForgotSentOk: ['Kalau email itu terdaftar, link reset sudah dikirim — cek inbox (dan folder spam).',
-                      'If that email is registered, a reset link has been sent — check your inbox (and spam folder).'],
-  acctErrResetFailed: ['Gagal mengirim link reset. Coba lagi sebentar lagi.','Couldn’t send the reset link. Please try again shortly.'],
-  acctResetNote:    ['Masukkan kata sandi baru untuk akun Anda.','Enter a new password for your account.'],
-  acctNewPassword:  ['Kata sandi baru','New password'],
-  acctResetCta:     ['Simpan kata sandi baru','Save new password'],
-  acctResetOk:      ['Kata sandi berhasil diperbarui.','Password updated successfully.'],
-  acctErrUpdateFailed: ['Gagal menyimpan kata sandi baru. Coba minta link reset baru.',
-                        'Couldn’t save the new password. Try requesting a new reset link.'],
+  acctLogin: 'Login',
+  acctSignup: 'Daftar',
+  acctLoginCta: 'Login',
+  acctSignupCta: 'Buat akun',
+  acctEmail: 'Email',
+  acctPassword: 'Password',
+  acctUsername: 'Username',
+  acctUsernamePh: '3-20 karakter: huruf, angka, _ (tanpa spasi)',
+  acctNote: 'Akun dipakai untuk menyimpan & membagikan deck, dan melacak koleksi kartu Anda (segera hadir).',
+  acctHi: 'Login sebagai',
+  acctLogout: 'Logout',
+  acctLoginTitle: 'Login / Daftar',
+  acctModalTitleLogin: 'Login ke akun',
+  acctErrGeneric: 'Terjadi kesalahan. Coba lagi.',
+  acctErrInvalid: 'Username/password salah.',
+  acctSignupOk: 'Akun dibuat! Cek email Anda untuk verifikasi sebelum login.',
+  acctErrUsernameFormat: 'Username harus 3-20 karakter: huruf, angka, atau garis bawah saja (tanpa spasi).',
+  acctErrUsernameTaken: 'Username itu sudah dipakai — coba yang lain.',
+  acctForgotLink: 'Lupa password?',
+  acctForgotNote: 'Masukkan email yang Anda pakai saat mendaftar. Kalau email itu terdaftar, kami akan mengirim link untuk membuat password baru.',
+  acctForgotCta: 'Kirim link reset',
+  acctForgotBack: '← Kembali ke Login',
+  acctForgotSentOk: 'Kalau email itu terdaftar, link reset sudah dikirim — cek inbox (dan folder spam).',
+  acctErrResetFailed: 'Gagal mengirim link reset. Coba lagi sebentar lagi.',
+  acctResetNote: 'Masukkan password baru untuk akun Anda.',
+  acctNewPassword: 'Password baru',
+  acctResetCta: 'Simpan password baru',
+  acctResetOk: 'Password berhasil diperbarui.',
+  acctErrUpdateFailed: 'Gagal menyimpan password baru. Coba minta link reset baru.',
 
   /* --- v6.35: Deck Saya (Akun) — simpan/muat/hapus deck ke akun (Phase 2) --- */
-  cloudTitle:        ['☁️ Deck Saya (Akun)','☁️ My Decks (Account)'],
-  cloudHintLoggedOut: ['Masuk ke akun untuk menyimpan deck supaya bisa dibuka lagi dari perangkat mana pun.',
-                       'Log in to save decks so you can open them again from any device.'],
-  cloudSaveBtn:      ['☁️ Simpan deck aktif ke akun','☁️ Save active deck to account'],
-  cloudSaving:       ['Menyimpan…','Saving…'],
-  cloudSaveOk:       ['Tersimpan ke akun.','Saved to your account.'],
-  cloudSaveErr:      ['Gagal menyimpan ke akun. Coba lagi.','Couldn’t save to your account. Please try again.'],
-  cloudEmpty:        ['Belum ada deck tersimpan di akun ini.','No decks saved to this account yet.'],
-  cloudLoadingList:  ['Memuat deck akun…','Loading account decks…'],
-  cloudListErr:      ['Gagal memuat daftar deck akun.','Couldn’t load your account decks.'],
-  cloudLoadBtn:      ['Muat','Load'],
-  cloudDeleteBtn:    ['Hapus','Delete'],
+  cloudTitle: '☁️ Deck Saya (Akun)',
+  cloudHintLoggedOut: 'Login ke akun untuk menyimpan deck supaya bisa dibuka lagi dari perangkat mana pun.',
+  cloudSaveBtn: '☁️ Simpan deck aktif ke akun',
+  cloudSaving: 'Menyimpan…',
+  cloudSaveOk: 'Tersimpan ke akun.',
+  cloudSaveErr: 'Gagal menyimpan ke akun. Coba lagi.',
+  cloudEmpty: 'Belum ada deck tersimpan di akun ini.',
+  cloudLoadingList: 'Memuat deck akun…',
+  cloudListErr: 'Gagal memuat daftar deck akun.',
+  cloudLoadBtn: 'Muat',
+  cloudDeleteBtn: 'Hapus',
   /* v6.43: label teks kecil di bawah icon tombol Deck Saya (beda dari title/
      aria-label di atas yang dipakai untuk tooltip lengkap) */
-  cloudPubLbl:       ['Publikasikan','Publish'],
-  cloudUnpubLbl:     ['Batalkan','Unpublish'],
-  cloudLoadLbl:      ['Muat','Load'],
-  cloudDelLbl:       ['Hapus','Delete'],
-  cloudDeleteConfirm: ['Hapus deck ini dari akun? Salinan di browser ini (kalau ada) tidak ikut terhapus.',
-                       'Delete this deck from your account? Any local copy in this browser is not affected.'],
-  cloudDeleteErr:    ['Gagal menghapus deck ini.','Couldn’t delete this deck.'],
-  cloudLoadOk:       ['Dimuat sebagai deck lokal baru.','Loaded as a new local deck.'],
-  cloudUpdatedLbl:   ['Diperbarui','Updated'],
-  cloudImportQuestion: ['Kamu punya {n} deck di browser ini yang belum ada di akun ini. Impor sekarang supaya bisa dibuka dari perangkat lain juga?',
-                        'You have {n} deck(s) in this browser not yet in this account. Import them now so you can open them from other devices too?'],
-  cloudImportYes:    ['Impor semua','Import all'],
-  cloudImportNo:     ['Lewati','Skip'],
-  cloudImportOk:     ['Berhasil diimpor ke akun.','Imported to your account.'],
-  cloudImportErr:    ['Gagal mengimpor. Coba lagi lewat tombol "Simpan deck aktif ke akun" satu per satu.',
-                      'Import failed. Try the "Save active deck to account" button one deck at a time instead.'],
-  cloudDashHint: ['Lihat, muat, atau hapus deck tersimpan di halaman <a href="#dashboard">🗂 Dashboard Saya</a>.',
-                  'View, load, or delete saved decks on the <a href="#dashboard">🗂 My Dashboard</a> page.'],
+  cloudPubLbl: 'Publikasikan',
+  cloudUnpubLbl: 'Batalkan',
+  cloudLoadLbl: 'Muat',
+  cloudDelLbl: 'Hapus',
+  cloudDeleteConfirm: 'Hapus deck ini dari akun? Salinan di browser ini (kalau ada) tidak ikut terhapus.',
+  cloudDeleteErr: 'Gagal menghapus deck ini.',
+  cloudLoadOk: 'Dimuat sebagai deck lokal baru.',
+  cloudUpdatedLbl: 'Diperbarui',
+  cloudImportQuestion: 'Kamu punya {n} deck di browser ini yang belum ada di akun ini. Impor sekarang supaya bisa dibuka dari perangkat lain juga?',
+  cloudImportYes: 'Impor semua',
+  cloudImportNo: 'Lewati',
+  cloudImportOk: 'Berhasil diimpor ke akun.',
+  cloudImportErr: 'Gagal mengimpor. Coba lagi lewat tombol "Simpan deck aktif ke akun" satu per satu.',
+  cloudDashHint: 'Lihat, muat, atau hapus deck tersimpan di halaman <a href="#dashboard">🗂 Dashboard Saya</a>.',
 
   /* v6.37 — revamp galeri "Dari Pengguna": like + komentar */
-  pubLikeTitle:      ['Suka','Like'],
-  pubCommentsTitle:  ['Lihat komentar','View comments'],
-  pubCommentsLoading:['Memuat komentar…','Loading comments…'],
-  pubCommentsErr:    ['Gagal memuat komentar.','Couldn’t load comments.'],
-  pubCommentsEmpty:  ['Belum ada komentar. Jadilah yang pertama!','No comments yet. Be the first!'],
-  pubCommentPh:      ['Tulis komentar…','Write a comment…'],
-  pubCommentSend:    ['Kirim','Send'],
-  pubCommentLoginHint: ['Masuk ke akun untuk ikut berkomentar.','Sign in to join the conversation.'],
-  pubCommentPostErr:  ['Gagal mengirim komentar. Coba lagi.','Couldn’t post your comment. Try again.'],
-  pubCommentDeleteBtn:['Hapus komentar','Delete comment'],
-  pubCommentDeleteConfirm: ['Hapus komentar ini? Tidak bisa dibatalkan.','Delete this comment? This can’t be undone.'],
-  pubCommentDeleteErr: ['Gagal menghapus komentar.','Couldn’t delete this comment.'],
+  pubLikeTitle: 'Suka',
+  pubCommentsTitle: 'Lihat komentar',
+  pubCommentsLoading: 'Memuat komentar…',
+  pubCommentsErr: 'Gagal memuat komentar.',
+  pubCommentsEmpty: 'Belum ada komentar. Jadilah yang pertama!',
+  pubCommentPh: 'Tulis komentar…',
+  pubCommentSend: 'Kirim',
+  pubCommentLoginHint: 'Login ke akun untuk ikut berkomentar.',
+  pubCommentPostErr: 'Gagal mengirim komentar. Coba lagi.',
+  pubCommentDeleteBtn: 'Hapus komentar',
+  pubCommentDeleteConfirm: 'Hapus komentar ini? Tidak bisa dibatalkan.',
+  pubCommentDeleteErr: 'Gagal menghapus komentar.',
 
   /* v6.37 — halaman Dashboard Saya (Phase 4/5) */
-  navDashboard:  ['Dashboard Saya','My Dashboard'],
-  navDashboardS: ['Dashboard','Dashboard'],
-  dashHead: ['🗂 Dashboard Saya','🗂 My Dashboard'],
-  dashIntro: ['Deck yang tersimpan di akunmu, dan koleksi kartu yang sudah kamu punya.',
-              'Decks saved to your account, and the cards you already own.'],
-  dashLoginHint: ['Masuk ke akun untuk melihat deck tersimpan dan koleksi kartumu.',
-                  'Sign in to see your saved decks and card collection.'],
-  dashLoginBtn: ['👤 Masuk / Daftar','👤 Sign in / Sign up'],
-  dashDeckHead: ['☁️ Deck Saya','☁️ My Decks'],
-  dashCollHead: ['🎴 Koleksi Kartu Saya','🎴 My Card Collection'],
-  dashCollIntro: ['Catat berapa salinan tiap kartu yang sudah kamu punya (ketik langsung atau pakai tombol +/-, sampai 1000 salinan) — datanya tersimpan ke akun, bukan cuma di perangkat ini. Klik gambar atau nama kartu untuk lihat detail lengkapnya.',
-                  'Track how many copies of each card you own (type a number directly or use the +/- buttons, up to 1000) — saved to your account, not just this device. Click a card’s image or name to see its full detail.'],
-  dashCollSearchPh: ['Cari nama/nomor kartu...','Search card name/number...'],
+  navDashboard: 'Dashboard Saya',
+  navDashboardS: 'Dashboard',
+  dashHead: '🗂 Dashboard Saya',
+  dashIntro: 'Deck yang tersimpan di akunmu, dan koleksi kartu yang sudah kamu punya.',
+  dashLoginHint: 'Login ke akun untuk melihat deck tersimpan dan koleksi kartumu.',
+  dashLoginBtn: '👤 Login / Daftar',
+  dashDeckHead: '☁️ Deck Saya',
+  dashCollHead: '🎴 Koleksi Kartu Saya',
+  dashCollIntro: 'Catat berapa salinan tiap kartu yang sudah kamu punya (ketik langsung atau pakai tombol +/-, sampai 1000 salinan) — datanya tersimpan ke akun, bukan cuma di perangkat ini. Klik gambar atau nama kartu untuk lihat detail lengkapnya.',
+  dashCollSearchPh: 'Cari nama/nomor kartu...',
   /* v6.44: dropdown 3-state (ganti checkbox "hanya belum punya" tunggal) */
-  dashCollFilterAll:     ['Semua kartu','All cards'],
-  dashCollFilterOwned:   ['Sudah dimiliki','Already owned'],
-  dashCollFilterMissing: ['Belum dimiliki','Not owned yet'],
-  dashCollProgressLbl: ['kartu dengan minimal 1 salinan','cards with at least 1 copy'],
-  dashCollNone: ['Tidak ada kartu yang cocok.','No matching cards.'],
+  dashCollFilterAll: 'Semua kartu',
+  dashCollFilterOwned: 'Sudah dimiliki',
+  dashCollFilterMissing: 'Belum dimiliki',
+  dashCollProgressLbl: 'kartu dengan minimal 1 salinan',
+  dashCollNone: 'Tidak ada kartu yang cocok.',
 
   /* v6.37 — perbaikan bug ketemu saat verifikasi: tombol "Salin" di halaman
      Dukung (nomor rekening/e-wallet) TERNYATA ikut memakai key `subCopyBtn`
@@ -2661,30 +2696,70 @@ const T = {
      dihapus itu, tombol Dukung ini ikut kebobolan (tampil sebagai teks
      mentah "subCopyBtn" alih-alih "Salin"/"Copy"). Diberi key SENDIRI di
      sini (`dkCopyBtn`, bukan dipakai bersama lagi) supaya tidak terulang. */
-  dkCopyBtn: ['Salin','Copy'],
+  dkCopyBtn: 'Salin',
 };
 
-const LANGS = ['id','en'];
 function t(k){
-  const row = T[k];
-  if(!row) return k;
-  return row[state.lang === 'en' ? 1 : 0] || row[0];
+  const v = T[k];
+  return (v === undefined || v === null) ? k : v;
 }
-/* nama & teks efek kartu mengikuti bahasa aktif, dengan cadangan ke Indonesia */
-function cardName(c){ return (state.lang==='en' && c.nm_en) ? c.nm_en : c.nm; }
-function cardEff(c){  return (state.lang==='en' && c.e_en)  ? c.e_en  : c.e; }
-/* di mode Inggris, 16 kartu promo disembunyikan karena versi Inggrisnya belum terbit.
-   Datanya tetap ada di database, jadi begitu gambarnya tersedia tinggal ditampilkan. */
-/* Kode seri yang BELUM punya terjemahan resmi Bahasa Indonesia (masih fan-
-   translation buatan sesi Claude) — disembunyikan total di mode ID supaya
-   tidak ada salah informasi terjemahan, tapi TETAP tampil penuh di mode
-   Inggris (datanya sudah lengkap, sumbernya resmi). Begitu tim MHR Indonesia
-   merilis terjemahan resmi untuk seri ini, cukup hapus kodenya dari array ini
-   (lihat README.md § v6.29). */
-const ID_PENDING_SETS = ['SP01'];
-function cardVisible(c){
-  if(state.lang !== 'en' && ID_PENDING_SETS.includes(c.s)) return false;
-  return state.lang !== 'en' || !!c.nm_en;
+/* v6.45 — nama & teks efek kartu SEKARANG mengikuti state.cardLang (preferensi
+   bahasa kartu — lihat state.cardLang di atas). state.lang/tombol ganti bahasa
+   chrome UI sudah dihapus total di v6.46. Permintaan pemilik 18 September 2026: kartu
+   tidak boleh lagi disembunyikan hanya karena belum punya terjemahan di salah
+   satu bahasa (ke depannya akan ada kartu eksklusif ID-saja atau EN-saja) —
+   jadi ada fallback otomatis ke bahasa yang TERSEDIA kalau bahasa pilihan
+   pengguna tidak ada untuk kartu itu. cardLangInfo() adalah satu sumber
+   kebenaran dipakai bareng oleh cardName/cardEff/artDir/cardLangBadgeHTML,
+   supaya keempatnya selalu konsisten kartu per kartu.
+
+   PENTING soal SP01 (koreksi dari asumsi awal): dicek langsung ke cards.js —
+   SEMUA 288 kartu (termasuk SP01) sudah punya field `nm`/`e` (Indonesia) TERISI.
+   Bekas ID_PENDING_SETS TIDAK menyembunyikan SP01 karena ID-nya kosong — field
+   itu memang SUDAH diisi teks Indonesia, tapi hasil FAN-TRANSLATION sesi Claude
+   (bukan resmi dari MHR Indonesia/CARDFUN), makanya sengaja disembunyikan total
+   di mode ID supaya tidak terlihat seperti terjemahan resmi. Cuma 16 kartu dasar
+   (dari 208 kartu pra-SP01) yang benar-benar tidak punya `nm_en` sama sekali.
+   Menghapus ID_PENDING_SETS berarti fan-translation SP01 itu SEKARANG IKUT
+   TERLIHAT ke pengguna yang pilih cardLang=ID — bukan sekadar "kartu yang
+   tadinya kosong sekarang tampil", tapi "teks tidak resmi yang tadinya sengaja
+   disembunyikan sekarang ditampilkan". Sesuai permintaan pemilik (tampilkan apa
+   adanya, jangan gating), tapi diberi FAN_TRANSLATED_ID_SETS di bawah supaya
+   badge bahasa memberi peringatan jelas — bukan dihilangkan diam-diam. */
+const FAN_TRANSLATED_ID_SETS = ['SP01'];
+function cardLangInfo(c){
+  const hasId = !!c.nm, hasEn = !!c.nm_en;
+  const want = state.cardLang;
+  let shown = want;
+  if(want === 'en' && !hasEn) shown = hasId ? 'id' : 'en';
+  else if(want === 'id' && !hasId) shown = hasEn ? 'en' : 'id';
+  const fanId = shown === 'id' && FAN_TRANSLATED_ID_SETS.includes(c.s);
+  return { hasId, hasEn, shown, fallback: shown !== want, fanId };
+}
+function cardName(c){ const li = cardLangInfo(c); return li.shown==='en' ? (c.nm_en||c.nm) : (c.nm||c.nm_en); }
+function cardEff(c){  const li = cardLangInfo(c); return li.shown==='en' ? (c.e_en||c.e)   : (c.e||c.e_en); }
+/* v6.45 — semua kartu yang punya nama di SALAH SATU bahasa dianggap valid untuk
+   ditampilkan (praktis selalu true di database sekarang — cek langsung: 0 dari
+   288 kartu tidak punya `nm`). Kartu tidak lagi digating berdasarkan bahasa
+   aktif apa pun. */
+function cardVisible(c){ return !!(c.nm || c.nm_en); }
+/* lencana kecil menandai bahasa yang TERSEDIA untuk kartu ini (bukan cuma yang
+   sedang ditampilkan) — supaya pengguna tahu kalau teks yang mereka lihat
+   sebenarnya fallback, bukan pilihan mereka. Kartu SP01 dapat tanda "*" +
+   tooltip peringatan fan-translation kalau yang ditampilkan teks ID (lihat
+   FAN_TRANSLATED_ID_SETS di atas). cls opsional untuk gaya beda di grid/
+   lightbox (lihat .langtag di CSS). */
+function cardLangBadgeHTML(c, cls){
+  const hasId = !!c.nm, hasEn = !!c.nm_en;
+  const base = cls || 'langtag';
+  const fanId = FAN_TRANSLATED_ID_SETS.includes(c.s);
+  if(hasId && hasEn){
+    return fanId
+      ? `<span class="${base} both fan" title="${t('langBothFanTip')}">ID*+EN</span>`
+      : `<span class="${base} both" title="${t('langBothTip')}">ID+EN</span>`;
+  }
+  if(hasEn) return `<span class="${base} en" title="${t('langEnOnlyTip')}">EN</span>`;
+  return `<span class="${base} id" title="${t('langIdOnlyTip')}">ID</span>`;
 }
 
 /* lencana kecil untuk kartu yang teks efeknya pernah direvisi resmi (field `er`
@@ -2721,23 +2796,33 @@ function counterBadgeHTML(c, cls){
   return `<span class="${cls||'ctrbadge'}" title="${t('ctrActiTip')}">${label}</span>`;
 }
 
-/* Nama deck komunitas di data.js ditulis dalam Bahasa Indonesia ("Merah - Hijau").
-   Di mode Inggris, kata warnanya saja yang diterjemahkan supaya tetap terbaca
-   ("Red - Green"); kata lain seperti "Budget SD" dibiarkan apa adanya.
-   (WARNA_EN didefinisikan sekali dekat COLORS, lihat atas.) */
 /* v6.18: dipakai untuk field yang bisa datang dari SUBMISSION PUBLIK (nama/kredit/
    deskripsi deck komunitas) sebelum ditaruh ke innerHTML — mencegah HTML/script
    nyelip ke tampilan kalau pemilik lengah saat menempel kode kiriman ke data.js.
    Bukan sanitasi penuh, cukup untuk memblokir pembentukan tag. */
 function escHtml(s){ return String(s||'').replace(/</g,'&lt;'); }
-function namaDeckLokal(nm){
-  if(state.lang !== 'en') return nm;
-  return String(nm||'').replace(/\b(Merah|Kuning|Biru|Hijau)\b/g, w => WARNA_EN[w] || w);
-}
+/* v6.46 — dulu menerjemahkan kata warna (Merah/Kuning/Biru/Hijau) ke Inggris
+   saat mode bahasa chrome UI = EN. Mode itu (state.lang/#btnLang) sudah dihapus
+   total; nama deck komunitas sekarang selalu ditampilkan apa adanya sesuai yang
+   ditulis pemiliknya (biasanya Bahasa Indonesia) — sesuai arah 'komunitas sendiri
+   akan terbentuk' dari pemilik. WARNA_EN (dekat COLORS) jadi tidak dipakai lagi
+   di sini tapi dibiarkan ada kalau suatu saat dibutuhkan lagi. Nama fungsi
+   dipertahankan (bukan dihapus) supaya semua pemanggilnya tidak perlu diubah. */
+function namaDeckLokal(nm){ return nm; }
 
-function applyLang(){
-  document.documentElement.lang = state.lang;
-  /* judul tab dan deskripsi share ikut bahasa aktif */
+/* v6.46 — dulu bernama applyLang(), dipanggil ulang tiap tombol #btnLang
+   dipencet untuk menukar semua teks chrome UI antara Indonesia/Inggris
+   (termasuk menyembunyikan tab LGS/Tournaments Deck/Community Deck saat mode
+   EN). Tombol & mekanisme itu sudah dihapus total: kamus T sekarang cuma
+   berisi SATU string dwibahasa per key (lihat komentar DUA BAHASA di atas T),
+   dan ketiga tab itu SELALU tampil untuk semua pengunjung (permintaan pemilik
+   18 September 2026 — visinya website ini jadi lebih universal, komunitas
+   Indonesia yang sudah ada tidak masalah kalau tetap mayoritas berkomentar
+   Bahasa Indonesia). Fungsi ini jadi murni SEKALI-JALAN saat halaman dimuat
+   (dipanggil dari amanJalankan('bahasa', applyText) di bagian init), bukan lagi
+   dipanggil ulang tiap toggle — makanya nama diganti applyText(). */
+function applyText(){
+  document.documentElement.lang = 'id';
   document.title = t('metaTitle');
   const md = document.querySelector('meta[name="description"]');
   if(md) md.setAttribute('content', t('metaDesc'));
@@ -2745,38 +2830,18 @@ function applyLang(){
   if(ogt) ogt.setAttribute('content', t('metaTitle'));
   const ogd = document.querySelector('meta[property="og:description"]');
   if(ogd) ogd.setAttribute('content', t('metaDesc'));
-  /* Mode Inggris sengaja dibuat sederhana: hanya Kartu + Deck Builder.
-     Community Deck, Tournaments Deck, dan Weekly Rush LGS isinya konten komunitas
-     Indonesia (nama deck berbahasa Indonesia, label peringkat turnamen,
-     jadwal LGS Indonesia), jadi tidak ditampilkan — pengunjung luar negeri
-     langsung fokus ke deck builder.
-     Pengecualian: mode admin (?admin=1) tetap bisa membuka Community Deck
-     supaya pembuat kode deck tidak terkunci saat bahasanya Inggris. Halaman
-     Tournaments Deck (v6.26) TIDAK punya panel admin (beda dengan Community Deck —
-     tidak ada submission publik/generator kode di sini, isinya cuma murni
-     ditempel pemilik ke data.js seperti LGS), jadi tidak perlu pengecualian
-     admin — selalu ikut aturan yang sama dengan Weekly Rush LGS. */
-  const sembunyi = { lgs:(state.lang === 'en'), tourney:(state.lang === 'en'),
-    meta:(state.lang === 'en' && !isAdmin) };
-  Object.entries(sembunyi).forEach(([p,off])=>{
-    const tab = $(`#navTabs button[data-page="${p}"]`);
-    if(tab) tab.hidden = off;
-  });
-  if(sembunyi[state.page]){ setPage('cards'); return; }
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const k = el.dataset.i18n;
-    if(T[k]) el.innerHTML = t(k);
+    if(T[k] !== undefined) el.innerHTML = t(k);
   });
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
     const k = el.dataset.i18nPh;
-    if(T[k]) el.placeholder = t(k);
+    if(T[k] !== undefined) el.placeholder = t(k);
   });
   document.querySelectorAll('[data-i18n-title]').forEach(el=>{
     const k = el.dataset.i18nTitle;
-    if(T[k]) el.title = t(k);
+    if(T[k] !== undefined) el.title = t(k);
   });
-  const b = $('#btnLang');
-  if(b) b.textContent = state.lang === 'en' ? '🌐 EN' : '🌐 ID';
   // dropdown & tombol warna yang isinya dibuat oleh JavaScript perlu digambar ulang
   renderColorButtons();
   isiDropdown();
@@ -2888,11 +2953,9 @@ function renderSim(){
   $('#simMull').disabled = simTukar.size === 0;
   $('#simMull').textContent = simTukar.size ? `${t('simMull')} ${simTukar.size} ${t('cards')}` : t('simMull');
   $('#simInfo').innerHTML = simTangan.length
-    ? (state.lang === 'en'
-        ? `deck left <b>${simDeck.length}</b> · mulligans <b>${simRonde}</b>` +
-          (simRonde > 1 ? ` <span style="color:var(--merah)">(official limit: 1)</span>` : '')
-        : `sisa deck <b>${simDeck.length}</b> · mulligan <b>${simRonde}×</b>` +
-          (simRonde > 1 ? ` <span style="color:var(--merah)">(resmi maks 1×)</span>` : '')) : '';
+    ? `sisa deck <b>${simDeck.length}</b> · mulligan <b>${simRonde}×</b>` +
+      (simRonde > 1 ? ` <span style="color:var(--merah)">(resmi maks 1×)</span>` : '')
+    : '';
 
   if(!simTangan.length){ $('#simTangan').innerHTML = '<div class="sim-row">—</div>'; }
   else {
@@ -3165,7 +3228,7 @@ function pdfSafe(s){
 
 function tanggalCetak(){
   try {
-    return new Date().toLocaleDateString(state.lang === 'en' ? 'en-GB' : 'id-ID',
+    return new Date().toLocaleDateString('id-ID',
       {day:'2-digit', month:'long', year:'numeric'});
   } catch(e){ return ''; }
 }
@@ -3460,6 +3523,7 @@ function openLightbox(no){
   lbNo = no;
   const q = state.deck[no]||0;
   const aktif = artOf(no);
+  const li = cardLangInfo(c);
   $('#lbInner').innerHTML = `
     <div>
       <img class="lb-img" alt="${cardName(c)}" data-ext="0" decoding="async" src="${artFile(c.no)}"
@@ -3472,7 +3536,7 @@ function openLightbox(no){
     </div>
     <div class="lb-info">
       <h3>${cardName(c)}</h3>
-      <div class="no">${c.no} · ${c.s} · ${c.ra.join(' / ')} ${errataBadgeHTML(c)} ${counterBadgeHTML(c)}</div>
+      <div class="no">${c.no} · ${c.s} · ${c.ra.join(' / ')} ${errataBadgeHTML(c)} ${counterBadgeHTML(c)} ${cardLangBadgeHTML(c)}</div>
       <div class="lb-stats">
         <div>${t('levelLbl')} <b>${c.l}</b></div>
         <div>${t('cAttack')} <b>${c.r}</b></div>
@@ -3481,6 +3545,7 @@ function openLightbox(no){
       </div>
       <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:10px">${c.f}</div>
       <div class="lb-eff">${cardEff(c)}</div>
+      ${li.fanId ? `<div class="lb-fan-note" style="font-size:11px;color:var(--merah);margin:6px 0 0">${t('langFanNote')}</div>` : ''}
       ${relatedHTML(c)}
       ${c.ra.length>1?`
       <div class="lb-var">
@@ -3496,8 +3561,13 @@ function openLightbox(no){
 }
 function lbImgFallback(img,no){
   const exts=['jpg','png','webp'];
+  if(!img.dataset.dirFallback){
+    img.dataset.dirFallback = '1';
+    const alt = altArtFile(no);
+    if(alt){ img.dataset.ext = '0'; img.src = alt; return; }
+  }
   let i=parseInt(img.dataset.ext)+1;
-  if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
+  if(i<exts.length){ img.dataset.ext=i; img.src=`${artDir(DB.find(d=>d.no===no))}${no}.${exts[i]}`; }
   else { img.onerror=null; img.classList.add('failed');
          const ph=img.nextElementSibling; if(ph) ph.style.display='flex'; }
 }
@@ -3900,7 +3970,7 @@ function renderDukung(){
     if(cfg.teks){
       if(typeof cfg.teks === 'string') kalimat = cfg.teks;
       else if(typeof cfg.teks === 'object')
-        kalimat = cfg.teks[state.lang] || cfg.teks.id || cfg.teks.en || kalimat;
+        kalimat = cfg.teks.id || cfg.teks.en || kalimat;
     }
     kaki.hidden = false;
     kaki.style.visibility = 'visible';
@@ -3938,7 +4008,7 @@ function renderDukungPage(){
   if(cfg.teks){
     if(typeof cfg.teks === 'string') kalimat = cfg.teks;
     else if(typeof cfg.teks === 'object')
-      kalimat = cfg.teks[state.lang] || cfg.teks.id || cfg.teks.en || kalimat;
+      kalimat = cfg.teks.id || cfg.teks.en || kalimat;
   }
   const nama = cfg.nama ? escHtml(cfg.nama) : '';
   const linkMail = mailtoDukung(cfg);
@@ -3975,8 +4045,7 @@ function tanggalRingkas(iso){
   const d = new Date(iso);
   if(isNaN(d)) return '-';
   const bulanID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-  const bulanEN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const b = (state.lang==='en'?bulanEN:bulanID)[d.getMonth()];
+  const b = bulanID[d.getMonth()];
   const jam = String(d.getHours()).padStart(2,'0') + '.' + String(d.getMinutes()).padStart(2,'0');
   return `${d.getDate()} ${b} ${d.getFullYear()}, ${jam}`;
 }
@@ -4332,7 +4401,7 @@ id: `
 <h2 class="pd-title">Panduan Bermain Marvel Hero Rush</h2>
 <p class="pd-lead">Untuk pemain baru yang belum familiar dengan aturan Marvel Hero Rush TCG.
   Dirangkum dari poster rulebook resmi terbitan PT. Jason Entertainment Indonesia (CARDFUN),
-  dicocokkan dengan 208 kartu di Deck Lab.</p>
+  dicocokkan dengan 288 kartu di Deck Lab.</p>
 
 <nav class="pd-toc">
   <a href="#pd-menang">Cara Menang</a>
@@ -4639,326 +4708,22 @@ id: `
   Indonesia (CARDFUN) &amp; Marvel; bagian Aturan Pertandingan &amp; Turnamen berdasarkan konvensi
   komunitas/LGS yang berlaku saat ini.</p>
 `,
-en: `
-<h2 class="pd-title">How to Play Marvel Hero Rush</h2>
-<p class="pd-lead">For new players who aren't familiar with Marvel Hero Rush TCG yet.
-  Summarized from the official rulebook posters published by PT. Jason Entertainment Indonesia
-  (CARDFUN), cross-checked against the 208 cards in Deck Lab.</p>
-
-<nav class="pd-toc">
-  <a href="#pd-menang">How to Win</a>
-  <a href="#pd-siap">What You Need</a>
-  <a href="#pd-kartu">Card Anatomy</a>
-  <a href="#pd-area">Field Layout</a>
-  <a href="#pd-giliran">Turn Flow</a>
-  <a href="#pd-aksi">Action Phase</a>
-  <a href="#pd-adjust">Adjustment Phase</a>
-  <a href="#pd-battle">Battle Phase</a>
-  <a href="#pd-kemampuan">Key Abilities</a>
-  <a href="#pd-efek">Effect Types</a>
-  <a href="#pd-istilah">Key Terms</a>
-  <a href="#pd-deck">Deck Rules</a>
-  <a href="#pd-turnamen">Match &amp; Tournament Rules</a>
-</nav>
-
-<div class="pd-sec" id="pd-menang">
-  <h3>How to Win</h3>
-  <p>Marvel Hero Rush is a 1v1 card battle game between Marvel characters. Each turn, both players
-    call characters, attack, and defend. There are three ways to win:</p>
-  <div class="pd-box win">
-    <b>1. Collect 9 Rush Point cards</b> in your TIMELINE — earned whenever your character
-    successfully attacks the opponent's <b>Weakness</b> (an empty BATTLE position).<br><br>
-    <b>2. Your opponent's main deck reaches 0 cards</b> — the moment this happens, regardless of the
-    cause (their last card was drawn, or the deck was emptied by a card effect), they are
-    immediately declared the loser.<br><br>
-    <b>3. A card's effect directly declares a player the winner.</b>
-  </div>
-</div>
-
-<div class="pd-sec" id="pd-siap">
-  <h3>What You Need</h3>
-  <ul>
-    <li><b>Main Deck — exactly 50 character cards.</b> Maximum 2 colors, maximum 3 cards sharing the
-      same character name (counted by name, not card number — so 3 different rarity versions of the
-      same character still count as one "name").</li>
-    <li><b>Rush Point Deck — 9 cards</b>, separate from the Main Deck, with no color/count
-      restriction. This is your "life total" — one of these 9 moves to your TIMELINE each time you
-      successfully attack the opponent's Weakness.</li>
-  </ul>
-  <p><b>Before starting:</b> shuffle your Main Deck, then each player draws 6 cards as their opening
-    hand (the first player decides first, then the second player). If your opening hand isn't great,
-    you may <b>mulligan</b> once: put your <b>entire 6-card hand</b> to the <b>bottom</b> of the deck
-    (not a partial swap — mulligan means redoing your whole hand), draw 6 new cards from the top,
-    then reshuffle the deck.</p>
-</div>
-
-<div class="pd-sec" id="pd-kartu">
-  <h3>Card Anatomy</h3>
-  <p>Every character card carries the following info — all of it is filterable on the <b>Cards</b>
-    page of this Deck Lab:</p>
-  <ul>
-    <li><b>Name &amp; Series</b> — the character's name and the set code it's from (e.g. BP01, SD01).</li>
-    <li><b>Color</b> — Red, Yellow, Blue, or Green. A deck can use at most 2 colors.</li>
-    <li><b>Level (Lv)</b> — its calling cost. Level 1–3 can be called straight from hand; Level 4+
-      needs an extra requirement (see "Core Rule" under Action Phase).</li>
-    <li><b>Range (R)</b> — how far this card can reach into the opponent's side when attacking. R-0
-      means it can't attack at all; a higher R reaches further across the opponent's FRONT/WING/BACK.</li>
-    <li><b>Power</b> — battle strength. The higher one wins a direct clash.</li>
-    <li><b>Trait</b> — the character's affiliation/group (e.g. Human/Avengers).</li>
-    <li><b>Rarity</b> — print variant rarity (doesn't affect the rules).</li>
-  </ul>
-  <p>Card effect text starts with a short tag that identifies the effect type:</p>
-  <div class="pd-tags">
-    <span>[TRIG]</span><span>[AUTO]</span><span>[ACTI]</span><span>[COUNTER]</span>
-    <span>[COUNTER-ACTI]</span><span>[UNIQUE]</span><span>[BLOCK]</span><span>[DOUBLE ATTACK]</span>
-  </div>
-  <p>What each tag means is explained in <a href="#pd-efek">Effect Types</a> and
-    <a href="#pd-kemampuan">Key Abilities</a> below.</p>
-</div>
-
-<div class="pd-sec" id="pd-area">
-  <h3>Field Layout</h3>
-  <p>Each player has 4 battle slots forming a diamond formation — together called <b>BATTLE</b>.
-    Characters in these 4 slots can be freely rearranged during the <b>Adjustment Phase</b> (after
-    Action Phase, before Battle Phase — see below) so each character's attack range (R) lines up
-    before attacking actually begins:</p>
-  <div class="pd-field">
-    <div class="pd-slot front">FRONT</div>
-    <div class="pd-slot wl">WING</div>
-    <div class="pd-slot wr">WING</div>
-    <div class="pd-slot back">BACK</div>
-  </div>
-  <div class="pd-base">+ a <b>BASE</b> area (behind BATTLE) — for face-down/charge cards, max 6
-    cards. BATTLE and BASE together make up one player's <b>FIELD</b> — this is the area meant by
-    effect text like [TRIG](FIELD).</div>
-  <p>The attack order each turn is always fixed: <b>FRONT first</b>, then <b>both WINGs</b> (if both
-    are filled, you choose the order), then <b>BACK</b> last. An empty BATTLE slot is called a
-    <b>Weakness</b> — an easy target that, if successfully attacked, earns you 1 Rush Point card.</p>
-  <p>Other areas besides BATTLE/BASE:</p>
-  <div class="pd-grid2">
-    <div class="pd-term"><span class="k">Retreat</span><p>Where cards that lost a battle, were
-      sacrificed, or were discarded end up. Cards here are normally inactive — but some other cards
-      have effects that bring them back to hand, FIELD, or even the deck.</p></div>
-    <div class="pd-term"><span class="k">Void</span><p>Where <b>pruned</b> cards go — removed from
-      play. No limit on how many can be here. Usually treated as gone for good, but certain card
-      effects can bring a card back from VOID to the FIELD.</p></div>
-    <div class="pd-term"><span class="k">Deck</span><p>Your Main Deck pile. The moment it reaches 0
-      cards, you immediately lose (see How to Win). The card count of either Deck — yours or your
-      opponent's — may be confirmed at any time; the cards themselves still can't be looked at.</p></div>
-    <div class="pd-term"><span class="k">Rush Point Deck</span><p>Your 9 point cards. Moves one at a
-      time to your TIMELINE each time you successfully attack the opponent's Weakness.</p></div>
-    <div class="pd-term"><span class="k">Timeline</span><p>Where earned Rush Point cards go. Collect
-      9 here and you win.</p></div>
-  </div>
-</div>
-
-<div class="pd-sec" id="pd-giliran">
-  <h3>Turn Flow</h3>
-  <p>Every turn runs through 7 phases in order:</p>
-  <div class="pd-flow">
-    <span><b>1</b>Start Phase</span><span><b>2</b>Draw Phase</span><span><b>3</b>Action Phase</span>
-    <span><b>4</b>Adjustment Phase</span><span><b>5</b>Battle Phase</span>
-    <span><b>6</b>Counter Phase</span><span><b>7</b>End Phase</span>
-  </div>
-  <ul>
-    <li><b>Start Phase</b> — effects that trigger "at the start of your turn" resolve here.</li>
-    <li><b>Draw Phase</b> — draw 2 cards. Hand limit is 9 (discard the excess in End Phase).</li>
-    <li><b>Action Phase, Adjustment Phase &amp; Battle Phase</b> — detailed below, since this is the
-      core of the game.</li>
-    <li><b>Counter Phase</b> — the last window before the turn ends: each player in turn (opponent
-      first) picks one of three things — call a <b>[COUNTER]</b> character (max once per phase per
-      turn), activate a card effect, or do nothing. The phase ends once both players pass in a row.</li>
-    <li><b>End Phase</b> — discard down to the 9-card hand limit, then the turn passes to the other
-      player.</li>
-  </ul>
-  <div class="pd-box warn"><b>First-turn note:</b> the player who goes first is heavily restricted
-    on their very first turn — they may only place <b>1 face-down card</b> in BASE, call
-    <b>1 character</b> (not up to 3), and <b>can't attack</b> the opponent's BATTLE at all (skipping
-    the entire Battle Phase) — since the opponent hasn't had a chance to call anyone out to attack
-    yet.</div>
-</div>
-
-<div class="pd-sec" id="pd-aksi">
-  <h3>Action Phase — Calling &amp; Arranging Characters</h3>
-  <p>During this phase you may take the following actions repeatedly, in any order, as long as you
-    stay within their limits:</p>
-  <ul>
-    <li><b>Set a Card Face-Down</b> (max 1× per turn) — place 1 card face-down into BASE, then draw
-      1 card from your deck. (Different from calling a character into BASE in the next point — that
-      doesn't count against this 1× limit.)</li>
-    <li><b>Call a Character</b> (max 3× per turn) — move 1 character card from your hand into an
-      empty spot on your <b>FIELD</b>. It can go into a BATTLE slot <b>or</b> into BASE — the max of
-      3 calls per turn applies either way:
-      <ul>
-        <li>Level 3 or lower → call it directly, no extra cost.</li>
-        <li>Level 4 or higher → you must first retreat one or more character cards from your BATTLE
-          whose <b>combined Level exactly matches</b> the Level of the character being called.
-          Face-down/charge cards in BASE can help pay this too — each charge card counts as Level 1.
-          Players commonly call this <b>"paying the cost"</b> or <b>"sacrificing"</b> — same thing as
-          retreating.</li>
-      </ul>
-    </li>
-    <li><b>BATTLE-BASE move (BBM for short)</b> — moving a character card between your own BATTLE
-      and BASE (this doesn't target the opponent at all). A character <b>called this same turn</b>
-      can't perform a BBM yet — it has to wait until your next turn, unless another card's effect
-      specifically allows an earlier BBM.</li>
-  </ul>
-</div>
-
-<div class="pd-sec" id="pd-adjust">
-  <h3>Adjustment Phase — Positioning</h3>
-  <p>A short but important phase between Action Phase and Battle Phase: here you may rearrange the
-    characters already in your BATTLE all at once, freely swapping between all 4 slots (FRONT ↔
-    WING ↔ BACK), as much as you like. Swapping positions <b>doesn't count as a "move"</b> and isn't
-    limited in number.</p>
-  <p>The point: line up which character sits at FRONT/WING/BACK <b>before</b> Battle Phase starts, so
-    each character's Range (R) matches whatever you want to attack — or whatever position you want
-    to protect.</p>
-</div>
-
-<div class="pd-sec" id="pd-battle">
-  <h3>Battle Phase — Attacking</h3>
-  <p>The player going first skips this phase on their first turn (see the note above). On every
-    other turn, characters attack in order: <b>FRONT → WING → WING → BACK</b>. Each character gets
-    only 1 chance to attack per turn, and may choose not to attack — but once the order moves past a
-    slot, that character's attack chance is <b>lost for the turn</b>, you can't come back to it
-    later. Once an attack is declared, its procedure is also <b>locked in</b> until it finishes.</p>
-  <p>For each attacking character, there are 3 steps:</p>
-  <ul>
-    <li><b>① Target Phase</b> — the character picks 1 enemy character (or a Weakness) within its own
-      Range (R) to attack.</li>
-    <li><b>② Counter Phase (mini)</b> — the opponent goes first, then you: each may call 1
-      [COUNTER] character (max once per phase per turn), activate an effect, or do nothing — just
-      like the end-of-turn Counter Phase, but scoped to this one battle only.</li>
-    <li><b>③ Decision Step</b> — power is compared: the higher one wins (the loser goes to RETREAT);
-      on a tie, <b>both</b> go to RETREAT. If the target was a Weakness and the attack succeeded,
-      you gain 1 Rush Point card into your TIMELINE.</li>
-  </ul>
-</div>
-
-<div class="pd-sec" id="pd-kemampuan">
-  <h3>Key Abilities</h3>
-  <p>Six named abilities that appear in card text — match them against the tag printed on the card
-    itself (e.g. <span class="pd-tags"><span>[COUNTER]</span></span>), not whatever other rulebook
-    translation's naming might be floating around, since the official card text is what Deck Lab
-    goes by:</p>
-  <div class="pd-grid2">
-    <div class="pd-term"><span class="k">Counter</span><p>Can be called in response to an action, and
-      can counter-call in response to the opponent's calling.</p></div>
-    <div class="pd-term"><span class="k">Block</span><p>Redirects the opponent's attack target from
-      another card to this one. Max once per turn.</p></div>
-    <div class="pd-term"><span class="k">Double-Attack</span><p>Gets a second attack opportunity in
-      the same turn.</p></div>
-    <div class="pd-term"><span class="k">Assault</span><p>If it wins a battle while attacking, that
-      attack still counts as a successful hit on the opponent's Weakness.</p></div>
-    <div class="pd-term"><span class="k">Air Strike</span><p>Can still attack an occupied enemy
-      BATTLE slot by treating it as a Weakness.</p></div>
-    <div class="pd-term"><span class="k">Unique</span><p>No other card with the same name may exist
-      on your FIELD. This effect can't be removed.</p></div>
-  </div>
-</div>
-
-<div class="pd-sec" id="pd-efek">
-  <h3>Effect Types</h3>
-  <div class="pd-grid2">
-    <div class="pd-term"><span class="k">Trigger</span><p>Fires automatically once its condition is
-      met (e.g. when the card enters the field).</p></div>
-    <div class="pd-term"><span class="k">Automatic</span><p>Stays active continuously as long as the
-      card is in the right area — nothing needs to be "switched on".</p></div>
-    <div class="pd-term"><span class="k">Activate</span><p>You choose to activate it yourself, but
-      only during your own Action Phase.</p></div>
-    <div class="pd-term"><span class="k">Counter-Activate</span><p>Can be activated during your
-      Action Phase <b>or</b> during a counter step (the end-of-turn Counter Phase, or the mini
-      Counter Phase inside a battle).</p></div>
-  </div>
-  <p>If a Trigger effect's text contains the word <b>"may"</b> after the clause explaining when it
-    fires, that effect is <b>optional</b> — you decide whether to trigger it, it isn't automatic.</p>
-</div>
-
-<div class="pd-sec" id="pd-istilah">
-  <h3>Other Key Terms</h3>
-  <div class="pd-grid2">
-    <div class="pd-term"><span class="k">Field</span><p>A player's BATTLE + BASE combined. This is
-      the area meant by effect text like [TRIG](FIELD).</p></div>
-    <div class="pd-term"><span class="k">BBM</span><p>Common shorthand players use for BATTLE-BASE
-      move — moving your own character card between BATTLE and BASE.</p></div>
-    <div class="pd-term"><span class="k">Weakness</span><p>An empty BATTLE slot — a target that, if
-      successfully attacked, grants 1 Rush Point.</p></div>
-    <div class="pd-term"><span class="k">Set Card / Charge Card</span><p>A character card placed
-      face-down in BASE. It loses its effect, is treated as not being in BATTLE, and only its owner
-      may look at it. May be retreated (counted as Level 1) to help pay for a Level 4+ call.</p></div>
-    <div class="pd-term"><span class="k">Prune</span><p>Sending a card to VOID. This is what the
-      "Prune" mechanic filter on the Cards page is matching for.</p></div>
-    <div class="pd-term"><span class="k">Retreat (the action)</span><p>Moving a card from BATTLE
-      into the RETREAT area — this is the "cost" paid when calling a Level 4+ character. Not to be
-      confused with a card <b>already sitting</b> in the RETREAT area (see the Field Layout section),
-      which normally doesn't come back on its own unless another card's effect brings it back.</p></div>
-    <div class="pd-term"><span class="k">Power 0 = auto-retreat</span><p>If a card's power drops to
-      0 or below because of an effect, that card is <b>automatically retreated</b> — no battle needed.</p></div>
-  </div>
-</div>
-
-<div class="pd-sec" id="pd-deck">
-  <h3>Deck-Building Rules</h3>
-  <p>Summary of the deck-building rules this Deck Builder validates automatically:</p>
-  <ul>
-    <li>Main Deck must be <b>exactly 50 cards</b>.</li>
-    <li>Maximum <b>2 different colors</b> per deck.</li>
-    <li>Maximum <b>3 cards per character name</b> — counted by name, so 3 different rarities of the
-      same character still share one 3-copy allowance.</li>
-  </ul>
-  <p>Build your deck on the <b>Deck Builder</b> page — Deck Lab automatically flags any violation of
-    the rules above before you share it as a link or image.</p>
-</div>
-
-<div class="pd-sec" id="pd-turnamen">
-  <h3>Match &amp; Tournament Rules</h3>
-  <p>This is about running a <b>match</b>, not the core game rules above — some of it isn't officially
-    set by MHR yet, so it comes down to player agreement or whatever the local LGS/tournament decides:</p>
-  <ul>
-    <li><b>Deciding who goes first</b> — a <b>coin toss</b> or a <b>dice roll</b>, whichever the two
-      players agree on.</li>
-    <li><b>Match time limit</b> — there's no official time rule from MHR yet. If an LGS or tournament
-      sets its own time limit, here's the order used to decide a winner once time is up (and no one
-      has won outright):
-      <ol>
-        <li>Whoever has <b>more Rush Points</b> in their TIMELINE wins.</li>
-        <li>If tied, whoever has <b>more cards left in their Main Deck</b> wins.</li>
-        <li>If still tied, it's decided by a coin toss or dice roll.</li>
-      </ol>
-    </li>
-    <li><b>Match format</b> — currently <b>Best of 1</b> (a single game decides it), both for casual
-      LGS play and official tournaments. This could change for certain rounds of official tournaments
-      down the line (e.g. the qualifying rounds vs. Top 32/16/8/4), but nothing's fixed for that yet.</li>
-  </ul>
-  <div class="pd-box warn">This section may change as soon as MHR publishes official tournament
-    rules — when in doubt, check with the organizer/TO of the event you're attending.</div>
-</div>
-
-<p style="color:var(--muted);font-size:11px;margin-top:8px">Source: the official "Area Permainan"
-  (Field) &amp; "Tata Cara Bermain" (How to Play) rulebook posters for Marvel Hero Rush TCG —
-  PT. Jason Entertainment Indonesia (CARDFUN) &amp; Marvel; the Match &amp; Tournament Rules section
-  is based on current community/LGS convention.</p>
-`
 };
 
 function renderPanduan(){
   const w = $('#panduanWrap');
   if(!w) return;
-  w.innerHTML = GUIDE[state.lang === 'en' ? 'en' : 'id'];
+  w.innerHTML = GUIDE.id;
 }
 
 /* ==================== NAVIGASI HALAMAN ==================== */
 const PAGES = ['cards','build','meta','tourney','lgs','panduan','dukung','dashboard'];
 function setPage(p, dariHash){
   if(!PAGES.includes(p)) p = 'cards';
-  /* mode Inggris hanya punya Kartu + Deck Builder (lihat applyLang).
-     Panduan sengaja dikecualikan — dwibahasa penuh, dan justru paling
-     berguna untuk pemain baru berbahasa Inggris. Tournaments Deck (v6.26) ikut
-     aturan yang sama dengan Weekly Rush LGS — nama deck & label peringkat konten
-     komunitas Indonesia, tidak ada pengecualian admin (tidak ada panel admin
-     di halaman ini, beda dengan Community Deck). */
-  if(state.lang === 'en' && (p === 'lgs' || p === 'tourney' || (p === 'meta' && !isAdmin))) p = 'cards';
+  /* v6.46 — semua tab (termasuk LGS/Tournaments Deck/Community Deck) SELALU
+     tampil untuk semua pengunjung sekarang (lihat applyText) — tidak ada lagi
+     pengecualian berdasarkan bahasa. Panduan (rulebook) tetap Bahasa Indonesia
+     saja sebagai rujukan resmi (belum diterjemahkan penuh ke Inggris). */
   state.page = p;
   document.body.className = 'page-' + p;
   [...$('#navTabs').children].forEach(b=>
@@ -5502,8 +5267,7 @@ function tourneyCardUsage(ev){
     return {no, c, deckCount:tl.deckCount, pct:Math.round(tl.deckCount/n*100), copies:tl.copies};
   }).filter(Boolean).sort((a,b)=>
     b.deckCount - a.deckCount || b.copies - a.copies ||
-    (state.lang === 'en' ? (a.c.nm_en||a.c.nm).localeCompare(b.c.nm_en||b.c.nm)
-                          : a.c.nm.localeCompare(b.c.nm))
+    cardName(a.c).localeCompare(cardName(b.c))
   ).slice(0, 10);   // top 10 cukup untuk gambaran, tidak memenuhi layar
   return {n, rows};
 }
@@ -5557,7 +5321,7 @@ function renderTourney(){
         <span class="tny-usage-rank">${i+1}</span>
         <img class="tny-usage-thumb" alt="" data-ext="0" src="images/${r.no}.jpg" loading="lazy"
           onerror="tnyUsageImgFallback(this,'${r.no}','${CMAP[r.c.c]}')">
-        <span class="tny-usage-nm">${escHtml(state.lang==='en' ? (r.c.nm_en||r.c.nm) : r.c.nm)}</span>
+        <span class="tny-usage-nm">${escHtml(cardName(r.c))}</span>
         <span class="tny-usage-right">
           <span class="tny-usage-bar-wrap"><div class="tny-usage-bar" style="width:${r.pct}%;background:${CMAP[r.c.c]}"></div></span>
           <span class="tny-usage-meta">${r.deckCount}/${usage.n} ${t('tourneyUsageDeck')} (${r.pct}%) · ${r.copies} ${t('tourneyUsageCopy')}</span>
@@ -5642,7 +5406,7 @@ function renderProxyBox(){
   const box = $('#proxyBox');
   if(!box) return;
   box.innerHTML = !isLoggedIn
-    ? `<p class="auth-note" id="proxyHint" style="margin-top:14px">🖨 Masuk ke akun untuk mencetak kartu proxy (PDF).</p>`
+    ? `<p class="auth-note" id="proxyHint" style="margin-top:14px">🖨 Login ke akun untuk mencetak kartu proxy (PDF).</p>`
     : `
     <div class="admin-box" style="margin-top:14px;margin-bottom:0">
       <div class="t">🖨 Cetak kartu proxy</div>
@@ -5769,10 +5533,10 @@ function pxRowImgFallback(img,no){
    di bahasa aktif, lalu versi Indonesia (yang selalu lengkap), baru png/webp. */
 function pxRantaiGambar(no){
   const c = DB.find(d=>d.no===no);
-  const utamaAktif = `${artDir()}${no}.jpg`;
-  const daftar = [artFile(no), utamaAktif, `images/${no}.jpg`,
-                  `images/${no}.png`, `images/${no}.webp`];
-  if(c && artDir() !== 'images/') daftar.splice(3, 0, `${artDir()}${no}.png`);
+  const dir = artDir(c);
+  const alt = dir === 'images/en/' ? 'images/' : 'images/en/';
+  const daftar = [artFile(no), `${dir}${no}.jpg`, `${dir}${no}.png`, `${dir}${no}.webp`,
+                  `${alt}${no}.jpg`, `${alt}${no}.png`, `${alt}${no}.webp`];
   return [...new Set(daftar)];
 }
 
@@ -5823,7 +5587,7 @@ function pxBlobToDataURL(b){
   });
 }
 async function pxCardImage(no){
-  const kunci = artFile(no) + '|' + artDir();
+  const kunci = artFile(no) + '|' + artDir(DB.find(d=>d.no===no));
   if(kunci in pxImgCache) return pxImgCache[kunci];
   let out = null;
   for(const src of pxRantaiGambar(no)){
@@ -6038,24 +5802,26 @@ $('#pxPdf').addEventListener('click', async ()=>{
 });
 
 
-/* muat pengaturan tersimpan *//* muat pengaturan tersimpan */
-/* Urutan penentuan bahasa (v6.22 — deteksi bahasa browser DIHAPUS sesuai
-   permintaan eksplisit pemilik: EN cuma alternatif, default HARUS selalu ID
-   buat semua pengunjung apa pun bahasa perangkatnya. Laporan lapangan: beberapa
-   pengunjung mobile masuk ke versi EN duluan karena bahasa/region perangkat
-   mereka bukan Indonesia — itu bug dari sudut pandang produk, bukan fitur):
-   1. parameter ?lang=en / ?lang=id  — untuk link yang dibagikan ke komunitas
-      berbahasa Inggris (Singapura, Malaysia, Thailand). Pilihan ini disimpan.
-   2. pilihan yang pernah disimpan pengguna di perangkat ini
-   3. default: ID — SELALU, tidak peduli bahasa/region browser atau perangkat */
-(function tentukanBahasa(){
-  const p = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
-  if(p === 'en' || p === 'id'){ store.lang = p; }
-  else if(store.lang !== 'en' && store.lang !== 'id'){
-    store.lang = 'id';
+/* muat pengaturan tersimpan */
+/* v6.46 — mekanisme penentuan bahasa CHROME UI (state.lang/store.lang/?lang=,
+   dulu di sini) dihapus total bersama tombol #btnLang — lihat komentar
+   'DUA BAHASA' di atas kamus T. Yang tersisa cuma preferensi bahasa KARTU
+   (?cardlang=, di bawah), yang memang beda konsep sejak awal (lihat
+   cardLangInfo()). */
+/* v6.45 — preferensi bahasa TEKS KARTU, terpisah dari bahasa chrome di atas.
+   Pola sama: ?cardlang=en/id untuk link yang dibagikan, lalu preferensi
+   tersimpan, default ID. TIDAK menyembunyikan kartu apa pun — cuma menentukan
+   nama/efek/gambar mana yang ditampilkan kalau kartu punya keduanya (lihat
+   cardLangInfo()). */
+(function tentukanBahasaKartu(){
+  const p = (new URLSearchParams(location.search).get('cardlang') || '').toLowerCase();
+  if(p === 'en' || p === 'id'){ store.cardLang = p; }
+  else if(store.cardLang !== 'en' && store.cardLang !== 'id'){
+    store.cardLang = 'id';
   }
-  state.lang = (store.lang === 'en') ? 'en' : 'id';
+  state.cardLang = (store.cardLang === 'en') ? 'en' : 'id';
 })();
+{ const fcl = $('#fCardLang'); if(fcl) fcl.value = state.cardLang; }
 if(!store.view) store.view = 'grid';      // default tampilan grid
 if(store.view === 'grid'){
   state.view = 'grid';
@@ -6078,7 +5844,7 @@ if(!DB.length){
     <span style="font-size:11px">Card database failed to load — cards.js is missing or unreadable.</span>
   </div>`;
 }
-amanJalankan('bahasa', applyLang);
+amanJalankan('bahasa', applyText);
 amanJalankan('renderDeckSelect', renderDeckSelect);
 amanJalankan('renderAdminBox',   renderAdminBox);
 amanJalankan('renderProxyBox', renderProxyBox);
