@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.44** · 16 September 2026
+**Versi saat ini: v6.46** · 18 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -106,65 +106,57 @@ Dukung tidak ditampilkan sama sekali — jadi aman dibiarkan kosong sampai akunn
 Untuk mematikan sementara, cukup beri komentar pada seluruh blok
 (`// window.DUKUNG = ...`).
 
-### Versi bahasa Inggris (untuk Singapura / Malaysia / Thailand)
+### Bahasa situs & bahasa kartu (sejak v6.46)
 
-Sejak v6.2 seluruh antarmuka yang dilihat pengunjung sudah dua bahasa penuh.
+Teks antarmuka (menu, tombol, tooltip, dst.) sekarang **satu set string
+dwibahasa tunggal** — bukan lagi dua varian ID/EN yang dipilih lewat tombol.
+Gayanya "campuran ringan": mayoritas Bahasa Indonesia santai, istilah
+kunci/teknis yang memang sudah umum dipakai apa adanya dalam Bahasa Inggris
+(`Login`, `Password`, `Logout`, `Filter`, `Deck`, dst.) — supaya pengunjung
+luar Indonesia setidaknya sedikit paham tanpa perlu toggle apa pun. Tombol
+ganti bahasa situs (🌐 ID/EN) di header **sudah dihapus total**, beserta
+seluruh mekanisme di belakangnya (`state.lang`, `store.lang`, parameter
+`?lang=`) — lihat § v6.46 di bawah untuk detail lengkap.
 
-**Cara bahasa ditentukan**, berurutan:
+**Semua tab (Community Deck, Tournaments Deck, Weekly Rush LGS) sekarang
+selalu tampil untuk semua pengunjung**, apa pun asalnya — tidak ada lagi mode
+yang menyembunyikannya atau mengalihkan ke halaman Cards. Sesuai arah
+pemilik: mayoritas pengunjung/komunitas tetap Bahasa Indonesia, dan itu
+bukan masalah — komunitasnya akan terbentuk sendiri.
 
-1. Parameter **`?lang=en`** atau **`?lang=id`** di alamat — pilihan ini ikut tersimpan
-2. Pilihan yang pernah ditekan pengguna di perangkat itu (tombol 🌐 di header)
-3. **Bahasa browser** — kalau bukan Bahasa Indonesia, situs langsung tampil Inggris
-
-Link untuk dibagikan ke komunitas berbahasa Inggris:
+**Bahasa KARTU** (nama & teks efek per kartu) beda konsep sejak v6.45 — itu
+preferensi `state.cardLang` (`'id'`/`'en'`, default `'id'`) yang dipilih lewat
+filter `<select id="fCardLang">` di bar filter (Deck Builder & halaman
+Kartu), **bukan** bahasa situs. Semua 288 kartu selalu tampil untuk kedua
+pilihan — kalau kartu tidak punya teks di bahasa yang dipilih, otomatis
+fallback ke bahasa yang tersedia (lihat § v6.45). Link untuk membagikan
+preferensi ini:
 
 ```
-https://data2712-code.github.io/mhr-lab-x7k2m9/?lang=en
+https://mhrdecklab.com/?cardlang=en
 ```
 
-Bisa juga digabung dengan hash halaman, mis. `?lang=en#build` untuk langsung membuka
-Deck Builder. Untuk link di bio TikTok, pakai versi `?lang=en` kalau audiens yang dituju
-pemain luar negeri.
+Bisa digabung dengan hash halaman, mis. `?cardlang=en#build`.
 
-**Mode Inggris sengaja dibuat sederhana: hanya dua menu — Cards dan Deck Builder.**
+**Panduan Bermain (rulebook)** sengaja tetap Bahasa Indonesia saja sebagai
+rujukan resmi — belum diterjemahkan penuh ke Inggris (isinya jauh lebih
+panjang dari string UI pendek; lihat § v6.46 untuk alasan & rencana ke
+depan).
 
-| Hal | Perilaku |
-|---|---|
-| Menu | hanya **Cards** dan **Deck Builder**. Tab **Community Deck**, **Tournaments Deck** (halaman sejak v6.26, nama tab "Tournaments Deck" sejak v6.42 — sebelumnya "Tournaments"), dan **Weekly Rush LGS** (nama tab sejak v6.41 — judul halaman (H2) di dalamnya tetap "Hero Base") tidak ditampilkan, karena isinya konten komunitas Indonesia (nama deck berbahasa Indonesia, label peringkat turnamen, jadwal LGS Indonesia) |
-| Alamat `#meta` / `#tourney` / `#lgs` | otomatis dialihkan ke halaman Cards, jadi tidak ada halaman kosong |
-| Database | 192 kartu — 16 kartu promo (PB01/EB01/TB01) disembunyikan karena versi Inggrisnya belum terbit |
-| Gambar | dari `images/en/`, otomatis jatuh ke `images/` kalau berkasnya belum ada |
-| Link deck yang dibagikan | tetap berfungsi penuh — langsung membuka Deck Builder beserta kotak "Save as my deck" |
-| Judul tab & preview link | `<title>` dan meta description ikut bahasa aktif |
-| Decklist PDF | seluruh label ikut bahasa aktif |
-
-**Mode admin dikecualikan:** dengan `?admin=1`, tab Community Deck tetap terlihat walau
-bahasanya Inggris — supaya pembuat kode deck tidak terkunci. Kalau nanti Community Deck
-ingin dibuka untuk pengunjung Inggris, cukup ubah satu baris di `applyLang`
-(objek `sembunyi`), dan siapkan nama deck versi Inggris kalau perlu. Tab **Tournaments
-Deck** (sejak v6.26) **tidak** punya pengecualian admin ini — halaman itu tidak punya
-panel admin/generator kode sama sekali (isinya cuma ditempel manual pemilik ke
-`data.js`, sama seperti Weekly Rush LGS), jadi selalu ikut aturan yang sama dengan
-Weekly Rush LGS.
-
-**Yang sengaja tetap Bahasa Indonesia:** panel mode admin (pembuat kode deck komunitas
-dan cetak kartu proxy), serta halaman Community Deck, Tournaments Deck, dan Weekly
-Rush LGS — keempatnya memang hanya tampil di mode Indonesia (Community Deck: kecuali
-mode admin).
-
-### Cara menambah teks / gambar bahasa Inggris
+### Cara menambah teks / gambar bahasa Inggris untuk kartu
 
 Gambar Inggris disimpan di `images/en/` dengan penamaan sama seperti versi
 Indonesia (`BP01-001.jpg`, varian `BP01-001_MR.jpg`).
 
 Untuk 16 kartu promo yang belum punya versi Inggris: begitu terbit, tambahkan
-`nm_en` dan `e_en` pada entri kartunya di `index.html`, lalu unggah gambarnya
-ke `images/en/`. Kartu itu otomatis ikut tampil di mode Inggris — tidak perlu
-mengubah kode lain.
+`nm_en` dan `e_en` pada entri kartunya di `cards.js`, lalu unggah gambarnya
+ke `images/en/`. Kartu itu otomatis ikut tampil untuk pengunjung yang pilih
+preferensi bahasa kartu EN — tidak perlu mengubah kode lain.
 
-Menambah teks antarmuka baru: tambahkan satu baris di kamus `T` di dalam
-`index.html` dengan format `kunci: ['teks Indonesia','English text']`, lalu
-pakai `t('kunci')` di JavaScript atau `data-i18n="kunci"` di HTML.
+Menambah teks ANTARMUKA (bukan teks kartu) baru: tambahkan satu baris di
+kamus `T` di dalam `index.html` dengan format `kunci: 'satu string
+dwibahasa'` (lihat gaya "campuran ringan" di atas), lalu pakai `t('kunci')`
+di JavaScript atau `data-i18n="kunci"` di HTML.
 
 ### Cara menambah varian artwork (alternate art)
 
@@ -465,7 +457,7 @@ bersifat case-sensitive.
 
 | Hal | Keterangan |
 |---|---|
-| Sumber data kartu | API resmi `server.marvelherorush.com/marvel/card/list` (200 kartu) + 8 kartu Hero File SD01–SD04 dari scan kartu + 80 kartu SP01 dari API resmi `en/cards` (versi Inggris, belum ada cetakan/terjemahan ID resmi — **disembunyikan di mode ID sejak v6.29**, lihat § v6.29) = **288 kartu di database, 208 tampil di mode ID / 272 di mode EN** |
+| Sumber data kartu | API resmi `server.marvelherorush.com/marvel/card/list` (200 kartu) + 8 kartu Hero File SD01–SD04 dari scan kartu + 80 kartu SP01 dari API resmi `en/cards` (versi Inggris; teks Indonesianya fan-translation sesi Claude, belum resmi dari MHR Indonesia/CARDFUN — **sejak v6.45 TETAP TAMPIL di kedua bahasa kartu, tapi diberi tanda `ID*+EN` + peringatan, bukan disembunyikan seperti v6.29–v6.44**, lihat § v6.45) = **288 kartu di database, tampil semua di kedua preferensi bahasa kartu (`state.cardLang`) sejak v6.45**. 16 kartu (dari 208 kartu dasar pra-SP01) belum punya `nm_en` (teks Inggris resmi) — otomatis fallback ke teks Indonesia kalau bahasa kartu EN dipilih. |
 | Ukuran gambar kartu | lebar 450 px (SP01: ~568×784, belum di-resize seragam — lihat § v6.28), ber-watermark SAMPLE, ±80–90 KB per file (SP01: ±170 KB, screenshot resolusi lebih tinggi) |
 | Varian artwork | ~76 berkas alternate art, penamaan `NOMOR_RARITY.jpg` (mis. `BP01-001_MR.jpg`) |
 | Aturan deck | 50 kartu, maksimal 3 salinan **per nama karakter**, maksimal 2 warna (101.1) |
@@ -485,6 +477,230 @@ Angka versi di depan wajib dipertahankan — kalau format berubah, naikkan ke 2
 dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ---
+
+### v6.45 — Filter bahasa kartu (ID/EN independen dari bahasa situs), lencana bahasa per kartu, kartu tidak lagi digating — 18 September 2026 *(`index.html`)*
+
+Permintaan pemilik (bagian pertama dari rencana "situs lebih universal"): pindahkan
+"bahasa kartu" dari tombol ganti bahasa situs (🌐 ID/EN, yang selama ini mengubah
+chrome UI SEKALIGUS teks kartu dalam satu saklar) ke filter tersendiri di bar
+filter Deck Builder/Kartu, dan kartu tidak boleh lagi disembunyikan hanya karena
+belum punya terjemahan di salah satu bahasa (ke depannya akan ada kartu yang
+eksklusif ID-saja atau EN-saja). Tombol ganti bahasa situs (🌐) **BELUM dihapus**
+di rilis ini — itu langkah kedua yang lebih besar (lihat "Berikutnya" di bawah),
+sengaja dipisah supaya masing-masing bisa diverifikasi sendiri-sendiri.
+
+**Preferensi baru, independen dari bahasa chrome UI:**
+- `state.cardLang` (`'id'`/`'en'`, default `'id'`) — disimpan `store.cardLang`,
+  bisa diset lewat `?cardlang=en`/`?cardlang=id` di URL (pola sama dengan
+  `?lang=`). Kontrol filternya: `<select id="fCardLang">` baru di bar filter
+  (Deck Builder & halaman Kartu), sejajar dengan filter seri/rarity/trait —
+  **bukan** filter yang menyempitkan hasil (sengaja tidak masuk hitungan
+  `updateFilterBadge()`), cuma menentukan bahasa nama/efek/gambar yang tampil.
+- **`cardLangInfo(c)`** — satu sumber kebenaran baru dipakai bareng oleh
+  `cardName()`/`cardEff()`/`artDir()`/`cardLangBadgeHTML()`, supaya keempatnya
+  selalu konsisten per kartu. Kalau kartu tidak punya teks di bahasa yang
+  dipilih pengguna, otomatis fallback ke bahasa yang tersedia (field `fallback`
+  di hasilnya menandai kapan itu terjadi).
+- **`cardVisible(c)`** disederhanakan jadi `!!(c.nm || c.nm_en)` — praktis
+  selalu `true` sekarang (dicek langsung ke `cards.js`: 0 dari 288 kartu yang
+  tidak punya `nm`). Bekas `ID_PENDING_SETS` (yang dulu menyembunyikan SP01
+  total di mode ID) **dihapus**.
+
+**Temuan penting saat implementasi (bukan sekadar "kartu kosong sekarang
+tampil"):** dicek langsung ke `cards.js` — SEMUA 288 kartu, termasuk SP01,
+sudah punya field `nm`/`e` (Indonesia) terisi. `ID_PENDING_SETS` yang dihapus
+di atas TIDAK menyembunyikan SP01 karena field ID-nya kosong — field itu sudah
+diisi teks Indonesia hasil **fan-translation sesi Claude** (bukan resmi dari
+MHR Indonesia/CARDFUN), dan sengaja disembunyikan total di mode ID supaya
+tidak disangka terjemahan resmi. Menghapus gating itu berarti fan-translation
+SP01 SEKARANG IKUT TERLIHAT untuk pengguna yang pilih bahasa kartu ID — bukan
+cuma "kartu yang tadinya kosong sekarang tampil". Cuma **16 kartu** (dari 208
+kartu dasar pra-SP01) yang benar-benar tidak punya `nm_en` sama sekali.
+
+Supaya ini tidak terlihat seperti sengaja "menyelundupkan" teks tidak resmi:
+ditambahkan `FAN_TRANSLATED_ID_SETS = ['SP01']` — **bukan** untuk gating lagi,
+cuma untuk **memberi peringatan jelas**:
+- Lencana bahasa kartu SP01 di mode ID tampil sebagai **`ID*+EN`** (border putus-
+  putus merah), beda dari `ID+EN` polos untuk kartu lain — tooltip menjelaskan
+  teks ID-nya fan-translation, teks EN-nya resmi.
+- Di popup detail kartu (lightbox), muncul baris peringatan kecil berwarna merah
+  di bawah teks efek: "⚠ Teks Indonesia di atas masih terjemahan fan-made, belum
+  resmi dari MHR Indonesia/CARDFUN." — cuma muncul untuk kartu di
+  `FAN_TRANSLATED_ID_SETS` saat teks ID yang ditampilkan.
+
+**Lencana bahasa per kartu (baru)** — `cardLangBadgeHTML(c, cls)`, dipasang di
+daftar, grid, dan lightbox (sejajar dengan lencana Errata/Counter yang sudah
+ada): teks pill `ID+EN` (kartu punya keduanya), `ID*+EN` (keduanya, tapi ID-nya
+fan-translation — lihat di atas), `EN` atau `ID` (cuma satu bahasa — belum ada
+kasusnya di database sekarang, tapi kodenya sudah siap untuk kartu eksklusif
+satu bahasa di masa depan). Dipilih tag teks, bukan ikon bendera 🇮🇩/🇬🇧 — lebih
+jelas dibaca di ukuran kecil dan tidak ambigu (beberapa bendera serupa untuk
+mata yang tidak familiar). CSS baru: `.langtag` + varian `.both`/`.both.fan`/
+`.id`/`.en`, termasuk posisi absolute di mode grid (pojok kanan atas, di bawah
+tombol share).
+
+**Gambar kartu ikut `cardLangInfo()` per kartu** — `artDir(c)` sekarang menerima
+kartu (bukan lagi baca `state.lang` global): `images/` = printing Indonesia
+(termasuk teks Errata V.1 yang sudah dibakar ke pixel untuk beberapa kartu),
+`images/en/` = printing Inggris asli. Beberapa seri (PB01/EB01/TB01) cuma punya
+satu printing — `images/en/` tidak punya berkasnya sama sekali — jadi
+`imgFallback()`/`gridImgFallback()`/`lbImgFallback()` sekarang mencoba
+**direktori lain** dulu (`altArtFile()`) sebelum lanjut ke fallback ekstensi
+lain (jpg→png→webp) seperti sebelumnya. `pxRantaiGambar()` (cetak proxy) disusun
+ulang dengan pola yang sama, lebih sederhana dari rantai hardcode sebelumnya.
+
+**Konsistensi lain yang dirapikan sekalian** (ditemukan saat audit semua
+pemanggil `cardName`/`cardEff`/`artDir`): tiga tempat yang sebelumnya baca
+`state.lang` langsung untuk teks kartu (pesan pelanggaran kuota salinan di
+panel deck, urutan & label "kartu paling sering dipakai" di halaman
+Tournaments Deck) diubah untuk lewat `cardName()` — supaya ikut preferensi
+`cardLang` yang baru, bukan lagi bahasa chrome UI.
+
+**Jumlah kartu disamakan** — karena `cardVisible()` tidak lagi menyaring
+berdasar bahasa, `#hTotal`, tagline, `<meta name="description">`,
+`og:description`, JSON-LD, dan teks pembuka halaman Panduan semuanya diperbarui
+dari "208 kartu"/"272 cards" (angka lama yang tergantung mode) jadi **288
+kartu/cards** (total sebenarnya, sama di kedua mode sekarang) di kedua bahasa.
+Kualifier "· Ver. Indonesia"/"· English Ver." di tagline dihapus karena sudah
+tidak akurat (keduanya menampilkan database yang sama sekarang).
+
+**Verifikasi**: `node --check` pada blok `<script>` inline — lolos. Diuji
+langsung ke `cards.js` (bukan cuma dibaca) untuk memastikan klaim "0 dari 288
+kartu tidak punya `nm`" dan "16 kartu tidak punya `nm_en`" akurat, bukan
+tebakan. Diuji fungsional dengan Playwright (server lokal): `#hTotal` = 288;
+pencarian `SP01-001` dengan `cardLang=id` menampilkan kartu (dulu 0 hasil,
+disembunyikan `ID_PENDING_SETS`) dengan lencana `ID*+EN` + peringatan fan-
+translation di lightbox; ganti `cardLang` ke `en` mengubah nama & gambar yang
+tampil (termasuk untuk kartu errata seperti `BP01-002`, yang gambarnya memang
+beda pixel antara `images/`= ID-dengan-errata vs `images/en/`= EN asli);
+`BP01-001` (kartu biasa, punya `nm`+`nm_en`) menampilkan lencana `ID+EN` polos
+tanpa peringatan. Semua transisi tanpa error console.
+
+**Belum dikerjakan di rilis ini (langkah berikutnya, per diskusi 18 September):**
+1. Hapus tombol ganti bahasa situs (🌐) — perlu keputusan tambahan dulu karena
+   `state.lang` saat ini JUGA mengatur hal-hal di luar teks kartu: menyembunyikan
+   total tab Community Deck/Tournaments Deck/Weekly Rush LGS di mode EN (isinya
+   konten komunitas Indonesia), format locale angka/tanggal (id-ID vs en-US),
+   dan konten halaman Panduan Bermain (rulebook lengkap, cuma ada versi
+   Indonesia+Inggris masing-masing penuh, beda dari string UI pendek).
+2. Kumpulkan ~150 entri kamus `T` (teks UI: menu, tombol, placeholder, tooltip)
+   jadi SATU teks per kunci yang "dwibahasa secara alami" (bukan kaku), sesuai
+   permintaan pemilik — supaya pengunjung luar Indonesia setidaknya sedikit
+   paham tanpa perlu toggle. Sengaja belum dikerjakan di rilis ini karena gaya
+   penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
+   terpisah, lebih ke pekerjaan tulisan daripada kode).
+
+### v6.46 — Hapus toggle bahasa situs total, UI dwibahasa tunggal, tab komunitas selalu tampil, rulebook tetap ID — 18 September 2026 *(`index.html`)*
+
+Bagian KEDUA dari rencana "situs lebih universal" (bagian pertama: § v6.45,
+filter bahasa kartu). Feedback pemilik setelah melihat § v6.45:
+
+1. Kerjakan filter bahasa kartu (sudah — v6.45), lalu **hapus total** tombol
+   ganti bahasa situs (🌐) supaya tidak ada dua mekanisme ganti bahasa yang
+   tumpang tindih di website ini.
+2. Bisakah teks UI dibuat **bilingual/campuran** — Bahasa Indonesia yang tidak
+   kaku, dan pengunjung luar Indonesia setidaknya sedikit paham?
+3. Tujuannya membuat situs lebih universal — mayoritas pengunjung/komunitas
+   tetap Bahasa Indonesia dan itu bukan masalah, komunitasnya akan terbentuk
+   sendiri.
+
+Sebelum mengerjakan, tiga keputusan diajukan ke pemilik (karena `state.lang`
+lama ternyata mengatur lebih dari sekadar teks) dan dipilih opsi yang
+direkomendasikan untuk ketiganya:
+
+- **Tab LGS/Tournaments Deck/Community Deck** (dulu disembunyikan total di
+  mode EN) → **selalu tampil untuk semua pengunjung**.
+- **Format locale angka/tanggal** (dulu id-ID vs en-US ikut `state.lang`) →
+  **selalu id-ID** (mayoritas pengunjung & konteks Rupiah/Indonesia).
+- **Panduan Bermain (rulebook)** (dulu punya versi ID+EN penuh masing-masing)
+  → **tetap Bahasa Indonesia saja** sebagai rujukan resmi untuk rilis ini;
+  terjemahan penuh ke Inggris adalah proyek terpisah, bukan digabung ke sini.
+- **Gaya bilingual teks UI** → **"campuran ringan"**: mayoritas Indonesia
+  santai, istilah kunci/teknis yang sudah umum tetap Inggris (`Login` bukan
+  `Masuk`, `Password` bukan `Kata sandi`, `Logout` bukan `Keluar` — filter,
+  deck, level, power, dst. sudah dari dulu begitu di seluruh kamus `T`).
+
+**Yang dihapus total** (tidak ada lagi jejaknya di kode, cuma komentar
+historis untuk konteks):
+- Tombol `#btnLang` (🌐 ID/EN) di header — elemennya, event listener-nya, dan
+  update teksnya di `applyLang()`.
+- `state.lang` & `store.lang` (state/localStorage) beserta IIFE
+  `tentukanBahasa()` yang membaca parameter `?lang=en`/`?lang=id`.
+- Array `LANGS`. Kamus `T` (dulu `{kunci: ['teks ID','teks EN']}`, ~357 entri)
+  dikumpulkan jadi `{kunci: 'satu string dwibahasa'}` — `t(k)` disederhanakan
+  jadi `T[k]` langsung, tidak ada lagi pemilihan indeks array.
+- Blok `sembunyi`/hide-tab di `applyLang()` (yang dulu menyembunyikan tab
+  LGS/Tournaments Deck/Community Deck di mode EN, dengan pengecualian admin
+  untuk Community Deck) — dihapus dari `applyLang()` **dan** dari `setPage()`
+  (dulu ada pengalihan otomatis ke halaman Cards kalau membuka tab yang lagi
+  disembunyikan).
+- Varian `en` di objek `GUIDE` (isi lengkap halaman Panduan Bermain) — cuma
+  `GUIDE.id` yang tersisa, `renderPanduan()` tidak lagi memilih berdasarkan
+  bahasa.
+- Ternary `state.lang` di lima tempat lain yang masing-masing kecil: format
+  Total Power (selalu `id-ID`), teks info simulasi draw awal (selalu versi
+  Indonesia — dulu ada versi Inggris terpisah di luar kamus `T`), format
+  tanggal cetak decklist PDF (selalu `id-ID`), lookup `cfg.teks[state.lang]`
+  untuk kalimat custom halaman Dukung (2 tempat — sekarang cuma
+  `cfg.teks.id || cfg.teks.en`), dan nama bulan di `tanggalRingkas()` (array
+  `bulanEN` dihapus, selalu `bulanID`).
+- `namaDeckLokal()` (dulu menerjemahkan kata warna "Merah/Kuning/Biru/Hijau"
+  jadi "Red/Yellow/Blue/Green" di mode EN) — nama fungsi dipertahankan (semua
+  pemanggilnya tidak perlu diubah) tapi isinya jadi `return nm;` polos, sesuai
+  arah "komunitas Indonesia apa adanya, bukan masalah".
+
+**`applyLang()` diganti nama jadi `applyText()`** dan berubah peran: dulu
+dipanggil ulang setiap tombol 🌐 dipencet (makanya isinya kerja berat:
+toggle tab, render ulang kartu/deck, dst.), sekarang murni **sekali-jalan
+saat halaman dimuat** (dipanggil dari `amanJalankan('bahasa', applyText)` di
+bagian init) — cuma menempelkan teks dari kamus `T` ke elemen `data-i18n`/
+`data-i18n-ph`/`data-i18n-title`, set `document.documentElement.lang = 'id'`
+sekali, dan judul tab/meta description.
+
+**Kluster Login/Password/Logout** — 21 entri kamus `T` (dari 357) diberi teks
+override manual mengikuti gaya "campuran ringan" (bukan sekadar dipakai teks
+Indonesia default seperti 336 entri lain): `acctLogin`, `acctLoginCta`,
+`acctPassword`, `acctHi`, `acctLogout`, `acctLoginTitle`,
+`acctModalTitleLogin`, `acctErrInvalid`, `acctSignupOk`, `acctForgotLink`,
+`acctForgotNote`, `acctForgotBack`, `acctResetNote`, `acctNewPassword`,
+`acctResetCta`, `acctResetOk`, `acctErrUpdateFailed`, `cloudHintLoggedOut`,
+`pubCommentLoginHint`, `dashLoginHint`, `dashLoginBtn` — semua kemunculan
+"Masuk"/"Kata sandi"/"Keluar" dalam konteks akun diganti "Login"/"Password"/
+"Logout". Satu string hardcoded di luar kamus `T` (hint cetak proxy PDF,
+`renderProxyBox()`) diubah manual dengan cara yang sama. 336 entri lain
+sengaja **dibiarkan apa adanya** (teks Indonesia yang sudah ada) — kebanyakan
+sudah "campuran ringan" secara alami sejak awal karena istilah game (BLOCK,
+COUNTER, RETREAT, FIELD, BATTLE, Power, Level, Summon, dst.) memang ditulis
+dalam Bahasa Inggris apa adanya di teks Indonesia manapun di kamus ini;
+menambah terjemahan paralel di setiap kalimat panjang justru jadi "campuran
+berat" (opsi yang TIDAK dipilih pemilik).
+
+**Verifikasi**: parser Python khusus (bukan regex biasa — JS string literal
+punya escape `\'`/`\"` yang berbahaya untuk regex naif) dipakai untuk
+membongkar-pasang 357 entri kamus `T` dari `[id,en]` jadi string tunggal,
+lalu hasilnya di-`eval()` langsung di Node untuk memastikan seluruhnya
+ter-parse valid (357 keys, tidak ada yang hilang/dobel) sebelum ditulis balik
+ke `index.html`. `node --check` pada blok `<script>` inline — lolos. Diuji
+fungsional dengan Playwright (server lokal): `#btnLang` sudah tidak ada;
+`state.lang` sudah tidak ada di objek `state` (`'lang' in state` → `false`);
+tab LGS & Tournaments Deck & Community Deck bisa dibuka langsung (body class
+`page-lgs`/`page-tourney`/`page-meta`, bukan dialihkan ke `page-cards`);
+`T.acctLogin`/`T.acctPassword`/`T.acctLogout` = `"Login"`/`"Password"`/
+`"Logout"`; label form login di DOM menampilkan "Login"/"Password"; halaman
+Panduan cuma berisi heading Indonesia ("Panduan Bermain Marvel Hero Rush"),
+tidak ada lagi heading Inggris ("How to Play..."); `document.documentElement.lang`
+= `"id"`; Total Power di panel deck tampil format `id-ID` (mis. `19.500`,
+titik sebagai pemisah ribuan). Semua transisi tanpa error console (selain
+404 gambar & Supabase yang diblokir jaringan sandbox — tidak terkait
+perubahan ini, sama seperti pengujian § v6.45).
+
+**Belum dikerjakan / sengaja di luar rilis ini:**
+1. Terjemahan penuh Panduan Bermain (rulebook) ke Inggris — proyek tulisan
+   terpisah, jauh lebih besar dari teks UI pendek.
+2. 336 entri kamus `T` yang tidak masuk kluster Login/Password/Logout belum
+   diberi pass "campuran ringan" tambahan satu-per-satu — kalau pemilik mau
+   contoh gaya lain untuk kalimat tertentu (tooltip, pesan error panjang,
+   dst.), bisa dikerjakan bertahap lewat sesi terpisah.
 
 ### v6.44 — Tambah filter "sudah dimiliki" di Koleksi Kartu Saya — 16 September 2026 *(`index.html`)*
 
