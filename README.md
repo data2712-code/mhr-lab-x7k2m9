@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.47** · 18 September 2026
+**Versi saat ini: v6.48** · 18 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -589,6 +589,60 @@ tanpa peringatan. Semua transisi tanpa error console.
    paham tanpa perlu toggle. Sengaja belum dikerjakan di rilis ini karena gaya
    penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
    terpisah, lebih ke pekerjaan tulisan daripada kode).
+
+### v6.48 — Ganti favicon/app icon jadi logo resmi "MHR Deck Lab" — 18 September 2026 *(`icons/*.png`)*
+
+Permintaan pemilik: pasang logo resmi (kartu-kartu + labu erlenmeyer, gradasi
+kuning-oranye "MHR" + putih "DECK LAB") sebagai icon utama situs — sebelumnya
+`icons/` masih berisi set placeholder (huruf "M" kuning dengan border, bukan
+logo final).
+
+Logo yang dikirim pemilik berbentuk banner lebar (1600×497, ikon + wordmark
+sejajar) — bukan bentuk kotak yang dibutuhkan favicon/app icon. Jadi bagian
+ikon (kartu-kartu + labu, tanpa teks "MHR DECK LAB") di-crop dari sisi kiri
+banner, lalu di-render ulang ke kanvas kotak dengan warna latar
+`#0E1216` (sama persis dengan `theme_color`/`background_color` di
+`manifest.json`, supaya menyatu dengan splash screen PWA) dan padding yang
+disesuaikan per jenis:
+
+- **Icon biasa** (favicon, apple-touch-icon, `icon-192`/`icon-512`, purpose
+  `"any"`) — mark diisi ~80% lebar kanvas, padding wajar ala app-icon standar.
+- **`icon-maskable-512`** — mark sengaja diperkecil ke ~62% lebar kanvas
+  supaya tetap aman di dalam *safe zone* (lingkaran tengah 80%) yang dipakai
+  launcher Android untuk masking bentuk (lingkaran/persegi bulat/dsb) —
+  kalau tidak, bagian tepi ikon (labu, kartu) bisa terpotong di beberapa
+  launcher.
+
+**File yang diganti** (nama file SAMA PERSIS dengan sebelumnya, jadi tidak
+ada referensi di `index.html`/`manifest.json` yang perlu diubah):
+
+- `icons/favicon-16.png`, `icons/favicon-32.png` — tab browser.
+- `icons/apple-touch-icon.png` (180×180) — ikon saat disimpan ke home screen
+  iOS.
+- `icons/icon-192.png`, `icons/icon-512.png` (purpose `"any"`) — ikon PWA
+  umum.
+- `icons/icon-maskable-512.png` (purpose `"maskable"`) — ikon adaptif
+  Android, full-bleed tanpa transparansi sesuai spesifikasi maskable icon.
+
+**Catatan:** favicon 16×16 secara alami agak buram (detail kartu, kilau,
+petir tidak muat jernih di 16 piksel) — ini wajar untuk logo serapi ini dan
+sama seperti kebanyakan situs dengan logo detail; ukuran 32×32 ke atas sudah
+jelas terbaca. Gambar sosial (`og-image.jpg`, dipakai `og:image` untuk
+preview link di media sosial) TIDAK disentuh di rilis ini karena bukan yang
+diminta — beda dari favicon/app icon, itu murni gambar preview link,
+sengaja dibiarkan menunggu arahan terpisah kalau pemilik mau logo baru juga
+dipakai di sana.
+
+**Verifikasi**: dibandingkan dulu dengan set ikon lama (placeholder huruf
+"M") untuk konfirmasi bahwa memang belum pakai logo asli; hasil crop & tiap
+ukuran dicek visual satu per satu (termasuk upscale nearest-neighbor untuk
+favicon 16×16/32×32, karena di ukuran itu kelihatan sekali kalau detailnya
+hilang); tidak ada perubahan kode (HTML/JS/manifest) karena nama file
+dipertahankan sama, jadi tidak perlu tes fungsional Playwright — cukup
+verifikasi biner (ukuran file wajar, mode warna benar: `"any"` RGB solid,
+`"maskable"` RGB full-bleed tanpa alpha) dan sinkronisasi byte-identik +
+stabilitas 15 detik ke perangkat pemilik, sama seperti rilis-rilis
+sebelumnya.
 
 ### v6.47 — Tanggal publish deck di galeri "Dari Pengguna" — 18 September 2026 *(`index.html`, `decks.js`)*
 
