@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.46** · 18 September 2026
+**Versi saat ini: v6.47** · 18 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -589,6 +589,55 @@ tanpa peringatan. Semua transisi tanpa error console.
    paham tanpa perlu toggle. Sengaja belum dikerjakan di rilis ini karena gaya
    penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
    terpisah, lebih ke pekerjaan tulisan daripada kode).
+
+### v6.47 — Tanggal publish deck di galeri "Dari Pengguna" — 18 September 2026 *(`index.html`, `decks.js`)*
+
+Permintaan pemilik: di Community Deck, untuk deck yang dipublikasikan
+pengguna lewat akun mereka, tambahkan timestamp supaya bisa diketahui kapan
+deck itu dipublish — format tanggal-bulan-tahun (`DD-MM-YYYY`, mis.
+`18-09-2026`).
+
+**Kenapa bukan cuma pakai `created_at` yang sudah ada:** `created_at` adalah
+kapan baris deck itu pertama kali disimpan ke akun (lewat "Deck Saya
+(Akun)") — bisa jauh sebelum dipublikasikan, karena publish adalah langkah
+TERPISAH (toggle "Publikasikan" belakangan). Supaya tanggal yang tampil
+benar-benar "kapan dipublish" (bukan "kapan disimpan"), ditambahkan kolom
+baru:
+
+- **`public.decks.published_at`** (timestamptz, nullable) — migrasi SQL
+  terpisah, `mhr_decklab_published_at_migration.sql` (pemilik jalankan
+  sendiri di SQL Editor Supabase, sama seperti skema-skema sebelumnya; aman
+  dijalankan berkali-kali, pakai `IF NOT EXISTS`).
+- **`decks.js` → `setPublic()`**: diisi `new Date().toISOString()` di klien
+  setiap kali `isPublic` di-set `true` (toggle "Publikasikan"). SENGAJA
+  TIDAK disentuh saat `isPublic` `false` (unpublish) — tanggal publish
+  terakhir tetap tersimpan meski deck sedang disembunyikan, dan republish
+  berikutnya otomatis memperbarui ke tanggal publikasi TERBARU (bukan
+  riwayat lengkap — cukup untuk kebutuhan "kapan deck ini tayang").
+  `listPublic()` diperbarui untuk ikut mengambil kolom ini.
+- **Kompatibilitas mundur:** deck yang SUDAH publik sebelum migrasi
+  dijalankan otomatis punya `published_at` kosong — galeri jatuh ke
+  `created_at` sebagai perkiraan sampai deck itu di-unpublish lalu
+  dipublikasikan ulang (`row.published_at || row.created_at` di
+  `renderPubGrid()`).
+
+**Tampilan** — badge kecil `📅 DD-MM-YYYY` ditambahkan ke baris statistik
+kartu galeri (sejajar dengan jumlah kartu & rata-rata Lv), lewat fungsi baru
+`tanggalDMY(iso)` (format numerik dua-digit, beda dari `tanggalRingkas()`
+yang sudah ada — itu untuk tanggal komentar, formatnya "18 Sep 2026, 14.05"
+dengan jam, bukan yang diminta di sini). String tooltip baru: `pubDateTip`.
+Cuma diterapkan ke galeri **"Dari Pengguna"** (deck yang benar-benar
+dipublikasikan lewat akun) — bagian "⭐ Pilihan Pemilik" (deck komunitas dari
+`data.js`, dikurasi manual) tidak disentuh karena bukan itu yang diminta.
+
+**Verifikasi**: `node --check` pada `decks.js` dan blok `<script>` inline —
+lolos. Diuji fungsional dengan Playwright: `tanggalDMY()` diuji langsung
+(`2026-09-18` → `18-09-2026`, `2026-01-05` → `05-01-2026`, tanggal tidak
+valid → `-`); `renderPubGrid()` dites dengan data tiruan (stub
+`window.MHRDecks`/`window.MHRSocial`, karena sandbox tidak ada akses
+internet ke Supabase) untuk dua kasus — deck dengan `published_at` terisi
+(tampil `10-09-2026`, dari `published_at`) dan deck dengan `published_at`
+kosong (tampil `01-08-2026`, fallback ke `created_at`) — keduanya lolos.
 
 ### v6.46 — Hapus toggle bahasa situs total, UI dwibahasa tunggal, tab komunitas selalu tampil, rulebook tetap ID — 18 September 2026 *(`index.html`)*
 
