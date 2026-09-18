@@ -180,7 +180,7 @@
       try{
         const { data: decks, error } = await c
           .from('decks')
-          .select('id,owner_id,name,deck_code,playstyle,created_at,updated_at')
+          .select('id,owner_id,name,deck_code,playstyle,created_at,updated_at,published_at')
           .eq('is_public', true)
           .order('created_at', { ascending:false })
           .limit(limit || 60);
@@ -205,18 +205,29 @@
        (is_public -> false saja, TIDAK menghapus baris — beda dari remove()
        di atas). Sengaja TIDAK memfilter owner_id, sama seperti remove() —
        RLS (`users can update own decks` OR `admins can update any deck`)
-       yang menjaga siapa benar-benar boleh berhasil melakukan ini. */
+       yang menjaga siapa benar-benar boleh berhasil melakukan ini.
+       v6.47 — set `published_at` = sekarang tiap kali deck di-toggle JADI
+       publik (permintaan pemilik: tampilkan tanggal publish di galeri "Dari
+       Pengguna", format DD-MM-YYYY — lihat tanggalDMY() & renderPubGrid() di
+       index.html). Republish sesudah unpublish otomatis memperbarui tanggal
+       ke publikasi TERBARU (bukan yang pertama) — cocok dengan maksud kolom
+       ini ("kapan deck ini tayang di galeri", bukan riwayat lengkap). Kolom
+       `published_at` (timestamptz, nullable) perlu migrasi SQL sekali di
+       Supabase (lihat README § v6.47) — TIDAK disentuh sama sekali saat
+       `isPublic` false (unpublish), jadi tanggal publish terakhir tetap
+       tersimpan meski deck sedang disembunyikan. */
     async setPublic({ id, isPublic, playstyle }){
       const c = client();
       if(!c) return { data:null, error:{ message:'AUTH_NOT_READY' } };
       const patch = { is_public: !!isPublic };
       if(typeof playstyle === 'string') patch.playstyle = playstyle;
+      if(isPublic) patch.published_at = new Date().toISOString();
       try{
         const { data, error } = await c
           .from('decks')
           .update(patch)
           .eq('id', id)
-          .select('id,name,is_public,playstyle')
+          .select('id,name,is_public,playstyle,published_at')
           .maybeSingle();
         return { data, error };
       }catch(e){
