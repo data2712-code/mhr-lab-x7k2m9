@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.50  ·  19 September 2026
+     MHR DECK LAB  ·  versi 6.51  ·  19 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 288 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.50">
+<meta name="version" content="6.51">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1528,7 +1528,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.50</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.51</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2389,13 +2389,22 @@ const T = {
   cRange: 'Jarak',
   cPower: 'Power',
   cColor: 'Warna',
+  /* v6.51 — label "Colour" KHUSUS untuk popup detail kartu (.lb-stats).
+     cColor sendiri ("Warna") sengaja TIDAK diubah karena masih dipakai di
+     grid preview kartu & baris perbandingan simulator — permintaan pemilik
+     cuma menyebut popup detail kartu. */
+  cColorFull: 'Colour',
   cAdd: '+ Deck',
   cFull: 'Kuota penuh',
   cShare: 'Bagikan kartu ini',
   cSameName: 'Nama sama dicetak ulang di seri lain — kuota salinan digabung',
   cOfficial: 'lihat kartu di situs resmi ↗',
-  cAttack: 'Jarak serangan',
-  cFight: 'Kekuatan bertarung',
+  /* v6.51 — cAttack & cFight cuma dipakai di popup detail kartu (.lb-stats,
+     lihat renderLightbox()), TIDAK dipakai di grid preview (yang pakai
+     cRange/cPower terpisah, tetap "Jarak"/"Power") — jadi aman diringkas
+     tanpa mempengaruhi tempat lain. */
+  cAttack: 'R',
+  cFight: 'Power',
   cAddDeck: '+ Tambah ke deck',
   errata: 'Errata',
   errataTip: 'Teks efek kartu ini pernah direvisi resmi oleh tim MHR Indonesia (Errata {v}).',
@@ -3547,7 +3556,7 @@ function openLightbox(no){
         <div>${t('levelLbl')} <b>${c.l}</b></div>
         <div>${t('cAttack')} <b>${c.r}</b></div>
         <div>${t('cFight')} <b>${c.p}</b></div>
-        <div>${t('cColor')} <b>${t(c.c)}</b></div>
+        <div>${t('cColorFull')} <b>${t(c.c)}</b></div>
       </div>
       <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:10px">${c.f}</div>
       <div class="lb-eff">${cardEff(c)}</div>
