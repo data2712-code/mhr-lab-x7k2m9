@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.50** · 19 September 2026
+**Versi saat ini: v6.51** · 19 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -590,6 +590,37 @@ tanpa peringatan. Semua transisi tanpa error console.
    penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
    terpisah, lebih ke pekerjaan tulisan daripada kode).
 
+### v6.51 — Ringkas label statistik di popup detail kartu (Jarak Serangan→R, Kekuatan Bertarung→Power, Warna→Colour) — 19 September 2026 *(`index.html`)*
+
+Permintaan pemilik: di popup detail kartu (klik kartu untuk lihat rincian),
+tiga label statistik diringkas — "Jarak Serangan" jadi **R**, "Kekuatan
+Bertarung" jadi **Power**, "Warna" jadi **Colour**.
+
+**Cuma di popup detail, sengaja tidak menyebar ke tempat lain**: label-label
+ini berasal dari kamus `T` (`cAttack`, `cFight`, `cColor`) yang dicek dulu
+dipakai di mana saja sebelum diubah:
+
+- `cAttack` ("Jarak serangan") dan `cFight` ("Kekuatan bertarung") ternyata
+  CUMA dipakai di popup detail (`.lb-stats`, fungsi `openLightbox()`) — jadi
+  aman langsung diringkas jadi `'R'` dan `'Power'` tanpa efek samping.
+- `cColor` ("Warna") sebaliknya dipakai di TIGA tempat: grid preview kartu,
+  baris perbandingan di Simulator, DAN popup detail. Karena permintaan
+  pemilik cuma menyebut popup detail kartu, `cColor` sendiri sengaja
+  DIBIARKAN tetap "Warna" (supaya grid preview & Simulator tidak ikut
+  berubah tanpa diminta) — dibuat key baru khusus, `cColorFull: 'Colour'`,
+  dan cuma baris popup detail yang dipindah pakai key baru ini.
+
+Hasil di popup detail sekarang: `Level 2` · `R 1` · `Power 500` ·
+`Colour Merah` (persis urutan tampilan di layar: Level, R, Power, Colour).
+
+**Verifikasi**: `node --check` pada blok `<script>` inline terbesar — lolos.
+Diuji dengan Playwright: buka `openLightbox('BP01-004')` (kartu "[Never Back
+Down] Hulk" dari contoh pemilik), teks `.lb-stats` dicek persis
+`"Level 2\nR 1\nPower 500\nColour Merah"`; dicek juga lewat `t(key)` langsung
+bahwa `cColor`/`cRange`/`cPower` (dipakai di grid preview & Simulator) TIDAK
+ikut berubah (`cColor` masih `"Warna"`), memastikan perubahan benar-benar
+terisolasi ke popup detail saja sesuai permintaan. Screenshot popup detail
+dicek visual manual, cocok dengan tangkapan layar yang dikirim pemilik.
 ### v6.50 — Hapus tagline di bawah logo header, perbesar logo — 19 September 2026 *(`index.html`)*
 
 Permintaan pemilik (lanjutan dari v6.49): buang teks tagline ("Marvel Hero
