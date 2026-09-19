@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.49** · 19 September 2026
+**Versi saat ini: v6.50** · 19 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -590,6 +590,52 @@ tanpa peringatan. Semua transisi tanpa error console.
    penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
    terpisah, lebih ke pekerjaan tulisan daripada kode).
 
+### v6.50 — Hapus tagline di bawah logo header, perbesar logo — 19 September 2026 *(`index.html`)*
+
+Permintaan pemilik (lanjutan dari v6.49): buang teks tagline ("Marvel Hero
+Rush TCG Deck Builder · 288 kartu (...)") yang tampil di bawah logo header,
+dan perbesar ukuran logo.
+
+**Tagline dihapus total** — bukan cuma disembunyikan lewat CSS (`display:none`),
+tapi elemen `<p data-i18n="tagline">` di markup, aturan CSS `.brand p` (desktop
+& mobile), dan entri kamus `T.tagline` yang jadi tidak terpakai semuanya
+dihapus bersih dari kode — supaya tidak ada sisa kode mati yang membingungkan
+kalau ada yang baca ulang berkas ini nanti. `.brand` sekarang cuma berisi satu
+baris: `<h1><img class="logo" ...></h1>`. Teks tagline yang tadinya ada di situ
+dipindah jadi bagian dari atribut `alt` gambar logo (`alt="MHR Deck Lab —
+Marvel Hero Rush TCG Deck Builder"`) supaya konteksnya tidak hilang sama
+sekali untuk pembaca layar dan mesin pencari, walau sudah tidak tampil visual.
+
+**Ukuran logo diperbesar**:
+
+| | Sebelum (v6.49) | Sesudah (v6.50) |
+|---|---|---|
+| Desktop (`.brand .logo`) | 40px tinggi (≈126×40px) | **56px tinggi** (≈176×56px) |
+| Mobile (≤640px) | 32px tinggi (≈101×32px) | **44px tinggi** (≈139×44px) |
+
+Rasio dipertahankan lewat `width:auto` + `width`/`height` intrinsik di tag
+`<img>` (630×200) — jadi tetap tidak ada pergeseran layout (CLS) di ukuran
+baru ini. Rekomendasi ukuran ini didasarkan pada: (1) header sekarang cuma
+berisi logo (tagline sudah hilang), jadi ada ruang vertikal lebih yang tadinya
+dipakai teks tagline, aman dipakai memperbesar logo tanpa header jadi jauh
+lebih tinggi dari sebelumnya; (2) 56px masih proporsional dibanding elemen
+header lain di sebelahnya (pill statistik & tombol TikTok/Instagram/Dukung
+tinggi ≈28-34px) — logo jadi elemen paling dominan di header (sesuai fungsinya
+sebagai identitas brand) tanpa "menelan" elemen-elemen kecil di sebelahnya;
+(3) di mobile, 44px dipilih supaya logo + baris tombol sosial di bawahnya
+(yang di-scroll horizontal) masih muat nyaman di header yang sudah dipadatkan
+(`padding:12px 16px 10px` pada breakpoint ≤640px).
+
+**Verifikasi**: `node --check` pada blok `<script>` inline terbesar — lolos
+(entri kamus `T.tagline` yang dihapus dicek dulu tidak dipakai di tempat lain
+— cuma satu pemakaian, di markup header yang sama-sama dihapus). Diuji visual
+dengan Playwright di dua lebar viewport: desktop 1280px (bounding box logo
+176×56, sesuai `height:56px`) dan mobile 390px (bounding box 139×44, sesuai
+`height:44px`); dicek juga elemen `[data-i18n="tagline"]` sudah nol di DOM.
+Screenshot kedua ukuran dicek visual manual — logo lebih besar terasa lebih
+menonjol tanpa mendesak elemen navigasi/statistik di sebelahnya, tagline sudah
+tidak tampil. Tidak ada error konsol baru di luar 404 gambar kartu/Supabase
+yang memang diblokir di sandbox (bukan regresi).
 ### v6.49 — Logo asli di judul header (ganti teks "MHR DECK LAB"), latar transparan di logo header & favicon tab browser — 19 September 2026 *(`index.html`, `icons/logo-header.png`, `icons/favicon-16.png`, `icons/favicon-32.png`)*
 
 Permintaan pemilik (lanjutan dari v6.48): pakai logo resmi untuk mengganti teks
