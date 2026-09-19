@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.48** · 18 September 2026
+**Versi saat ini: v6.49** · 19 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -590,6 +590,63 @@ tanpa peringatan. Semua transisi tanpa error console.
    penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
    terpisah, lebih ke pekerjaan tulisan daripada kode).
 
+### v6.49 — Logo asli di judul header (ganti teks "MHR DECK LAB"), latar transparan di logo header & favicon tab browser — 19 September 2026 *(`index.html`, `icons/logo-header.png`, `icons/favicon-16.png`, `icons/favicon-32.png`)*
+
+Permintaan pemilik (lanjutan dari v6.48): pakai logo resmi untuk mengganti teks
+"MHR DECK LAB" di judul header situs, dan buang warna latar belakang gelap yang
+ikut ter-crop dari file logo aslinya (baik di header maupun di ikon tab browser)
+supaya menyatu bersih dengan latar situs, bukan kelihatan seperti kotak.
+
+**Header (`.brand h1`)** — logo asli (ikon kartu+labu dan wordmark "MHR DECK LAB")
+di-crop dari banner yang dikirim pemilik, lalu latar solid `#0E1216`-nya dibuang
+lewat *color-keying* (deteksi jarak warna tiap piksel ke warna latar, dengan
+ambang batas ganda supaya tepi anti-alias tetap halus — bukan potongan kasar)
+jadi PNG RGBA transparan (`icons/logo-header.png`, 630×200). Markup:
+
+```html
+<h1><img class="logo" src="icons/logo-header.png" alt="MHR Deck Lab" width="630" height="200"></h1>
+```
+
+`<h1>` dipertahankan (bukan dihapus) supaya heading semantik/SEO halaman tidak
+hilang — pembaca layar tetap mengumumkan "MHR Deck Lab" lewat atribut `alt`,
+cuma tampilannya sekarang gambar. Atribut `width`/`height` di tag `<img>`
+sengaja diisi ukuran asli file (630×200) walau tampilannya diatur lewat CSS
+(`height:40px` desktop, `32px` di layar sempit, `width:auto`) — supaya browser
+bisa menghitung rasio aspek dari awal dan tidak ada pergeseran layout (CLS)
+saat gambar baru selesai dimuat, konsisten dengan kehati-hatian CLS yang sudah
+ada di elemen header lain (lihat catatan `.hdr-stats`/`.dukung` di CSS).
+Class `.stripe` (dulu mewarnai "MHR" jadi kuning lewat CSS) sudah tidak
+dipakai lagi karena warnanya sekarang bagian dari file gambar itu sendiri —
+dihapus dari CSS.
+
+**Favicon tab browser** (`icons/favicon-16.png`, `icons/favicon-32.png`) —
+dibuat ulang dari mark ikon (kartu+labu) dengan latar TRANSPARAN (bukan kotak
+`#0E1216` solid seperti v6.48), pakai teknik color-keying yang sama seperti di
+atas. Nama file dipertahankan sama, jadi tidak ada perubahan referensi di
+`index.html`. `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, dan
+`icon-maskable-512.png` SENGAJA TIDAK diubah (tetap latar solid dari v6.48) —
+permintaan pemilik secara spesifik menyebut "tab browser", dan ikon maskable
+Android memang WAJIB full-bleed tanpa transparansi sesuai spesifikasinya (kalau
+dibuat transparan, sebagian ikon bisa terpotong/berlubang saat di-masking
+launcher); apple-touch-icon juga konvensinya lebih aman opaque di iOS.
+
+**Catatan risiko tampilan**: karena bagian putih pada ikon (badan kartu, garis
+wordmark "DECK LAB") jadi transparan, di tab browser MODE TERANG (latar tab
+putih/abu muda — default banyak browser termasuk Chrome) bagian putih itu jadi
+nyaris tidak kelihatan, yang tersisa cuma garis tepi hitam/abu tipis. Di mode
+gelap (atau di header situs yang memang gelap) hasilnya bersih dan jelas. Ini
+trade-off yang disadari, bukan bug — diberi tahu ke pemilik; kalau ternyata
+kurang jelas di tab mode terang, favicon bisa dikembalikan pakai latar solid
+seperti v6.48.
+
+**Verifikasi**: `node --check` pada blok `<script>` inline terbesar — lolos
+(tidak ada logika JS yang disentuh, murni HTML/CSS/aset gambar). Diuji visual
+dengan Playwright: `naturalWidth`/`naturalHeight` gambar termuat 630×200,
+`complete:true` (tidak broken), bounding box hasil render mempertahankan rasio
+aspek yang benar (126×40 pada lebar viewport 1280px, sesuai `height:40px`),
+dan screenshot header dicek visual manual — logo tampil bersih tanpa kotak
+latar, menyatu dengan gradasi header. Tidak ada error konsol baru di luar 404
+gambar kartu/Supabase yang memang diblokir di sandbox (bukan regresi).
 ### v6.48 — Ganti favicon/app icon jadi logo resmi "MHR Deck Lab" — 18 September 2026 *(`icons/*.png`)*
 
 Permintaan pemilik: pasang logo resmi (kartu-kartu + labu erlenmeyer, gradasi
