@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.49  ·  19 September 2026
+     MHR DECK LAB  ·  versi 6.50  ·  19 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 288 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.49">
+<meta name="version" content="6.50">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -58,8 +58,13 @@
      browser bisa hitung aspect-ratio dari awal dan tidak ada pergeseran layout
      (CLS) saat gambar baru selesai dimuat, sama seperti kehati-hatian CLS di
      elemen header lain (lihat komentar .hdr-stats/.dukung di atas). */
-  .brand .logo{display:block;height:40px;width:auto}
-  .brand p{color:var(--muted);font-size:12px;margin-top:4px;letter-spacing:.02em}
+  /* v6.50 — logo diperbesar (40px->56px desktop, 32px->44px mobile) dan
+     tagline teks di bawah logo dihapus total (permintaan pemilik) — .brand
+     sekarang cuma berisi <h1><img class="logo"...></h1>, jadi aturan
+     ".brand p" yang dulu menata tagline itu sudah tidak dipakai, dihapus.
+     Key kamus "tagline" di objek T juga sudah dihapus (lihat pencarian
+     sebelum menghapus — dulu cuma dipakai satu tempat, di sini). */
+  .brand .logo{display:block;height:56px;width:auto}
   .hdr-stats{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .tiktok{display:inline-flex;align-items:center;gap:7px;text-decoration:none;
     background:var(--paper);color:#101418;border-radius:999px;padding:7px 14px;
@@ -227,8 +232,7 @@
     /* header lebih ringkas — penghitung sudah tampil di navigasi bawah */
     header{padding:12px 16px 10px}
     .hdr-stats .pill{display:none}
-    .brand .logo{height:32px}
-    .brand p{font-size:11px;margin-top:3px}
+    .brand .logo{height:44px}
   }
 
   /* ------- card list ------- */
@@ -1116,8 +1120,7 @@
 
 <header>
   <div class="brand">
-    <h1><img class="logo" src="icons/logo-header.png" alt="MHR Deck Lab" width="630" height="200"></h1>
-    <p data-i18n="tagline">Marvel Hero Rush TCG Deck Builder · 288 kartu (BP01 · PB01 · PR · SD01–SD04 · SP01)</p>
+    <h1><img class="logo" src="icons/logo-header.png" alt="MHR Deck Lab — Marvel Hero Rush TCG Deck Builder" width="630" height="200"></h1>
   </div>
   <div class="hdr-stats">
     <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">288</b></div>
@@ -1525,7 +1528,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.49</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.50</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2299,7 +2302,6 @@ const T = {
      (lihat catatan di cardVisible()). Kualifier "Ver. Indonesia"/"English Ver."
      dihapus — sudah tidak akurat, keduanya sekarang menampilkan database yang
      sama persis. */
-  tagline: 'Marvel Hero Rush TCG Deck Builder · 288 kartu (BP01 · PB01 · PR · SD01–SD04 · SP01)',
   navCards: 'Kartu',
   navCardsS: 'Kartu',
   navBuild: 'Deck Builder',
