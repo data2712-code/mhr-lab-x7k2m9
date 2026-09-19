@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.51** · 19 September 2026
+**Versi saat ini: v6.52** · 19 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -590,6 +590,21 @@ tanpa peringatan. Semua transisi tanpa error console.
    penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
    terpisah, lebih ke pekerjaan tulisan daripada kode).
 
+### v6.52 — "Warna" jadi "Colour" di SEMUA tempat (bukan cuma popup detail) — 19 September 2026 *(`index.html`)*
+
+Susulan v6.51: pemilik konfirmasi label "Colour" dimaksudkan berlaku di mana
+saja, bukan cuma di popup detail kartu. Key sementara `cColorFull` (dibuat di
+v6.51 khusus supaya grid preview & Simulator TIDAK ikut berubah) digabung
+balik ke `cColor` — sekarang cuma ada satu key, `cColor: 'Colour'`, dipakai
+konsisten di ketiga tempat: grid preview kartu, baris perbandingan Simulator,
+dan popup detail kartu.
+
+**Verifikasi**: `node --check` pada blok `<script>` inline terbesar — lolos.
+Dicek lewat `t('cColor')` langsung -> `"Colour"`; popup detail (`openLightbox
+('BP01-004')`) dicek ulang — tetap tampil `Level 2 / R 1 / Power 500 / Colour
+Merah` (label R/Power dari v6.51 tidak berubah, cuma Colour yang tadinya key
+terpisah sekarang disatukan). Tidak ada key `cColorFull` tersisa di kode (key
+mati dihapus, bukan dibiarkan nganggur).
 ### v6.51 — Ringkas label statistik di popup detail kartu (Jarak Serangan→R, Kekuatan Bertarung→Power, Warna→Colour) — 19 September 2026 *(`index.html`)*
 
 Permintaan pemilik: di popup detail kartu (klik kartu untuk lihat rincian),
