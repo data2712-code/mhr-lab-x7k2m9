@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.54** · 20 September 2026
+**Versi saat ini: v6.56** · 20 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -589,6 +589,109 @@ tanpa peringatan. Semua transisi tanpa error console.
    paham tanpa perlu toggle. Sengaja belum dikerjakan di rilis ini karena gaya
    penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
    terpisah, lebih ke pekerjaan tulisan daripada kode).
+
+### v6.56 — Betulkan urutan rarity HR/SEC di 3 kartu SP01 (HR di atas SEC, bukan sebaliknya) — 20 September 2026 *(`cards.js`)*
+
+Koreksi dari pemilik atas asumsi urutan di v6.55: **HR adalah rarity
+tertinggi, satu tingkat di atas SEC** (bukan MR→HR→SEC seperti asumsi saya
+sebelumnya). Array `ra` untuk `SP01-021`, `SP01-022`, `SP01-063` diubah
+urutannya dari `[UR, MR, HR, SEC]` jadi `[UR, MR, SEC, HR]`, supaya urutan
+chip varian di lightbox mencerminkan hierarki rarity yang benar (HR
+tampil paling akhir/tertinggi). `ra[0]` (art utama/default, `UR`) tidak
+berubah — cuma urutan 3 kode terakhir yang ditukar.
+
+Pemilik juga menyebut **HR adalah satu-satunya rarity yang kartunya
+bernomor** (dicatat sebagai konteks — sesuai temuan v6.55 bahwa arsip scan
+mentah `SP01_English` punya sub-varian `_HR_616`/`_HR_99` yang terpisah;
+situs tetap pakai satu berkas `_HR.jpg` gabungan per kartu untuk saat ini,
+belum ada perubahan ke sistem penomoran per-kartu — lihat catatan di
+status proyek untuk tindak lanjut kalau pemilik mau situs membedakan
+nomor cetak individual).
+
+**Verifikasi**: `node --check` pada `cards.js` — lolos, jumlah kartu tetap
+293. Diuji ulang lewat Playwright: chip varian SP01-021 sekarang merender
+persis dalam urutan `UR, MR, SEC, HR` di lightbox.
+### v6.55 — Tambah kode rarity varian alt-art (MR/HR/SEC) yang belum tercatat untuk 30 kartu SP01 — 20 September 2026 *(`cards.js`)*
+
+Pemilik minta cek folder "Database Image Kartu" > English (semua sub-folder)
+khusus untuk file dengan penanda rarity varian di nama filenya, contoh
+`SP01-021_SEC.jpg`, lalu pastikan kartu-kartu itu sudah bisa dipilih varian
+art-nya di situs.
+
+**Temuan**: file gambar varian untuk SEMUA kasus yang ditemukan **sudah ada**
+di `images/` dan `images/en/` situs (diunggah di sesi sebelumnya) — jadi ini
+murni pekerjaan data, bukan pekerjaan gambar. Yang kurang adalah array `ra`
+di `cards.js`: 30 kartu SP01 sudah punya berkas gambar `_MR`/`_HR`/`_SEC` di
+folder `images/`, tapi kode rarity-nya belum ditambahkan ke `ra`, jadi chip
+pemilihan varian di lightbox tidak muncul untuk kode-kode itu.
+
+Dicek dengan mencocokkan (a) daftar berkas live di `images/` (lewat listing
+folder perangkat) terhadap (b) isi `ra` tiap kartu di `cards.js` — 30 kartu
+SP01 punya berkas varian tanpa kode yang sesuai di `ra`:
+
+| Kartu | `ra` sebelum | `ra` sesudah |
+|---|---|---|
+| SP01-001 | `[UR]` | `[UR, MR]` |
+| SP01-002 | `[UR]` | `[UR, MR]` |
+| SP01-003 | `[UR]` | `[UR, MR]` |
+| SP01-005 | `[GR]` | `[GR, MR]` |
+| SP01-009 | `[SR]` | `[SR, MR]` |
+| SP01-011 | `[SR]` | `[SR, MR]` |
+| SP01-021 | `[UR]` | `[UR, MR, HR, SEC]` |
+| SP01-022 | `[UR]` | `[UR, MR, HR, SEC]` |
+| SP01-023 | `[UR]` | `[UR, MR]` |
+| SP01-024 | `[GR]` | `[GR, MR]` |
+| SP01-027 | `[GR]` | `[GR, MR]` |
+| SP01-028 | `[SR]` | `[SR, MR]` |
+| SP01-030 | `[SR]` | `[SR, MR]` |
+| SP01-032 | `[SR]` | `[SR, MR]` |
+| SP01-041 | `[UR]` | `[UR, MR]` |
+| SP01-042 | `[UR]` | `[UR, MR]` |
+| SP01-043 | `[UR]` | `[UR, MR]` |
+| SP01-044 | `[GR]` | `[GR, MR]` |
+| SP01-045 | `[GR]` | `[GR, MR]` |
+| SP01-052 | `[SR]` | `[SR, MR]` |
+| SP01-061 | `[UR]` | `[UR, MR]` |
+| SP01-062 | `[UR]` | `[UR, MR]` |
+| SP01-063 | `[UR]` | `[UR, MR, HR, SEC]` |
+| SP01-064 | `[GR]` | `[GR, MR]` |
+| SP01-065 | `[GR]` | `[GR, MR]` |
+| SP01-067 | `[GR]` | `[GR, MR]` |
+| SP01-068 | `[SR]` | `[SR, MR]` |
+| SP01-069 | `[SR]` | `[SR, MR]` |
+| SP01-074 | `[R]` | `[R, MR]` |
+| SP01-079 | `[R]` | `[R, MR]` |
+
+Tidak ada perubahan kode di `index.html` — filter rarity (`#fRarity`) dan
+filter series (`#fSeries`) sudah dibangun otomatis dari isi `DB` saat
+render, jadi kode "HR" (baru pertama kali muncul di database ini) dan
+kombinasi varian yang baru langsung terbaca tanpa perlu sentuh UI.
+
+**Catatan/asumsi yang perlu dikonfirmasi pemilik**:
+
+1. Urutan kode yang ditambahkan ke `ra` (`MR` lalu `HR` lalu `SEC` untuk
+   kartu yang punya ketiganya) adalah **asumsi saya sendiri** — bukan urutan
+   yang diminta eksplisit. Kalau pemilik punya urutan/arti berbeda untuk
+   "HR" (misalnya bukan singkatan yang saya kira), tolong dikoreksi.
+2. Arsip scan mentah di folder "Database Image Kartu" > English > SP01_English
+   punya sub-varian terpisah untuk HR, contoh `SP01-021_HR_616.jpg` dan
+   `SP01-021_HR_99.jpg`. Situs (dan berkas di `images/`/`images/en/`) hanya
+   punya SATU `SP01-021_HR.jpg` gabungan — jadi rilis ini tetap mengikuti apa
+   yang sudah live, tidak memecah jadi sub-varian HR terpisah. Beri tahu
+   kalau situs sebenarnya perlu membedakan sub-varian tersebut.
+
+**Verifikasi**: `node --check` pada `cards.js` — lolos, jumlah kartu tetap
+293 (cuma modifikasi field `ra`, bukan tambah/hapus entri). Dicek juga
+lewat listing folder perangkat langsung (`images/` dan `images/en/`) bahwa
+SEMUA berkas `_MR`/`_HR`/`_SEC` untuk ke-30 kartu di atas benar-benar ada di
+kedua folder sebelum kode rarity-nya ditambahkan ke `ra`. Uji fungsional
+Playwright dijalankan di situs lokal: dicek isi `ra` lewat `DB`, chip varian
+di lightbox untuk SP01-021/022/063 (4 varian) dan SP01-001/074 (2 varian)
+merender kode yang benar, lalu untuk SP01-021 chip "HR" benar-benar diklik
+pakai berkas gambar asli yang ditarik dari perangkat (bukan placeholder) —
+probe gambar berhasil, `store.art` tersimpan, gambar di lightbox berpindah
+ke `SP01-021_HR.jpg`, dan filter dropdown rarity (`#fRarity`) sekarang
+mencantumkan "HR" di antara pilihannya.
 
 ### v6.54 — Koreksi EB01-011 (memang kartu tanpa efek, bukan scan tidak terbaca) + catatan TODO terjemahan resmi — 20 September 2026 *(`cards.js`)*
 
