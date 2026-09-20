@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.52** · 19 September 2026
+**Versi saat ini: v6.54** · 20 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -590,6 +590,114 @@ tanpa peringatan. Semua transisi tanpa error console.
    penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
    terpisah, lebih ke pekerjaan tulisan daripada kode).
 
+### v6.54 — Koreksi EB01-011 (memang kartu tanpa efek, bukan scan tidak terbaca) + catatan TODO terjemahan resmi — 20 September 2026 *(`cards.js`)*
+
+Dua koreksi dari pemilik atas rilis v6.53:
+
+1. **EB01-011 memang tidak punya efek kartu** (bukan efeknya tidak terbaca
+   di scan seperti dugaan awal saya). Field `e`/`e_en` yang tadinya berisi
+   catatan "teks tidak terbaca pada scan..." diganti jadi `"[COUNTER]"` saja
+   — kartu ini kartu ber-keyword [COUNTER] tanpa teks efek tambahan, itu
+   memang desainnya, bukan kekurangan data. `counterInfo()` tetap mendeteksi
+   tag [COUNTER]-nya dengan benar untuk lencana Counter di grid/lightbox.
+2. Pemilik sempat menanyakan maksud "fan-translation" di rilis v6.53 —
+   dijelaskan ini fitur yang sudah ada sejak v6.45 (dipakai 80 kartu SP01):
+   field `nm`/`e` (Indonesia) untuk kartu yang cuma punya scan Inggris diisi
+   terjemahan buatan Claude sendiri, ditandai lencana "ID*+EN" + peringatan
+   di popup detail. Pemilik konfirmasi: **pertahankan pola ini untuk
+   EB01-010..014** (tidak perlu diubah ke Inggris-saja), TAPI kalau nanti
+   MHR Indonesia/CARDFUN merilis terjemahan resmi untuk kelima kartu ini,
+   field `nm`/`e`-nya harus diganti ke teks resmi tersebut. Ditambahkan
+   komentar TODO eksplisit persis di atas entri `EB01-010` di `cards.js`
+   supaya tidak terlewat di sesi berikutnya.
+
+**Verifikasi**: `node --check` pada `cards.js` — lolos. Isi field `e`/`e_en`
+EB01-011 dicek ulang lewat grep — sekarang `"[COUNTER]"` persis, tidak ada
+sisa teks catatan lama. File diverifikasi lewat `device_commit_files` +
+re-stage + byte-diff seperti biasa.
+### v6.53 — Tambah 5 kartu promo turnamen baru EB01-010..014 dari folder "Database Image Kartu" (scan Inggris + fan-translation) — 20 September 2026 *(`cards.js`, `index.html`, `images/*.jpg`)*
+
+Pemilik menambahkan folder pribadi "Database Image Kartu" (arsip scan kartu,
+terpisah dari folder `images/` yang benar-benar dipakai situs) dan minta
+dicek: apakah ada kartu di folder itu yang belum tampil di situs. Dicek
+dengan cara mengekstrak semua kode kartu dari nama berkas di folder
+`Database Image Kartu/English/` (semua sub-folder set: BP01, EB01, PB01-A,
+PB01-B, SD01-04, SP01, TB01 — varian rarity seperti `_MR`/`_SEC`/`_HR_*`
+dianggap sama dengan kode dasarnya, bukan kartu terpisah) lalu dibandingkan
+ke 288 kode kartu yang sudah ada di `cards.js`. Hasil: seluruh 288 kartu di
+situs sudah punya scan di folder tersebut (tidak ada yang hilang arahnya),
+tapi ada 5 kode BARU yang belum pernah ditambahkan ke situs: EB01-010,
+EB01-011, EB01-012, EB01-013, EB01-014.
+
+Kelima kartu ini adalah scan promo turnamen berwatermark "SAMPLE" untuk
+"Regionals 2026" (EB01-010/011 tanpa keterangan hasil, EB01-012 "TOP 16",
+EB01-013 "TOP 8", EB01-014 "TOP 4") — beda dari EB01-006..009 yang sudah
+ada di situs lebih dulu (scan resmi Indonesia, seri `s:"PR"`). Kelima kartu
+baru ini HANYA punya scan bahasa Inggris (tidak ada scan Indonesia sama
+sekali), jadi mengikuti keputusan pemilik sebelumnya: ditambahkan sekarang
+dengan teks Inggris asli + fan-translation Indonesia (dibuat sesi Claude,
+BUKAN terjemahan resmi MHR Indonesia/CARDFUN) — pola yang sama seperti 80
+kartu SP01.
+
+Detail per kartu (warna dicek dari ikon berlian di lencana Level, dengan
+membandingkan potongan gambar sudut kiri-atas terhadap kartu referensi warna
+yang sudah pasti dari `BP01-004`=Merah, `BP01-031`=Kuning, `BP01-061`=Biru,
+`BP01-091`=Hijau, dari folder scan yang sama supaya gaya artnya konsisten):
+
+- **EB01-010** 「Dimension Piercer」Iron Man — Lv3, R-1, Power 3500, Merah,
+  trait Human/Avengers, ER. Teks efek Inggris jelas terbaca penuh.
+- **EB01-011** 「Tough Guardian」Hulk — Lv3, R-1, Power 3000, Kuning, trait
+  Human/Avengers, ER. Kartu ini punya tag [COUNTER] tapi kotak teks efeknya
+  TIDAK terbaca sama sekali pada scan yang ada (bukan tergantikan teks lain,
+  memang kosong/buram) — sesuai arahan pemilik, kartu ini tetap ditambahkan
+  dengan catatan eksplisit di `e`/`e_en` bahwa teksnya belum terbaca dan akan
+  diperbarui kalau ada scan yang lebih jelas. `counterInfo()` tetap mendeteksi
+  tag [COUNTER]-nya dengan benar untuk lencana Counter di grid/lightbox.
+- **EB01-012** 「Turn The Tide」Captain America — Lv4, R-1, Power 4500, Biru,
+  trait Human/Avengers, ER.
+- **EB01-013** 「Red Room Experiment Subject」Black Widow — Lv3, R-1, Power
+  2500, Merah, trait Human/Avengers, ER.
+- **EB01-014** 「Echo of Fate」Spider-Man — Lv6, R-5, Power 2000, Hijau,
+  trait Human/Web, ER.
+
+**Kenapa seri baru `s:"EB01"`, bukan pakai `s:"PR"` seperti EB01-006..009**:
+`FAN_TRANSLATED_ID_SETS` (dipakai `cardLangInfo()`/`cardLangBadgeHTML()` v6.45
+untuk menandai kartu dengan lencana "ID*+EN" + peringatan fan-translation di
+popup detail) bekerja per KODE SERI (`c.s`), bukan per kartu. EB01-006..009
+sudah punya scan Indonesia RESMI (bukan fan-translation) — kalau field `s`
+kelima kartu baru ini disamakan jadi `"PR"` lalu `"PR"` dimasukkan ke
+`FAN_TRANSLATED_ID_SETS`, EB01-006..009 (dan TB01-001 yang juga `s:"PR"`)
+ikut salah ditandai sebagai fan-translation padahal bukan. Solusinya: kelima
+kartu baru pakai kode seri baru yang berdiri sendiri, `"EB01"`, dan `"EB01"`
+ditambahkan ke `FAN_TRANSLATED_ID_SETS` (jadi `['SP01', 'EB01']`) — filter
+seri di UI otomatis dapat opsi baru "EB01" (dibangun dinamis dari `c.s` yang
+ada di database, lihat `#fSeries` di `index.html`), terpisah dari opsi "PR"
+yang sudah ada.
+
+**Gambar kartu**: kelima scan sumber (`Database Image Kartu/English/
+EB01_English/EB01-01{0..4}.png`, ukuran asli ±744×1039px, ada watermark
+diagonal "SAMPLE" dari kartu promo aslinya — TIDAK dihilangkan, cuma diubah
+ukuran/format) di-resize ke 450×620 (ukuran standar semua gambar kartu di
+`images/`) dan disimpan sebagai `.jpg` kualitas 90 di `images/EB01-010.jpg`
+.. `images/EB01-014.jpg`. Diletakkan di `images/` (BUKAN `images/en/`),
+mengikuti pola printing-tunggal yang sudah dipakai EB01-006..009/PB01/TB01:
+`artDir()` bisa saja menghitung `images/en/` kalau bahasa yang ditampilkan
+untuk kartu ini kebetulan "en", tapi karena berkasnya tidak ada di sana,
+`imgFallback()` otomatis mencoba direktori sebaliknya (`altArtFile()`) dan
+berhasil memuat dari `images/` — dicek langsung lewat `artDir()`/`artFile()`
+di kedua mode bahasa, hasilnya sesuai perkiraan.
+
+**Verifikasi**: `node --check` pada `cards.js` dan blok `<script>` inline
+terbesar — lolos. Server lokal (`python3 -m http.server`) + Playwright —
+total `DB.length` jadi 293 (288+5); opsi filter seri (`#fSeries`) memuat
+"EB01" terpisah dari "PR"; filter seri="EB01" menampilkan tepat 5 kartu;
+kelima kartu baru dicek satu per satu lewat `cardLangInfo()`/`cardName()`/
+`cardEff()`/`cardLangBadgeHTML()` — semua tampil lencana "ID*+EN" dengan
+tooltip peringatan fan-translation yang benar, `fanId:true`; `openLightbox
+('EB01-010')` dicek — catatan peringatan fan-translation
+(`.lb-fan-note`) tampil dengan teks yang benar. Tidak ada `PAGEERROR` di
+console. File diverifikasi lewat `device_commit_files` + re-stage +
+byte-diff (teks) / pixel-diff (gambar) seperti biasa.
 ### v6.52 — "Warna" jadi "Colour" di SEMUA tempat (bukan cuma popup detail) — 19 September 2026 *(`index.html`)*
 
 Susulan v6.51: pemilik konfirmasi label "Colour" dimaksudkan berlaku di mana
