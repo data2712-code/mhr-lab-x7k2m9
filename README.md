@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.56** · 20 September 2026
+**Versi saat ini: v6.57** · 22 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -589,6 +589,41 @@ tanpa peringatan. Semua transisi tanpa error console.
    paham tanpa perlu toggle. Sengaja belum dikerjakan di rilis ini karena gaya
    penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
    terpisah, lebih ke pekerjaan tulisan daripada kode).
+
+### v6.57 — Ganti logo header ke versi horizontal + catatan retroaktif perbaikan gambar SP01-021_MR — 22 September 2026 *(`index.html`, `icons/logo-header.png`, `images/SP01-021_MR.jpg`, `images/en/SP01-021_MR.jpg`)*
+
+**1. Logo header diganti ke versi horizontal.** Pemilik minta pakai berkas
+`Icon MHR Deck Lab (Horizontal).png` dari folder "Icon MHR Deck Lab" (bukan
+berkas `logo-header.png` lama). Sumbernya berlatar hitam solid (bukan PNG
+transparan) — dihilangkan lewat color-key (bukan sekadar ditimpa mentah),
+lalu di-crop rapat ke bounding box konten dan diresize ke 759×220 (rasio
+3.45:1, sebelumnya 630×200 / 3.15:1). `width`/`height` di tag `<img class=
+"logo">` diperbarui mengikuti rasio baru supaya CSS `height:56px/44px;
+width:auto` tetap menghitung aspect-ratio dengan benar (mencegah CLS).
+Tidak ada perubahan lain di `index.html` selain ini dan bump versi.
+
+**2. Catatan retroaktif — perbaikan `SP01-021_MR.jpg` (21 September 2026,
+belum tercatat versi saat itu).** Pemilik laporkan gambar varian MR kartu
+`SP01-021` di situs live menampilkan gambar `SP01-020` "Tarantula" (salah
+label sejak upload sebelumnya, bukan bagian dari pekerjaan v6.53–v6.56).
+Dikonfirmasi lewat perbandingan visual langsung: `images/SP01-021_MR.jpg`
+waktu itu byte-for-byte beda dari `images/SP01-020.jpg` tapi isinya gambar
+yang sama persis. Pemilik kirim scan asli "SP01-021_MR" versi Inggris;
+diproses (crop tepi minor + resize ke 568×784 standar seri SP01, JPEG
+kualitas 90) dan dipasang ke `images/SP01-021_MR.jpg` **dan**
+`images/en/SP01-021_MR.jpg` (keduanya sebelumnya identik, sama-sama salah).
+Kartu 4-varian lain (`SP01-022`, `SP01-063`) dan versi HR-nya dicek juga —
+semuanya sudah benar, jadi ini murni satu file yang salah label, bukan
+masalah menyeluruh. Perbaikan ini sudah live di server sejak 21 September
+(dikonfirmasi lewat fetch langsung ke `mhrdecklab.com` dengan cache-buster),
+tapi belum sempat dapat nomor versi/entri changelog resmi — dicatat di sini
+supaya riwayatnya lengkap.
+
+**Verifikasi**: logo baru dicek dengan compositing di atas warna latar situs
+(`#0E1216`) untuk memastikan tidak ada halo/tepi hitam sisa color-key.
+Perbaikan gambar SP01-021_MR sebelumnya sudah diverifikasi lewat
+`device_commit_files` + re-stage + byte-diff + stability wait 15 detik,
+dan dikonfirmasi ulang live di server dengan screenshot browser langsung.
 
 ### v6.56 — Betulkan urutan rarity HR/SEC di 3 kartu SP01 (HR di atas SEC, bukan sebaliknya) — 20 September 2026 *(`cards.js`)*
 
