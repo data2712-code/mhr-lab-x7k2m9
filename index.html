@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.58  ·  24 September 2026
+     MHR DECK LAB  ·  versi 6.59  ·  24 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 288 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.58">
+<meta name="version" content="6.59">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -672,6 +672,20 @@
   .pd-slot.back{grid-column:2;grid-row:3}
   .pd-base{max-width:340px;margin:0 auto 16px;background:var(--panel);border:1px dashed var(--line);
     border-radius:8px;text-align:center;padding:9px;font-size:11.5px;color:var(--muted)}
+  /* v6.59 — nomor pasal rulebook, tabel (rarity/jarak), dan garis jarak serangan */
+  .pd-ref{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;
+    color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:5px;
+    padding:1px 5px;vertical-align:middle;white-space:nowrap}
+  .pd-table{border-collapse:collapse;margin:10px 0 14px;font-size:12.5px;width:100%;max-width:520px}
+  .pd-table th,.pd-table td{border:1px solid var(--line);padding:6px 9px;text-align:left;color:#C9CFD8}
+  .pd-table th{background:var(--panel2);color:var(--paper);font-weight:700}
+  .pd-table td:first-child{font-family:var(--mono);color:var(--paper)}
+  .pd-line{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:10px 0 14px;font-size:11.5px}
+  .pd-line span{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:5px 8px;
+    font-family:var(--disp);font-weight:700;letter-spacing:.03em;color:var(--paper)}
+  .pd-line span.op{border-color:var(--merah)}
+  .pd-line i{font-style:normal;font-family:var(--mono);color:var(--accent);font-size:11px}
+  .pd-sec a{color:var(--accent);text-underline-offset:2px}
 
   /* halaman: DUKUNG */
   body:not(.page-dukung) #dukungPage{display:none}
@@ -1300,9 +1314,9 @@
         <span class="lbl" data-i18n="mech">Mekanik</span>
         <button data-m="prune" aria-pressed="false" data-i18n="mPrune">Prune</button>
         <button data-m="countercall" aria-pressed="false" data-i18n="mCounterCall"
-          data-i18n-title="mCounterCallT" title="Kartu ber-kemampuan [COUNTER] — dipanggil ke BATTLE saat jendela counter">Counter call</button>
+          data-i18n-title="mCounterCallT" title="Kartu ber-kemampuan [COUNTER] — bisa di-COUNTER CALL dari HAND saat Counter Step atau Counter Phase (305.1)">Counter call</button>
         <button data-m="counteracti" aria-pressed="false" data-i18n="mCounterActi"
-          data-i18n-title="mCounterActiT" title="Kartu ber-[COUNTER-ACTI] — efek diaktifkan dari HAND/FIELD/BACK/BATTLE saat jendela counter">Counter efek</button>
+          data-i18n-title="mCounterActiT" title="Kartu ber-[COUNTER-ACTI] — efek diaktifkan dari HAND/FIELD/BACK/BATTLE di Action Phase sendiri, Counter Step, atau Counter Phase (201.10.f.3)">Counter efek</button>
         <button data-m="move" aria-pressed="false" data-i18n="mMove">BATTLE-BASE move</button>
         <button data-m="attach" aria-pressed="false" data-i18n="mAttach">Pasang</button>
         <button data-m="set" aria-pressed="false" data-i18n="mSet">Kartu tertutup</button>
@@ -1535,7 +1549,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.58</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.59</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -1775,6 +1789,17 @@ function renderDeckSelect(){
     `<option${n===store.active?' selected':''}>${n.replace(/</g,'&lt;')}</option>`).join('');
 }
 
+/* v6.59 — arti & urutan resmi rarity (Comprehensive Rules 1.03 § 201.14 untuk
+   Character, § 202.6 untuk Rush Point — C cuma ada di Rush Point). Dipakai
+   dropdown filter rarity dan tooltip lencana rarity di kartu. */
+const RARITY_INFO = {R:'Rare', SR:'Super Rare', GR:'Grand Rare', UR:'Ultimate Rare',
+  MR:'Alternate Art tingkat 1', SEC:'Alternate Art tingkat 2', HR:'Alternate Art tingkat 3',
+  LR:'Legendary Alternate Art', PR:'Promotional Rare', ER:'Event Rare', TR:'Treasure Rare', C:'Common'};
+const RARITY_ORDER = ['R','SR','GR','UR','MR','SEC','HR','LR','PR','ER','TR','C'];
+function rarityCmp(a,b){
+  const x = RARITY_ORDER.indexOf(a), y = RARITY_ORDER.indexOf(b);
+  return (x<0?99:x) - (y<0?99:y) || a.localeCompare(b);
+}
 /* --- isi dropdown --- */
 function isiDropdown(){
   const uniq = (arr)=>[...new Set(arr)];
@@ -1791,7 +1816,7 @@ function isiDropdown(){
   uniq(DB.filter(cardVisible).map(c=>c.s)).sort().forEach(v=>$('#fSeries').insertAdjacentHTML('beforeend',`<option>${v}</option>`));
   uniq(DB.map(c=>c.l)).sort((a,b)=>a-b).forEach(v=>$('#fLevel').insertAdjacentHTML('beforeend',`<option value="${v}">${t('levelLbl')} ${v}</option>`));
   uniq(DB.map(c=>c.r)).sort((a,b)=>a-b).forEach(v=>$('#fRange').insertAdjacentHTML('beforeend',`<option value="${v}">${t('rangeLbl')} ${v}</option>`));
-  uniq(DB.filter(cardVisible).flatMap(c=>c.ra)).sort().forEach(v=>$('#fRarity').insertAdjacentHTML('beforeend',`<option>${v}</option>`));
+  uniq(DB.filter(cardVisible).flatMap(c=>c.ra)).sort(rarityCmp).forEach(v=>$('#fRarity').insertAdjacentHTML('beforeend',`<option value="${v}">${v} — ${RARITY_INFO[v]||v}</option>`));
   uniq(DB.filter(cardVisible).flatMap(traitsOf)).sort().forEach(v=>$('#fTrait').insertAdjacentHTML('beforeend',`<option>${v}</option>`));
   /* Kemampuan kunci (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE/UNIQUE — masing-
      masing cuma 1-6 kartu, digabung satu dropdown alih-alih lima tombol mechBar.
@@ -1909,7 +1934,7 @@ function cardListHTML(c,q){
           <div class="card-top">
             <span class="card-name" data-zoom="${c.no}">${cardName(c)}</span>
             <span class="card-no">${c.no}</span>
-            ${c.ra.map(r=>`<span class="rar${r===artOf(c.no)&&c.ra.length>1?' alt':''}">${r}</span>`).join('')}
+            ${c.ra.map(r=>`<span class="rar${r===artOf(c.no)&&c.ra.length>1?' alt':''}" title="${r} — ${RARITY_INFO[r]||r}">${r}</span>`).join('')}
             ${errataBadgeHTML(c)}
             ${counterBadgeHTML(c)}
             ${cardLangBadgeHTML(c)}
@@ -2117,7 +2142,7 @@ function renderDeck(){
       const info = counterInfo(c);
       if(info && info.type==='call') ctrCallQ += q;
       else if(info && info.type==='acti') ctrActiQ += q;
-      // biaya Summon (301.19): Lv1-3 langsung, Lv4+ harus RETREAT setara
+      // biaya CALL (301.19): Lv1-3 langsung, Lv4+ harus RETREAT setara dari FIELD
       if(c.l<=3) sumFreeQ += q; else sumPaidQ += q;
     });
     st.innerHTML = `
@@ -2342,7 +2367,7 @@ const T = {
   allTrait: 'Semua trait',
   allRarity: 'Semua rarity',
   allKeyAbil: 'Kemampuan kunci',
-  fKeyAbilT: 'Filter kemampuan kunci (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE/UNIQUE — digabung satu dropdown karena masing-masing cuma 1-6 kartu',
+  fKeyAbilT: 'Filter kemampuan kunci (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE (di rulebook: AIR-ATTACK)/UNIQUE — digabung satu dropdown karena masing-masing cuma 1-6 kartu',
   mk_block: 'BLOCK',
   mk_doubleattack: 'DOUBLE ATTACK',
   mk_assault: 'ASSAULT',
@@ -2373,9 +2398,9 @@ const T = {
   mech: 'Mekanik',
   mPrune: 'Prune',
   mCounterCall: 'Counter call',
-  mCounterCallT: 'Kartu ber-kemampuan [COUNTER] — dipanggil ke BATTLE saat jendela counter',
+  mCounterCallT: 'Kartu ber-kemampuan [COUNTER] — bisa di-COUNTER CALL dari HAND saat Counter Step atau Counter Phase (305.1)',
   mCounterActi: 'Counter efek',
-  mCounterActiT: 'Kartu ber-[COUNTER-ACTI] — efek diaktifkan dari HAND/FIELD/BACK/BATTLE saat jendela counter',
+  mCounterActiT: 'Kartu ber-[COUNTER-ACTI] — efek diaktifkan dari HAND/FIELD/BACK/BATTLE di Action Phase sendiri, Counter Step, atau Counter Phase (201.10.f.3)',
   mMove: 'BATTLE-BASE move',
   mAttach: 'Pasang',
   mSet: 'Kartu tertutup',
@@ -2416,13 +2441,13 @@ const T = {
   errataTip: 'Teks efek kartu ini pernah direvisi resmi oleh tim MHR Indonesia (Errata {v}).',
   ctrCall: 'Counter call',
   ctrActi: 'Counter efek',
-  summonCost: 'Biaya Summon (gratis/bayar)',
-  summonCostT: 'Lv1-3 = Summon langsung, gratis. Lv4+ = harus RETREAT kartu di FIELD yang total Level-nya sama (301.19)',
+  summonCost: 'Biaya CALL (gratis/bayar)',
+  summonCostT: 'Lv1-3 = CALL langsung, gratis. Lv4+ = harus RETREAT Character di FIELD (BATTLE atau BASE) yang total Lv-nya sama; Face-Down Card dihitung Lv1 (301.19, 301.21.g)',
   ctrFree: 'gratis',
   ctrPay: 'bayar',
   ctrFrom: 'dari',
-  ctrCallTip: 'Kemampuan [COUNTER]: bisa dipanggil ke BATTLE saat jendela counter (COUNTER STEP/PHASE), maks. 1× per pemain per jendela. Lv1–3 gratis, Lv4+ perlu RETREAT kartu di FIELD dengan total Lv yang sama.',
-  ctrActiTip: 'Kemampuan [COUNTER-ACTI]: efeknya diaktifkan langsung dari zona ini saat jendela counter, bukan dipanggil sebagai karakter baru ke BATTLE.',
+  ctrCallTip: 'Kemampuan [COUNTER]: bisa di-COUNTER CALL dari HAND saat Counter Step (dalam battle) atau Counter Phase — maks. 1× per pemain per giliran di tiap fase itu. Biaya CALL tetap berlaku: Lv1–3 gratis, Lv4+ perlu RETREAT Character di FIELD dengan total Lv yang sama (301.19, 303.2.a.4.3.2.3.1, 303.2.a.5.2.1).',
+  ctrActiTip: 'Kemampuan [COUNTER-ACTI]: efeknya diaktifkan langsung dari zona ini — di Action Phase sendiri, Counter Step, atau Counter Phase — bukan di-CALL sebagai Character baru (201.10.f.3).',
   cNow: 'kini',
   cArtwork: 'Versi artwork',
   cMain: 'utama',
@@ -3586,7 +3611,7 @@ function openLightbox(no){
       <div class="lb-var">
         <div class="t">${t('cArtwork')}</div>
         <div class="chips">${c.ra.map(r=>
-          `<button data-var="${r}" aria-pressed="${r===aktif}">${r}${r===c.ra[0]?' · '+t('cMain'):''}</button>`).join('')}</div>
+          `<button data-var="${r}" aria-pressed="${r===aktif}" title="${r} — ${RARITY_INFO[r]||r}">${r}${r===c.ra[0]?' · '+t('cMain'):''}</button>`).join('')}</div>
         <div class="msg" id="lbVarMsg"></div>
       </div>`:''}
       <button class="lb-add" id="lbAdd">${t('cAddDeck')}${q?` (${t('cNow')} ×${q})`:''}</button>
@@ -4437,291 +4462,386 @@ $('#lgsFilter').addEventListener('change', e=>{
 });
 
 /* ==================== HALAMAN PANDUAN ====================
-   Isi disimpan sebagai dua blok HTML siap-pakai (bukan lewat kamus T satu-
+   Isi disimpan sebagai satu blok HTML siap-pakai (bukan lewat kamus T satu-
    satu per kalimat) karena isinya prosa panjang — pola yang sama dipakai
-   DUKUNG.teks di data.js. Sumber: dua poster rulebook resmi terbitan
-   PT. Jason Entertainment Indonesia (CARDFUN) — "Area Permainan" dan
-   "Tata Cara Bermain" — dibandingkan silang dengan cards.js & aturan
-   deck-building yang sudah divalidasi Deck Lab. */
+   DUKUNG.teks di data.js.
+   v6.59 — DITULIS ULANG TOTAL mengikuti Comprehensive Rules Ver. 1.03 RESMI
+   dari Jason (penerbit MHR, dikonfirmasi pemilik 24 September 2026). Sumber
+   lama (poster CARDFUN + terjemahan tidak resmi) tidak dipakai lagi sebagai
+   acuan. Nomor pasal ditampilkan lewat <span class="pd-ref">. Nama kemampuan
+   mengikuti teks kartu kalau berbeda dari rulebook (AIR STRIKE vs AIR-ATTACK). */
 const GUIDE = {
 id: `
 <h2 class="pd-title">Panduan Bermain Marvel Hero Rush</h2>
 <p class="pd-lead">Untuk pemain baru yang belum familiar dengan aturan Marvel Hero Rush TCG.
-  Dirangkum dari poster rulebook resmi terbitan PT. Jason Entertainment Indonesia (CARDFUN),
-  dicocokkan dengan 288 kartu di Deck Lab.</p>
+  Disusun ulang mengikuti <b>Comprehensive Rules Ver. 1.03 resmi</b> dari Jason (penerbit
+  Marvel Hero Rush, pembaruan 12 Agustus 2026). Angka kecil seperti <span class="pd-ref">301.19</span>
+  adalah nomor pasal di rulebook itu, supaya mudah dicek langsung.</p>
 
 <nav class="pd-toc">
   <a href="#pd-menang">Cara Menang</a>
-  <a href="#pd-siap">Yang Disiapkan</a>
+  <a href="#pd-siap">Persiapan</a>
   <a href="#pd-kartu">Anatomi Kartu</a>
+  <a href="#pd-rarity">Rarity</a>
   <a href="#pd-area">Area Permainan</a>
+  <a href="#pd-jarak">Jarak Serangan</a>
   <a href="#pd-giliran">Alur Giliran</a>
   <a href="#pd-aksi">Action Phase</a>
-  <a href="#pd-adjust">Adjustment Phase</a>
   <a href="#pd-battle">Battle Phase</a>
-  <a href="#pd-kemampuan">Kemampuan Kunci</a>
+  <a href="#pd-akhir">Counter &amp; End Phase</a>
   <a href="#pd-efek">Jenis Efek</a>
-  <a href="#pd-istilah">Istilah Penting</a>
+  <a href="#pd-kemampuan">Kemampuan Kunci</a>
+  <a href="#pd-istilah">Aturan Inti &amp; Istilah</a>
   <a href="#pd-deck">Aturan Deck</a>
   <a href="#pd-turnamen">Aturan Pertandingan</a>
 </nav>
 
 <div class="pd-sec" id="pd-menang">
-  <h3>Cara Menang</h3>
-  <p>Marvel Hero Rush adalah kartu pertarungan 1 lawan 1 antar karakter Marvel. Setiap giliran, kedua
-    pemain memanggil karakter, menyerang, dan mempertahankan diri. Ada tiga cara menang:</p>
+  <h3>Cara Menang <span class="pd-ref">103</span></h3>
+  <p>Marvel Hero Rush adalah permainan kartu 1 lawan 1 antar karakter Marvel. Anda menang begitu
+    salah satu dari tiga kondisi ini terpenuhi — permainan langsung berakhir saat itu juga:</p>
   <div class="pd-box win">
-    <b>1. Kumpulkan 9 kartu Rush Point</b> di area TIMELINE Anda — didapat tiap kali karakter Anda
+    <b>1. Ada 9 Rush Point di Timeline Anda.</b> Anda mendapat 1 Rush Point tiap kali karakter Anda
     berhasil menyerang <b>Weakness</b> lawan (posisi BATTLE lawan yang kosong).<br><br>
-    <b>2. Deck utama lawan habis (0 kartu tersisa)</b> — begitu kondisi ini terjadi, apa pun
-    penyebabnya (kartu terakhir ditarik, atau deck dikosongkan lewat efek kartu), lawan langsung
-    dinyatakan kalah saat itu juga.<br><br>
-    <b>3. Efek sebuah kartu langsung menyatakan seorang pemain sebagai pemenang.</b>
+    <b>2. Deck lawan berisi 0 kartu.</b> Apa pun penyebabnya — kartu terakhir ditarik, atau deck
+    dikosongkan lewat efek kartu — lawan langsung kalah saat itu juga.<br><br>
+    <b>3. Efek sebuah kartu menyatakan Anda sebagai pemenang.</b>
   </div>
 </div>
 
 <div class="pd-sec" id="pd-siap">
-  <h3>Yang Perlu Disiapkan</h3>
+  <h3>Persiapan <span class="pd-ref">101 · 303.1</span></h3>
   <ul>
-    <li><b>Main Deck — tepat 50 kartu karakter.</b> Maksimal 2 warna, maksimal 3 kartu dengan nama
-      karakter yang sama (dihitung dari nama, bukan nomor kartu — jadi 3 versi rarity berbeda dari
-      karakter yang sama tetap dianggap satu "nama").</li>
-    <li><b>Rush Point Deck — 9 kartu</b>, terpisah dari Main Deck, tanpa batasan warna/jumlah. Inilah
-      "nyawa" Anda — 9 kartu ini pindah satu per satu ke TIMELINE tiap kali Weakness lawan berhasil
-      diserang.</li>
+    <li><b>Deck — tepat 50 Character.</b> Maksimal 2 warna, maksimal 3 kartu dengan nama Character
+      yang sama (lihat <a href="#pd-deck">Aturan Deck</a>).</li>
+    <li><b>Rush Point Deck — 9 Rush Point</b>, terpisah dari Deck, tanpa batasan pilihan. Rush Point
+      tidak ikut dihitung dalam 50 kartu Deck.</li>
+    <li><b>Card token</b> — kalau deck Anda memakai token, siapkan sebelum bermain. Token tidak
+      termasuk isi Deck <span class="pd-ref">301.5</span>.</li>
   </ul>
-  <p><b>Sebelum mulai:</b> kocok Main Deck, lalu tiap pemain mengambil 6 kartu sebagai tangan awal
-    (pemain pertama menentukan lebih dulu, baru pemain kedua). Kalau tangan awal dirasa kurang
-    bagus, boleh <b>mulligan</b> satu kali: taruh <b>seluruh 6 kartu di tangan</b> ke <b>bawah</b>
-    deck (bukan pilih-pilih sebagian — mulligan berarti mengulang semuanya), ambil 6 kartu baru dari
-    atas, lalu kocok ulang deck.</p>
+  <p><b>Urutan memulai permainan:</b></p>
+  <ol>
+    <li>Tiap pemain mengocok Deck 50 kartunya dan menaruhnya tertutup di area Deck.</li>
+    <li>Tiap pemain menaruh Rush Point Deck (9 kartu) tertutup di area Rush Point Deck.</li>
+    <li>Tentukan pemain pertama dan kedua dengan cara yang disepakati kedua pemain.</li>
+    <li>Tiap pemain menarik <b>6 kartu</b> dari atas Deck sebagai tangan awal.</li>
+    <li><b>Mengganti tangan awal (mulligan)</b> — pemain pertama memutuskan lebih dulu, lalu pemain
+      kedua. Pilih kartu <b>mana saja</b> yang ingin diganti (boleh sebagian, boleh semua), taruh
+      tertutup di <b>bawah</b> Deck, tarik kartu baru sejumlah yang sama dari atas, lalu kocok Deck.
+      Tiap pemain hanya memutuskan satu kali.</li>
+    <li>Permainan dimulai dari giliran pemain pertama.</li>
+  </ol>
+  <div class="pd-box warn"><b>Giliran pertama pemain pertama:</b> Action CALL hanya boleh
+    <b>1 kali</b> (bukan 3) <span class="pd-ref">303.2.a.3.1.2.3</span>, dan <b>seluruh Battle Phase
+    dilewati</b> <span class="pd-ref">303.2.a.4.1</span>. Base Deployment tetap boleh seperti biasa.</div>
 </div>
 
 <div class="pd-sec" id="pd-kartu">
-  <h3>Anatomi Kartu</h3>
-  <p>Tiap kartu karakter punya info berikut — semuanya bisa difilter di halaman <b>Kartu</b> pada Deck Lab ini:</p>
+  <h3>Anatomi Kartu <span class="pd-ref">201</span></h3>
+  <p>Informasi di bagian depan kartu Character:</p>
   <ul>
-    <li><b>Nama &amp; Seri</b> — nama karakter dan kode set asalnya (mis. BP01, SD01).</li>
-    <li><b>Warna</b> — Merah, Kuning, Biru, atau Hijau. Deck maksimal memakai 2 warna.</li>
-    <li><b>Level (Lv)</b> — biaya panggil. Level 1–3 bisa langsung dipanggil dari tangan; Level 4 ke atas
-      butuh syarat tambahan (lihat "Aturan Inti" di bagian Action Phase).</li>
-    <li><b>Jarak Serangan (R)</b> — seberapa jauh kartu ini bisa menjangkau target di sisi lawan saat
-      menyerang. R-0 berarti kartu tidak bisa menyerang sama sekali; makin besar angka R, makin jauh
-      jangkauannya melintasi FRONT/WING/BACK lawan.</li>
-    <li><b>Power</b> — kekuatan bertarung. Yang lebih besar menang saat berhadapan langsung.</li>
-    <li><b>Trait</b> — golongan/afiliasi karakter (mis. Human/Avengers).</li>
-    <li><b>Rarity</b> — tingkat kelangkaan varian cetakan (tidak memengaruhi aturan main).</li>
+    <li><b>COLOR</b> — ikon permata di kiri atas. Ada 6 warna: Merah, Kuning, Biru, Hijau, Orange,
+      Purple (Orange &amp; Purple belum terbit). Juga ditunjukkan <b>color indicator</b> (lampu enam
+      warna) di kiri bawah.</li>
+    <li><b>LEVEL (Lv)</b> — Lv1 sampai Lv6, di kiri atas. Menentukan biaya CALL.</li>
+    <li><b>Nama Character</b> — di tengah kartu. Seluruh teks nama dihitung, termasuk julukan dalam
+      kurung seperti <i>[Antimatter]</i>. Nama inilah satu-satunya dasar untuk membedakan kartu.</li>
+    <li><b>SEASON</b> — huruf S + angka di kiri bawah nama. Bertambah seiring rilis produk baru dan
+      berkaitan dengan event permainan.</li>
+    <li><b>Trait</b> — teks miring di kanan bawah nama (mis. <i>Human/Avengers</i>).</li>
+    <li><b>Effect</b> — di bawah nama: jenis efek, lokasi &amp; syarat, lalu teks efek. Lihat
+      <a href="#pd-efek">Jenis Efek</a>.</li>
+    <li><b>RANGE (R)</b> — "R-angka" di kanan bawah: jarak serangan. Lihat
+      <a href="#pd-jarak">Jarak Serangan</a>.</li>
+    <li><b>ATTACK POWER</b> — angka di sebelah kanan R. Yang lebih besar menang saat bertarung.</li>
+    <li><b>Nomor kartu</b> — kanan atas, format <i>produk-nomor</i> (mis. BP01-001).</li>
+    <li><b>RARITY</b> — huruf di sebelah nomor kartu. Lihat <a href="#pd-rarity">Rarity</a>.</li>
   </ul>
-  <p>Teks efek kartu memakai kode singkat di depan kalimat efeknya:</p>
+  <p>Kode yang muncul di teks efek kartu:</p>
   <div class="pd-tags">
-    <span>[TRIG]</span><span>[AUTO]</span><span>[ACTI]</span><span>[COUNTER]</span>
-    <span>[COUNTER-ACTI]</span><span>[UNIQUE]</span><span>[BLOCK]</span><span>[DOUBLE ATTACK]</span>
+    <span>[TRIG]</span><span>[AUTO]</span><span>[ACTI]</span><span>[COUNTER-ACTI]</span>
+    <span>[COUNTER]</span><span>[BLOCK]</span><span>[DOUBLE ATTACK]</span><span>[ASSAULT]</span>
+    <span>[AIR STRIKE]</span><span>[UNIQUE]</span>
   </div>
-  <p>Arti tiap kode dijelaskan di bagian <a href="#pd-efek">Jenis Efek</a> dan
-    <a href="#pd-kemampuan">Kemampuan Kunci</a> di bawah.</p>
+</div>
+
+<div class="pd-sec" id="pd-rarity">
+  <h3>Rarity <span class="pd-ref">201.14 · 202.6</span></h3>
+  <p>Rarity hanya soal kelangkaan &amp; versi cetakan — <b>tidak memengaruhi aturan main</b>. Kartu
+    bernama sama dengan rarity berbeda tetap dihitung satu nama.</p>
+  <table class="pd-table">
+    <tr><th>Kode</th><th>Arti</th></tr>
+    <tr><td>R</td><td>Rare</td></tr>
+    <tr><td>SR</td><td>Super Rare</td></tr>
+    <tr><td>GR</td><td>Grand Rare</td></tr>
+    <tr><td>UR</td><td>Ultimate Rare</td></tr>
+    <tr><td>MR</td><td>Alternate Art tingkat 1</td></tr>
+    <tr><td>SEC</td><td>Alternate Art tingkat 2</td></tr>
+    <tr><td>HR</td><td>Alternate Art tingkat 3</td></tr>
+    <tr><td>LR</td><td>Legendary Alternate Art</td></tr>
+    <tr><td>PR</td><td>Promotional Rare</td></tr>
+    <tr><td>ER</td><td>Event Rare</td></tr>
+    <tr><td>TR</td><td>Treasure Rare</td></tr>
+  </table>
+  <p>Rush Point punya rarity sendiri: <b>C</b> (Common), serta MR, SEC, HR, LR, PR, ER, dan TR.</p>
 </div>
 
 <div class="pd-sec" id="pd-area">
-  <h3>Area Permainan</h3>
-  <p>Setiap pemain punya 4 slot pertarungan yang membentuk formasi berlian — bersama disebut area
-    <b>BATTLE</b>. Posisi karakter di keempat slot ini bisa ditukar-tukar bebas di <b>Adjustment
-    Phase</b> (setelah Action Phase, sebelum Battle Phase — lihat bagian di bawah) supaya jarak
-    serangan (R) masing-masing karakter pas sebelum benar-benar menyerang:</p>
+  <h3>Area Permainan <span class="pd-ref">102 · 302</span></h3>
+  <p><b>FIELD</b> milik tiap pemain terdiri dari <b>BATTLE</b> dan <b>BASE</b>. BATTLE punya 4 posisi,
+    masing-masing maksimal 1 Character:</p>
   <div class="pd-field">
     <div class="pd-slot front">FRONT</div>
     <div class="pd-slot wl">WING</div>
     <div class="pd-slot wr">WING</div>
     <div class="pd-slot back">BACK</div>
   </div>
-  <div class="pd-base">+ area <b>BASE</b> (di belakang BATTLE) — tempat kartu tertutup/charge, maksimal 6 kartu.
-    BATTLE dan BASE bersama-sama disebut <b>FIELD</b> milik satu pemain — ini area yang dimaksud di
-    teks efek seperti [TRIG](FIELD).</div>
-  <p>Urutan menyerang tiap giliran selalu tetap: <b>FRONT lebih dulu</b>, lalu <b>kedua WING</b>
-    (kalau dua-duanya terisi, Anda yang menentukan urutannya), baru <b>BACK</b> paling akhir.
-    Posisi BATTLE yang kosong disebut <b>Weakness</b> — target empuk yang kalau berhasil diserang,
-    Anda dapat 1 kartu Rush Point.</p>
-  <p>Area lain di luar BATTLE/BASE:</p>
+  <div class="pd-base">+ <b>BASE</b> — tempat Character dan Face-Down Card, <b>maksimal 6 kartu</b>
+    (gabungan keduanya). Karakter hanya bisa menyerang dari BATTLE.</div>
+  <p>Posisi BATTLE yang kosong disebut <b>Weakness</b>. Area di luar FIELD (<b>Off-field</b>):</p>
   <div class="pd-grid2">
-    <div class="pd-term"><span class="k">Retreat</span><p>Tempat kartu yang kalah bertarung,
-      dikorbankan, atau dibuang berakhir. Normalnya kartu di sini tidak aktif — tapi beberapa kartu
-      lain punya efek yang bisa mengembalikannya ke tangan, FIELD, atau bahkan deck.</p></div>
-    <div class="pd-term"><span class="k">Void</span><p>Tempat kartu yang sudah <b>di-prune</b>
-      (disingkirkan dari permainan). Jumlahnya tidak terbatas. Biasanya dianggap "hilang", tapi ada
-      juga kartu tertentu yang efeknya bisa mengembalikan kartu dari VOID ke FIELD.</p></div>
-    <div class="pd-term"><span class="k">Deck</span><p>Tumpukan Main Deck Anda. Begitu mencapai 0
-      kartu, Anda langsung kalah saat itu juga (lihat Cara Menang). Jumlah kartu tersisa di Deck
-      manapun — milik sendiri atau lawan — boleh ditanyakan/dikonfirmasi kapan saja, kartunya sendiri
-      tetap tidak boleh dilihat.</p></div>
-    <div class="pd-term"><span class="k">Rush Point Deck</span><p>9 kartu poin Anda. Berpindah satu
-      per satu ke TIMELINE tiap kali berhasil menyerang Weakness lawan.</p></div>
-    <div class="pd-term"><span class="k">Timeline</span><p>Tempat kartu Rush Point yang sudah didapat.
-      Kalau sudah terkumpul 9 di sini, Anda menang.</p></div>
+    <div class="pd-term"><span class="k">Deck</span><p>Tertutup dalam satu tumpukan. Isinya tidak boleh
+      dilihat siapa pun dan urutannya tidak boleh diubah, kecuali diperintah aturan/efek. Jumlah kartu
+      di Deck siapa pun boleh dicek kapan saja.</p></div>
+    <div class="pd-term"><span class="k">Rush Point Deck</span><p>9 Rush Point tertutup. Aturannya
+      sama seperti Deck: tidak boleh dilihat, jumlahnya boleh dicek.</p></div>
+    <div class="pd-term"><span class="k">Timeline</span><p>Tempat Rush Point yang sudah Anda dapat.
+      Tanpa batas. 9 Rush Point di sini = menang.</p></div>
+    <div class="pd-term"><span class="k">RETREAT</span><p>Tempat kartu yang di-Retreat atau dibuang
+      (discard). Terbuka, tanpa batas, urutan bebas, boleh dilihat kedua pemain kapan saja.</p></div>
+    <div class="pd-term"><span class="k">VOID</span><p>Tempat kartu yang di-<b>Prune</b>. Terbuka,
+      tanpa batas, urutan bebas, boleh dilihat kedua pemain kapan saja.</p></div>
+    <div class="pd-term"><span class="k">HAND</span><p>Kartu di tangan. Tertutup — hanya pemiliknya yang
+      boleh melihat, tapi jumlahnya boleh dicek lawan. Tanpa batas selama giliran; batas 9 hanya
+      dicek di End Phase.</p></div>
   </div>
+</div>
+
+<div class="pd-sec" id="pd-jarak">
+  <h3>Jarak Serangan (R) <span class="pd-ref">303.2.a.4.3.1.1</span></h3>
+  <p>Setiap langkah antar posisi berjarak <b>1</b>, berurutan dari BACK Anda sampai BACK lawan:</p>
+  <div class="pd-line">
+    <span>BACK Anda</span><i>1</i><span>WING Anda</span><i>1</i><span>FRONT Anda</span><i>1</i>
+    <span class="op">FRONT lawan</span><i>1</i><span class="op">WING lawan</span><i>1</i><span class="op">BACK lawan</span>
+  </div>
+  <p>Karakter bisa menyerang target (Character lawan di BATTLE, atau Weakness) yang jaraknya
+    <b>sama dengan atau kurang dari R</b>-nya. R minimal yang dibutuhkan:</p>
+  <table class="pd-table">
+    <tr><th>Menyerang dari</th><th>ke FRONT lawan</th><th>ke WING lawan</th><th>ke BACK lawan</th></tr>
+    <tr><td>FRONT</td><td>R1</td><td>R2</td><td>R3</td></tr>
+    <tr><td>WING</td><td>R2</td><td>R3</td><td>R4</td></tr>
+    <tr><td>BACK</td><td>R3</td><td>R4</td><td>R5</td></tr>
+  </table>
+  <p>Karakter dengan <b>R 0</b>, atau yang tidak punya target sah dalam jangkauan R-nya, tidak bisa
+    menyerang <span class="pd-ref">303.2.a.4.6</span>.</p>
 </div>
 
 <div class="pd-sec" id="pd-giliran">
-  <h3>Alur Satu Giliran</h3>
-  <p>Tiap giliran terdiri dari 7 fase berurutan:</p>
+  <h3>Alur Satu Giliran <span class="pd-ref">303.2</span></h3>
+  <p>Tiap giliran terdiri dari <b>6 fase</b> berurutan:</p>
   <div class="pd-flow">
-    <span><b>1</b>Start Phase</span><span><b>2</b>Draw Phase</span><span><b>3</b>Action Phase</span>
-    <span><b>4</b>Adjustment Phase</span><span><b>5</b>Battle Phase</span>
-    <span><b>6</b>Counter Phase</span><span><b>7</b>End Phase</span>
+    <span><b>1</b>Start of Turn</span><span><b>2</b>Draw Phase</span><span><b>3</b>Action Phase</span>
+    <span><b>4</b>Battle Phase</span><span><b>5</b>Counter Phase</span><span><b>6</b>End Phase</span>
   </div>
   <ul>
-    <li><b>Start Phase</b> — efek kartu yang aktif "saat memulai giliran" dijalankan di sini.</li>
-    <li><b>Draw Phase</b> — tarik 2 kartu. Batas tangan maksimal 9 kartu (kelebihan harus dibuang di
-      End Phase).</li>
-    <li><b>Action Phase, Adjustment Phase &amp; Battle Phase</b> — dijelaskan detail di bagian di
-      bawah, karena ini inti permainan.</li>
-    <li><b>Counter Phase</b> — jendela terakhir sebelum giliran berakhir: tiap pemain bergiliran
-      (lawan lebih dulu) memilih salah satu dari tiga hal — panggil kartu berkemampuan
-      <b>[COUNTER]</b> (maksimal 1 kali per fase ini per giliran), aktifkan efek kartu, atau tidak
-      berbuat apa-apa. Fase berakhir kalau kedua pemain berturut-turut memilih tidak berbuat apa-apa.</li>
-    <li><b>End Phase</b> — buang kelebihan kartu di tangan sampai maksimal 9, lalu giliran berpindah
-      ke pemain lain.</li>
+    <li><b>Start of Turn</b> — efek yang terpicu "saat awal giliran" dijalankan.</li>
+    <li><b>Draw Phase</b> — pemain yang sedang giliran (Turn Player) menarik <b>2 kartu</b>.</li>
+    <li><b>Action Phase</b>, <b>Battle Phase</b>, <b>Counter Phase</b> &amp; <b>End Phase</b> —
+      dijelaskan di bagian berikut.</li>
   </ul>
-  <div class="pd-box warn"><b>Catatan giliran pertama:</b> pemain yang jalan duluan sangat dibatasi
-    di giliran pertamanya — hanya boleh menaruh <b>1 kartu tertutup</b> di BASE, memanggil
-    <b>1 karakter</b> (bukan sampai 3), dan <b>tidak bisa menyerang</b> BATTLE lawan sama sekali
-    (melewati seluruh Battle Phase) — karena lawan belum sempat memanggil karakter apa pun untuk
-    diserang.</div>
 </div>
 
 <div class="pd-sec" id="pd-aksi">
-  <h3>Action Phase — Memanggil &amp; Mengatur Karakter</h3>
-  <p>Di fase ini Anda boleh melakukan tindakan berikut berulang kali, dalam urutan bebas, selama
-    masih memenuhi batasannya:</p>
+  <h3>Action Phase <span class="pd-ref">303.2.a.3</span></h3>
+  <p>Turn Player boleh melakukan tindakan berikut dalam urutan bebas, lalu menyatakan Action Phase
+    selesai:</p>
   <ul>
-    <li><b>Pasang Kartu Tertutup / Set Card</b> (maks 1× per giliran) — taruh 1 kartu tertutup ke
-      BASE, lalu tarik 1 kartu dari deck Anda. (Beda dengan memanggil karakter ke BASE di poin
-      berikutnya — itu tidak termasuk batas 1× ini.)</li>
-    <li><b>Panggil Karakter / Call</b> (maks 3× per giliran) — pindahkan 1 kartu karakter dari tangan
-      ke <b>FIELD</b> yang kosong. Boleh diletakkan di slot BATTLE <b>atau</b> di BASE — batas
-      maksimal tetap 3 pemanggilan per giliran, terlepas dari mana kartunya diletakkan:
+    <li><b>Base Deployment</b> (maks <b>1×</b> per giliran) — taruh 1 kartu dari HAND secara
+      tertutup ke BASE, lalu tarik 1 kartu.</li>
+    <li><b>Action CALL</b> (maks <b>3×</b> per giliran; <b>1×</b> di giliran pertama pemain
+      pertama) — CALL 1 Character dari HAND ke FIELD Anda:
       <ul>
-        <li>Level 3 ke bawah → panggil langsung, tanpa syarat.</li>
-        <li>Level 4 ke atas → Anda harus lebih dulu me-retreat (memindahkan ke RETREAT) satu atau
-          lebih kartu karakter di BATTLE Anda yang <b>total Level-nya sama persis</b> dengan Level
-          karakter yang dipanggil. Kartu tertutup/charge di BASE juga boleh dipakai untuk membayar
-          ini — tiap kartu charge dihitung sebagai Level 1. Istilah yang biasa dipakai pemain untuk
-          ini: <b>"bayar cost/biaya"</b> atau <b>"sacrifice"</b> — sama saja dengan retreat.</li>
+        <li><b>Lv3 ke bawah</b> → langsung PLACE ke FIELD.</li>
+        <li><b>Lv4 ke atas</b> → RETREAT dulu 1 atau lebih Character di <b>FIELD Anda (BATTLE
+          maupun BASE)</b> yang total Lv-nya <b>sama persis</b> dengan Lv Character yang di-CALL, baru
+          PLACE ke FIELD <span class="pd-ref">301.19</span>. Face-Down Card di BASE juga boleh
+          di-RETREAT untuk membayar — tiap kartu dihitung <b>Lv1</b>
+          <span class="pd-ref">301.21.g</span>.</li>
       </ul>
     </li>
-    <li><b>BATTLE-BASE move (disingkat BBM)</b> — memindahkan kartu karakter antara BATTLE dan BASE
-      milik Anda sendiri (bukan menyerang lawan). Karakter yang <b>baru dipanggil di giliran yang
-      sama</b> belum bisa melakukan BBM — harus menunggu giliran berikutnya, kecuali ada efek kartu
-      lain yang secara khusus mengizinkan BBM lebih awal.</li>
+    <li><b>BATTLE-BASE MOVE</b> — pindahkan 1 Character Anda antara BATTLE dan BASE. Tiap Character
+      punya 1 kesempatan per giliran. Character yang baru masuk FIELD giliran ini <b>belum boleh</b>
+      BATTLE-BASE MOVE — kecuali Character yang baru dibuka dari Face-Down Card
+      <span class="pd-ref">301.22.b</span>.</li>
+    <li><b>Mengaktifkan efek</b> — aktifkan [ACTI] atau [COUNTER-ACTI] milik kartu Anda.</li>
   </ul>
-</div>
-
-<div class="pd-sec" id="pd-adjust">
-  <h3>Adjustment Phase — Mengatur Posisi</h3>
-  <p>Fase singkat tapi penting di antara Action Phase dan Battle Phase: di sini Anda boleh menukar
-    posisi karakter yang sudah ada di BATTLE Anda sekaligus, bebas antar keempat slot (FRONT ↔ WING
-    ↔ BACK), sepuasnya. Pertukaran posisi <b>tidak dihitung sebagai "gerakan"</b> dan tidak
-    terbatas jumlahnya.</p>
-  <p>Gunanya: menyesuaikan karakter mana yang berada di FRONT/WING/BACK <b>sebelum</b> Battle Phase
-    dimulai, supaya jarak serangan (R) tiap karakter pas dengan target yang ingin Anda serang atau
-    posisi yang ingin Anda lindungi.</p>
 </div>
 
 <div class="pd-sec" id="pd-battle">
-  <h3>Battle Phase — Menyerang</h3>
-  <p>Pemain yang mendapat giliran pertama melewati fase ini di giliran pertamanya (lihat catatan di
-    atas). Di giliran lain, karakter menyerang berurutan: <b>FRONT → WING → WING → BACK</b>. Tiap
-    karakter hanya mendapat 1 kesempatan menyerang per giliran, dan boleh memilih untuk tidak
-    menyerang — tapi begitu urutan bergeser ke slot berikutnya, kesempatan menyerang karakter yang
-    dilewati <b>hilang untuk giliran ini</b>, tidak bisa "balik lagi" belakangan. Begitu sebuah
-    serangan dideklarasikan, prosesnya juga <b>terkunci</b> sampai selesai.</p>
-  <p>Untuk setiap karakter yang menyerang, ada 3 langkah:</p>
+  <h3>Battle Phase <span class="pd-ref">303.2.a.4</span></h3>
+  <p>Pemain pertama melewati fase ini di giliran pertamanya. Di giliran lain, urutannya:</p>
+  <ol>
+    <li><b>Atur posisi (sekali)</b> — Turn Player boleh <b>satu kali</b> menyusun ulang posisi sampai
+      4 Character di BATTLE-nya. Penyusunan ini tidak dihitung sebagai perpindahan (movement).</li>
+    <li><b>Menyerang berurutan</b>: <b>FRONT → WING → BACK</b>. Kalau kedua WING terisi, Anda yang
+      menentukan WING mana duluan.</li>
+  </ol>
   <ul>
-    <li><b>① Target Phase</b> — karakter memilih 1 karakter musuh (atau Weakness) yang berada dalam
-      jangkauan R miliknya untuk diserang.</li>
-    <li><b>② Counter Phase (mini)</b> — musuh lebih dulu, lalu Anda, sama-sama boleh memanggil 1
-      kartu [COUNTER] (maksimal sekali per fase ini per giliran), mengaktifkan efek, atau tidak
-      berbuat apa-apa — persis seperti Counter Phase di akhir giliran, tapi khusus untuk pertarungan
-      ini saja.</li>
-    <li><b>③ Langkah Keputusan</b> — power dibandingkan: yang lebih besar menang (yang kalah masuk
-      RETREAT); kalau sama besar, <b>kedua-duanya</b> masuk RETREAT. Kalau targetnya Weakness dan
-      berhasil, Anda dapat 1 kartu Rush Point ke TIMELINE.</li>
+    <li>Tiap Character punya <b>1 kesempatan menyerang</b> per giliran ([DOUBLE ATTACK] memberi
+      kesempatan kedua). Boleh memilih tidak menyerang, tapi kesempatannya hilang untuk giliran ini.</li>
+    <li>Begitu serangan dinyatakan, prosesnya terkunci dan harus dijalankan sampai selesai.</li>
+  </ul>
+  <h4>Tiap serangan melewati 3 langkah:</h4>
+  <ol>
+    <li><b>Select Target Step</b> — pilih 1 Character di BATTLE lawan atau 1 Weakness dalam
+      jangkauan R. Kalau efek membuat targetnya tidak sah lagi, pilih target ulang. Kalau penyerang
+      keluar dari FIELD, tidak bisa menyerang lagi, atau tidak ada target sah tersisa, battle
+      berakhir.</li>
+    <li><b>Counter Step</b> — bergantian, <b>lawan lebih dulu</b>, tiap pemain memilih 1 dari 3:
+      COUNTER CALL Character ber-[COUNTER] (maks 1× per giliran per pemain), mengaktifkan
+      [COUNTER-ACTI], atau tidak berbuat apa-apa. Selesai kalau kedua pemain berturut-turut tidak
+      berbuat apa-apa. Kalau targetnya jadi tidak sah, kembali ke Select Target Step.</li>
+    <li><b>Confirmation Step</b> — hasil ditentukan:
+      <ul>
+        <li><b>Character vs Character</b>: Attack Power lebih besar <b>Win the Fight</b>; yang kalah
+          (<b>Lose the Fight</b>) di-RETREAT. Kalau sama besar: <b>BOTH LOSE</b>, keduanya
+          di-RETREAT.</li>
+        <li><b>Character vs Weakness</b>: serangan berhasil — Turn Player menaruh kartu teratas Rush
+          Point Deck-nya ke Timeline-nya.</li>
+      </ul>
+    </li>
+  </ol>
+</div>
+
+<div class="pd-sec" id="pd-akhir">
+  <h3>Counter Phase &amp; End Phase <span class="pd-ref">303.2.a.5–6</span></h3>
+  <ul>
+    <li><b>Counter Phase</b> — bergantian, <b>lawan lebih dulu</b>, tiap pemain memilih 1 dari 3:
+      COUNTER CALL Character ber-[COUNTER] (maks 1× per giliran per pemain di fase ini), mengaktifkan
+      [COUNTER-ACTI], atau tidak berbuat apa-apa. Selesai kalau kedua pemain berturut-turut tidak
+      berbuat apa-apa.</li>
+    <li><b>End Phase</b>, berurutan:
+      <ol>
+        <li>Efek yang terpicu "saat akhir giliran" dijalankan. Efek akhir giliran yang baru muncul
+          sesudahnya sudah terlewat dan tidak terpicu.</li>
+        <li>Efek yang berlaku "selama giliran ini" berakhir.</li>
+        <li>Kalau kartu di HAND Turn Player lebih dari 9, ia membuang kartu sampai tersisa 9.</li>
+      </ol>
+    </li>
   </ul>
 </div>
 
-<div class="pd-sec" id="pd-kemampuan">
-  <h3>Kemampuan Kunci</h3>
-  <p>Enam kemampuan bernama yang muncul di teks kartu — cocokkan dengan kode di kartu (mis.
-    <span class="pd-tags"><span>[COUNTER]</span></span>), bukan istilah rulebook terjemahan lain
-    yang mungkin beredar, karena penamaan di kartu resmi Indonesia inilah yang dipakai Deck Lab:</p>
+<div class="pd-sec" id="pd-efek">
+  <h3>Jenis Efek <span class="pd-ref">201.10 · 304</span></h3>
+  <p>Format efek di kartu: <b>jenis efek</b> → <b>lokasi / syarat</b> (teks putih di latar hitam,
+    dipisah garis miring) → <b>teks efek</b>.</p>
   <div class="pd-grid2">
-    <div class="pd-term"><span class="k">Counter</span><p>Bisa dipanggil sebagai balasan terhadap
-      action, dan bisa melakukan counter terhadap pemanggilan lawan.</p></div>
-    <div class="pd-term"><span class="k">Block</span><p>Mengalihkan target serangan musuh dari kartu
-      lain ke kartu ini. Maksimal 1× per giliran.</p></div>
-    <div class="pd-term"><span class="k">Double-Attack</span><p>Mendapat kesempatan menyerang kedua
-      kalinya di giliran yang sama.</p></div>
-    <div class="pd-term"><span class="k">Assault</span><p>Kalau menang bertarung saat menyerang,
-      serangan itu tetap dihitung sebagai serangan berhasil ke Weakness lawan.</p></div>
-    <div class="pd-term"><span class="k">Air Strike</span><p>Tetap bisa menyerang BATTLE musuh yang
-      terisi kartu, dengan menganggapnya sebagai Weakness.</p></div>
-    <div class="pd-term"><span class="k">Unique</span><p>Tidak boleh ada kartu lain bernama sama di
-      FIELD Anda. Efek ini tidak bisa dihilangkan.</p></div>
+    <div class="pd-term"><span class="k">[TRIG] Trigger Effect</span><p>Latar merah. Terpicu saat syaratnya
+      terpenuhi selama kartu ada di lokasi efeknya. Kalau teksnya memakai kata "boleh/may", efek itu
+      opsional; kalau tidak, efek itu <b>wajib</b> (MANDATORY EFFECT).</p></div>
+    <div class="pd-term"><span class="k">[AUTO] Auto Effect</span><p>Latar hijau. Berlaku terus-menerus
+      selama kartu ada di lokasi efeknya.</p></div>
+    <div class="pd-term"><span class="k">[ACTI] Activated Effect</span><p>Latar biru. Diaktifkan sendiri
+      oleh pemilik kartu di Action Phase-nya. Hanya boleh diaktifkan kalau teksnya punya bagian yang
+      bisa dijalankan.</p></div>
+    <div class="pd-term"><span class="k">[COUNTER-ACTI]</span><p>Activated Effect yang juga boleh
+      diaktifkan di Counter Phase siapa pun dan di Counter Step dalam battle — selain di Action Phase
+      Anda.</p></div>
+    <div class="pd-term"><span class="k">Ability</span><p>Kata kunci singkat (teks putih di latar hitam,
+      kiri atas teks efek) yang mewakili efek lengkap — lihat
+      <a href="#pd-kemampuan">Kemampuan Kunci</a>.</p></div>
   </div>
+  <p><b>Menjalankan efek:</b> efek dijalankan <b>segera</b> dan <b>semaksimal mungkin</b>. Kalau
+    beberapa efek terpicu bersamaan, efek berikutnya menunggu yang sekarang selesai. Pemain yang
+    memicu beberapa efek menentukan urutannya sendiri; kalau kedua pemain memicu efek di waktu yang
+    sama, <b>Turn Player menentukan urutan efeknya lebih dulu</b>, lalu lawan. Trigger Effect dari
+    HAND tidak perlu diumumkan, tapi tetap harus dimasukkan ke urutan <span class="pd-ref">304.1</span>.</p>
 </div>
 
-<div class="pd-sec" id="pd-efek">
-  <h3>Jenis Efek</h3>
+<div class="pd-sec" id="pd-kemampuan">
+  <h3>Kemampuan Kunci <span class="pd-ref">305</span></h3>
   <div class="pd-grid2">
-    <div class="pd-term"><span class="k">Trigger</span><p>Aktif otomatis begitu syarat/kondisinya
-      terpenuhi (mis. saat kartu masuk FIELD).</p></div>
-    <div class="pd-term"><span class="k">Automatic</span><p>Berlaku terus-menerus selama kartunya
-      ada di area yang sesuai — tidak perlu "dinyalakan".</p></div>
-    <div class="pd-term"><span class="k">Activate</span><p>Bisa Anda aktifkan sendiri, tapi hanya di
-      Action Phase giliran Anda.</p></div>
-    <div class="pd-term"><span class="k">Counter-Activate</span><p>Bisa diaktifkan di Action Phase
-      giliran Anda <b>atau</b> di langkah counter (Counter Phase akhir giliran maupun mini-Counter
-      Phase dalam pertarungan).</p></div>
+    <div class="pd-term"><span class="k">COUNTER</span><p>[AUTO] (HAND): kartu ini boleh dipanggil
+      lewat <b>COUNTER CALL</b> — di Counter Step dalam battle atau di Counter Phase. Biaya CALL tetap
+      berlaku (Lv4+ bayar RETREAT).</p></div>
+    <div class="pd-term"><span class="k">BLOCK</span><p>[COUNTER-ACTI] (BATTLE / 1× per giliran): kalau
+      kartu ini bisa dipilih sebagai target oleh Character lawan yang sedang menyerang, alihkan target
+      serangan itu ke kartu ini.</p></div>
+    <div class="pd-term"><span class="k">DOUBLE ATTACK</span><p>[AUTO] (BATTLE): kartu ini punya
+      kesempatan menyerang kedua.</p></div>
+    <div class="pd-term"><span class="k">ASSAULT</span><p>[AUTO] (BATTLE): kalau kartu ini Win the Fight
+      saat menyerang, serangannya juga dihitung berhasil menyerang Weakness (dapat Rush Point).</p></div>
+    <div class="pd-term"><span class="k">AIR STRIKE</span><p>[AUTO] (BATTLE): boleh menyerang posisi
+      BATTLE lawan yang berisi Character seolah-olah itu Weakness. <i>Di rulebook ditulis
+      "AIR-ATTACK"; di kartu tercetak AIR STRIKE.</i></p></div>
+    <div class="pd-term"><span class="k">UNIQUE</span><p>[AUTO] (FIELD): tidak boleh ada kartu lain
+      bernama sama di FIELD Anda. Efek ini tidak bisa hilang. Face-Down Card yang akan dibuka tapi
+      terhalang UNIQUE tidak jadi dibuka — cukup diperlihatkan.</p></div>
   </div>
-  <p>Kalau teks efek Trigger mengandung kata <b>"boleh"</b> setelah kalimat penjelas kapan efek itu
-    aktif, efek tersebut <b>opsional</b> — Anda yang memutuskan mau memicunya atau tidak, bukan wajib
-    otomatis.</p>
 </div>
 
 <div class="pd-sec" id="pd-istilah">
-  <h3>Istilah Penting Lainnya</h3>
+  <h3>Aturan Inti &amp; Istilah <span class="pd-ref">301</span></h3>
+  <div class="pd-box"><b>Prioritas aturan:</b> teks efek "tidak bisa" &gt; teks efek "bisa" &gt; aturan
+    "tidak bisa" &gt; aturan "bisa" <span class="pd-ref">301.1</span>.</div>
   <div class="pd-grid2">
-    <div class="pd-term"><span class="k">Field</span><p>Gabungan area BATTLE + BASE milik satu
-      pemain. Ini yang dimaksud teks efek seperti [TRIG](FIELD).</p></div>
-    <div class="pd-term"><span class="k">BBM</span><p>Singkatan yang biasa dipakai pemain untuk
-      BATTLE-BASE move — memindahkan kartu karakter sendiri antara BATTLE dan BASE.</p></div>
-    <div class="pd-term"><span class="k">Weakness</span><p>Posisi BATTLE yang kosong — target yang
-      kalau berhasil diserang memberi 1 Rush Point.</p></div>
-    <div class="pd-term"><span class="k">Set Card / Kartu Charge</span><p>Kartu karakter yang
-      ditaruh tertutup di BASE. Kehilangan efeknya, dianggap tidak di BATTLE, dan hanya pemiliknya
-      yang boleh melihatnya. Boleh di-retreat (dianggap Level 1) untuk membantu membayar panggilan
-      Level 4+.</p></div>
-    <div class="pd-term"><span class="k">Prune</span><p>Menyingkirkan kartu ke VOID. Ini yang
-      dicocokkan filter mekanik "Prune" di halaman Kartu.</p></div>
-    <div class="pd-term"><span class="k">Retreat (aksi)</span><p>Tindakan memindahkan kartu dari
-      BATTLE ke area RETREAT — ini yang jadi "biaya" saat memanggil karakter Level 4+. Beda dengan
-      kartu yang <b>sudah</b> berada di area RETREAT (lihat definisi di bagian Area Permainan), yang
-      normalnya tidak otomatis kembali kecuali ada efek kartu lain yang membawanya balik.</p></div>
-    <div class="pd-term"><span class="k">Power 0 = retreat otomatis</span><p>Kalau power sebuah kartu
-      turun jadi 0 atau kurang akibat efek kartu, kartu itu <b>otomatis di-retreat</b> — tidak perlu
-      menunggu pertarungan.</p></div>
+    <div class="pd-term"><span class="k">PLACE / SET</span><p>PLACE = menaruh kartu terbuka ke area
+      tertentu. SET = menaruh kartu tertutup.</p></div>
+    <div class="pd-term"><span class="k">Face-Down Card</span><p>Character tertutup di BASE. Kehilangan
+      efeknya, dianggap area tertutup, hanya pemiliknya yang boleh melihat. Dihitung Lv1 saat
+      di-RETREAT untuk membayar CALL Lv4+.</p></div>
+    <div class="pd-term"><span class="k">RETREAT</span><p>Memindahkan kartu dari FIELD ke RETREAT.
+      Character yang Attack Power-nya diturunkan efek jadi <b>0</b> langsung di-RETREAT — hasil ini
+      terkunci.</p></div>
+    <div class="pd-term"><span class="k">Discard</span><p>Membuang kartu dari HAND (atau dari Deck
+      lewat efek) ke RETREAT.</p></div>
+    <div class="pd-term"><span class="k">Prune</span><p>Memindahkan kartu ke VOID.</p></div>
+    <div class="pd-term"><span class="k">Weakness</span><p>Posisi BATTLE yang kosong. Berhasil
+      menyerangnya = 1 Rush Point.</p></div>
+    <div class="pd-term"><span class="k">Nilai minimum</span><p>Attack Power, Lv, dan R minimal 0 dan
+      tanpa batas atas. Pengurangan yang melewati 0 tetap tercatat.</p></div>
+    <div class="pd-term"><span class="k">Injured</span><p>Character yang Attack Power-nya saat ini lebih
+      rendah dari aslinya, tapi bukan 0.</p></div>
+    <div class="pd-term"><span class="k">Owner / Controller</span><p>Owner = pemain pemilik deck asal
+      kartu. Controller = pemilik area FIELD tempat kartu itu berada.</p></div>
+    <div class="pd-term"><span class="k">Your side / Opponent's side</span><p>Untuk kartu di FIELD
+      merujuk ke controller-nya; untuk kartu di luar FIELD merujuk ke owner-nya.</p></div>
+    <div class="pd-term"><span class="k">Swap</span><p>Menukar posisi 2 kartu — status dan Attached Card
+      masing-masing ikut tertukar.</p></div>
+    <div class="pd-term"><span class="k">Attached Card</span><p>Character yang ditumpuk di bawah
+      Character lain. Ikut ke mana kartu induknya pergi, tidak dihitung dalam batas area, urutannya
+      tidak boleh diubah. <b>Detach</b> = melepasnya jadi Character lagi.</p></div>
+    <div class="pd-term"><span class="k">BATTLE MOVE</span><p>Perpindahan antar posisi BATTLE milik
+      sendiri (biasanya lewat efek). Beda dengan BATTLE-BASE MOVE.</p></div>
+    <div class="pd-term"><span class="k">Leave the FIELD</span><p>Kartu yang keluar dari FIELD
+      kembali ke kondisi aslinya dan dianggap kartu baru — semua perubahan hilang.</p></div>
+    <div class="pd-term"><span class="k">Look At / Reveal</span><p>Look At = melihat sendiri tanpa
+      menunjukkan ke lawan. Reveal = diperlihatkan ke kedua pemain; kartunya tetap di tempat.</p></div>
+    <div class="pd-term"><span class="k">Up to X / Any Number / All</span><p>Boleh memilih dari 0 sampai
+      batasnya. Memilih 0 (atau "All" yang maksimalnya 0) = efek dianggap tidak dijalankan.</p></div>
+    <div class="pd-term"><span class="k">After doing so</span><p>Bagian sesudah "After doing so" hanya
+      dijalankan kalau seluruh bagian sebelumnya berhasil dijalankan penuh.</p></div>
+    <div class="pd-term"><span class="k">Immunity</span><p>Kartu tidak bisa dijadikan target efek
+      kartu.</p></div>
+    <div class="pd-term"><span class="k">GAINED / Lose</span><p>Mendapat atau kehilangan Lv/R/Attack
+      Power ±, Ability, efek, atau trait. Kalau keduanya berlaku bersamaan, <b>Lose</b> yang
+      menang.</p></div>
+    <div class="pd-term"><span class="k">Name / Trait contains</span><p>Teks yang dicari harus muncul
+      utuh dan bersambung di nama/trait kartu.</p></div>
   </div>
 </div>
 
 <div class="pd-sec" id="pd-deck">
-  <h3>Aturan Menyusun Deck</h3>
-  <p>Ringkasan aturan deck-building yang divalidasi otomatis oleh Deck Builder di Deck Lab ini:</p>
+  <h3>Aturan Menyusun Deck <span class="pd-ref">101 · 201.7</span></h3>
+  <p>Divalidasi otomatis oleh Deck Builder di Deck Lab ini:</p>
   <ul>
-    <li>Main Deck harus <b>tepat 50 kartu</b>.</li>
-    <li>Maksimal <b>2 warna</b> berbeda dalam satu deck.</li>
-    <li>Maksimal <b>3 kartu per nama karakter</b> — dihitung dari nama, jadi 3 rarity berbeda dari
-      karakter yang sama tetap dihitung satu jatah.</li>
+    <li>Deck harus <b>tepat 50 Character</b>.</li>
+    <li>Maksimal <b>2 warna</b> berbeda.</li>
+    <li>Maksimal <b>3 kartu per nama Character</b>. Kartu bernama sama tetap dihitung satu nama
+      walaupun nomor kartu, rarity, atau <b>bahasa cetaknya</b> berbeda.</li>
   </ul>
-  <p>Susun deck Anda di halaman <b>Deck Builder</b> — Deck Lab otomatis memberi tahu kalau ada
-    pelanggaran salah satu aturan di atas, sebelum Anda membagikannya sebagai link atau gambar.</p>
+  <p>Susun deck di halaman <b>Deck Builder</b> — Deck Lab memberi tahu kalau ada aturan yang
+    dilanggar sebelum Anda membagikannya.</p>
 </div>
 
 <div class="pd-sec" id="pd-turnamen">
@@ -4730,8 +4850,9 @@ id: `
     diatur resmi oleh pihak MHR, jadi tergantung kesepakatan pemain atau ketentuan masing-masing
     LGS/turnamen setempat:</p>
   <ul>
-    <li><b>Menentukan siapa jalan duluan</b> — lewat <b>coin toss</b> atau <b>lempar dadu</b>,
-      tergantung kesepakatan kedua pemain.</li>
+    <li><b>Menentukan siapa jalan duluan</b> — rulebook cuma mensyaratkan cara yang
+      <b>disepakati kedua pemain</b> <span class="pd-ref">303.1.c</span>; yang umum dipakai
+      <b>coin toss</b> atau <b>lempar dadu</b>.</li>
     <li><b>Batas waktu pertandingan</b> — belum ada aturan waktu resmi dari pihak MHR. Kalau sebuah
       LGS atau turnamen menetapkan batas waktunya sendiri, urutan penentuan pemenang begitu waktu
       habis (dan belum ada yang menang secara wajar):
@@ -4748,12 +4869,11 @@ id: `
   </ul>
   <div class="pd-box warn">Bagian ini bisa berubah begitu pihak MHR resmi mengeluarkan aturan
     turnamen tertulis — kalau ragu, konfirmasi langsung ke penyelenggara/TO acara yang Anda ikuti.</div>
-</div>
 
-<p style="color:var(--muted);font-size:11px;margin-top:8px">Sumber: poster rulebook resmi
-  "Area Permainan" &amp; "Tata Cara Bermain" Marvel Hero Rush TCG — PT. Jason Entertainment
-  Indonesia (CARDFUN) &amp; Marvel; bagian Aturan Pertandingan &amp; Turnamen berdasarkan konvensi
-  komunitas/LGS yang berlaku saat ini.</p>
+<p style="color:var(--muted);font-size:11px;margin-top:8px">Sumber: <b>Marvel Hero Rush
+  Comprehensive Rules Ver. 1.03</b> resmi dari Jason (pembaruan 12 Agustus 2026). Nama kemampuan
+  mengikuti teks kartu kalau berbeda (AIR STRIKE). Bagian Aturan Pertandingan &amp; Turnamen
+  berdasarkan konvensi komunitas/LGS yang berlaku saat ini.</p>
 `,
 };
 
