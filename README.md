@@ -41,6 +41,19 @@ mhr-lab-x7k2m9/
 └── images/ · images/en/  ← gambar kartu, nama = nomor kartu (BP01-001.jpg)
 ```
 
+**Bahan kerja internal TIDAK disimpan di repo ini** (sejak 24 September 2026).
+Repo ini publik dan seluruh isinya ikut ter-publish ke `mhrdecklab.com`, jadi
+scan mentah, sumber logo, hasil kerja Claude, dan migrasi SQL disimpan di folder
+lokal terpisah di sebelah repo — **jangan dikembalikan ke sini**:
+
+```
+Documents\GitHub\mhr-deck-lab-internal\
+├── Database Image Kartu\      ← scan kartu mentah (English/ · Indonesia/ · Watermarks Sample/)
+├── Icon MHR Deck Lab\         ← sumber logo (termasuk versi Horizontal)
+├── Claude outputs\            ← screenshot/berkas kerja sesi Claude
+└── mhr_decklab_published_at_migration.sql  ← migrasi Supabase v6.47 (sudah dijalankan)
+```
+
 Aplikasi ini sepenuhnya statis — tanpa server, tanpa database, tanpa akun.
 Semua data deck tersimpan di browser pengguna (localStorage).
 
@@ -589,6 +602,32 @@ tanpa peringatan. Semua transisi tanpa error console.
    paham tanpa perlu toggle. Sengaja belum dikerjakan di rilis ini karena gaya
    penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
    terpisah, lebih ke pekerjaan tulisan daripada kode).
+
+### Bahan kerja internal dikeluarkan dari repo publik — 24 September 2026 *(hapus `Database Image Kartu/`, `Claude outputs/`, `Icon MHR Deck Lab/`, `mhr_decklab_published_at_migration.sql`; tidak ada perubahan kode, versi tetap v6.57)*
+
+Hasil audit folder lokal vs situs live (semua berkas situs identik dengan yang
+live di v6.57) menemukan bahwa karena repo ini **publik** dan GitHub Pages
+menyajikan seluruh isi repo, berkas kerja internal bisa dibuka siapa saja,
+mis. `mhrdecklab.com/Database Image Kartu/English/BP01_English/BP01-001.jpg`
+(863 scan mentah, 413 MB, masuk sejak commit v6.52 19 September),
+`mhrdecklab.com/Claude outputs/…`, dan berkas migrasi SQL.
+
+Keempatnya dipindah ke folder lokal `Documents\GitHub\mhr-deck-lab-internal\`
+(di luar repo, lihat § Struktur file). Tidak ada kode situs yang memakainya
+(cuma disebut di komentar `index.html`), jadi fungsi situs tidak berubah.
+
+Keputusan pemilik yang perlu diingat sesi berikutnya:
+- **Riwayat git TIDAK ditulis ulang** — berkas-berkas itu masih bisa diambil
+  dari commit lama di GitHub. Dipilih sadar demi kesederhanaan (tanpa force push).
+- **`README.md` tetap di repo dan tetap bisa dibuka publik**
+  (`mhrdecklab.com/README.md`), termasuk paragraf "Catatan izin" di atas —
+  pemilik menyatakan tidak masalah.
+- `tools/generate_card_pages.py` sengaja tetap di repo (dibutuhkan untuk
+  membuat halaman `cards/*.html`, isinya tidak sensitif).
+
+Mulai sekarang, scan kartu baru dan berkas kerja lainnya disimpan di folder
+internal itu, **bukan** di dalam repo. Hanya gambar final ber-watermark SAMPLE
+yang masuk ke `images/` / `images/en/`.
 
 ### v6.57 — Ganti logo header ke versi horizontal + catatan retroaktif perbaikan gambar SP01-021_MR — 22 September 2026 *(`index.html`, `icons/logo-header.png`, `images/SP01-021_MR.jpg`, `images/en/SP01-021_MR.jpg`)*
 
