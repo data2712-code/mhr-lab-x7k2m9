@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.58** · 24 September 2026
+**Versi saat ini: v6.59** · 24 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -507,6 +507,48 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.59 — Panduan Bermain ditulis ulang total mengikuti Comprehensive Rules 1.03 RESMI dari Jason — 24 September 2026 *(`index.html`, `README.md`)*
+
+Pemilik mengirim Comprehensive Rules Ver. 1.03 versi **resmi** dari Jason (penerbit
+Marvel Hero Rush) dan minta seluruh situs disesuaikan dengan dokumen ini. Rincian aturan
+& sumbernya ada di § Aturan resmi Marvel Hero Rush di bawah.
+
+**1. Halaman Panduan (`GUIDE.id`) ditulis ulang total** — 15 bagian, masing-masing diberi
+nomor pasal (`<span class="pd-ref">`): Cara Menang, Persiapan, Anatomi Kartu, **Rarity**
+(baru), Area Permainan, **Jarak Serangan** (baru — garis jarak + tabel R minimal per
+posisi), Alur Giliran, Action Phase, Battle Phase, Counter & End Phase, Jenis Efek,
+Kemampuan Kunci, **Aturan Inti & Istilah** (baru, ±20 istilah), Aturan Deck, Aturan
+Pertandingan (isi tetap, cuma ditambah rujukan 303.1.c).
+Koreksi isi yang sebelumnya salah:
+- Mulligan: boleh mengganti **sebagian** kartu (dulu ditulis wajib semua 6) — 303.1.e
+- Biaya CALL Lv4+: RETREAT dari **FIELD** (BATTLE maupun BASE), dulu ditulis "di BATTLE" — 301.19.b
+- **Tidak ada Adjustment Phase**: giliran = 6 fase; susun ulang posisi hanya **sekali**,
+  sampai 4 Character, sebagai langkah pertama Battle Phase (dulu 7 fase + "sepuasnya") — 303.2.a.4.2.1
+- Deskripsi COUNTER dibetulkan (dipanggil lewat COUNTER CALL dari HAND; bukan "bisa
+  meng-counter pemanggilan lawan") — 305.1
+- End Phase: urutan 3 langkahnya ditulis lengkap; batas 9 kartu hanya untuk Turn Player
+CSS baru: `.pd-ref`, `.pd-table`, `.pd-line`, `.pd-sec a` (warna tautan aksen; dulu
+biru bawaan browser, susah dibaca di latar gelap).
+
+**2. Istilah UI disamakan:** "Biaya Summon" → **"Biaya CALL"** (tooltip menyebut FIELD
+= BATTLE atau BASE, Face-Down Card = Lv1); tooltip Counter call / Counter efek memakai
+COUNTER CALL, Counter Step, Counter Phase + nomor pasal; tooltip filter kemampuan kunci
+menyebut "AIR-ATTACK" sebagai nama rulebook untuk AIR STRIKE. Label ringkas pilihan
+pemilik (R / Power / Colour, v6.51–v6.52) sengaja **tidak** diubah.
+
+**3. Rarity:** konstanta baru `RARITY_INFO` + `RARITY_ORDER` (201.14/202.6). Dropdown
+filter rarity sekarang urut resmi (R → SR → GR → UR → MR → SEC → HR → PR → ER → TR) dan
+berlabel artinya (mis. "SEC — Alternate Art tingkat 2"); nilai filter tetap kode rarity.
+Lencana rarity di kartu & tombol varian artwork di popup diberi tooltip artinya.
+
+**4. README** § Aturan resmi disusun ulang dengan rulebook resmi sebagai acuan utama;
+pertanyaan rarity lama ditandai terjawab; "Environment" diganti SEASON; tabel riwayat
+pembaruan aturan ditambah baris v6.59.
+
+**Verifikasi:** `node --check` blok script utama; Panduan dirender di Chromium (desktop
+1280 px & mobile 375 px) — 15 bagian tampil, tanpa error console, tanpa scroll
+horizontal; dropdown rarity terisi 10 opsi berurutan.
 
 ### v6.58 — Audit keamanan & kerapian: rem login di Supabase, escHtml diperkuat, riwayat git dibersihkan, README dibetulkan — 24 September 2026 *(`index.html`, `auth.js`, `README.md`, Supabase SQL, riwayat git)*
 
@@ -3949,161 +3991,175 @@ Ditujukan untuk alur kerja meninjau dan mengganti kartu setelah deck jadi.
 
 ## Aturan resmi Marvel Hero Rush (rujukan lengkap untuk Deck Lab)
 
-> Bagian ini kumpulan **seluruh** aturan permainan yang sudah dipelajari dari sumber
-> resmi maupun penjelasan pemilik, supaya sesi Claude mana pun — termasuk percakapan
-> yang benar-benar baru, tanpa riwayat chat sebelumnya — bisa langsung paham konteks
-> aturan cukup dari membaca README ini. **Wajib diperbarui** setiap kali ada rulebook
-> resmi baru, errata baru, set kartu dengan mekanik baru, atau temuan baru dari
-> pemilik — catat perubahannya di tabel "Riwayat pembaruan aturan" di bagian paling
-> bawah bagian ini, jangan cuma menimpa isi tanpa jejak.
+> Bagian ini kumpulan **seluruh** aturan permainan yang dipakai Deck Lab, supaya sesi
+> Claude mana pun — termasuk percakapan baru tanpa riwayat chat — bisa langsung paham
+> konteks aturan cukup dari README ini. **Wajib diperbarui** setiap ada rulebook resmi
+> baru, errata, atau set dengan mekanik baru — catat di tabel "Riwayat pembaruan aturan"
+> di bawah, jangan menimpa tanpa jejak.
+>
+> **Sejak v6.59 (24 September 2026) acuan utamanya adalah Comprehensive Rules Ver. 1.03
+> RESMI dari Jason** (penerbit Marvel Hero Rush), dikonfirmasi pemilik. Halaman Panduan
+> Bermain di situs sudah ditulis ulang total mengikuti dokumen ini, lengkap dengan nomor
+> pasalnya.
 
 ### Sumber & tingkat keotoritatifan
 
-1. **Poster cetak resmi CARDFUN / PT. Jason Entertainment Indonesia** — dua poster A3
-   Bahasa Indonesia ("Area Permainan Marvel Hero Rush" & "Tata Cara Bermain Marvel
-   Hero Rush") yang menyertai produk fisik yang beredar di Indonesia. **Paling
-   otoritatif** untuk istilah dan aturan yang dipakai di pasar Indonesia.
-2. **Comprehensive Rules 1.03 (Inggris, tidak resmi)** — terjemahan pihak ketiga dari
-   rulebook Tiongkok (dibagikan komunitas lewat Google Drive, update 2026-08-12).
-   Riwayat revisi: 1.00 (16 Jun 2026) → 1.01 (24 Jun) → 1.02 (23 Jul) → 1.03 (12 Agu).
-   Lebih rinci secara nomor pasal, tapi sebagian nama kemampuannya (lihat tabel di
-   bawah) **tidak cocok** dengan poster resmi maupun teks kartu — kalau bertentangan,
-   poster resmi dan teks kartu yang menang.
-3. **Teks kartu itu sendiri** (`cards.js`) — untuk kebutuhan filter/mekanik di kode,
-   selalu cocokkan ke **teks kartu**, bukan ke nama pasal rulebook manapun. Kartu ID
-   memakai kurung siku biasa (`[COUNTER]`, `[UNIQUE]`), kartu EN memakai 【】.
-4. **Penjelasan pemilik dari pengalaman meja langsung** — menutup celah yang tidak
-   dijelaskan rulebook (mis. urutan detail COUNTER STEP, taksonomi Counter call vs
-   Counter efek).
+1. **Marvel Hero Rush Comprehensive Rules Ver. 1.03 — versi resmi Jason** (bahasa
+   Inggris, "Updated Terminology", pembaruan 12 Agustus 2026; riwayat revisi 1.00
+   16 Jun → 1.01 24 Jun → 1.02 23 Jul → 1.03 12 Agu 2026). **Acuan utama** untuk semua
+   aturan dan istilah. Berkas dikirim pemilik 24 September 2026 (simpan salinannya di
+   folder internal, bukan di repo).
+2. **Teks kartu itu sendiri** (`cards.js`) — untuk filter/mekanik di kode, tetap cocokkan
+   ke **teks kartu**. Satu-satunya beda istilah dengan rulebook resmi: kartu mencetak
+   **AIR STRIKE**, rulebook menulis **AIR-ATTACK** (305.5) — kode & filter tetap
+   `AIR STRIKE`, Panduan menyebut keduanya. Kartu ID memakai `[...]`, kartu EN memakai 【】.
+3. **Poster cetak CARDFUN / PT. Jason Entertainment Indonesia** ("Area Permainan" &
+   "Tata Cara Bermain") — dulu acuan utama; sekarang cuma pelengkap. Kalau bertentangan
+   dengan rulebook resmi, **rulebook yang menang**. Panduan lama (disusun dari poster)
+   menampilkan "Adjustment Phase" sebagai fase tersendiri — di rulebook resmi itu cuma
+   langkah pertama Battle Phase (lihat di bawah).
+4. ~~Comprehensive Rules 1.03 terjemahan tidak resmi~~ — **tidak dipakai lagi**; digantikan
+   versi resmi di poin 1 (isi pasalnya sama, istilahnya dulu banyak yang beda).
+5. **Penjelasan pemilik dari pengalaman meja** — untuk celah yang tidak diatur rulebook
+   (mis. aturan pertandingan/turnamen).
 
-### Konstruksi deck
+### Konstruksi deck (101, 201.7)
 
-- Main deck **tepat 50 kartu** karakter
-- Maksimal **2 warna** per deck
-- Maksimal **3 kartu dengan nama karakter yang sama** (per nama, bukan per nomor
-  kartu — varian artwork beda nomor tapi nama sama tetap terhitung satu kelompok)
-- Rush Point Deck: **9 kartu**, tanpa batasan pemilihan — bukan keputusan deck-building
-- 6 warna menurut rulebook: Merah, Kuning, Biru, Hijau, **Orange, Purple** (dua
-  terakhir belum terbit produknya — database baru mendukung 4)
-- Rarity yang **beredar dan terverifikasi ada di database**: UR, MR, SEC, GR, SR, R,
-  ER, PR, TR. Rulebook 1.03 menyebut daftar berbeda (C, SR, UR, MR, SEC, HR, LR, PR,
-  ER, TR) — **GR/R vs C/HR/LR masih pertanyaan terbuka**, kemungkinan istilah cetakan
-  Indonesia berbeda dari rulebook internasional; jangan asumsikan salah satu benar
-  sebelum dicek langsung ke kartu fisik atau API resmi
-- Menang saat (rujukan: poster resmi + Comprehensive Rules 1.03 § 103): **(1)** 9
-  kartu Rush Point berhasil dikumpulkan di **TIMELINE Anda sendiri** (didapat tiap
-  kali karakter Anda berhasil menyerang Weakness lawan), **(2)** deck utama lawan
-  mencapai **0 kartu** — kondisi ini bersifat langsung (state-based) begitu deck
-  lawan 0 kartu, apa pun penyebabnya (kartu terakhir ditarik ATAU deck dikosongkan
-  lewat efek kartu, bukan cuma dipicu saat lawan mencoba menarik), ia langsung
-  dinyatakan kalah saat itu juga, **(3)** efek sebuah kartu langsung menyatakan
-  seorang pemain sebagai pemenang (belum ada kartu di database yang memakai efek
-  ini per 3 September 2026, tapi kondisinya tercantum eksplisit di rulebook)
+- Deck **tepat 50 Character**; maksimal **2 warna** (101.1.c)
+- Maksimal **3 kartu dengan nama Character yang sama** (101.1.d). Nama = seluruh teks nama
+  termasuk julukan dalam kurung (201.7.b). Nama sama dengan nomor/rarity berbeda
+  (201.7.e) **atau bahasa cetak berbeda** (201.7.d) tetap dihitung satu nama. Kode
+  `perNama` di Deck Builder mengelompokkan per `nm` (nama ID) — sudah sesuai (dicek
+  v6.59: tidak ada nama EN yang sama tapi nama ID-nya beda, selain beda spasi)
+- Rush Point Deck: **9 Rush Point**, bebas (101.2) — tidak dikelola di Deck Lab
+- 6 warna (201.5.b): Merah, Kuning, Biru, Hijau, **Orange, Purple** (dua terakhir belum
+  terbit — database baru 4)
+- **Rarity resmi — pertanyaan lama GR/R vs C/HR/LR TERJAWAB (201.14 / 202.6):**
+  Character: R, SR, GR, UR, MR (Alt Art tingkat 1), SEC (Alt Art tingkat 2), HR (Alt Art
+  tingkat 3), LR (Legendary Alt Art), PR, ER, TR. **C hanya untuk Rush Point.** Semua
+  rarity di database (R, SR, GR, UR, MR, SEC, HR, PR, ER, TR) valid; LR belum ada. Urutan
+  HR di atas SEC mengonfirmasi koreksi v6.56. Arti & urutan ini dipakai `RARITY_INFO` /
+  `RARITY_ORDER` di `index.html` (dropdown filter + tooltip lencana)
+- Menang (103.1): **(a)** 9 Rush Point di Timeline sendiri, **(b)** Deck lawan berisi
+  0 kartu (state-based — apa pun penyebabnya), **(c)** efek kartu menyatakan pemenang
 
-### Struktur giliran & battlefield
+### Persiapan & struktur giliran (302, 303)
 
-- Tangan awal **6 kartu**; mulligan = kembalikan semua ke **bawah** deck, ambil ulang
-  sejumlah sama, kocok deck. Aturan resmi maksimal 1× mulligan; simulator draw di
-  Deck Lab sengaja membiarkan berulang untuk eksplorasi
-- Tiap giliran: **tarik 2 kartu**; batas tangan **9 kartu**
-- **Base Deployment**: taruh 1 kartu tertutup ke BASE lalu tarik 1 kartu, maksimal
-  **1× per giliran**
-- **Action Summon**: maksimal **3× per giliran**; **giliran pertama pemain pertama
-  hanya 1× Action Summon**, dan **Battle Phase dilewati total** di giliran itu
-  (temuan dari poster resmi — tidak pernah tercatat di Comprehensive Rules)
-- **BASE menampung maksimal 6 kartu** (temuan poster resmi — gabungan karakter +
-  kartu set/tertutup, bukan dua kuota terpisah)
-- **BATTLE**: FRONT (maks 1) + BACK (maks 1) + 2×WING (maks 1 masing-masing) →
-  **maksimal 4 karakter** di BATTLE sekaligus
-- Kalau nilai serangan **R = 0, atau tidak ada target sah dalam jangkauan R**,
-  karakter itu tidak bisa menyerang (direvisi di rulebook 1.03 — sebelumnya cuma
-  disebut "R=0")
+- Urutan persiapan (303.1): kocok Deck → taruh Rush Point Deck → tentukan pemain pertama
+  dengan cara yang disepakati → tarik **6** → **ganti tangan awal**: pemain pertama dulu,
+  lalu pemain kedua; kartu yang **dipilih** (boleh sebagian, boleh semua) ditaruh
+  tertutup di **bawah** Deck, tarik sejumlah sama, lalu kocok Deck. Sekali keputusan per
+  pemain. **Koreksi v6.59:** Panduan lama bilang wajib mengembalikan seluruh 6 kartu —
+  salah. (Simulator draw di Deck Lab sejak awal sudah pakai mulligan sebagian, dan sengaja
+  membolehkan berulang untuk eksplorasi.)
+- **6 fase** (303.2): Start of Turn → Draw (tarik 2) → Action → Battle → Counter → End.
+  **Tidak ada "Adjustment Phase"** — koreksi v6.59 (Panduan lama menampilkan 7 fase)
+- **Action Phase** (303.2.a.3): Base Deployment (1 kartu HAND → BASE tertutup, lalu tarik
+  1; maks 1×) · Action CALL (maks 3×; **1× di giliran pertama pemain pertama**,
+  303.2.a.3.1.2.3) · BATTLE-BASE MOVE (1× per Character per giliran; Character yang baru
+  masuk FIELD giliran ini tidak boleh, kecuali yang baru dibuka dari Face-Down Card —
+  301.22.b) · aktifkan [ACTI]/[COUNTER-ACTI]
+- **Battle Phase** (303.2.a.4): dilewati pemain pertama di giliran pertamanya (303.2.a.4.1).
+  Langkah pertama: Turn Player boleh **sekali** menyusun ulang posisi sampai 4 Character
+  di BATTLE (bukan movement) — **koreksi v6.59**, Panduan lama bilang "sepuasnya/tidak
+  terbatas". Lalu menyerang FRONT → WING (urutan dua WING bebas) → BACK; 1 kesempatan
+  per Character; tidak menyerang = kesempatan hilang; serangan yang sudah dinyatakan
+  terkunci
+- Tiap battle: **Select Target Step** (target Character di BATTLE lawan atau Weakness
+  dalam R; target tidak sah → pilih ulang; penyerang keluar FIELD/tidak bisa menyerang/
+  tidak ada target → battle selesai) → **Counter Step** (lawan dulu, bergantian: COUNTER
+  CALL maks 1× per giliran per pemain / [COUNTER-ACTI] / pass; dua pass berturut-turut
+  → lanjut) → **Confirmation Step** (Attack Power lebih besar Win the Fight, yang kalah
+  RETREAT; sama = BOTH LOSE, keduanya RETREAT; vs Weakness = Turn Player menaruh kartu
+  teratas Rush Point Deck-nya ke Timeline)
+- **Counter Phase** (303.2.a.5): seperti Counter Step, COUNTER CALL maks 1× per giliran
+  per pemain di fase ini
+- **End Phase** (303.2.a.6): trigger akhir giliran (yang muncul belakangan terlewat) →
+  efek "giliran ini" berakhir → Turn Player buang sampai **9** kartu di HAND
+- **Area** (302): BATTLE = FRONT/2×WING/BACK (masing-masing maks 1); **BASE maks 6**
+  (302.6, Character + Face-Down Card); RETREAT & VOID terbuka, tanpa batas; HAND tanpa
+  batas selama giliran; Attached Card tidak dihitung dalam batas area (301.25.k)
+- **Jarak serangan** (303.2.a.4.3.1.1): tiap langkah = 1, BACK sendiri → WING → FRONT →
+  FRONT lawan → WING lawan → BACK lawan. R minimal: dari FRONT 1/2/3, dari WING 2/3/4,
+  dari BACK 3/4/5 (ke FRONT/WING/BACK lawan). R 0 atau tanpa target sah = tidak bisa
+  menyerang (303.2.a.4.6)
 
-### Biaya Summon (kurva level)
+### Biaya CALL (kurva level, 301.19)
 
-- **Level 1–3**: Summon langsung, tanpa biaya tambahan
-- **Level 4+**: harus me-RETREAT (buang) kartu di FIELD sendiri yang **total
-  Level-nya sama persis** dengan Level kartu yang dipanggil
-- Kartu tertutup (Set Card) di BASE dihitung sebagai **Level 1** saat dipakai untuk
-  membayar biaya Summon Lv4+
-- Ini alasan kurva level penting saat menyusun deck — kartu Lv rendah berfungsi
-  sebagai "mata uang" untuk memanggil kartu Lv tinggi (rasio Lv1–3 : Lv4–6 di
-  database saat ini: 128 : 80)
+- **Lv1–3**: PLACE langsung dari HAND ke FIELD
+- **Lv4+**: RETREAT 1+ Character di **FIELD sendiri (BATTLE maupun BASE)** yang total
+  Lv-nya sama persis, lalu PLACE. **Koreksi v6.59:** Panduan lama menulis "di BATTLE"
+- Face-Down Card di BASE boleh di-RETREAT untuk membayar, dihitung **Lv1** per kartu
+  (301.21.g)
+- Istilah resmi **CALL** (bukan "Summon") — label statistik di panel deck sekarang
+  "Biaya CALL (gratis/bayar)"
 
-### Kemampuan kunci — pemetaan istilah (kode SELALU ikut teks kartu, bukan tabel ini)
+### Kemampuan kunci (305) — istilah resmi = istilah kartu
 
-Poster resmi CARDFUN memakai istilah **yang sama persis dengan teks kartu**. Rulebook
-1.03 (terjemahan tidak resmi) memakai nama lain untuk sebagian kemampuan — tabel ini
-cuma referensi silang, jangan dipakai untuk filter/UI:
-
-| Istilah kartu / poster resmi | Rulebook 1.03 (tidak resmi) | Pasal | Definisi ringkas | Jumlah kartu (ID/EN) |
+| Istilah kartu | Rulebook resmi | Pasal | Definisi ringkas | Jumlah kartu (ID/EN) |
 |---|---|---|---|---|
-| `[COUNTER]` | Respond | 305.1 | Efek berkelanjutan (HAND): kartu boleh **dipanggil** dari tangan saat jendela counter | 23 total (lihat pecahan di bawah) |
-| `[BLOCK]` | Intercept | 305.2 | Respond-Activated (BATTLE, 1×/giliran): alihkan target serangan lawan ke kartu ini | 1/1 |
-| `[DOUBLE ATTACK]` | Combo | 305.3 | Kartu ini punya kesempatan serang kedua | 2/2 |
-| `ASSAULT` | Assault (sama) | 305.4 | Kalau menang bertarung saat menyerang, dianggap berhasil menyerang Weakness | 2/2 |
-| `AIR STRIKE` | Air Raid | 305.5 | Boleh menyerang BATTLE berisi karakter seolah itu Weakness | 1/1 |
-| `UNIQUE` | Unique (sama) | 305.6 | Tidak boleh ada kartu bernama sama di FIELD sendiri; efek ini tidak bisa hilang | 6/4 |
+| `[COUNTER]` | COUNTER | 305.1 | [AUTO] (HAND): boleh dipanggil lewat COUNTER CALL (Counter Step / Counter Phase) | 23 total (lihat pecahan di bawah) |
+| `[BLOCK]` | BLOCK | 305.2 | [COUNTER-ACTI] (BATTLE, 1×/giliran): kalau kartu ini bisa jadi target penyerang lawan, alihkan target ke kartu ini | 1/1 |
+| `[DOUBLE ATTACK]` | DOUBLE ATTACK | 305.3 | [AUTO] (BATTLE): kesempatan serang kedua | 2/2 |
+| `ASSAULT` | ASSAULT | 305.4 | [AUTO] (BATTLE): Win the Fight saat menyerang = juga dihitung berhasil menyerang Weakness | 2/2 |
+| `AIR STRIKE` | **AIR-ATTACK** | 305.5 | [AUTO] (BATTLE): boleh menyerang posisi BATTLE berisi Character seolah Weakness | 1/1 |
+| `UNIQUE` | UNIQUE | 305.6 | [AUTO] (FIELD): tidak boleh ada kartu bernama sama di FIELD sendiri; tak bisa hilang. Face-Down Card yang terhalang UNIQUE tidak dibuka, cuma diperlihatkan (301.22.d) | 6/4 |
 
-Kemampuan lain berdasar jenis trigger (bukan kemampuan kunci di atas), dihitung dari
-208 kartu (ID/EN): **TRIG 120/111 · AUTO 65/61 · ACTI 42/37**.
+Jenis efek (201.10): **[TRIG]** Trigger (merah; opsional kalau ada "may/boleh", selain itu
+MANDATORY) · **[AUTO]** (hijau, terus-menerus) · **[ACTI]** (biru, Action Phase sendiri) ·
+**[COUNTER-ACTI]** (juga di Counter Phase siapa pun & Counter Step) · **Ability** (kata kunci
+hitam). Dihitung dari 208 kartu (ID/EN): **TRIG 120/111 · AUTO 65/61 · ACTI 42/37**.
+Urutan resolusi (304.1.g): kalau kedua pemain memicu efek bersamaan, Turn Player
+mengurutkan efeknya dulu, lalu lawan; trigger dari HAND tidak perlu diumumkan.
 
 ### Counter — dua jenis berbeda (jangan disamakan)
 
 Filter "Counter" lama sempat menghitung total 23 kartu yang sebenarnya dua mekanik
 berbeda (sudah dipecah di UI sejak v6.15):
 
-- **Counter call (9 kartu)** — kartu ber-`[COUNTER]`, **dipanggil** ke BATTLE saat
-  jendela counter, ikut aturan biaya Summon biasa (Lv1–3 gratis / Lv4+ RETREAT
-  setara). Batas **1× per pemain per jendela**. Bimodal: Lv1/Lv3 gratis (5 kartu),
-  Lv6 bayar RETREAT total Lv6 (4 kartu) — tidak ada Lv4/Lv5.
-- **Counter efek / `[COUNTER-ACTI]` (14 kartu)** — yang bekerja efeknya, bukan
-  pemanggilan kartu. Zona sumber efek menentukan syaratnya: dari **HAND** (3 kartu,
-  bisa dipakai walau papan kosong), **FIELD** (7, sekali per giliran), **BACK** (1),
-  atau **BATTLE** (3, sekali per giliran — salah satunya `[BLOCK]`).
+- **Counter call (9 kartu)** — kartu ber-`[COUNTER]`, di-**COUNTER CALL** dari HAND saat
+  Counter Step atau Counter Phase, ikut biaya CALL biasa (Lv1–3 gratis / Lv4+ RETREAT
+  setara dari FIELD). Maks **1× per pemain per giliran** di tiap fase itu
+  (303.2.a.4.3.2.3.1.1, 303.2.a.5.2.1.1). Bimodal: Lv1/Lv3 gratis (5 kartu), Lv6 bayar
+  RETREAT total Lv6 (4 kartu) — tidak ada Lv4/Lv5.
+- **Counter efek / `[COUNTER-ACTI]` (14 kartu)** — yang bekerja efeknya, bukan pemanggilan
+  kartu. Zona sumber efek menentukan syaratnya: **HAND** (3 kartu), **FIELD** (7, sekali
+  per giliran), **BACK** (1), **BATTLE** (3, sekali per giliran — salah satunya `[BLOCK]`).
 - Tidak ada kartu yang punya keduanya sekaligus (0 tumpang tindih)
-- Ada 3 kartu yang masuk BATTLE **tanpa** membayar biaya Summon biasa karena
-  mekanismenya "tukar" (Replace/Exchange, pasal 301.18) bukan Summon: `BP01-061`
-  (tukar dari tangan dengan karakter biru Lv4+ di BATTLE, biaya 2 kartu tertutup
-  RETREAT), `SD04-001` (dipasang/attach ke karakter [Human], tidak masuk sebagai
-  karakter terpisah), `BP01-096` (tukar dirinya dari FIELD dengan kartu di tangan)
+- 3 kartu masuk BATTLE **tanpa** biaya CALL karena mekanismenya Swap (301.18) / Attach
+  (301.25), bukan CALL: `BP01-061`, `SD04-001`, `BP01-096`
 
-**Urutan COUNTER STEP** (dalam satu deklarasi serangan):
+### Aturan inti yang sering dipakai (301)
 
-1. Penyerang (A) mendeklarasikan serangan dari FRONT/WING/BACK
-2. A mendeklarasikan target ke FRONT/WING/BACK milik lawan (B), sepanjang jarak R
-   terpenuhi
-3. Masuk COUNTER STEP — **B lebih dulu**, baru A. Masing-masing maksimal 1 counter
-   call di jendela ini
-4. Tidak ada counter → pertarungan resolve sesuai efek/hasil
-5. Ada counter dan target jadi tidak sah → **kembali ke langkah 2**, A deklarasi
-   target ulang (aturan ini ditambahkan resmi di rulebook versi 1.02, 23 Juli 2026)
-
-`[BLOCK]` bekerja di jendela ini dengan **mengalihkan** target, bukan membatalkan
-serangan sepenuhnya. Ada juga **COUNTER PHASE** — fase terpisah setelah Battle Phase,
-sebelum Turn End, beda dari COUNTER STEP yang di dalam pertarungan; teks kartu yang
-menyebut "COUNTER PHASE atau COUNTER STEP" memang merujuk ke dua jendela berbeda ini.
+- Prioritas (301.1): efek "tidak bisa" > efek "bisa" > aturan "tidak bisa" > aturan "bisa"
+- Attack Power/Lv/R minimal 0, tanpa batas atas; pengurangan melewati 0 tetap tercatat
+  (301.8/10/11). Attack Power diturunkan efek jadi 0 → otomatis RETREAT, terkunci (301.16)
+- **Injured** (301.9): Attack Power saat ini < aslinya tapi bukan 0
+- Face-Down Card (301.21): kehilangan efek, area tertutup, hanya pemilik yang boleh lihat
+- Swap (301.18), Attach/detach (301.25–26), Look At vs Reveal (301.27–28), Random (301.29,
+  lawan yang menentukan), GAINED vs Lose (301.31–32, Lose menang), Up to X / Any Number /
+  All (memilih 0 = tidak dijalankan), After doing so (301.38), Immunity (301.39, tidak
+  bisa jadi target efek), Your side / Opponent's side (301.47–48), Leave the FIELD =
+  kartu baru, status kembali asli (301.45)
+- Istilah baru 1.03: Attacking / Has Attacked / Has Been Attacked / In Battle / Has
+  Battled (301.49–53)
 
 ### Errata resmi
 
 - **Errata V.1** dari tim MHR Indonesia (diterapkan v6.12–v6.13): 12 kartu bernama +
   reprint `SD01-018` (13 file gambar total, `BP01-046` punya 2 varian art) direvisi
   teksnya — baik di database (`cards.js`, field `er:"V.1"`) maupun di **gambar
-  kartunya sendiri** (teks tercetak di gambar ikut diedit ulang, bukan cuma metadata).
-  Ditandai badge "Errata" di UI. Gambar versi Inggris tidak diubah (errata bersumber
-  Bahasa Indonesia).
+  kartunya sendiri**. Ditandai badge "Errata" di UI. Gambar versi Inggris tidak diubah
+  (errata bersumber Bahasa Indonesia).
 
 ### Field yang belum diimplementasikan / masih terbuka
 
-- **Environment (pasal 201.8)** — kode format `S+angka` di kiri bawah kartu, dipakai
-  untuk rotasi/legalitas format turnamen. `cards.js` **belum** menyimpan field ini
-  sama sekali. Kalau penerbit mulai memberlakukan rotasi, perlu tambah field `env` +
-  filter/validasi di Deck Lab.
-- **Rarity GR/R vs C/HR/LR** — lihat bagian "Konstruksi deck" di atas, belum
-  diverifikasi ke sumber otoritatif.
-- **Dropdown "Kemampuan kunci"** — filter gabungan untuk Block/Double Attack/Assault/
-  Air Strike/Unique (masing-masing cuma 1–6 kartu, terlalu sedikit untuk tombol
-  sendiri-sendiri) — sudah diusulkan, belum dibangun.
+- **SEASON (201.8)** — dulu disebut "Environment": kode `S+angka` di kiri bawah nama,
+  bertambah seiring rilis dan berkaitan dengan event permainan. `cards.js` **belum**
+  menyimpannya. Kalau penerbit mulai memakai SEASON untuk format/rotasi turnamen, perlu
+  field `season` + filter/validasi.
+- **Rarity LR** — resmi ada, belum ada kartunya di database.
+- **Warna Orange/Purple** — resmi ada, belum terbit.
 
 ### Riwayat pembaruan aturan (tabel ini sendiri — beda dari § Riwayat Update di atas
 yang mencatat perubahan kode/data)
@@ -4117,11 +4173,12 @@ yang mencatat perubahan kode/data)
 | 2 September 2026 | Konsolidasi (bukan sumber baru) | Bagian ini pertama kali disusun dari seluruh temuan di atas jadi satu rujukan tunggal di README, supaya sesi baru tidak perlu membaca ulang riwayat percakapan |
 | 3 September 2026 (v6.23) | Klarifikasi pemilik (bukan aturan baru, cuma perjelas teks) | Halaman Panduan Bermain § "Cara Menang" (ID & EN) dan bagian "Konstruksi deck" di atas diperjelas: kondisi menang #2 (deck utama lawan habis) sekarang eksplisit menyebut lawan **langsung dinyatakan kalah** saat itu juga, bukan cuma "tidak bisa menarik kartu". Sekalian dikoreksi typo di README: baris "9 kartu Rush Point ditaruh di TIMELINE **lawan**" seharusnya TIMELINE **sendiri** (sudah benar di teks Panduan Bermain, README yang salah ketik) |
 | 3 September 2026 (v6.24) | Comprehensive Rules 1.03 § 103 "Winning the Game" (dibaca langsung dari Google Docs, bukan cuma diingat dari riset 26 Agustus) | Kondisi menang #2 dikoreksi jadi **state-based** — rulebook cuma bilang "deck lawan punya 0 kartu", bukan "dipicu saat lawan mencoba menarik" seperti kalimat v6.23 sebelumnya; berlaku baik kartu terakhir baru ditarik maupun deck dikosongkan via efek kartu. Ditambahkan **kondisi menang #3**: efek kartu bisa langsung menyatakan pemenang (103.1.c) — belum ada kartu di database yang memakainya per hari ini, tapi kondisinya tercantum eksplisit di rulebook. Pemilik dikonfirmasi lebih dulu sebelum diterapkan (poster resmi tetap lebih otoritatif dari rulebook 1.03 kalau suatu saat bertentangan) |
+| 24 September 2026 (v6.59) | **Comprehensive Rules Ver. 1.03 resmi dari Jason** (dikonfirmasi pemilik) | Jadi acuan utama, menggantikan terjemahan tidak resmi & poster. Isi pasal sama dengan 1.03 lama, tapi istilah kini **cocok dengan kartu** (COUNTER/BLOCK/DOUBLE ATTACK/ASSAULT/UNIQUE, CALL, Base Deployment, BATTLE-BASE MOVE, Win/Lose the Fight, BOTH LOSE, SEASON) — kecuali AIR-ATTACK vs AIR STRIKE di kartu. Pertanyaan rarity **terjawab** (C cuma Rush Point; GR/R/HR/LR resmi). Tiga **koreksi** ke Panduan lama: mulligan boleh sebagian; biaya CALL Lv4+ dari FIELD (bukan cuma BATTLE); tidak ada Adjustment Phase — susun ulang posisi cuma sekali di awal Battle Phase. Panduan Bermain ditulis ulang total |
 
-> **Untuk pemilik:** kalau ada pembaruan resmi dari MHR Indonesia/CARDFUN (rulebook
-> versi baru, errata baru, set kartu baru dengan mekanik baru), cukup kasih tahu di
-> sesi Claude mana pun — bagian ini akan diperbarui, dicatat di tabel riwayat di
-> atas, dan (kalau berdampak ke kode) tercermin juga di § Riwayat Update seperti biasa.
+> **Untuk pemilik:** kalau ada pembaruan resmi dari Jason/MHR Indonesia (rulebook versi
+> baru, errata baru, set kartu dengan mekanik baru), cukup kasih tahu di sesi Claude mana
+> pun — bagian ini akan diperbarui, dicatat di tabel riwayat di atas, dan (kalau berdampak
+> ke kode) tercermin juga di § Riwayat Update seperti biasa.
 
 ## Rencana / ide berikutnya
 
