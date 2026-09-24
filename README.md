@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.57** · 22 September 2026
+**Versi saat ini: v6.58** · 24 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -48,21 +48,34 @@ lokal terpisah di sebelah repo — **jangan dikembalikan ke sini**:
 
 ```
 Documents\GitHub\mhr-deck-lab-internal\
-├── Database Image Kartu\      ← scan kartu mentah (English/ · Indonesia/ · Watermarks Sample/)
+├── Database Image Kartu\      ← scan kartu mentah (English/ · Indonesia/, termasuk Indonesia\Watermarks Sample\)
 ├── Icon MHR Deck Lab\         ← sumber logo (termasuk versi Horizontal)
 ├── Claude outputs\            ← screenshot/berkas kerja sesi Claude
-└── mhr_decklab_published_at_migration.sql  ← migrasi Supabase v6.47 (sudah dijalankan)
+├── mhr_decklab_published_at_migration.sql  ← migrasi Supabase v6.47 (sudah dijalankan)
+├── mhr_decklab_v658_hardening.sql          ← pengamanan DB v6.58 (rem login + batas panjang teks)
+└── Claude outputs\dari-riwayat-git\        ← skema SQL & catatan lama yang dipulihkan dari riwayat git (v6.58)
 ```
 
-Aplikasi ini sepenuhnya statis — tanpa server, tanpa database, tanpa akun.
-Semua data deck tersimpan di browser pengguna (localStorage).
+Situs ini statis (GitHub Pages, di belakang Cloudflare), tapi **sejak v6.30 punya
+akun pengguna lewat Supabase** (login, Deck Saya (Akun), galeri komunitas, like/komentar,
+koleksi kartu). Deck yang disusun tanpa login tetap tersimpan di browser (localStorage).
+Keamanan data akun bergantung pada **Row Level Security (RLS) Supabase** — semua
+tabel `public.*` wajib RLS aktif (dicek ulang v6.58).
 
 ## Cara update
 
-1. Edit / ganti `index.html`
-2. Repository → **Add file → Upload files** → drop file → **Commit changes**
-3. Tunggu 1–2 menit, buka situs dengan `?v=` angka baru untuk melewati cache
-4. Perbarui bagian **Riwayat Update** di README ini
+Repo dikelola lewat **git lokal** di `Documents\GitHub\mhr-lab-x7k2m9` (GitHub Desktop /
+Git Bash), bukan lagi upload lewat web.
+
+1. Edit berkas di folder lokal
+2. Perbarui bagian **Riwayat Update** di README ini
+3. Commit + **Push origin** (GitHub Desktop) — atau `git add -A && git commit -m "..." && git push`
+4. Tunggu 1–2 menit sampai GitHub Pages selesai build
+5. Cloudflare menyimpan cache sampai ±4 jam — kalau perubahan belum kelihatan,
+   dashboard Cloudflare → **Caching → Configuration → Purge Everything**
+
+> Jangan pakai **Add file → Upload files** di web GitHub untuk menghapus/memindah berkas —
+> cara itu cuma bisa menambah/menimpa, tidak bisa menghapus.
 
 > **Aturan tetap proyek ini — berlaku untuk sesi Claude mana pun, kapan pun:**
 > **setiap** perubahan atau pembaruan, sekecil apa pun — baik `index.html`, `cards.js`,
@@ -241,7 +254,7 @@ cuma untuk akun yang sudah daftar dan login.
 
 1. Masuk (login) ke akun — daftar dulu kalau belum punya
 2. Susun deck di tab **🛠 Deck Builder** seperti biasa
-3. Di **panel deck**, paling bawah (di bawah tombol Backup/Restore), muncul kotak
+3. Di **panel deck**, paling bawah, muncul kotak
    **🖨 Cetak kartu proxy** → klik **🖨 Cetak kartu proxy (PDF)**
 4. Daftar cetak otomatis terisi dari deck aktif. Bisa disesuaikan: **+ / − / ✕** per
    kartu, cari kartu lain di kolom pencarian, atau **↺ Muat dari deck aktif**
@@ -441,8 +454,8 @@ Tanpa cookie dan tidak melacak individu, jadi tidak perlu banner persetujuan coo
 
 Catatan:
 - Data butuh beberapa menit sampai muncul pertama kali
-- Karena domainnya `github.io` (dipakai bersama), statistik hanya mencakup
-  halaman di bawah path repository ini
+- Sejak 2 September 2026 situs memakai domain sendiri `mhrdecklab.com`, jadi
+  statistik mencakup seluruh situs
 - Untuk mematikan: hapus atau beri komentar pada tag `<script>` Cloudflare
   di akhir `index.html`
 - GitHub Insights → Traffic **bukan** statistik situs — itu hanya kunjungan
@@ -450,16 +463,15 @@ Catatan:
 
 ### Cara mengecek versi file
 
-Nomor versi tercatat di tiga tempat, jadi mudah dipastikan file mana yang aktif:
+Nomor versi tercatat di tiga tempat di `index.html` — ketiganya wajib dinaikkan bersamaan:
 
 | Lokasi | Cara melihat |
 |---|---|
-| Nama file kiriman | `mhr_deck_lab_public_v6.19.html` |
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.19` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.58` di bawah disclaimer footer |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.19</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.58</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -491,117 +503,61 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 ---
 
-### v6.45 — Filter bahasa kartu (ID/EN independen dari bahasa situs), lencana bahasa per kartu, kartu tidak lagi digating — 18 September 2026 *(`index.html`)*
+## Riwayat Update
 
-Permintaan pemilik (bagian pertama dari rencana "situs lebih universal"): pindahkan
-"bahasa kartu" dari tombol ganti bahasa situs (🌐 ID/EN, yang selama ini mengubah
-chrome UI SEKALIGUS teks kartu dalam satu saklar) ke filter tersendiri di bar
-filter Deck Builder/Kartu, dan kartu tidak boleh lagi disembunyikan hanya karena
-belum punya terjemahan di salah satu bahasa (ke depannya akan ada kartu yang
-eksklusif ID-saja atau EN-saja). Tombol ganti bahasa situs (🌐) **BELUM dihapus**
-di rilis ini — itu langkah kedua yang lebih besar (lihat "Berikutnya" di bawah),
-sengaja dipisah supaya masing-masing bisa diverifikasi sendiri-sendiri.
+> Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
+> ditaruh di atas entri bernomor pada tanggal yang sama.
 
-**Preferensi baru, independen dari bahasa chrome UI:**
-- `state.cardLang` (`'id'`/`'en'`, default `'id'`) — disimpan `store.cardLang`,
-  bisa diset lewat `?cardlang=en`/`?cardlang=id` di URL (pola sama dengan
-  `?lang=`). Kontrol filternya: `<select id="fCardLang">` baru di bar filter
-  (Deck Builder & halaman Kartu), sejajar dengan filter seri/rarity/trait —
-  **bukan** filter yang menyempitkan hasil (sengaja tidak masuk hitungan
-  `updateFilterBadge()`), cuma menentukan bahasa nama/efek/gambar yang tampil.
-- **`cardLangInfo(c)`** — satu sumber kebenaran baru dipakai bareng oleh
-  `cardName()`/`cardEff()`/`artDir()`/`cardLangBadgeHTML()`, supaya keempatnya
-  selalu konsisten per kartu. Kalau kartu tidak punya teks di bahasa yang
-  dipilih pengguna, otomatis fallback ke bahasa yang tersedia (field `fallback`
-  di hasilnya menandai kapan itu terjadi).
-- **`cardVisible(c)`** disederhanakan jadi `!!(c.nm || c.nm_en)` — praktis
-  selalu `true` sekarang (dicek langsung ke `cards.js`: 0 dari 288 kartu yang
-  tidak punya `nm`). Bekas `ID_PENDING_SETS` (yang dulu menyembunyikan SP01
-  total di mode ID) **dihapus**.
+### v6.58 — Audit keamanan & kerapian: rem login di Supabase, escHtml diperkuat, riwayat git dibersihkan, README dibetulkan — 24 September 2026 *(`index.html`, `auth.js`, `README.md`, Supabase SQL, riwayat git)*
 
-**Temuan penting saat implementasi (bukan sekadar "kartu kosong sekarang
-tampil"):** dicek langsung ke `cards.js` — SEMUA 288 kartu, termasuk SP01,
-sudah punya field `nm`/`e` (Indonesia) terisi. `ID_PENDING_SETS` yang dihapus
-di atas TIDAK menyembunyikan SP01 karena field ID-nya kosong — field itu sudah
-diisi teks Indonesia hasil **fan-translation sesi Claude** (bukan resmi dari
-MHR Indonesia/CARDFUN), dan sengaja disembunyikan total di mode ID supaya
-tidak disangka terjemahan resmi. Menghapus gating itu berarti fan-translation
-SP01 SEKARANG IKUT TERLIHAT untuk pengguna yang pilih bahasa kartu ID — bukan
-cuma "kartu yang tadinya kosong sekarang tampil". Cuma **16 kartu** (dari 208
-kartu dasar pra-SP01) yang benar-benar tidak punya `nm_en` sama sekali.
+Permintaan pemilik: tinjau ulang pekerjaan terakhir sebelum rilis, lalu kerjakan
+semua temuan.
 
-Supaya ini tidak terlihat seperti sengaja "menyelundupkan" teks tidak resmi:
-ditambahkan `FAN_TRANSLATED_ID_SETS = ['SP01']` — **bukan** untuk gating lagi,
-cuma untuk **memberi peringatan jelas**:
-- Lencana bahasa kartu SP01 di mode ID tampil sebagai **`ID*+EN`** (border putus-
-  putus merah), beda dari `ID+EN` polos untuk kartu lain — tooltip menjelaskan
-  teks ID-nya fan-translation, teks EN-nya resmi.
-- Di popup detail kartu (lightbox), muncul baris peringatan kecil berwarna merah
-  di bawah teks efek: "⚠ Teks Indonesia di atas masih terjemahan fan-made, belum
-  resmi dari MHR Indonesia/CARDFUN." — cuma muncul untuk kartu di
-  `FAN_TRANSLATED_ID_SETS` saat teks ID yang ditampilkan.
+**1. Supabase — rem percobaan login (`verify_login`).** Fungsi ini bisa dipanggil
+anon lewat RPC dan **tidak** kena rate-limit bawaan Supabase Auth; karena username
+tampil publik di galeri, kata sandi akun mana pun (termasuk admin) bisa ditebak
+tanpa batas. Sekarang: maks **10 gagal per username** dan **30 gagal per IP** dalam
+15 menit (tabel baru `public.login_attempts`, RLS aktif tanpa policy = tidak bisa
+dibaca dari situs; IP diambil dari header `x-forwarded-for`). Login sukses mereset
+hitungan username itu; baris lebih dari 1 hari dihapus otomatis. Pesan di situs
+tidak berubah (tetap generik). Efek samping yang disadari: orang iseng bisa
+mengunci satu username 15 menit dengan sengaja salah 10x.
+Diuji langsung lewat REST API anon: 13 percobaan gagal → tercatat berhenti di 10,
+IP terisi, tabel tidak bisa dibaca anon; baris uji sudah dihapus.
+SQL-nya: `mhr_decklab_v658_hardening.sql` (folder internal).
 
-**Lencana bahasa per kartu (baru)** — `cardLangBadgeHTML(c, cls)`, dipasang di
-daftar, grid, dan lightbox (sejajar dengan lencana Errata/Counter yang sudah
-ada): teks pill `ID+EN` (kartu punya keduanya), `ID*+EN` (keduanya, tapi ID-nya
-fan-translation — lihat di atas), `EN` atau `ID` (cuma satu bahasa — belum ada
-kasusnya di database sekarang, tapi kodenya sudah siap untuk kartu eksklusif
-satu bahasa di masa depan). Dipilih tag teks, bukan ikon bendera 🇮🇩/🇬🇧 — lebih
-jelas dibaca di ukuran kecil dan tidak ambigu (beberapa bendera serupa untuk
-mata yang tidak familiar). CSS baru: `.langtag` + varian `.both`/`.both.fan`/
-`.id`/`.en`, termasuk posisi absolute di mode grid (pojok kanan atas, di bawah
-tombol share).
+**2. Supabase — batas panjang teks di level database** (sebelumnya cuma di form):
+komentar 1–500 karakter, nama deck ≤ 80, playstyle ≤ 1000, kode deck ≤ 1000,
+koleksi ≤ 50.000 karakter JSON. Data lama dicek muat semua sebelum dipasang.
 
-**Gambar kartu ikut `cardLangInfo()` per kartu** — `artDir(c)` sekarang menerima
-kartu (bukan lagi baca `state.lang` global): `images/` = printing Indonesia
-(termasuk teks Errata V.1 yang sudah dibakar ke pixel untuk beberapa kartu),
-`images/en/` = printing Inggris asli. Beberapa seri (PB01/EB01/TB01) cuma punya
-satu printing — `images/en/` tidak punya berkasnya sama sekali — jadi
-`imgFallback()`/`gridImgFallback()`/`lbImgFallback()` sekarang mencoba
-**direktori lain** dulu (`altArtFile()`) sebelum lanjut ke fallback ekstensi
-lain (jpg→png→webp) seperti sebelumnya. `pxRantaiGambar()` (cetak proxy) disusun
-ulang dengan pola yang sama, lebih sederhana dari rantai hardcode sebelumnya.
+**3. Hasil audit RLS (tidak ada yang diubah):** keenam tabel `public.*` RLS aktif;
+`admin_users` tanpa policy tulis (admin hanya bisa ditambah lewat SQL Editor);
+like/komentar hanya untuk deck publik; koleksi hanya milik sendiri. Aman.
 
-**Konsistensi lain yang dirapikan sekalian** (ditemukan saat audit semua
-pemanggil `cardName`/`cardEff`/`artDir`): tiga tempat yang sebelumnya baca
-`state.lang` langsung untuk teks kartu (pesan pelanggaran kuota salinan di
-panel deck, urutan & label "kartu paling sering dipakai" di halaman
-Tournaments Deck) diubah untuk lewat `cardName()` — supaya ikut preferensi
-`cardLang` yang baru, bukan lagi bahasa chrome UI.
+**4. `escHtml()` (index.html)** sekarang meng-escape `& < > " '` (sebelumnya cuma
+`<`), jadi aman juga dipakai di dalam atribut HTML. Tampilan tidak berubah.
 
-**Jumlah kartu disamakan** — karena `cardVisible()` tidak lagi menyaring
-berdasar bahasa, `#hTotal`, tagline, `<meta name="description">`,
-`og:description`, JSON-LD, dan teks pembuka halaman Panduan semuanya diperbarui
-dari "208 kartu"/"272 cards" (angka lama yang tergantung mode) jadi **288
-kartu/cards** (total sebenarnya, sama di kedua mode sekarang) di kedua bahasa.
-Kualifier "· Ver. Indonesia"/"· English Ver." di tagline dihapus karena sudah
-tidak akurat (keduanya menampilkan database yang sama sekarang).
+**5. Riwayat git dibersihkan** (keputusan 24 September "riwayat TIDAK ditulis
+ulang" **dibalik oleh pemilik**): `Database Image Kartu/` (863 scan mentah tanpa
+watermark — bertentangan dengan syarat izin gambar), `Claude outputs/`,
+`Icon MHR Deck Lab/`, dan `mhr_decklab_published_at_migration.sql` dihapus dari
+**seluruh** commit lewat `git filter-branch`, lalu force push. Pohon berkas
+commit terakhir identik (hash tree sama), jadi situs tidak berubah. Semua
+hash commit lama ikut berubah.
+Sebelum itu, 7 berkas yang **hanya** tersisa di riwayat git (dihapus 13 September,
+tidak ada salinan lokal) dipulihkan ke
+`mhr-deck-lab-internal\Claude outputs\dari-riwayat-git\` — termasuk skema SQL
+Supabase (`phase0`, `admin`, `username`, `username_login`).
 
-**Verifikasi**: `node --check` pada blok `<script>` inline — lolos. Diuji
-langsung ke `cards.js` (bukan cuma dibaca) untuk memastikan klaim "0 dari 288
-kartu tidak punya `nm`" dan "16 kartu tidak punya `nm_en`" akurat, bukan
-tebakan. Diuji fungsional dengan Playwright (server lokal): `#hTotal` = 288;
-pencarian `SP01-001` dengan `cardLang=id` menampilkan kartu (dulu 0 hasil,
-disembunyikan `ID_PENDING_SETS`) dengan lencana `ID*+EN` + peringatan fan-
-translation di lightbox; ganti `cardLang` ke `en` mengubah nama & gambar yang
-tampil (termasuk untuk kartu errata seperti `BP01-002`, yang gambarnya memang
-beda pixel antara `images/`= ID-dengan-errata vs `images/en/`= EN asli);
-`BP01-001` (kartu biasa, punya `nm`+`nm_en`) menampilkan lencana `ID+EN` polos
-tanpa peringatan. Semua transisi tanpa error console.
+**6. README dibetulkan:** email admin & email pihak ketiga dihapus dari teks
+(catatan: email di metadata author commit tetap publik — itu bawaan git);
+bagian usang diperbarui (situs bukan lagi "tanpa akun", cara update lewat git
+lokal + purge Cloudflare, tabel versi, catatan statistik `github.io`, sisa
+tombol Backup/Restore); letak `Watermarks Sample\` diperjelas; seluruh Riwayat
+Update disusun ulang dari terbaru ke terlama di bawah satu judul.
 
-**Belum dikerjakan di rilis ini (langkah berikutnya, per diskusi 18 September):**
-1. Hapus tombol ganti bahasa situs (🌐) — perlu keputusan tambahan dulu karena
-   `state.lang` saat ini JUGA mengatur hal-hal di luar teks kartu: menyembunyikan
-   total tab Community Deck/Tournaments Deck/Weekly Rush LGS di mode EN (isinya
-   konten komunitas Indonesia), format locale angka/tanggal (id-ID vs en-US),
-   dan konten halaman Panduan Bermain (rulebook lengkap, cuma ada versi
-   Indonesia+Inggris masing-masing penuh, beda dari string UI pendek).
-2. Kumpulkan ~150 entri kamus `T` (teks UI: menu, tombol, placeholder, tooltip)
-   jadi SATU teks per kunci yang "dwibahasa secara alami" (bukan kaku), sesuai
-   permintaan pemilik — supaya pengunjung luar Indonesia setidaknya sedikit
-   paham tanpa perlu toggle. Sengaja belum dikerjakan di rilis ini karena gaya
-   penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
-   terpisah, lebih ke pekerjaan tulisan daripada kode).
+**7. `auth.js`** — komentar yang merujuk berkas migrasi yang sudah tidak ada di
+repo dibetulkan. Tidak ada perubahan kode.
 
 ### Bahan kerja internal dikeluarkan dari repo publik — 24 September 2026 *(hapus `Database Image Kartu/`, `Claude outputs/`, `Icon MHR Deck Lab/`, `mhr_decklab_published_at_migration.sql`; tidak ada perubahan kode, versi tetap v6.57)*
 
@@ -685,6 +641,7 @@ nomor cetak individual).
 **Verifikasi**: `node --check` pada `cards.js` — lolos, jumlah kartu tetap
 293. Diuji ulang lewat Playwright: chip varian SP01-021 sekarang merender
 persis dalam urutan `UR, MR, SEC, HR` di lightbox.
+
 ### v6.55 — Tambah kode rarity varian alt-art (MR/HR/SEC) yang belum tercatat untuk 30 kartu SP01 — 20 September 2026 *(`cards.js`)*
 
 Pemilik minta cek folder "Database Image Kartu" > English (semua sub-folder)
@@ -792,6 +749,7 @@ Dua koreksi dari pemilik atas rilis v6.53:
 EB01-011 dicek ulang lewat grep — sekarang `"[COUNTER]"` persis, tidak ada
 sisa teks catatan lama. File diverifikasi lewat `device_commit_files` +
 re-stage + byte-diff seperti biasa.
+
 ### v6.53 — Tambah 5 kartu promo turnamen baru EB01-010..014 dari folder "Database Image Kartu" (scan Inggris + fan-translation) — 20 September 2026 *(`cards.js`, `index.html`, `images/*.jpg`)*
 
 Pemilik menambahkan folder pribadi "Database Image Kartu" (arsip scan kartu,
@@ -875,6 +833,7 @@ tooltip peringatan fan-translation yang benar, `fanId:true`; `openLightbox
 (`.lb-fan-note`) tampil dengan teks yang benar. Tidak ada `PAGEERROR` di
 console. File diverifikasi lewat `device_commit_files` + re-stage +
 byte-diff (teks) / pixel-diff (gambar) seperti biasa.
+
 ### v6.52 — "Warna" jadi "Colour" di SEMUA tempat (bukan cuma popup detail) — 19 September 2026 *(`index.html`)*
 
 Susulan v6.51: pemilik konfirmasi label "Colour" dimaksudkan berlaku di mana
@@ -890,6 +849,7 @@ Dicek lewat `t('cColor')` langsung -> `"Colour"`; popup detail (`openLightbox
 Merah` (label R/Power dari v6.51 tidak berubah, cuma Colour yang tadinya key
 terpisah sekarang disatukan). Tidak ada key `cColorFull` tersisa di kode (key
 mati dihapus, bukan dibiarkan nganggur).
+
 ### v6.51 — Ringkas label statistik di popup detail kartu (Jarak Serangan→R, Kekuatan Bertarung→Power, Warna→Colour) — 19 September 2026 *(`index.html`)*
 
 Permintaan pemilik: di popup detail kartu (klik kartu untuk lihat rincian),
@@ -921,6 +881,7 @@ bahwa `cColor`/`cRange`/`cPower` (dipakai di grid preview & Simulator) TIDAK
 ikut berubah (`cColor` masih `"Warna"`), memastikan perubahan benar-benar
 terisolasi ke popup detail saja sesuai permintaan. Screenshot popup detail
 dicek visual manual, cocok dengan tangkapan layar yang dikirim pemilik.
+
 ### v6.50 — Hapus tagline di bawah logo header, perbesar logo — 19 September 2026 *(`index.html`)*
 
 Permintaan pemilik (lanjutan dari v6.49): buang teks tagline ("Marvel Hero
@@ -967,6 +928,7 @@ Screenshot kedua ukuran dicek visual manual — logo lebih besar terasa lebih
 menonjol tanpa mendesak elemen navigasi/statistik di sebelahnya, tagline sudah
 tidak tampil. Tidak ada error konsol baru di luar 404 gambar kartu/Supabase
 yang memang diblokir di sandbox (bukan regresi).
+
 ### v6.49 — Logo asli di judul header (ganti teks "MHR DECK LAB"), latar transparan di logo header & favicon tab browser — 19 September 2026 *(`index.html`, `icons/logo-header.png`, `icons/favicon-16.png`, `icons/favicon-32.png`)*
 
 Permintaan pemilik (lanjutan dari v6.48): pakai logo resmi untuk mengganti teks
@@ -1024,6 +986,7 @@ aspek yang benar (126×40 pada lebar viewport 1280px, sesuai `height:40px`),
 dan screenshot header dicek visual manual — logo tampil bersih tanpa kotak
 latar, menyatu dengan gradasi header. Tidak ada error konsol baru di luar 404
 gambar kartu/Supabase yang memang diblokir di sandbox (bukan regresi).
+
 ### v6.48 — Ganti favicon/app icon jadi logo resmi "MHR Deck Lab" — 18 September 2026 *(`icons/*.png`)*
 
 Permintaan pemilik: pasang logo resmi (kartu-kartu + labu erlenmeyer, gradasi
@@ -1239,6 +1202,118 @@ perubahan ini, sama seperti pengujian § v6.45).
    contoh gaya lain untuk kalimat tertentu (tooltip, pesan error panjang,
    dst.), bisa dikerjakan bertahap lewat sesi terpisah.
 
+### v6.45 — Filter bahasa kartu (ID/EN independen dari bahasa situs), lencana bahasa per kartu, kartu tidak lagi digating — 18 September 2026 *(`index.html`)*
+
+Permintaan pemilik (bagian pertama dari rencana "situs lebih universal"): pindahkan
+"bahasa kartu" dari tombol ganti bahasa situs (🌐 ID/EN, yang selama ini mengubah
+chrome UI SEKALIGUS teks kartu dalam satu saklar) ke filter tersendiri di bar
+filter Deck Builder/Kartu, dan kartu tidak boleh lagi disembunyikan hanya karena
+belum punya terjemahan di salah satu bahasa (ke depannya akan ada kartu yang
+eksklusif ID-saja atau EN-saja). Tombol ganti bahasa situs (🌐) **BELUM dihapus**
+di rilis ini — itu langkah kedua yang lebih besar (lihat "Berikutnya" di bawah),
+sengaja dipisah supaya masing-masing bisa diverifikasi sendiri-sendiri.
+
+**Preferensi baru, independen dari bahasa chrome UI:**
+- `state.cardLang` (`'id'`/`'en'`, default `'id'`) — disimpan `store.cardLang`,
+  bisa diset lewat `?cardlang=en`/`?cardlang=id` di URL (pola sama dengan
+  `?lang=`). Kontrol filternya: `<select id="fCardLang">` baru di bar filter
+  (Deck Builder & halaman Kartu), sejajar dengan filter seri/rarity/trait —
+  **bukan** filter yang menyempitkan hasil (sengaja tidak masuk hitungan
+  `updateFilterBadge()`), cuma menentukan bahasa nama/efek/gambar yang tampil.
+- **`cardLangInfo(c)`** — satu sumber kebenaran baru dipakai bareng oleh
+  `cardName()`/`cardEff()`/`artDir()`/`cardLangBadgeHTML()`, supaya keempatnya
+  selalu konsisten per kartu. Kalau kartu tidak punya teks di bahasa yang
+  dipilih pengguna, otomatis fallback ke bahasa yang tersedia (field `fallback`
+  di hasilnya menandai kapan itu terjadi).
+- **`cardVisible(c)`** disederhanakan jadi `!!(c.nm || c.nm_en)` — praktis
+  selalu `true` sekarang (dicek langsung ke `cards.js`: 0 dari 288 kartu yang
+  tidak punya `nm`). Bekas `ID_PENDING_SETS` (yang dulu menyembunyikan SP01
+  total di mode ID) **dihapus**.
+
+**Temuan penting saat implementasi (bukan sekadar "kartu kosong sekarang
+tampil"):** dicek langsung ke `cards.js` — SEMUA 288 kartu, termasuk SP01,
+sudah punya field `nm`/`e` (Indonesia) terisi. `ID_PENDING_SETS` yang dihapus
+di atas TIDAK menyembunyikan SP01 karena field ID-nya kosong — field itu sudah
+diisi teks Indonesia hasil **fan-translation sesi Claude** (bukan resmi dari
+MHR Indonesia/CARDFUN), dan sengaja disembunyikan total di mode ID supaya
+tidak disangka terjemahan resmi. Menghapus gating itu berarti fan-translation
+SP01 SEKARANG IKUT TERLIHAT untuk pengguna yang pilih bahasa kartu ID — bukan
+cuma "kartu yang tadinya kosong sekarang tampil". Cuma **16 kartu** (dari 208
+kartu dasar pra-SP01) yang benar-benar tidak punya `nm_en` sama sekali.
+
+Supaya ini tidak terlihat seperti sengaja "menyelundupkan" teks tidak resmi:
+ditambahkan `FAN_TRANSLATED_ID_SETS = ['SP01']` — **bukan** untuk gating lagi,
+cuma untuk **memberi peringatan jelas**:
+- Lencana bahasa kartu SP01 di mode ID tampil sebagai **`ID*+EN`** (border putus-
+  putus merah), beda dari `ID+EN` polos untuk kartu lain — tooltip menjelaskan
+  teks ID-nya fan-translation, teks EN-nya resmi.
+- Di popup detail kartu (lightbox), muncul baris peringatan kecil berwarna merah
+  di bawah teks efek: "⚠ Teks Indonesia di atas masih terjemahan fan-made, belum
+  resmi dari MHR Indonesia/CARDFUN." — cuma muncul untuk kartu di
+  `FAN_TRANSLATED_ID_SETS` saat teks ID yang ditampilkan.
+
+**Lencana bahasa per kartu (baru)** — `cardLangBadgeHTML(c, cls)`, dipasang di
+daftar, grid, dan lightbox (sejajar dengan lencana Errata/Counter yang sudah
+ada): teks pill `ID+EN` (kartu punya keduanya), `ID*+EN` (keduanya, tapi ID-nya
+fan-translation — lihat di atas), `EN` atau `ID` (cuma satu bahasa — belum ada
+kasusnya di database sekarang, tapi kodenya sudah siap untuk kartu eksklusif
+satu bahasa di masa depan). Dipilih tag teks, bukan ikon bendera 🇮🇩/🇬🇧 — lebih
+jelas dibaca di ukuran kecil dan tidak ambigu (beberapa bendera serupa untuk
+mata yang tidak familiar). CSS baru: `.langtag` + varian `.both`/`.both.fan`/
+`.id`/`.en`, termasuk posisi absolute di mode grid (pojok kanan atas, di bawah
+tombol share).
+
+**Gambar kartu ikut `cardLangInfo()` per kartu** — `artDir(c)` sekarang menerima
+kartu (bukan lagi baca `state.lang` global): `images/` = printing Indonesia
+(termasuk teks Errata V.1 yang sudah dibakar ke pixel untuk beberapa kartu),
+`images/en/` = printing Inggris asli. Beberapa seri (PB01/EB01/TB01) cuma punya
+satu printing — `images/en/` tidak punya berkasnya sama sekali — jadi
+`imgFallback()`/`gridImgFallback()`/`lbImgFallback()` sekarang mencoba
+**direktori lain** dulu (`altArtFile()`) sebelum lanjut ke fallback ekstensi
+lain (jpg→png→webp) seperti sebelumnya. `pxRantaiGambar()` (cetak proxy) disusun
+ulang dengan pola yang sama, lebih sederhana dari rantai hardcode sebelumnya.
+
+**Konsistensi lain yang dirapikan sekalian** (ditemukan saat audit semua
+pemanggil `cardName`/`cardEff`/`artDir`): tiga tempat yang sebelumnya baca
+`state.lang` langsung untuk teks kartu (pesan pelanggaran kuota salinan di
+panel deck, urutan & label "kartu paling sering dipakai" di halaman
+Tournaments Deck) diubah untuk lewat `cardName()` — supaya ikut preferensi
+`cardLang` yang baru, bukan lagi bahasa chrome UI.
+
+**Jumlah kartu disamakan** — karena `cardVisible()` tidak lagi menyaring
+berdasar bahasa, `#hTotal`, tagline, `<meta name="description">`,
+`og:description`, JSON-LD, dan teks pembuka halaman Panduan semuanya diperbarui
+dari "208 kartu"/"272 cards" (angka lama yang tergantung mode) jadi **288
+kartu/cards** (total sebenarnya, sama di kedua mode sekarang) di kedua bahasa.
+Kualifier "· Ver. Indonesia"/"· English Ver." di tagline dihapus karena sudah
+tidak akurat (keduanya menampilkan database yang sama sekarang).
+
+**Verifikasi**: `node --check` pada blok `<script>` inline — lolos. Diuji
+langsung ke `cards.js` (bukan cuma dibaca) untuk memastikan klaim "0 dari 288
+kartu tidak punya `nm`" dan "16 kartu tidak punya `nm_en`" akurat, bukan
+tebakan. Diuji fungsional dengan Playwright (server lokal): `#hTotal` = 288;
+pencarian `SP01-001` dengan `cardLang=id` menampilkan kartu (dulu 0 hasil,
+disembunyikan `ID_PENDING_SETS`) dengan lencana `ID*+EN` + peringatan fan-
+translation di lightbox; ganti `cardLang` ke `en` mengubah nama & gambar yang
+tampil (termasuk untuk kartu errata seperti `BP01-002`, yang gambarnya memang
+beda pixel antara `images/`= ID-dengan-errata vs `images/en/`= EN asli);
+`BP01-001` (kartu biasa, punya `nm`+`nm_en`) menampilkan lencana `ID+EN` polos
+tanpa peringatan. Semua transisi tanpa error console.
+
+**Belum dikerjakan di rilis ini (langkah berikutnya, per diskusi 18 September):**
+1. Hapus tombol ganti bahasa situs (🌐) — perlu keputusan tambahan dulu karena
+   `state.lang` saat ini JUGA mengatur hal-hal di luar teks kartu: menyembunyikan
+   total tab Community Deck/Tournaments Deck/Weekly Rush LGS di mode EN (isinya
+   konten komunitas Indonesia), format locale angka/tanggal (id-ID vs en-US),
+   dan konten halaman Panduan Bermain (rulebook lengkap, cuma ada versi
+   Indonesia+Inggris masing-masing penuh, beda dari string UI pendek).
+2. Kumpulkan ~150 entri kamus `T` (teks UI: menu, tombol, placeholder, tooltip)
+   jadi SATU teks per kunci yang "dwibahasa secara alami" (bukan kaku), sesuai
+   permintaan pemilik — supaya pengunjung luar Indonesia setidaknya sedikit
+   paham tanpa perlu toggle. Sengaja belum dikerjakan di rilis ini karena gaya
+   penulisannya perlu dicek dulu ke pemilik lewat beberapa contoh (butuh sesi
+   terpisah, lebih ke pekerjaan tulisan daripada kode).
+
 ### v6.44 — Tambah filter "sudah dimiliki" di Koleksi Kartu Saya — 16 September 2026 *(`index.html`)*
 
 Permintaan pemilik: fitur Koleksi Kartu (Dashboard Saya) sebelumnya cuma punya
@@ -1357,52 +1432,6 @@ bagian dari entri susulan ini.
 - Diverifikasi (sesi sebelumnya): fetch raw file dari GitHub + `node --check` pada
   blok `<script>` inline, dan grep gabungan (`backup|btnRestore|bkFile|bkNote|
   BK_MAKS|BK_APP|tampilkanKotakRestore|terapkanRestore|\.bk-`) — nol sisa referensi.
-
-### Halaman "Dukung Kami" di dalam app — ganti total redirect Saweria — 8 September 2026 *(`index.html` + `data.js`)*
-
-Permintaan pemilik: ganti halaman Dukung yang sebelumnya cuma mendirect ke
-Saweria, jadi halaman sendiri di dalam app (mirip referensi desain yang
-dikirim pemilik), menampilkan GoPay, rekening Mandiri, dan rekening BCA. Untuk
-saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
-
-- **Klarifikasi sebelum eksekusi (lewat AskUserQuestion + pesan langsung)**:
-  email tujuan saran/komentar = `dataanggi2712@yahoo.co.id` (email yang sama
-  dipakai untuk submission deck komunitas sejak v6.19); bentuk halaman =
-  **halaman baru di dalam app** (bukan modal/popup), serupa Kartu/Build/Panduan;
-  Saweria **diganti total** (bukan ditambah di samping) — hanya GoPay/Mandiri/BCA
-  yang tampil. Nomor rekening & nama pemilik akun diberikan langsung oleh pemilik.
-- **`data.js`**: `window.DUKUNG` diubah total dari `{url, label, teks}` (link
-  Saweria) jadi `{nama, metode:[{jenis,label,nomor}], emailSaran, teks}` — lihat
-  format lengkap & contoh di bagian **Dukungan sukarela** di atas.
-- **`index.html`**: `'dukung'` ditambahkan ke `PAGES` (hash routing generik yang
-  sudah ada otomatis mendukungnya, tidak perlu listener baru) — section baru
-  `#dukungPage` + fungsi `renderDukungPage()` menyusun kartu tiap metode
-  (ikon via `DUKUNG_ICON`, nomor rekening, tombol salin — memakai ulang pola
-  copy-to-clipboard dari tombol `#btnTabel`) dan tombol CTA `mailto:` ke
-  `emailSaran`. Tombol header `#btnDukung` & link footer `.foot-dukung` diubah
-  dari `target="_blank"` ke `href="#dukung"` (anchor internal statis, tidak lagi
-  di-set lewat JS). `renderDukung()` disederhanakan: validasi berdasarkan
-  `cfg.metode.length > 0`, bukan cek URL. CSS halaman baru (`.dk-wrap`,
-  `.dk-item`, dst.) mengikuti pola halaman Panduan (`.pd-wrap`) & token desain
-  yang sudah ada.
-- **Bug ditemukan & diperbaiki sebelum deploy**: label metode sempat memakai
-  class `"lb"` yang ternyata sudah dipakai global untuk lightbox kartu
-  (`.lb{position:fixed;inset:0;z-index:60;...}`) — menyebabkan tiap label metode
-  menutupi seluruh layar (ketemu lewat verifikasi Playwright screenshot, bukan
-  cuma cek DOM/computed style). Diganti jadi class unik `dklb`.
-- **Verifikasi**: `node --check` lolos untuk kedua berkas; diuji penuh secara
-  lokal (`python3 -m http.server` + Playwright headless, viewport desktop &
-  mobile) — halaman Dukung tampil benar di ID & EN, tombol salin bekerja
-  (`navigator.clipboard`), link `mailto:` terbentuk benar, tidak ada error
-  konsol JS. Deploy 1 commit ke `main` lewat Chrome (`index.html` + `data.js`).
-  Setelah deploy: cek langsung `raw.githubusercontent.com` mengonfirmasi kedua
-  berkas live dan benar, lalu ditemukan **Cloudflare edge cache masih
-  menyajikan `data.js` versi lama** (`cf-cache-status: HIT`, `Browser Cache
-  TTL`/edge TTL 4 jam) meski origin GitHub sudah baru — **Purge Everything**
-  dijalankan dari dashboard Cloudflare, dikonfirmasi `cf-cache-status: MISS`
-  lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
-
-## Riwayat Update
 
 ### v6.39 — Cetak kartu proxy dibuka untuk semua anggota login (sebelumnya admin-only) — 14 September 2026 *(`index.html`)*
 
@@ -1631,7 +1660,7 @@ ada sejak awal), lalu memuatnya lagi dari perangkat lain.
 ### v6.34 — fitur "Lupa kata sandi?" — 13 September 2026 *(`index.html`, `auth.js`)*
 
 Permintaan pemilik: tambahkan fitur ganti kata sandi buat orang yang lupa,
-plus akun `data2712` (email `dataanggi2712@gmail.com`) dinaikkan jadi admin
+plus akun milik pemilik dinaikkan jadi admin
 lewat SQL Editor Supabase langsung (tidak lewat situs — lihat catatan
 `isAdmin()` di v6.31).
 
@@ -1730,8 +1759,8 @@ sungguhan: unik, format dibatasi, dicek ketersediaannya sebelum akun dibuat.
   pindah.
 - Constraint format: `username ~ '^[A-Za-z0-9_]{3,20}$'` (3-20 karakter,
   huruf/angka/underscore saja, tanpa spasi/emoji).
-- Index unik case-insensitive (`lower(username)`) — "Data2712" dan
-  "data2712" tidak bisa dua-duanya ada, mencegah kebingungan identitas yang
+- Index unik case-insensitive (`lower(username)`) — "Player1" dan
+  "player1" tidak bisa dua-duanya ada, mencegah kebingungan identitas yang
   tidak akan terjadi dengan constraint unik biasa.
 - Trigger `handle_new_user()` diperbarui: baca `username` dari metadata
   signup (dulu `display_name`); fallback (kalau sampai ada yang mendaftar
@@ -1766,8 +1795,7 @@ gagal dan pesannya dipetakan ke pesan yang sama di `index.html`.
   berbahasa yang sesuai.
 - `refreshAccountUI()`: pemanggilan `getDisplayName` → `getUsername`.
 
-**Kredensial akun pemilik (username `data2712`, email
-`dataanggi2712@gmail.com`) — TIDAK dibuatkan lewat sesi ini**: pemilik
+**Kredensial akun pemilik — TIDAK dibuatkan lewat sesi ini**: pemilik
 mengirim password langsung di chat dan meminta akunnya sekalian dijadikan
 admin. Kata sandi TIDAK PERNAH diketikkan ke form manapun oleh Claude
 (kebijakan tetap, berlaku walau diminta & diberi langsung) — pemilik perlu
@@ -2044,8 +2072,6 @@ yang sama dengan Alex Hobby Shop, dan tautan peta mengarah ke link yang
 benar. Deploy 1 commit ke `main` lewat Chrome, lalu Cloudflare
 `Purge Everything`.
 
-
-
 ### Deck komunitas baru: "Ultron" oleh Rob — 9 September 2026 *(hanya `data.js`)*
 Pemilik meneruskan kiriman deck dari komunitas untuk ditambahkan ke Community
 Deck: `{ nm:'Ultron', cr:'Rob', ds:'Personal Grudge Hulk bisa tukar Ultron Army,
@@ -2086,6 +2112,50 @@ file kartu lain di repo).
   Diperbaiki dengan `navigator.serviceWorker.getRegistrations()`→`unregister()`
   + `caches.keys()`→`caches.delete()` lewat console, lalu reload — situs live
   dikonfirmasi menampilkan artwork yang benar.
+
+### Halaman "Dukung Kami" di dalam app — ganti total redirect Saweria — 8 September 2026 *(`index.html` + `data.js`)*
+
+Permintaan pemilik: ganti halaman Dukung yang sebelumnya cuma mendirect ke
+Saweria, jadi halaman sendiri di dalam app (mirip referensi desain yang
+dikirim pemilik), menampilkan GoPay, rekening Mandiri, dan rekening BCA. Untuk
+saran/komentar pengunjung, disediakan tombol kirim email (bukan chat).
+
+- **Klarifikasi sebelum eksekusi (lewat AskUserQuestion + pesan langsung)**:
+  email tujuan saran/komentar = `dataanggi2712@yahoo.co.id` (email yang sama
+  dipakai untuk submission deck komunitas sejak v6.19); bentuk halaman =
+  **halaman baru di dalam app** (bukan modal/popup), serupa Kartu/Build/Panduan;
+  Saweria **diganti total** (bukan ditambah di samping) — hanya GoPay/Mandiri/BCA
+  yang tampil. Nomor rekening & nama pemilik akun diberikan langsung oleh pemilik.
+- **`data.js`**: `window.DUKUNG` diubah total dari `{url, label, teks}` (link
+  Saweria) jadi `{nama, metode:[{jenis,label,nomor}], emailSaran, teks}` — lihat
+  format lengkap & contoh di bagian **Dukungan sukarela** di atas.
+- **`index.html`**: `'dukung'` ditambahkan ke `PAGES` (hash routing generik yang
+  sudah ada otomatis mendukungnya, tidak perlu listener baru) — section baru
+  `#dukungPage` + fungsi `renderDukungPage()` menyusun kartu tiap metode
+  (ikon via `DUKUNG_ICON`, nomor rekening, tombol salin — memakai ulang pola
+  copy-to-clipboard dari tombol `#btnTabel`) dan tombol CTA `mailto:` ke
+  `emailSaran`. Tombol header `#btnDukung` & link footer `.foot-dukung` diubah
+  dari `target="_blank"` ke `href="#dukung"` (anchor internal statis, tidak lagi
+  di-set lewat JS). `renderDukung()` disederhanakan: validasi berdasarkan
+  `cfg.metode.length > 0`, bukan cek URL. CSS halaman baru (`.dk-wrap`,
+  `.dk-item`, dst.) mengikuti pola halaman Panduan (`.pd-wrap`) & token desain
+  yang sudah ada.
+- **Bug ditemukan & diperbaiki sebelum deploy**: label metode sempat memakai
+  class `"lb"` yang ternyata sudah dipakai global untuk lightbox kartu
+  (`.lb{position:fixed;inset:0;z-index:60;...}`) — menyebabkan tiap label metode
+  menutupi seluruh layar (ketemu lewat verifikasi Playwright screenshot, bukan
+  cuma cek DOM/computed style). Diganti jadi class unik `dklb`.
+- **Verifikasi**: `node --check` lolos untuk kedua berkas; diuji penuh secara
+  lokal (`python3 -m http.server` + Playwright headless, viewport desktop &
+  mobile) — halaman Dukung tampil benar di ID & EN, tombol salin bekerja
+  (`navigator.clipboard`), link `mailto:` terbentuk benar, tidak ada error
+  konsol JS. Deploy 1 commit ke `main` lewat Chrome (`index.html` + `data.js`).
+  Setelah deploy: cek langsung `raw.githubusercontent.com` mengonfirmasi kedua
+  berkas live dan benar, lalu ditemukan **Cloudflare edge cache masih
+  menyajikan `data.js` versi lama** (`cf-cache-status: HIT`, `Browser Cache
+  TTL`/edge TTL 4 jam) meski origin GitHub sudah baru — **Purge Everything**
+  dijalankan dari dashboard Cloudflare, dikonfirmasi `cf-cache-status: MISS`
+  lalu situs live `mhrdecklab.com/#dukung` diuji end-to-end dan tampil benar.
 
 ### Kalimat keterangan halaman Dukung diubah — 8 September 2026 *(hanya `data.js`)*
 Permintaan pemilik: ganti kalimat di `DUKUNG.teks.id` (tampil di footer & subjudul
@@ -2383,6 +2453,37 @@ tes fungsional Playwright (toko & kota baru muncul di render, badge hitung
 filter kota jadi "Tanjung Pinang (1)", link peta & label hari benar, total
 `window.LGS.length` = 19).
 
+### Revisi kecil Tournaments + insiden cache Cloudflare #2 — 4 September 2026 *(hanya `data.js`, tanpa naik versi kode)*
+Tepat setelah v6.26 di-push pemilik:
+
+- Pemilik minta field `penyelenggara` event Multiverse Battle disederhanakan
+  dari "AZLN x CARDFUN x Marvel Hero Rush Indonesia" jadi cukup **"Marvel
+  Hero Rush Indonesia"** — diubah langsung di `data.js`.
+- Pemilik lapor menu Tournaments kosong ("belum muncul konten") di situs
+  live. Diagnosis: `index.html` sudah benar v6.26 (menu Tournaments muncul),
+  tapi `data.js` di edge Cloudflare masih versi lama (Edge TTL 4 jam) —
+  fetch dengan cache-buster ke URL yang sama membuktikan datanya sudah benar
+  di origin. Ini insiden cache Cloudflare basi **kedua** dengan pola persis
+  sama seperti kejadian Arnando Garage (lihat entri "Tambahan jadwal — 4
+  September 2026" di bawah) — bukan bug kode, bukan berarti push gagal.
+  **Diperbaiki** dengan purge cache Cloudflare manual (teknik yang sama,
+  lewat browser bawaan Claude dengan izin eksplisit pemilik) untuk `/`,
+  `/index.html`, `/data.js`, `/cards.js`, `/manifest.json` — dikonfirmasi
+  fixed lewat tes langsung di situs live (menu Tournaments menampilkan 1
+  event, 4 deck, badge hitung "4", semua benar).
+
+### Tambahan jadwal — 4 September 2026 *(hanya `data.js`)*
+- **Arnando Garage** (Bali) masuk daftar — Minggu 18.00 WITA – Selesai. Ini toko
+  LGS **pertama di luar zona WIB** yang terdaftar, jadi field `tz:'WITA'`
+  dipakai untuk toko ini (field ini sudah ada sejak awal di skema `LGS`, tinggal
+  dipakai — tidak perlu perubahan kode)
+- Total kini **18 toko · 24 sesi per minggu · 8 kota**
+- Kota baru (**Bali**) otomatis masuk grup **Luar Jabodetabek** di dropdown filter
+  (tidak perlu ubah `index.html` — `wilayahKota()` sudah menangani kota di luar
+  Jabodetabek secara default sejak v6.16, cukup nama kotanya belum terdaftar di
+  grup Jabodetabek)
+- `index.html` **tidak berubah** (tetap v6.25) — cukup unggah ulang `data.js`
+
 ### v6.27 — analisis "Kartu paling sering dipakai" di halaman Tournaments — 4 September 2026
 Permintaan pemilik: tampilkan analisis persentase kartu apa saja yang paling
 sering/banyak dipakai dari deck-deck Top turnamen, ditampilkan langsung di
@@ -2436,25 +2537,6 @@ bagian turnamen terkait.
   ≤640px (HP) `.tny-usage-right` otomatis turun ke barisnya sendiri. Diuji
   ulang dengan Playwright di 5 lebar layar (1502/1280/768/414/375px) — tidak
   ada lagi teks yang melewati tepi panel di lebar manapun.
-
-### Revisi kecil Tournaments + insiden cache Cloudflare #2 — 4 September 2026 *(hanya `data.js`, tanpa naik versi kode)*
-Tepat setelah v6.26 di-push pemilik:
-
-- Pemilik minta field `penyelenggara` event Multiverse Battle disederhanakan
-  dari "AZLN x CARDFUN x Marvel Hero Rush Indonesia" jadi cukup **"Marvel
-  Hero Rush Indonesia"** — diubah langsung di `data.js`.
-- Pemilik lapor menu Tournaments kosong ("belum muncul konten") di situs
-  live. Diagnosis: `index.html` sudah benar v6.26 (menu Tournaments muncul),
-  tapi `data.js` di edge Cloudflare masih versi lama (Edge TTL 4 jam) —
-  fetch dengan cache-buster ke URL yang sama membuktikan datanya sudah benar
-  di origin. Ini insiden cache Cloudflare basi **kedua** dengan pola persis
-  sama seperti kejadian Arnando Garage (lihat entri "Tambahan jadwal — 4
-  September 2026" di bawah) — bukan bug kode, bukan berarti push gagal.
-  **Diperbaiki** dengan purge cache Cloudflare manual (teknik yang sama,
-  lewat browser bawaan Claude dengan izin eksplisit pemilik) untuk `/`,
-  `/index.html`, `/data.js`, `/cards.js`, `/manifest.json` — dikonfirmasi
-  fixed lewat tes langsung di situs live (menu Tournaments menampilkan 1
-  event, 4 deck, badge hitung "4", semua benar).
 
 ### v6.26 — menu baru Tournaments + Deck Komunitas berganti nama jadi Community Deck — 4 September 2026
 Dua permintaan pemilik sekaligus:
@@ -2515,18 +2597,6 @@ Dua permintaan pemilik sekaligus:
      tidak terpengaruh. Console bersih dari error JS (404 gambar kartu di
      lingkungan uji lokal itu wajar — folder `images/` tidak ikut diuji,
      bukan indikasi bug).
-
-### Tambahan jadwal — 4 September 2026 *(hanya `data.js`)*
-- **Arnando Garage** (Bali) masuk daftar — Minggu 18.00 WITA – Selesai. Ini toko
-  LGS **pertama di luar zona WIB** yang terdaftar, jadi field `tz:'WITA'`
-  dipakai untuk toko ini (field ini sudah ada sejak awal di skema `LGS`, tinggal
-  dipakai — tidak perlu perubahan kode)
-- Total kini **18 toko · 24 sesi per minggu · 8 kota**
-- Kota baru (**Bali**) otomatis masuk grup **Luar Jabodetabek** di dropdown filter
-  (tidak perlu ubah `index.html` — `wilayahKota()` sudah menangani kota di luar
-  Jabodetabek secara default sejak v6.16, cukup nama kotanya belum terdaftar di
-  grup Jabodetabek)
-- `index.html` **tidak berubah** (tetap v6.25) — cukup unggah ulang `data.js`
 
 ### v6.25 — Panduan Bermain diperkaya dari studi lengkap Comprehensive Rules 1.03 — 3 September 2026
 Permintaan pemilik: pelajari dan simpan Comprehensive Rules 1.03 secara menyeluruh
@@ -2724,7 +2794,7 @@ bisa disiapkan.
 **SEO — Google Search Console (selesai — ⚠️ butuh satu langkah manual dari
 pemilik, lihat catatan penting di bawah):**
 - `mhrdecklab.com` didaftarkan sebagai Domain property di akun
-  `dataanggi2712@gmail.com` (akun Google yang sama dipakai untuk Cloudflare)
+  Google milik pemilik (akun yang sama dipakai untuk Cloudflare)
 - Diverifikasi lewat DNS TXT record (`google-site-verification=...`) yang
   ditambahkan langsung ke DNS Cloudflare — **status: Ownership verified** ✅.
   Sengaja pakai cara TXT record manual, BUKAN opsi "authorize Google to access
@@ -2952,6 +3022,24 @@ kartu versi Inggris) sudah usang.
   tetap muncul normal, nol error konsol/halaman
 - Tidak ada perubahan `index.html` — jadi tidak ada kenaikan nomor versi untuk entri ini
 
+### Dokumentasi — 2 September 2026 *(hanya `README.md`, tidak ada perubahan kode/data)*
+- Ditambahkan aturan tetap proyek: **setiap** perubahan, sekecil apa pun, wajib
+  dicatat sebagai entri baru di bagian ini — supaya sesi Claude baru (tanpa akses ke
+  riwayat percakapan sebelumnya) tetap bisa membaca riwayat lengkap cukup dari file
+  ini
+- Bagian **"Catatan dari rulebook resmi (Comprehensive Rules 1.00)"** yang sudah usang
+  diganti total dengan **"Aturan resmi Marvel Hero Rush (rujukan lengkap untuk Deck
+  Lab)"** — konsolidasi seluruh aturan permainan yang sudah dipelajari sejauh ini dari
+  Comprehensive Rules 1.00 → 1.03, poster cetak resmi CARDFUN/Jason Entertainment, dan
+  taksonomi Counter dari penjelasan pemilik. Mencakup: konstruksi deck, struktur
+  giliran & battlefield, biaya Summon, pemetaan istilah kemampuan kunci, dua jenis
+  Counter, errata resmi, field yang belum diimplementasikan (Environment, rarity
+  GR/R), dan tabel "Riwayat pembaruan aturan" tersendiri untuk melacak kapan tiap
+  temuan aturan masuk. Bagian ini akan terus diperbarui setiap kali ada rulebook
+  resmi baru, errata baru, atau set kartu dengan mekanik baru
+- Daftar "Rencana / ide berikutnya": item "Impor deck dari teks" ditandai selesai
+  (sudah dikerjakan di v6.16)
+
 ### v6.19 — 2 September 2026 · kanal email di kotak submission deck komunitas
 Permintaan pemilik: tambahkan alamat email sebagai kanal alternatif pengiriman kode
 submission, selain DM TikTok yang sudah ada.
@@ -3028,24 +3116,6 @@ difokuskan ke bagian yang benar-benar belum ada:
 - Nama branding Weekly Rush LGS ("Assemble Night" untuk acara, "Hero Base"
   untuk toko peserta) dikonfirmasi final oleh pemilik — belum diterapkan ke
   kode/`data.js`, menunggu perintah eksplisit kapan dipakai
-
-### Dokumentasi — 2 September 2026 *(hanya `README.md`, tidak ada perubahan kode/data)*
-- Ditambahkan aturan tetap proyek: **setiap** perubahan, sekecil apa pun, wajib
-  dicatat sebagai entri baru di bagian ini — supaya sesi Claude baru (tanpa akses ke
-  riwayat percakapan sebelumnya) tetap bisa membaca riwayat lengkap cukup dari file
-  ini
-- Bagian **"Catatan dari rulebook resmi (Comprehensive Rules 1.00)"** yang sudah usang
-  diganti total dengan **"Aturan resmi Marvel Hero Rush (rujukan lengkap untuk Deck
-  Lab)"** — konsolidasi seluruh aturan permainan yang sudah dipelajari sejauh ini dari
-  Comprehensive Rules 1.00 → 1.03, poster cetak resmi CARDFUN/Jason Entertainment, dan
-  taksonomi Counter dari penjelasan pemilik. Mencakup: konstruksi deck, struktur
-  giliran & battlefield, biaya Summon, pemetaan istilah kemampuan kunci, dua jenis
-  Counter, errata resmi, field yang belum diimplementasikan (Environment, rarity
-  GR/R), dan tabel "Riwayat pembaruan aturan" tersendiri untuk melacak kapan tiap
-  temuan aturan masuk. Bagian ini akan terus diperbarui setiap kali ada rulebook
-  resmi baru, errata baru, atau set kartu dengan mekanik baru
-- Daftar "Rencana / ide berikutnya": item "Impor deck dari teks" ditandai selesai
-  (sudah dikerjakan di v6.16)
 
 ### v6.17 — 2 September 2026 · perbaikan CLS lanjutan (dari laporan Cloudflare Agustus)
 Laporan Cloudflare bulan penuh (1–31 Agustus) mencatat CLS memburuk dari 7% "poor"
@@ -3424,6 +3494,12 @@ Yang diperbaiki adalah elemen yang persis disebut di Debug View laporan itu.
   Safari iOS yang di laporan tercatat paling lambat (P75 2.067 ms vs 1.237 ms Chrome
   Mobile)
 
+### Tambahan jadwal — 26 Agustus 2026 *(hanya `data.js`)*
+- **Catnie Hobbies & Games** (Tangerang Selatan) masuk daftar — Minggu 14.00 WIB.
+  Total kini **10 toko · 13 sesi per minggu · 3 kota**
+- Filter kota otomatis bertambah jadi tiga: Jakarta 5 · Tangerang Selatan 1 · Batam 4
+- `index.html` **tidak berubah** (tetap v6.1) — cukup unggah ulang `data.js`
+
 ### v6.3 — 26 Agustus 2026
 - **Mode Inggris disederhanakan: hanya menu Cards dan Deck Builder.** Tab
   **Deck Komunitas** ikut disembunyikan (sebelumnya hanya Turnamen), karena isinya
@@ -3453,12 +3529,6 @@ Inggris bisa memakai Deck Lab sepenuhnya.
   (sebelumnya selalu Indonesia)
 - 🔧 **Fix:** tombol navigasi yang disembunyikan tetap tampil karena atribut `hidden`
   kalah dari `display:flex` di CSS
-
-### Tambahan jadwal — 26 Agustus 2026 *(hanya `data.js`)*
-- **Catnie Hobbies & Games** (Tangerang Selatan) masuk daftar — Minggu 14.00 WIB.
-  Total kini **10 toko · 13 sesi per minggu · 3 kota**
-- Filter kota otomatis bertambah jadi tiga: Jakarta 5 · Tangerang Selatan 1 · Batam 4
-- `index.html` **tidak berubah** (tetap v6.1) — cukup unggah ulang `data.js`
 
 ### v6.1 — 26 Agustus 2026
 - **Jadwal turnamen diperbarui: 4 toko baru di Batam** — Gattchaa One Batam Mall (Senin
@@ -3678,6 +3748,15 @@ Ditujukan untuk alur kerja meninjau dan mengganti kartu setelah deck jadi.
   disembunyikan karena informasinya sudah ada di lencana navigasi bawah
 - Tampilan desktop tidak berubah sama sekali
 
+### Varian artwork batch 1 — 16 Agustus 2026
+- **40 berkas alternate art** diunggah ke `images/` — melengkapi seluruh varian
+  yang tercatat di database (33 versi MR + 7 versi SEC)
+- Nama berkas ditentukan dari nomor kartu yang tercetak di tiap gambar, bukan dari
+  urutan berkas asal, sehingga tidak ada risiko tertukar
+- Gambar asal beresolusi 1559×2150 diseragamkan ke lebar 450 px agar konsisten
+  dengan gambar kartu lain, lalu diberi watermark SAMPLE
+- `index.html` tidak berubah — cukup unggah gambarnya
+
 ### v3.6 — 16 Agustus 2026
 - 🔧 **Fix penting:** deck komunitas dan jadwal LGS dipindah ke berkas terpisah
   **`data.js`**. Sebelumnya keduanya ditulis di dalam `index.html`, sehingga setiap
@@ -3689,15 +3768,6 @@ Ditujukan untuk alur kerja meninjau dan mengganti kartu setelah deck jadi.
   otomatis berjalan. Pratinjau kini benar-benar terpisah dari deck aktif
 - Nama variabel `DECK_CONTOH` diganti `DECK_KOMUNITAS` agar sesuai nama menunya
 - Kalau `data.js` gagal dimuat, aplikasi tetap berjalan dengan daftar kosong
-
-### Varian artwork batch 1 — 16 Agustus 2026
-- **40 berkas alternate art** diunggah ke `images/` — melengkapi seluruh varian
-  yang tercatat di database (33 versi MR + 7 versi SEC)
-- Nama berkas ditentukan dari nomor kartu yang tercetak di tiap gambar, bukan dari
-  urutan berkas asal, sehingga tidak ada risiko tertukar
-- Gambar asal beresolusi 1559×2150 diseragamkan ke lebar 450 px agar konsisten
-  dengan gambar kartu lain, lalu diberi watermark SAMPLE
-- `index.html` tidak berubah — cukup unggah gambarnya
 
 ### v3.5 — 11 Agustus 2026
 - **Dukungan varian artwork (alternate art)** — kartu dengan lebih dari satu
@@ -3894,7 +3964,7 @@ Ditujukan untuk alur kerja meninjau dan mengganti kartu setelah deck jadi.
    Hero Rush") yang menyertai produk fisik yang beredar di Indonesia. **Paling
    otoritatif** untuk istilah dan aturan yang dipakai di pasar Indonesia.
 2. **Comprehensive Rules 1.03 (Inggris, tidak resmi)** — terjemahan pihak ketiga dari
-   rulebook Tiongkok (Google Drive, `kokoh.masyarakat@gmail.com`, update 2026-08-12).
+   rulebook Tiongkok (dibagikan komunitas lewat Google Drive, update 2026-08-12).
    Riwayat revisi: 1.00 (16 Jun 2026) → 1.01 (24 Jun) → 1.02 (23 Jul) → 1.03 (12 Agu).
    Lebih rinci secara nomor pasal, tapi sebagian nama kemampuannya (lihat tabel di
    bawah) **tidak cocok** dengan poster resmi maupun teks kartu — kalau bertentangan,

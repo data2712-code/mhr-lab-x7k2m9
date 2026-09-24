@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.57  ·  22 September 2026
+     MHR DECK LAB  ·  versi 6.58  ·  24 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 288 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.57">
+<meta name="version" content="6.58">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1535,7 +1535,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.57</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.58</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2830,8 +2830,12 @@ function counterBadgeHTML(c, cls){
 /* v6.18: dipakai untuk field yang bisa datang dari SUBMISSION PUBLIK (nama/kredit/
    deskripsi deck komunitas) sebelum ditaruh ke innerHTML — mencegah HTML/script
    nyelip ke tampilan kalau pemilik lengah saat menempel kode kiriman ke data.js.
-   Bukan sanitasi penuh, cukup untuk memblokir pembentukan tag. */
-function escHtml(s){ return String(s||'').replace(/</g,'&lt;'); }
+   Bukan sanitasi penuh, cukup untuk memblokir pembentukan tag.
+   v6.58 — sekarang meng-escape & < > " ' (bukan cuma <), supaya juga aman
+   dipakai DI DALAM atribut HTML (title="…", href="…", data-…="…"). Hasil
+   tampilan teks biasa tidak berubah. */
+const ESC_MAP = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+function escHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, ch=>ESC_MAP[ch]); }
 /* v6.46 — dulu menerjemahkan kata warna (Merah/Kuning/Biru/Hijau) ke Inggris
    saat mode bahasa chrome UI = EN. Mode itu (state.lang/#btnLang) sudah dihapus
    total; nama deck komunitas sekarang selalu ditampilkan apa adanya sesuai yang

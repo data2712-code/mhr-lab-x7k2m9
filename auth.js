@@ -29,7 +29,8 @@
    v6.33 — login sekarang pakai USERNAME + kata sandi, bukan email lagi.
    Supabase Auth sendiri cuma bisa login pakai email, jadi signIn() di
    bawah menerjemahkan username -> email dulu lewat fungsi database
-   `verify_login` (lihat mhr_decklab_username_login_migration.sql) SEBELUM
+   `verify_login` (didefinisikan di Supabase → SQL Editor; berkas migrasinya
+   tidak disimpan di repo) SEBELUM
    memanggil signInWithPassword asli. Fungsi itu sengaja HANYA
    mengembalikan email kalau kata sandinya juga benar (dicek di database
    pakai hash bcrypt yang sama seperti Supabase sendiri, lewat pgcrypto) —
