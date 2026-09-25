@@ -1,0 +1,42 @@
+# MHR Deck Lab v6.62 — bangun ulang halaman statis Berita (news/*.html,
+# rss.xml, news-sitemap.xml) dari tabel `news` di Supabase.
+# Jalan otomatis tiap 3 jam, dan bisa dijalankan manual:
+#   GitHub → tab Actions → "Halaman Berita" → Run workflow
+# Cuma membuat commit kalau memang ada yang berubah.
+# Catatan: setelah workflow ini membuat commit, lakukan "Pull origin" dulu di
+# GitHub Desktop sebelum push perubahan lain.
+name: Halaman Berita
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */3 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: news-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Bangun halaman berita
+        run: node tools/generate_news_pages.js
+      - name: Commit kalau ada perubahan
+        run: |
+          git add -A news rss.xml news-sitemap.xml
+          if git diff --cached --quiet; then
+            echo "Tidak ada perubahan."
+          else
+            git config user.name "mhr-news-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Berita: perbarui halaman statis"
+            git push
+          fi
