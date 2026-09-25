@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>Berita MHR Deck Lab</title>
+  <link>https://mhrdecklab.com/#berita</link>
+  <atom:link href="https://mhrdecklab.com/rss.xml" rel="self" type="application/rss+xml"/>
+  <description>Berita Marvel Hero Rush TCG dalam Bahasa Indonesia</description>
+  <language>id</language>
+  <item>
+    <title>Comprehensive Rules 1.03: Panduan ditulis ulang</title>
+    <link>https://mhrdecklab.com/news/comprehensive-rules-1-03-panduan-baru.html</link>
+    <guid isPermaLink="true">https://mhrdecklab.com/news/comprehensive-rules-1-03-panduan-baru.html</guid>
+    <pubDate>Fri, 25 Sep 2026 18:12:26 GMT</pubDate>
+    <category>aturan</category>
+    <description>Aturan resmi terbaru dari Jason. Halaman Panduan kini punya bagian Rarity, Jarak Serangan, dan daftar istilah — plus koreksi aturan Mulligan.</description>
+  </item>
+  <item>
+    <title>Halaman Berita hadir di MHR Deck Lab</title>
+    <link>https://mhrdecklab.com/news/halaman-berita-mhr-deck-lab.html</link>
+    <guid isPermaLink="true">https://mhrdecklab.com/news/halaman-berita-mhr-deck-lab.html</guid>
+    <pubDate>Fri, 25 Sep 2026 18:09:08 GMT</pubDate>
+    <category>situs</category>
+    <description>Kabar Marvel Hero Rush dalam Bahasa Indonesia, kartu yang bisa diklik langsung dari artikel, preview rapi di WhatsApp, dan RSS.</description>
+  </item>
+  <item>
+    <title>SP01 &quot;Era of Spiders&quot; kini pakai teks &amp; gambar resmi Bahasa Indonesia</title>
+    <link>https://mhrdecklab.com/news/sp01-teks-resmi-bahasa-indonesia.html</link>
+    <guid isPermaLink="true">https://mhrdecklab.com/news/sp01-teks-resmi-bahasa-indonesia.html</guid>
+    <pubDate>Fri, 25 Sep 2026 17:52:08 GMT</pubDate>
+    <category>situs</category>
+    <description>79 kartu SP01 sekarang memakai teks efek resmi Indonesia, dan 114 gambarnya diganti versi cetakan Indonesia.</description>
+    <enclosure url="https://mhrdecklab.com/images/news/sp01-indonesia/cover.jpg" type="image/jpeg" length="0"/>
+  </item>
+  <item>
+    <title>Warna baru Orange &amp; Purple: preview SD05, SD06 &amp; PB02</title>
+    <link>https://mhrdecklab.com/news/preview-sd05-sd06-pb02-orange-purple.html</link>
+    <guid isPermaLink="true">https://mhrdecklab.com/news/preview-sd05-sd06-pb02-orange-purple.html</guid>
+    <pubDate>Fri, 25 Sep 2026 17:49:19 GMT</pubDate>
+    <category>spoiler</category>
+    <description>Dua warna baru resmi hadir di Marvel Hero Rush lewat Starter Deck SD05 dan SD06, plus 21 kartu promo PB02. Ini kartu-kartu andalannya, lengkap dengan terjemahan.</description>
+    <enclosure url="https://mhrdecklab.com/images/news/sd05-sd06-pb02/cover.jpg" type="image/jpeg" length="0"/>
+  </item>
+</channel>
+</rss>
