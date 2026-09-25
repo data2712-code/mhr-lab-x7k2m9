@@ -509,6 +509,32 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v6.64 — Halaman SET & SPOILER (Fase 3) — 26 September 2026 *(`index.html`, `set-ui.js` baru, `spoilers.js` baru, `data.js`, `home-ui.js`, `sw.js`)*
+
+Fase 3: satu halaman per produk + tempat kartu yang baru diungkap.
+- **Tab 📦 Set** (`#set`): daftar "Segera rilis" (spoiler, dengan hitung hari) dan
+  "Sudah rilis". Tiap set: kartu sampul, kode, nama, tipe, jumlah kartu, bar warna.
+- **`#set/<kode>`**: info produk (tipe, jumlah kartu, jumlah cetakan termasuk varian,
+  tanggal rilis ID/China, deskripsi, link berita, tombol "Buka di halaman Kartu"),
+  statistik warna / rarity semua cetakan / sebaran level, lalu semua gambar kartunya.
+  Kartu rilis → lightbox biasa. Kartu spoiler → panel sendiri (gambar + terjemahan fan).
+- **Data baru di `data.js`: `window.SETS`** — urutan, nama resmi, tipe, status
+  (`rilis`/`spoiler`), tanggal rilis, deskripsi, slug berita. Nama resmi diambil dari
+  halaman produk marvelherorush.com: SD01 REALITY, SD02 MIND, SD03 SPACE, SD04 TIME,
+  BP01 The Avengers, SP01 Era of Spiders, EB01 Event Pack, PB01 Promotion Pack,
+  TB01 Treasure Booster. SD05/SD06/PB02 belum punya nama resmi → `namaSementara`.
+  Tanggal rilis set lama belum diisi (belum ada sumber resmi) — tinggal diisi di `rilis`.
+- **`spoilers.js` baru**: 27 cetakan SD05/SD06/PB02 (terjemahan fan dari PDF v6.62),
+  memakai gambar ber-watermark di `images/news/sd05-sd06-pb02/`. Tidak masuk deck builder.
+  Saat rilis resmi: pindahkan ke `cards.js`, hapus dari sini, ubah `status` set jadi `rilis`.
+- **Beranda**: "Jelajahi per seri" jadi "Jelajahi per set" dan menuju halaman Set.
+- **Navigasi**: 10 tab. Di layar < 1440 px angka penghitung di tab disembunyikan dan
+  padding dirapatkan supaya semua tab muat; kalau tetap tidak muat, bar bisa digeser.
+
+**Verifikasi:** `node --check`; Playwright 1280 & 390 px: daftar 12 set, SP01 116
+cetakan, SD06 3 cetakan + panel spoiler, PB02 21 kartu, tombol "Buka di halaman Kartu"
+memasang filter seri, tanpa overflow halaman dan tanpa error console.
+
 ### v6.63 — Halaman BERANDA (Fase 2) — 26 September 2026 *(`index.html`, `home-ui.js` baru, `data.js`, `sw.js`)*
 
 Fase 2 dari rencana "situs berita + deck builder": halaman pembuka baru `#beranda`.

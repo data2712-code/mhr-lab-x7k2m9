@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.63  ·  26 September 2026
+     MHR DECK LAB  ·  versi 6.64  ·  26 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 288 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.63">
+<meta name="version" content="6.64">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -450,10 +450,13 @@
   .meta-card .pub-mod button{flex:1;font-size:11px;padding:6px 4px}
   /* ================= NAVIGASI HALAMAN ================= */
   nav.tabs{display:flex;gap:4px;padding:0 20px;border-bottom:2px solid var(--line);
-    background:var(--ink);position:sticky;top:0;z-index:8}
+    background:var(--ink);position:sticky;top:0;z-index:8;overflow-x:auto;scrollbar-width:none}
+  nav.tabs::-webkit-scrollbar{display:none}
+  /* v6.64 — 10 tab: angka penghitung disembunyikan di layar < 1440px supaya semua tab muat */
+  @media (max-width:1440px){ nav.tabs .cnt{display:none} }
   nav.tabs button{background:none;border:none;border-bottom:3px solid transparent;
-    color:var(--muted);padding:12px 16px 10px;font-size:13.5px;font-weight:600;cursor:pointer;
-    display:flex;align-items:center;gap:7px;transition:.15s;margin-bottom:-2px}
+    color:var(--muted);padding:12px 11px 10px;font-size:13.5px;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;gap:7px;transition:.15s;margin-bottom:0;white-space:nowrap;flex:none}
   nav.tabs button:hover{color:var(--paper)}
   nav.tabs button[aria-current="true"]{color:var(--accent);border-bottom-color:var(--accent)}
   nav.tabs .ts{display:none}
@@ -990,6 +993,76 @@
     .hm-skel .hm-lead,.hm-skel .hm-side{min-height:220px}
   }
 
+/* ================= HALAMAN SET & SPOILER (v6.64) ================= */
+  body:not(.page-set) #setPage{display:none}
+  body.page-set .filters, body.page-set .cards, body.page-set .deck{display:none}
+  body.page-set .layout{grid-template-columns:minmax(0,1fr)}
+  a.hm-ser{text-decoration:none}
+  .st-wrap{padding:22px 20px 60px;max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+  .st-muted{color:var(--muted);font-size:12px}
+  .st-code{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--paper);background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:2px 7px}
+  .st-badge{font-family:var(--disp);font-weight:800;font-size:10.5px;letter-spacing:.08em;color:#fff;background:var(--purple);border-radius:5px;padding:3px 7px}
+  .st-top{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .st-dd{color:var(--accent)}
+  .st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+  .st-tile{display:flex;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-decoration:none;color:inherit;transition:.15s}
+  .st-tile:hover{border-color:#46546a;transform:translateY(-2px)}
+  .st-sp{border-color:color-mix(in srgb,var(--purple) 50%,var(--line));background:linear-gradient(135deg,rgba(139,92,246,.10),var(--panel) 60%)}
+  .st-img{width:64px;flex:none}
+  .st-img img{width:100%;aspect-ratio:568/793;object-fit:cover;border-radius:6px;border:1px solid var(--line);display:block;background:var(--panel2)}
+  .st-b{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+  .st-b>b{font-family:var(--disp);font-size:16px;line-height:1.2}
+  .st-bar{display:flex;height:5px;border-radius:3px;overflow:hidden;background:var(--panel2);margin-top:auto}
+  .st-bar-lg{height:10px;margin:4px 0 8px}
+  .st-hero{display:grid;grid-template-columns:170px minmax(0,1fr);gap:22px;align-items:start}
+  .st-hero-img img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+  .st-hero-b{display:flex;flex-direction:column;gap:8px}
+  .st-hero-b h1{font-family:var(--disp);font-size:32px;line-height:1.1}
+  .st-facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .st-facts div{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 12px;display:flex;flex-direction:column;gap:2px}
+  .st-facts i{font-style:normal;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .st-facts b{font-size:14px} .st-facts small{color:var(--accent);font-weight:700}
+  .st-desc{color:#C9CFD8;font-size:13.5px;line-height:1.6;max-width:640px}
+  .st-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .st-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .st-h3{font-family:var(--disp);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .st-legs{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px}
+  .st-leg i,.st-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0}
+  .st-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .st-chip{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:12.5px;color:#C9CFD8}
+  .st-chip b{font-family:var(--mono);color:var(--paper)}
+  .st-lv{display:flex;gap:6px;align-items:flex-end;height:96px}
+  .st-lv div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:2px}
+  .st-lv span{width:100%;max-width:34px;background:var(--accent);border-radius:4px 4px 0 0;min-height:3px;order:1}
+  .st-lv b{font-size:11px;order:0}
+  .st-lv i{font-style:normal;font-size:10.5px;color:var(--muted);order:2}
+  .st-note{background:rgba(139,92,246,.10);border:1px solid color-mix(in srgb,var(--purple) 50%,var(--line));border-radius:10px;padding:10px 13px;font-size:12.5px;line-height:1.6;color:#D5DAE1}
+  .st-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+  .st-card{background:none;border:none;padding:0;cursor:pointer;display:flex;flex-direction:column;gap:5px;color:var(--paper);font-family:var(--body);text-align:center}
+  .st-card img{width:100%;aspect-ratio:568/793;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:var(--panel2);transition:transform .15s}
+  .st-card:hover img{transform:translateY(-3px);border-color:var(--accent)}
+  .st-card span{font-size:11.5px;color:var(--muted)} .st-card b{font-family:var(--mono);color:var(--paper);font-weight:600}
+  #stSpoil{position:fixed;inset:0;z-index:75;background:rgba(5,7,9,.82);display:flex;align-items:center;justify-content:center;padding:18px}
+  #stSpoil[hidden]{display:none}
+  .st-sp-in{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:760px;width:100%;
+    max-height:92vh;overflow:auto;display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:18px;padding:18px}
+  .st-sp-in>img{width:100%;border-radius:10px;display:block}
+  .st-sp-b{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+  .st-sp-b h3{font-family:var(--disp);font-size:22px;line-height:1.2}
+  .st-eff{display:flex;flex-direction:column;gap:8px;font-size:13.5px;line-height:1.6;color:#D5DAE1;margin-top:4px}
+  .st-eff p{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+  .st-sp-x{position:absolute;top:10px;right:10px;background:var(--panel2);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:5px 10px;cursor:pointer}
+  @media (max-width:920px){
+    .st-wrap{padding:14px 14px 90px}
+    .st-grid{grid-template-columns:minmax(0,1fr)}
+    .st-hero{grid-template-columns:110px minmax(0,1fr);gap:14px}
+    .st-hero-b h1{font-size:23px}
+    .st-stats{grid-template-columns:minmax(0,1fr)}
+    .st-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .st-sp-in{grid-template-columns:minmax(0,1fr);padding:14px}
+    .st-sp-in>img{max-width:260px;margin:0 auto}
+  }
+
   /* ================= MOBILE: navigasi bawah ================= */
   @media (max-width:920px){
     .filters{top:0}
@@ -1437,6 +1510,7 @@
   <button data-page="beranda" aria-current="false">🏠 <span class="tl">Beranda</span><span class="ts">Beranda</span></button>
   <button data-page="berita" aria-current="false">📰 <span class="tl">Berita</span><span class="ts">Berita</span></button>
   <button data-page="cards" aria-current="true">🃏 <span class="tl" data-i18n="navCards">Kartu</span><span class="ts" data-i18n="navCardsS">Kartu</span> <span class="cnt" id="navCard">208</span></button>
+  <button data-page="set" aria-current="false">📦 <span class="tl">Set</span><span class="ts">Set</span></button>
   <button data-page="build" aria-current="false">🛠 <span class="tl" data-i18n="navBuild">Deck Builder</span><span class="ts" data-i18n="navBuildS">Builder</span> <span class="cnt" id="navDeck">0</span></button>
   <button data-page="meta" aria-current="false">🏆 <span class="tl" data-i18n="navMeta">Community Deck</span><span class="ts" data-i18n="navMetaS">Community Deck</span> <span class="cnt" id="navMeta">0</span></button>
   <button data-page="tourney" aria-current="false">🥇 <span class="tl" data-i18n="navTourney">Tournaments Deck</span><span class="ts" data-i18n="navTourneyS">Tournaments Deck</span> <span class="cnt" id="navTourney">0</span></button>
@@ -1444,6 +1518,9 @@
   <button data-page="panduan" aria-current="false">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span></button>
   <button data-page="dashboard" aria-current="false">🗂 <span class="tl" data-i18n="navDashboard">Dashboard Saya</span><span class="ts" data-i18n="navDashboardS">Dashboard</span></button>
 </nav>
+
+<!-- v6.64 — halaman Set & Spoiler (isi digambar set-ui.js: renderSet) -->
+<section id="setPage"><div class="st-wrap" id="setWrap"></div></section>
 
 <!-- v6.63 — halaman Beranda (isi digambar home-ui.js: renderBeranda) -->
 <section id="berandaPage"><div class="hm-wrap" id="berandaWrap"></div></section>
@@ -1794,21 +1871,24 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.63"></script>
-<script src="data.js?v=6.63"></script>
+<script src="cards.js?v=6.64"></script>
+<script src="data.js?v=6.64"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.63"></script>
-<script src="decks.js?v=6.63"></script>
+<script src="auth.js?v=6.64"></script>
+<script src="decks.js?v=6.64"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.63"></script>
-<script src="collection.js?v=6.63"></script>
+<script src="social.js?v=6.64"></script>
+<script src="collection.js?v=6.64"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.63"></script>
-<script src="news-ui.js?v=6.63"></script>
+<script src="news.js?v=6.64"></script>
+<script src="news-ui.js?v=6.64"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.63"></script>
+<script src="home-ui.js?v=6.64"></script>
+<!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
+<script src="spoilers.js?v=6.64"></script>
+<script src="set-ui.js?v=6.64"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -1834,7 +1914,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.63</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.64</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -5172,12 +5252,13 @@ function renderPanduan(){
 }
 
 /* ==================== NAVIGASI HALAMAN ==================== */
-const PAGES = ['beranda','berita','cards','build','meta','tourney','lgs','panduan','dukung','dashboard'];
+const PAGES = ['beranda','berita','cards','set','build','meta','tourney','lgs','panduan','dukung','dashboard'];
 const TITLE_AWAL = document.title;
 function setPage(p, dariHash){
   /* v6.62 — 'berita/<slug>' = satu artikel (lihat news-ui.js) */
   let sub = null;
   if(typeof p === 'string' && p.startsWith('berita/')){ sub = p.slice(7); p = 'berita'; }
+  if(typeof p === 'string' && p.startsWith('set/')){ sub = p.slice(4).toUpperCase(); p = 'set'; }  /* v6.64 */
   if(!PAGES.includes(p)) p = 'cards';
   if(p !== 'berita') document.title = TITLE_AWAL;
   /* v6.46 — semua tab (termasuk LGS/Tournaments Deck/Community Deck) SELALU
@@ -5190,6 +5271,7 @@ function setPage(p, dariHash){
     b.setAttribute('aria-current', String(b.dataset.page === p)));
   { const ab = $('#navTabs [aria-current="true"]'); if(ab && ab.scrollIntoView) ab.scrollIntoView({block:'nearest', inline:'nearest'}); }
   if(p === 'beranda' && typeof renderBeranda === 'function') renderBeranda();
+  if(p === 'set' && typeof renderSet === 'function') renderSet(sub);
   if(p === 'berita' && typeof renderBerita === 'function') renderBerita(sub);
   if(p === 'meta') renderMeta();
   if(p === 'tourney') renderTourney();
@@ -6331,6 +6413,8 @@ if(hashAwal.startsWith('#d=')){
   handleSharedLink();
 } else if(hashAwal.startsWith('#c=')){
   handleCardLink();
+} else if(hashAwal.startsWith('#set/') && window.setKodeFromHash && window.setKodeFromHash(hashAwal)){
+  setPage('set/' + window.setKodeFromHash(hashAwal), true);
 } else if(hashAwal.startsWith('#berita/') && window.beritaSlugFromHash && window.beritaSlugFromHash(hashAwal)){
   setPage('berita/' + window.beritaSlugFromHash(hashAwal), true);
 } else {
@@ -6344,6 +6428,10 @@ window.addEventListener('hashchange', ()=>{
   const h = location.hash;
   if(h.startsWith('#d=')){ setPage('build', true); handleSharedLink(); return; }
   if(h.startsWith('#c=')){ handleCardLink(); return; }
+  if(h === '#set' || h.startsWith('#set/')){
+    const kode = window.setKodeFromHash ? window.setKodeFromHash(h) : null;
+    setPage(kode ? 'set/'+kode : 'set', true); return;
+  }
   if(h === '#berita' || h.startsWith('#berita/')){
     const slug = window.beritaSlugFromHash ? window.beritaSlugFromHash(h) : null;
     setPage(slug ? 'berita/'+slug : 'berita', true); return;

@@ -43,6 +43,8 @@ const STATIC_ASSETS = [
   './news.js', // v6.62 — servis Berita + renderer Markdown (lihat window.MHRNews/NewsMD)
   './news-ui.js', // v6.62 — tampilan halaman Berita + editor admin
   './home-ui.js', // v6.63 — halaman Beranda
+  './spoilers.js', // v6.64 — kartu yang diungkap tapi belum rilis
+  './set-ui.js', // v6.64 — halaman Set & Spoiler
 ];
 
 self.addEventListener('install', e=>{

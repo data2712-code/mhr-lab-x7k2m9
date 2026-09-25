@@ -132,6 +132,41 @@ window.TOURNAMENTS = [
   },
 ];
 
+/* ========== DAFTAR SET / PRODUK (v6.64) ==========
+   Dipakai halaman Set (#set dan #set/<kode>). Urutan di sini = urutan tampil.
+     kode      : awalan nomor kartu (SP01, BP01, SD05, ...). Kartu di cards.js
+                 (atau spoilers.js) yang nomornya diawali kode ini masuk ke set ini.
+     nama      : nama resmi produk (kosongkan kalau belum ada nama resmi)
+     tipe      : 'Starter Deck' | 'Expansion Pack' | 'Lainnya'
+     status    : 'rilis' (kartu di cards.js) | 'spoiler' (kartu di spoilers.js, belum rilis)
+     rilis     : opsional { id:'YYYY-MM-DD', cn:'YYYY-MM-DD' } — tanggal rilis Indonesia / China
+     namaSementara : dipakai selama nama resmi belum ada (tampil dengan catatan "nama sementara")
+     deskripsi : opsional, 1-2 kalimat isi produk
+     berita    : opsional, slug artikel Berita terkait
+   Nama resmi diambil dari halaman produk marvelherorush.com (September 2026). */
+window.SETS = [
+  { kode:'SD05', nama:'', namaSementara:'Starter Deck Orange', tipe:'Starter Deck', status:'spoiler', rilis:{ cn:'2026-10-16' },
+    deskripsi:'Starter deck warna baru Orange. Baru 3 kartu yang diungkap.',
+    berita:'preview-sd05-sd06-pb02-orange-purple' },
+  { kode:'SD06', nama:'', namaSementara:'Starter Deck Purple', tipe:'Starter Deck', status:'spoiler', rilis:{ cn:'2026-10-16' },
+    deskripsi:'Starter deck warna baru Purple. Baru 2 kartu (3 cetakan) yang diungkap.',
+    berita:'preview-sd05-sd06-pb02-orange-purple' },
+  { kode:'PB02', nama:'', namaSementara:'Promo Pack', tipe:'Lainnya', status:'spoiler', rilis:{ cn:'2026-10-16' },
+    deskripsi:'Promo pack yang disertakan di tiap box SD05/SD06: 21 kartu PR (10 Orange, 10 Purple, 1 Kuning).',
+    berita:'preview-sd05-sd06-pb02-orange-purple' },
+  { kode:'SP01', nama:'Era of Spiders', tipe:'Expansion Pack', status:'rilis',
+    berita:'sp01-teks-resmi-bahasa-indonesia' },
+  { kode:'EB01', nama:'Event Pack', tipe:'Lainnya', status:'rilis' },
+  { kode:'TB01', nama:'Treasure Booster', tipe:'Lainnya', status:'rilis' },
+  { kode:'PB01', nama:'Promotion Pack', tipe:'Lainnya', status:'rilis',
+    deskripsi:'Gabungan PB01-A dan PB01-B.' },
+  { kode:'BP01', nama:'The Avengers', tipe:'Expansion Pack', status:'rilis' },
+  { kode:'SD01', nama:'REALITY', tipe:'Starter Deck', status:'rilis' },
+  { kode:'SD02', nama:'MIND', tipe:'Starter Deck', status:'rilis' },
+  { kode:'SD03', nama:'SPACE', tipe:'Starter Deck', status:'rilis' },
+  { kode:'SD04', nama:'TIME', tipe:'Starter Deck', status:'rilis' },
+];
+
 /* ========== JADWAL RILIS (v6.63) ==========
    Dipakai kotak "Rilis berikutnya" + hitung mundur di halaman Beranda.
    Yang tampil cuma SATU: rilis terdekat yang tanggalnya belum lewat —

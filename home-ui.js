@@ -9,7 +9,7 @@
      - juara turnamen terbaru            → window.TOURNAMENTS di data.js
      - deck komunitas terpopuler         → MHRDecks.listPublic + MHRSocial.engagementFor
        (like 7 hari terakhir; kalau belum ada like, deck publik terbaru)
-     - jelajah per seri                  → DB (cards.js)
+     - jelajah per set                   → window.SETS (data.js) + DB → #set/<kode>
 
    Dimuat SEBELUM blok <script> inline di index.html; fungsinya baru
    dipanggil dari setPage('beranda'), jadi global dari blok inline ($, DB,
@@ -98,21 +98,19 @@
     </section>`;
   }
 
-  /* ---------------- jelajah per seri ---------------- */
-  const SERI_NAMA = {SD:'Starter Deck', BP:'Booster Pack', SP:'Special Pack', EB:'Extra Booster', PB:'Promo Pack', TB:'Theme Booster', PR:'Promo'};
+  /* ---------------- jelajah per set (v6.64: menuju halaman Set) ---------------- */
   function seriesHTML(){
-    if(typeof DB === 'undefined') return '';
-    const cnt = {};
-    DB.forEach(c=>{ cnt[c.s] = (cnt[c.s]||0)+1; });
-    const keys = Object.keys(cnt).sort();
+    const sets = Array.isArray(window.SETS) ? window.SETS.filter(s=>s.status!=='spoiler') : [];
+    if(!sets.length || typeof DB === 'undefined') return '';
     return `<section class="hm-sec">
-      <div class="hm-sec-h"><h2>Jelajahi kartu per seri</h2><a class="hm-link" href="#cards">Semua ${DB.length} kartu →</a></div>
-      <div class="hm-series">${keys.map(k=>{
-        const c = DB.find(d=>d.s===k && d.l>=5) || DB.find(d=>d.s===k);
-        return `<button class="hm-ser" data-seri="${E(k)}">
+      <div class="hm-sec-h"><h2>Jelajahi per set</h2><a class="hm-link" href="#set">Semua set & spoiler →</a></div>
+      <div class="hm-series">${sets.map(s=>{
+        const cards = DB.filter(d=>d.no.startsWith(s.kode)); if(!cards.length) return '';
+        const c = cards.slice().sort((a,b)=>b.l-a.l)[0];
+        return `<a class="hm-ser" href="#set/${E(s.kode)}">
           <img src="${E(artFile(c.no))}" alt="" loading="lazy">
-          <span><b>${E(k)}</b><i>${E(SERI_NAMA[k.slice(0,2)]||'Seri')} · ${cnt[k]} kartu</i></span>
-        </button>`; }).join('')}</div>
+          <span><b>${E(s.kode)}</b><i>${E(s.nama||s.tipe||'')} · ${cards.length} kartu</i></span>
+        </a>`; }).join('')}</div>
     </section>`;
   }
 
@@ -216,13 +214,4 @@
   window.renderBeranda = renderBeranda;
   window.refreshBeranda = ()=>{ cache = {news:null, popular:null}; if(typeof state!=='undefined' && state.page==='beranda') renderBeranda(); };
 
-  /* klik kartu seri → halaman Kartu dengan filter seri */
-  document.addEventListener('click', e=>{
-    const b = e.target.closest('#berandaPage [data-seri]'); if(!b) return;
-    const pre = b.dataset.seri;
-    const opt = [...document.querySelectorAll('#fSeries option')].find(o=>o.value === pre);
-    setPage('cards');
-    const sel = document.querySelector('#fSeries');
-    if(sel && opt){ sel.value = opt.value; sel.dispatchEvent(new Event('change')); }
-  });
 })();
