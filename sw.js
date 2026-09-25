@@ -42,6 +42,7 @@ const STATIC_ASSETS = [
   './collection.js', // v6.37 — servis koleksi kartu pribadi (lihat window.MHRCollection)
   './news.js', // v6.62 — servis Berita + renderer Markdown (lihat window.MHRNews/NewsMD)
   './news-ui.js', // v6.62 — tampilan halaman Berita + editor admin
+  './home-ui.js', // v6.63 — halaman Beranda
 ];
 
 self.addEventListener('install', e=>{

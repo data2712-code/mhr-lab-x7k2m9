@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.62  ·  25 September 2026
+     MHR DECK LAB  ·  versi 6.63  ·  26 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 288 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.62">
+<meta name="version" content="6.63">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -884,6 +884,112 @@
     .ne-row{grid-template-columns:minmax(0,1fr)}
   }
 
+/* ================= HALAMAN BERANDA (v6.63) ================= */
+  body:not(.page-beranda) #berandaPage{display:none}
+  body.page-beranda .filters, body.page-beranda .cards, body.page-beranda .deck{display:none}
+  body.page-beranda .layout{grid-template-columns:minmax(0,1fr)}
+  .hm-wrap{padding:22px 20px 60px;max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+  .hm-muted{color:var(--muted);font-size:12px}
+  .hm-kicker{font-family:var(--disp);font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .hm-link{color:var(--accent);text-decoration:none;font-size:12.5px;font-weight:700;white-space:nowrap}
+  .hm-link:hover{text-decoration:underline}
+  .hm-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:auto}
+  .hm-box-h,.hm-sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
+  .hm-box-h h3{font-family:var(--disp);font-size:15px;letter-spacing:.03em;text-transform:uppercase}
+  .hm-sec-h h2{font-family:var(--disp);font-size:20px;letter-spacing:.03em;text-transform:uppercase}
+
+  /* berita utama + samping */
+  .hm-news{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:16px}
+  .hm-lead{display:flex;flex-direction:column;border-radius:16px;overflow:hidden;border:1px solid var(--line);
+    background:var(--panel);text-decoration:none;color:inherit}
+  .hm-lead-img{aspect-ratio:1200/630;background:linear-gradient(135deg,#1F2731,#11161c)}
+  .hm-lead-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .hm-lead-b{padding:16px 22px 18px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+  .hm-lead-b h2{font-family:var(--disp);font-size:26px;line-height:1.15;color:var(--paper)}
+  .hm-lead-b p{color:#C9CFD8;font-size:13.5px;line-height:1.55;max-width:640px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .hm-lead:hover{border-color:#46546a}
+  .hm-side{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:4px}
+  .hm-item{display:flex;flex-direction:column;gap:5px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line);text-decoration:none;color:inherit}
+  .hm-item:first-of-type{border-top:none}
+  .hm-item b{font-size:14px;line-height:1.35;color:var(--paper)}
+  .hm-item:hover b{color:var(--accent)}
+  .hm-skel .hm-lead,.hm-skel .hm-side{animation:nwPulse 1.2s infinite;min-height:340px}
+
+  /* hitung mundur */
+  .hm-cd{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:16px 20px;border-radius:14px;
+    border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));
+    background:linear-gradient(90deg,rgba(242,176,30,.12),rgba(139,92,246,.10) 70%,transparent)}
+  .hm-cd-l{display:flex;flex-direction:column;gap:3px;flex:1;min-width:200px}
+  .hm-cd-l b{font-family:var(--disp);font-size:19px;line-height:1.2}
+  .hm-cd-date{font-size:12.5px;color:#C9CFD8}
+  .hm-cd-t{display:flex;gap:8px}
+  .hm-cd-t span{display:flex;flex-direction:column;align-items:center;min-width:62px;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 8px}
+  .hm-cd-t b{font-family:var(--mono);font-size:24px;color:var(--accent);line-height:1.1}
+  .hm-cd-t i{font-style:normal;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .hm-cd-go{color:var(--paper);text-decoration:none;font-weight:700;font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:8px 14px;white-space:nowrap}
+  .hm-cd-go:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* akses cepat */
+  .hm-quick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .hm-q{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px;text-decoration:none;color:inherit;transition:.15s}
+  .hm-q:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .hm-q-i{width:40px;height:40px;flex:none;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:19px}
+  .hm-q b{display:block;font-family:var(--disp);font-size:15px;letter-spacing:.02em}
+  .hm-q i{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:2px}
+
+  /* dua kolom: LGS + juara */
+  .hm-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .hm-box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+  .hm-lgs{list-style:none;display:flex;flex-direction:column}
+  .hm-lgs li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+  .hm-lgs li:first-child{border-top:none}
+  .hm-lgs a{color:var(--paper);text-decoration:none} .hm-lgs a:hover{color:var(--accent)}
+  .hm-lgs span{color:var(--muted);font-size:12px;text-align:right;white-space:nowrap}
+  .hm-more-n{font-size:12px;color:var(--muted)}
+  .hm-champ{display:flex;gap:14px;align-items:center}
+  .hm-strip{display:flex;flex:none}
+  .hm-strip img{width:54px;aspect-ratio:568/793;object-fit:cover;border-radius:5px;border:1px solid var(--line);margin-left:-22px;box-shadow:-4px 0 10px rgba(0,0,0,.4);background:var(--panel2)}
+  .hm-strip img:first-child{margin-left:0}
+  .hm-badge{display:inline-block;font-family:var(--disp);font-weight:800;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    background:var(--accent);color:#1A1206;border-radius:5px;padding:2px 7px;vertical-align:1px}
+  .hm-champ b{font-size:15px}
+
+  /* deck populer */
+  .hm-decks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .hm-deck{display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-decoration:none;color:inherit;transition:.15s}
+  .hm-deck:hover{border-color:#46546a;transform:translateY(-2px)}
+  .hm-deck .hm-strip img{width:64px}
+  .hm-deck-b{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .hm-deck-b b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hm-bar{display:flex;height:5px;border-radius:3px;overflow:hidden;background:var(--panel2);margin-top:4px}
+
+  /* seri */
+  .hm-series{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .hm-ser{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;cursor:pointer;text-align:left;color:var(--paper);font-family:var(--body)}
+  .hm-ser:hover{border-color:var(--accent)}
+  .hm-ser img{width:38px;aspect-ratio:568/793;object-fit:cover;border-radius:4px;flex:none;background:var(--panel2)}
+  .hm-ser b{display:block;font-family:var(--mono);font-size:13px}
+  .hm-ser i{display:block;font-style:normal;font-size:11px;color:var(--muted)}
+
+  @media (max-width:920px){
+    .hm-wrap{padding:14px 14px 90px;gap:18px}
+    .hm-news{grid-template-columns:minmax(0,1fr)}
+    .hm-lead-b{padding:14px 16px 16px}
+    .hm-lead-b h2{font-size:21px}
+    .hm-quick{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .hm-q{padding:12px;gap:10px} .hm-q-i{width:34px;height:34px;font-size:16px}
+    .hm-cols{grid-template-columns:minmax(0,1fr)}
+    .hm-decks{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .hm-deck .hm-strip img{width:48px;margin-left:-18px}
+    .hm-deck .hm-strip img:first-child{margin-left:0}
+    .hm-cd{padding:14px}
+    .hm-cd-t span{min-width:54px}
+    .hm-cd-t b{font-size:20px}
+    .hm-series{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .hm-skel .hm-lead,.hm-skel .hm-side{min-height:220px}
+  }
+
   /* ================= MOBILE: navigasi bawah ================= */
   @media (max-width:920px){
     .filters{top:0}
@@ -1303,7 +1409,7 @@
 
 <header>
   <div class="brand">
-    <h1><img class="logo" src="icons/logo-header.png" alt="MHR Deck Lab — Marvel Hero Rush TCG Deck Builder" width="759" height="220"></h1>
+    <h1><a href="#beranda" title="Beranda" style="display:block"><img class="logo" src="icons/logo-header.png" alt="MHR Deck Lab — Marvel Hero Rush TCG Deck Builder" width="759" height="220"></a></h1>
   </div>
   <div class="hdr-stats">
     <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">288</b></div>
@@ -1328,6 +1434,7 @@
 </header>
 
 <nav class="tabs" id="navTabs">
+  <button data-page="beranda" aria-current="false">🏠 <span class="tl">Beranda</span><span class="ts">Beranda</span></button>
   <button data-page="berita" aria-current="false">📰 <span class="tl">Berita</span><span class="ts">Berita</span></button>
   <button data-page="cards" aria-current="true">🃏 <span class="tl" data-i18n="navCards">Kartu</span><span class="ts" data-i18n="navCardsS">Kartu</span> <span class="cnt" id="navCard">208</span></button>
   <button data-page="build" aria-current="false">🛠 <span class="tl" data-i18n="navBuild">Deck Builder</span><span class="ts" data-i18n="navBuildS">Builder</span> <span class="cnt" id="navDeck">0</span></button>
@@ -1337,6 +1444,9 @@
   <button data-page="panduan" aria-current="false">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span></button>
   <button data-page="dashboard" aria-current="false">🗂 <span class="tl" data-i18n="navDashboard">Dashboard Saya</span><span class="ts" data-i18n="navDashboardS">Dashboard</span></button>
 </nav>
+
+<!-- v6.63 — halaman Beranda (isi digambar home-ui.js: renderBeranda) -->
+<section id="berandaPage"><div class="hm-wrap" id="berandaWrap"></div></section>
 
 <!-- v6.62 — halaman Berita (isi digambar news-ui.js: renderBerita) -->
 <section id="beritaPage"><div class="nw-wrap" id="beritaWrap"></div></section>
@@ -1684,19 +1794,21 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.62"></script>
-<script src="data.js?v=6.62"></script>
+<script src="cards.js?v=6.63"></script>
+<script src="data.js?v=6.63"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.62"></script>
-<script src="decks.js?v=6.62"></script>
+<script src="auth.js?v=6.63"></script>
+<script src="decks.js?v=6.63"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.62"></script>
-<script src="collection.js?v=6.62"></script>
+<script src="social.js?v=6.63"></script>
+<script src="collection.js?v=6.63"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.62"></script>
-<script src="news-ui.js?v=6.62"></script>
+<script src="news.js?v=6.63"></script>
+<script src="news-ui.js?v=6.63"></script>
+<!-- v6.63 — halaman Beranda (#beranda) -->
+<script src="home-ui.js?v=6.63"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -1722,7 +1834,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.62</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.63</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -5060,7 +5172,7 @@ function renderPanduan(){
 }
 
 /* ==================== NAVIGASI HALAMAN ==================== */
-const PAGES = ['berita','cards','build','meta','tourney','lgs','panduan','dukung','dashboard'];
+const PAGES = ['beranda','berita','cards','build','meta','tourney','lgs','panduan','dukung','dashboard'];
 const TITLE_AWAL = document.title;
 function setPage(p, dariHash){
   /* v6.62 — 'berita/<slug>' = satu artikel (lihat news-ui.js) */
@@ -5077,6 +5189,7 @@ function setPage(p, dariHash){
   [...$('#navTabs').children].forEach(b=>
     b.setAttribute('aria-current', String(b.dataset.page === p)));
   { const ab = $('#navTabs [aria-current="true"]'); if(ab && ab.scrollIntoView) ab.scrollIntoView({block:'nearest', inline:'nearest'}); }
+  if(p === 'beranda' && typeof renderBeranda === 'function') renderBeranda();
   if(p === 'berita' && typeof renderBerita === 'function') renderBerita(sub);
   if(p === 'meta') renderMeta();
   if(p === 'tourney') renderTourney();
@@ -6221,8 +6334,9 @@ if(hashAwal.startsWith('#d=')){
 } else if(hashAwal.startsWith('#berita/') && window.beritaSlugFromHash && window.beritaSlugFromHash(hashAwal)){
   setPage('berita/' + window.beritaSlugFromHash(hashAwal), true);
 } else {
+  /* v6.63 — tanpa #hash (buka mhrdecklab.com biasa) = halaman Beranda */
   const p = hashAwal.replace('#','');
-  setPage(PAGES.includes(p) ? p : (store.page || 'cards'), true);
+  setPage(PAGES.includes(p) ? p : 'beranda', true);
 }
 
 /* dukung tombol maju/mundur browser */

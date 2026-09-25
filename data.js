@@ -132,6 +132,22 @@ window.TOURNAMENTS = [
   },
 ];
 
+/* ========== JADWAL RILIS (v6.63) ==========
+   Dipakai kotak "Rilis berikutnya" + hitung mundur di halaman Beranda.
+   Yang tampil cuma SATU: rilis terdekat yang tanggalnya belum lewat —
+   jadi rilis lama boleh dibiarkan, otomatis tidak tampil lagi.
+     nama    : nama produk
+     tanggal : 'YYYY-MM-DD' (dihitung dari jam 00.00 WIB, kecuali diisi zona)
+     wilayah : opsional, mis. 'China', 'Indonesia'
+     berita  : opsional, slug artikel Berita (tombol "Lihat detail" membuka artikel itu)
+     link    : opsional, dipakai kalau berita kosong (https://...)
+     zona    : opsional, mis. '+08:00' untuk jam China
+   Kosongkan daftarnya ([]) untuk menyembunyikan kotak ini. */
+window.RILIS = [
+  { nama:'SD05 & SD06 Starter Deck + PB02 (Orange & Purple)', tanggal:'2026-10-16',
+    wilayah:'China', zona:'+08:00', berita:'preview-sd05-sd06-pb02-orange-purple' },
+];
+
 /* ========== DUKUNGAN SUKARELA ==========
    Tombol "☕ Dukung" di header dan tautan di footer hanya muncul kalau bagian
    ini ada dan minimal satu metode terisi di `metode`. Untuk mematikannya

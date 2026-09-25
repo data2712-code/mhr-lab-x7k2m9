@@ -509,6 +509,32 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v6.63 — Halaman BERANDA (Fase 2) — 26 September 2026 *(`index.html`, `home-ui.js` baru, `data.js`, `sw.js`)*
+
+Fase 2 dari rencana "situs berita + deck builder": halaman pembuka baru `#beranda`.
+**Membuka mhrdecklab.com tanpa #hash sekarang selalu mendarat di Beranda** (dulu
+kembali ke halaman terakhir yang dibuka). Logo di header juga menuju Beranda.
+Tab 🏠 Beranda ditambahkan paling kiri.
+
+Isi (semua dari data yang sudah ada — tidak ada SQL baru):
+- **Berita utama** (artikel disematkan/terbaru, cover besar) + 3 berita terbaru di samping.
+- **Rilis berikutnya + hitung mundur** (hari/jam/menit) — dari daftar baru
+  `window.RILIS` di `data.js` (nama, tanggal, wilayah, zona, slug berita). Yang tampil
+  cuma rilis terdekat yang belum lewat; kosongkan daftar untuk menyembunyikan kotaknya.
+  Isi awal: SD05/SD06/PB02, 16 Oktober 2026 (China).
+- **Akses cepat**: Cari Kartu, Buat Deck, Community Deck, Panduan.
+- **Weekly Rush hari ini** (dari `window.LGS`, hari ini menurut jam perangkat).
+- **Juara turnamen terbaru** (entri pertama `window.TOURNAMENTS`, tombol buka deck).
+- **Deck komunitas populer**: 4 deck publik dengan like terbanyak 7 hari terakhir
+  (seri: like total, lalu terbaru).
+- **Jelajahi per seri**: klik → halaman Kartu dengan filter seri terpasang.
+
+Tiap bagian aman gagal: kalau sumber datanya kosong/error, bagian itu tidak tampil.
+
+**Verifikasi:** `node --check` semua JS + blok inline; Playwright dengan Supabase
+tiruan di 1280 & 390 px: tanpa overflow horizontal, tanpa error console, klik seri
+membuka Kartu dengan filter benar, hitung mundur memakai tanggal di `data.js`.
+
 ### v6.62 — Halaman BERITA (Fase 1): daftar & artikel, editor admin, halaman statis + RSS — 25 September 2026 *(`index.html`, `news.js` baru, `news-ui.js` baru, `sw.js`, `robots.txt`, `tools/generate_news_pages.js` baru, `.github/workflows/news-pages.yml` baru, `images/news/`)*
 
 Permintaan pemilik: situs tidak hanya jadi tempat bikin deck, tapi juga tempat membaca
