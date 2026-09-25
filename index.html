@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.60  ·  25 September 2026
+     MHR DECK LAB  ·  versi 6.61  ·  25 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 288 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.60">
+<meta name="version" content="6.61">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1514,16 +1514,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <!-- Data yang Anda kelola sendiri: deck komunitas + jadwal turnamen LGS.
      Sengaja dipisah agar TIDAK ikut tertimpa saat index.html diperbarui. -->
-<script src="cards.js"></script>
-<script src="data.js"></script>
+<!-- v6.61 — "?v=" di belakang nama berkas .js lokal = cache-buster: browser
+     menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
+     lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
+     cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
+<script src="cards.js?v=6.61"></script>
+<script src="data.js?v=6.61"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js"></script>
-<script src="decks.js"></script>
+<script src="auth.js?v=6.61"></script>
+<script src="decks.js?v=6.61"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js"></script>
-<script src="collection.js"></script>
+<script src="social.js?v=6.61"></script>
+<script src="collection.js?v=6.61"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -1549,7 +1553,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.60</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.61</div>
 </footer>
 
 <div class="dview" id="simView" hidden>

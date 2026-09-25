@@ -103,7 +103,10 @@ self.addEventListener('fetch', e=>{
       if(res && res.ok) cache.put(req, res.clone());
       return res;
     }catch(err){
-      const hit = await cache.match(req) || await cache.match('./index.html');
+      /* v6.61 — ignoreSearch: skrip lokal sekarang dimuat dengan "?v=6.61"
+         (cache-buster), jadi saat offline cocokkan tanpa query string supaya
+         salinan di cache (./cards.js dst.) tetap ketemu. */
+      const hit = await cache.match(req, {ignoreSearch: true}) || await cache.match('./index.html');
       if(hit) return hit;
       throw err;
     }

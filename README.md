@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.60** · 25 September 2026
+**Versi saat ini: v6.61** · 25 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -463,15 +463,16 @@ Catatan:
 
 ### Cara mengecek versi file
 
-Nomor versi tercatat di tiga tempat di `index.html` — ketiganya wajib dinaikkan bersamaan:
+Nomor versi tercatat di tiga tempat di `index.html` — ketiganya wajib dinaikkan bersamaan (plus angka `?v=` di keenam tag `<script>` lokal, lihat § v6.61):
 
 | Lokasi | Cara melihat |
 |---|---|
 | Komentar di baris awal file | buka file dengan editor teks, atau `Ctrl+U` (view source) di browser |
 | `<meta name="version">` | di dalam `<head>` |
-| Pojok bawah situs | teks kecil `v6.58` di bawah disclaimer footer |
+| Pojok bawah situs | teks kecil `v6.61` di bawah disclaimer footer |
+| Tag `<script>` lokal | `cards.js?v=6.61` dst. (cache-buster, sejak v6.61) |
 
-Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.58</div>`
+Kalau teks versi di footer tidak diinginkan, hapus baris `<div ...>v6.61</div>`
 di dekat akhir `<footer>` — tidak memengaruhi fungsi apa pun.
 
 Menambah gambar kartu: masuk ke folder `images` dulu, baru Upload files.
@@ -507,6 +508,27 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.61 — Cache-buster "?v=" untuk skrip lokal — 25 September 2026 *(`index.html`, `sw.js`)*
+
+Ditemukan saat verifikasi live v6.60: kunjungan pertama setelah deploy sudah memakai
+`index.html` baru, tapi `cards.js` masih versi lama dari cache HTTP browser (baru benar
+setelah reload). Solusi yang disetujui pemilik: keenam skrip lokal di `index.html`
+sekarang dimuat dengan query versi — `cards.js?v=6.61`, `data.js?v=6.61`,
+`auth.js?v=6.61`, `decks.js?v=6.61`, `social.js?v=6.61`, `collection.js?v=6.61` —
+sehingga browser menganggapnya URL baru tiap kali angkanya naik.
+
+**Aturan baru:** setiap kali salah satu dari keenam berkas itu diubah (termasuk
+`data.js` saja, mis. jadwal LGS), naikkan angka `?v=` di keenam tag `<script>` itu
+bersama tiga penanda versi lain (komentar baris 3, `<meta name="version">`, footer).
+
+`sw.js`: fallback offline sekarang memakai `cache.match(req, {ignoreSearch:true})`
+supaya URL ber-`?v=` tetap cocok dengan salinan `./cards.js` dst. di cache.
+`CACHE_VERSION` sengaja **tidak** dinaikkan (tetap v7) — skema cache tidak berubah,
+dan menaikkannya akan memaksa semua pengguna mengunduh ulang seluruh gambar.
+
+**Verifikasi:** `node --check` sw.js + blok script utama; situs lokal via Playwright
+memuat 293 kartu dari `cards.js?v=6.61` tanpa error console.
 
 ### v6.60 — SP01 versi Bahasa Indonesia RESMI: 79 teks efek + 114 gambar cetakan Indonesia — 25 September 2026 *(`cards.js`, `index.html`, `sw.js`, `images/SP01-*.jpg`)*
 
