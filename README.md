@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.59** · 24 September 2026
+**Versi saat ini: v6.60** · 25 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -29,7 +29,7 @@ Simpan bukti tertulis izinnya beserta nama pemberi dan tanggalnya.
 ```
 mhr-lab-x7k2m9/
 ├── index.html        ← seluruh aplikasi (HTML + CSS + JS)
-├── cards.js           ← database 288 kartu (80 SP01 disembunyikan sementara di mode ID — lihat § v6.29) — diganti tiap ada set kartu baru
+├── cards.js           ← database 293 kartu (SP01 teks Indonesia resmi sejak v6.60, kecuali SP01-029) — diganti tiap ada set kartu baru
 ├── data.js             ← deck komunitas, hasil turnamen (sejak v6.26), jadwal LGS, dukungan — diedit sendiri pemilik
 ├── manifest.json    ← PWA: nama, ikon, warna tema (sejak v6.6)
 ├── sw.js                 ← PWA: service worker, cache offline (sejak v6.6)
@@ -507,6 +507,60 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.60 — SP01 versi Bahasa Indonesia RESMI: 79 teks efek + 114 gambar cetakan Indonesia — 25 September 2026 *(`cards.js`, `index.html`, `sw.js`, `images/SP01-*.jpg`)*
+
+Pemilik menaruh scan kartu SP01 cetakan **resmi Bahasa Indonesia** (dari web resmi
+MHR) di `mhr-deck-lab-internal\Database Image Kartu\Indonesia\SP01_Indonesia\`
+(117 berkas PNG 744×1039, sudah ber-watermark SAMPLE) dan minta situs diperbarui.
+Catatan pemilik: **SP01-029 dan SP01-030 versi Indonesia belum dirilis resmi.**
+
+**1. Gambar (114 berkas di `images/`, folder bahasa Indonesia).** Semua PNG
+diratakan ke latar #1F1F1F (sudut transparan), di-resize ke 568×793 (seragam
+dengan gambar SP01 sebelumnya), JPEG kualitas 88. Menimpa salinan gambar Inggris
+yang dipasang di `images/` sejak v6.28. `images/en/` **tidak disentuh**.
+- Varian HR: folder sumber punya dua versi bernomor (`_HR_616` dan `_HR_99`) untuk
+  SP01-021/022/063. Situs cuma punya satu slot `_HR.jpg`, jadi dipakai **`_HR_99`**
+  — versi yang sama dengan gambar Inggris yang sudah dipakai (dicek dengan
+  perbandingan visual). `_HR_616` tidak diunggah.
+- **SP01-029**: tidak ada gambar Indonesia sama sekali → `images/SP01-029.jpg` tetap
+  salinan Inggris.
+- **SP01-030**: cuma ada `SP01-030_MR.png` Indonesia → `images/SP01-030_MR.jpg`
+  diganti versi Indonesia; `images/SP01-030.jpg` (SR, versi utama) tetap salinan
+  Inggris.
+- Dicek: semua 114 berkas cocok nama dengan kombinasi nomor+rarity di `cards.js`
+  (tidak ada yang kurang/berlebih selain SP01-029/030 di atas), nomor kartu di
+  pojok kanan atas tiap gambar cocok dengan nama berkasnya, watermark SAMPLE ada
+  di semua gambar.
+
+**2. Teks efek Indonesia resmi (79 kartu).** Field `e` SP01-001..080 (kecuali 029)
+diganti dengan teks yang **dibaca langsung dari gambar kartu resmi Indonesia**
+(fan-translation v6.28 dibuang). SP01-030 memakai teks dari gambar MR-nya
+(teks efeknya sama). SP01-017 memang tanpa efek (tidak berubah). Nama kartu (`nm`)
+tidak berubah — cetakan Indonesia tetap memakai nama Inggris. Konvensi database
+dipertahankan: kemampuan [UNIQUE]/[BLOCK]/[AIR STRIKE]/[DOUBLE ATTACK]/[ASSAULT]
+diberi teks pengingat dalam kurung seperti kartu lain (walau cetakan SP01 tidak
+mencetaknya) — penting untuk [BLOCK], karena `counterInfo()` membaca
+`[COUNTER-ACTI]` di pengingatnya untuk lencana Counter efek.
+Ditemukan saat transkripsi: fan-translation lama **SP01-065** ternyata salah total
+(isinya duplikat teks SP01-064) — sekarang benar.
+
+**3. Penanda fan-translation per kartu.** `FAN_TRANSLATED_ID_SETS = ['SP01','EB01']`
+diganti fungsi `isFanId(c)` yang membaca field baru `fan:1` di `cards.js`. Kartu
+bertanda sekarang hanya **SP01-029** dan **EB01-010..014**; 79 kartu SP01 lain
+tampil lencana "ID+EN" biasa (tanpa peringatan).
+
+**4. `sw.js` `CACHE_VERSION` v6 → v7** — gambar di-cache cache-first permanen,
+jadi tanpa ini HP yang pernah membuka situs tetap menampilkan gambar Inggris lama.
+
+**Sisa pekerjaan:** begitu SP01-029 dan SP01-030 (SR) Indonesia dirilis resmi,
+ganti `images/SP01-029.jpg`, `images/SP01-030.jpg`, teks `e` SP01-029, lalu hapus
+`fan:1` di SP01-029.
+
+**Verifikasi:** `node --check` cards.js/sw.js/blok script; situs lokal via Playwright:
+293 kartu, 6 kartu bertanda fan, SP01-065 lencana "ID+EN", BLOCK SP01-023/031/053
+tetap terbaca Counter efek (BATTLE), filter kemampuan kunci tetap jalan, lightbox
+SP01-065 menampilkan gambar Indonesia + teks resmi, tanpa error console.
 
 ### v6.59 — Panduan Bermain ditulis ulang total mengikuti Comprehensive Rules 1.03 RESMI dari Jason — 24 September 2026 *(`index.html`, `README.md`)*
 

@@ -26,7 +26,7 @@
    supaya versi baru langsung dipakai tanpa perlu semua tab ditutup dulu.
    =================================================================== */
 
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v7'; // v6.60 — 114 gambar SP01 di images/ diganti cetakan resmi Indonesia (cache-first, jadi wajib naik)
 const CACHE_STATIC = `mhr-shell-${CACHE_VERSION}`;
 const CACHE_IMAGES = `mhr-images-${CACHE_VERSION}`;
 
