@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.61  ·  25 September 2026
+     MHR DECK LAB  ·  versi 6.62  ·  25 September 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,7 +16,7 @@
 <meta property="og:description" content="Susun deck Marvel Hero Rush: 288 kartu, filter lengkap, kurva level, dan bagikan deck sebagai link atau gambar.">
 <meta property="og:image" content="og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.61">
+<meta name="version" content="6.62">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -726,6 +726,164 @@
     text-transform:uppercase;transition:.15s}
   .dk-cta a:hover{opacity:.88}
 
+  /* ================= HALAMAN BERITA (v6.62) ================= */
+  body:not(.page-berita) #beritaPage{display:none}
+  body.page-berita .filters, body.page-berita .cards, body.page-berita .deck{display:none}
+  body.page-berita .layout{grid-template-columns:minmax(0,1fr)}
+  .nw-wrap{padding:22px 20px 60px;max-width:1120px;margin:0 auto}
+  .nw-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+  .nw-title{font-family:var(--disp);font-size:28px;letter-spacing:.04em;text-transform:uppercase;line-height:1.1}
+  .nw-lead{color:var(--muted);font-size:13px;line-height:1.6;margin-top:6px;max-width:620px}
+  .nw-actions{display:flex;gap:8px;align-items:center}
+  .nw-rss{font-family:var(--mono);font-size:11px;font-weight:700;color:#F59A23;border:1px solid #6b4a1c;
+    border-radius:6px;padding:6px 9px;text-decoration:none}
+  .nw-rss:hover{background:rgba(245,154,35,.12)}
+  .nw-btn{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
+    color:var(--paper);border-radius:8px;padding:8px 13px;font-size:12.5px;font-weight:700;cursor:pointer;
+    text-decoration:none;white-space:nowrap;font-family:var(--body);transition:.15s}
+  .nw-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .nw-btn-pri{background:var(--accent);border-color:var(--accent);color:#1A1206}
+  .nw-btn-pri:hover{opacity:.9;color:#1A1206}
+  .nw-btn-del:hover{border-color:var(--merah);color:var(--merah)}
+  .nw-filter{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px}
+  .nw-filter button{--c:var(--accent);background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:999px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer}
+  .nw-filter button[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--paper)}
+
+  .nw-cat{--c:var(--accent);display:inline-block;font-family:var(--disp);font-weight:800;font-size:10.5px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--c);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);
+    background:color-mix(in srgb,var(--c) 12%,transparent);border-radius:5px;padding:3px 7px}
+  .nw-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .nw-pin{font-size:11px;color:var(--muted)}
+  .nw-draft{font-family:var(--mono);font-size:10.5px;font-weight:700;color:#1A1206;background:#C9CFD8;border-radius:4px;padding:2px 6px}
+
+  .nw-card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    overflow:hidden;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
+  .nw-card:hover{border-color:#46546a;transform:translateY(-2px)}
+  .nw-cover{aspect-ratio:16/9;background:var(--panel2);overflow:hidden}
+  .nw-cover img{width:100%;height:100%;object-fit:cover;display:block}
+  .nw-noimg{--c:var(--accent);display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:4px;padding:18px 20px;
+    background:radial-gradient(120% 90% at 100% 0%,color-mix(in srgb,var(--c) 38%,transparent),transparent 60%),
+      repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 2px,transparent 2px 14px),linear-gradient(160deg,#1F2731,#11161c)}
+  .nw-noimg span{font-family:var(--disp);font-weight:800;font-size:30px;line-height:1;letter-spacing:.03em;text-transform:uppercase;color:var(--c)}
+  .nw-noimg i{font-style:normal;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:#5A6673}
+  .nw-cbody{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .nw-card h3{font-family:var(--disp);font-size:18px;line-height:1.25;letter-spacing:.01em}
+  .nw-card p{color:#AEB6C2;font-size:13px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;
+    -webkit-box-orient:vertical;overflow:hidden}
+  .nw-date{color:var(--muted);font-size:11.5px;margin-top:auto}
+  .nw-hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);margin-bottom:16px}
+  .nw-hero .nw-cover{aspect-ratio:auto;min-height:280px}
+  .nw-hero .nw-cbody{padding:24px 26px;justify-content:center}
+  .nw-hero h3{font-size:28px}
+  .nw-hero p{-webkit-line-clamp:5;font-size:14px}
+  .nw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .nw-skel .nw-cover{animation:nwPulse 1.2s infinite}
+  .nw-skel i{display:block;height:12px;border-radius:4px;background:var(--panel2);animation:nwPulse 1.2s infinite}
+  .nw-skel i:nth-child(2){width:80%}.nw-skel i:nth-child(3){width:45%}
+  @keyframes nwPulse{50%{opacity:.5}}
+  .nw-empty{background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:34px 20px;
+    text-align:center;color:var(--muted);font-size:13px}
+
+  /* artikel */
+  .nw-art{max-width:760px;margin:0 auto}
+  .nw-back{display:inline-block;color:var(--muted);text-decoration:none;font-size:12.5px;margin-bottom:16px}
+  .nw-back:hover{color:var(--accent)}
+  .nw-art h1{font-family:var(--disp);font-size:34px;line-height:1.15;letter-spacing:.01em;margin:10px 0 8px}
+  .nw-byline{color:var(--muted);font-size:12.5px}
+  .nw-byline b{color:var(--paper);font-weight:600}
+  .nw-artcover{margin:18px 0 4px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+  .nw-artcover img{display:block;width:100%;height:auto}
+  .nw-excerpt{font-size:16px;line-height:1.65;color:#D5DAE1;margin:18px 0 4px;padding-left:14px;border-left:3px solid var(--accent)}
+  .nw-body{font-size:15px;line-height:1.75;color:#D5DAE1}
+  .nw-body>*{margin-top:14px}
+  .nw-body h2{font-family:var(--disp);font-size:23px;line-height:1.25;color:var(--paper);margin-top:30px;letter-spacing:.01em}
+  .nw-body h3{font-family:var(--disp);font-size:18px;color:var(--paper);margin-top:22px}
+  .nw-body a{color:var(--accent);text-underline-offset:2px}
+  .nw-body strong{color:var(--paper)}
+  .nw-body ul,.nw-body ol{padding-left:22px}
+  .nw-body li{margin:4px 0}
+  .nw-body blockquote{border-left:3px solid var(--line);padding:4px 0 4px 14px;color:#AEB6C2;font-style:italic}
+  .nw-body hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+  .nw-fig img{display:block;max-width:100%;border-radius:10px;margin:0 auto}
+  .nw-fig figcaption{color:var(--muted);font-size:12px;text-align:center;margin-top:6px}
+  .nw-chip{--cc:var(--accent);display:inline-flex;align-items:baseline;gap:5px;text-decoration:none!important;
+    color:var(--paper)!important;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--cc);
+    border-radius:6px;padding:1px 7px;font-size:.92em;white-space:nowrap}
+  .nw-chip b{font-family:var(--mono);font-size:.82em;color:var(--muted);font-weight:600}
+  .nw-chip:hover{border-color:var(--cc)}
+  .nw-chip-x{color:var(--muted)!important;font-family:var(--mono)}
+  .nw-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:18px!important}
+  .nw-gcard{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--paper);margin:0}
+  .nw-gcard img{width:100%;aspect-ratio:568/793;object-fit:cover;border-radius:8px;border:1px solid var(--line);
+    background:var(--panel2);transition:transform .15s}
+  a.nw-gcard:hover img{transform:translateY(-3px);border-color:var(--accent)}
+  .nw-gcard span{font-size:12px;line-height:1.4;color:#AEB6C2;text-align:center}
+  .nw-gcard-x{aspect-ratio:568/793;align-items:center;justify-content:center;background:var(--panel2);
+    border-radius:8px;font-family:var(--mono);color:var(--muted)}
+  .nw-source{margin-top:26px;font-size:12.5px;color:var(--muted);background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:10px 13px}
+  .nw-source a{color:var(--accent)}
+  .nw-share{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+  .nw-share>span{color:var(--muted);font-size:12.5px}
+  .nw-sp{flex:1}
+  .nw-more{margin-top:40px}
+  .nw-more h3{font-family:var(--disp);font-size:18px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px}
+  .nw-more .nw-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+  .nw-tip{position:fixed;z-index:80;width:180px;border-radius:9px;box-shadow:0 10px 30px rgba(0,0,0,.55);pointer-events:none}
+
+  /* editor admin */
+  body.nw-lock{overflow:hidden}
+  #nwEditor{position:fixed;inset:0;z-index:70;background:var(--ink);display:flex;flex-direction:column}
+  #nwEditor[hidden]{display:none}
+  .ne-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+  .ne-bar>b{font-family:var(--disp);font-size:16px;letter-spacing:.04em;text-transform:uppercase;margin-right:auto}
+  .ne-status{font-size:12px;color:var(--hijau)}
+  .ne-status.bad{color:var(--merah)}
+  .ne-tabs{display:none}
+  .ne-main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:0}
+  .ne-form{overflow:auto;padding:16px 18px 40px;display:flex;flex-direction:column;gap:12px;border-right:1px solid var(--line)}
+  .ne-form label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:#C9CFD8}
+  .ne-form small{font-weight:400;color:var(--muted)}
+  .ne-form input:not([type=checkbox]),.ne-form select,.ne-form textarea{background:var(--panel);border:1px solid var(--line);
+    color:var(--paper);border-radius:8px;padding:9px 10px;font:13px/1.5 var(--body);width:100%}
+  .ne-form textarea#neBody{font-family:var(--mono);font-size:12.5px;min-height:320px;resize:vertical}
+  .ne-form input:focus,.ne-form select:focus,.ne-form textarea:focus{outline:none;border-color:var(--accent)}
+  .ne-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ne-inl{grid-template-columns:1fr auto;align-items:center}
+  .ne-up{cursor:pointer}
+  .ne-chk{flex-direction:row!important;align-items:center;gap:8px!important;align-self:end;padding-bottom:9px}
+  .ne-tools{display:flex;gap:4px;flex-wrap:wrap}
+  .ne-tools button,.ne-tools .ne-up{background:var(--panel2);border:1px solid var(--line);color:var(--paper);border-radius:6px;
+    padding:5px 9px;font-size:12px;cursor:pointer;font-weight:600}
+  .ne-tools button:hover,.ne-tools .ne-up:hover{border-color:var(--accent)}
+  .ne-help summary{cursor:pointer;color:var(--muted);font-size:12px}
+  .ne-help pre{font-family:var(--mono);font-size:11.5px;line-height:1.6;color:#C9CFD8;background:var(--panel);
+    border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:6px;overflow:auto;white-space:pre}
+  .ne-prev{overflow:auto;padding:22px 24px 60px}
+
+  @media (max-width:920px){
+    .nw-wrap{padding:16px 14px 90px}
+    .nw-title{font-size:22px}
+    .nw-hero{display:flex}
+    .nw-hero .nw-cover{aspect-ratio:16/9;min-height:0}
+    .nw-hero .nw-cbody{padding:14px 16px 16px}
+    .nw-hero h3{font-size:21px}
+    .nw-grid{grid-template-columns:minmax(0,1fr)}
+    .nw-art h1{font-size:26px}
+    .nw-body{font-size:14.5px}
+    .nw-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .nw-tip{display:none}
+    .ne-tabs{display:flex;gap:4px;order:5;width:100%}
+    .ne-tabs button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--paper);border-radius:7px;padding:7px;font-weight:700}
+    .ne-tabs button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+    .ne-main{grid-template-columns:minmax(0,1fr)}
+    #nwEditor:not([data-view="prev"]) .ne-prev{display:none}
+    #nwEditor[data-view="prev"] .ne-form{display:none}
+    .ne-form{border-right:none}
+    .ne-row{grid-template-columns:minmax(0,1fr)}
+  }
+
   /* ================= MOBILE: navigasi bawah ================= */
   @media (max-width:920px){
     .filters{top:0}
@@ -739,6 +897,10 @@
     nav.tabs .tl{display:none}
     nav.tabs .ts{display:inline}
     nav.tabs button{padding:9px 2px 8px;font-size:10.5px}
+    /* v6.62 — tab ke-8 (Berita): bar bawah bisa digeser ke samping, tidak terpotong */
+    nav.tabs{overflow-x:auto;scrollbar-width:none;justify-content:flex-start}
+    nav.tabs::-webkit-scrollbar{display:none}
+    nav.tabs button{flex:1 0 auto;min-width:60px;padding:9px 6px 8px}
     .deck{bottom:56px!important}
     body.page-build .cards{padding-bottom:64px}
     .meta-wrap{padding-bottom:80px}
@@ -1166,6 +1328,7 @@
 </header>
 
 <nav class="tabs" id="navTabs">
+  <button data-page="berita" aria-current="false">📰 <span class="tl">Berita</span><span class="ts">Berita</span></button>
   <button data-page="cards" aria-current="true">🃏 <span class="tl" data-i18n="navCards">Kartu</span><span class="ts" data-i18n="navCardsS">Kartu</span> <span class="cnt" id="navCard">208</span></button>
   <button data-page="build" aria-current="false">🛠 <span class="tl" data-i18n="navBuild">Deck Builder</span><span class="ts" data-i18n="navBuildS">Builder</span> <span class="cnt" id="navDeck">0</span></button>
   <button data-page="meta" aria-current="false">🏆 <span class="tl" data-i18n="navMeta">Community Deck</span><span class="ts" data-i18n="navMetaS">Community Deck</span> <span class="cnt" id="navMeta">0</span></button>
@@ -1174,6 +1337,9 @@
   <button data-page="panduan" aria-current="false">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span></button>
   <button data-page="dashboard" aria-current="false">🗂 <span class="tl" data-i18n="navDashboard">Dashboard Saya</span><span class="ts" data-i18n="navDashboardS">Dashboard</span></button>
 </nav>
+
+<!-- v6.62 — halaman Berita (isi digambar news-ui.js: renderBerita) -->
+<section id="beritaPage"><div class="nw-wrap" id="beritaWrap"></div></section>
 
 <section id="panduanPage"><div class="pd-wrap" id="panduanWrap"></div></section>
 
@@ -1518,16 +1684,19 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.61"></script>
-<script src="data.js?v=6.61"></script>
+<script src="cards.js?v=6.62"></script>
+<script src="data.js?v=6.62"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.61"></script>
-<script src="decks.js?v=6.61"></script>
+<script src="auth.js?v=6.62"></script>
+<script src="decks.js?v=6.62"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.61"></script>
-<script src="collection.js?v=6.61"></script>
+<script src="social.js?v=6.62"></script>
+<script src="collection.js?v=6.62"></script>
+<!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
+<script src="news.js?v=6.62"></script>
+<script src="news-ui.js?v=6.62"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -1553,7 +1722,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.61</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.62</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -4891,9 +5060,14 @@ function renderPanduan(){
 }
 
 /* ==================== NAVIGASI HALAMAN ==================== */
-const PAGES = ['cards','build','meta','tourney','lgs','panduan','dukung','dashboard'];
+const PAGES = ['berita','cards','build','meta','tourney','lgs','panduan','dukung','dashboard'];
+const TITLE_AWAL = document.title;
 function setPage(p, dariHash){
+  /* v6.62 — 'berita/<slug>' = satu artikel (lihat news-ui.js) */
+  let sub = null;
+  if(typeof p === 'string' && p.startsWith('berita/')){ sub = p.slice(7); p = 'berita'; }
   if(!PAGES.includes(p)) p = 'cards';
+  if(p !== 'berita') document.title = TITLE_AWAL;
   /* v6.46 — semua tab (termasuk LGS/Tournaments Deck/Community Deck) SELALU
      tampil untuk semua pengunjung sekarang (lihat applyText) — tidak ada lagi
      pengecualian berdasarkan bahasa. Panduan (rulebook) tetap Bahasa Indonesia
@@ -4902,6 +5076,8 @@ function setPage(p, dariHash){
   document.body.className = 'page-' + p;
   [...$('#navTabs').children].forEach(b=>
     b.setAttribute('aria-current', String(b.dataset.page === p)));
+  { const ab = $('#navTabs [aria-current="true"]'); if(ab && ab.scrollIntoView) ab.scrollIntoView({block:'nearest', inline:'nearest'}); }
+  if(p === 'berita' && typeof renderBerita === 'function') renderBerita(sub);
   if(p === 'meta') renderMeta();
   if(p === 'tourney') renderTourney();
   if(p === 'lgs') renderLgs();
@@ -4909,7 +5085,7 @@ function setPage(p, dariHash){
   if(p === 'dukung') renderDukungPage();
   if(p === 'dashboard') renderDashboardPage();
   if(p === 'cards' || p === 'build') renderCards();
-  if(!dariHash) history.replaceState(null,'','#'+p);
+  if(!dariHash) history.replaceState(null,'','#'+p+(sub?'/'+sub:''));
   window.scrollTo({top:0});
   if(store){ store.page = p; persist(); }
 }
@@ -6042,6 +6218,8 @@ if(hashAwal.startsWith('#d=')){
   handleSharedLink();
 } else if(hashAwal.startsWith('#c=')){
   handleCardLink();
+} else if(hashAwal.startsWith('#berita/') && window.beritaSlugFromHash && window.beritaSlugFromHash(hashAwal)){
+  setPage('berita/' + window.beritaSlugFromHash(hashAwal), true);
 } else {
   const p = hashAwal.replace('#','');
   setPage(PAGES.includes(p) ? p : (store.page || 'cards'), true);
@@ -6052,6 +6230,10 @@ window.addEventListener('hashchange', ()=>{
   const h = location.hash;
   if(h.startsWith('#d=')){ setPage('build', true); handleSharedLink(); return; }
   if(h.startsWith('#c=')){ handleCardLink(); return; }
+  if(h === '#berita' || h.startsWith('#berita/')){
+    const slug = window.beritaSlugFromHash ? window.beritaSlugFromHash(h) : null;
+    setPage(slug ? 'berita/'+slug : 'berita', true); return;
+  }
   const p = h.replace('#','');
   if(PAGES.includes(p) && p !== state.page) setPage(p, true);
 });
@@ -6113,6 +6295,8 @@ window.addEventListener('hashchange', ()=>{
     isAccountAdmin = loggedIn && await window.MHRAuth.isAdmin(session);
     isLoggedIn = loggedIn;
     if(typeof renderProxyBox === 'function') renderProxyBox();
+    /* v6.62 — admin melihat draft + tombol tulis/edit di halaman Berita */
+    if(typeof refreshBerita === 'function') refreshBerita();
   }
 
   if(btnAccount) btnAccount.addEventListener('click', openAuthModal);

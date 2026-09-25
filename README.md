@@ -509,6 +509,58 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v6.62 — Halaman BERITA (Fase 1): daftar & artikel, editor admin, halaman statis + RSS — 25 September 2026 *(`index.html`, `news.js` baru, `news-ui.js` baru, `sw.js`, `robots.txt`, `tools/generate_news_pages.js` baru, `.github/workflows/news-pages.yml` baru, `images/news/`)*
+
+Permintaan pemilik: situs tidak hanya jadi tempat bikin deck, tapi juga tempat membaca
+berita terbaru Marvel Hero Rush (terinspirasi halaman berita piltoverarchive.com).
+
+**1. Database (Supabase).** `mhr_decklab_v662_news.sql` (folder internal): fungsi
+`mhr_is_admin()` (security definer, cek `admin_users`), tabel `public.news` (slug, judul,
+ringkasan, isi Markdown, kategori, cover, sumber, penulis, sematkan, draft/terbit,
+`published_at` otomatis saat pertama terbit) dengan RLS — publik cuma membaca yang
+sudah terbit, cuma admin yang bisa menulis/menghapus — plus bucket storage
+`news-images` (publik baca, admin unggah, maks 2 MB, jpg/png/webp).
+`mhr_decklab_v662_news_seed.sql`: 4 artikel awal sebagai DRAFT.
+
+**2. Tab 📰 Berita** (tab pertama; halaman default tetap Kartu). `#berita` = daftar
+(artikel utama besar + grid, filter kategori, link RSS), `#berita/<slug>` = artikel
+(cover, ringkasan, isi, sumber, tombol WhatsApp/Salin link, "Berita lainnya").
+Kategori: Rilis Set, Spoiler, Aturan & Errata, Turnamen, Event LGS, Update Situs.
+Markdown mini ditulis sendiri di `news.js` (escape dulu, aman dari HTML/`javascript:`)
+dengan sintaks khusus: `[[SP01-021]]` = chip kartu (klik buka lightbox, hover
+pratinjau gambar), baris berisi tag kartu saja = galeri kartu,
+`{{img:url|keterangan}}` = galeri gambar bebas (untuk spoiler yang belum ada di database).
+
+**3. Editor admin** (akun di `admin_users`): tombol "＋ Tulis Berita", Edit, Hapus.
+Layar penuh, form kiri + pratinjau langsung kanan (HP: tab Tulis/Pratinjau), toolbar
+format, unggah gambar cover/isi ke storage, slug otomatis dari judul, Simpan draft /
+Terbitkan. Draft cuma terlihat admin.
+
+**4. Halaman statis untuk Google & WhatsApp.** `tools/generate_news_pages.js` (Node)
+mengambil berita terbit dari Supabase lalu menulis `news/<slug>.html` (artikel lengkap +
+og:image + JSON-LD NewsArticle), `news/index.html`, `rss.xml`, `news-sitemap.xml`
+(`sitemap.xml` kartu tidak disentuh; `robots.txt` menyebut keduanya). Renderer-nya
+memakai `news.js` yang sama, jadi tampilannya identik. Dijalankan otomatis oleh
+GitHub Actions `news-pages.yml` tiap 3 jam + tombol "Run workflow" manual; hanya commit
+kalau ada yang berubah. **Setelah workflow ini membuat commit, "Pull origin" dulu di
+GitHub Desktop sebelum push.**
+
+**5. Artikel pertama:** preview SD05/SD06/PB02 (Orange & Purple). 27 gambar kartu dari
+lembar produk Tionghoa dirapikan (tepi putih dipangkas, sudut membulat) dan diberi
+watermark SAMPLE di `images/news/sd05-sd06-pb02/`, plus 2 cover 1200×630.
+
+**6. Lain-lain.** Bar navigasi bawah di HP sekarang bisa digeser ke samping (8 tab tidak
+muat lagi). `sw.js`: `news.js` & `news-ui.js` masuk STATIC_ASSETS; `CACHE_VERSION`
+sengaja TIDAK dinaikkan (sw.js yang berubah sudah memicu instal ulang, dan menaikkan
+versi akan membuang cache gambar kartu semua pengunjung tanpa perlu). Cache-buster
+semua skrip lokal `?v=6.62`.
+
+**Verifikasi:** `node --check` semua JS + blok script inline, SQL di-parse (pglast),
+uji renderer (XSS, tebal/miring, tag kartu), situs lokal via Playwright dengan Supabase
+tiruan: daftar/artikel/editor di desktop 1280 & HP 390, tanpa overflow horizontal,
+tanpa error console, chip kartu membuka lightbox tanpa pindah halaman, generator statis
+dijalankan dengan data contoh.
+
 ### v6.61 — Cache-buster "?v=" untuk skrip lokal — 25 September 2026 *(`index.html`, `sw.js`)*
 
 Ditemukan saat verifikasi live v6.60: kunjungan pertama setelah deploy sudah memakai

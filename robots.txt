@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://mhrdecklab.com/sitemap.xml
+Sitemap: https://mhrdecklab.com/news-sitemap.xml

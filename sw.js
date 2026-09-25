@@ -40,6 +40,8 @@ const STATIC_ASSETS = [
   './decks.js', // v6.35 — servis simpan/muat/hapus deck ke akun (lihat window.MHRDecks)
   './social.js', // v6.37 — servis like+komentar galeri publik (lihat window.MHRSocial)
   './collection.js', // v6.37 — servis koleksi kartu pribadi (lihat window.MHRCollection)
+  './news.js', // v6.62 — servis Berita + renderer Markdown (lihat window.MHRNews/NewsMD)
+  './news-ui.js', // v6.62 — tampilan halaman Berita + editor admin
 ];
 
 self.addEventListener('install', e=>{
