@@ -22,8 +22,8 @@
 (function(){
   const E = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const $q = s => document.querySelector(s);
-  const HARI = ['','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
-  const BULAN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const HARI = ['','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const BULAN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const fmtTgl = d => `${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
   let cdTimer = 0;
   let cache = { news:null, popular:null };
@@ -39,12 +39,12 @@
     const link = r.berita ? `#berita/${E(r.berita)}` : (r.link || '');
     return `<div class="hm-cd">
       <div class="hm-cd-l">
-        <span class="hm-kicker">Rilis berikutnya${r.wilayah?` · ${E(r.wilayah)}`:''}</span>
+        <span class="hm-kicker">Next release${r.wilayah?` · ${E(r.wilayah)}`:''}</span>
         <b>${E(r.nama)}</b>
         <span class="hm-cd-date">${(([y,m,d])=>`${+d} ${BULAN[+m-1]} ${y}`)(r.tanggal.split('-'))}</span>
       </div>
       <div class="hm-cd-t" data-t="${r.t}">${cdUnits(r.t)}</div>
-      ${link?`<a class="hm-cd-go" href="${E(link)}">Lihat detail →</a>`:''}
+      ${link?`<a class="hm-cd-go" href="${E(link)}">See details →</a>`:''}
     </div>`;
   }
   function cdUnits(t){
@@ -53,7 +53,7 @@
     const h = Math.floor(s/3600);  s -= h*3600;
     const m = Math.floor(s/60);
     const u = (n,l)=>`<span><b>${String(n).padStart(2,'0')}</b><i>${l}</i></span>`;
-    return u(d,'hari') + u(h,'jam') + u(m,'menit');
+    return u(d,'days') + u(h,'hrs') + u(m,'min');
   }
   function tickCountdown(){
     const el = $q('.hm-cd-t'); if(!el){ clearInterval(cdTimer); cdTimer = 0; return; }
@@ -70,12 +70,12 @@
     rows.sort((a,b)=>a.w.localeCompare(b.w));
     const body = rows.length
       ? `<ul class="hm-lgs">${rows.slice(0,5).map(r=>`<li><a href="${E(r.map)}" target="_blank" rel="noopener"><b>${E(r.nm)}</b></a><span>${E(r.kota)} · ${E(r.w)}</span></li>`).join('')}</ul>
-         ${rows.length>5?`<div class="hm-more-n">+${rows.length-5} toko lain</div>`:''}`
-      : `<p class="hm-muted">Tidak ada jadwal Weekly Rush hari ini.</p>`;
+         ${rows.length>5?`<div class="hm-more-n">+${rows.length-5} more stores</div>`:''}`
+      : `<p class="hm-muted">No Weekly Rush scheduled today.</p>`;
     return `<section class="hm-box">
-      <div class="hm-box-h"><h3>📅 Weekly Rush hari ini</h3><span class="hm-muted">${HARI[hi]}</span></div>
+      <div class="hm-box-h"><h3>📅 Weekly Rush today</h3><span class="hm-muted">${HARI[hi]}</span></div>
       ${body}
-      <a class="hm-link" href="#lgs">Semua jadwal LGS →</a>
+      <a class="hm-link" href="#lgs">All LGS schedules →</a>
     </section>`;
   }
 
@@ -88,13 +88,13 @@
     const strip = (r && typeof previewCards === 'function') ? previewCards(r.deck, 4).map(c=>
       `<img src="${E(artFile(c.no))}" alt="" loading="lazy">`).join('') : '';
     return `<section class="hm-box">
-      <div class="hm-box-h"><h3>🥇 Juara turnamen terbaru</h3></div>
+      <div class="hm-box-h"><h3>🥇 Latest tournament champion</h3></div>
       <div class="hm-champ">
         <div class="hm-strip">${strip}</div>
-        <div><span class="hm-badge">${E(d.pk||'Juara 1')}</span> <b>${E(d.nm)}</b>
+        <div><span class="hm-badge">${E(d.pk||'1st Place')}</span> <b>${E(d.nm)}</b>
         <div class="hm-muted">${E(ev.nama)} · ${E(ev.tanggal||'')}${ev.lokasi?` · ${E(ev.lokasi)}`:''}</div></div>
       </div>
-      <div class="hm-row"><a class="hm-link" href="#d=${encodeURIComponent(d.cd)}">Buka deck →</a><a class="hm-link" href="#tourney">Semua hasil →</a></div>
+      <div class="hm-row"><a class="hm-link" href="#d=${encodeURIComponent(d.cd)}">Open deck →</a><a class="hm-link" href="#tourney">All results →</a></div>
     </section>`;
   }
 
@@ -103,13 +103,13 @@
     const sets = Array.isArray(window.SETS) ? window.SETS.filter(s=>s.status!=='spoiler') : [];
     if(!sets.length || typeof DB === 'undefined') return '';
     return `<section class="hm-sec">
-      <div class="hm-sec-h"><h2>Jelajahi per set</h2><a class="hm-link" href="#set">Semua set & spoiler →</a></div>
+      <div class="hm-sec-h"><h2>Browse by set</h2><a class="hm-link" href="#set">All sets & spoilers →</a></div>
       <div class="hm-series">${sets.map(s=>{
         const cards = DB.filter(d=>d.no.startsWith(s.kode)); if(!cards.length) return '';
         const c = cards.slice().sort((a,b)=>b.l-a.l)[0];
         return `<a class="hm-ser" href="#set/${E(s.kode)}">
           <img src="${E(artFile(c.no))}" alt="" loading="lazy">
-          <span><b>${E(s.kode)}</b><i>${E(s.nama||s.tipe||'')} · ${cards.length} kartu</i></span>
+          <span><b>${E(s.kode)}</b><i>${E(s.nama||s.tipe||'')} · ${cards.length} cards</i></span>
         </a>`; }).join('')}</div>
     </section>`;
   }
@@ -145,12 +145,12 @@
         <div class="hm-strip">${strip}</div>
         <div class="hm-deck-b">
           <b>${E(d.name)}</b>
-          <span class="hm-muted">${d.username?`oleh ${E(d.username)} · `:''}❤ ${d.la}</span>
+          <span class="hm-muted">${d.username?`by ${E(d.username)} · `:''}❤ ${d.la}</span>
           <div class="hm-bar">${bar}</div>
         </div>
       </a>`;
     }).join('');
-    return `<div class="hm-sec-h"><h2>Deck komunitas populer</h2><a class="hm-link" href="#meta">Lihat semua →</a></div>
+    return `<div class="hm-sec-h"><h2>Popular community decks</h2><a class="hm-link" href="#meta">See all →</a></div>
       <div class="hm-decks">${cards}</div>`;
   }
 
@@ -175,9 +175,9 @@
         <div class="hm-lead-b">${catBadge(top.category)}<h2>${E(top.title)}</h2>${top.excerpt?`<p>${E(top.excerpt)}</p>`:''}<span class="hm-muted">${date(top.published_at)}</span></div>
       </a>
       <div class="hm-side">
-        <div class="hm-box-h"><h3>Berita terbaru</h3><a class="hm-link" href="#berita">Semua →</a></div>
+        <div class="hm-box-h"><h3>Latest news</h3><a class="hm-link" href="#berita">All →</a></div>
         ${rest.slice(0,3).map(a=>`<a class="hm-item" href="#berita/${E(a.slug)}">
-          ${catBadge(a.category)}<b>${E(a.title)}</b><span class="hm-muted">${date(a.published_at)}</span></a>`).join('') || '<p class="hm-muted">Belum ada berita lain.</p>'}
+          ${catBadge(a.category)}<b>${E(a.title)}</b><span class="hm-muted">${date(a.published_at)}</span></a>`).join('') || '<p class="hm-muted">No other news yet.</p>'}
       </div>
     </section>`;
   }
@@ -187,16 +187,16 @@
     const nDeck = (typeof DECK_KOMUNITAS !== 'undefined') ? DECK_KOMUNITAS.length : 0;
     const q = (href, ico, t, s) => `<a class="hm-q" href="${href}"><span class="hm-q-i">${ico}</span><span><b>${t}</b><i>${s}</i></span></a>`;
     return `<section class="hm-quick">
-      ${q('#cards','🃏','Cari Kartu', `${typeof DB!=='undefined'?DB.length:''} kartu, filter lengkap`)}
-      ${q('#build','🛠','Buat Deck','Susun, cek kurva, bagikan')}
-      ${q('#meta','🏆','Community Deck', `${nDeck} deck siap pakai`)}
-      ${q('#panduan','📘','Baru main?','Panduan aturan resmi 1.03')}
+      ${q('#cards','🃏','Search Cards', `${typeof DB!=='undefined'?DB.length:''} cards, full filters`)}
+      ${q('#build','🛠','Build a Deck','Build, check the curve, share')}
+      ${q('#meta','🏆','Community Deck', `${nDeck} ready-to-use decks`)}
+      ${q('#panduan','📘','New to the game?','Official rules guide 1.03')}
     </section>`;
   }
 
   async function renderBeranda(){
     const w = $q('#berandaWrap'); if(!w) return;
-    document.title = 'MHR Deck Lab — Berita, Kartu & Deck Builder Marvel Hero Rush';
+    document.title = 'MHR Deck Lab — News, Cards & Marvel Hero Rush Deck Builder';
     const rel = nextRelease();
     w.innerHTML = `
       <div id="hmNews">${cache.news ? newsHTML(cache.news) : '<div class="hm-news hm-skel"><div class="hm-lead"></div><div class="hm-side"></div></div>'}</div>

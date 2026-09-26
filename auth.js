@@ -59,17 +59,17 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkdG9oeWx1dmt1Y3NjdXdueWRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMjgyODAsImV4cCI6MjEwNDgwNDI4MH0.0oO2jpX6iTsxDFxdprXAltUTxq5wGTEJAPwifiimmnM';
 
   if(typeof window.supabase === 'undefined' || !window.supabase.createClient){
-    console.error('[MHR Deck Lab] Supabase SDK tidak termuat — cek urutan <script> di index.html (harus sebelum auth.js).');
+    console.error('[MHR Deck Lab] Supabase SDK failed to load — check the <script> tag order in index.html (must be before auth.js).');
     window.MHRAuth = {
       ready: false,
       getSession: async ()=>null,
       onAuthChange: ()=>{},
       onPasswordRecovery: ()=>{},
-      signUp: async ()=>({error:{message:'Supabase SDK tidak termuat'}}),
-      signIn: async ()=>({error:{message:'Supabase SDK tidak termuat'}}),
+      signUp: async ()=>({error:{message:'Supabase SDK failed to load'}}),
+      signIn: async ()=>({error:{message:'Supabase SDK failed to load'}}),
       signOut: async ()=>{},
-      resetPassword: async ()=>({error:{message:'Supabase SDK tidak termuat'}}),
-      updatePassword: async ()=>({error:{message:'Supabase SDK tidak termuat'}}),
+      resetPassword: async ()=>({error:{message:'Supabase SDK failed to load'}}),
+      updatePassword: async ()=>({error:{message:'Supabase SDK failed to load'}}),
       isAdmin: async ()=>false,
     };
     return;

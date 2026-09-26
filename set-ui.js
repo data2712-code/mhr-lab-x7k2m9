@@ -19,13 +19,19 @@
 (function(){
   const E = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const $q = s => document.querySelector(s);
-  const BULAN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const BULAN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const tgl = s => { if(!s) return ''; const [y,m,d] = s.split('-'); return `${+d} ${BULAN[+m-1]} ${y}`; };
   const SETS = () => Array.isArray(window.SETS) ? window.SETS : [];
   const SPOIL = () => Array.isArray(window.SPOILERS) ? window.SPOILERS : [];
   const hex = c => (typeof HEXC !== 'undefined' && HEXC[c]) || '#8B96A5';
   const colOrder = c => (typeof CORDER !== 'undefined' && c in CORDER) ? CORDER[c] : 9;
-  const WARNA_ID = {Merah:'Merah', Kuning:'Kuning', Biru:'Biru', Hijau:'Hijau', Orange:'Orange', Purple:'Ungu'};
+  /* v6.66 — dulu punya peta warna sendiri (WARNA_ID, Indonesia-only, termasuk
+     "Ungu" untuk Purple). Situs sekarang satu bahasa (Inggris), jadi label
+     warna dipakai bareng dari WARNA_EN yang sudah ada di index.html (const
+     top-level di script inline, terlihat di sini lewat lexical scope
+     bersama antar tag <script> — bukan lewat window — makanya dicek pakai
+     typeof, sama seperti pola hex()/colOrder() di atas). */
+  const WARNA_ID = c => (typeof WARNA_EN !== 'undefined' && WARNA_EN[c]) || c;
 
   /* satu "cetakan" = satu gambar: kartu dasar + tiap varian rarity-nya */
   function setData(s){
@@ -59,7 +65,7 @@
     const cnt = {}; uniq.forEach(p=>cnt[p.c]=(cnt[p.c]||0)+1);
     const tot = uniq.length || 1;
     return Object.entries(cnt).sort((a,b)=>colOrder(a[0])-colOrder(b[0]))
-      .map(([c,n])=>`<i style="width:${n/tot*100}%;background:${hex(c)}" title="${E(WARNA_ID[c]||c)}: ${n}"></i>`).join('');
+      .map(([c,n])=>`<i style="width:${n/tot*100}%;background:${hex(c)}" title="${E(WARNA_ID(c)||c)}: ${n}"></i>`).join('');
   }
 
   /* ---------------- daftar set ---------------- */
@@ -72,8 +78,8 @@
       <div class="st-b">
         <div class="st-top"><span class="st-code">${E(s.kode)}</span>${d.spoiler?'<span class="st-badge">SPOILER</span>':''}</div>
         <b>${E(title(s))}</b>
-        <span class="st-muted">${E(s.tipe||'')} · ${d.spoiler?`${d.uniq.length} kartu diungkap`:`${d.uniq.length} kartu`}</span>
-        ${rel?`<span class="st-muted">${E(rel)}${dd?` · <b class="st-dd">${dd} hari lagi</b>`:''}</span>`:''}
+        <span class="st-muted">${E(s.tipe||'')} · ${d.spoiler?`${d.uniq.length} cards revealed`:`${d.uniq.length} cards`}</span>
+        ${rel?`<span class="st-muted">${E(rel)}${dd?` · <b class="st-dd">${dd} days left</b>`:''}</span>`:''}
         <div class="st-bar">${colorBar(d.uniq)}</div>
       </div>
     </a>`;
@@ -84,10 +90,10 @@
     w.innerHTML = `
       <div class="st-head">
         <h2 class="nw-title">Set & Spoiler</h2>
-        <p class="nw-lead">Semua produk Marvel Hero Rush: isi, statistik warna & rarity, dan daftar kartunya. Kartu dari set yang belum rilis ditandai SPOILER.</p>
+        <p class="nw-lead">Every Marvel Hero Rush product: contents, colour & rarity stats, and its card list. Cards from a set that hasn't released yet are marked SPOILER.</p>
       </div>
-      ${sp.length?`<section><div class="hm-sec-h"><h2>Segera rilis</h2></div><div class="st-grid">${sp.map(tile).join('')}</div></section>`:''}
-      <section><div class="hm-sec-h"><h2>Sudah rilis</h2></div><div class="st-grid">${rl.map(tile).join('')}</div></section>`;
+      ${sp.length?`<section><div class="hm-sec-h"><h2>Coming soon</h2></div><div class="st-grid">${sp.map(tile).join('')}</div></section>`:''}
+      <section><div class="hm-sec-h"><h2>Released</h2></div><div class="st-grid">${rl.map(tile).join('')}</div></section>`;
   }
 
   /* ---------------- satu set ---------------- */
@@ -107,45 +113,45 @@
   function colorLegend(uniq){
     const cnt = {}; uniq.forEach(p=>cnt[p.c]=(cnt[p.c]||0)+1);
     return Object.entries(cnt).sort((a,b)=>colOrder(a[0])-colOrder(b[0]))
-      .map(([c,n])=>`<span class="st-leg"><i style="background:${hex(c)}"></i>${E(WARNA_ID[c]||c)} ${n}</span>`).join('');
+      .map(([c,n])=>`<span class="st-leg"><i style="background:${hex(c)}"></i>${E(WARNA_ID(c)||c)} ${n}</span>`).join('');
   }
   function renderDetail(w, kode){
     const s = SETS().find(x=>x.kode===kode);
-    if(!s){ w.innerHTML = `<a class="nw-back" href="#set">← Semua set</a><div class="nw-empty">Set ${E(kode)} tidak ditemukan.</div>`; return; }
+    if(!s){ w.innerHTML = `<a class="nw-back" href="#set">← All sets</a><div class="nw-empty">Set ${E(kode)} not found.</div>`; return; }
     const d = setData(s);
     const dd = daysTo(s);
     const shown = d.prints.slice().sort((a,b)=>a.no.localeCompare(b.no) || (b.base-a.base));
     const series = !d.spoiler ? [...new Set((DB||[]).filter(c=>c.no.startsWith(kode)).map(c=>c.s))] : [];
-    document.title = `${kode} ${title(s)} — Set Marvel Hero Rush — MHR Deck Lab`;
+    document.title = `${kode} ${title(s)} — Marvel Hero Rush Set — MHR Deck Lab`;
     w.innerHTML = `
-      <a class="nw-back" href="#set">← Semua set</a>
+      <a class="nw-back" href="#set">← All sets</a>
       <div class="st-hero">
         <div class="st-hero-img">${coverImg(d)?`<img src="${E(coverImg(d))}" alt="">`:''}</div>
         <div class="st-hero-b">
-          <div class="st-top"><span class="st-code">${E(s.kode)}</span>${d.spoiler?'<span class="st-badge">SPOILER · BELUM RILIS</span>':''}</div>
+          <div class="st-top"><span class="st-code">${E(s.kode)}</span>${d.spoiler?'<span class="st-badge">SPOILER · NOT YET RELEASED</span>':''}</div>
           <h1>${E(title(s))}</h1>
-          ${!s.nama?'<span class="st-muted">Nama sementara — nama resmi produk belum diumumkan.</span>':''}
+          ${!s.nama?'<span class="st-muted">Working title — the official product name hasn\'t been announced yet.</span>':''}
           <div class="st-facts">
-            <div><i>Tipe</i><b>${E(s.tipe||'-')}</b></div>
-            <div><i>${d.spoiler?'Kartu diungkap':'Jumlah kartu'}</i><b>${d.uniq.length}</b></div>
-            <div><i>Cetakan (termasuk varian)</i><b>${d.prints.length}</b></div>
-            ${s.rilis&&s.rilis.id?`<div><i>Rilis Indonesia</i><b>${tgl(s.rilis.id)}</b></div>`:''}
-            ${s.rilis&&s.rilis.cn?`<div><i>Rilis China</i><b>${tgl(s.rilis.cn)}${dd?` <small>(${dd} hari lagi)</small>`:''}</b></div>`:''}
+            <div><i>Type</i><b>${E(s.tipe||'-')}</b></div>
+            <div><i>${d.spoiler?'Cards revealed':'Card count'}</i><b>${d.uniq.length}</b></div>
+            <div><i>Prints (including variants)</i><b>${d.prints.length}</b></div>
+            ${s.rilis&&s.rilis.id?`<div><i>Indonesia release</i><b>${tgl(s.rilis.id)}</b></div>`:''}
+            ${s.rilis&&s.rilis.cn?`<div><i>China release</i><b>${tgl(s.rilis.cn)}${dd?` <small>(${dd} days left)</small>`:''}</b></div>`:''}
           </div>
           ${s.deskripsi?`<p class="st-desc">${E(s.deskripsi)}</p>`:''}
           <div class="st-actions">
-            ${s.berita?`<a class="nw-btn" href="#berita/${E(s.berita)}">📰 Baca beritanya</a>`:''}
-            ${series.length===1?`<button class="nw-btn" data-stseri="${E(series[0])}">🃏 Buka di halaman Kartu</button>`:''}
+            ${s.berita?`<a class="nw-btn" href="#berita/${E(s.berita)}">📰 Read the news</a>`:''}
+            ${series.length===1?`<button class="nw-btn" data-stseri="${E(series[0])}">🃏 View in Cards page</button>`:''}
           </div>
         </div>
       </div>
       ${d.uniq.length?`<div class="st-stats">
-        <div class="hm-box"><h3 class="st-h3">Warna</h3><div class="st-bar st-bar-lg">${colorBar(d.uniq)}</div><div class="st-legs">${colorLegend(d.uniq)}</div></div>
-        <div class="hm-box"><h3 class="st-h3">Rarity (semua cetakan)</h3><div class="st-chips">${rarityChips(d.prints)}</div></div>
-        <div class="hm-box"><h3 class="st-h3">Sebaran level</h3>${levelBars(d.uniq)}</div>
+        <div class="hm-box"><h3 class="st-h3">Colour</h3><div class="st-bar st-bar-lg">${colorBar(d.uniq)}</div><div class="st-legs">${colorLegend(d.uniq)}</div></div>
+        <div class="hm-box"><h3 class="st-h3">Rarity (all prints)</h3><div class="st-chips">${rarityChips(d.prints)}</div></div>
+        <div class="hm-box"><h3 class="st-h3">Level spread</h3>${levelBars(d.uniq)}</div>
       </div>`:''}
-      ${d.spoiler?'<div class="st-note">Teks kartu spoiler adalah <b>terjemahan fan</b> dari lembar produk Tionghoa dan bisa berbeda dari versi resmi. Kartu ini belum bisa dipakai di Deck Builder.</div>':''}
-      <div class="hm-sec-h" style="margin-top:6px"><h2>Daftar kartu</h2><span class="st-muted">${shown.length} gambar</span></div>
+      ${d.spoiler?'<div class="st-note">Spoiler card text is a <b>fan translation</b> from Chinese product sheets and may differ from the official version. These cards can\'t be used in the Deck Builder yet.</div>':''}
+      <div class="hm-sec-h" style="margin-top:6px"><h2>Card list</h2><span class="st-muted">${shown.length} images</span></div>
       <div class="st-cards">${shown.map(p=>`<button class="st-card" data-${p.spoiler?'spoil':'card'}="${E(p.no)}" data-ra="${E(p.ra)}">
           <img src="${E(p.img)}" alt="${E(p.no+' '+p.nm)}" loading="lazy">
           <span><b>${E(p.no)}</b> ${E(p.ra)}</span>
@@ -164,9 +170,9 @@
       <button class="st-sp-x" data-stclose>✕</button>
       <img src="${E(c.img)}" alt="">
       <div class="st-sp-b">
-        <span class="st-badge">SPOILER · TERJEMAHAN FAN</span>
+        <span class="st-badge">SPOILER · FAN TRANSLATION</span>
         <h3>${E(c.nm)}</h3>
-        <div class="st-muted"><i class="st-dot" style="background:${hex(c.c)}"></i>${E(WARNA_ID[c.c]||c.c)} · ${E(c.no)} ${E(c.ra)} · Lv${c.l} · R-${c.r} · Power ${c.p}</div>
+        <div class="st-muted"><i class="st-dot" style="background:${hex(c.c)}"></i>${E(WARNA_ID(c.c)||c.c)} · ${E(c.no)} ${E(c.ra)} · Lv${c.l} · R-${c.r} · Power ${c.p}</div>
         <div class="st-muted">Trait: ${E(c.f)}</div>
         <div class="st-eff">${eff.map(x=>`<p>${E(x)}</p>`).join('')}</div>
       </div>
@@ -191,7 +197,7 @@
   window.renderSet = function(kode){
     const w = $q('#setWrap'); if(!w) return;
     if(kode) renderDetail(w, kode.toUpperCase());
-    else { document.title = 'Set & Spoiler Marvel Hero Rush — MHR Deck Lab'; renderList(w); }
+    else { document.title = 'Marvel Hero Rush Set & Spoiler — MHR Deck Lab'; renderList(w); }
   };
   window.setKodeFromHash = h => { const m = /^#set\/([A-Za-z0-9-]+)$/.exec(h||''); return m ? m[1].toUpperCase() : null; };
 })();

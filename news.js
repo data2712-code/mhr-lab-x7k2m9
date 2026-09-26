@@ -37,12 +37,12 @@
   }
 
   const CATEGORIES = {
-    rilis:    {label:'Rilis Set',      color:'#F2B01E'},
+    rilis:    {label:'Set Release',    color:'#F2B01E'},
     spoiler:  {label:'Spoiler',        color:'#8B5CF6'},
-    aturan:   {label:'Aturan & Errata',color:'#3B87E8'},
-    turnamen: {label:'Turnamen',       color:'#E4442E'},
-    event:    {label:'Event LGS',      color:'#33A45C'},
-    situs:    {label:'Update Situs',   color:'#8B96A5'},
+    aturan:   {label:'Rules & Errata', color:'#3B87E8'},
+    turnamen: {label:'Tournament',     color:'#E4442E'},
+    event:    {label:'LGS Event',      color:'#33A45C'},
+    situs:    {label:'Site Update',    color:'#8B96A5'},
   };
 
   /* ---------------- renderer Markdown mini ---------------- */
@@ -198,7 +198,7 @@
     /* unggah gambar ke bucket news-images, kembalikan URL publiknya */
     async uploadImage(file){
       const c = client(); if(!c) return {error:{message:'offline'}};
-      if(file.size > 2*1024*1024) return {error:{message:'Ukuran gambar maksimal 2 MB'}};
+      if(file.size > 2*1024*1024) return {error:{message:'Maximum image size is 2 MB'}};
       const ext = (file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'');
       const path = `${new Date().toISOString().slice(0,7)}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}.${ext}`;
       const { error } = await c.storage.from('news-images').upload(path, file, {cacheControl:'31536000', upsert:false});

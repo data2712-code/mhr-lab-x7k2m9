@@ -119,7 +119,7 @@ window.TOURNAMENTS = [
      kode      : awalan nomor kartu (SP01, BP01, SD05, ...). Kartu di cards.js
                  (atau spoilers.js) yang nomornya diawali kode ini masuk ke set ini.
      nama      : nama resmi produk (kosongkan kalau belum ada nama resmi)
-     tipe      : 'Starter Deck' | 'Expansion Pack' | 'Lainnya'
+     tipe      : 'Starter Deck' | 'Expansion Pack' | 'Other'
      status    : 'rilis' (kartu di cards.js) | 'spoiler' (kartu di spoilers.js, belum rilis)
      rilis     : opsional { id:'YYYY-MM-DD', cn:'YYYY-MM-DD' } — tanggal rilis Indonesia / China
      namaSementara : dipakai selama nama resmi belum ada (tampil dengan catatan "nama sementara")
@@ -128,20 +128,20 @@ window.TOURNAMENTS = [
    Nama resmi diambil dari halaman produk marvelherorush.com (September 2026). */
 window.SETS = [
   { kode:'SD05', nama:'', namaSementara:'Starter Deck Orange', tipe:'Starter Deck', status:'spoiler', rilis:{ cn:'2026-10-16' },
-    deskripsi:'Starter deck warna baru Orange. Baru 3 kartu yang diungkap.',
+    deskripsi:'New Orange colour starter deck. Only 3 cards revealed so far.',
     berita:'preview-sd05-sd06-pb02-orange-purple' },
   { kode:'SD06', nama:'', namaSementara:'Starter Deck Purple', tipe:'Starter Deck', status:'spoiler', rilis:{ cn:'2026-10-16' },
-    deskripsi:'Starter deck warna baru Purple. Baru 2 kartu (3 cetakan) yang diungkap.',
+    deskripsi:'New Purple colour starter deck. Only 2 cards (3 prints) revealed so far.',
     berita:'preview-sd05-sd06-pb02-orange-purple' },
-  { kode:'PB02', nama:'', namaSementara:'Promo Pack', tipe:'Lainnya', status:'spoiler', rilis:{ cn:'2026-10-16' },
-    deskripsi:'Promo pack yang disertakan di tiap box SD05/SD06: 21 kartu PR (10 Orange, 10 Purple, 1 Kuning).',
+  { kode:'PB02', nama:'', namaSementara:'Promo Pack', tipe:'Other', status:'spoiler', rilis:{ cn:'2026-10-16' },
+    deskripsi:'Promo pack included in every SD05/SD06 box: 21 PR cards (10 Orange, 10 Purple, 1 Yellow).',
     berita:'preview-sd05-sd06-pb02-orange-purple' },
   { kode:'SP01', nama:'Era of Spiders', tipe:'Expansion Pack', status:'rilis',
     berita:'sp01-teks-resmi-bahasa-indonesia' },
-  { kode:'EB01', nama:'Event Pack', tipe:'Lainnya', status:'rilis' },
-  { kode:'TB01', nama:'Treasure Booster', tipe:'Lainnya', status:'rilis' },
-  { kode:'PB01', nama:'Promotion Pack', tipe:'Lainnya', status:'rilis',
-    deskripsi:'Gabungan PB01-A dan PB01-B.' },
+  { kode:'EB01', nama:'Event Pack', tipe:'Other', status:'rilis' },
+  { kode:'TB01', nama:'Treasure Booster', tipe:'Other', status:'rilis' },
+  { kode:'PB01', nama:'Promotion Pack', tipe:'Other', status:'rilis',
+    deskripsi:'Combines PB01-A and PB01-B.' },
   { kode:'BP01', nama:'The Avengers', tipe:'Expansion Pack', status:'rilis' },
   { kode:'SD01', nama:'REALITY', tipe:'Starter Deck', status:'rilis' },
   { kode:'SD02', nama:'MIND', tipe:'Starter Deck', status:'rilis' },
@@ -176,7 +176,8 @@ window.RILIS = [
                 boleh tambah/kurangi metode kapan saja.
    emailSaran : alamat email tujuan tombol "Kirim saran/komentar" di halaman Dukung.
    teks       : kalimat yang tampil di footer & sebagai subjudul halaman Dukung —
-                silakan diubah kapan saja. id = Bahasa Indonesia, en = English. */
+                silakan diubah kapan saja. en = English (dipakai duluan, situs kini
+                satu bahasa), id = Bahasa Indonesia (cadangan kalau en kosong). */
 window.DUKUNG = {
   nama: 'Data Anggi Pratama',
   metode: [
@@ -195,9 +196,9 @@ window.DUKUNG = {
 
 /* ========== JADWAL TURNAMEN LGS ==========
    h  = hari: 1 Senin, 2 Selasa, 3 Rabu, 4 Kamis, 5 Jumat, 6 Sabtu, 7 Minggu
-   w  = jam main. Tulis jamnya saja seperti biasa ('19.30 - Selesai') —
+   w  = jam main. Tulis jamnya saja seperti biasa ('19:30 - Close') —
         zona waktu TIDAK perlu diketik di sini, aplikasi menyisipkannya sendiri
-        dari field tz, jadi tampil menjadi '19.30 WIB - Selesai'.
+        dari field tz, jadi tampil menjadi '19:30 WIB - Close'.
    kota = kota tempat toko berada. Ini yang dipakai untuk lencana kota dan
         untuk baris filter di atas jadwal (filter otomatis muncul kalau kotanya
         lebih dari satu).
@@ -213,78 +214,78 @@ window.LGS = [
   /* ---------- JAKARTA ---------- */
   { nm:'Ogre Gandaria Neverland', kota:'Jakarta', tz:'WIB',
     map:'https://maps.app.goo.gl/7wAqGnKSyeECnt8C6',
-    jd:[ {h:1, w:'19.00 - Selesai'}, {h:5, w:'19.00 - Selesai'} ] },
+    jd:[ {h:1, w:'19:00 - Close'}, {h:5, w:'19:00 - Close'} ] },
   { nm:'Global Hobiz Store', kota:'Jakarta', tz:'WIB',
     map:'https://maps.app.goo.gl/8BQJ1EZJQXPyrMqh8',
-    jd:[ {h:3, w:'19.30 - Selesai'}, {h:6, w:'13.00 - Selesai'} ] },
+    jd:[ {h:3, w:'19:30 - Close'}, {h:6, w:'13:00 - Close'} ] },
   { nm:'TwoStompas', kota:'Jakarta', tz:'WIB',
     map:'https://maps.app.goo.gl/ss2chXHcrwmUJAnF9',
-    jd:[ {h:4, w:'19.00 - Selesai'}, {h:6, w:'15.00 - Selesai'} ] },
+    jd:[ {h:4, w:'19:00 - Close'}, {h:6, w:'15:00 - Close'} ] },
   { nm:'ONIC TCG Viridian Vault', kota:'Jakarta', tz:'WIB',
     map:'https://maps.app.goo.gl/yLw8FSPnj6wMfDGTA',
-    jd:[ {h:7, w:'15.00 - Selesai'} ] },
+    jd:[ {h:7, w:'15:00 - Close'} ] },
   { nm:'Sultan Pokebab', kota:'Jakarta', tz:'WIB',
     map:'https://maps.app.goo.gl/A9TFGEr9SEhDYsmAA',
-    jd:[ {h:5, w:'19.30 - Selesai'} ] },
+    jd:[ {h:5, w:'19:30 - Close'} ] },
 
    /* ---------- BEKASI ---------- */
   { nm:'Royal Knight Bekasi', kota:'Bekasi', tz:'WIB',
     map:'https://maps.app.goo.gl/py2NMFJ678jVDMxc9',
-    jd:[ {h:1, w:'19.30 - Selesai'} ] },
+    jd:[ {h:1, w:'19:30 - Close'} ] },
   { nm:'Papa Roger', kota:'Bekasi', tz:'WIB',
     map:'https://maps.app.goo.gl/XmiEfHf9U5w5VBuw5',
-    jd:[ {h:2, w:'19.30 - Selesai'} ] },
+    jd:[ {h:2, w:'19:30 - Close'} ] },
   { nm:'Monopolis', kota:'Bekasi', tz:'WIB',
     map:'https://maps.app.goo.gl/UKdWFpaSB1seyZgU7',
-    jd:[ {h:2, w:'19.00 - Selesai'} ] },
+    jd:[ {h:2, w:'19:00 - Close'} ] },
 
   /* ---------- TANGERANG ---------- */
   { nm:'Invaders Board Game Station', kota:'Tangerang', tz:'WIB',
     map:'https://maps.app.goo.gl/pWxvL18uXMr5EGBC7',
-    jd:[ {h:4, w:'19.00 - Selesai'} ] },
+    jd:[ {h:4, w:'19:00 - Close'} ] },
   { nm:'Alex Hobby Shop', kota:'Tangerang', tz:'WIB',
     map:'https://maps.app.goo.gl/PLSf5L1EnhnhsGQt8',
-    jd:[ {h:5, w:'20.00 - Selesai'} ] },
+    jd:[ {h:5, w:'20:00 - Close'} ] },
   { nm:'Gamba Card Store', kota:'Tangerang', tz:'WIB',
     map:'https://share.google/aURhCxax8lMfIc7hW',
-    jd:[ {h:5, w:'19.00 - Selesai'}, {h:7, w:'19.00 - Selesai'} ] },
+    jd:[ {h:5, w:'19:00 - Close'}, {h:7, w:'19:00 - Close'} ] },
 
   /* ---------- TANGERANG SELATAN ---------- */
   { nm:'Catnie Hobbies & Games', kota:'Tangerang Selatan', tz:'WIB',
     map:'https://maps.app.goo.gl/MDPiU3MRvqSWybW27',
-    jd:[ {h:7, w:'14.00 - Selesai'} ] },
+    jd:[ {h:7, w:'14:00 - Close'} ] },
 
   /* ---------- DEPOK ---------- */
   { nm:'Savepoint', kota:'Depok', tz:'WIB',
     map:'https://maps.app.goo.gl/truvxqDEXS1Wgoo58?g_st=ic',
-    jd:[ {h:5, w:'19.30 - Selesai'}, {h:7, w:'16.00 - Selesai'} ] },
+    jd:[ {h:5, w:'19:30 - Close'}, {h:7, w:'16:00 - Close'} ] },
 
    /* ---------- MEDAN ---------- */
   { nm:'Exordium TCG', kota:'Medan', tz:'WIB',
     map:'https://maps.app.goo.gl/cm9fCd7vSbVdSzwo9?g_st=ac',
-    jd:[ {h:2, w:'19.00 - Selesai'}, {h:7, w:'14.00 - Selesai'} ] },
+    jd:[ {h:2, w:'19:00 - Close'}, {h:7, w:'14:00 - Close'} ] },
 
   /* ---------- BATAM ---------- */
   { nm:'Gattchaa One Batam Mall', kota:'Batam', tz:'WIB',
     map:'https://share.google/ufGPacTa06OHPWLfi',
-    jd:[ {h:1, w:'19.30 - Selesai'} ] },
+    jd:[ {h:1, w:'19:30 - Close'} ] },
   { nm:'House of Cards', kota:'Batam', tz:'WIB',
     map:'https://share.google/D1PSrddxbi4iKLpAY',
-    jd:[ {h:3, w:'19.00 - Selesai'} ] },
+    jd:[ {h:3, w:'19:00 - Close'} ] },
   { nm:'Gale Force Games', kota:'Batam', tz:'WIB',
     map:'https://share.google/aB4TPR379JHjwGvXY',
-    jd:[ {h:5, w:'19.00 - Selesai'}, {h:7, w:'16.00 - Selesai'} ] },
+    jd:[ {h:5, w:'19:00 - Close'}, {h:7, w:'16:00 - Close'} ] },
   { nm:'Gattchaa Mega Mall Batam Center', kota:'Batam', tz:'WIB',
     map:'https://share.google/iUeCNf1jNzVs8x2yo',
-    jd:[ {h:6, w:'17.30 - Selesai'} ] },
+    jd:[ {h:6, w:'17:30 - Close'} ] },
 
   /* ---------- BALI ---------- */
   { nm:'Arnando Garage', kota:'Bali', tz:'WITA',
     map:'https://maps.app.goo.gl/WhqtYPMQoqB6ZdSt8',
-    jd:[ {h:7, w:'18.00 - Selesai'} ] },
+    jd:[ {h:7, w:'18:00 - Close'} ] },
 
   /* ---------- TANJUNG PINANG ---------- */
   { nm:'Sekte Figure', kota:'Tanjung Pinang', tz:'WIB',
     map:'https://maps.app.goo.gl/WKbaPmpWmtRqq1XKA',
-    jd:[ {h:5, w:'19.00 - Selesai'} ] },
+    jd:[ {h:5, w:'19:00 - Close'} ] },
 ];
