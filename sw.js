@@ -26,7 +26,7 @@
    supaya versi baru langsung dipakai tanpa perlu semua tab ditutup dulu.
    =================================================================== */
 
-const CACHE_VERSION = 'v7'; // v6.60 — 114 gambar SP01 di images/ diganti cetakan resmi Indonesia (cache-first, jadi wajib naik)
+const CACHE_VERSION = 'v8'; // v6.65 — tournaments.js ditambahkan ke STATIC_ASSETS (jadi wajib naik)
 const CACHE_STATIC = `mhr-shell-${CACHE_VERSION}`;
 const CACHE_IMAGES = `mhr-images-${CACHE_VERSION}`;
 
@@ -45,6 +45,7 @@ const STATIC_ASSETS = [
   './home-ui.js', // v6.63 — halaman Beranda
   './spoilers.js', // v6.64 — kartu yang diungkap tapi belum rilis
   './set-ui.js', // v6.64 — halaman Set & Spoiler
+  './tournaments.js', // v6.65 — servis data Turnamen (Supabase public.tournaments, Fase 4)
 ];
 
 self.addEventListener('install', e=>{

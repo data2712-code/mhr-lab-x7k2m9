@@ -77,41 +77,22 @@ window.DECK_KOMUNITAS = [
     cd:'1.VWx0cm9u.A0012A0313A0343A0023A0072A0142A0203A0221A0232A0263A0352A0372A0403A0423A0432A0492A0522A0542F0043F0053F0132' },
 ];
 
-/* ========== TOURNAMENTS (v6.26) ==========
-   Deck Top-N dari turnamen RESMI Marvel Hero Rush (bukan deck komunitas biasa —
-   ini hasil pertandingan sungguhan, dikelompokkan per event). Beda dengan
-   DECK_KOMUNITAS, bagian ini TIDAK punya jalur submission publik — isinya
-   murni ditempel manual oleh pemilik dari hasil resmi (mis. postingan
-   Instagram panitia), sama seperti LGS di atas.
+/* ========== TOURNAMENTS — DEPRECATED sejak v6.65 ==========
+   v6.26–v6.64: hasil Top-N turnamen resmi ditempel manual di sini
+   (window.TOURNAMENTS), tanpa jalur submission publik.
 
-   Tambah turnamen baru dengan menyisipkan satu objek event baru di dalam
-   daftar window.TOURNAMENTS:
-     {
-       nama: 'Nama Turnamen',
-       tanggal: '30 Agustus 2026',
-       lokasi: 'Kota / tempat venue',
-       penyelenggara: 'Nama panitia/toko/komunitas penyelenggara',
-       sumber: 'https://...',   // link postingan resmi hasil turnamen (opsional)
-       top: [
-         { pk:'Juara 1', nm:'Merah - Hijau', cr:'', ds:'', cd:'1.<kode>' },
-         { pk:'Juara 2', nm:'Kuning - Biru', cr:'', ds:'', cd:'1.<kode>' },
-         ...
-       ]
-     }
+   v6.65 (Fase 4): dipindah ke tabel Supabase public.tournaments, dikelola
+   lewat form admin langsung di halaman Tournaments Deck (login akun admin →
+   tombol "+ Tambah turnamen" di situ) — tidak perlu lagi edit data.js atau
+   push GitHub tiap ada hasil turnamen baru. Lihat tournaments.js
+   (window.MHRTournaments) dan mhr_decklab_v665_tournaments.sql di folder
+   internal (migrasi ini juga men-seed ulang turnamen 'Multiverse Battle' di
+   bawah ke Supabase, jadi datanya tidak hilang).
 
-   Tiap entri deck di dalam `top` memakai format `cd` PERSIS SAMA dengan
-   Community Deck di atas (kode dari tombol "Salin link deck" / mode admin) —
-   jadi cara menambah deck baru pun sama: susun deck di Deck Builder, salin
-   kodenya, tempel ke `cd`. `pk` = label peringkat (bebas teks: "Juara 1",
-   "Semifinalis", "Runner-up", dst — tampil sebagai lencana kecil di kartu
-   deck). `cr` = nama pemain/pembuat KALAU diketahui dari sumber resmi —
-   kosongkan (`''`) kalau tidak ada datanya, JANGAN ditebak/dikarang nama.
-   `nm` sengaja ditulis format warna yang sama dengan Community Deck
-   ('Merah - Hijau' dst, urutan CORDER) supaya namaDeckLokal() ikut
-   menerjemahkan otomatis kalau suatu saat halaman ini dibuka mode admin.
+   window.TOURNAMENTS TIDAK dibaca lagi oleh index.html — blok di bawah
+   cuma arsip/referensi, sengaja tidak dihapus supaya riwayat kode deck-nya
+   tetap ada kalau suatu saat dibutuhkan.
 
-   Hapus turnamen: hapus satu objek event-nya. Hapus satu deck saja: hapus
-   satu entri di dalam `top`-nya. Ubah urutan: pindahkan objeknya. */
 window.TOURNAMENTS = [
   {
     nama: 'Multiverse Battle',
@@ -131,6 +112,7 @@ window.TOURNAMENTS = [
     ]
   },
 ];
+*/
 
 /* ========== DAFTAR SET / PRODUK (v6.64) ==========
    Dipakai halaman Set (#set dan #set/<kode>). Urutan di sini = urutan tampil.

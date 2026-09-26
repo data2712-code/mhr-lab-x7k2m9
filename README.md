@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.61** · 25 September 2026
+**Versi saat ini: v6.65** · 26 September 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -508,6 +508,37 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.65 — Input hasil Turnamen + statistik meta (Fase 4) — 26 September 2026 *(`index.html`, `tournaments.js` baru, `data.js`, `sw.js`, Supabase SQL)*
+
+Fase 4: hasil turnamen resmi tidak lagi diedit manual di `data.js` — sekarang
+lewat form admin di halaman Tournaments Deck sendiri, dan halaman itu juga
+menampilkan statistik meta gabungan dari semua turnamen.
+
+- **Data pindah ke Supabase**: tabel baru `public.tournaments` (`tournaments.js`
+  BARU, servisnya — pola sama dengan `news.js`). RLS: publik cuma baca (tidak ada
+  status draft — hasil turnamen ditambahkan admin setelah datanya lengkap dari
+  sumber resmi, jadi langsung tayang), admin (`mhr_is_admin()`, sudah ada sejak
+  v6.62) yang boleh tulis/ubah/hapus — gerbang **akun admin beneran**
+  (`isAccountAdmin`, sama seperti editor Berita), BUKAN `?admin=1` lama.
+  `window.TOURNAMENTS` di `data.js` **DEPRECATED** — datanya (turnamen
+  "Multiverse Battle") di-seed ulang ke Supabase lewat migrasi SQL supaya tidak
+  hilang, arsip lamanya ditinggal sebagai komentar di `data.js`.
+- **Form admin tambah/edit/hapus turnamen** langsung di halaman Tournaments
+  Deck: nama, tanggal, lokasi, penyelenggara, link sumber, dan daftar deck Top-N
+  (peringkat, nama warna, pemain opsional, catatan opsional, kode deck — format
+  sama persis dengan `encodeDeck()`/`decodeDeck()` Community Deck, jadi bisa
+  langsung dimuat/dilihat lewat jalur yang sama).
+- **Statistik meta gabungan** (bagian baru di atas daftar turnamen, dihitung
+  otomatis dari deck Top-N semua turnamen resmi — **bukan** digabung dengan
+  Deck Komunitas, supaya representasinya kompetitif): persentase pemakaian
+  warna, 10 kartu paling sering dipakai lintas turnamen, dan tren bulanan
+  (jumlah deck + sebaran warna per bulan).
+
+**Verifikasi:** `node --check` pada seluruh skrip inline; Playwright dengan
+Supabase REST di-mock (daftar turnamen kosong, satu turnamen, dua turnamen beda
+bulan) di 1280 & 390 px, termasuk tampilan form admin (`isAccountAdmin` di-mock
+`true`) — tanpa overflow dan tanpa error console.
 
 ### v6.64 — Halaman SET & SPOILER (Fase 3) — 26 September 2026 *(`index.html`, `set-ui.js` baru, `spoilers.js` baru, `data.js`, `home-ui.js`, `sw.js`)*
 

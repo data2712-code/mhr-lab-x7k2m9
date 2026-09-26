@@ -568,6 +568,65 @@
     .tny-usage-right{flex-basis:100%;margin-left:58px}
   }
 
+  /* v6.65 (Fase 4): statistik meta gabungan (semua turnamen) + form admin.
+     Reuse pola visual .tny-analysis/.tny-usage-* di atas supaya konsisten,
+     ditambah widget khusus warna (.tny-color-*) dan tren bulanan (.tny-trend-*). */
+  .tny-stats{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px 20px;margin-bottom:28px}
+  .tny-stats h3{font-family:var(--disp);font-size:16px;letter-spacing:.05em;text-transform:uppercase}
+  .tny-stats .sub{font-size:11.5px;color:var(--muted);margin:4px 0 16px}
+  .tny-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+  .tny-stats-block h4{font-family:var(--disp);font-size:12.5px;letter-spacing:.05em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .tny-stats-empty{font-size:11.5px;color:var(--muted);padding:6px 0}
+  .tny-color-row{display:flex;align-items:center;gap:8px;padding:5px 0}
+  .tny-color-dot{width:10px;height:10px;border-radius:50%;flex:none}
+  .tny-color-nm{flex:none;width:60px;font-size:11.5px;color:var(--paper)}
+  .tny-color-bar-wrap{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+  .tny-color-bar{height:100%}
+  .tny-color-pct{flex:none;width:34px;text-align:right;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  .tny-trend-row{display:flex;align-items:center;gap:8px;padding:5px 0}
+  .tny-trend-month{flex:none;width:62px;font-size:11px;color:var(--paper)}
+  .tny-trend-bar{flex:1;display:flex;height:10px;border-radius:3px;overflow:hidden;background:var(--line)}
+  .tny-trend-bar span{display:block;height:100%}
+  .tny-trend-n{flex:none;font-family:var(--mono);font-size:10.5px;color:var(--muted);white-space:nowrap}
+
+  /* form admin tambah/edit turnamen — gerbang isAccountAdmin, sama seperti
+     editor Berita (bukan ?admin=1). */
+  .tny-admin-top{margin-bottom:22px}
+  .tny-admin-addbtn{background:var(--accent);color:#1A1206;border:none;border-radius:9px;
+    padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer}
+  .tny-admin-addbtn:hover{opacity:.9}
+  .tny-form{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px 20px;margin-bottom:26px;display:flex;flex-direction:column;gap:12px}
+  .tny-form h4{font-family:var(--disp);font-size:15px;letter-spacing:.03em}
+  .tny-form label{display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--muted)}
+  .tny-form input, .tny-form textarea{background:var(--panel2);border:1px solid var(--line);
+    color:var(--paper);border-radius:8px;padding:9px 10px;font-size:13px;font-family:inherit;width:100%}
+  .tny-form textarea{min-height:52px;resize:vertical;font-family:var(--mono);font-size:11.5px}
+  .tny-form input:focus, .tny-form textarea:focus{outline:none;border-color:var(--accent)}
+  .tny-row4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .tny-deckrow{position:relative;background:var(--panel2);border:1px solid var(--line);
+    border-radius:10px;padding:12px 34px 12px 12px;display:flex;flex-direction:column;gap:8px}
+  .tny-deckrow-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+  .tny-deckrow-del{position:absolute;top:8px;right:8px;background:none;border:none;
+    color:var(--muted);font-size:14px;cursor:pointer;line-height:1;padding:2px 4px}
+  .tny-deckrow-del:hover{color:var(--accent)}
+  .tny-adddeckbtn{align-self:flex-start;background:var(--panel2);border:1px solid var(--line);
+    color:var(--paper);border-radius:8px;padding:8px 14px;font-size:12.5px;cursor:pointer}
+  .tny-adddeckbtn:hover{border-color:var(--accent)}
+  .tny-form-act{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .tny-form-act button.main{background:var(--accent);color:#1A1206;border:none;border-radius:8px;
+    padding:9px 18px;font-weight:700;font-size:13px;cursor:pointer}
+  .tny-form-act button:not(.main){background:none;border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;padding:9px 14px;font-size:12.5px;cursor:pointer}
+  .tny-form-status{font-size:11.5px;color:var(--muted)}
+  .tny-form-status.bad{color:#E4442E}
+  .tny-event-adm{display:flex;gap:8px;margin-left:auto}
+  .tny-event-adm button{background:none;border:1px solid var(--line);color:var(--muted);
+    border-radius:7px;padding:4px 10px;font-size:11.5px;cursor:pointer}
+  .tny-event-adm button:hover{border-color:var(--accent);color:var(--paper)}
+
   /* ================= HALAMAN TURNAMEN LGS ================= */
   body:not(.page-lgs) #lgsPage{display:none}
   body.page-lgs .filters, body.page-lgs .cards, body.page-lgs .deck{display:none}
@@ -1602,6 +1661,8 @@
       <p data-i18n="tourneyIntro">Deck-deck dari babak Top di turnamen resmi Marvel Hero Rush. Muat salah satunya ke
         Deck Builder untuk dilihat isinya — deck yang sedang Anda susun tidak tertimpa.</p>
     </div>
+    <div id="tnyAdminBox"></div>
+    <div id="tnyStats"></div>
     <div id="tourneyList"></div>
   </div>
 </section>
@@ -1871,24 +1932,26 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.64"></script>
-<script src="data.js?v=6.64"></script>
+<script src="cards.js?v=6.65"></script>
+<script src="data.js?v=6.65"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.64"></script>
-<script src="decks.js?v=6.64"></script>
+<script src="auth.js?v=6.65"></script>
+<script src="decks.js?v=6.65"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.64"></script>
-<script src="collection.js?v=6.64"></script>
+<script src="social.js?v=6.65"></script>
+<script src="collection.js?v=6.65"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.64"></script>
-<script src="news-ui.js?v=6.64"></script>
+<script src="news.js?v=6.65"></script>
+<script src="news-ui.js?v=6.65"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.64"></script>
+<script src="home-ui.js?v=6.65"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.64"></script>
-<script src="set-ui.js?v=6.64"></script>
+<script src="spoilers.js?v=6.65"></script>
+<script src="set-ui.js?v=6.65"></script>
+<!-- v6.65 — halaman Tournaments Deck (Fase 4): servis data Supabase public.tournaments -->
+<script src="tournaments.js?v=6.65"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -1914,7 +1977,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.64</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.65</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2908,6 +2971,14 @@ const T = {
   tourneyUsageSub: 'Dihitung otomatis dari deck-deck Top di atas — persentase menunjukkan berapa deck yang memakai kartu ini.',
   tourneyUsageDeck: 'deck',
   tourneyUsageCopy: 'salinan',
+  /* v6.65 (Fase 4): statistik meta gabungan — semua turnamen resmi sekaligus */
+  tnyStatsHead: '📈 Statistik Meta',
+  tnyStatsSub: 'Dari {n} turnamen resmi ({d} deck Top) — dihitung otomatis, bukan angka manual.',
+  tnyStatsColorHead: 'Pemakaian Warna',
+  tnyStatsCardHead: 'Kartu Paling Sering Dipakai',
+  tnyStatsTrendHead: 'Tren Bulanan',
+  tnyStatsCardNone: 'Belum cukup data deck untuk dihitung.',
+  tnyStatsTrendNone: 'Butuh turnamen di lebih dari satu bulan untuk melihat tren.',
   close: '✕ Tutup',
   /* --- simulasi draw --- */
   simHead: 'Simulasi Draw Awal',
@@ -5770,34 +5841,56 @@ $('#metaGrid').addEventListener('click', e=>{
   }
 });
 
-/* ==================== v6.26: HALAMAN TOURNAMENTS ====================
-   Deck Top-N dari turnamen resmi Marvel Hero Rush. Datanya window.TOURNAMENTS
-   di data.js (dikelola pemilik sendiri lewat editor GitHub, sama seperti
-   DECK_KOMUNITAS/LGS — bukan hasil submission publik, jadi tidak ada panel
-   admin/generator kode di halaman ini). Tiap deck di dalam event.top memakai
-   field `cd` dengan format PERSIS SAMA dengan encodeDeck()/decodeDeck() yang
-   sudah dipakai Community Deck, supaya bisa langsung dimuat ke Deck Builder
-   atau dilihat visual lewat jalur (openDeckView) yang sama — tidak ada kode
-   baru untuk decode/render kartu. Struktur satu entri di event.top:
+/* ==================== v6.26/v6.65: HALAMAN TOURNAMENTS ====================
+   Deck Top-N dari turnamen resmi Marvel Hero Rush. v6.65 (Fase 4): datanya
+   sekarang dari tabel Supabase public.tournaments (window.MHRTournaments,
+   lihat tournaments.js) lewat form admin di halaman ini sendiri — BUKAN lagi
+   window.TOURNAMENTS di data.js (lihat catatan "DEPRECATED sejak v6.65" di
+   sana; mhr_decklab_v665_tournaments.sql men-seed ulang datanya ke Supabase
+   supaya tidak hilang). Gerbang form admin isAccountAdmin (akun admin
+   beneran via Supabase, SAMA seperti editor Berita) — beda dari `isAdmin`
+   (?admin=1) yang cuma buat generator kode deck lama, TIDAK dipakai di sini.
+
+   Tiap deck di dalam event.top memakai field `cd` dengan format PERSIS SAMA
+   dengan encodeDeck()/decodeDeck() yang sudah dipakai Community Deck,
+   supaya bisa langsung dimuat ke Deck Builder atau dilihat visual lewat
+   jalur (openDeckView) yang sama — tidak ada kode baru untuk decode/render
+   kartu. Struktur satu entri di event.top:
      { pk:'Juara 1', nm:'Merah - Hijau', cr:'', ds:'', cd:'1.....' }
    pk = label peringkat (badge, bebas teks — "Juara 1", "Semifinalis", dst),
    cr = nama pembuat/pemain kalau diketahui (opsional, kosongkan kalau tidak
    ada data resmi — JANGAN ditebak/dikarang). */
-const TOURNAMENTS = (typeof window !== 'undefined' && Array.isArray(window.TOURNAMENTS))
-  ? window.TOURNAMENTS : [];
+let TOURNAMENTS = [];
+const TNY_ST = { loaded:false, loading:false };
 
-let TOURNEY_FLAT = [];   // diisi ulang tiap renderTourney(); {ev, d} datar untuk handler klik
+async function loadTournaments(force){
+  if(TNY_ST.loading) return;
+  if(TNY_ST.loaded && !force) return;
+  if(!window.MHRTournaments || !window.MHRTournaments.ready) return;
+  TNY_ST.loading = true;
+  const { data, error } = await window.MHRTournaments.list();
+  TNY_ST.loading = false;
+  if(!error){ TOURNAMENTS = data; TNY_ST.loaded = true; }
+}
+
+let TOURNEY_FLAT = [];   // diisi ulang tiap renderTourneyBody(); {ev, d} datar untuk handler klik
+
+function tnyFmtTanggal(iso){
+  if(!iso) return '';
+  try{ return new Date(iso+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}); }
+  catch(e){ return iso; }
+}
 
 /* v6.27: analisis "kartu paling sering dipakai" per event. SENGAJA dihitung
    otomatis di sini dari deck-deck event.top (decodeDeck() yang sama seperti
-   di atas) — BUKAN angka yang ditulis manual di data.js — supaya hasilnya
-   selalu ikut berubah kalau pemilik menambah/mengurangi deck Top suatu
-   turnamen, tanpa perlu hitung ulang manual. deckCount = jumlah deck (dari
-   deck valid di event ini) yang memakai kartu tsb, pct = persentasenya,
-   copies = total salinan kartu itu dijumlah semua deck. Diurutkan: paling
-   banyak deck dulu, lalu paling banyak salinan, lalu abjad. Kalau event cuma
-   punya <2 deck valid, persentase tidak bermakna — kembalikan rows kosong
-   (bagian analisis disembunyikan di renderTourney()). */
+   di atas) — BUKAN angka yang ditulis manual — supaya hasilnya selalu ikut
+   berubah kalau admin menambah/mengurangi deck Top suatu turnamen, tanpa
+   perlu hitung ulang manual. deckCount = jumlah deck (dari deck valid di
+   event ini) yang memakai kartu tsb, pct = persentasenya, copies = total
+   salinan kartu itu dijumlah semua deck. Diurutkan: paling banyak deck
+   dulu, lalu paling banyak salinan, lalu abjad. Kalau event cuma punya <2
+   deck valid, persentase tidak bermakna — kembalikan rows kosong (bagian
+   analisis disembunyikan di renderTourneyBody()). */
 function tourneyCardUsage(ev){
   const tally = {};   // no -> {deckCount, copies}
   let n = 0;
@@ -5824,13 +5917,153 @@ function tourneyCardUsage(ev){
   return {n, rows};
 }
 
-function renderTourney(){
+/* ======= v6.65 (Fase 4): statistik meta GABUNGAN — semua turnamen sekaligus,
+   ditampilkan sebagai satu ringkasan di atas daftar event (beda dengan
+   tourneyCardUsage() di atas yang menganalisis satu event saja). Sama-sama
+   dihitung otomatis dari decodeDeck(), bukan angka manual, jadi selalu
+   sinkron kalau admin menambah/mengedit/menghapus turnamen. Sumber data
+   SENGAJA cuma Top-N turnamen resmi (bukan digabung dengan Deck Komunitas)
+   supaya representasinya kompetitif, bukan campur deck casual. */
+
+/* persentase pemakaian warna — dihitung dari kartu ASLI tiap deck (field .c
+   di DB lewat decodeDeck), bukan dari label teks `nm` yang formatnya bebas. */
+function tourneyColorUsage(){
+  const tally = {};  // warna -> jumlah kartu (dijumlah semua deck valid)
+  let totalDeck = 0, totalKartu = 0;
+  TOURNAMENTS.forEach(ev=>(ev.top||[]).forEach(d=>{
+    const r = decodeDeck(d.cd);
+    if(!r || !Object.keys(r.deck).length) return;
+    totalDeck++;
+    Object.entries(r.deck).forEach(([no,q])=>{
+      const c = DB.find(x=>x.no===no); if(!c) return;
+      tally[c.c] = (tally[c.c]||0) + q;
+      totalKartu += q;
+    });
+  }));
+  const rows = Object.keys(tally).sort((a,b)=>CORDER[a]-CORDER[b])
+    .map(c=>({c, n:tally[c], pct: totalKartu ? Math.round(tally[c]/totalKartu*100) : 0}));
+  return {totalDeck, totalKartu, rows};
+}
+
+/* kartu paling sering dipakai — SAMA seperti tourneyCardUsage() tapi
+   digabung lintas semua turnamen, bukan per event. */
+function tourneyCardUsageAll(){
+  const tally = {};
+  let n = 0;
+  TOURNAMENTS.forEach(ev=>(ev.top||[]).forEach(d=>{
+    const r = decodeDeck(d.cd);
+    if(!r || !Object.keys(r.deck).length) return;
+    n++;
+    Object.entries(r.deck).forEach(([no,q])=>{
+      const t = tally[no] || (tally[no] = {deckCount:0, copies:0});
+      t.deckCount++;
+      t.copies += q;
+    });
+  }));
+  if(n < 2) return {n, rows:[]};
+  const rows = Object.keys(tally).map(no=>{
+    const c = DB.find(x=>x.no===no);
+    if(!c) return null;
+    const tl = tally[no];
+    return {no, c, deckCount:tl.deckCount, pct:Math.round(tl.deckCount/n*100), copies:tl.copies};
+  }).filter(Boolean).sort((a,b)=>
+    b.deckCount - a.deckCount || b.copies - a.copies ||
+    cardName(a.c).localeCompare(cardName(b.c))
+  ).slice(0, 10);
+  return {n, rows};
+}
+
+/* tren bulanan — dikelompokkan dari field `tanggal` tiap turnamen (sekarang
+   tanggal ISO asli dari Supabase, bukan lagi teks bebas seperti sebelum
+   v6.65), jadi otomatis terurut rapi walau turnamen ditambah tidak
+   berurutan. Per bulan: total deck valid + sebaran warnanya (kartu asli,
+   sama seperti tourneyColorUsage), diurutkan kronologis lama→baru. */
+function tourneyMonthlyTrend(){
+  const bulan = {};  // 'YYYY-MM' -> {totalDeck, warna:{c:n}, totalKartu}
+  TOURNAMENTS.forEach(ev=>{
+    const iso = String(ev.tanggal||'').slice(0,7);  // 'YYYY-MM'
+    if(!/^\d{4}-\d{2}$/.test(iso)) return;
+    (ev.top||[]).forEach(d=>{
+      const r = decodeDeck(d.cd);
+      if(!r || !Object.keys(r.deck).length) return;
+      const b = bulan[iso] || (bulan[iso] = {totalDeck:0, warna:{}, totalKartu:0});
+      b.totalDeck++;
+      Object.entries(r.deck).forEach(([no,q])=>{
+        const c = DB.find(x=>x.no===no); if(!c) return;
+        b.warna[c.c] = (b.warna[c.c]||0) + q;
+        b.totalKartu += q;
+      });
+    });
+  });
+  return Object.keys(bulan).sort().map(k=>{
+    const b = bulan[k];
+    const label = new Date(k+'-01T00:00:00').toLocaleDateString('id-ID',{month:'short',year:'numeric'});
+    const warna = Object.keys(b.warna).sort((a,c)=>CORDER[a]-CORDER[c])
+      .map(c=>({c, pct: b.totalKartu ? b.warna[c]/b.totalKartu*100 : 0}));
+    return {key:k, label, totalDeck:b.totalDeck, warna};
+  });
+}
+
+function renderTnyStats(){
+  const box = $('#tnyStats'); if(!box) return;
+  const color = tourneyColorUsage();
+  if(!color.totalDeck){ box.innerHTML = ''; return; }
+  const usage = tourneyCardUsageAll();
+  const trend = tourneyMonthlyTrend();
+  const colorHtml = color.rows.map(r=>`<div class="tny-color-row">
+      <span class="tny-color-dot" style="background:${CMAP[r.c]}"></span>
+      <span class="tny-color-nm">${escHtml(r.c)}</span>
+      <span class="tny-color-bar-wrap"><div class="tny-color-bar" style="width:${r.pct}%;background:${CMAP[r.c]}"></div></span>
+      <span class="tny-color-pct">${r.pct}%</span>
+    </div>`).join('');
+  const cardHtml = usage.rows.length ? usage.rows.map((r,i)=>`<div class="tny-usage-row">
+      <span class="tny-usage-rank">${i+1}</span>
+      <img class="tny-usage-thumb" alt="" data-ext="0" src="images/${r.no}.jpg" loading="lazy"
+        onerror="tnyUsageImgFallback(this,'${r.no}','${CMAP[r.c.c]}')">
+      <span class="tny-usage-nm">${escHtml(cardName(r.c))}</span>
+      <span class="tny-usage-right">
+        <span class="tny-usage-bar-wrap"><div class="tny-usage-bar" style="width:${r.pct}%;background:${CMAP[r.c.c]}"></div></span>
+        <span class="tny-usage-meta">${r.deckCount}/${usage.n} ${t('tourneyUsageDeck')} (${r.pct}%) · ${r.copies} ${t('tourneyUsageCopy')}</span>
+      </span>
+    </div>`).join('') : `<div class="tny-stats-empty">${t('tnyStatsCardNone')}</div>`;
+  const trendHtml = trend.length > 1 ? trend.map(m=>`<div class="tny-trend-row">
+      <span class="tny-trend-month">${escHtml(m.label)}</span>
+      <span class="tny-trend-bar">${m.warna.map(w=>`<span style="width:${w.pct}%;background:${CMAP[w.c]}" title="${w.c}: ${Math.round(w.pct)}%"></span>`).join('')}</span>
+      <span class="tny-trend-n">${m.totalDeck} ${t('tourneyUsageDeck')}</span>
+    </div>`).join('') : `<div class="tny-stats-empty">${t('tnyStatsTrendNone')}</div>`;
+  box.innerHTML = `<div class="tny-stats">
+    <h3>${t('tnyStatsHead')}</h3>
+    <div class="sub">${t('tnyStatsSub').replace('{n}', TOURNAMENTS.length).replace('{d}', color.totalDeck)}</div>
+    <div class="tny-stats-grid">
+      <div class="tny-stats-block"><h4>${t('tnyStatsColorHead')}</h4>${colorHtml}</div>
+      <div class="tny-stats-block"><h4>${t('tnyStatsCardHead')}</h4>${cardHtml}</div>
+      <div class="tny-stats-block"><h4>${t('tnyStatsTrendHead')}</h4>${trendHtml}</div>
+    </div>
+  </div>`;
+}
+
+async function renderTourney(){
+  const w = $('#tourneyList');
+  if(!window.MHRTournaments || !window.MHRTournaments.ready){
+    w.innerHTML = `<div class="empty">Turnamen butuh koneksi internet.</div>`;
+    $('#navTourney').textContent = 0;
+    return;
+  }
+  renderTnyAdminBox();
+  renderTourneyBody();
+  await loadTournaments();
+  if(state.page === 'tourney'){ renderTnyAdminBox(); renderTourneyBody(); }
+}
+
+function renderTourneyBody(){
   TOURNEY_FLAT = [];
   if(!TOURNAMENTS.length){
     $('#tourneyList').innerHTML = `<div class="empty">${t('tourneyNone')}</div>`;
     $('#navTourney').textContent = 0;
+    $('#tnyStats').innerHTML = '';
     return;
   }
+  const admOn = (typeof isAccountAdmin !== 'undefined' && isAccountAdmin);
   $('#tourneyList').innerHTML = TOURNAMENTS.map(ev=>{
     const kartu = (ev.top||[]).map(d=>{
       const r = decodeDeck(d.cd);
@@ -5864,7 +6097,7 @@ function renderTourney(){
         </div>
       </div>`;
     }).join('');
-    const meta = [ev.tanggal, ev.lokasi, ev.penyelenggara].filter(Boolean).join(' · ');
+    const meta = [tnyFmtTanggal(ev.tanggal), ev.lokasi, ev.penyelenggara].filter(Boolean).join(' · ');
     const usage = tourneyCardUsage(ev);
     const usageHtml = usage.rows.length ? `<div class="tny-analysis">
       <h4>${t('tourneyUsageHead')}</h4>
@@ -5880,20 +6113,48 @@ function renderTourney(){
         </span>
       </div>`).join('')}
     </div>` : '';
+    const admBtns = admOn ? `<div class="tny-event-adm">
+        <button data-tny-edit="${escHtml(ev.id)}">✏️ Edit</button>
+        <button data-tny-del="${escHtml(ev.id)}">🗑 Hapus</button>
+      </div>` : '';
     return `<div class="tny-event">
       <div class="tny-event-head">
         <div class="tny-event-nm">${escHtml(ev.nama)}</div>
         ${meta?`<div class="tny-event-meta">${escHtml(meta)}</div>`:''}
         ${ev.sumber?`<div class="tny-event-src">${t('tourneySrc')}: <a href="${escHtml(ev.sumber)}" target="_blank" rel="noopener">Instagram</a></div>`:''}
+        ${admBtns}
       </div>
       <div class="tny-grid">${kartu}</div>
       ${usageHtml}
     </div>`;
   }).join('');
   $('#navTourney').textContent = TOURNEY_FLAT.length;
+  renderTnyStats();
 }
 
 $('#tourneyList').addEventListener('click', e=>{
+  const edit = e.target.closest('[data-tny-edit]');
+  const del = e.target.closest('[data-tny-del]');
+  if(edit){
+    const ev = TOURNAMENTS.find(x=>x.id === edit.dataset.tnyEdit);
+    if(ev){
+      TNY_ADM.editing = ev; TNY_ADM.open = true;
+      renderTnyAdminBox();
+      const box = $('#tnyAdminBox'); if(box && box.scrollIntoView) box.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+    return;
+  }
+  if(del){
+    const ev = TOURNAMENTS.find(x=>x.id === del.dataset.tnyDel);
+    if(ev && confirm(`Hapus turnamen "${ev.nama}" beserta semua deck Top-nya? Tindakan ini tidak bisa dibatalkan.`)){
+      window.MHRTournaments.remove(ev.id).then(async ({error})=>{
+        if(error){ alert('Gagal menghapus: '+error.message); return; }
+        await loadTournaments(true);
+        renderTourneyBody();
+      });
+    }
+    return;
+  }
   const bl = e.target.closest('[data-tny-load]');
   const bv = e.target.closest('[data-tny-view]');
   if(!bl && !bv) return;
@@ -5918,6 +6179,132 @@ $('#tourneyList').addEventListener('click', e=>{
   } else {
     openDeckView({...r.deck}, namaDeckLokal(d.nm) + (d.pk?` — ${d.pk}`:''));
   }
+});
+
+/* ======= v6.65 (Fase 4): form admin tambah/edit turnamen =======
+   Gerbang isAccountAdmin (akun admin beneran via Supabase — SAMA seperti
+   editor Berita), bukan lagi ?admin=1. Begitu disimpan, hasil langsung
+   tayang untuk semua pengunjung (tidak ada status draft di sini — beda
+   dari Berita — karena hasil turnamen cuma ditambahkan admin setelah
+   datanya lengkap dari sumber resmi). */
+const TNY_ADM = { open:false, editing:null };
+
+function tnyDeckRowHTML(d){
+  d = d || {pk:'', nm:'', cr:'', ds:'', cd:''};
+  return `<div class="tny-deckrow">
+    <button type="button" class="tny-deckrow-del" data-tny-delrow title="Hapus baris">✕</button>
+    <div class="tny-deckrow-grid">
+      <input class="tny-d-pk" placeholder="Peringkat (mis. Juara 1)" value="${escHtml(d.pk||'')}">
+      <input class="tny-d-nm" placeholder="Nama warna (mis. Merah - Hijau)" value="${escHtml(d.nm||'')}">
+      <input class="tny-d-cr" placeholder="Nama pemain (opsional)" value="${escHtml(d.cr||'')}">
+    </div>
+    <input class="tny-d-ds" placeholder="Catatan singkat (opsional)" value="${escHtml(d.ds||'')}">
+    <textarea class="tny-d-cd" placeholder="Tempel kode deck (tombol Salin link deck di Deck Builder / Deck Saya)">${escHtml(d.cd||'')}</textarea>
+  </div>`;
+}
+
+function tnyFormHTML(ev){
+  const decks = (ev && ev.top && ev.top.length) ? ev.top : [null];
+  return `<div class="tny-form" id="tnyForm">
+    <h4>${ev ? 'Edit Turnamen' : 'Tambah Turnamen Baru'}</h4>
+    <div class="tny-row4">
+      <label>Nama Turnamen<input id="tnyFNama" value="${escHtml(ev?ev.nama:'')}" placeholder="mis. Multiverse Battle"></label>
+      <label>Tanggal<input id="tnyFTanggal" type="date" value="${escHtml(ev?ev.tanggal:'')}"></label>
+    </div>
+    <div class="tny-row4">
+      <label>Lokasi<input id="tnyFLokasi" value="${escHtml(ev?(ev.lokasi||''):'')}" placeholder="Kota / tempat venue (opsional)"></label>
+      <label>Penyelenggara<input id="tnyFPenyelenggara" value="${escHtml(ev?(ev.penyelenggara||''):'')}" placeholder="Nama panitia/toko/komunitas (opsional)"></label>
+    </div>
+    <label>Link Sumber<input id="tnyFSumber" value="${escHtml(ev?(ev.sumber||''):'')}" placeholder="https://... (opsional, link postingan resmi hasil)"></label>
+    <div id="tnyDeckRows" style="display:flex;flex-direction:column;gap:10px">
+      ${decks.map(tnyDeckRowHTML).join('')}
+    </div>
+    <button type="button" class="tny-adddeckbtn" data-tny-addrow>+ Tambah Deck</button>
+    <div class="tny-form-act">
+      <button type="button" class="main" data-tny-save>${ev?'Simpan Perubahan':'Simpan Turnamen'}</button>
+      <button type="button" data-tny-cancel>Batal</button>
+      <span class="tny-form-status" id="tnyFStatus"></span>
+    </div>
+  </div>`;
+}
+
+function renderTnyAdminBox(){
+  const box = $('#tnyAdminBox'); if(!box) return;
+  if(typeof isAccountAdmin === 'undefined' || !isAccountAdmin){
+    box.innerHTML = ''; TNY_ADM.open = false; TNY_ADM.editing = null;
+    return;
+  }
+  box.innerHTML = TNY_ADM.open
+    ? tnyFormHTML(TNY_ADM.editing)
+    : `<div class="tny-admin-top"><button class="tny-admin-addbtn" data-tny-newform>+ Tambah Turnamen</button></div>`;
+}
+
+function tnySetStatus(msg, bad){
+  const s = $('#tnyFStatus'); if(s){ s.textContent = msg; s.classList.toggle('bad', !!bad); }
+}
+
+function readTnyForm(){
+  const rows = [...$('#tnyDeckRows').children].map(row=>({
+    pk: row.querySelector('.tny-d-pk').value.trim(),
+    nm: row.querySelector('.tny-d-nm').value.trim(),
+    cr: row.querySelector('.tny-d-cr').value.trim(),
+    ds: row.querySelector('.tny-d-ds').value.trim(),
+    cd: row.querySelector('.tny-d-cd').value.trim(),
+  })).filter(d=>d.cd);   // baris kosong (belum ditempel kode) diabaikan
+  return {
+    nama: $('#tnyFNama').value.trim(),
+    tanggal: $('#tnyFTanggal').value,
+    lokasi: $('#tnyFLokasi').value.trim(),
+    penyelenggara: $('#tnyFPenyelenggara').value.trim(),
+    sumber: $('#tnyFSumber').value.trim(),
+    top: rows,
+  };
+}
+
+async function saveTnyForm(){
+  const row = readTnyForm();
+  if(row.nama.length < 3){ tnySetStatus('Nama turnamen minimal 3 huruf', true); return; }
+  if(!row.tanggal){ tnySetStatus('Tanggal wajib diisi', true); return; }
+  if(!row.top.length){ tnySetStatus('Minimal 1 deck dengan kode yang valid', true); return; }
+  for(const d of row.top){
+    const r = decodeDeck(d.cd);
+    if(!r || !Object.keys(r.deck).length){ tnySetStatus(`Kode deck tidak valid pada baris "${d.pk||d.nm||'salah satu'}"`, true); return; }
+  }
+  if(row.sumber && !/^https:\/\//.test(row.sumber)){ tnySetStatus('Link sumber harus diawali https://', true); return; }
+  if(TNY_ADM.editing) row.id = TNY_ADM.editing.id;
+  tnySetStatus('Menyimpan…');
+  const { error } = await window.MHRTournaments.save(row);
+  if(error){
+    tnySetStatus(/duplicate|unique/i.test(error.message) ? 'Turnamen dengan nama & tanggal itu sudah ada' : 'Gagal: '+error.message, true);
+    return;
+  }
+  TNY_ADM.editing = null; TNY_ADM.open = false;
+  await loadTournaments(true);
+  renderTnyAdminBox();
+  renderTourneyBody();
+}
+
+$('#tnyAdminBox').addEventListener('click', e=>{
+  if(e.target.closest('[data-tny-newform]')){
+    TNY_ADM.editing = null; TNY_ADM.open = true; renderTnyAdminBox();
+    return;
+  }
+  if(e.target.closest('[data-tny-cancel]')){
+    TNY_ADM.editing = null; TNY_ADM.open = false; renderTnyAdminBox();
+    return;
+  }
+  if(e.target.closest('[data-tny-addrow]')){
+    $('#tnyDeckRows').insertAdjacentHTML('beforeend', tnyDeckRowHTML(null));
+    return;
+  }
+  const delRow = e.target.closest('[data-tny-delrow]');
+  if(delRow){
+    const rows = $('#tnyDeckRows').children;
+    if(rows.length > 1) delRow.closest('.tny-deckrow').remove();
+    else alert('Turnamen harus punya minimal 1 deck.');
+    return;
+  }
+  if(e.target.closest('[data-tny-save]')){ saveTnyForm(); return; }
 });
 
 /* v6.36 — kotak submission manual publik (v6.18, "Kirim deck kamu ke Community
