@@ -689,7 +689,15 @@
   /* ================= HALAMAN PANDUAN ATURAN ================= */
   .pd-wrap{padding:22px 20px 90px;max-width:860px;margin:0 auto}
   .pd-wrap h2.pd-title{font-family:var(--disp);font-size:28px;letter-spacing:.05em;text-transform:uppercase}
-  .pd-wrap>p.pd-lead{color:var(--muted);font-size:12.5px;line-height:1.65;margin:6px 0 20px;max-width:620px}
+  .pd-wrap p.pd-lead{color:var(--muted);font-size:12.5px;line-height:1.65;margin:6px 0 20px;max-width:620px}
+  /* v6.67 — sub-tab Panduan (Site Guide vs Official Rules), sama pola dengan .auth-tabs */
+  .pd-tabs{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  .pd-tab{background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:9px;padding:9px 14px;font-size:12.5px;font-weight:600;cursor:pointer}
+  .pd-tab[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+  .pd-tab:hover{border-color:var(--accent)}
+  .or-sub{font-size:12.5px;font-weight:700;margin:12px 0 4px;color:#C9CFD8;padding-left:10px;
+    border-left:2px solid var(--line)}
   .pd-toc{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px}
   .pd-toc a{background:var(--panel);border:1px solid var(--line);color:var(--paper);
     text-decoration:none;border-radius:999px;padding:6px 13px;font-size:12px}
@@ -1587,7 +1595,15 @@
 <!-- v6.62 — halaman Berita (isi digambar news-ui.js: renderBerita) -->
 <section id="beritaPage"><div class="nw-wrap" id="beritaWrap"></div></section>
 
-<section id="panduanPage"><div class="pd-wrap" id="panduanWrap"></div></section>
+<section id="panduanPage">
+  <div class="pd-wrap">
+    <div class="pd-tabs" id="pdTabs">
+      <button class="pd-tab" data-pdtab="guide" aria-pressed="true">📘 Site Guide</button>
+      <button class="pd-tab" data-pdtab="official" aria-pressed="false">📜 Official Rules 1.03</button>
+    </div>
+    <div id="panduanWrap"></div>
+  </div>
+</section>
 
 <section id="dukungPage"><div class="dk-wrap" id="dukungWrap"></div></section>
 
@@ -1932,26 +1948,26 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.65"></script>
-<script src="data.js?v=6.65"></script>
+<script src="cards.js?v=6.67"></script>
+<script src="data.js?v=6.67"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.65"></script>
-<script src="decks.js?v=6.65"></script>
+<script src="auth.js?v=6.67"></script>
+<script src="decks.js?v=6.67"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.65"></script>
-<script src="collection.js?v=6.65"></script>
+<script src="social.js?v=6.67"></script>
+<script src="collection.js?v=6.67"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.65"></script>
-<script src="news-ui.js?v=6.65"></script>
+<script src="news.js?v=6.67"></script>
+<script src="news-ui.js?v=6.67"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.65"></script>
+<script src="home-ui.js?v=6.67"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.65"></script>
-<script src="set-ui.js?v=6.65"></script>
+<script src="spoilers.js?v=6.67"></script>
+<script src="set-ui.js?v=6.67"></script>
 <!-- v6.65 — halaman Tournaments Deck (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.65"></script>
+<script src="tournaments.js?v=6.67"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -1977,7 +1993,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.65</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.67</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2182,6 +2198,7 @@ const state = {
      tombol. cardLang tetap ada sendiri — cuma preferensi bahasa kartu, dipilih
      lewat filter bar, disimpan di store.cardLang. */
   cardLang:'id',
+  pdTab:'guide',  // v6.67 — sub-tab halaman Panduan: 'guide' | 'official'
   deck:{}  // key: card no -> qty
 };
 
@@ -3321,7 +3338,7 @@ function namaDeckLokal(nm){ return nm; }
    (dipanggil dari amanJalankan('bahasa', applyText) di bagian init), bukan lagi
    dipanggil ulang tiap toggle — makanya nama diganti applyText(). */
 function applyText(){
-  document.documentElement.lang = 'id';
+  document.documentElement.lang = 'en';
   document.title = t('metaTitle');
   const md = document.querySelector('meta[name="description"]');
   if(md) md.setAttribute('content', t('metaDesc'));
@@ -3984,6 +4001,15 @@ $('#viewTog').addEventListener('click', e=>{
   [...$('#viewTog').children].forEach(x=>x.setAttribute('aria-pressed', x===b));
   renderCards();
   if(store){ store.view = state.view; persist(); }
+});
+
+/* --- sub-tab halaman Panduan: Site Guide vs Official Rules (v6.67) --- */
+$('#pdTabs').addEventListener('click', e=>{
+  const b = e.target.closest('[data-pdtab]'); if(!b) return;
+  if(state.pdTab === b.dataset.pdtab) return;
+  state.pdTab = b.dataset.pdtab;
+  renderPanduan();
+  $('#panduanWrap').scrollIntoView({block:'start'});
 });
 
 /* --- popup gambar kartu --- */
@@ -5324,10 +5350,640 @@ const GUIDE = `
   current community/LGS convention.</p>
 `;
 
+/* v6.67 — Comprehensive Rules 1.03 official rulebook (full text from Jason, English
+   translation with source rule numbers), added as a second sub-tab on the Panduan
+   page ("Site Guide" vs "Official Rules") so players can read the primary source
+   directly instead of only the rewritten summary above. Converted from the .docx
+   Jason shared (Marvel_Hero_Rush_Comprehensive_Rules_V1.03_English_Updated_Terminology),
+   preserving every rule number via <span class="pd-ref">. */
+const OFFICIAL_RULES = `
+<h2 class="pd-title" style="margin-top:0">MARVEL HERO RUSH Trading Card Game</h2>
+<p class="pd-lead"><b>Comprehensive Rules 1.03</b> — official rulebook from Jason (Marvel Hero Rush publisher), English translation, rule numbers preserved from the source document. Updated 12 August 2026.</p>
+<p>Updated: 2026-08-12</p>
+<p>© 2026 MARVEL ©JASON</p>
+<p>English translation of the Chinese Comprehensive Rules 1.03. Rule numbers are preserved from the source document.</p>
+<nav class="pd-toc">
+  <a href="#or-h1-1" style="font-weight:700">0. Preface</a>
+  <a href="#or-h1-2" style="font-weight:700">1. Game Basics</a>
+  <a href="#or-h2-1">101. Deck Construction Rules</a>
+  <a href="#or-h2-2">102. Game Areas</a>
+  <a href="#or-h2-3">103. Ways to Win</a>
+  <a href="#or-h1-3" style="font-weight:700">2. Card Types</a>
+  <a href="#or-h2-4">201. Characters</a>
+  <a href="#or-h2-5">202. Rush Points</a>
+  <a href="#or-h1-4" style="font-weight:700">3. Advanced Game Rules</a>
+  <a href="#or-h2-6">301. Core Rules</a>
+  <a href="#or-h2-7">302. Area Rules</a>
+  <a href="#or-h2-8">303. Starting the Game</a>
+  <a href="#or-h2-9">304. Advanced Effect Rules</a>
+  <a href="#or-h2-10">305. Ability List</a>
+  <a href="#or-h1-5" style="font-weight:700">Revision Log</a>
+  <a href="#or-h2-11">1. 2026.06.16 - Version 1.00</a>
+  <a href="#or-h2-12">2. 2026.06.24 - Version 1.01</a>
+  <a href="#or-h2-13">3. 2026.07.23 - Version 1.02</a>
+  <a href="#or-h2-14">4. 2026.08.12 - Version 1.03</a>
+</nav>
+
+<div class="pd-sec" id="or-h1-1">
+<h3><span class="pd-ref">0.</span> Preface</h3>
+<p><span class="pd-ref">001.</span> MARVEL HERO RUSH Trading Card Game is a trading card game developed based on the MARVEL IP, hereinafter referred to as the [Game].</p>
+<p><span class="pd-ref">002.</span> The Game is set against a multiverse in which energy continues to run out of control. Incursion events cause timelines to become entangled and erode one another, placing countless universes on the brink of destruction. Players take on the role of Time Guardians. To protect their respective universes, they unite with forces from across the multiverse and fight together. Fate has brought everyone together at this moment - a dimensional war is about to begin!</p>
+<p><span class="pd-ref">003.</span> The Comprehensive Rules provide detailed explanations of the rules of MARVEL HERO RUSH, allowing players to find the most complete answers available for the Game.</p>
+</div>
+<div class="pd-sec" id="or-h1-2">
+<h3><span class="pd-ref">1.</span> Game Basics</h3>
+<h4 id="or-h2-1"><span class="pd-ref">101.</span> Deck Construction Rules</h4>
+<h4 class="or-sub"><span class="pd-ref">101.1.</span> Deck Construction</h4>
+<p><span class="pd-ref">101.1.a.</span> Before playing the Game, each player must prepare a Deck.</p>
+<p><span class="pd-ref">101.1.b.</span> A Deck is constructed with exactly 50 Characters. It cannot contain more or fewer than 50 cards.</p>
+<p><span class="pd-ref">101.1.c.</span> The Characters used to construct a Deck may contain no more than 2 colors.</p>
+<p><span class="pd-ref">101.1.d.</span> A Deck may contain no more than 3 cards with the same Character name.</p>
+<h4 class="or-sub"><span class="pd-ref">101.2.</span> Rush Point Deck Construction</h4>
+<p><span class="pd-ref">101.2.a.</span> Before playing the Game, each player must prepare a Rush Point Deck.</p>
+<p><span class="pd-ref">101.2.b.</span> A Rush Point Deck consists of 9 Rush Points.</p>
+<p><span class="pd-ref">101.2.c.</span> There are no special restrictions on which Rush Points may be used to construct a Rush Point Deck.</p>
+<h4 id="or-h2-2"><span class="pd-ref">102.</span> Game Areas</h4>
+<p><span class="pd-ref">102.1.</span> Game Areas are the areas involved in gameplay. Game Areas include the FIELD and Off-field areas.</p>
+<p><span class="pd-ref">102.2.</span> The FIELD contains the BATTLE and BASE.</p>
+<p><span class="pd-ref">102.3.</span> The BATTLE contains the FRONT, WING areas, and BACK.</p>
+<p><span class="pd-ref">102.4.</span> Off-field areas include the Deck, Rush Point Deck, Timeline, RETREAT, VOID, and HAND.</p>
+<p><span class="pd-ref">102.5.</span> Each player has their own BATTLE, BASE, Deck, Rush Point Deck, Timeline, RETREAT, VOID, and HAND.</p>
+<h4 id="or-h2-3"><span class="pd-ref">103.</span> Ways to Win</h4>
+<p><span class="pd-ref">103.1.</span> If a player fulfills any one of the following conditions, that player wins the game, the opposing player loses the game, and the game ends.</p>
+<p><span class="pd-ref">103.1.a.</span> There are 9 Rush Points in that player&#x27;s Timeline.</p>
+<p><span class="pd-ref">103.1.b.</span> The opposing player&#x27;s Deck contains 0 cards.</p>
+<p><span class="pd-ref">103.1.c.</span> A card effect resolves and declares that player the winner of the game.</p>
+</div>
+<div class="pd-sec" id="or-h1-3">
+<h3><span class="pd-ref">2.</span> Card Types</h3>
+<h4 id="or-h2-4"><span class="pd-ref">201.</span> Characters</h4>
+<p><span class="pd-ref">201.1.</span> Characters are one of the types of cards used by players to play the Game and are used for Deck construction.</p>
+<p><span class="pd-ref">201.2.</span> Characters fall within the definitions of [Card] and [Cards].</p>
+<p><span class="pd-ref">201.3.</span> The information on the front of a Character includes COLOR, LEVEL, FEATURES, SEASON, trait, Effect, RANGE, ATTACK POWER, card number, RARITY, color indicator, and copyright mark.</p>
+<p><span class="pd-ref">201.4.</span> Even if a Character changes into another card type, it generally does not lose the front-face information listed above.</p>
+<h4 class="or-sub"><span class="pd-ref">201.5.</span> COLOR</h4>
+<p><span class="pd-ref">201.5.a.</span> A Character&#x27;s color is generally shown in the upper-left corner of its front face using a gem icon. The color of the gem is the Character&#x27;s color.</p>
+<p><span class="pd-ref">201.5.b.</span> There are 6 Character colors in total: red, yellow, blue, green, orange, and purple.</p>
+<p><span class="pd-ref">201.5.c.</span> Character color is related to Deck construction. (See 101.1.c. for details.)</p>
+<p><span class="pd-ref">201.5.d.</span> Character color is generally used as a reference by card effects.</p>
+<h4 class="or-sub"><span class="pd-ref">201.6.</span> LEVEL</h4>
+<p><span class="pd-ref">201.6.a.</span> A Character&#x27;s level is generally shown in the upper-left corner of its front face using the word LEVEL and a number. The number is the Character&#x27;s level, hereinafter referred to as [Lv].</p>
+<p><span class="pd-ref">201.6.b.</span> There are 6 Character levels in total: Lv1, Lv2, Lv3, Lv4, Lv5, and Lv6.</p>
+<p><span class="pd-ref">201.6.c.</span> Character level is related to CALL. (See 301.19. for details.)</p>
+<p><span class="pd-ref">201.6.e.</span> Character level is generally used as a reference by card effects.</p>
+<h4 class="or-sub"><span class="pd-ref">201.7.</span> FEATURES</h4>
+<p><span class="pd-ref">201.7.a.</span> A Character&#x27;s name is generally located around the center of its front face.</p>
+<p><span class="pd-ref">201.7.b.</span> A Character&#x27;s name includes all text in the name, including punctuation, titles, and personal names.</p>
+<p><span class="pd-ref">201.7.c.</span> A Character&#x27;s name is the sole basis for distinguishing different cards. Cards with the same Character name are treated as the same card.</p>
+<p><span class="pd-ref">201.7.d.</span> Cards whose Character names are printed in different languages but represent the same content are also treated as having the same Character name.</p>
+<p><span class="pd-ref">201.7.e.</span> Due to product characteristics, cards with the same Character name may sometimes have different card numbers and rarities.</p>
+<p><span class="pd-ref">201.7.f.</span> Character names are related to Deck construction. (See 101.1.d. for details.)</p>
+<p><span class="pd-ref">201.7.g.</span> Character names are generally used as references by card effects.</p>
+<h4 class="or-sub"><span class="pd-ref">201.8.</span> SEASON</h4>
+<p><span class="pd-ref">201.8.a.</span> A Character&#x27;s environment is generally shown below and to the left of its name using an S and a number. The number is the Character&#x27;s environment.</p>
+<p><span class="pd-ref">201.8.b.</span> Character environments are updated along with products and may periodically increase in numerical order.</p>
+<p><span class="pd-ref">201.8.c.</span> Character environments are related to Game events.</p>
+<h4 class="or-sub"><span class="pd-ref">201.9.</span> Trait</h4>
+<p><span class="pd-ref">201.9.a.</span> A Character&#x27;s trait is generally shown below and to the right of its name in italic text. The italic text is the Character&#x27;s trait.</p>
+<p><span class="pd-ref">201.9.b.</span> Character traits are generally used as references by card effects.</p>
+<h4 class="or-sub"><span class="pd-ref">201.10.</span> Effects</h4>
+<p><span class="pd-ref">201.10.a.</span> A Character&#x27;s effects are generally located directly below its name.</p>
+<p><span class="pd-ref">201.10.b.</span> Character Effects include Effect Type, Effect Text, and Ability.</p>
+<p><span class="pd-ref">201.10.c.</span> Effect Types include Trigger Effect (Trig Effect), Auto Effect (Auto Effect), and Activated Effect (Acti Effect).</p>
+<h4 class="or-sub"><span class="pd-ref">201.10.d.</span> Trigger Effect (Trig Effect)</h4>
+<p><span class="pd-ref">201.10.d.1.</span> Trigger Effects are generally marked with white text on a red background. The Effect Location and Condition that follow are generally marked with white text on a black background and separated by a slash; the Effect Text follows immediately afterward.</p>
+<p><span class="pd-ref">201.10.d.2.</span> A Trigger Effect is an Effect that triggers when its Condition is met while the card is in the corresponding Effect Location. There may sometimes be additional Conditions.</p>
+<p><span class="pd-ref">201.10.d.3.</span> The Effect Text is the content that must be resolved.</p>
+<h4 class="or-sub"><span class="pd-ref">201.10.e.</span> Auto Effect (Auto Effect)</h4>
+<p><span class="pd-ref">201.10.e.1.</span> Auto Effects are generally marked with white text on a green background. The Effect Location and Condition that follow are generally marked with white text on a black background and separated by a slash; the Effect Text follows immediately afterward.</p>
+<p><span class="pd-ref">201.10.e.2.</span> An Auto Effect is an Effect that continuously applies while the card is in the corresponding Effect Location. There may sometimes be additional Conditions.</p>
+<p><span class="pd-ref">201.10.e.3.</span> The Effect Text is the content that must be resolved.</p>
+<h4 class="or-sub"><span class="pd-ref">201.10.f.</span> Activated Effect (Acti Effect)</h4>
+<p><span class="pd-ref">201.10.f.1.</span> Activated Effects are generally marked with white text on a blue background. The Effect Location and Condition that follow are generally marked with white text on a black background and separated by a slash; the Effect Text follows immediately afterward.</p>
+<p><span class="pd-ref">201.10.f.2.</span> An Activated Effect is an Effect that the card&#x27;s controller may activate during their Action Phase while the card is in the corresponding Effect Location. There may sometimes be additional Conditions.</p>
+<p><span class="pd-ref">201.10.f.3.</span> There is another type of Activated Effect in which the word COUNTER appears before Activated. If the card is in the corresponding Effect Location, its controller may activate that Effect during their own Action Phase, during either player&#x27;s Counter Phase, and during the Counter Step of the Battle Phase. There may sometimes be additional Conditions.</p>
+<p><span class="pd-ref">201.10.f.4.</span> The Effect Text is the content that must be resolved.</p>
+<h4 class="or-sub"><span class="pd-ref">201.10.g.</span> Ability</h4>
+<p><span class="pd-ref">201.10.g.1.</span> Ability is generally located at the upper-left of the Effect Text.</p>
+<p><span class="pd-ref">201.10.g.2.</span> An Ability is an Effect for which the Effect Type and Effect Text are omitted. It is generally marked with white text on a black background.</p>
+<h4 class="or-sub"><span class="pd-ref">201.11.</span> RANGE</h4>
+<p><span class="pd-ref">201.11.a.</span> A Character&#x27;s Attack Range is generally shown in the lower-right corner of its front face using R, a dash, and a number. The number is the Character&#x27;s Attack Range, hereinafter referred to as [R].</p>
+<p><span class="pd-ref">201.11.b.</span> A Character&#x27;s Attack Range is generally related to that Character&#x27;s attacks. (See 303.2.a.4.3.1.1. for details.)</p>
+<p><span class="pd-ref">201.11.c.</span> A Character&#x27;s Attack Range is generally used as a reference by card effects.</p>
+<h4 class="or-sub"><span class="pd-ref">201.12.</span> ATTACK POWER</h4>
+<p><span class="pd-ref">201.12.a.</span> A Character&#x27;s Attack Power is generally shown to the right of its Attack Range using a number. That number is the Character&#x27;s Attack Power.</p>
+<p><span class="pd-ref">201.12.b.</span> A Character&#x27;s Attack Power is generally related to that Character&#x27;s battles. (See 303.2.a.4.3.3.1. for details.)</p>
+<p><span class="pd-ref">201.12.c.</span> A Character&#x27;s Attack Power is generally used as a reference by card effects.</p>
+<h4 class="or-sub"><span class="pd-ref">201.13.</span> Card Number</h4>
+<p><span class="pd-ref">201.13.a.</span> A Character&#x27;s card number is generally located in the upper-right corner of its front face.</p>
+<p><span class="pd-ref">201.13.b.</span> A Character&#x27;s card number identifies its source and number. The portion to the left of the dash indicates the Game product in which the card appears, and the portion to the right indicates its number within that product.</p>
+<h4 class="or-sub"><span class="pd-ref">201.14.</span> RARITY</h4>
+<p><span class="pd-ref">201.14.a.</span> A Character&#x27;s rarity is generally shown to the right of the card number using English letters. Those letters indicate the Character&#x27;s rarity.</p>
+<p><span class="pd-ref">201.14.b.</span> Character rarities include R (Rare), SR (Super Rare), GR (Grand Rare), UR (Ultimate Rare), MR (Level 1 Alternate Art), SEC (Level 2 Alternate Art), HR (Level 3 Alternate Art), LR (Legendary Alternate Art), PR (Promotional Rare), ER (Event Rare), and TR (Treasure Rare).</p>
+<h4 class="or-sub"><span class="pd-ref">201.15.</span> Color Indicator</h4>
+<p><span class="pd-ref">201.15.a.</span> A Character&#x27;s color indicator is generally located in the lower-left corner of its front face and is shown as a six-color light indicator. The illuminated color is the Character&#x27;s color, and the illuminated position can also help identify the card&#x27;s color.</p>
+<h4 class="or-sub"><span class="pd-ref">201.16.</span> Copyright Mark</h4>
+<p><span class="pd-ref">201.16.a.</span> A Character&#x27;s copyright mark is generally located at the far right of the color indicator. It includes the copyright mark, MARVEL, and JASON for identification; both are copyright holders of the Game.</p>
+<h4 id="or-h2-5"><span class="pd-ref">202.</span> Rush Points</h4>
+<p><span class="pd-ref">202.1.</span> Rush Points are one of the types of cards used by players to play the Game. They are used to construct a Rush Point Deck and are not included when constructing the main Deck.</p>
+<p><span class="pd-ref">202.2.</span> Rush Points fall within the definitions of [Card] and [Cards].</p>
+<p><span class="pd-ref">202.3.</span> Rush Points are generally related to the ways to win. (See 103.1.a. for details.)</p>
+<p><span class="pd-ref">202.4.</span> The information on the front of a Rush Point includes its card number and rarity.</p>
+<h4 class="or-sub"><span class="pd-ref">202.5.</span> Card Number</h4>
+<p><span class="pd-ref">202.5.a.</span> A Rush Point&#x27;s card number is generally located in the upper-right corner of its front face.</p>
+<p><span class="pd-ref">202.5.b.</span> A Rush Point&#x27;s card number identifies its source and number. The portion to the left of the dash indicates the Game product in which the card appears, and the portion to the right indicates its number within that product.</p>
+<h4 class="or-sub"><span class="pd-ref">202.6.</span> Rarity</h4>
+<p><span class="pd-ref">202.6.a.</span> A Rush Point&#x27;s rarity is generally shown to the right of the card number using English letters. Those letters indicate the Rush Point&#x27;s rarity.</p>
+<p><span class="pd-ref">202.6.b.</span> Rush Point rarities include C (Common), MR (Level 1 Alternate Art), SEC (Level 2 Alternate Art), HR (Level 3 Alternate Art), LR (Legendary Alternate Art), PR (Promotional Rare), ER (Event Rare), and TR (Treasure Rare).</p>
+</div>
+<div class="pd-sec" id="or-h1-4">
+<h3><span class="pd-ref">3.</span> Advanced Game Rules</h3>
+<h4 id="or-h2-6"><span class="pd-ref">301.</span> Core Rules</h4>
+<h4 class="or-sub"><span class="pd-ref">301.1.</span> Priority</h4>
+<p><span class="pd-ref">301.1.a.</span> Effect text [cannot] &gt; effect text [can] &gt; rules text [cannot] &gt; rules text [can].</p>
+<h4 class="or-sub"><span class="pd-ref">301.2.</span> Multiple Cards</h4>
+<p><span class="pd-ref">301.2.a.</span> When an action in the Game simultaneously involves multiple cards, process it as the same action performed multiple times, one card at a time.</p>
+<p><span class="pd-ref">301.2.a.1.</span> If, while carrying out those actions, a restriction makes it impossible to continue performing the action, no further actions are performed.</p>
+<p><span class="pd-ref">301.2.a.2.</span> If cards being flipped include both Characters and Face-Down Cards, first turn the former Characters face-down, then flip the latter Face-Down Cards face-up.</p>
+<p><span class="pd-ref">301.2.b.</span> When an effect in the Game simultaneously involves multiple cards, process it as the same effect performed multiple times, one card at a time.</p>
+<h4 class="or-sub"><span class="pd-ref">301.3.</span> Card Owner</h4>
+<p><span class="pd-ref">301.3.a.</span> The owner of a card is the player who is playing the Game with the Deck constructed using that card. This also includes the Rush Points and card tokens prepared by that player.</p>
+<p><span class="pd-ref">301.3.b.</span> If a card is returned to the HAND, return that card to its owner&#x27;s HAND.</p>
+<p><span class="pd-ref">301.3.c.</span> If a card is returned to the Deck, return that card to its owner&#x27;s Deck.</p>
+<p><span class="pd-ref">301.3.d.</span> If a card is shuffled back into the Deck, shuffle that card into its owner&#x27;s Deck.</p>
+<p><span class="pd-ref">301.3.e.</span> If a card Retreats, place that card into its owner&#x27;s RETREAT.</p>
+<p><span class="pd-ref">301.3.f.</span> If a card is Pruned, place that card into its owner&#x27;s VOID.</p>
+<p><span class="pd-ref">301.3.g.</span> If a Rush Point is returned to the Deck, return that card to its owner&#x27;s Rush Point Deck.</p>
+<p><span class="pd-ref">301.3.h.</span> If a Rush Point is shuffled back into the Deck, shuffle that card into its owner&#x27;s Rush Point Deck.</p>
+<h4 class="or-sub"><span class="pd-ref">301.4.</span> Card Controller</h4>
+<p><span class="pd-ref">301.4.a.</span> The controller of a card is the player to whom the FIELD area containing that card belongs.</p>
+<h4 class="or-sub"><span class="pd-ref">301.5.</span> Card Tokens</h4>
+<p><span class="pd-ref">301.5.a.</span> If your Deck uses card tokens, you must prepare them in advance.</p>
+<p><span class="pd-ref">301.5.b.</span> Card tokens are not included when constructing a player&#x27;s Deck.</p>
+<p><span class="pd-ref">301.5.c.</span> Card tokens are placed in an area where they do not interfere with the Game.</p>
+<p><span class="pd-ref">301.5.d.</span> A player may look at the card tokens they prepared at any time, but may not look at card tokens prepared by the opponent.</p>
+<p><span class="pd-ref">301.5.e.</span> Once a card token leaves the FIELD, return it to its original location.</p>
+<p><span class="pd-ref">301.5.f.</span> Important information about a card token, such as its name and card type, is written on the token.</p>
+<h4 class="or-sub"><span class="pd-ref">301.6.</span> Original</h4>
+<p><span class="pd-ref">301.6.a.</span> [Original] refers to the information printed on the front of a card.</p>
+<h4 class="or-sub"><span class="pd-ref">301.7.</span> This Card</h4>
+<p><span class="pd-ref">301.7.a.</span> [This Card] refers to the card that has the effect and is also the source of that effect.</p>
+<p><span class="pd-ref">301.7.b.</span> If a card effect applies to its own source (that is, [This Card] or the card that has that effect), that card effect does not designate a target.</p>
+<h4 class="or-sub"><span class="pd-ref">301.8.</span> Minimum and Maximum Character Attack Power</h4>
+<p><span class="pd-ref">301.8.a.</span> The minimum Attack Power of a Character is 0. There is no maximum.</p>
+<p><span class="pd-ref">301.8.b.</span> If an effect reduces a Character&#x27;s Attack Power to the minimum value, any amount of reduction beyond that minimum still exists.</p>
+<h4 class="or-sub"><span class="pd-ref">301.9.</span> Injured Characters</h4>
+<p><span class="pd-ref">301.9.a.</span> A Character is injured when its current Attack Power on the FIELD is lower than its original Attack Power but is not 0.</p>
+<h4 class="or-sub"><span class="pd-ref">301.10.</span> Minimum and Maximum Character Lv</h4>
+<p><span class="pd-ref">301.10.a.</span> The minimum Lv of a Character is 0. There is no maximum.</p>
+<p><span class="pd-ref">301.10.b.</span> If an effect reduces a Character&#x27;s Lv to the minimum value, any amount of reduction beyond that minimum still exists.</p>
+<h4 class="or-sub"><span class="pd-ref">301.11.</span> Minimum and Maximum Character R</h4>
+<p><span class="pd-ref">301.11.a.</span> The minimum R of a Character is 0. There is no maximum.</p>
+<p><span class="pd-ref">301.11.b.</span> If an effect reduces a Character&#x27;s R to the minimum value, any amount of reduction beyond that minimum still exists.</p>
+<h4 class="or-sub"><span class="pd-ref">301.12.</span> PLACE Card</h4>
+<p><span class="pd-ref">301.12.a.</span> To PLACE a card means to put that card face-up into the specified area.</p>
+<h4 class="or-sub"><span class="pd-ref">301.13.</span> SET Card</h4>
+<p><span class="pd-ref">301.13.a.</span> To SET a card means to put that card face-down into the specified area.</p>
+<h4 class="or-sub"><span class="pd-ref">301.14.</span> Turn a Card Face-down</h4>
+<p><span class="pd-ref">301.14.a.</span> A BASE card is turned face-down when any of the following occurs. Turn that card so its back is facing up, refresh its state, and end all effects that were already applying to that card.</p>
+<p><span class="pd-ref">301.14.a.1.</span> A Character resolves an effect that says [Turn a Character Face-down].</p>
+<p><span class="pd-ref">301.14.a.2.</span> A Character resolves an effect that says [Flip a Card].</p>
+<h4 class="or-sub"><span class="pd-ref">301.15.</span> Discard a Card</h4>
+<p><span class="pd-ref">301.15.a.</span> A card is discarded and placed into the RETREAT when any of the following occurs.</p>
+<p><span class="pd-ref">301.15.a.1.</span> A card in the HAND is resolved by the rule action [Discard from HAND].</p>
+<p><span class="pd-ref">301.15.a.2.</span> A card in the HAND is resolved by the effect [Discard from HAND].</p>
+<p><span class="pd-ref">301.15.a.3.</span> A card in the Deck is resolved by the effect [Discard a Card].</p>
+<h4 class="or-sub"><span class="pd-ref">301.16.</span> Retreat Card</h4>
+<p><span class="pd-ref">301.16.a.</span> A card on the FIELD is Retreated and placed into RETREAT when any of the following occurs.</p>
+<p><span class="pd-ref">301.16.a.1.</span> A Character&#x27;s Attack Power is reduced to 0 by an effect.</p>
+<p><span class="pd-ref">301.16.a.2.</span> A Character is resolved by the rule action [Retreat a Character].</p>
+<p><span class="pd-ref">301.16.a.3.</span> A Character is resolved by the effect [Retreat a Character].</p>
+<p><span class="pd-ref">301.16.a.4.</span> An Attached Card is resolved by the effect [Retreat a Card].</p>
+<p><span class="pd-ref">301.16.a.5.</span> A Face-Down Card is resolved by the rule action [Retreat a Card].</p>
+<p><span class="pd-ref">301.16.a.6.</span> A Face-Down Card is resolved by the effect [Retreat a Card].</p>
+<p><span class="pd-ref">301.16.b.</span> Once a Character&#x27;s Attack Power becomes 0, the Retreat result is locked in and that Character must Retreat.</p>
+<h4 class="or-sub"><span class="pd-ref">301.17.</span> Prune Card</h4>
+<p><span class="pd-ref">301.17.a.</span> To Prune a Card means to place that card into VOID.</p>
+<h4 class="or-sub"><span class="pd-ref">301.18.</span> Swap Card</h4>
+<p><span class="pd-ref">301.18.a.</span> To Swap a Card means to exchange the positions of 2 cards with each other.</p>
+<p><span class="pd-ref">301.18.b.</span> The cards being swapped exchange their respective current states.</p>
+<p><span class="pd-ref">301.18.c.</span> The cards being swapped exchange their respective current Attached Cards.</p>
+<p><span class="pd-ref">301.18.d.</span> If 2 cards on the FIELD are swapped with each other, both cards are treated as moving.</p>
+<p><span class="pd-ref">301.18.e.</span> If 2 cards in different areas other than the HAND and Deck are swapped with each other, both cards are treated as being placed.</p>
+<p><span class="pd-ref">301.18.f.</span> If 1 card in the HAND is swapped with a card in another area, the former is treated as being placed and the latter is treated as moving.</p>
+<p><span class="pd-ref">301.18.g.</span> If 1 card in the Deck is swapped with a card in another area, the former is treated as being placed and the latter is treated as moving.</p>
+<p><span class="pd-ref">301.18.h.</span> If swapping a card would cause that card to move, but an effect prevents that card from moving, the swap cannot be resolved.</p>
+<h4 class="or-sub"><span class="pd-ref">301.19.</span> CALL</h4>
+<p><span class="pd-ref">301.19.a.</span> CALL a Lv3 or lower Character: PLACE the Character being called from the HAND onto your FIELD.</p>
+<p><span class="pd-ref">301.19.b.</span> CALL a Lv4 or higher Character: Retreat 1 or more Characters on your FIELD whose combined Lv equals the Lv of the Character being called, then PLACE that Character from your HAND onto your FIELD.</p>
+<p><span class="pd-ref">301.19.c.</span> If card Effect Text includes [CALL], that [CALL] follows this rule.</p>
+<p><span class="pd-ref">301.19.d.</span> If rules text includes [CALL], that [CALL] follows this rule.</p>
+<p><span class="pd-ref">301.19.e.</span> CALL is generally related to Action CALL. (See 303.2.a.3.1.2. for details.)</p>
+<p><span class="pd-ref">301.19.f.</span> CALL is generally related to COUNTER CALL. (See 303.2.a.4.3.2.3.1. and 303.2.a.5.2.1. for details.)</p>
+<h4 class="or-sub"><span class="pd-ref">301.20.</span> Weakness</h4>
+<p><span class="pd-ref">301.20.a.</span> An empty BATTLE area belonging to a player is called a [Weakness].</p>
+<h4 class="or-sub"><span class="pd-ref">301.21.</span> Face-Down Cards</h4>
+<p><span class="pd-ref">301.21.a.</span> A Character may be placed face-down in the BASE by an effect or rule, or it may be turned face-down. When this happens, the Character becomes a Face-Down Card.</p>
+<p><span class="pd-ref">301.21.b.</span> Face-Down Cards fall within the definitions of [Card] and [Cards].</p>
+<p><span class="pd-ref">301.21.c.</span> A Face-Down Card loses its effects.</p>
+<p><span class="pd-ref">301.21.d.</span> A Face-Down Card is treated as being in a non-public area.</p>
+<p><span class="pd-ref">301.21.e.</span> Information on the front of a Face-Down Card cannot be used as a reference.</p>
+<p><span class="pd-ref">301.21.f.</span> Each player may only look at their own Face-Down Cards.</p>
+<p><span class="pd-ref">301.21.g.</span> When a player CALLS a Lv4 or higher Character, that player may Retreat 1 or more Face-Down Cards to satisfy all or part of that Character&#x27;s CALL requirement. Each Face-Down Card is treated as 1 Lv1 card for this purpose.</p>
+<p><span class="pd-ref">301.21.h.</span> If a Face-Down Card leaves the FIELD, it goes to the new area while still treated as a Face-Down Card with its effects lost, then changes back to the card type and state appropriate for the new area.</p>
+<h4 class="or-sub"><span class="pd-ref">301.22.</span> Flip a Face-Down Card Face-up</h4>
+<p><span class="pd-ref">301.22.a.</span> To flip a Face-Down Card face-up means that an effect turns the Face-Down Card face-up. It is no longer a Face-Down Card and becomes a Character again.</p>
+<p><span class="pd-ref">301.22.b.</span> A Character that changes back from a Face-Down Card is not subject to the restriction [A Character placed onto the FIELD during the current turn cannot perform BATTLE-BASE MOVE].</p>
+<p><span class="pd-ref">301.22.c.</span> A Face-Down Card in the BASE must be turned face-up when any of the following occurs.</p>
+<p><span class="pd-ref">301.22.c.1.</span> The Face-Down Card resolves an effect that says [Flip a Face-Down Card Face-up].</p>
+<p><span class="pd-ref">301.22.c.2.</span> The Face-Down Card resolves an effect that says [Flip a Card].</p>
+<p><span class="pd-ref">301.22.d.</span> If a Face-Down Card that is about to be flipped face-up would be restricted by the [UNIQUE] Ability, that Face-Down Card cannot be flipped face-up and must instead be revealed.</p>
+<h4 class="or-sub"><span class="pd-ref">301.23.</span> BATTLE MOVE</h4>
+<p><span class="pd-ref">301.23.a.</span> BATTLE MOVE means movement between BATTLE areas belonging to the same player.</p>
+<p><span class="pd-ref">301.23.b.</span> If a card moves between BATTLE areas belonging to the same player due to an Effect, that movement is also treated as BATTLE MOVE.</p>
+<h4 class="or-sub"><span class="pd-ref">301.24.</span> BATTLE-BASE MOVE</h4>
+<p><span class="pd-ref">301.24.a.</span> BATTLE-BASE MOVE means movement between a BATTLE area and the BASE belonging to the same player.</p>
+<p><span class="pd-ref">301.24.b.</span> If a card moves between a BATTLE area and the BASE belonging to the same player due to an Effect, that movement is also treated as BATTLE-BASE MOVE.</p>
+<h4 class="or-sub"><span class="pd-ref">301.25.</span> Attach Character</h4>
+<p><span class="pd-ref">301.25.a.</span> A Character may be placed onto the FIELD or moved by an effect and stacked underneath another Character. The former Character then becomes an Attached Card.</p>
+<p><span class="pd-ref">301.25.b.</span> An Attached Card cannot itself perform another Attach action to the card it is attached to.</p>
+<p><span class="pd-ref">301.25.c.</span> An Attached Card follows the card it is attached to. The card it is attached to does not follow its Attached Card.</p>
+<p><span class="pd-ref">301.25.d.</span> If a single Attached Card follows the card it is attached to back to the HAND, after the attached-to card returns to the HAND, the owner of the Attached Card returns that Attached Card to their HAND.</p>
+<p><span class="pd-ref">301.25.e.</span> If a single Attached Card follows the card it is attached to back to the top of the Deck, after the attached-to card returns to the top of the Deck, the owner of the Attached Card returns that Attached Card to the top of their Deck.</p>
+<p><span class="pd-ref">301.25.f.</span> If a single Attached Card follows the card it is attached to back to the bottom of the Deck, after the attached-to card returns to the bottom of the Deck, the owner of the Attached Card returns that Attached Card to the bottom of their Deck.</p>
+<p><span class="pd-ref">301.25.g.</span> If multiple Attached Cards follow the card they are attached to back to the HAND, after the attached-to card returns to the HAND, the owner of those Attached Cards returns them to their HAND one at a time in the order in which they were attached. For smoother gameplay, these multiple actions are carried out together.</p>
+<p><span class="pd-ref">301.25.h.</span> If multiple Attached Cards follow the card they are attached to back to the top of the Deck, after the attached-to card returns to the top of the Deck, the owner of those Attached Cards returns them to the top of their Deck one at a time in the order in which they were attached.</p>
+<p><span class="pd-ref">301.25.i.</span> If multiple Attached Cards follow the card they are attached to back to the bottom of the Deck, after the attached-to card returns to the bottom of the Deck, the owner of those Attached Cards returns them to the bottom of their Deck one at a time in the order in which they were attached.</p>
+<p><span class="pd-ref">301.25.j.</span> If multiple Attached Cards follow the card they are attached to when it is shuffled back into the Deck, after the attached-to card is shuffled back into the Deck, the owner of those Attached Cards shuffles them back into their Deck one at a time in the order in which they were attached. For smoother gameplay, these multiple actions are carried out together.</p>
+<p><span class="pd-ref">301.25.k.</span> An Attached Card is considered to be in the same area as the card it is attached to, but it does not count toward that area&#x27;s card limit.</p>
+<p><span class="pd-ref">301.25.l.</span> If the card to which an Attached Card is attached is no longer a Character, place its Attached Cards into the RETREAT.</p>
+<p><span class="pd-ref">301.25.m.</span> Attached Cards must be stacked underneath a Character in the order in which they were attached. A later Attached Card is stacked below an earlier Attached Card.</p>
+<p><span class="pd-ref">301.25.n.</span> A player cannot change the order of Attached Cards stacked underneath a Character.</p>
+<h4 class="or-sub"><span class="pd-ref">301.26.</span> detach Attached Card</h4>
+<p><span class="pd-ref">301.26.a.</span> An Attached Card is detached when an effect causes it to stop being stacked underneath a Character and move to a specified area on the FIELD. The Attached Card then becomes a Character again.</p>
+<p><span class="pd-ref">301.26.b.</span> detach is treated as movement.</p>
+<h4 class="or-sub"><span class="pd-ref">301.27.</span> Look At</h4>
+<p><span class="pd-ref">301.27.a.</span> To [Look At] means to confirm the front-face information of the target card without needing to show that information to the opponent.</p>
+<h4 class="or-sub"><span class="pd-ref">301.28.</span> Reveal</h4>
+<p><span class="pd-ref">301.28.a.</span> To [Reveal] means for both players to confirm the front-face information of the target card.</p>
+<p><span class="pd-ref">301.28.b.</span> A card that has been revealed does not leave its current position.</p>
+<h4 class="or-sub"><span class="pd-ref">301.29.</span> Random</h4>
+<p><span class="pd-ref">301.29.a.</span> When the front-face information of a group of cards cannot be determined, the other player designates the required action for those cards.</p>
+<h4 class="or-sub"><span class="pd-ref">301.30.</span> Shuffle</h4>
+<p><span class="pd-ref">301.30.a.</span> Shuffle means to return the target card to the Deck, then shuffle the Deck.</p>
+<h4 class="or-sub"><span class="pd-ref">301.31.</span> GAINED</h4>
+<p><span class="pd-ref">301.31.a.</span> The term [GAINED] means to gain Lv±X, R±X, Attack Power ±X, an Ability, an Effect, a trait, and so on.</p>
+<h4 class="or-sub"><span class="pd-ref">301.32.</span> Lose</h4>
+<p><span class="pd-ref">301.32.a.</span> To [Lose] means to lose Lv±, R±, Attack Power ±, an Ability, an effect, a trait, and so on.</p>
+<p><span class="pd-ref">301.32.a.1.</span> Losing Lv±, R±, or Attack Power ± means that the corresponding ± modification does not apply.</p>
+<p><span class="pd-ref">301.32.b.</span> If [GAINED] and [Lose] apply to the same content of the same object, [Lose] takes precedence over [GAINED].</p>
+<h4 class="or-sub"><span class="pd-ref">301.33.</span> Lose Effects</h4>
+<p><span class="pd-ref">301.33.a.</span> To lose effects means to lose all effect types, effect text, and abilities. Any effects gained afterward are also lost.</p>
+<h4 class="or-sub"><span class="pd-ref">301.34.</span> Up to X</h4>
+<p><span class="pd-ref">301.34.a.</span> [Up to X] indicates an optional range for an effect, from 0 through X.</p>
+<p><span class="pd-ref">301.34.b.</span> If a player chooses 0, the effect is treated as not having resolved.</p>
+<h4 class="or-sub"><span class="pd-ref">301.35.</span> Any Number</h4>
+<p><span class="pd-ref">301.35.a.</span> [Any Number] indicates an optional range for an effect, from 0 through the maximum possible value.</p>
+<p><span class="pd-ref">301.35.b.</span> If a player chooses 0, the effect is treated as not having resolved.</p>
+<h4 class="or-sub"><span class="pd-ref">301.36.</span> Name Contains [A]</h4>
+<p><span class="pd-ref">301.36.a.</span> [Name contains A] means that [A] appears in the card&#x27;s name, and the text of [A] must be continuous.</p>
+<h4 class="or-sub"><span class="pd-ref">301.37.</span> Trait Contains [A]</h4>
+<p><span class="pd-ref">301.37.a.</span> [Trait contains A] means that [A] appears in the card&#x27;s trait, and the text of [A] must be continuous.</p>
+<h4 class="or-sub"><span class="pd-ref">301.38.</span> After Doing So</h4>
+<p><span class="pd-ref">301.38.a.</span> If effect text contains [After doing so], the text after [After doing so] can only be resolved if all text before [After doing so] has been successfully resolved in full.</p>
+<h4 class="or-sub"><span class="pd-ref">301.39.</span> Immunity</h4>
+<p><span class="pd-ref">301.39.a.</span> [Immunity] means the card cannot be targeted by card effects.</p>
+<h4 class="or-sub"><span class="pd-ref">301.40.</span> Lv, R, and Attack Power ±</h4>
+<p><span class="pd-ref">301.40.a.</span> Only effects that grant Lv±X, R±X, or Attack Power ±X can satisfy corresponding ± conditions in effect text.</p>
+<h4 class="or-sub"><span class="pd-ref">301.41.</span> Changes to Lv, R, and Attack Power</h4>
+<p><span class="pd-ref">301.41.a.</span> If a card is already being affected by an increase or decrease to Lv, R, or Attack Power from a Trigger Effect or Activated Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by a Trigger Effect or Activated Effect, the former effect ends completely.</p>
+<p><span class="pd-ref">301.41.b.</span> If a card is already being affected by an increase or decrease to Lv, R, or Attack Power from a Trigger Effect or Activated Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by an Auto Effect, the former effect ends completely.</p>
+<p><span class="pd-ref">301.41.c.</span> If a card is already being affected by a change to Lv, R, or Attack Power from a Trigger Effect or Activated Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by an Auto Effect, the former effect ends completely.</p>
+<p><span class="pd-ref">301.41.d.</span> If a card is already being affected by a change to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by another Auto Effect, the former effect ends completely. If the latter change effect ends for a reason other than a new change effect, the former effect applies again.</p>
+<p><span class="pd-ref">301.41.e.</span> If a card is already being affected by a change to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by a Trigger Effect or Activated Effect, the former effect ends completely. If the latter change effect ends for a reason other than a new change effect, the former effect applies again.</p>
+<p><span class="pd-ref">301.41.f.</span> If a card is already being affected by a change to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power then receives an increase or decrease from an Auto Effect, apply the latter increase or decrease using the result of the former effect as the base value.</p>
+<p><span class="pd-ref">301.41.g.</span> If a card is already being affected by an increase or decrease to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by an Auto Effect, the former effect ends completely. If the latter change effect ends for a reason other than a new change effect, the former effect applies again.</p>
+<p><span class="pd-ref">301.41.h.</span> If a card is already being affected by a change to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power then receives an increase or decrease from a Trigger Effect or Activated Effect, apply the latter increase or decrease using the result of the former effect as the base value.</p>
+<p><span class="pd-ref">301.41.i.</span> If a card is already being affected by a change to Lv, R, or Attack Power from a Trigger Effect or Activated Effect, and that card&#x27;s Lv, R, or Attack Power then receives an increase or decrease from an Auto Effect, apply the latter increase or decrease using the result of the former effect as the base value.</p>
+<p><span class="pd-ref">301.41.j.</span> If a card is already being affected by an increase or decrease to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by a Trigger Effect or Activated Effect, the former effect ends completely. If the latter change effect ends for a reason other than a new change effect, the former effect applies again.</p>
+<p><span class="pd-ref">301.41.k.</span> If a card is already being affected by a change to Lv, R, or Attack Power from a Trigger Effect or Activated Effect, and that card&#x27;s Lv, R, or Attack Power then receives an increase or decrease from a Trigger Effect or Activated Effect, apply the latter increase or decrease using the result of the former effect as the base value.</p>
+<p><span class="pd-ref">301.41.l.</span> Swapping Lv values with each other is treated as a Lv change.</p>
+<p><span class="pd-ref">301.41.m.</span> Swapping R values with each other is treated as an R change.</p>
+<p><span class="pd-ref">301.41.n.</span> Swapping Attack Power values with each other is treated as a Attack Power change.</p>
+<p><span class="pd-ref">301.42.</span> If an effect causes a card to leave the FIELD first and another card to be placed onto the FIELD afterward, and the earlier part of the effect successfully removes the area&#x27;s restriction, then the card placed onto the FIELD by the later part of the effect is not subject to that area&#x27;s restriction.</p>
+<p><span class="pd-ref">301.43.</span> If a rule action causes a card to leave the FIELD first and another card to be placed onto the FIELD afterward, and the earlier part successfully removes the area&#x27;s restriction, then the card placed onto the FIELD by the later part is not subject to that area&#x27;s restriction.</p>
+<p><span class="pd-ref">301.44.</span> If an effect swaps 2 cards with each other, and the completed swap complies with the area&#x27;s restrictions, the 2 swapped cards are not subject to the area&#x27;s restrictions during that swap.</p>
+<h4 class="or-sub"><span class="pd-ref">301.45.</span> Leave the FIELD</h4>
+<p><span class="pd-ref">301.45.a.</span> To leave the FIELD means for a card on the FIELD to leave the FIELD and no longer be on the FIELD, becoming located in an Off-field area instead.</p>
+<p><span class="pd-ref">301.45.b.</span> When a card leaves the FIELD, all of its states are refreshed in the new area and it becomes a new card.</p>
+<p><span class="pd-ref">301.45.c.</span> When a card is in an Off-field area, it returns to its original state.</p>
+<p><span class="pd-ref">301.45.d.</span> If a card whose card type has changed leaves the FIELD, it goes to the new area while retaining its changed card type, then changes back to the card type and state appropriate for the area it entered.</p>
+<h4 class="or-sub"><span class="pd-ref">301.46.</span> All</h4>
+<p><span class="pd-ref">301.46.a.</span> [All] means the selection range of the effect is the maximum possible value.</p>
+<p><span class="pd-ref">301.46.b.</span> If the maximum possible value of [All] is 0, the effect is treated as not having resolved.</p>
+<h4 class="or-sub"><span class="pd-ref">301.47.</span> Your Side</h4>
+<p><span class="pd-ref">301.47.a.</span> If the effect of a card on the FIELD contains [your side], [your side] refers to that card&#x27;s controller.</p>
+<p><span class="pd-ref">301.47.a.1.</span> If the effect of a card on the FIELD contains [when a card on your side is placed onto the FIELD], [your side] must refer to the controller of that [card].</p>
+<p><span class="pd-ref">301.47.b.</span> If the effect of a card in an Off-field area contains [your side], [your side] refers to that card&#x27;s owner.</p>
+<p><span class="pd-ref">301.47.b.1.</span> If the effect of a card in an Off-field area contains [when a card on your side is placed onto the FIELD], [your side] must refer to the controller of that [card].</p>
+<h4 class="or-sub"><span class="pd-ref">301.48.</span> Opponent&#x27;s Side</h4>
+<p><span class="pd-ref">301.48.a.</span> If the effect of a card on the FIELD contains [opponent&#x27;s side], [opponent&#x27;s side] refers to the player opposing that card&#x27;s controller.</p>
+<p><span class="pd-ref">301.48.a.1.</span> If the effect of a card on the FIELD contains [when a card on the opponent&#x27;s side is placed onto the FIELD], [opponent&#x27;s side] must refer to the controller of that [card].</p>
+<p><span class="pd-ref">301.48.b.</span> If the effect of a card in an Off-field area contains [opponent&#x27;s side], [opponent&#x27;s side] refers to the player opposing that card&#x27;s owner.</p>
+<p><span class="pd-ref">301.48.b.1.</span> If the effect of a card in an Off-field area contains [when a card on the opponent&#x27;s side is placed onto the FIELD], [opponent&#x27;s side] must refer to the controller of that [card].</p>
+<h4 class="or-sub"><span class="pd-ref">301.49.</span> Attacking</h4>
+<p><span class="pd-ref">301.49.a.</span> [Attacking] means that an attack is being performed and the Game is in the battle process until that battle ends.</p>
+<h4 class="or-sub"><span class="pd-ref">301.50.</span> Has Attacked</h4>
+<p><span class="pd-ref">301.50.a.</span> [Has Attacked] means that the Character has previously performed an attack.</p>
+<h4 class="or-sub"><span class="pd-ref">301.51.</span> Has Been Attacked</h4>
+<p><span class="pd-ref">301.51.a.</span> [Has Been Attacked] means that the Character has previously been selected as an Attack Target.</p>
+<h4 class="or-sub"><span class="pd-ref">301.52.</span> In Battle</h4>
+<p><span class="pd-ref">301.52.a.</span> [In Battle] means that a battle is occurring and the Game is in the battle process until that battle ends.</p>
+<h4 class="or-sub"><span class="pd-ref">301.53.</span> Has Battled</h4>
+<p><span class="pd-ref">301.53.a.</span> [Has Battled] means that a battle has previously occurred involving that Character.</p>
+<h4 id="or-h2-7"><span class="pd-ref">302.</span> Area Rules</h4>
+<h4 class="or-sub"><span class="pd-ref">302.1.</span> FIELD</h4>
+<p><span class="pd-ref">302.1.a.</span> The FIELD is the collective term for the BATTLE and BASE.</p>
+<p><span class="pd-ref">302.1.b.</span> The FIELD is a public area.</p>
+<h4 class="or-sub"><span class="pd-ref">302.2.</span> BATTLE</h4>
+<p><span class="pd-ref">302.2.a.</span> The BATTLE is the collective term for the FRONT, WING areas, and BACK.</p>
+<p><span class="pd-ref">302.2.b.</span> A Character belonging to the Turn Player can only attack while it is in the BATTLE. The Turn Player may also choose not to attack with it.</p>
+<h4 class="or-sub"><span class="pd-ref">302.3.</span> FRONT</h4>
+<p><span class="pd-ref">302.3.a.</span> The FRONT is an area where a player places Characters. Its limit is 1 card.</p>
+<h4 class="or-sub"><span class="pd-ref">302.4.</span> WING areas</h4>
+<p><span class="pd-ref">302.4.a.</span> The WING areas are 2 areas where a player places Characters. Each WING has a limit of 1 card.</p>
+<h4 class="or-sub"><span class="pd-ref">302.5.</span> BACK</h4>
+<p><span class="pd-ref">302.5.a.</span> The BACK is an area where a player places Characters. Its limit is 1 card.</p>
+<h4 class="or-sub"><span class="pd-ref">302.6.</span> BASE</h4>
+<p><span class="pd-ref">302.6.a.</span> The BASE is an area where a player places Characters and Face-Down Cards. Its limit is 6 cards.</p>
+<h4 class="or-sub"><span class="pd-ref">302.7.</span> Off-field</h4>
+<p><span class="pd-ref">302.7.a.</span> Off-field is the collective term for the RETREAT, VOID, Timeline, Deck, Rush Point Deck, and HAND.</p>
+<h4 class="or-sub"><span class="pd-ref">302.8.</span> RETREAT</h4>
+<p><span class="pd-ref">302.8.a.</span> The RETREAT is an area where a player places cards that have Retreated or been discarded. It has no limit.</p>
+<p><span class="pd-ref">302.8.b.</span> Cards in the RETREAT are face-up and the RETREAT is a public area.</p>
+<p><span class="pd-ref">302.8.c.</span> Cards in the RETREAT may be arranged in any order.</p>
+<p><span class="pd-ref">302.8.d.</span> A player may look at cards in either player&#x27;s RETREAT at any time.</p>
+<h4 class="or-sub"><span class="pd-ref">302.9.</span> VOID</h4>
+<p><span class="pd-ref">302.9.a.</span> The VOID is an area where a player places Pruned cards. It has no limit.</p>
+<p><span class="pd-ref">302.9.b.</span> Cards in the VOID are face-up and the VOID is a public area.</p>
+<p><span class="pd-ref">302.9.c.</span> Cards in the VOID may be arranged in any order.</p>
+<p><span class="pd-ref">302.9.d.</span> A player may look at cards in either player&#x27;s VOID at any time.</p>
+<h4 class="or-sub"><span class="pd-ref">302.10.</span> Timeline</h4>
+<p><span class="pd-ref">302.10.a.</span> The Timeline is an area where a player places Rush Points. It has no limit.</p>
+<h4 class="or-sub"><span class="pd-ref">302.11.</span> Deck</h4>
+<p><span class="pd-ref">302.11.a.</span> The Deck is the area where a player places their Deck face-down.</p>
+<p><span class="pd-ref">302.11.b.</span> Every card in the Deck must remain face-down in a single stack, and the order of cards in the Deck cannot be changed except as instructed by the rules or effects.</p>
+<p><span class="pd-ref">302.11.c.</span> Players cannot look at either their own Deck or the opponent&#x27;s Deck.</p>
+<p><span class="pd-ref">302.11.d.</span> A player may confirm the number of cards in either player&#x27;s Deck at any time.</p>
+<h4 class="or-sub"><span class="pd-ref">302.12.</span> Rush Point Deck</h4>
+<p><span class="pd-ref">302.12.a.</span> The Rush Point Deck is the area where a player places their Rush Point Deck face-down.</p>
+<p><span class="pd-ref">302.12.b.</span> Every card in the Rush Point Deck must remain face-down in a single stack, and the order of cards in the Rush Point Deck cannot be changed except as instructed by the rules or effects.</p>
+<p><span class="pd-ref">302.12.c.</span> Players cannot look at either their own Rush Point Deck or the opponent&#x27;s Rush Point Deck.</p>
+<p><span class="pd-ref">302.12.d.</span> A player may confirm the number of cards in either player&#x27;s Rush Point Deck at any time.</p>
+<h4 class="or-sub"><span class="pd-ref">302.13.</span> HAND</h4>
+<p><span class="pd-ref">302.13.a.</span> The HAND is the area where a player keeps cards that have been added to their HAND but have not yet been used. It has no limit.</p>
+<p><span class="pd-ref">302.13.b.</span> To draw X cards means to add the top X cards of that player&#x27;s Deck to their HAND.</p>
+<p><span class="pd-ref">302.13.c.</span> The HAND is a non-public area.</p>
+<p><span class="pd-ref">302.13.d.</span> A player may arrange the cards in their HAND in any manner.</p>
+<p><span class="pd-ref">302.13.e.</span> Each player may only look at their own HAND.</p>
+<p><span class="pd-ref">302.13.f.</span> A player may confirm the number of cards in either player&#x27;s HAND at any time.</p>
+<h4 id="or-h2-8"><span class="pd-ref">303.</span> Starting the Game</h4>
+<p><span class="pd-ref">303.1.</span> When a game begins, prepare for the Game in the following order.</p>
+<p><span class="pd-ref">303.1.a.</span> Each player thoroughly shuffles their legally constructed 50-card Character Deck, then places it face-down in their Deck area.</p>
+<p><span class="pd-ref">303.1.b.</span> Each player places their Rush Point Deck, consisting of 9 Rush Points, face-down in their Rush Point Deck area.</p>
+<p><span class="pd-ref">303.1.c.</span> The first player and second player must be determined by a method agreed upon by both players.</p>
+<p><span class="pd-ref">303.1.d.</span> Each player draws 6 cards from the top of their Deck as their starting HAND.</p>
+<p><span class="pd-ref">303.1.e.</span> Each player decides whether to adjust their starting HAND, with the first player deciding first, followed by the second player. A player who adjusts their starting HAND places the cards they wish to adjust face-down on the bottom of their Deck, draws the same number of cards from the top of their Deck, then shuffles their Deck.</p>
+<p><span class="pd-ref">303.1.f.</span> The Game begins, and the first player starts their turn.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.</span> Game Flow</h4>
+<p><span class="pd-ref">303.2.a.</span> Starting with the first player, turns proceed in the following order. When one player&#x27;s turn is complete, the other player begins their turn.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.1.</span> Start of Turn</h4>
+<p><span class="pd-ref">303.2.a.1.1.</span> Trigger effects that trigger at the start of the turn.</p>
+<p><span class="pd-ref">303.2.a.1.2.</span> After all Effects have finished resolving, the Start of Turn Phase ends and the next phase begins.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.2.</span> Draw Phase</h4>
+<p><span class="pd-ref">303.2.a.2.1.</span> The Turn Player draws 2 cards.</p>
+<p><span class="pd-ref">303.2.a.2.2.</span> After all effects have finished resolving, the Draw Phase ends and the next phase begins.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.3.</span> Action Phase</h4>
+<p><span class="pd-ref">303.2.a.3.1.</span> During this phase, the Turn Player may perform the following actions in any order.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.3.1.1.</span> Base Deployment</h4>
+<p><span class="pd-ref">303.2.a.3.1.1.1.</span> For this action, the Turn Player places 1 card from their HAND face-down into their BASE. After doing so, they draw 1 card.</p>
+<p><span class="pd-ref">303.2.a.3.1.1.2.</span> The Turn Player may perform this action at most once during this phase each turn.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.3.1.2.</span> Action CALL</h4>
+<p><span class="pd-ref">303.2.a.3.1.2.1.</span> For this action, the Turn Player performs 1 CALL for a Character.</p>
+<p><span class="pd-ref">303.2.a.3.1.2.2.</span> The Turn Player may perform this action at most 3 times during this phase each turn.</p>
+<p><span class="pd-ref">303.2.a.3.1.2.3.</span> During the first player&#x27;s first turn, the first player may perform this action at most once during this phase.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.3.1.3.</span> BATTLE-BASE MOVE</h4>
+<p><span class="pd-ref">303.2.a.3.1.3.1.</span> For this action, 1 Character on the Turn Player&#x27;s FIELD performs 1 BATTLE-BASE MOVE.</p>
+<p><span class="pd-ref">303.2.a.3.1.3.2.</span> Each Character on the Turn Player&#x27;s FIELD has 1 opportunity to perform BATTLE-BASE MOVE each turn.</p>
+<p><span class="pd-ref">303.2.a.3.1.3.3.</span> A Character placed onto the FIELD during the current turn cannot perform BATTLE-BASE MOVE.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.3.1.4.</span> Activated Effects</h4>
+<p><span class="pd-ref">303.2.a.3.1.4.1.</span> For this action, the Turn Player activates an Activated Effect or COUNTER-Activated Effect of one of their cards.</p>
+<p><span class="pd-ref">303.2.a.3.2.</span> The Turn Player may declare the end of the Action Phase, after which the next phase begins.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.4.</span> Battle Phase</h4>
+<p><span class="pd-ref">303.2.a.4.1.</span> The first player skips this phase during their first turn.</p>
+<p><span class="pd-ref">303.2.a.4.2.</span> During this phase, the Turn Player proceeds in the following order.</p>
+<p><span class="pd-ref">303.2.a.4.2.1.</span> The Turn Player may, once, rearrange the BATTLE positions of up to 4 Characters in their BATTLE.</p>
+<p><span class="pd-ref">303.2.a.4.2.1.1.</span> Rearranging is not treated as movement.</p>
+<p><span class="pd-ref">303.2.a.4.2.2.</span> The Turn Player attacks with Characters in the order FRONT, WING areas, then BACK.</p>
+<p><span class="pd-ref">303.2.a.4.3.</span> Each Character follows the battle process below in order.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.4.3.1.</span> Select Target Step</h4>
+<p><span class="pd-ref">303.2.a.4.3.1.1.</span> In this step, a Character attacks by choosing 1 Character in the opponent&#x27;s BATTLE or an Weakness within its R (Attack Range) as the target, and a battle occurs.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.1.1.</span> The distance between the Turn Player&#x27;s BACK and their WING areas is 1.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.1.2.</span> The distance between the Turn Player&#x27;s WING areas and their FRONT is 1.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.1.3.</span> The distance between the Turn Player&#x27;s FRONT and the Opposing Player&#x27;s FRONT is 1.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.1.4.</span> The distance between the Opposing Player&#x27;s FRONT and their WING areas is 1.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.1.5.</span> The distance between the Opposing Player&#x27;s WING areas and their BACK is 1.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.2.</span> After all effects triggered during this step have finished resolving, this step ends and the next step begins.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.3.</span> If, due to effect resolution during this step, the attacking Character has no Attack Target within its R that complies with the attack rules, finish resolving all unresolved effects. If the Character still has no valid Attack Target within its R afterward, the battle ends. If a valid Attack Target within its R exists again, return to selecting an Attack Target.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.4.</span> If the attacking Character leaves the FIELD due to effect resolution during this step, finish resolving all unresolved effects, then end the battle.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.5.</span> If the attacking Character becomes unable to attack due to effect resolution during this step, finish resolving all unresolved effects, then end the battle.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.6.</span> If the original Attack Target becomes invalid under the attack rules during this step, finish resolving all unresolved effects, then return to selecting an Attack Target.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.4.3.2.</span> Counter Step</h4>
+<p><span class="pd-ref">303.2.a.4.3.2.1.</span> During this step, players continuously alternate choosing 1 action at a time, beginning with the opponent choosing 1 action, followed by the Turn Player choosing 1 action.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.2.</span> If the original Attack Target becomes invalid under the attack rules during this step, finish resolving all unresolved effects, then return to the Select Target Step and select an Attack Target again.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.3.</span> The following 3 actions may be chosen during this step.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.3.1.</span> A player performs 1 COUNTER CALL for a Character with the [COUNTER] Ability.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.3.1.1.</span> During this phase, each player may perform this action at most once per turn.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.3.2.</span> A player activates a COUNTER-Activated Effect of one of their cards.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.3.3.</span> A player takes no action.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.4.</span> If both players consecutively choose to take no action, this step ends and the next step begins.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.5.</span> If, due to effect resolution during this step, the attacking Character has no Attack Target within its R that complies with the attack rules, finish resolving all unresolved effects. If the Character still has no valid Attack Target within its R afterward, the battle ends. If a valid Attack Target within its R exists again, return to the Select Target Step and select an Attack Target again.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.6.</span> If the attacking Character leaves the FIELD due to effect resolution during this step, finish resolving all unresolved effects, then end the battle.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.7.</span> If the attacking Character becomes unable to attack due to effect resolution during this step, finish resolving all unresolved effects, then end the battle.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.4.3.3.</span> Confirmation Step</h4>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.4.3.3.1.</span> Character vs. Character</h4>
+<p><span class="pd-ref">303.2.a.4.3.3.1.1.</span> If the Turn Player&#x27;s Character has greater Attack Power than the Opposing Player&#x27;s Character, the Turn Player&#x27;s Character is determined to Win the Fight and the Opposing Player&#x27;s Character is determined to Lose the Fight. Retreat the Opposing Player&#x27;s Character.</p>
+<p><span class="pd-ref">303.2.a.4.3.3.1.2.</span> If the Turn Player&#x27;s Character has less Attack Power than the Opposing Player&#x27;s Character, the Opposing Player&#x27;s Character is determined to Win the Fight and the Turn Player&#x27;s Character is determined to Lose the Fight. Retreat the Turn Player&#x27;s Character.</p>
+<p><span class="pd-ref">303.2.a.4.3.3.1.3.</span> If the Turn Player&#x27;s Character has Attack Power equal to the Opposing Player&#x27;s Character, BOTH LOSE. Retreat both Characters.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.4.3.3.2.</span> Character vs. Weakness</h4>
+<p><span class="pd-ref">303.2.a.4.3.3.2.1.</span> The Turn Player&#x27;s Character is determined to have successfully attacked a Weakness. PLACE the top card of that player&#x27;s Rush Point Deck into their Timeline.</p>
+<p><span class="pd-ref">303.2.a.4.3.3.3.</span> After all effects triggered during this step have finished resolving, the battle ends.</p>
+<p><span class="pd-ref">303.2.a.4.4.</span> Each Character on the Turn Player&#x27;s FIELD has 1 opportunity to attack each turn.</p>
+<p><span class="pd-ref">303.2.a.4.5.</span> Once a player declares an attack with a Character, the battle process is locked in and must proceed.</p>
+<p><span class="pd-ref">303.2.a.4.6.</span> If a Character&#x27;s R is 0, or there is no Attack Target within its R that complies with the attack rules, that Character cannot attack.</p>
+<p><span class="pd-ref">303.2.a.4.7.</span> If the Turn Player chooses not to attack with a Character during this phase, that Character loses its original attack opportunity for the current turn.</p>
+<p><span class="pd-ref">303.2.a.4.8.</span> When the Turn Player&#x27;s FRONT is reached in the attack order, or after the battle of a Character in the FRONT ends, if there is no Character in the FRONT, no Character there with an attack opportunity, or the Character there cannot attack, proceed to attacks from the WING areas.</p>
+<p><span class="pd-ref">303.2.a.4.9.</span> When the Turn Player&#x27;s WING areas are reached in the attack order, or after the battle of a Character in a WING ends, if there is no Character in the WING areas, no Character there with an attack opportunity, or the Characters there cannot attack, proceed to attacks from the BACK.</p>
+<p><span class="pd-ref">303.2.a.4.9.1.</span> If both WING areas each contain 1 Character, the Turn Player may choose the order in which those 2 Characters attack.</p>
+<p><span class="pd-ref">303.2.a.4.10.</span> When the Turn Player&#x27;s BACK is reached in the attack order, or after the battle of a Character in the BACK ends, if there is no Character in the BACK, no Character there with an attack opportunity, or the Character there cannot attack, this phase ends and the next phase begins.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.5.</span> Counter Phase</h4>
+<p><span class="pd-ref">303.2.a.5.1.</span> During this phase, players continuously alternate choosing 1 action at a time, beginning with the opponent choosing 1 action, followed by the Turn Player choosing 1 action.</p>
+<p><span class="pd-ref">303.2.a.5.2.</span> The following 3 actions may be chosen during this phase.</p>
+<p><span class="pd-ref">303.2.a.5.2.1.</span> A player performs 1 COUNTER CALL for a Character with the [COUNTER] Ability.</p>
+<p><span class="pd-ref">303.2.a.5.2.1.1.</span> During this phase, each player may perform this action at most once per turn.</p>
+<p><span class="pd-ref">303.2.a.5.2.2.</span> A player activates a COUNTER-Activated Effect of one of their cards.</p>
+<p><span class="pd-ref">303.2.a.5.2.3.</span> A player takes no action.</p>
+<p><span class="pd-ref">303.2.a.5.3.</span> If both players consecutively choose to take no action, this phase ends and the next phase begins.</p>
+<h4 class="or-sub"><span class="pd-ref">303.2.a.6.</span> End Phase</h4>
+<p><span class="pd-ref">303.2.a.6.1.</span> This phase proceeds in the following order.</p>
+<p><span class="pd-ref">303.2.a.6.1.1.</span> Trigger effects that trigger at the end of the turn.</p>
+<p><span class="pd-ref">303.2.a.6.1.1.1.</span> If, after effects that trigger at the end of the turn have finished resolving, a new effect that would trigger at the end of the turn is created, that effect cannot trigger because its timing has been missed.</p>
+<p><span class="pd-ref">303.2.a.6.1.2.</span> Effects that apply for the current turn end.</p>
+<p><span class="pd-ref">303.2.a.6.1.2.1.</span> If ending effects that apply for the current turn triggers a new effect that applies for the current turn, that effect resolves and then immediately ends.</p>
+<p><span class="pd-ref">303.2.a.6.1.3.</span> If the Turn Player has more than 9 cards in their HAND, they discard cards until their HAND contains 9 cards.</p>
+<p><span class="pd-ref">303.2.a.6.2.</span> Once all of the above matters in this phase have been completed, this phase ends, the turn is complete, and the other player begins their turn.</p>
+<h4 id="or-h2-9"><span class="pd-ref">304.</span> Advanced Effect Rules</h4>
+<h4 class="or-sub"><span class="pd-ref">304.1.</span> Trigger Effect (Trig Effect)</h4>
+<p><span class="pd-ref">304.1.a.</span> The first sentence of a Trigger Effect&#x27;s effect text states the effect&#x27;s trigger timing. If the effect text immediately following it contains [may], the effect is an optional Trigger Effect and the player may choose whether or not to trigger it.</p>
+<p><span class="pd-ref">304.1.b.</span> The first sentence of a Trigger Effect&#x27;s Effect Text states the Effect&#x27;s trigger timing. If the Effect Text immediately following it does not contain [may], the Effect is a MANDATORY EFFECT and the player must trigger it.</p>
+<p><span class="pd-ref">304.1.c.</span> When an effect triggers, it resolves immediately.</p>
+<p><span class="pd-ref">304.1.d.</span> Once an effect begins resolving, it must be resolved to the greatest extent possible.</p>
+<p><span class="pd-ref">304.1.e.</span> If multiple effects trigger, the next effect cannot resolve until the current effect has finished resolving. Effects that have not yet resolved remain pending resolution.</p>
+<p><span class="pd-ref">304.1.f.</span> If one player triggers multiple effects at the same timing, that player determines their resolution order.</p>
+<p><span class="pd-ref">304.1.g.</span> If both players trigger multiple effects at the same timing, the Turn Player first determines the resolution order of their own effects, then the Opposing Player determines the resolution order of their own effects.</p>
+<p><span class="pd-ref">304.1.g.1.</span> The Turn Player first declares triggered effects in their public areas, then the Opposing Player declares triggered effects in their public areas.</p>
+<p><span class="pd-ref">304.1.g.2.</span> Neither player needs to declare the triggering of Trigger Effects in their HAND.</p>
+<p><span class="pd-ref">304.1.g.3.</span> Each player must place any triggered Trigger Effects from their HAND into the resolution order.</p>
+<p><span class="pd-ref">304.1.h.</span> If another effect triggers while an effect is resolving, finish resolving the current effect first, then resolve the derived Trigger Effect.</p>
+<p><span class="pd-ref">304.1.i.</span> If one player triggers multiple effects during the resolution or processing of an effect or rule action, those effects are treated as having triggered at the same timing and are handled according to the same-timing rules.</p>
+<p><span class="pd-ref">304.1.j.</span> Effects that trigger at a given timing and effects that are derived from rule processing at that same timing are treated as having triggered at the same timing and are handled according to the same-timing rules.</p>
+<p><span class="pd-ref">304.1.k.</span> If, while triggered effects at the same timing are being resolved, the contents of a player&#x27;s HAND change and the changed HAND contains a Trigger Effect that also satisfies the conditions for that timing, that Trigger Effect in the HAND is also treated as having triggered at that timing.</p>
+<h4 class="or-sub"><span class="pd-ref">304.2.</span> Activated Effect (Acti Effect)</h4>
+<p><span class="pd-ref">304.2.a.</span> Once an Activated Effect is activated, it resolves immediately.</p>
+<p><span class="pd-ref">304.2.b.</span> A player may only activate an Activated Effect if its effect text contains content that can be resolved.</p>
+<p><span class="pd-ref">304.2.c.</span> If an Activated Effect&#x27;s effect text contains [After doing so], the player may only activate that effect if there is content before [After doing so] that can be resolved.</p>
+<h4 id="or-h2-10"><span class="pd-ref">305.</span> Ability List</h4>
+<h4 class="or-sub"><span class="pd-ref">305.1.</span> COUNTER</h4>
+<p><span class="pd-ref">305.1.a.</span> The Effect of [COUNTER] is: Auto Effect (HAND): This card can be called using COUNTER CALL.</p>
+<h4 class="or-sub"><span class="pd-ref">305.2.</span> BLOCK</h4>
+<p><span class="pd-ref">305.2.a.</span> The Effect of [BLOCK] is: COUNTER-Activated Effect (BATTLE / Once per turn): If this card can be chosen as the Attack Target of an opponent&#x27;s attacking Character, change that Character&#x27;s Attack Target to this card.</p>
+<h4 class="or-sub"><span class="pd-ref">305.3.</span> DOUBLE ATTACK</h4>
+<p><span class="pd-ref">305.3.a.</span> The Effect of [DOUBLE ATTACK] is: Auto Effect (BATTLE): This card has a second attack opportunity.</p>
+<h4 class="or-sub"><span class="pd-ref">305.4.</span> ASSAULT</h4>
+<p><span class="pd-ref">305.4.a.</span> The Effect of [ASSAULT] is: Auto Effect (BATTLE): If this card Wins the Fight as a result of attacking, this card is determined to have successfully attacked a Weakness.</p>
+<h4 class="or-sub"><span class="pd-ref">305.5.</span> AIR-ATTACK</h4>
+<p><span class="pd-ref">305.5.a.</span> The Effect of [AIR-ATTACK] is: Auto Effect (BATTLE): Even if there is a Character in the opponent&#x27;s BATTLE, this card may attack the BATTLE area occupied by that Character as though it were a Weakness.</p>
+<h4 class="or-sub"><span class="pd-ref">305.6.</span> UNIQUE</h4>
+<p><span class="pd-ref">305.6.a.</span> The Effect of [UNIQUE] is: Auto Effect (FIELD): No other card with the same name as this card can exist on your FIELD. This Effect cannot be lost.</p>
+</div>
+<div class="pd-sec" id="or-h1-5">
+<h3>Revision Log</h3>
+<h4 id="or-h2-11"><span class="pd-ref">1.</span> 2026.06.16 - Version 1.00</h4>
+<h4 id="or-h2-12"><span class="pd-ref">2.</span> 2026.06.24 - Version 1.01</h4>
+<h4 class="or-sub">Deleted Entry</h4>
+<p><span class="pd-ref">301.7.c.</span> If a card effect applies to its own source (that is, [This Card]), the state gained by [This Card] from that card effect follows [This Card]. [This Card] will not swap the state gained by [This Card] when it is swapped with another card. (See 301.17.b. for details.)</p>
+<h4 class="or-sub">Revised Entries</h4>
+<p><span class="pd-ref">301.7.b.</span> If a card effect applies to its own source (that is, [This Card]), that card effect does not designate a target.</p>
+<p><span class="pd-ref">301.7.b.</span> If a card effect applies to its own source (that is, [This Card] or the card that has that effect), that card effect does not designate a target.</p>
+<p><span class="pd-ref">303.2.a.4.8.</span> When the Turn Player&#x27;s FRONT is reached in the attack order, and until the battle of a Character in the FRONT ends, if there is no Character in the FRONT with an attack opportunity, proceed to attacks from the WING areas.</p>
+<p><span class="pd-ref">303.2.a.4.8.</span> When the Turn Player&#x27;s FRONT is reached in the attack order, or after the battle of a Character in the FRONT ends, if there is no Character in the FRONT, no Character there with an attack opportunity, or the Character there cannot attack, proceed to attacks from the WING areas.</p>
+<p><span class="pd-ref">303.2.a.4.9.</span> When the Turn Player&#x27;s WING areas are reached in the attack order, and until the battle of a Character in a WING ends, if there is no Character in the WING areas with an attack opportunity, proceed to attacks from the BACK.</p>
+<p><span class="pd-ref">303.2.a.4.9.</span> When the Turn Player&#x27;s WING areas are reached in the attack order, or after the battle of a Character in a WING ends, if there is no Character in the WING areas, no Character there with an attack opportunity, or the Characters there cannot attack, proceed to attacks from the BACK.</p>
+<p><span class="pd-ref">303.2.a.4.10.</span> When the Turn Player&#x27;s BACK is reached in the attack order, and until the battle of a Character in the BACK ends, if there is no Character in the BACK with an attack opportunity, this phase ends and the next phase begins.</p>
+<p><span class="pd-ref">303.2.a.4.10.</span> When the Turn Player&#x27;s BACK is reached in the attack order, or after the battle of a Character in the BACK ends, if there is no Character in the BACK, no Character there with an attack opportunity, or the Character there cannot attack, this phase ends and the next phase begins.</p>
+<p><span class="pd-ref">301.25.g.</span> If multiple Attached Cards follow the card they are attached to back to the HAND, after the attached-to card returns to the HAND, the owner of those Attached Cards returns them to their HAND one at a time in any order. For smoother gameplay, these multiple actions are carried out together.</p>
+<p><span class="pd-ref">301.25.g.</span> If multiple Attached Cards follow the card they are attached to back to the HAND, after the attached-to card returns to the HAND, the owner of those Attached Cards returns them to their HAND one at a time in the order in which they were attached. For smoother gameplay, these multiple actions are carried out together.</p>
+<p><span class="pd-ref">301.25.h.</span> If multiple Attached Cards follow the card they are attached to back to the top of the Deck, after the attached-to card returns to the top of the Deck, the owner of those Attached Cards returns them to the top of their Deck one at a time in any order.</p>
+<p><span class="pd-ref">301.25.h.</span> If multiple Attached Cards follow the card they are attached to back to the top of the Deck, after the attached-to card returns to the top of the Deck, the owner of those Attached Cards returns them to the top of their Deck one at a time in the order in which they were attached.</p>
+<p><span class="pd-ref">301.25.i.</span> If multiple Attached Cards follow the card they are attached to back to the bottom of the Deck, after the attached-to card returns to the bottom of the Deck, the owner of those Attached Cards returns them to the bottom of their Deck one at a time in any order.</p>
+<p><span class="pd-ref">301.25.i.</span> If multiple Attached Cards follow the card they are attached to back to the bottom of the Deck, after the attached-to card returns to the bottom of the Deck, the owner of those Attached Cards returns them to the bottom of their Deck one at a time in the order in which they were attached.</p>
+<p><span class="pd-ref">301.25.j.</span> If multiple Attached Cards follow the card they are attached to when it is shuffled back into the Deck, after the attached-to card is shuffled back into the Deck, the owner of those Attached Cards shuffles them back into their Deck one at a time in any order. For smoother gameplay, these multiple actions are carried out together.</p>
+<p><span class="pd-ref">301.25.j.</span> If multiple Attached Cards follow the card they are attached to when it is shuffled back into the Deck, after the attached-to card is shuffled back into the Deck, the owner of those Attached Cards shuffles them back into their Deck one at a time in the order in which they were attached. For smoother gameplay, these multiple actions are carried out together.</p>
+<h4 class="or-sub">Added Entries</h4>
+<p><span class="pd-ref">301.25.m.</span> Attached Cards must be stacked underneath a Character in the order in which they were attached. A later Attached Card is stacked below an earlier Attached Card.</p>
+<p><span class="pd-ref">301.25.n.</span> A player cannot change the order of Attached Cards stacked underneath a Character.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.4.</span> If the attacking Character leaves the FIELD due to effect resolution during this step, finish resolving all unresolved effects, then end the battle.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.5.</span> If the attacking Character becomes unable to attack due to effect resolution during this step, finish resolving all unresolved effects, then end the battle.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.6.</span> If the attacking Character leaves the FIELD due to effect resolution during this step, finish resolving all unresolved effects, then end the battle.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.7.</span> If the attacking Character becomes unable to attack due to effect resolution during this step, finish resolving all unresolved effects, then end the battle.</p>
+<h4 id="or-h2-13"><span class="pd-ref">3.</span> 2026.07.23 - Version 1.02</h4>
+<h4 class="or-sub">Added Entries</h4>
+<p><span class="pd-ref">301.14.a.2.</span> A Character resolves an effect that says [Flip a Card].</p>
+<p><span class="pd-ref">301.22.c.</span> A Face-Down Card in the BASE must be turned face-up when any of the following occurs.</p>
+<p><span class="pd-ref">301.22.c.1.</span> The Face-Down Card resolves an effect that says [Flip a Face-Down Card Face-up].</p>
+<p><span class="pd-ref">301.22.c.2.</span> The Face-Down Card resolves an effect that says [Flip a Card].</p>
+<p><span class="pd-ref">303.2.a.4.3.1.6.</span> If the original Attack Target becomes invalid under the attack rules during this step, finish resolving all unresolved effects, then return to selecting an Attack Target.</p>
+<p><span class="pd-ref">303.2.a.6.1.1.1.</span> If, after effects that trigger at the end of the turn have finished resolving, a new effect that would trigger at the end of the turn is created, that effect cannot trigger because its timing has been missed.</p>
+<p><span class="pd-ref">303.2.a.6.1.2.1.</span> If ending effects that apply for the current turn triggers a new effect that applies for the current turn, that effect resolves and then immediately ends.</p>
+<h4 class="or-sub">Revised Entries</h4>
+<p><span class="pd-ref">301.22.b.</span> A Character that changes back from a Face-Down Card does not have the state [placed onto the FIELD during the current turn].</p>
+<p><span class="pd-ref">301.22.b.</span> A Character that changes back from a Face-Down Card is not subject to the restriction [A Character placed onto the FIELD during the current turn cannot perform BATTLE-BASE MOVE].</p>
+<p><span class="pd-ref">303.2.a.4.3.1.3.</span> If the attacking Character&#x27;s R becomes 0 due to effect resolution during this step, finish resolving all unresolved effects, then end the battle.</p>
+<p><span class="pd-ref">303.2.a.4.3.1.3.</span> If, due to effect resolution during this step, the attacking Character has no Attack Target within its R that complies with the attack rules, finish resolving all unresolved effects. If the Character still has no valid Attack Target within its R afterward, the battle ends. If a valid Attack Target within its R exists again, return to selecting an Attack Target.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.5.</span> If the attacking Character&#x27;s R becomes 0 due to effect resolution during this step, finish resolving all unresolved effects, then end the battle.</p>
+<p><span class="pd-ref">303.2.a.4.3.2.5.</span> If, due to effect resolution during this step, the attacking Character has no Attack Target within its R that complies with the attack rules, finish resolving all unresolved effects. If the Character still has no valid Attack Target within its R afterward, the battle ends. If a valid Attack Target within its R exists again, return to the Select Target Step and select an Attack Target again.</p>
+<p><span class="pd-ref">301.41.d.</span> If a card is already being affected by a change to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by another Auto Effect, the former effect ends completely.</p>
+<p><span class="pd-ref">301.41.d.</span> If a card is already being affected by a change to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by another Auto Effect, the former effect ends completely. If the latter change effect ends for a reason other than a new change effect, the former effect applies again.</p>
+<p><span class="pd-ref">301.41.e.</span> If a card is already being affected by a change to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by a Trigger Effect or Activated Effect, the former effect ends completely. However, because the former effect is a continuously applying Auto Effect change, the Auto Effect change ultimately becomes the final result.</p>
+<p><span class="pd-ref">301.41.e.</span> If a card is already being affected by a change to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by a Trigger Effect or Activated Effect, the former effect ends completely. If the latter change effect ends for a reason other than a new change effect, the former effect applies again.</p>
+<p><span class="pd-ref">301.41.g.</span> If a card is already being affected by an increase or decrease to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by an Auto Effect, use the result of the latter effect as the base value and apply the former increase or decrease to that value.</p>
+<p><span class="pd-ref">301.41.g.</span> If a card is already being affected by an increase or decrease to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by an Auto Effect, the former effect ends completely. If the latter change effect ends for a reason other than a new change effect, the former effect applies again.</p>
+<p><span class="pd-ref">301.41.j.</span> If a card is already being affected by an increase or decrease to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by a Trigger Effect or Activated Effect, use the result of the latter effect as the base value and apply the former increase or decrease to that value.</p>
+<p><span class="pd-ref">301.41.j.</span> If a card is already being affected by an increase or decrease to Lv, R, or Attack Power from an Auto Effect, and that card&#x27;s Lv, R, or Attack Power is then changed by a Trigger Effect or Activated Effect, the former effect ends completely. If the latter change effect ends for a reason other than a new change effect, the former effect applies again.</p>
+<h4 id="or-h2-14"><span class="pd-ref">4.</span> 2026.08.12 - Version 1.03</h4>
+<h4 class="or-sub">Added Entries</h4>
+<p><span class="pd-ref">301.2.a.1.</span> If, while carrying out those actions, a restriction makes it impossible to continue performing the action, no further actions are performed.</p>
+<p><span class="pd-ref">301.2.a.2.</span> If cards being flipped include both Characters and Face-Down Cards, first turn the former Characters face-down, then flip the latter Face-Down Cards face-up.</p>
+<p><span class="pd-ref">301.2.b.</span> When an effect in the Game simultaneously involves multiple cards, process it as the same effect performed multiple times, one card at a time.</p>
+<p><span class="pd-ref">301.22.d.</span> If a Face-Down Card that is about to be flipped face-up would be restricted by the [UNIQUE] Ability, that Face-Down Card cannot be flipped face-up and must instead be revealed.</p>
+<p><span class="pd-ref">301.46.</span> All</p>
+<p><span class="pd-ref">301.46.a.</span> [All] means the selection range of the effect is the maximum possible value.</p>
+<p><span class="pd-ref">301.46.b.</span> If the maximum possible value of [All] is 0, the effect is treated as not having resolved.</p>
+<p><span class="pd-ref">301.47.</span> Your Side</p>
+<p><span class="pd-ref">301.47.a.</span> If the effect of a card on the FIELD contains [your side], [your side] refers to that card&#x27;s controller.</p>
+<p><span class="pd-ref">301.47.a.1.</span> If the effect of a card on the FIELD contains [when a card on your side is placed onto the FIELD], [your side] must refer to the controller of that [card].</p>
+<p><span class="pd-ref">301.47.b.</span> If the effect of a card in an Off-field area contains [your side], [your side] refers to that card&#x27;s owner.</p>
+<p><span class="pd-ref">301.47.b.1.</span> If the effect of a card in an Off-field area contains [when a card on your side is placed onto the FIELD], [your side] must refer to the controller of that [card].</p>
+<p><span class="pd-ref">301.48.</span> Opponent&#x27;s Side</p>
+<p><span class="pd-ref">301.48.a.</span> If the effect of a card on the FIELD contains [opponent&#x27;s side], [opponent&#x27;s side] refers to the player opposing that card&#x27;s controller.</p>
+<p><span class="pd-ref">301.48.a.1.</span> If the effect of a card on the FIELD contains [when a card on the opponent&#x27;s side is placed onto the FIELD], [opponent&#x27;s side] must refer to the controller of that [card].</p>
+<p><span class="pd-ref">301.48.b.</span> If the effect of a card in an Off-field area contains [opponent&#x27;s side], [opponent&#x27;s side] refers to the player opposing that card&#x27;s owner.</p>
+<p><span class="pd-ref">301.48.b.1.</span> If the effect of a card in an Off-field area contains [when a card on the opponent&#x27;s side is placed onto the FIELD], [opponent&#x27;s side] must refer to the controller of that [card].</p>
+<p><span class="pd-ref">301.49.</span> Attacking</p>
+<p><span class="pd-ref">301.49.a.</span> [Attacking] means that an attack is being performed and the Game is in the battle process until that battle ends.</p>
+<p><span class="pd-ref">301.50.</span> Has Attacked</p>
+<p><span class="pd-ref">301.50.a.</span> [Has Attacked] means that the Character has previously performed an attack.</p>
+<p><span class="pd-ref">301.51.</span> Has Been Attacked</p>
+<p><span class="pd-ref">301.51.a.</span> [Has Been Attacked] means that the Character has previously been selected as an Attack Target.</p>
+<p><span class="pd-ref">301.52.</span> In Battle</p>
+<p><span class="pd-ref">301.52.a.</span> [In Battle] means that a battle is occurring and the Game is in the battle process until that battle ends.</p>
+<p><span class="pd-ref">301.53.</span> Has Battled</p>
+<p><span class="pd-ref">301.53.a.</span> [Has Battled] means that a battle has previously occurred involving that Character.</p>
+<p><span class="pd-ref">304.1.g.1.</span> The Turn Player first declares triggered effects in their public areas, then the Opposing Player declares triggered effects in their public areas.</p>
+<p><span class="pd-ref">304.1.g.2.</span> Neither player needs to declare the triggering of Trigger Effects in their HAND.</p>
+<p><span class="pd-ref">304.1.g.3.</span> Each player must place any triggered Trigger Effects from their HAND into the resolution order.</p>
+<h4 class="or-sub">Revised Entries</h4>
+<p><span class="pd-ref">301.2.a.</span> When an action in the Game involves multiple cards, process it as the same action performed multiple times, one card at a time.</p>
+<p><span class="pd-ref">301.2.a.</span> When an action in the Game simultaneously involves multiple cards, process it as the same action performed multiple times, one card at a time.</p>
+<p><span class="pd-ref">303.2.a.4.6.</span> If a Character&#x27;s R (Attack Range) is 0, that Character cannot attack.</p>
+<p><span class="pd-ref">303.2.a.4.6.</span> If a Character&#x27;s R is 0, or there is no Attack Target within its R that complies with the attack rules, that Character cannot attack.</p>
+</div>
+`;
+
+/* v6.67 — dua sub-tab di halaman Panduan: "Site Guide" (ringkasan tulisan sendiri,
+   GUIDE) dan "Official Rules" (teks penuh Comprehensive Rules 1.03 resmi dari Jason,
+   OFFICIAL_RULES). state.pdTab tidak disimpan ke store — selalu kembali ke 'guide'
+   tiap buka halaman, konsisten dengan tab lain yang bersifat sesi (mis. auth-tabs). */
 function renderPanduan(){
   const w = $('#panduanWrap');
   if(!w) return;
-  w.innerHTML = GUIDE;
+  const tabs = $('#pdTabs');
+  if(tabs){
+    [...tabs.children].forEach(b=>{
+      b.setAttribute('aria-pressed', b.dataset.pdtab === state.pdTab ? 'true' : 'false');
+    });
+  }
+  w.innerHTML = (state.pdTab === 'official') ? OFFICIAL_RULES : GUIDE;
 }
 
 /* ==================== NAVIGASI HALAMAN ==================== */
