@@ -1948,26 +1948,26 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.67"></script>
-<script src="data.js?v=6.67"></script>
+<script src="cards.js?v=6.68"></script>
+<script src="data.js?v=6.68"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.67"></script>
-<script src="decks.js?v=6.67"></script>
+<script src="auth.js?v=6.68"></script>
+<script src="decks.js?v=6.68"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.67"></script>
-<script src="collection.js?v=6.67"></script>
+<script src="social.js?v=6.68"></script>
+<script src="collection.js?v=6.68"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.67"></script>
-<script src="news-ui.js?v=6.67"></script>
+<script src="news.js?v=6.68"></script>
+<script src="news-ui.js?v=6.68"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.67"></script>
+<script src="home-ui.js?v=6.68"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.67"></script>
-<script src="set-ui.js?v=6.67"></script>
+<script src="spoilers.js?v=6.68"></script>
+<script src="set-ui.js?v=6.68"></script>
 <!-- v6.65 — halaman Tournaments Deck (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.67"></script>
+<script src="tournaments.js?v=6.68"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -1993,7 +1993,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.67</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.68</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -6909,14 +6909,28 @@ function tnySetStatus(msg, bad){
   const s = $('#tnyFStatus'); if(s){ s.textContent = msg; s.classList.toggle('bad', !!bad); }
 }
 
+/* v6.68 — bug: form Tournament admin nyuruh tempel hasil tombol "Copy deck
+   link" (lihat placeholder .tny-d-cd), tapi tombol itu menyalin FULL URL
+   (https://mhrdecklab.com/#d=1.xxx.yyy), sedangkan decodeDeck() di
+   saveTnyForm() cuma nerima kode telanjang (1.xxx.yyy) — code.split('.')
+   pada URL penuh kena titik di "https://mhrdecklab.com" duluan, jadi selalu
+   gagal ("Invalid deck code") walau kodenya sendiri benar. Sekarang ditempel
+   apa pun (URL penuh, atau kode telanjang) dibersihkan dulu lewat
+   cariKodeDeckDibagikan() (fungsi yang sama dipakai fitur "Import from
+   text") sebelum disimpan — supaya yang tersimpan ke database SELALU kode
+   telanjang, konsisten dengan asumsi decodeDeck()/openDeckView() di tempat
+   lain. */
 function readTnyForm(){
-  const rows = [...$('#tnyDeckRows').children].map(row=>({
-    pk: row.querySelector('.tny-d-pk').value.trim(),
-    nm: row.querySelector('.tny-d-nm').value.trim(),
-    cr: row.querySelector('.tny-d-cr').value.trim(),
-    ds: row.querySelector('.tny-d-ds').value.trim(),
-    cd: row.querySelector('.tny-d-cd').value.trim(),
-  })).filter(d=>d.cd);   // baris kosong (belum ditempel kode) diabaikan
+  const rows = [...$('#tnyDeckRows').children].map(row=>{
+    const cdRaw = row.querySelector('.tny-d-cd').value.trim();
+    return {
+      pk: row.querySelector('.tny-d-pk').value.trim(),
+      nm: row.querySelector('.tny-d-nm').value.trim(),
+      cr: row.querySelector('.tny-d-cr').value.trim(),
+      ds: row.querySelector('.tny-d-ds').value.trim(),
+      cd: cariKodeDeckDibagikan(cdRaw) || cdRaw,
+    };
+  }).filter(d=>d.cd);   // baris kosong (belum ditempel kode) diabaikan
   return {
     nama: $('#tnyFNama').value.trim(),
     tanggal: $('#tnyFTanggal').value,
@@ -6934,7 +6948,9 @@ async function saveTnyForm(){
   if(!row.top.length){ tnySetStatus('At least 1 deck with a valid code is required', true); return; }
   for(const d of row.top){
     const r = decodeDeck(d.cd);
-    if(!r || !Object.keys(r.deck).length){ tnySetStatus(`Invalid deck code on row "${d.pk||d.nm||'one of the rows'}"`, true); return; }
+    const label = d.pk||d.nm||'one of the rows';
+    if(!r){ tnySetStatus(`Invalid deck code on row "${label}" — it should look like 1.xxxx.yyyy (paste the "Copy deck link" output, or the code after #d=)`, true); return; }
+    if(!Object.keys(r.deck).length){ tnySetStatus(`Deck code on row "${label}" didn't match any known cards — it may be corrupted or truncated`, true); return; }
   }
   if(row.sumber && !/^https:\/\//.test(row.sumber)){ tnySetStatus('Source link must start with https://', true); return; }
   if(TNY_ADM.editing) row.id = TNY_ADM.editing.id;
