@@ -161,6 +161,8 @@ window.SETS = [
      zona    : opsional, mis. '+08:00' untuk jam China
    Kosongkan daftarnya ([]) untuk menyembunyikan kotak ini. */
 window.RILIS = [
+  { nama:'SP01 Era of Spiders', tanggal:'2026-10-03',
+    wilayah:'Indonesia', berita:'sp01-teks-resmi-bahasa-indonesia' },
   { nama:'SD05 & SD06 Starter Deck + PB02 (Orange & Purple)', tanggal:'2026-10-16',
     wilayah:'China', zona:'+08:00', berita:'preview-sd05-sd06-pb02-orange-purple' },
 ];
