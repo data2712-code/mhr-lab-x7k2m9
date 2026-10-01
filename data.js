@@ -194,8 +194,8 @@ window.DUKUNG = {
   teks: {
     id: 'MHR Deck Lab dibuat dan dirawat sendiri untuk teman - teman komunitas Marvel Hero Rush, ' +
         'Dukungan sukarela kamu akan dipakai untuk biaya domain, hosting dan fitur lainnya.',
-    en: 'MHR Deck Lab is built and maintained for the community — free and ad-free. ' +
-        'Your voluntary support will go toward developing the next features.'
+    en: 'MHR Deck Lab is built and maintained for the community, ' +
+        'your voluntary support will go toward developing the next features.'
   }
 };
 

@@ -509,6 +509,22 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v6.72 — Ganti kalimat keterangan halaman Dukung — 1 Oktober 2026 *(`data.js`)*
+
+Permintaan pemilik: `window.DUKUNG.teks.en` (kalimat yang tampil di footer
+"☕ Dukung" dan sebagai subjudul halaman Dukung) diganti jadi:
+
+> "MHR Deck Lab is built and maintained for the community, your voluntary
+> support will go toward developing the next features."
+
+`teks.id` tidak diubah (tidak pernah tampil — situs sekarang satu bahasa,
+`en` selalu dipakai duluan). Dict fallback `supportNote` di `index.html`
+(teks flash sebelum JS memuat `cfg.teks`) juga tidak diubah — sudah dari
+awal beda kata-kata dengan `teks.en`, tidak diminta untuk disamakan.
+Cache-buster skrip dinaikkan ke `?v=6.72` karena `data.js` berubah.
+
+**Verifikasi**: `node --check data.js` — lolos.
+
 ### v6.71 — Update metode Dukung: hapus Mandiri & BCA, nama jadi "Data", tambah Ko-fi — 1 Oktober 2026 *(`index.html`, `data.js`)*
 
 Permintaan pemilik: perbarui daftar metode di halaman Dukung (`window.DUKUNG`
