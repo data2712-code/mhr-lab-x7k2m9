@@ -439,7 +439,7 @@
     font-size:12.5px;margin-bottom:7px}
   /* v6.36 — "Dari Akun" (Phase 3): galeri publik, deck yang dipublikasikan
      langsung dari akun pengguna. Menumpang gaya .meta-card/.meta-grid yang
-     sudah ada supaya konsisten visual dengan Community Deck kurasi manual di
+     sudah ada supaya konsisten visual dengan User Decks kurasi manual di
      bawahnya, cuma menambah info "oleh siapa" + tombol moderasi admin. */
   .pub-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
     flex-wrap:wrap;margin:18px 0 4px}
@@ -517,7 +517,7 @@
 
   /* ================= HALAMAN TOURNAMENTS (v6.26) =================
      Menampilkan Top-N deck dari turnamen resmi Marvel Hero Rush, dikelompokkan
-     per event. Kartu deck memakai ulang gaya .meta-* (Community Deck) supaya
+     per event. Kartu deck memakai ulang gaya .meta-* (User Decks) supaya
      visual konsisten — cuma menambah pembungkus event + lencana peringkat. */
   body:not(.page-tourney) #tourneyPage{display:none}
   body.page-tourney .filters, body.page-tourney .cards, body.page-tourney .deck{display:none}
@@ -1469,7 +1469,7 @@
   /* v6.37 — halaman "Dashboard Saya" (Phase 4/5): deck tersimpan (dipindah
      dari panel Deck Builder) + koleksi kartu.
      v6.38 — halaman diperlebar (960px → 1180px, samakan dengan .meta-wrap
-     galeri Community Deck) dan bagian koleksi dirombak dari daftar sempit
+     galeri User Decks) dan bagian koleksi dirombak dari daftar sempit
      jadi GRID kartu besar ala galeri (lihat .coll-list/.coll-card di bawah)
      supaya terasa seperti "halaman koleksi kartu" sungguhan, bukan cuma
      kotak kecil — klik gambar/nama kartu membuka lightbox detail yang sama
@@ -1579,8 +1579,8 @@
   <button data-page="cards" aria-current="true">🃏 <span class="tl" data-i18n="navCards">Kartu</span><span class="ts" data-i18n="navCardsS">Kartu</span> <span class="cnt" id="navCard">208</span></button>
   <button data-page="set" aria-current="false">📦 <span class="tl">Set</span><span class="ts">Set</span></button>
   <button data-page="build" aria-current="false">🛠 <span class="tl" data-i18n="navBuild">Deck Builder</span><span class="ts" data-i18n="navBuildS">Builder</span> <span class="cnt" id="navDeck">0</span></button>
-  <button data-page="meta" aria-current="false">🏆 <span class="tl" data-i18n="navMeta">Community Deck</span><span class="ts" data-i18n="navMetaS">Community Deck</span> <span class="cnt" id="navMeta">0</span></button>
-  <button data-page="tourney" aria-current="false">🥇 <span class="tl" data-i18n="navTourney">Tournaments Deck</span><span class="ts" data-i18n="navTourneyS">Tournaments Deck</span> <span class="cnt" id="navTourney">0</span></button>
+  <button data-page="meta" aria-current="false">🏆 <span class="tl" data-i18n="navMeta">User Decks</span><span class="ts" data-i18n="navMetaS">User Decks</span> <span class="cnt" id="navMeta">0</span></button>
+  <button data-page="tourney" aria-current="false">🥇 <span class="tl" data-i18n="navTourney">Tournament Decks</span><span class="ts" data-i18n="navTourneyS">Tournament Decks</span> <span class="cnt" id="navTourney">0</span></button>
   <button data-page="lgs" aria-current="false">📅 <span class="tl" data-i18n="navLgs">Weekly Rush LGS</span><span class="ts" data-i18n="navLgsS">Weekly Rush LGS</span> <span class="cnt" id="navLgs">0</span></button>
   <button data-page="panduan" aria-current="false">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span></button>
   <button data-page="dashboard" aria-current="false">🗂 <span class="tl" data-i18n="navDashboard">Dashboard Saya</span><span class="ts" data-i18n="navDashboardS">Dashboard</span></button>
@@ -1647,7 +1647,7 @@
 <section id="metaPage">
   <div class="meta-wrap">
     <div class="meta-head">
-      <h2 data-i18n="metaHead">Community Deck</h2>
+      <h2 data-i18n="metaHead">User Decks</h2>
       <p data-i18n="metaIntro">Deck yang sedang banyak dipakai di komunitas MHR Indonesia. Muat salah satunya ke
         Deck Builder untuk dilihat isinya atau dimodifikasi — deck yang sedang Anda susun tidak tertimpa.</p>
     </div>
@@ -1673,7 +1673,7 @@
 <section id="tourneyPage">
   <div class="tourney-wrap">
     <div class="tourney-head">
-      <h2 data-i18n="tourneyHead">Tournaments Deck</h2>
+      <h2 data-i18n="tourneyHead">Tournament Decks</h2>
       <p data-i18n="tourneyIntro">Deck-deck dari babak Top di turnamen resmi Marvel Hero Rush. Muat salah satunya ke
         Deck Builder untuk dilihat isinya — deck yang sedang Anda susun tidak tertimpa.</p>
     </div>
@@ -1948,26 +1948,26 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.69"></script>
-<script src="data.js?v=6.69"></script>
+<script src="cards.js?v=6.70"></script>
+<script src="data.js?v=6.70"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.69"></script>
-<script src="decks.js?v=6.69"></script>
+<script src="auth.js?v=6.70"></script>
+<script src="decks.js?v=6.70"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.69"></script>
-<script src="collection.js?v=6.69"></script>
+<script src="social.js?v=6.70"></script>
+<script src="collection.js?v=6.70"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.69"></script>
-<script src="news-ui.js?v=6.69"></script>
+<script src="news.js?v=6.70"></script>
+<script src="news-ui.js?v=6.70"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.69"></script>
+<script src="home-ui.js?v=6.70"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.69"></script>
-<script src="set-ui.js?v=6.69"></script>
-<!-- v6.65 — halaman Tournaments Deck (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.69"></script>
+<script src="spoilers.js?v=6.70"></script>
+<script src="set-ui.js?v=6.70"></script>
+<!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
+<script src="tournaments.js?v=6.70"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -2783,10 +2783,10 @@ const T = {
   navCardsS: 'Cards',
   navBuild: 'Deck Builder',
   navBuildS: 'Builder',
-  navMeta: 'Community Deck',
-  navMetaS: 'Community Deck',
-  navTourney: 'Tournaments Deck',
-  navTourneyS: 'Tournaments Deck',
+  navMeta: 'User Decks',
+  navMetaS: 'User Decks',
+  navTourney: 'Tournament Decks',
+  navTourneyS: 'Tournament Decks',
   navLgs: 'Weekly Rush LGS',
   navLgsS: 'Weekly Rush LGS',
   navPanduan: 'Guide',
@@ -2952,7 +2952,7 @@ const T = {
   /* --- halaman & panel (v6.2) --- */
   metaTitle: 'MHR Deck Lab — Marvel Hero Rush Deck Builder',
   metaDesc: 'Marvel Hero Rush TCG deck builder: all 288 cards with images, stats, and effect text — available in Indonesian and English. Build a deck, share it as a link or an image.',
-  metaHead: 'Community Deck',
+  metaHead: 'User Decks',
   metaIntro: 'Decks that are popular in the MHR community right now. Load one into the Deck Builder to see its contents or tweak it — the deck you\'re currently building won\'t be overwritten.',
   metaLoad: 'Load into Deck Builder',
   metaView: 'View visual',
@@ -2968,7 +2968,7 @@ const T = {
   pubPublishBtn: '🌐 Publish',
   pubUnpublishBtn: 'Unpublish',
   pubPlaystylePrompt: 'Playstyle notes to show in the public gallery (optional, can be left blank):',
-  pubPublishOk: 'Published to Community Deck.',
+  pubPublishOk: 'Published to User Decks.',
   pubUnpublishOk: 'Publish cancelled.',
   pubErr: 'Failed to update publish status. Please try again.',
   pubModHide: 'Hide',
@@ -2977,9 +2977,10 @@ const T = {
   pubModConfirmDelete: 'Permanently delete this deck (including from the owner\'s account)? This action cannot be undone.',
   pubModErr: 'Failed to perform the moderation action.',
   lgsHead: 'Hero Base',
-  /* v6.26: halaman Tournaments Deck — deck Top-N dari turnamen resmi Marvel Hero Rush
-     (nama tab & judul halaman diganti dari "Tournaments" jadi "Tournaments Deck" di v6.42) */
-  tourneyHead: 'Tournaments Deck',
+  /* v6.26: halaman Tournament Decks — deck Top-N dari turnamen resmi Marvel Hero Rush
+     (nama tab & judul halaman diganti dari "Tournaments" jadi "Tournaments Deck" di v6.42,
+     lalu jadi "Tournament Decks" di v6.70) */
+  tourneyHead: 'Tournament Decks',
   tourneyIntro: 'Decks from the Top rounds of official Marvel Hero Rush tournaments. Load one into the Deck Builder to see its contents — the deck you\'re currently building won\'t be overwritten.',
   tourneyNone: 'No tournament data yet.',
   tourneySrc: 'Source',
@@ -3328,7 +3329,7 @@ function namaDeckLokal(nm){ return nm; }
 
 /* v6.46 — dulu bernama applyLang(), dipanggil ulang tiap tombol #btnLang
    dipencet untuk menukar semua teks chrome UI antara Indonesia/Inggris
-   (termasuk menyembunyikan tab LGS/Tournaments Deck/Community Deck saat mode
+   (termasuk menyembunyikan tab LGS/Tournament Decks/User Decks saat mode
    EN). Tombol & mekanisme itu sudah dihapus total: kamus T sekarang cuma
    berisi SATU string dwibahasa per key (lihat komentar DUA BAHASA di atas T),
    dan ketiga tab itu SELALU tampil untuk semua pengunjung (permintaan pemilik
@@ -5996,7 +5997,7 @@ function setPage(p, dariHash){
   if(typeof p === 'string' && p.startsWith('set/')){ sub = p.slice(4).toUpperCase(); p = 'set'; }  /* v6.64 */
   if(!PAGES.includes(p)) p = 'cards';
   if(p !== 'berita') document.title = TITLE_AWAL;
-  /* v6.46 — semua tab (termasuk LGS/Tournaments Deck/Community Deck) SELALU
+  /* v6.46 — semua tab (termasuk LGS/Tournament Decks/User Decks) SELALU
      tampil untuk semua pengunjung sekarang (lihat applyText) — tidak ada lagi
      pengecualian berdasarkan bahasa.
      v6.66 — Panduan (rulebook) kini juga sudah diterjemahkan penuh ke Bahasa
@@ -6307,7 +6308,7 @@ function metaImgFallback(img,no,warna){
   if(i<exts.length){ img.dataset.ext=i; img.src=`images/${no}.${exts[i]}`; }
   else { img.onerror=null; img.outerHTML = `<div class="ph" style="--phc:${warna}"></div>`; }
 }
-/* v6.27: fallback thumbnail 32px untuk baris analisis Tournaments Deck — beda dari
+/* v6.27: fallback thumbnail 32px untuk baris analisis Tournament Decks — beda dari
    metaImgFallback() karena elemen penggantinya bukan flex item di dalam
    .meta-strip, jadi butuh ukuran tetap sendiri (.tny-usage-thumb). */
 function tnyUsageImgFallback(img,no,warna){
@@ -6518,7 +6519,7 @@ $('#metaGrid').addEventListener('click', e=>{
    (?admin=1) yang cuma buat generator kode deck lama, TIDAK dipakai di sini.
 
    Tiap deck di dalam event.top memakai field `cd` dengan format PERSIS SAMA
-   dengan encodeDeck()/decodeDeck() yang sudah dipakai Community Deck,
+   dengan encodeDeck()/decodeDeck() yang sudah dipakai User Decks,
    supaya bisa langsung dimuat ke Deck Builder atau dilihat visual lewat
    jalur (openDeckView) yang sama — tidak ada kode baru untuk decode/render
    kartu. Struktur satu entri di event.top:
@@ -7821,7 +7822,7 @@ window.addEventListener('hashchange', ()=>{
       if(error){ showCloudNote(t('pubErr')); return; }
       showCloudNote(t(willPublish ? 'pubPublishOk' : 'pubUnpublishOk'));
       renderCloudList();
-      // kalau halaman Community Deck kebetulan sedang terbuka juga, segarkan
+      // kalau halaman User Decks kebetulan sedang terbuka juga, segarkan
       // galeri publiknya sekarang juga alih-alih menunggu navigasi ulang
       if(state.page === 'meta' && typeof renderPubGrid === 'function') renderPubGrid();
     }

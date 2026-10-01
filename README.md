@@ -509,6 +509,41 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v6.70 — Menu "Community Deck" jadi "User Decks", "Tournaments Deck" jadi "Tournament Decks" — 1 Oktober 2026 *(`index.html`, `home-ui.js`)*
+
+Permintaan pemilik: dua nama tab navigasi & judul halaman diganti sekaligus —
+"Community Deck" → "User Decks" dan "Tournaments Deck" → "Tournament Decks".
+Sama seperti rename sebelumnya (§ v6.42), tidak ada instruksi untuk
+membedakan nama tab vs judul halaman, jadi keduanya diganti bersamaan.
+
+- **`navMeta`/`navMetaS`** (label tombol nav `data-page="meta"`) dan
+  **`metaHead`** (judul H2 halaman `#metaPage`) diganti dari
+  `"Community Deck"` ke `"User Decks"`.
+- **`navTourney`/`navTourneyS`** (label tombol nav `data-page="tourney"`) dan
+  **`tourneyHead`** (judul H2 halaman `#tourneyPage`) diganti dari
+  `"Tournaments Deck"` ke `"Tournament Decks"`.
+- **`pubPublishOk`** (notifikasi sukses publish deck ke galeri publik) ikut
+  disesuaikan jadi `"Published to User Decks."` supaya tidak menyebut nama
+  lama.
+- Kartu akses cepat di halaman Beranda (`home-ui.js`, fungsi `quickHTML()`)
+  yang menunjuk ke `#meta` ikut diganti labelnya jadi "User Decks".
+- Komentar kode yang menyebut kedua nama tab ini (dekat `.pub-head`,
+  `.meta-*`/halaman Tournament Decks, `.meta-wrap`, `setPage()`, fallback
+  thumbnail analisis kartu, `encodeDeck()`/`decodeDeck()`, dan
+  `renderPubGrid()`) ikut diperbarui supaya konsisten dengan nama yang
+  sekarang tampil. Nama internal (class `.meta-*`, variabel
+  `DECK_KOMUNITAS`, dll.) **tidak diubah** — itu hook internal, bukan label
+  yang tampil ke pengunjung.
+- Cache-buster skrip dinaikkan ke `?v=6.70` (12 tag `<script>`) karena
+  `home-ui.js` ikut berubah.
+- Entri changelog LAMA (§ v6.42, § v6.26, dst.) **tidak disentuh** — itu
+  catatan historis tentang nama tab pada saat entri itu ditulis.
+
+**Verifikasi**: `node --check` pada blok `<script>` inline utama di
+`index.html` dan pada `home-ui.js` — lolos. Grep `Community Deck`/
+`Tournaments Deck` di kedua berkas sesudah edit — tidak ada sisa referensi
+ke label lama di luar entri changelog historis.
+
 ### v6.65 — Input hasil Turnamen + statistik meta (Fase 4) — 26 September 2026 *(`index.html`, `tournaments.js` baru, `data.js`, `sw.js`, Supabase SQL)*
 
 Fase 4: hasil turnamen resmi tidak lagi diedit manual di `data.js` — sekarang

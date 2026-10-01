@@ -189,7 +189,7 @@
     return `<section class="hm-quick">
       ${q('#cards','🃏','Search Cards', `${typeof DB!=='undefined'?DB.length:''} cards, full filters`)}
       ${q('#build','🛠','Build a Deck','Build, check the curve, share')}
-      ${q('#meta','🏆','Community Deck', `${nDeck} ready-to-use decks`)}
+      ${q('#meta','🏆','User Decks', `${nDeck} ready-to-use decks`)}
       ${q('#panduan','📘','New to the game?','Official rules guide 1.03')}
     </section>`;
   }
