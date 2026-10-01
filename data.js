@@ -173,19 +173,22 @@ window.RILIS = [
    sementara, cukup beri // di depan tiap barisnya.
 
    nama       : nama pemilik rekening/akun, tampil sebagai "a.n. <nama>".
-   metode     : daftar metode pembayaran, tiap metode = { jenis, label, nomor }.
-                jenis dipakai untuk memilih ikon (lihat DUKUNG_ICON di index.html);
-                boleh tambah/kurangi metode kapan saja.
+   metode     : daftar metode pembayaran, tiap metode = { jenis, label, nomor }
+                untuk rekening/e-wallet (nomor bisa disalin lewat tombol "Copy"),
+                atau { jenis, label, url } untuk link eksternal seperti Ko-fi
+                (tampil sebagai tombol "Open" yang membuka tab baru — lihat
+                renderDukungPage() di index.html). jenis dipakai untuk memilih
+                ikon (lihat DUKUNG_ICON di index.html); boleh tambah/kurangi
+                metode kapan saja.
    emailSaran : alamat email tujuan tombol "Kirim saran/komentar" di halaman Dukung.
    teks       : kalimat yang tampil di footer & sebagai subjudul halaman Dukung —
                 silakan diubah kapan saja. en = English (dipakai duluan, situs kini
                 satu bahasa), id = Bahasa Indonesia (cadangan kalau en kosong). */
 window.DUKUNG = {
-  nama: 'Data Anggi Pratama',
+  nama: 'Data',
   metode: [
-    { jenis: 'gopay',   label: 'GoPay',   nomor: '081384279992' },
-    { jenis: 'mandiri', label: 'Mandiri', nomor: '1370021339789' },
-    { jenis: 'bca',     label: 'BCA',     nomor: '1280141719' },
+    { jenis: 'gopay', label: 'GoPay', nomor: '081384279992' },
+    { jenis: 'kofi',  label: 'Ko-fi', url: 'https://ko-fi.com/data2712' },
   ],
   emailSaran: 'dataanggi2712@yahoo.co.id',
   teks: {

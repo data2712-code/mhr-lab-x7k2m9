@@ -1948,26 +1948,26 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.70"></script>
-<script src="data.js?v=6.70"></script>
+<script src="cards.js?v=6.71"></script>
+<script src="data.js?v=6.71"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.70"></script>
-<script src="decks.js?v=6.70"></script>
+<script src="auth.js?v=6.71"></script>
+<script src="decks.js?v=6.71"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.70"></script>
-<script src="collection.js?v=6.70"></script>
+<script src="social.js?v=6.71"></script>
+<script src="collection.js?v=6.71"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.70"></script>
-<script src="news-ui.js?v=6.70"></script>
+<script src="news.js?v=6.71"></script>
+<script src="news-ui.js?v=6.71"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.70"></script>
+<script src="home-ui.js?v=6.71"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.70"></script>
-<script src="set-ui.js?v=6.70"></script>
+<script src="spoilers.js?v=6.71"></script>
+<script src="set-ui.js?v=6.71"></script>
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.70"></script>
+<script src="tournaments.js?v=6.71"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -3197,6 +3197,9 @@ const T = {
      mentah "subCopyBtn" alih-alih "Salin"/"Copy"). Diberi key SENDIRI di
      sini (`dkCopyBtn`, bukan dipakai bersama lagi) supaya tidak terulang. */
   dkCopyBtn: 'Copy',
+  /* v6.71 — tombol untuk metode Dukung berbentuk link eksternal (mis. Ko-fi),
+     beda dari dkCopyBtn yang untuk metode bernomor (rekening/e-wallet). */
+  dkOpenBtn: 'Open',
 };
 
 function t(k){
@@ -4513,7 +4516,7 @@ function renderDukung(){
    jatuh ke ikon generik 💳, jadi menambah metode baru di data.js (mis. OVO,
    DANA) tidak butuh perubahan di sini. */
 const DUKUNG_ICON = { gopay:'📱', ovo:'📱', dana:'📱', shopeepay:'🛍️',
-  mandiri:'🏦', bca:'🏦', bni:'🏦', bri:'🏦' };
+  mandiri:'🏦', bca:'🏦', bni:'🏦', bri:'🏦', kofi:'☕' };
 function mailtoDukung(cfg){
   const email = (cfg && cfg.emailSaran) || '';
   if(!email) return '';
@@ -4548,13 +4551,15 @@ function renderDukungPage(){
           <div class="dk-icon">${DUKUNG_ICON[m.jenis] || '💳'}</div>
           <div class="dk-info">
             <span class="dklb">${escHtml(m.label || m.jenis || '')}</span>
-            <span class="no">${escHtml(m.nomor || '')}</span>
+            ${m.url ? '' : `<span class="no">${escHtml(m.nomor || '')}</span>`}
           </div>
-          <button class="dk-copy" type="button" data-idx="${i}">${t('dkCopyBtn')}</button>
+          ${m.url
+            ? `<a class="dk-copy dk-link" href="${escHtml(m.url)}" target="_blank" rel="noopener">${t('dkOpenBtn')}</a>`
+            : `<button class="dk-copy" type="button" data-idx="${i}">${t('dkCopyBtn')}</button>`}
         </div>`).join('')}
     </div>
     ${linkMail ? `<div class="dk-cta"><a href="${linkMail}">✉ ${t('dkCta')}</a></div>` : ''}`;
-  wrap.querySelectorAll('.dk-copy').forEach(btn=>{
+  wrap.querySelectorAll('.dk-copy:not(.dk-link)').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const m = metode[btn.dataset.idx];
       const teks = m && m.nomor;

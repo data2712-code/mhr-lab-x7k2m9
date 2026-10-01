@@ -509,6 +509,36 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v6.71 — Update metode Dukung: hapus Mandiri & BCA, nama jadi "Data", tambah Ko-fi — 1 Oktober 2026 *(`index.html`, `data.js`)*
+
+Permintaan pemilik: perbarui daftar metode di halaman Dukung (`window.DUKUNG`
+di `data.js`).
+
+- **Dihapus**: metode `mandiri` dan `bca` (rekening bank) dari `metode`.
+- **`nama`** diganti dari `'Data Anggi Pratama'` jadi `'Data'` — ini yang
+  tampil sebagai "Account name: **Data**" di halaman Dukung.
+- **Ditambah**: metode baru `{ jenis: 'kofi', label: 'Ko-fi', url: 'https://ko-fi.com/data2712' }`.
+  Karena Ko-fi adalah link, bukan nomor rekening/e-wallet yang disalin,
+  `metode` sekarang mendukung dua bentuk field: `nomor` (disalin lewat
+  tombol "Copy", perilaku lama, tidak berubah) atau `url` (dibuka di tab
+  baru lewat tombol baru "Open"/`dkOpenBtn`). `renderDukungPage()` di
+  `index.html` dicabangkan sesuai field yang ada di tiap entri — menambah
+  metode link lain di masa depan (mis. PayPal, Trakteer) tinggal isi
+  `url`, tidak perlu ubah kode lagi.
+- Ikon `☕` ditambahkan ke `DUKUNG_ICON` untuk `jenis:'kofi'`. Ikon metode
+  lama yang sudah tidak dipakai (`mandiri`, `bca`) **tidak dihapus** dari
+  peta ikon — tetap jadi fallback siap pakai kalau nanti ditambah lagi,
+  sama seperti `bni`/`bri` yang dari awal memang belum pernah dipakai.
+- Listener tombol "Copy" (`wrap.querySelectorAll('.dk-copy')`) disempitkan
+  jadi `.dk-copy:not(.dk-link)` supaya tidak nyangkut di tombol "Open"
+  (yang sudah berupa `<a>` biasa, tidak butuh JS untuk membuka link-nya).
+- Cache-buster skrip dinaikkan ke `?v=6.71` (12 tag `<script>`) karena
+  `data.js` ikut berubah.
+
+**Verifikasi**: `node --check` pada `data.js` dan blok `<script>` inline
+utama di `index.html` — lolos. Grep `Mandiri`/`BCA`/`Data Anggi Pratama` di
+`data.js` sesudah edit — tidak ada sisa.
+
 ### v6.70 — Menu "Community Deck" jadi "User Decks", "Tournaments Deck" jadi "Tournament Decks" — 1 Oktober 2026 *(`index.html`, `home-ui.js`)*
 
 Permintaan pemilik: dua nama tab navigasi & judul halaman diganti sekaligus —
