@@ -509,6 +509,33 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Perbaikan label di halaman Panduan tab "Official Rules" — 3 Oktober 2026 *(`index.html`)*
+
+Pemilik membandingkan isi tab "Official Rules" (`OFFICIAL_RULES` di `index.html`)
+dengan PDF resmi `MarvelHeroRush综合规则书1.03.pdf` dari Jason/Card Fun halaman
+demi halaman. Hasilnya: terjemahan sudah akurat dan lengkap di seluruh 305
+section plus riwayat revisi 1.00–1.03 — hanya ditemukan 2 hal kecil, keduanya
+sudah diperbaiki:
+
+- **201.7 salah label "FEATURES", seharusnya "NAME"** — judul section 201.7
+  dan daftar informasi di 201.3 sama-sama salah menyebut field nama karakter
+  (名称) sebagai "FEATURES", padahal field *trait* (特征, section 201.9)
+  sudah benar diberi label "trait" secara terpisah. Diperbaiki ke "NAME" di
+  kedua tempat.
+- **301.26 judulnya "detach Attached Card" (huruf kecil)** — tidak konsisten
+  dengan semua judul section lain yang Title Case (mis. "301.25. Attach
+  Character"). Diperbaiki ke "Detach Attached Card".
+
+Tidak ada perubahan pada isi aturan (rules text) itu sendiri — murni perbaikan
+label/judul. Karena perubahan ini hanya pada teks inline di `index.html` (bukan
+salah satu dari 12 berkas `.js` yang pakai cache-buster `?v=`), cache-buster
+**tidak dinaikkan** — konsisten dengan `sw.js` yang memperlakukan `index.html`
+sebagai NETWORK-FIRST (selalu diambil ulang dari server saat online).
+
+**Verifikasi**: Grep `FEATURES` dan `detach Attached Card` di `index.html`
+sesudah edit — tidak ada sisa. `node --check` pada blok `<script>` inline
+utama — lolos.
+
 ### v6.72 — Ganti kalimat keterangan halaman Dukung — 1 Oktober 2026 *(`data.js`)*
 
 Permintaan pemilik: `window.DUKUNG.teks.en` (kalimat yang tampil di footer
