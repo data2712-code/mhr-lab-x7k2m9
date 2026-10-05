@@ -385,6 +385,26 @@
   .mech button[aria-pressed="true"]{background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:700}
   .mech .lbl{font-size:11px;color:var(--muted);align-self:center;letter-spacing:.06em;
     text-transform:uppercase;margin-right:2px}
+  /* --- v6.73: filter Game area / Effect / Power (panel lipat "fxPanel") --- */
+  .mech button:disabled{opacity:.35;cursor:not-allowed}
+  .mech button:disabled:hover{color:var(--muted)}
+  .mech .fxtog{border-style:dashed}
+  .mech .fxtog[aria-expanded="true"]{border-style:solid;border-color:var(--accent);color:var(--paper)}
+  .mech .fxtog .fxn[hidden]{display:none}
+  .mech .fxtog .fxn{display:inline-block;margin-left:6px;min-width:17px;padding:0 5px;border-radius:999px;
+    background:var(--accent);color:#1A1206;font-family:var(--mono);font-size:10.5px;font-weight:800;line-height:17px}
+  .fxpanel{width:100%;display:flex;flex-direction:column;gap:8px;margin-top:2px;padding-top:9px;
+    border-top:1px dashed var(--line)}
+  .fxpanel[hidden]{display:none}
+  .fxpanel .mech{margin-top:0}
+  .pwrange{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .pwrange input{width:96px;background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:6px 9px;font-size:12.5px;outline:none;font-family:var(--mono)}
+  .pwrange input:focus{border-color:var(--accent)}
+  .pwrange input[aria-invalid="true"]{border-color:var(--merah)}
+  .pwrange .dash{color:var(--muted)}
+  .pwrange .pwbad{color:#FFB4A8;font-size:11.5px}
+  .pwrange .pwbad[hidden]{display:none}
   /* --- peringatan aturan deck --- */
   .rule{border-radius:9px;padding:8px 11px;font-size:12px;line-height:1.5;margin-bottom:10px;
     display:flex;gap:8px;align-items:flex-start}
@@ -1753,6 +1773,30 @@
         <button data-m="retreat" aria-pressed="false" data-i18n="mRetreat">Trigger RETREAT</button>
         <button data-m="draw" aria-pressed="false" data-i18n="mDraw">Tarik kartu</button>
         <button data-m="debuff" aria-pressed="false" data-i18n="mDebuff">Turunkan Power</button>
+        <!-- v6.73 — membuka panel filter Game area / Effect / Power di bawah -->
+        <button class="fxtog" id="btnFx" aria-expanded="false" aria-controls="fxPanel"
+          data-i18n-title="fMoreT"><span data-i18n="fMore">Areas · Effect · Power</span><span class="fxn" id="fxBadge" hidden>0</span></button>
+      </div>
+      <!-- v6.73 — filter lanjutan (permintaan pemilik 5 Oktober 2026): Game area, Effect, Power.
+           Chip area/effect digambar JS (renderFxButtons) supaya hitungan kartunya ikut data. -->
+      <div class="fxpanel" id="fxPanel" hidden>
+        <div class="mech" id="areaBar">
+          <span class="lbl" data-i18n="fAreaLbl" data-i18n-title="fAreaT">Game area</span>
+          <span id="areaChips" style="display:contents"></span>
+        </div>
+        <div class="mech" id="effBar">
+          <span class="lbl" data-i18n="fEffLbl" data-i18n-title="fEffT">Effect</span>
+          <span id="effChips" style="display:contents"></span>
+        </div>
+        <div class="mech" id="pwrBar">
+          <span class="lbl" data-i18n="fPowLbl" data-i18n-title="fPowT">Power</span>
+          <span class="pwrange">
+            <input id="fPowMin" type="number" inputmode="numeric" min="0" step="500" data-i18n-ph="fPowMin" placeholder="Min">
+            <span class="dash">–</span>
+            <input id="fPowMax" type="number" inputmode="numeric" min="0" step="500" data-i18n-ph="fPowMax" placeholder="Max">
+            <span class="pwbad" id="pwBad" hidden data-i18n="fPowBad">Min is higher than Max — nothing can match.</span>
+          </span>
+        </div>
       </div>
       </div>
       <div class="count-note" id="noteShown"></div>
@@ -2157,6 +2201,22 @@ function renderColorButtons(){
     `<button class="cbtn ${c.toLowerCase()}" data-c="${c}" data-on="${state.colors.has(c)?'1':'0'}" title="${c}"></button>`).join('');
 }
 
+/* v6.73 — chip Game area / Effect digambar dari data kartu (hitungan kartu di tooltip);
+   chip dengan 0 kartu dinonaktifkan. Dipanggil dari applyText(), seperti renderColorButtons(). */
+function renderFxButtons(){
+  const vis = DB.filter(cardVisible);
+  const nA = {}, nE = {};
+  vis.forEach(c=>{ const f = cardFx(c); f.areas.forEach(k=>nA[k]=(nA[k]||0)+1); f.eff.forEach(k=>nE[k]=(nE[k]||0)+1); });
+  $('#areaChips').innerHTML = FX_AREAS.map(([k])=>{
+    const n = nA[k]||0;
+    return `<button data-a="${k}" aria-pressed="${state.areas.has(k)}"${n?'':' disabled'} title="${n ? n+' '+t('cards') : t('fAreaNone')}">${k}</button>`;
+  }).join('');
+  $('#effChips').innerHTML = FX_EFFECTS.map(([k,lbl,tip])=>{
+    const n = nE[k]||0;
+    return `<button data-e="${k}" aria-pressed="${state.effects.has(k)}"${n?'':' disabled'} title="${t(tip)} (${n} ${t('cards')})">${t(lbl)}</button>`;
+  }).join('');
+}
+
 /* pola pencocokan filter mekanik (dicek pada teks efek kartu) */
 const MECH = {
   prune:   /\bPrune\b/i,
@@ -2182,6 +2242,77 @@ const MECH = {
 };
 const KEY_ABIL = ['block','doubleattack','assault','airstrike','unique'];
 
+/* ---- v6.73: filter "Game area" / "Effect" (permintaan pemilik 5 Oktober 2026) ----
+   Keduanya dihitung dari teks efek kartu (e = Indonesia, e_en = Inggris; kartu
+   cocok kalau SALAH SATU bahasa cocok, sama seperti MECH di atas).
+   - Teks pengingat kata kunci ([UNIQUE](...), [COUNTER](...), [BLOCK](...), dst.
+     / UNIQUE(...), COUNTER(...) di teks Inggris) DIBUANG dulu: isinya cuma
+     pengingat aturan (mis. "[AUTO/FIELD] Tidak diperbolehkan ada karakter lain…")
+     dan bukan efek sungguhan kartu itu, jadi tanpa dibuang kartu yang cuma punya
+     UNIQUE/COUNTER akan salah terhitung punya efek AUTO / area FIELD.
+   - Efek: [TRIG]/[AUTO]/[ACTI] (Indonesia) atau TRIG【…】/AUTO【…】/ACTI【…】
+     (Inggris). [COUNTER-ACTI] / COUNTER·ACTI termasuk Activated (Rulebook 305:
+     "COUNTER-Activated Effect").
+   - Area: kartu menyebut area itu di teks efeknya — baik di kurung zona aktif
+     (mis. TRIG【RETREAT】) maupun di isi efek. Teks Inggris menulis "field" dan
+     "deck" huruf kecil, dan "back"/"retreat" huruf kecil adalah kata kerja biasa
+     (bukan area), jadi hanya FIELD/DECK/RUSH POINT DECK/TIMELINE yang dicek tanpa
+     membedakan huruf besar-kecil. HAND selalu ditulis huruf besar di kedua bahasa.
+     RUSH POINT DECK & TIMELINE saat ini belum disebut teks kartu mana pun →
+     chip-nya otomatis non-aktif sampai ada kartu yang menyebutnya. */
+const FX_AREAS = [
+  ['FRONT',  /\bFRONT\b/],
+  ['WING',   /\bWING\b/],
+  ['BACK',   /\bBACK\b/],
+  ['FIELD',  /\bfield\b/i],
+  ['BATTLE', /\bBATTLE\b/],
+  ['BASE',   /\bBASE\b/],
+  ['VOID',   /\bVOID\b/],
+  ['RETREAT',/\bRETREAT\b/],
+  ['HAND',   /\bHAND\b/],
+  ['DECK',   /\bdeck\b/i],              // dicek SETELAH "rush point deck" dibuang (lihat fxAreasOf)
+  ['RUSH POINT DECK', /\brush point deck\b/i],
+  ['TIMELINE', /\btimeline\b/i],
+];
+const FX_EFFECTS = [
+  ['trig', 'fEffTrig', 'fEffTrigT', /\[TRIG\]|\bTRIG【/],
+  ['auto', 'fEffAuto', 'fEffAutoT', /\[AUTO\]|\bAUTO【/],
+  ['acti', 'fEffActi', 'fEffActiT', /\[(?:COUNTER-)?ACTI\]|\bACTI【/],
+];
+/* buang "[KATA KUNCI](...pengingat...)" / "KATA KUNCI(...pengingat...)" dengan
+   kurung seimbang — pengingat BLOCK memuat kurung bersarang "(BATTLE/ONCE PER TURN)". */
+function fxStripReminders(s){
+  const re = /\[(?:UNIQUE COUNTER|UNIQUE|COUNTER|BLOCK|DOUBLE ATTACK|ASSAULT|AIR STRIKE)\]\(|\b(?:UNIQUE COUNTER|UNIQUE|COUNTER|BLOCK|DOUBLE ATTACK|ASSAULT|AIR STRIKE)\(/g;
+  let out = '', last = 0, m;
+  while((m = re.exec(s))){
+    let depth = 1, i = re.lastIndex;
+    while(i < s.length && depth > 0){ const ch = s[i++]; if(ch === '(') depth++; else if(ch === ')') depth--; }
+    out += s.slice(last, m.index); last = i; re.lastIndex = i;
+  }
+  return out + s.slice(last);
+}
+const FX_CACHE = new Map();
+function cardFx(c){
+  let r = FX_CACHE.get(c.no);
+  if(r) return r;
+  r = {areas:new Set(), eff:new Set()};
+  [c.e, c.e_en].forEach(raw=>{
+    if(!raw) return;
+    const txt = fxStripReminders(raw);
+    FX_EFFECTS.forEach(([k,,,re])=>{ if(re.test(txt)) r.eff.add(k); });
+    const noRp = txt.replace(/rush point deck/gi, ' ');
+    FX_AREAS.forEach(([k,re])=>{ if(re.test(k==='DECK' ? noRp : txt)) r.areas.add(k); });
+  });
+  FX_CACHE.set(c.no, r);
+  return r;
+}
+/* batas Power manual: '' = tanpa batas; hanya bilangan bulat >= 0 yang dianggap */
+function fxPowBound(v){
+  if(v === '' || v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null;
+}
+
 /* daftar trait unik, dipecah dari field trait tiap kartu */
 function traitsOf(c){
   return (c.f||'').split('/').map(t=>t.trim()).filter(t=>t && t!=='-');
@@ -2192,6 +2323,7 @@ const state = {
   q:'', colors:new Set(COLORS),
   series:'', level:'', range:'', rarity:'', trait:'', keyAbil:'', sort:'no', view:'list',
   mech:new Set(), page:'cards', onlyDeck:false,
+  areas:new Set(), effects:new Set(), powMin:'', powMax:'',  // v6.73
   /* v6.46 — bahasa TEKS kartu (nama & efek + gambar). state.lang (toggle bahasa
      chrome UI ID/EN) DIHAPUS TOTAL di v6.46 — teks UI sekarang satu set string
      dwibahasa tunggal (lihat kamus T), bukan lagi dua varian yang dipilih lewat
@@ -2287,6 +2419,10 @@ function filtered(){
     (!state.keyAbil || (MECH[state.keyAbil] && (MECH[state.keyAbil].test(c.e) || MECH[state.keyAbil].test(c.e_en||'')))) &&
     (!state.onlyDeck || (state.deck[c.no]||0) > 0) &&
     [...state.mech].every(m => MECH[m] && (MECH[m].test(c.e) || MECH[m].test(c.e_en||''))) &&
+    [...state.areas].every(a => cardFx(c).areas.has(a)) &&
+    [...state.effects].every(k => cardFx(c).eff.has(k)) &&
+    (fxPowBound(state.powMin) === null || c.p >= fxPowBound(state.powMin)) &&
+    (fxPowBound(state.powMax) === null || c.p <= fxPowBound(state.powMax)) &&
     (!q || (cardName(c)+' '+cardEff(c)+' '+c.nm+' '+c.e+' '+c.f+' '+c.no).toLowerCase().includes(q))
   );
   const s = state.sort;
@@ -2677,6 +2813,10 @@ function updateFilterBadge(){
   if(state.colors.size < COLORS.length) n++;
   ['series','level','range','trait','rarity','keyAbil'].forEach(k=>{ if(state[k]) n++; });
   n += state.mech.size;
+  const fx = state.areas.size + state.effects.size + ((state.powMin !== '' || state.powMax !== '') ? 1 : 0);
+  n += fx;
+  const fxb = $('#fxBadge');
+  if(fxb){ fxb.textContent = fx; fxb.hidden = fx === 0; }
   if(state.onlyDeck) n++;
   const b = $('#fBadge');
   if(!b) return;
@@ -2691,6 +2831,38 @@ $('#mechBar').addEventListener('click', e=>{
   else { state.mech.add(m); b.setAttribute('aria-pressed','true'); }
   renderCards();
 });
+/* v6.73 — panel filter Game area / Effect / Power */
+$('#btnFx').addEventListener('click', ()=>{
+  const p = $('#fxPanel'), buka = p.hidden;
+  p.hidden = !buka;
+  $('#btnFx').setAttribute('aria-expanded', String(buka));
+});
+$('#fxPanel').addEventListener('click', e=>{
+  const b = e.target.closest('[data-a],[data-e]');
+  if(!b || b.disabled) return;
+  const set = b.dataset.a !== undefined ? state.areas : state.effects;
+  const key = b.dataset.a !== undefined ? b.dataset.a : b.dataset.e;
+  if(set.has(key)){ set.delete(key); b.setAttribute('aria-pressed','false'); }
+  else { set.add(key); b.setAttribute('aria-pressed','true'); }
+  renderCards();
+});
+function fxPowSync(){
+  const lo = fxPowBound(state.powMin), hi = fxPowBound(state.powMax);
+  const bad = lo !== null && hi !== null && lo > hi;
+  ['fPowMin','fPowMax'].forEach(id=>{
+    if(bad) $('#'+id).setAttribute('aria-invalid','true'); else $('#'+id).removeAttribute('aria-invalid');
+  });
+  $('#pwBad').hidden = !bad;
+}
+['fPowMin','fPowMax'].forEach(id=>{
+  $('#'+id).addEventListener('input', e=>{
+    const v = e.target.value.trim();
+    const n = fxPowBound(v);
+    state[id==='fPowMin' ? 'powMin' : 'powMax'] = n === null ? '' : String(n);
+    fxPowSync();
+    renderCardsNanti(150);
+  });
+});
 $('#fSort').addEventListener('change', e=>{ state.sort=e.target.value; renderCards(); });
 $('#cbtns').addEventListener('click', e=>{
   const b=e.target.closest('.cbtn'); if(!b) return;
@@ -2703,6 +2875,9 @@ $('#btnReset').addEventListener('click', ()=>{
   clearTimeout(qTmr); qTmr = null;
   state.q=''; state.series=''; state.level=''; state.range=''; state.rarity=''; state.trait=''; state.keyAbil=''; state.sort='no';
   state.mech.clear();
+  state.areas.clear(); state.effects.clear(); state.powMin = ''; state.powMax = '';
+  document.querySelectorAll('#fxPanel [data-a],#fxPanel [data-e]').forEach(b=>b.setAttribute('aria-pressed','false'));
+  $('#fPowMin').value = ''; $('#fPowMax').value = ''; fxPowSync();
   state.onlyDeck = false;
   $('#btnOnlyDeck').setAttribute('aria-pressed','false');
   document.querySelectorAll('#mechBar [data-m]').forEach(b=>b.setAttribute('aria-pressed','false'));
@@ -2852,6 +3027,25 @@ const T = {
   mRetreat: 'Trigger RETREAT',
   mDraw: 'Draw card',
   mDebuff: 'Lower Power',
+  /* v6.73 — filter Game area / Effect / Power */
+  fMore: 'Areas · Effect · Power',
+  fMoreT: 'More filters: game areas, effect type, and a custom Power range',
+  fAreaLbl: 'Game area',
+  fAreaT: 'Cards whose effect text mentions the area — either where the effect activates (e.g. TRIG【RETREAT】) or where it moves or checks cards. Pick several to require all of them.',
+  fAreaNone: 'No card text mentions this area yet',
+  fEffLbl: 'Effect',
+  fEffT: 'Effect type. Pick several to require all of them.',
+  fEffTrig: 'Trigger',
+  fEffTrigT: 'Cards with a [TRIG] Trigger effect',
+  fEffAuto: 'Auto',
+  fEffAutoT: 'Cards with an [AUTO] Auto effect (the reminder text of [UNIQUE] or [COUNTER] alone does not count)',
+  fEffActi: 'Activated',
+  fEffActiT: 'Cards with an [ACTI] Activated effect, including [COUNTER-ACTI]',
+  fPowLbl: 'Power',
+  fPowMin: 'Min',
+  fPowMax: 'Max',
+  fPowT: 'Show only cards whose Power is inside this range (both ends included). Leave a box empty for no limit.',
+  fPowBad: 'Min is higher than Max — nothing can match.',
   matchCount: 'cards match the filter',
   noMatch: 'No cards match. Try loosening the filter.',
   levelLbl: 'Level',
@@ -3364,6 +3558,7 @@ function applyText(){
   });
   // dropdown & tombol warna yang isinya dibuat oleh JavaScript perlu digambar ulang
   renderColorButtons();
+  renderFxButtons();
   isiDropdown();
   renderCards(); renderDeck();
   if(typeof renderDukung === 'function') renderDukung();

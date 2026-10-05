@@ -509,6 +509,54 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v6.73 — Filter baru di Deck Builder: Game area, Effect, dan Power min/max — 5 Oktober 2026 *(`index.html`)*
+
+Permintaan pemilik: tiga filter baru di halaman Cards / Deck Builder. Semuanya
+ada di panel lipat yang dibuka tombol **"Areas · Effect · Power"** di baris
+Mechanic (angka di tombol = jumlah filter aktif di panel itu, ikut terhitung di
+badge ⚙ Filter versi HP, dan ikut dikosongkan tombol **Reset**).
+
+- **Game area** — `FRONT, WING, BACK, FIELD, BATTLE, BASE, VOID, RETREAT, HAND,
+  DECK, RUSH POINT DECK, TIMELINE` (HAND ditambahkan di hari yang sama atas
+  permintaan pemilik; 99 kartu). Kartu cocok kalau teks efeknya **menyebut** area
+  itu, baik di kurung zona aktif (mis. `TRIG【RETREAT】`) maupun di isi efek.
+  Beberapa chip dipilih sekaligus = kartu harus menyebut SEMUA (sama seperti
+  chip Mechanic).
+- **Effect** — `Trigger`, `Auto`, `Activated` (dari `[TRIG]`/`[AUTO]`/`[ACTI]`
+  di teks Indonesia, `TRIG【】`/`AUTO【】`/`ACTI【】` di teks Inggris).
+  `[COUNTER-ACTI]` dihitung sebagai Activated (Rulebook 305).
+- **Power** — dua kotak angka Min dan Max, diisi bebas (kelipatan 500, batas
+  ikut inklusif). Salah satu boleh kosong = tanpa batas di sisi itu. Kalau Min
+  lebih besar dari Max, kotak jadi merah + muncul peringatan dan hasilnya kosong.
+
+**Catatan penting untuk perawatan data**
+- Teks pengingat kata kunci (`[UNIQUE](…)`, `[COUNTER](…)`, `[BLOCK](…)`, dst. /
+  `UNIQUE(…)`, `COUNTER(…)` di teks Inggris) **dibuang dulu** sebelum dicocokkan
+  (`fxStripReminders()`). Isinya cuma pengingat aturan — contohnya pengingat
+  UNIQUE berbunyi "`[AUTO/FIELD]` … pada FIELD Anda" — sehingga tanpa dibuang,
+  kartu yang cuma punya UNIQUE/COUNTER akan salah terhitung punya efek Auto.
+- Teks Inggris menulis `field`/`deck` dengan huruf kecil, dan `back`/`retreat`
+  huruf kecil adalah kata biasa (bukan area), jadi hanya FIELD/DECK/RUSH POINT
+  DECK/TIMELINE yang dicocokkan tanpa membedakan huruf besar-kecil.
+- **RUSH POINT DECK dan TIMELINE saat ini 0 kartu** (belum ada teks kartu yang
+  menyebutnya), jadi chip-nya otomatis non-aktif (abu-abu) — akan menyala
+  sendiri begitu ada kartu yang menyebutnya di `cards.js`, tanpa ubah kode.
+- HAND selalu ditulis huruf besar di `e` maupun `e_en` (tidak ada "hand" huruf
+  kecil), jadi dicocokkan dengan `/\bHAND\b/` tanpa `i`.
+- Kartu tanpa `e_en` dicocokkan dari teks Indonesia saja; kartu dengan kedua
+  bahasa cocok kalau salah satu bahasa cocok (sama dengan `MECH`).
+
+Tidak ada berkas baru dan tidak ada perubahan pada `cards.js`, jadi `sw.js` dan
+cache-buster **tidak dinaikkan** (`index.html` NETWORK-FIRST).
+
+**Verifikasi**: `node --check` pada blok `<script>` inline utama — lolos. Diuji di
+browser headless dengan `cards.js` asli (293 kartu): hasil tiap chip area/effect
+dan rentang Power dibandingkan dengan implementasi pembanding terpisah — semua
+cocok (mis. FIELD 185, BATTLE 172, RETREAT 111, Trigger 171, Auto 79, Activated
+82; gabungan RETREAT+Trigger = 86; Power 3000–4000 di atasnya = 21); Reset,
+bahasa kartu Indonesia/Inggris, dan layar HP 390px tanpa scroll horizontal juga
+dicek.
+
 ### Perbaikan label di halaman Panduan tab "Official Rules" — 3 Oktober 2026 *(`index.html`)*
 
 Pemilik membandingkan isi tab "Official Rules" (`OFFICIAL_RULES` di `index.html`)
