@@ -3248,8 +3248,6 @@ const T = {
   dlPContact: 'Contact / WhatsApp',
   dlPEvent: 'Event Name',
   dlPDate: 'Date',
-  dlPStore: 'LGS / Venue',
-  dlPSign: 'Signature',
   dlSeries: 'SERIES',
   dlSub: 'Subtotal',
   dlTargetOk: 'on target',
@@ -3919,10 +3917,12 @@ $('#btnImportGo').addEventListener('click', ()=>{
 });
 
 /* ==================== LEMBAR DECKLIST PDF (teks saja) ====================
-   Berkas PDF A4 berisi kop, kode deck, blok data pemain yang diisi tangan,
+   Berkas PDF A4 berisi kop (logo MHR Deck Lab + tanggal), kode deck, blok data
+   pemain yang diisi tangan (Player Name, Date, Contact / WhatsApp, Event Name),
    lalu tabel kartu per warna dengan subtotal dan total — mengikuti gaya
-   lembar decklist turnamen. Tidak memuat gambar sama sekali, jadi berkasnya
-   kecil dan enak dicetak di printer hitam-putih.
+   lembar decklist turnamen. Satu-satunya gambar adalah logo di kop (v6.74,
+   icons/logo-header.png); selebihnya teks, jadi berkasnya tetap kecil dan
+   enak dicetak di printer hitam-putih.
    Fitur ini untuk semua pengguna (bukan admin-only). */
 
 /* jsPDF memakai font standar (WinAnsi), jadi karakter di luar Latin-1 —
@@ -3948,6 +3948,60 @@ function tanggalCetak(){
   } catch(e){ return ''; }
 }
 
+/* v6.74 — logo kop PDF. Dimuat dari icons/logo-header.png (berkas yang sama
+   dengan logo header situs), digambar ke canvas supaya jadi data-URL PNG yang
+   bisa dimasukkan ke jsPDF. Hasilnya di-cache; kalau gagal dimuat (offline dan
+   belum ter-cache, dsb.) fungsi mengembalikan null dan kop jatuh kembali ke
+   teks "MHR DECK LAB" seperti sebelumnya, jadi PDF tetap jadi.
+   Logo aslinya dirancang untuk latar gelap: teks "DECK LAB" putih dengan kontur
+   gelap yang tipis (~1,5 px dari 759 px), jadi di kertas putih hampir hilang.
+   Karena itu kontur gelapnya DITEBALKAN khusus untuk cetak: siluet logo diwarnai
+   gelap lalu distempel di sekeliling logo (lingkaran berjari-jari PDF_LOGO_KONTUR
+   px) sebelum logo aslinya digambar di atasnya. Berkas logo aslinya tidak diubah. */
+const PDF_LOGO_KONTUR = 4;          /* px pada logo 759 px lebar; naikkan = kontur lebih tebal */
+let PDF_LOGO = null;
+function pdfMuatLogo(){
+  if(PDF_LOGO) return Promise.resolve(PDF_LOGO);
+  return new Promise(res=>{
+    const img = new Image();
+    img.onload = ()=>{
+      try {
+        const iw = img.naturalWidth, ih = img.naturalHeight, r = PDF_LOGO_KONTUR, pad = r + 1;
+        /* siluet gelap */
+        const sil = document.createElement('canvas');
+        sil.width = iw; sil.height = ih;
+        const sx = sil.getContext('2d');
+        sx.drawImage(img, 0, 0);
+        sx.globalCompositeOperation = 'source-in';
+        sx.fillStyle = '#14181F'; sx.fillRect(0, 0, iw, ih);
+        /* buang piksel nyaris transparan (sisa antialias di berkas logo) dan buat
+           siluet padat — kalau tidak, piksel-piksel itu menumpuk jadi bintik gelap
+           setelah distempel puluhan kali */
+        const dat = sx.getImageData(0, 0, iw, ih), px = dat.data;
+        for(let i = 3; i < px.length; i += 4) px[i] = px[i] >= 64 ? 255 : 0;
+        sx.putImageData(dat, 0, 0);
+        /* kanvas hasil: siluet distempel melingkar, logo asli di atasnya */
+        const cv = document.createElement('canvas');
+        cv.width = iw + pad*2; cv.height = ih + pad*2;
+        const cx = cv.getContext('2d');
+        const LANGKAH = 24;
+        for(let ring = 1; ring <= r; ring++){
+          for(let k = 0; k < LANGKAH; k++){
+            const a = k * 2 * Math.PI / LANGKAH;
+            cx.drawImage(sil, pad + Math.cos(a)*ring, pad + Math.sin(a)*ring);
+          }
+        }
+        cx.drawImage(sil, pad, pad);
+        cx.drawImage(img, pad, pad);
+        PDF_LOGO = {data: cv.toDataURL('image/png'), w: cv.width, h: cv.height, pad, iw, ih};
+      } catch(e){ PDF_LOGO = null; }
+      res(PDF_LOGO);
+    };
+    img.onerror = ()=>res(null);
+    img.src = 'icons/logo-header.png';
+  });
+}
+
 async function buatDecklistPDF(){
   const btn = $('#btnDlPdf');
   const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no), q}))
@@ -3960,6 +4014,7 @@ async function buatDecklistPDF(){
     alert(t('dlNoLib')); return;
   }
 
+  const logo   = await pdfMuatLogo();
   const total  = entries.reduce((a,x)=>a+x.q, 0);
   const lvSum  = entries.reduce((a,x)=>a + x.c.l*x.q, 0);
   const col    = {};
@@ -4005,11 +4060,22 @@ async function buatDecklistPDF(){
 
   /* ---------- halaman 1: kop ---------- */
   halamanBaru(false);
-  pdf.setFont('helvetica','bold'); pdf.setFontSize(16); pdf.setTextColor(20);
-  pdf.text('MHR DECK LAB', M, y + 4);
   pdf.setFont('helvetica','normal'); pdf.setFontSize(9.5); pdf.setTextColor(110);
-  pdf.text(pdfSafe(tanggalCetak()), R, y + 4, {align:'right'});
-  y += 7; garis(y, 0.4); y += 6;
+  if(logo){
+    /* logo kiri (tinggi 13 mm menurut logo asli tanpa bantalan kontur), tanggal
+       rata kanan sejajar dasar logo. Kanvas logo punya bantalan `pad` px di tiap
+       sisi untuk kontur tebal, jadi gambar digeser mundur sebesar bantalan itu. */
+    const LOGO_H = 13, K = LOGO_H / logo.ih;
+    pdf.addImage(logo.data, 'PNG', M - 1 - logo.pad*K, y - logo.pad*K, logo.w*K, logo.h*K);
+    pdf.text(pdfSafe(tanggalCetak()), R, y + LOGO_H - 3.5, {align:'right'});
+    y += LOGO_H + 1.5; garis(y, 0.4); y += 6;
+  } else {
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(16); pdf.setTextColor(20);
+    pdf.text('MHR DECK LAB', M, y + 4);
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(9.5); pdf.setTextColor(110);
+    pdf.text(pdfSafe(tanggalCetak()), R, y + 4, {align:'right'});
+    y += 7; garis(y, 0.4); y += 6;
+  }
 
   /* nama deck */
   pdf.setFont('helvetica','bold'); pdf.setFontSize(13); pdf.setTextColor(20);
@@ -4041,11 +4107,13 @@ async function buatDecklistPDF(){
   pdf.setFont('helvetica','bold'); pdf.setFontSize(8.4); pdf.setTextColor(60);
   pdf.text(pdfSafe(t('dlPlayer')), M, y);
   y += 3;
-  const kolomKiri = [t('dlPName'), t('dlPContact'), t('dlPStore')];
-  const kolomKanan = [t('dlPDate'), t('dlPEvent'), t('dlPSign')];
+  /* v6.74 — baris "LGS / Venue" dan "Signature" dihapus (permintaan pemilik):
+     tinggal dua baris, empat sel. */
+  const kolomKiri = [t('dlPName'), t('dlPContact')];
+  const kolomKanan = [t('dlPDate'), t('dlPEvent')];
   const lebar = (R - M) / 2, tinggiSel = 11;
   pdf.setDrawColor(175); pdf.setLineWidth(0.2);
-  for(let i=0;i<3;i++){
+  for(let i=0;i<kolomKiri.length;i++){
     const yy = y + i*tinggiSel;
     pdf.rect(M, yy, lebar, tinggiSel);
     pdf.rect(M + lebar, yy, lebar, tinggiSel);
@@ -4053,7 +4121,7 @@ async function buatDecklistPDF(){
     pdf.text(pdfSafe(kolomKiri[i]),  M + 2, yy + 3.6);
     pdf.text(pdfSafe(kolomKanan[i]), M + lebar + 2, yy + 3.6);
   }
-  y += 3*tinggiSel + 7;
+  y += kolomKiri.length*tinggiSel + 7;
 
   /* ---------- tabel kartu per warna ---------- */
   kepalaKolom();

@@ -207,18 +207,20 @@ ke folder `images/`.
 ### Ekspor lembar decklist (PDF teks)
 
 Tombol **📄 Decklist PDF** di panel deck — **untuk semua pengguna**, bukan admin saja.
-Menghasilkan berkas `decklist-<nama deck>.pdf` berisi teks saja (tanpa gambar), jadi
-ukurannya hanya beberapa KB dan enak dicetak di printer hitam-putih.
+Menghasilkan berkas `decklist-<nama deck>.pdf` berisi teks plus satu gambar saja, yaitu
+logo di kop (sejak v6.74), jadi ukurannya hanya sekitar 100 KB dan tetap enak dicetak
+di printer hitam-putih.
 
 Isi lembarnya, mengikuti gaya lembar decklist turnamen:
 
-1. Kop **MHR DECK LAB** beserta tanggal cetak
+1. Kop berisi **logo MHR Deck Lab** (`icons/logo-header.png`, tanpa latar, dengan kontur gelap ditebalkan khusus cetak) beserta tanggal cetak
 2. Nama deck + ringkasan: total kartu, komposisi warna, rata-rata Lv, dan status
    terhadap target ukuran deck
 3. Kotak **Kode Deck** — kode dari fitur "Salin link deck", jadi decknya bisa dibuka
    ulang di Deck Lab hanya dari lembar cetaknya
 4. Blok **Data Pemain** yang kosong untuk diisi tulisan tangan: Nama Pemain, Tanggal,
-   Kontak / WhatsApp, Nama Event, LGS / Tempat, dan Tanda Tangan
+   Kontak / WhatsApp, dan Nama Event (empat kotak; baris LGS / Tempat dan Tanda Tangan
+   dihapus di v6.74)
 5. Tabel kartu **dikelompokkan per warna** dengan kolom Nama Kartu · Seri · Nomor · Lv ·
    Jumlah, ditutup **Subtotal** tiap warna dan **Total** keseluruhan
 Kaki halaman sengaja dibiarkan bersih. Nomor halaman hanya ditulis kalau lembarnya
@@ -508,6 +510,35 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.74 — Decklist PDF: logo MHR Deck Lab di kop, baris LGS/Venue & Signature dihapus — 5 Oktober 2026 *(`index.html`)*
+
+Permintaan pemilik untuk format cetak decklist (tombol **📄 Decklist PDF**):
+
+- **Kop memakai logo MHR Deck Lab** (`icons/logo-header.png`, berkas yang sama dengan
+  logo header situs), menggantikan tulisan teks "MHR DECK LAB", dipasang langsung di
+  kertas putih tanpa lencana/latar (pilihan pemilik). Tanggal cetak tetap rata kanan.
+- **Kontur logo ditebalkan khusus untuk cetak.** Logo aslinya dirancang untuk latar
+  gelap: teks "DECK LAB" putih dengan kontur gelap yang tipis (sekitar 1,5 px dari
+  lebar 759 px), jadi di kertas putih nyaris hilang. `pdfMuatLogo()` mewarnai siluet
+  logo gelap (`#14181F`), menstempelnya melingkar di sekeliling logo (jari-jari
+  `PDF_LOGO_KONTUR` = 4 px, sekitar 0,25 mm di kertas), lalu menggambar logo aslinya
+  di atasnya. **Berkas `logo-header.png` tidak diubah** — logo situs tetap seperti
+  semula. Mau lebih tebal/tipis: ubah `PDF_LOGO_KONTUR` (3 = halus, 4 = dipakai,
+  6 = tebal tapi celah huruf mulai tertutup). Piksel hampir transparan di berkas logo
+  dibuang dulu (ambang alpha 64) supaya tidak jadi bintik gelap setelah distempel.
+- **Blok Player Info tinggal dua baris**: Player Name | Date dan Contact / WhatsApp |
+  Event Name. Kotak "LGS / Venue" dan "Signature" dihapus; kunci teksnya (`dlPStore`,
+  `dlPSign`) ikut dihapus dari kamus `T` karena tidak dipakai di tempat lain.
+- Logo dimuat lewat `pdfMuatLogo()` (gambar → canvas → data-URL PNG, di-cache; file
+  PDF sekitar 100 KB). Kalau
+  gambar gagal dimuat, kop jatuh kembali ke tulisan "MHR DECK LAB" seperti dulu, jadi
+  PDF tetap bisa dibuat.
+
+Diuji (jsPDF 2.5.1, Chromium): PDF 1 halaman dan 2 halaman jadi tanpa error, kop
+halaman 2 tidak berubah, dan cadangan teks berfungsi saat logo diblokir. Tidak ada
+berkas baru dan `sw.js` tidak perlu diubah (`index.html` network-first; logo yang sama
+sudah dimuat header situs di setiap kunjungan).
 
 ### v6.73 — Filter baru di Deck Builder: Game area, Effect, dan Power min/max — 5 Oktober 2026 *(`index.html`)*
 
