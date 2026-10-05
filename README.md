@@ -207,6 +207,8 @@ ke folder `images/`.
 ### Ekspor lembar decklist (PDF teks)
 
 Tombol **📄 Decklist PDF** di panel deck — **untuk semua pengguna**, bukan admin saja.
+Sejak v6.75 tombol ini membuka menu pilihan: **Text list** (lembar teks di bawah) atau
+**Full image** (lembar bergambar dengan kurva Level dan QR, lihat riwayat v6.75).
 Menghasilkan berkas `decklist-<nama deck>.pdf` berisi teks plus satu gambar saja, yaitu
 logo di kop (sejak v6.74), jadi ukurannya hanya sekitar 100 KB dan tetap enak dicetak
 di printer hitam-putih.
@@ -510,6 +512,53 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.75 — Decklist PDF "Full image": lembar decklist bergambar + menu pilihan format — 5 Oktober 2026 *(`index.html`)*
+
+Permintaan pemilik: opsi lembar decklist **penuh gambar** (mengikuti contoh lembar
+decklist bergambar yang dikirim pemilik), selain lembar teks yang sudah ada. Pilihan
+pemilik lewat tanya-jawab: **PDF A4**, tema **terang hemat tinta**, kop **logo + QR
+link deck**, dan **satu tombol dengan menu pilihan format**.
+
+- **Tombol 📄 Decklist PDF sekarang membuka menu kecil**: *Text list* (lembar teks
+  lama, tidak berubah) dan *Full image* (format baru). Menu bisa dipakai keyboard
+  (↑ ↓, Esc kembali ke tombol), menutup saat klik di luar/scroll/resize, dan posisinya
+  fixed supaya tidak terpotong panel deck (HP maupun desktop).
+- **Isi lembar Full image** (A4 portrait, fungsi `buatDecklistGambarPDF()`):
+  - Panel kop abu-abu muda: nama deck + titik warna, **kurva Level** (jumlah salinan per
+    Lv 1–6, angka di atas batang), **Cards / Counter / Avg Lv**, logo MHR Deck Lab
+    (versi kontur tebal dari v6.74), dan **QR code** yang membuka deck itu di Deck Builder.
+  - **Grid gambar kartu**: kartu sama digabung, lencana **"3x"** di pojok kanan atas,
+    bingkai tipis sesuai warna kartu, urut **Level naik → warna → nomor kartu** (seperti
+    contoh). 6 kolom; kalau kartu unik terlalu banyak untuk satu halaman dipakai 7 lalu
+    8 kolom, dan kalau masih tak muat lanjut ke halaman 2.
+  - Kaki halaman: "Card art © MARVEL © JASON · fan-made content, unofficial" dan
+    mhrdecklab.com.
+- **Definisi "Counter"** = jumlah salinan kartu yang punya mekanik Counter menurut
+  `counterInfo()` (lencana Counter di grid kartu): `[COUNTER]` / `[UNIQUE COUNTER]`
+  (call) atau `[COUNTER-ACTI]`. Kalau di contoh pemilik angkanya dihitung lain, ubah
+  satu baris `nCtr`.
+- **QR**: isinya `https://mhrdecklab.com/#d=<kode deck>` — isi yang sama dengan "Salin
+  link deck", tapi dengan domain kanonis supaya tetap benar kalau PDF dibuat dari alamat
+  lain (pratinjau). Dibuat sebagai kotak vektor (tajam saat dicetak) dengan pustaka
+  `qrcode-generator` 1.4.4 dari cdnjs (dimuat sesuai kebutuhan, seperti jsPDF). Kalau
+  pustaka gagal dimuat, QR dilewati dan lembar tetap jadi (diganti teks mhrdecklab.com).
+  Hasil QR diuji dibaca ulang dan cocok dengan kode deck aslinya.
+- **Gambar kartu** diambil lewat `loadCardImgAny()` (sama dengan "Lihat deck — HD":
+  mengikuti varian art dan bahasa kartu pilihan pemain), lalu diperkecil lewat canvas
+  ke JPEG ±340 px — PDF 1 halaman sekitar 1,2–1,4 MB. Kartu yang gambarnya gagal
+  dimuat diganti kotak abu-abu berisi nomor kartu. Sudut gambar dipotong membulat
+  (clip jsPDF); kalau clip gagal, gambar tetap digambar kotak dengan bingkai berwarna.
+- Nama berkas: `decklist-<nama deck>-image.pdf` (lembar teks tetap `decklist-<nama deck>.pdf`).
+- Kunci teks baru di kamus `T`: `dlMenuText`, `dlMenuTextD`, `dlMenuImg`, `dlMenuImgD`,
+  `dlImgCards`, `dlImgAvgLv`, `dlImgCounter`, `dlImgScan`, `dlImgSub`, `dlImgFoot`.
+- Tidak ada blok isian pemain di format ini (contoh pemilik juga tidak punya); untuk
+  lembar yang diisi tangan tetap pakai *Text list*.
+
+Diuji (Chromium, jsPDF 2.5.1) dengan deck turnamen sungguhan (Radian, Mirza, Edwin,
+Yogie; 19–23 kartu unik), deck uji 50 kartu unik tanpa sebagian gambar (7 kolom, 1
+halaman), QR gagal dimuat, menu (buka/tutup/keyboard/pilih), dan lembar teks lewat menu.
+Tidak ada berkas baru; `sw.js` tidak perlu diubah (`index.html` network-first).
 
 ### v6.74 — Decklist PDF: logo MHR Deck Lab di kop, baris LGS/Venue & Signature dihapus — 5 Oktober 2026 *(`index.html`)*
 

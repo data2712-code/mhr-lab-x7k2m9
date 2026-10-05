@@ -351,6 +351,15 @@
     border-radius:6px;padding:5px 8px;font-family:var(--mono);width:100%}
 
   .deck-actions{display:flex;gap:8px;margin-top:14px}
+  /* v6.75 — menu pilihan format di tombol Decklist PDF (Text list / Full image) */
+  .dlmenu{position:fixed;z-index:70;min-width:236px;max-width:calc(100vw - 16px);background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.5)}
+  .dlmenu[hidden]{display:none}
+  .dlmenu button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--paper);
+    padding:9px 10px;border-radius:7px;cursor:pointer;font-size:12.5px;font-weight:700}
+  .dlmenu button small{display:block;font-weight:400;color:var(--muted);font-size:11px;margin-top:2px;line-height:1.35}
+  .dlmenu button:hover,.dlmenu button:focus-visible{background:var(--ink);outline:none}
+  .dlmenu button:focus-visible{box-shadow:0 0 0 2px var(--accent) inset}
   .btn2{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--paper);
     border-radius:8px;padding:9px 6px;cursor:pointer;font-size:12.5px;font-weight:600}
   .btn2:hover{border-color:var(--accent)}
@@ -1867,7 +1876,7 @@
     <div class="deck-actions" style="margin-top:8px">
       <button class="btn2" id="btnLink" data-i18n="copyLink">🔗 Salin link deck</button>
       <button class="btn2" id="btnTabel" data-i18n="copyTable">Salin tabel</button>
-      <button class="btn2" id="btnDlPdf" data-i18n="dlBtn">📄 Decklist PDF</button>
+      <button class="btn2" id="btnDlPdf" data-i18n="dlBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="dlMenu">📄 Decklist PDF</button>
       <button class="btn2" id="btnImport" data-i18n="impBtn">📋 Impor dari teks</button>
       <button class="btn2 danger" id="btnClear" data-i18n="clearDeck">Kosongkan</button>
     </div>
@@ -3249,6 +3258,16 @@ const T = {
   dlPEvent: 'Event Name',
   dlPDate: 'Date',
   dlSeries: 'SERIES',
+  dlMenuText: 'Text list',
+  dlMenuTextD: 'Card table to print and fill in by hand',
+  dlMenuImg: 'Full image',
+  dlMenuImgD: 'Card art grid with level curve and QR code',
+  dlImgCards: 'Cards',
+  dlImgAvgLv: 'Avg Lv',
+  dlImgCounter: 'Counter',
+  dlImgScan: 'Scan to open this deck in the Deck Builder',
+  dlImgSub: 'Marvel Hero Rush deck builder',
+  dlImgFoot: 'Card art © MARVEL © JASON · fan-made content, unofficial',
   dlSub: 'Subtotal',
   dlTargetOk: 'on target',
   dlTargetNo: 'not on target',
@@ -4198,14 +4217,308 @@ async function buatDecklistPDF(){
   btn.textContent = `✓ PDF · ${jml} ${t('dlPage')}`;
   setTimeout(()=>btn.textContent = t('dlBtn'), 2600);
 }
-$('#btnDlPdf').addEventListener('click', ()=>{
-  buatDecklistPDF().catch(err=>{
-    console.error('[MHR Deck Lab] gagal membuat decklist PDF:', err);
-    $('#btnDlPdf').disabled = false;
-    $('#btnDlPdf').textContent = t('dlBtn');
-    alert(t('dlNoLib'));
+/* =============== v6.75 — DECKLIST PDF "FULL IMAGE" ===============
+   Format kedua dari tombol Decklist PDF (permintaan pemilik, mengikuti contoh
+   lembar decklist bergambar): A4 portrait, tema TERANG (hemat tinta), berisi
+     - panel kop: nama deck + titik warna, kurva Level, Cards / Counter / Avg Lv,
+       logo MHR Deck Lab, QR code yang membuka deck ini di Deck Builder;
+     - grid gambar kartu (kartu sama digabung, lencana "3x" di pojok kanan atas),
+       diurut Level naik → warna → nomor, bingkai tipis sesuai warna kartu.
+   Kolom grid 6 (kartu paling besar); kalau jumlah kartu unik tak muat di satu
+   halaman dipakai 7 lalu 8 kolom, dan kalau masih tak muat lanjut ke halaman 2.
+   Gambar memakai loadCardImgAny() (ikut varian art & bahasa pilihan pemain),
+   diperkecil lewat canvas ke JPEG ±340 px supaya PDF tetap ringan (±1 MB).
+   Kartu yang gambarnya gagal dimuat digantikan kotak abu-abu berisi nomor kartu. */
+function pxEnsureQR(){
+  if(typeof window.qrcode === 'function') return Promise.resolve(true);
+  return new Promise(res=>{
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+    sc.onload  = ()=>res(typeof window.qrcode === 'function');
+    sc.onerror = ()=>res(false);
+    document.head.appendChild(sc);
   });
-});
+}
+/* gambar → JPEG data-URL berlebar maksimal `lebar` px (background putih) */
+function pdfKecilkanGambar(im, lebar){
+  const k = Math.min(1, lebar / im.naturalWidth);
+  const cv = document.createElement('canvas');
+  cv.width  = Math.round(im.naturalWidth  * k);
+  cv.height = Math.round(im.naturalHeight * k);
+  const cx = cv.getContext('2d');
+  cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height);
+  cx.drawImage(im, 0, 0, cv.width, cv.height);
+  return cv.toDataURL('image/jpeg', 0.86);
+}
+/* link kanonis supaya QR di kertas tetap benar walau dibuat dari alamat lain
+   (mis. pratinjau). Sama dengan isi "Salin link deck": '#d=<kode deck>'. */
+function pdfLinkDeck(){
+  const host = /^https?:$/.test(location.protocol) && /(^|\.)mhrdecklab\.com$/.test(location.hostname)
+    ? location.origin + '/' : 'https://mhrdecklab.com/';
+  return host + '#d=' + encodeDeck(state.deck, store.active);
+}
+
+async function buatDecklistGambarPDF(){
+  const btn = $('#btnDlPdf');
+  const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no), q}))
+    .filter(x=>x.c);
+  if(!entries.length){ alert(t('mDeckEmpty')); return; }
+
+  btn.disabled = true; btn.textContent = t('dlBusy');
+  if(!await pxEnsureJsPDF()){
+    btn.disabled = false; btn.textContent = t('dlBtn');
+    alert(t('dlNoLib')); return;
+  }
+  const adaQR = await pxEnsureQR();        /* gagal = lembar tetap jadi, tanpa QR */
+  const logo  = await pdfMuatLogo();
+
+  /* urutan seperti contoh: Level naik, lalu warna, lalu nomor kartu */
+  entries.sort((a,b)=>a.c.l-b.c.l || CORDER[a.c.c]-CORDER[b.c.c] || a.c.no.localeCompare(b.c.no));
+
+  /* gambar kartu (berurutan supaya tombol bisa menampilkan progres) */
+  const gambar = {};
+  for(let i=0;i<entries.length;i++){
+    const no = entries[i].c.no;
+    btn.textContent = `${t('hdLoading')} ${i+1}/${entries.length}`;
+    const im = await loadCardImgAny(no);
+    gambar[no] = im ? pdfKecilkanGambar(im, 340) : null;
+  }
+
+  const total  = entries.reduce((a,x)=>a+x.q, 0);
+  const lvSum  = entries.reduce((a,x)=>a + x.c.l*x.q, 0);
+  const nCtr   = entries.reduce((a,x)=>a + (counterInfo(x.c) ? x.q : 0), 0);
+  const warna  = {};
+  entries.forEach(({c,q})=>warna[c.c] = (warna[c.c]||0) + q);
+  const lvMax  = Math.max(6, ...entries.map(x=>x.c.l));
+  const perLv  = Array.from({length:lvMax}, ()=>0);
+  entries.forEach(({c,q})=>perLv[c.l-1] += q);
+
+  const {jsPDF} = window.jspdf;
+  const pdf = new jsPDF({unit:'mm', format:'a4', orientation:'portrait', compress:true});
+  const PW = 210, PH = 297, M = 10, CW = PW - 2*M;           /* area isi 190 mm */
+  const TEKS = [31,41,55], ABU = [107,114,128];
+
+  /* ---------- panel kop ---------- */
+  const PH_KOP = 34;
+  pdf.setFillColor(245,246,248); pdf.setDrawColor(213,217,224); pdf.setLineWidth(0.3);
+  pdf.roundedRect(M, M, CW, PH_KOP, 2.5, 2.5, 'FD');
+
+  /* QR kanan */
+  const QR = 25.5;
+  const qx = M + CW - 4 - QR, qy = M + (PH_KOP - QR)/2;
+  if(adaQR){
+    try {
+      const qr = window.qrcode(0, 'M');
+      qr.addData(pdfLinkDeck()); qr.make();
+      const n = qr.getModuleCount(), cell = QR / n;
+      pdf.setFillColor(255,255,255);
+      pdf.rect(qx - 1.2, qy - 1.2, QR + 2.4, QR + 2.4, 'F');
+      pdf.setFillColor(0,0,0);
+      for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+        if(qr.isDark(r,c)) pdf.rect(qx + c*cell, qy + r*cell, cell + 0.03, cell + 0.03, 'F');
+      }
+    } catch(e){ console.warn('[MHR Deck Lab] QR gagal dibuat:', e); }
+  }
+  /* logo + keterangan di kiri QR, rata kanan */
+  const kananTeks = adaQR ? qx - 3.2 : M + CW - 4;
+  let kiriBlok = kananTeks;
+  if(logo){
+    const LH = 11, K = LH / logo.ih, LW = logo.iw * K;
+    pdf.addImage(logo.data, 'PNG', kananTeks - LW - logo.pad*K, M + 4 - logo.pad*K, logo.w*K, logo.h*K);
+    kiriBlok = kananTeks - LW;
+  } else {
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(13); pdf.setTextColor(...TEKS);
+    pdf.text('MHR DECK LAB', kananTeks, M + 11, {align:'right'});
+    kiriBlok = kananTeks - pdf.getTextWidth('MHR DECK LAB');
+  }
+  pdf.setFont('helvetica','normal'); pdf.setFontSize(6.6); pdf.setTextColor(...ABU);
+  pdf.text(pdfSafe(t('dlImgSub')), kananTeks, M + 19, {align:'right'});
+  if(adaQR){
+    const baris = pdf.splitTextToSize(pdfSafe(t('dlImgScan')), 46);
+    baris.slice(0,2).forEach((ln,i)=>pdf.text(ln, kananTeks, M + 24 + i*3.1, {align:'right'}));
+  } else {
+    pdf.text('mhrdecklab.com', kananTeks, M + 24, {align:'right'});
+  }
+
+  /* nama deck + titik warna (kiri atas) */
+  const kiri = M + 5, lebarKiri = Math.max(40, kiriBlok - 6 - kiri);
+  const urutW = Object.keys(warna).sort((a,b)=>warna[b]-warna[a] || CORDER[a]-CORDER[b]);
+  const lebarDots = urutW.length * 4.6;
+  let nama = pdfSafe(store.active) || 'Deck';
+  let fs = 17;
+  pdf.setFont('helvetica','bold'); pdf.setFontSize(fs);
+  while(pdf.getTextWidth(nama) > lebarKiri - lebarDots && fs > 11){ fs -= 1; pdf.setFontSize(fs); }
+  while(pdf.getTextWidth(nama) > lebarKiri - lebarDots && nama.length > 4){ nama = nama.slice(0,-2) + '.'; }
+  pdf.setTextColor(...TEKS);
+  pdf.text(nama, kiri, M + 11);
+  const dx = kiri + pdf.getTextWidth(nama) + 3.2;
+  urutW.forEach((w,i)=>{
+    pdf.setFillColor(HEXC[w] || '#888888');
+    pdf.circle(dx + i*4.6 + 1.5, M + 9.5, 1.5, 'F');
+  });
+
+  /* kurva Level (kiri bawah) */
+  const bx0 = kiri, by = M + 29.5, BW = 5, BG = 1.7, BH = 9.5;
+  const maks = Math.max(1, ...perLv);
+  perLv.forEach((n,i)=>{
+    const x = bx0 + i*(BW + BG), h = Math.max(0.6, BH * n / maks);
+    pdf.setFillColor(n ? 75 : 209, n ? 85 : 213, n ? 99 : 219);
+    pdf.rect(x, by - 4.2 - h, BW, h, 'F');
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(6); pdf.setTextColor(...ABU);
+    pdf.text(String(i+1), x + BW/2, by - 1, {align:'center'});
+    if(n){ pdf.setFont('helvetica','bold'); pdf.setFontSize(5.6); pdf.setTextColor(...TEKS);
+           pdf.text(String(n), x + BW/2, by - 4.2 - h - 0.7, {align:'center'}); }
+  });
+  /* statistik */
+  const sx0 = bx0 + lvMax*(BW + BG) + 5;
+  const stat = [[String(total), t('dlImgCards')], [String(nCtr), t('dlImgCounter')],
+                [(lvSum/total).toFixed(1), t('dlImgAvgLv')]];
+  stat.forEach(([angka,label],i)=>{
+    const x = sx0 + i*19;
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(15); pdf.setTextColor(...TEKS);
+    pdf.text(angka, x, by - 8);
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(6.2); pdf.setTextColor(...ABU);
+    pdf.text(pdfSafe(label).toUpperCase(), x, by - 4.4);
+  });
+
+  /* ---------- grid kartu ---------- */
+  const GAP = 3, KAKI = 13, AMAN = 1;
+  const y0 = M + PH_KOP + 6;
+  const tinggiAda1 = PH - KAKI - y0;
+  const n = entries.length;
+  const ukur = cols=>{ const w = (CW - (cols-1)*GAP)/cols; return {cols, w, h: w*88/63}; };
+  let g = ukur(8);
+  for(const cols of [6,7,8]){
+    const u = ukur(cols), rows = Math.ceil(n/cols);
+    if(rows*u.h + (rows-1)*GAP <= tinggiAda1 - AMAN){ g = u; break; }
+  }
+  const barisHal1 = Math.max(1, Math.floor((tinggiAda1 + GAP) / (g.h + GAP)));
+  const barisHalN = Math.max(1, Math.floor((PH - KAKI - M + GAP) / (g.h + GAP)));
+
+  const kaki = ()=>{
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(6.4); pdf.setTextColor(150);
+    pdf.text(pdfSafe(t('dlImgFoot')), M, PH - 7);
+    pdf.text('mhrdecklab.com', PW - M, PH - 7, {align:'right'});
+  };
+  kaki();
+
+  const gambarKartu = (x, y, w, h, c, q)=>{
+    const R = Math.max(1.2, w * 0.055);
+    const dat = gambar[c.no];
+    if(dat){
+      let terpotong = false;
+      try {
+        pdf.saveGraphicsState();
+        pdf.roundedRect(x, y, w, h, R, R, null);
+        pdf.clip(); pdf.discardPath();
+        pdf.addImage(dat, 'JPEG', x, y, w, h);
+        pdf.restoreGraphicsState();
+        terpotong = true;
+      } catch(e){ try{ pdf.restoreGraphicsState(); }catch(_){} }
+      if(!terpotong) pdf.addImage(dat, 'JPEG', x, y, w, h);
+    } else {
+      pdf.setFillColor(229,231,235); pdf.roundedRect(x, y, w, h, R, R, 'F');
+      pdf.setFont('helvetica','bold'); pdf.setFontSize(6.5); pdf.setTextColor(...ABU);
+      pdf.text(pdfSafe(c.no), x + w/2, y + h/2, {align:'center'});
+    }
+    /* bingkai sesuai warna kartu (menutup sudut putih pada gambar tertentu) */
+    pdf.setDrawColor(HEXC[c.c] || '#888888'); pdf.setLineWidth(Math.max(0.5, w*0.022));
+    pdf.roundedRect(x, y, w, h, R, R, 'S');
+    /* lencana jumlah salinan */
+    const bw = w * 0.34, bh = w * 0.19;
+    pdf.setFillColor(17,24,39);
+    pdf.roundedRect(x + w - bw - w*0.04, y + w*0.05, bw, bh, bh*0.3, bh*0.3, 'F');
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(Math.max(6.5, w * 0.30)); pdf.setTextColor(255,255,255);
+    pdf.text(q + 'x', x + w - w*0.04 - bw/2, y + w*0.05 + bh*0.72, {align:'center'});
+  };
+
+  let idx = 0, halaman = 1;
+  while(idx < n){
+    const maxBaris = halaman === 1 ? barisHal1 : barisHalN;
+    const yMulai   = halaman === 1 ? y0 : M;
+    for(let r=0; r<maxBaris && idx<n; r++){
+      for(let k=0; k<g.cols && idx<n; k++, idx++){
+        gambarKartu(M + k*(g.w + GAP), yMulai + r*(g.h + GAP), g.w, g.h, entries[idx].c, entries[idx].q);
+      }
+    }
+    if(idx < n){ pdf.addPage(); halaman++; kaki(); }
+  }
+  if(halaman > 1){
+    for(let p=1; p<=halaman; p++){
+      pdf.setPage(p); pdf.setFont('helvetica','normal'); pdf.setFontSize(6.6); pdf.setTextColor(140);
+      pdf.text(`${t('dlPage')} ${p}/${halaman}`, PW/2, PH - 7, {align:'center'});
+    }
+  }
+
+  const berkas = (store.active.replace(/[^\w\- ]+/g,'').trim() || 'deck');
+  pdf.save(`decklist-${berkas}-image.pdf`);
+  btn.disabled = false;
+  btn.textContent = `✓ PDF · ${halaman} ${t('dlPage')}`;
+  setTimeout(()=>btn.textContent = t('dlBtn'), 2600);
+}
+
+/* ---- menu pilihan format di tombol Decklist PDF ---- */
+(function(){
+  const tombol = $('#btnDlPdf');
+  const menu = document.createElement('div');
+  menu.id = 'dlMenu'; menu.className = 'dlmenu'; menu.hidden = true;
+  menu.setAttribute('role','menu');
+  document.body.appendChild(menu);
+
+  const jalankan = fn=>{
+    tutup();
+    fn().catch(err=>{
+      console.error('[MHR Deck Lab] gagal membuat decklist PDF:', err);
+      tombol.disabled = false;
+      tombol.textContent = t('dlBtn');
+      alert(t('dlNoLib'));
+    });
+  };
+  function isiMenu(){
+    menu.innerHTML =
+      `<button type="button" role="menuitem" data-f="text">${t('dlMenuText')}<small>${t('dlMenuTextD')}</small></button>` +
+      `<button type="button" role="menuitem" data-f="img">${t('dlMenuImg')}<small>${t('dlMenuImgD')}</small></button>`;
+  }
+  function posisi(){
+    const r = tombol.getBoundingClientRect();
+    const mw = menu.offsetWidth, mh = menu.offsetHeight;
+    let x = Math.min(Math.max(8, r.left), window.innerWidth - mw - 8);
+    let y = r.bottom + 6;
+    if(y + mh > window.innerHeight - 8) y = Math.max(8, r.top - mh - 6);
+    menu.style.left = x + 'px'; menu.style.top = y + 'px';
+  }
+  let bukaPada = 0;
+  function buka(){
+    isiMenu(); menu.hidden = false; posisi(); bukaPada = Date.now();
+    tombol.setAttribute('aria-expanded','true');
+    const pertama = menu.querySelector('button'); if(pertama) pertama.focus();
+  }
+  function tutup(balikFokus){
+    if(menu.hidden) return;
+    menu.hidden = true; tombol.setAttribute('aria-expanded','false');
+    if(balikFokus) tombol.focus();
+  }
+  tombol.addEventListener('click', e=>{
+    e.stopPropagation();
+    if(tombol.disabled) return;
+    menu.hidden ? buka() : tutup(true);
+  });
+  menu.addEventListener('click', e=>{
+    const b = e.target.closest('button[data-f]'); if(!b) return;
+    jalankan(b.dataset.f === 'img' ? buatDecklistGambarPDF : buatDecklistPDF);
+  });
+  menu.addEventListener('keydown', e=>{
+    const items = [...menu.querySelectorAll('button')], i = items.indexOf(document.activeElement);
+    if(e.key === 'ArrowDown'){ e.preventDefault(); items[(i+1) % items.length].focus(); }
+    else if(e.key === 'ArrowUp'){ e.preventDefault(); items[(i-1+items.length) % items.length].focus(); }
+    else if(e.key === 'Escape'){ e.preventDefault(); tutup(true); }
+    else if(e.key === 'Tab'){ tutup(); }
+  });
+  document.addEventListener('click', e=>{ if(!menu.hidden && !menu.contains(e.target)) tutup(); });
+  window.addEventListener('resize', ()=>tutup());
+  /* abaikan scroll yang terjadi sesaat setelah menu dibuka (mis. browser menggulung tombol ke tampilan) */
+  window.addEventListener('scroll', ()=>{ if(Date.now() - bukaPada > 300) tutup(); }, true);
+})();
 
 $('#deckGrip').addEventListener('click', ()=>$('#deckPanel').classList.toggle('open'));
 
