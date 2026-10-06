@@ -514,6 +514,41 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v6.77 — Filter Game area & Effect jadi dropdown, Power min/max pindah ke bar filter — 6 Oktober 2026 *(`index.html`)*
+
+Permintaan pemilik: filter **Game area** dan **Effect** (dulu chip di panel lipat
+"Areas · Effect · Power", v6.73) diubah menjadi **menu dropdown**, karena tampilannya
+lebih disukai dan seragam dengan dropdown filter lain.
+
+- **Dropdown baru** `#fArea` ("All game areas") dan `#fEffect` ("All effects") di bar
+  filter, tepat setelah "Key ability". Tiap opsi menampilkan jumlah kartunya, mis.
+  `HAND (92)`, `Trigger (171)`. Opsi dengan 0 kartu (**RUSH POINT DECK**, **TIMELINE** —
+  belum disebut teks kartu mana pun) tampil abu-abu dan tidak bisa dipilih; menyala
+  sendiri begitu ada kartu yang menyebutnya. Diisi `isiDropdown()` (bukan lagi
+  `renderFxButtons()`, yang dihapus), jadi ikut digambar ulang saat bahasa kartu berubah
+  dan pilihan yang aktif dipertahankan.
+- **Pilihan tunggal.** Dropdown hanya bisa satu nilai (seperti dropdown lain), jadi
+  kombinasi "area A DAN area B" dari versi chip tidak ada lagi; yang tetap bisa
+  dikombinasikan: satu area + satu effect + Power + mekanik + filter lain (semuanya AND).
+  `state.areas`/`state.effects` (Set) diganti `state.area`/`state.effect` (string).
+- **Power min/max** tetap dua kotak angka, tapi sekarang langsung di bar filter (tepat
+  setelah dropdown bahasa kartu; placeholder "Min power" / "Max power") — panel lipat dan
+  tombol "Areas · Effect · Power" **dihapus**. Peringatan merah "Min is higher than Max"
+  muncul sebagai satu baris penuh tepat di bawah kotak itu. Di HP (bar filter lipat ⚙)
+  kedua kotak berdampingan dalam satu baris.
+- Badge ⚙ Filter di HP menghitung area (1) + effect (1) + Power (1, walau Min dan Max
+  sama-sama diisi), dan tombol **Reset** mengosongkan semuanya.
+- Aturan pencocokan (apa yang dihitung "area", "Trigger/Auto/Activated", pembuangan
+  teks pengingat keyword, dsb.) **tidak berubah** — lihat v6.73 di bawah. Kunci teks
+  `fMore`, `fMoreT`, `fAreaLbl`, `fEffLbl`, `fPowLbl` dihapus; ditambah `allArea`,
+  `allEffect`; teks `fAreaT`/`fEffT`/`fPowMin`/`fPowMax` disesuaikan.
+
+Diuji (Chromium, desktop 1280 px dan HP 390 px) terhadap implementasi acuan terpisah
+pada 293 kartu: 12 area satu per satu (cocok semua, HAND 92), 3 effect, kombinasi
+RETREAT + Trigger = 86, + Power 3000–4000 = 21, Min saja (5000 = 43), Max saja
+(1000 = 68), Min > Max (0 hasil + peringatan), Reset, pilihan tetap setelah ganti
+bahasa kartu, tanpa scroll horizontal dan tanpa error konsol.
+
 ### v6.76 — Decklist PDF "Text list": kotak Deck Code diganti QR code — 6 Oktober 2026 *(`index.html`)*
 
 Permintaan pemilik: pada lembar decklist format teks, hilangkan bagian **Deck Code**
@@ -622,6 +657,9 @@ berkas baru dan `sw.js` tidak perlu diubah (`index.html` network-first; logo yan
 sudah dimuat header situs di setiap kunjungan).
 
 ### v6.73 — Filter baru di Deck Builder: Game area, Effect, dan Power min/max — 5 Oktober 2026 *(`index.html`)*
+
+> **Catatan v6.77:** tampilan chip + panel lipat yang dijelaskan di entri ini sudah diganti
+> dropdown (lihat v6.77 di atas). Aturan pencocokan di bawah masih berlaku.
 
 Permintaan pemilik: tiga filter baru di halaman Cards / Deck Builder. Semuanya
 ada di panel lipat yang dibuka tombol **"Areas · Effect · Power"** di baris
