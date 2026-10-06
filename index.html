@@ -3259,7 +3259,7 @@ const T = {
   dlPDate: 'Date',
   dlSeries: 'SERIES',
   dlMenuText: 'Text list',
-  dlMenuTextD: 'Card table to print and fill in by hand',
+  dlMenuTextD: 'Card table with QR code, to print and fill in by hand',
   dlMenuImg: 'Full image',
   dlMenuImgD: 'Card art grid with level curve and QR code',
   dlImgCards: 'Cards',
@@ -3936,7 +3936,8 @@ $('#btnImportGo').addEventListener('click', ()=>{
 });
 
 /* ==================== LEMBAR DECKLIST PDF (teks saja) ====================
-   Berkas PDF A4 berisi kop (logo MHR Deck Lab + tanggal), kode deck, blok data
+   Berkas PDF A4 berisi kop (logo MHR Deck Lab + tanggal), QR deck (v6.76, dulu
+   kotak kode teks), blok data
    pemain yang diisi tangan (Player Name, Date, Contact / WhatsApp, Event Name),
    lalu tabel kartu per warna dengan subtotal dan total — mengikuti gaya
    lembar decklist turnamen. Satu-satunya gambar adalah logo di kop (v6.74,
@@ -4034,6 +4035,7 @@ async function buatDecklistPDF(){
   }
 
   const logo   = await pdfMuatLogo();
+  const adaQR  = await pxEnsureQR();       /* v6.76: QR menggantikan kotak Deck Code; gagal = kotak kode dipakai lagi */
   const total  = entries.reduce((a,x)=>a+x.q, 0);
   const lvSum  = entries.reduce((a,x)=>a + x.c.l*x.q, 0);
   const col    = {};
@@ -4096,9 +4098,19 @@ async function buatDecklistPDF(){
     y += 7; garis(y, 0.4); y += 6;
   }
 
-  /* nama deck */
+  /* nama deck + ringkasan di kiri, QR deck di kanan.
+     v6.76 — QR (membuka deck ini di Deck Builder, isi sama dengan "Salin link deck")
+     MENGGANTIKAN kotak "Deck Code" yang berisi kode teks panjang. Kalau pustaka QR
+     gagal dimuat, kotak kode teks lama dipakai lagi supaya deck tetap bisa dibuka
+     ulang dari lembar cetaknya. */
+  const QRS = adaQR ? pdfUkuranQR(22, 34) : 22;
+  const lebarTeks = adaQR ? (R - M) - QRS - 6 : (R - M);
+  const yAwal = y;
+
+  let namaDeck = pdfSafe(store.active);
   pdf.setFont('helvetica','bold'); pdf.setFontSize(13); pdf.setTextColor(20);
-  pdf.text(pdfSafe(store.active), M, y + 3);
+  while(pdf.getTextWidth(namaDeck) > lebarTeks && namaDeck.length > 4) namaDeck = namaDeck.slice(0,-2) + '.';
+  pdf.text(namaDeck, M, y + 3);
   y += 8;
 
   /* ringkasan singkat */
@@ -4107,20 +4119,26 @@ async function buatDecklistPDF(){
     `  ·  ${t('tblAvgLv')} ${(lvSum/total).toFixed(2)}  ·  target ${target} ` +
     `(${total === target ? t('dlTargetOk') : t('dlTargetNo')})`;
   pdf.setFont('helvetica','normal'); pdf.setFontSize(8.6); pdf.setTextColor(70);
-  pdf.text(pdfSafe(ringkas), M, y);
-  y += 6;
+  const barisRingkas = pdf.splitTextToSize(pdfSafe(ringkas), lebarTeks);
+  pdf.text(barisRingkas, M, y);
+  y += 3.8 * (barisRingkas.length - 1) + 6;
 
-  /* kode deck */
-  const kode = encodeDeck(state.deck, store.active);
-  const potong = pdf.splitTextToSize(kode, R - M - 4);
-  const tinggiKode = 5.5 + potong.length * 3.4;
-  pdf.setDrawColor(175); pdf.setLineWidth(0.2);
-  pdf.rect(M, y, R - M, tinggiKode);
-  pdf.setFont('helvetica','bold'); pdf.setFontSize(7.4); pdf.setTextColor(110);
-  pdf.text(pdfSafe(t('dlCode')), M + 2, y + 3.6);
-  pdf.setFont('courier','normal'); pdf.setFontSize(7); pdf.setTextColor(40);
-  potong.forEach((ln,i)=>pdf.text(ln, M + 2, y + 7.2 + i*3.4));
-  y += tinggiKode + 6;
+  if(adaQR && pdfGambarQR(pdf, R - QRS, yAwal, QRS)){
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(7); pdf.setTextColor(120);
+    pdf.text(pdfSafe(t('dlImgScan')), R - QRS - 3.5, yAwal + QRS - 1.2, {align:'right'});
+    y = Math.max(y, yAwal + QRS + 6);
+  } else {
+    const kode = encodeDeck(state.deck, store.active);
+    const potong = pdf.splitTextToSize(kode, R - M - 4);
+    const tinggiKode = 5.5 + potong.length * 3.4;
+    pdf.setDrawColor(175); pdf.setLineWidth(0.2);
+    pdf.rect(M, y, R - M, tinggiKode);
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(7.4); pdf.setTextColor(110);
+    pdf.text(pdfSafe(t('dlCode')), M + 2, y + 3.6);
+    pdf.setFont('courier','normal'); pdf.setFontSize(7); pdf.setTextColor(40);
+    potong.forEach((ln,i)=>pdf.text(ln, M + 2, y + 7.2 + i*3.4));
+    y += tinggiKode + 6;
+  }
 
   /* ---------- blok data pemain ---------- */
   pdf.setFont('helvetica','bold'); pdf.setFontSize(8.4); pdf.setTextColor(60);
@@ -4250,6 +4268,34 @@ function pdfKecilkanGambar(im, lebar){
   cx.drawImage(im, 0, 0, cv.width, cv.height);
   return cv.toDataURL('image/jpeg', 0.86);
 }
+/* v6.76 — QR deck dipakai di dua lembar (Full image dan Text list), jadi digambar
+   lewat satu fungsi. Kotak vektor (tajam saat dicetak) + zona tenang putih 1,2 mm.
+   Mengembalikan true kalau QR berhasil digambar. */
+function pdfGambarQR(pdf, x, y, ukuran){
+  try {
+    const qr = window.qrcode(0, 'M');
+    qr.addData(pdfLinkDeck()); qr.make();
+    const n = qr.getModuleCount(), cell = ukuran / n;
+    pdf.setFillColor(255,255,255);
+    pdf.rect(x - 1.2, y - 1.2, ukuran + 2.4, ukuran + 2.4, 'F');
+    pdf.setFillColor(0,0,0);
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+      if(qr.isDark(r,c)) pdf.rect(x + c*cell, y + r*cell, cell + 0.03, cell + 0.03, 'F');
+    }
+    return true;
+  } catch(e){ console.warn('[MHR Deck Lab] QR gagal dibuat:', e); return false; }
+}
+/* Ukuran QR di kertas: modul (kotak kecil) minimal 0,4 mm supaya tetap terbaca
+   kamera HP walau dicetak printer laser. Deck umum (±20 kartu unik) cukup `dasar`
+   mm; deck dengan banyak kartu unik / nama panjang membuat QR lebih padat sehingga
+   ukurannya dinaikkan sampai `maks` mm. */
+function pdfUkuranQR(dasar, maks){
+  try {
+    const qr = window.qrcode(0, 'M');
+    qr.addData(pdfLinkDeck()); qr.make();
+    return Math.min(maks, Math.max(dasar, qr.getModuleCount() * 0.4));
+  } catch(e){ return dasar; }
+}
 /* link kanonis supaya QR di kertas tetap benar walau dibuat dari alamat lain
    (mis. pratinjau). Sama dengan isi "Salin link deck": '#d=<kode deck>'. */
 function pdfLinkDeck(){
@@ -4299,26 +4345,14 @@ async function buatDecklistGambarPDF(){
   const TEKS = [31,41,55], ABU = [107,114,128];
 
   /* ---------- panel kop ---------- */
-  const PH_KOP = 34;
+  const QR = adaQR ? pdfUkuranQR(25.5, 34) : 25.5;
+  const PH_KOP = Math.max(34, QR + 8.5);
   pdf.setFillColor(245,246,248); pdf.setDrawColor(213,217,224); pdf.setLineWidth(0.3);
   pdf.roundedRect(M, M, CW, PH_KOP, 2.5, 2.5, 'FD');
 
   /* QR kanan */
-  const QR = 25.5;
   const qx = M + CW - 4 - QR, qy = M + (PH_KOP - QR)/2;
-  if(adaQR){
-    try {
-      const qr = window.qrcode(0, 'M');
-      qr.addData(pdfLinkDeck()); qr.make();
-      const n = qr.getModuleCount(), cell = QR / n;
-      pdf.setFillColor(255,255,255);
-      pdf.rect(qx - 1.2, qy - 1.2, QR + 2.4, QR + 2.4, 'F');
-      pdf.setFillColor(0,0,0);
-      for(let r=0;r<n;r++) for(let c=0;c<n;c++){
-        if(qr.isDark(r,c)) pdf.rect(qx + c*cell, qy + r*cell, cell + 0.03, cell + 0.03, 'F');
-      }
-    } catch(e){ console.warn('[MHR Deck Lab] QR gagal dibuat:', e); }
-  }
+  if(adaQR) pdfGambarQR(pdf, qx, qy, QR);
   /* logo + keterangan di kiri QR, rata kanan */
   const kananTeks = adaQR ? qx - 3.2 : M + CW - 4;
   let kiriBlok = kananTeks;

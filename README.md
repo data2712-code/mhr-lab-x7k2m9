@@ -218,8 +218,9 @@ Isi lembarnya, mengikuti gaya lembar decklist turnamen:
 1. Kop berisi **logo MHR Deck Lab** (`icons/logo-header.png`, tanpa latar, dengan kontur gelap ditebalkan khusus cetak) beserta tanggal cetak
 2. Nama deck + ringkasan: total kartu, komposisi warna, rata-rata Lv, dan status
    terhadap target ukuran deck
-3. Kotak **Kode Deck** — kode dari fitur "Salin link deck", jadi decknya bisa dibuka
-   ulang di Deck Lab hanya dari lembar cetaknya
+3. **QR code** di kanan nama deck (sejak v6.76, menggantikan kotak "Deck Code" berisi
+   kode teks panjang) — dipindai membuka deck itu di Deck Builder, isinya sama dengan
+   "Salin link deck", jadi decknya bisa dibuka ulang hanya dari lembar cetaknya
 4. Blok **Data Pemain** yang kosong untuk diisi tulisan tangan: Nama Pemain, Tanggal,
    Kontak / WhatsApp, dan Nama Event (empat kotak; baris LGS / Tempat dan Tanda Tangan
    dihapus di v6.74)
@@ -512,6 +513,37 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.76 — Decklist PDF "Text list": kotak Deck Code diganti QR code — 6 Oktober 2026 *(`index.html`)*
+
+Permintaan pemilik: pada lembar decklist format teks, hilangkan bagian **Deck Code**
+dan ganti dengan **QR** seperti yang sudah ada di versi Full image (v6.75).
+
+- Kotak "Deck Code" (kode teks panjang) **dihapus**. Sebagai gantinya QR 22 mm di
+  kanan nama deck dan ringkasan, dengan keterangan kecil "Scan to open this deck in
+  the Deck Builder" di sebelah kirinya. Isi QR sama dengan Full image dan "Salin link
+  deck": `https://mhrdecklab.com/#d=<kode deck>`. Ruang yang dipakai lebih kecil dari
+  kotak kode lama.
+- **QR digambar lewat satu fungsi bersama**, `pdfGambarQR()`, dipakai kedua lembar
+  (Text list dan Full image). Lembar Full image tidak berubah tampilannya.
+- **Ukuran QR menyesuaikan kepadatan** (`pdfUkuranQR()`): kotak kecil di QR minimal
+  0,4 mm supaya tetap terbaca kamera HP walau dicetak printer laser. Deck umum (±20
+  kartu unik) cukup 22 mm (Text list) / 25,5 mm (Full image); deck dengan banyak kartu
+  unik atau nama sangat panjang membuat QR lebih padat, jadi dibesarkan sampai 34 mm
+  (panel kop Full image ikut sedikit lebih tinggi). Diuji: deck 50 kartu unik dengan
+  nama panjang (link ±390 karakter) tetap terbaca setelah dicetak ke PDF.
+- **Cadangan**: kalau pustaka QR gagal dimuat (offline, dsb.), kotak "Deck Code"
+  teks yang lama dipakai lagi supaya deck tetap bisa dibuka ulang dari lembar cetak.
+- Nama deck yang terlalu panjang dipotong dengan titik supaya tidak menabrak QR, dan
+  baris ringkasan otomatis turun ke baris kedua kalau tak muat.
+- Kunci teks `dlCode` ("Deck Code") tetap ada — sekarang hanya dipakai oleh kotak
+  cadangan. Deskripsi menu Text list jadi "Card table with QR code, to print and fill
+  in by hand".
+
+Diuji (Chromium, jsPDF 2.5.1): lembar 1 halaman dengan QR yang dibaca ulang dan cocok
+dengan kode deck asli, QR dimatikan (cadangan kotak kode), nama panjang, deck 50
+kartu unik, dan lembar Full image tetap jadi dengan QR terbaca. Tidak ada berkas baru;
+`sw.js` tidak perlu diubah (`index.html` network-first).
 
 ### v6.75 — Decklist PDF "Full image": lembar decklist bergambar + menu pilihan format — 5 Oktober 2026 *(`index.html`)*
 
