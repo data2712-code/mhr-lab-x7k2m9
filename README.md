@@ -514,6 +514,21 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v6.81 — Weekly Rush LGS: tombol Instagram selalu tampil, walau toko belum punya akun di data — 7 Oktober 2026 *(`data.js`, `index.html`)*
+
+Permintaan pemilik: tombol Instagram ditampilkan di semua kartu toko, termasuk toko yang
+belum punya akun Instagram di data situs. Pilihan pemilik untuk link-nya: **pencarian Google**.
+
+- Toko dengan field `ig` → tombol langsung ke `https://www.instagram.com/<ig>/` (seperti v6.79).
+- Toko **tanpa** `ig` → tombol Instagram tetap tampil dan membuka pencarian Google
+  `"<nama toko> <kota> instagram"` (di tab baru, `title` = "Search for <toko> on Instagram").
+  Toko baru yang ditambahkan ke `window.LGS` tanpa `ig` otomatis dapat tombol ini; cukup isi
+  `ig` nanti untuk mengganti ke link langsung. Tombol WhatsApp (`hp`/`wa`) tetap hanya tampil
+  kalau datanya diisi.
+- Komentar di `data.js` diperbarui. Saat ini ke-21 toko sudah punya `ig`, jadi perilaku baru
+  ini baru terlihat pada toko berikutnya. Diuji Playwright (mobile) dengan 2 toko tanpa `ig`
+  dan 1 toko bernama berisi tanda kutip/ampersand: link ter-encode benar, 0 error konsol.
+
 ### v6.80 — Weekly Rush LGS: jadwal Royal Knight Bekasi pindah ke Rabu — 7 Oktober 2026 *(`data.js`)*
 
 Permintaan pemilik: jadwal **Royal Knight Bekasi** diganti dari Senin menjadi **setiap Rabu**

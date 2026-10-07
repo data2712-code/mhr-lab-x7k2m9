@@ -5480,7 +5480,9 @@ function renderLgs(){
         <a class="lgs-map" href="${t.map}" target="_blank" rel="noopener">${PIN} Location</a>
         ${t.hp?`<a class="lgs-map" href="https://wa.me/${t.hp}" target="_blank" rel="noopener">${WA} Chat store</a>`:''}
         ${t.wa?`<a class="lgs-map" href="${t.wa}" target="_blank" rel="noopener">${WA} WA Group</a>`:''}
-        ${t.ig?`<a class="lgs-map" href="https://www.instagram.com/${t.ig}/" target="_blank" rel="noopener" title="@${t.ig} on Instagram">${IG} Instagram</a>`:''}
+        ${t.ig
+          ? `<a class="lgs-map" href="https://www.instagram.com/${t.ig}/" target="_blank" rel="noopener" title="@${t.ig} on Instagram">${IG} Instagram</a>`
+          : `<a class="lgs-map" href="https://www.google.com/search?q=${encodeURIComponent(t.nm + ' ' + (t.kota || '') + ' instagram')}" target="_blank" rel="noopener" title="Search for ${t.nm.replace(/"/g,'&quot;')} on Instagram">${IG} Instagram</a>`}
       </div>
     </div>`).join('');
 

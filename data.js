@@ -215,7 +215,9 @@ window.DUKUNG = {
         lencana kecil), mis. n:'Starter deck only' kalau sesi itu khusus starter deck.
    Field hp (nomor WhatsApp toko), wa (link grup WhatsApp) dan ig (username
    Instagram toko, tanpa @ dan tanpa URL, mis. ig:'onictcg') opsional —
-   tombolnya otomatis tidak tampil kalau dikosongkan.
+   tombol WhatsApp otomatis tidak tampil kalau dikosongkan. Khusus tombol Instagram
+   SELALU tampil: kalau ig kosong, tombolnya membuka pencarian Google
+   "<nama toko> <kota> instagram" (jadi toko baru langsung punya tombol).
    Nomor hp tanpa tanda + dan tanpa spasi, contoh: 6281234567890 */
 window.LGS_UPDATE = '7 October 2026';
 window.LGS = [
