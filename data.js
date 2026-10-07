@@ -211,86 +211,113 @@ window.DUKUNG = {
         'WITA' (UTC+8, Bali–NTB–NTT–Kalsel/Kaltim/Kaltara–Sulawesi),
         'WIT' (UTC+9, Maluku–Papua).
    Satu toko boleh punya beberapa jadwal — tambahkan objek lain di dalam jd.
-   Field hp (nomor WhatsApp toko) dan wa (link grup WhatsApp) opsional —
+   n  = catatan opsional untuk satu jadwal (dalam bahasa Inggris, tampil sebagai
+        lencana kecil), mis. n:'Starter deck only' kalau sesi itu khusus starter deck.
+   Field hp (nomor WhatsApp toko), wa (link grup WhatsApp) dan ig (username
+   Instagram toko, tanpa @ dan tanpa URL, mis. ig:'onictcg') opsional —
    tombolnya otomatis tidak tampil kalau dikosongkan.
    Nomor hp tanpa tanda + dan tanpa spasi, contoh: 6281234567890 */
-window.LGS_UPDATE = '11 September 2026';
+window.LGS_UPDATE = '7 October 2026';
 window.LGS = [
   /* ---------- JAKARTA ---------- */
   { nm:'Ogre Gandaria Neverland', kota:'Jakarta', tz:'WIB',
+    ig:'ogre.neverland',
     map:'https://maps.app.goo.gl/7wAqGnKSyeECnt8C6',
     jd:[ {h:1, w:'19:00 - Close'}, {h:5, w:'19:00 - Close'} ] },
   { nm:'Global Hobiz Store', kota:'Jakarta', tz:'WIB',
+    ig:'global_hobiz_store',
     map:'https://maps.app.goo.gl/8BQJ1EZJQXPyrMqh8',
     jd:[ {h:3, w:'19:30 - Close'}, {h:6, w:'13:00 - Close'} ] },
   { nm:'TwoStompas', kota:'Jakarta', tz:'WIB',
+    ig:'twostompas',
     map:'https://maps.app.goo.gl/ss2chXHcrwmUJAnF9',
     jd:[ {h:4, w:'19:00 - Close'}, {h:6, w:'15:00 - Close'} ] },
   { nm:'ONIC TCG Viridian Vault', kota:'Jakarta', tz:'WIB',
+    ig:'onictcg',
     map:'https://maps.app.goo.gl/yLw8FSPnj6wMfDGTA',
     jd:[ {h:7, w:'15:00 - Close'} ] },
   { nm:'Sultan Pokebab', kota:'Jakarta', tz:'WIB',
+    ig:'sultanpokebab_',
     map:'https://maps.app.goo.gl/A9TFGEr9SEhDYsmAA',
     jd:[ {h:5, w:'19:30 - Close'} ] },
 
    /* ---------- BEKASI ---------- */
   { nm:'Royal Knight Bekasi', kota:'Bekasi', tz:'WIB',
+    ig:'royalknightbekasi',
     map:'https://maps.app.goo.gl/py2NMFJ678jVDMxc9',
-    jd:[ {h:1, w:'19:30 - Close'} ] },
+    jd:[ {h:3, w:'19:30 - Close'} ] },
   { nm:'Papa Roger', kota:'Bekasi', tz:'WIB',
+    ig:'paparogercard',
     map:'https://maps.app.goo.gl/XmiEfHf9U5w5VBuw5',
     jd:[ {h:2, w:'19:30 - Close'} ] },
   { nm:'Monopolis', kota:'Bekasi', tz:'WIB',
+    ig:'monopolis.bekasi',
     map:'https://maps.app.goo.gl/UKdWFpaSB1seyZgU7',
     jd:[ {h:2, w:'19:00 - Close'} ] },
 
   /* ---------- TANGERANG ---------- */
   { nm:'Invaders Board Game Station', kota:'Tangerang', tz:'WIB',
+    ig:'invadersgs',
     map:'https://maps.app.goo.gl/pWxvL18uXMr5EGBC7',
     jd:[ {h:4, w:'19:00 - Close'} ] },
   { nm:'Alex Hobby Shop', kota:'Tangerang', tz:'WIB',
+    ig:'alex_hobby_shop',
     map:'https://maps.app.goo.gl/PLSf5L1EnhnhsGQt8',
     jd:[ {h:5, w:'20:00 - Close'} ] },
   { nm:'Gamba Card Store', kota:'Tangerang', tz:'WIB',
+    ig:'gambacardstore',
     map:'https://share.google/aURhCxax8lMfIc7hW',
     jd:[ {h:5, w:'19:00 - Close'}, {h:7, w:'19:00 - Close'} ] },
+  { nm:'Hobi.Q', kota:'Tangerang', tz:'WIB',
+    ig:'hobi.quarter',
+    map:'https://maps.app.goo.gl/sC5ajRoVNXTZbrnP7',
+    jd:[ {h:1, w:'19:15', n:'Starter deck only'}, {h:4, w:'19:15'} ] },
 
   /* ---------- TANGERANG SELATAN ---------- */
   { nm:'Catnie Hobbies & Games', kota:'Tangerang Selatan', tz:'WIB',
+    ig:'catnieshop',
     map:'https://maps.app.goo.gl/MDPiU3MRvqSWybW27',
     jd:[ {h:7, w:'14:00 - Close'} ] },
 
   /* ---------- DEPOK ---------- */
   { nm:'Savepoint', kota:'Depok', tz:'WIB',
+    ig:'savepointdpk',
     map:'https://maps.app.goo.gl/truvxqDEXS1Wgoo58?g_st=ic',
-    jd:[ {h:5, w:'19:30 - Close'}, {h:7, w:'16:00 - Close'} ] },
+    jd:[ {h:5, w:'19:30 - Close'}, {h:7, w:'16:00 - Close', n:'Starter deck only'} ] },
 
    /* ---------- MEDAN ---------- */
   { nm:'Exordium TCG', kota:'Medan', tz:'WIB',
+    ig:'exordiumtcg',
     map:'https://maps.app.goo.gl/cm9fCd7vSbVdSzwo9?g_st=ac',
     jd:[ {h:2, w:'19:00 - Close'}, {h:7, w:'14:00 - Close'} ] },
 
   /* ---------- BATAM ---------- */
   { nm:'Gattchaa One Batam Mall', kota:'Batam', tz:'WIB',
+    ig:'gattchaa.hobby.store',
     map:'https://share.google/ufGPacTa06OHPWLfi',
     jd:[ {h:1, w:'19:30 - Close'} ] },
   { nm:'House of Cards', kota:'Batam', tz:'WIB',
+    ig:'house.of.cards77',
     map:'https://share.google/D1PSrddxbi4iKLpAY',
     jd:[ {h:3, w:'19:00 - Close'} ] },
   { nm:'Gale Force Games', kota:'Batam', tz:'WIB',
+    ig:'galeforce.games',
     map:'https://share.google/aB4TPR379JHjwGvXY',
     jd:[ {h:5, w:'19:00 - Close'}, {h:7, w:'16:00 - Close'} ] },
   { nm:'Gattchaa Mega Mall Batam Center', kota:'Batam', tz:'WIB',
+    ig:'gattchaa.hobby.store',
     map:'https://share.google/iUeCNf1jNzVs8x2yo',
     jd:[ {h:6, w:'17:30 - Close'} ] },
 
   /* ---------- BALI ---------- */
   { nm:'Arnando Garage', kota:'Bali', tz:'WITA',
+    ig:'arnando_garage',
     map:'https://maps.app.goo.gl/WhqtYPMQoqB6ZdSt8',
     jd:[ {h:7, w:'18:00 - Close'} ] },
 
   /* ---------- TANJUNG PINANG ---------- */
   { nm:'Sekte Figure', kota:'Tanjung Pinang', tz:'WIB',
+    ig:'sektefigure.id',
     map:'https://maps.app.goo.gl/WKbaPmpWmtRqq1XKA',
     jd:[ {h:5, w:'19:00 - Close'} ] },
 ];

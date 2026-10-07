@@ -514,6 +514,59 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v6.80 — Weekly Rush LGS: jadwal Royal Knight Bekasi pindah ke Rabu — 7 Oktober 2026 *(`data.js`)*
+
+Permintaan pemilik: jadwal **Royal Knight Bekasi** diganti dari Senin menjadi **setiap Rabu**
+(sesuai bio Instagram mereka, "setiap rabu Marvel HR"). Jam tetap 19:30 - Close.
+Menyelesaikan catatan yang sempat dicatat di v6.79.
+
+### v6.79 — Weekly Rush LGS: tombol Instagram di tiap toko — 7 Oktober 2026 *(`data.js`, `index.html`)*
+
+Permintaan pemilik: cari akun sosial media tiap LGS lewat browser dan tampilkan di halaman
+Weekly Rush LGS. Platform yang dipilih: **Instagram**, ditampilkan sebagai tombol kecil di
+kartu toko (di sebelah "Location").
+
+- **Field baru `ig` di `window.LGS`** (opsional): username Instagram tanpa `@` dan tanpa URL,
+  mis. `ig:'onictcg'`. `renderLgs()` menggambar tombol `Instagram` (ikon yang sama dengan
+  tombol follow di header) ke `https://www.instagram.com/<ig>/`; kalau `ig` kosong tombolnya
+  tidak tampil, sama seperti tombol WhatsApp (`hp`/`wa`). Konstanta ikon `IG` ada di sebelah
+  `PIN`/`WA`.
+- **21 dari 21 toko terisi**, dicari lewat Google (browser) dan dicocokkan dengan nama toko,
+  kota/alamat, dan konten postingannya (banyak yang memposting Marvel Hero Rush):
+  Ogre Gandaria Neverland `ogre.neverland`, Global Hobiz Store `global_hobiz_store`,
+  TwoStompas `twostompas`, ONIC TCG Viridian Vault `onictcg`, Sultan Pokebab
+  `sultanpokebab_`, Royal Knight Bekasi `royalknightbekasi`, Papa Roger `paparogercard`,
+  Monopolis (Bekasi) `monopolis.bekasi`, Invaders Board Game Station `invadersgs`,
+  Alex Hobby Shop `alex_hobby_shop`, Gamba Card Store `gambacardstore`, Hobi.Q
+  `hobi.quarter`, Catnie Hobbies & Games `catnieshop`, Savepoint `savepointdpk`,
+  Exordium TCG `exordiumtcg`, Gattchaa One Batam Mall & Gattchaa Mega Mall Batam Center
+  (satu akun untuk kedua cabang) `gattchaa.hobby.store`, House of Cards `house.of.cards77`,
+  Gale Force Games `galeforce.games`, Arnando Garage `arnando_garage`, Sekte Figure
+  `sektefigure.id`.
+- Catatan untuk dicek pemilik: akun **Gamba Card Store** terdaftar di Instagram sebagai
+  "South Tangerang" sedangkan di data kita kotanya "Tangerang"; bio **Royal Knight Bekasi**
+  menyebut Marvel HR tiap **Rabu** sedangkan jadwal kita Senin 19:30.
+- Diuji Playwright desktop + mobile: 21 tombol muncul dengan tautan benar, ukuran ikon
+  normal, 0 error konsol.
+
+### v6.78 — Weekly Rush LGS: Hobi.Q ditambahkan, jadwal Savepoint diberi catatan "Starter deck only" — 7 Oktober 2026 *(`data.js`, `index.html`)*
+
+Permintaan pemilik: tambah LGS **Hobi.Q** dan tandai jadwal Minggu Savepoint sebagai khusus starter deck.
+
+- **Hobi.Q** (baru, kota **Tangerang** — dari tautan peta: Hobi.Q Greenlake City, Cipondoh):
+  Senin 19:15 WIB (**khusus starter deck**) dan Kamis 19:15 WIB. Tautan peta
+  `https://maps.app.goo.gl/sC5ajRoVNXTZbrnP7`. Jam ditulis `19:15` saja (tanpa "- Close")
+  karena jam tutup tidak disebutkan.
+- **Savepoint**: jadwal Minggu 16:00 sudah ada; sekarang diberi catatan **Starter deck only**.
+- **Field baru `n` di tiap entri `jd`** (opsional) — catatan jadwal berbahasa Inggris, mis.
+  `{h:7, w:'16:00 - Close', n:'Starter deck only'}`. `renderLgs()` meneruskannya dan
+  menampilkannya sebagai lencana kecil `.lgs-ntag` di panel "Today", kartu per hari, dan
+  sebagai akhiran di chip jadwal per toko. Jadwal tanpa `n` tampil seperti sebelumnya.
+- `LGS_UPDATE` diubah ke 7 Oktober 2026 (tampil di catatan bawah halaman). Jumlah LGS
+  sekarang 21 (badge nav ikut otomatis).
+- Diuji Playwright desktop + mobile (390 px): kedua toko muncul benar, lencana tampil di
+  kartu hari, filter kota Tangerang menampilkan 4 toko, 0 error konsol.
+
 ### v6.77 — Filter Game area & Effect jadi dropdown, Power min/max pindah ke bar filter — 6 Oktober 2026 *(`index.html`)*
 
 Permintaan pemilik: filter **Game area** dan **Effect** (dulu chip di panel lipat
