@@ -514,6 +514,21 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v6.82 — SEO: tag canonical + og:url, supaya Google tahu alamat utama situs — 8 Oktober 2026 *(`index.html`)*
+
+Latar belakang: Google Search Console mengirim email "Duplicate without user-selected canonical" untuk
+`http://mhrdecklab.com/` (versi http tanpa www yang menampilkan isi sama dengan versi https). Laporan "Page with
+redirect" untuk `http(s)://www.mhrdecklab.com/` normal — itu memang sudah dialihkan ke alamat utama.
+
+- `<link rel="canonical" href="https://mhrdecklab.com/">` ditambahkan di `<head>` (sebelumnya tidak ada; halaman
+  kartu `cards/*.html` sudah punya canonical sejak awal).
+- `og:url` ditambahkan dengan alamat yang sama, dan `og:image` diubah dari path relatif ke URL absolut
+  `https://mhrdecklab.com/og-image.jpg` (lebih andal untuk pratinjau WhatsApp/Discord/Facebook).
+- `robots.txt` dan `sitemap.xml` sudah benar (semua URL `https://mhrdecklab.com/...`), tidak diubah.
+- **Langkah manual di luar kode:** GitHub → Settings → Pages → centang *Enforce HTTPS*; Cloudflare → SSL/TLS →
+  Edge Certificates → aktifkan *Always Use HTTPS*, agar `http://` dialihkan ke `https://`. Setelah deploy, di
+  Search Console buka laporan masalahnya lalu klik *Validate Fix*.
+
 ### v6.81 — Weekly Rush LGS: tombol Instagram selalu tampil, walau toko belum punya akun di data — 7 Oktober 2026 *(`data.js`, `index.html`)*
 
 Permintaan pemilik: tombol Instagram ditampilkan di semua kartu toko, termasuk toko yang
