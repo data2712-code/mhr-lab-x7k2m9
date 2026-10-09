@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.90  ·  9 Oktober 2026
+     MHR DECK LAB  ·  versi 6.91  ·  9 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.90">
+<meta name="version" content="6.91">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2002,26 +2002,26 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.90"></script>
-<script src="data.js?v=6.90"></script>
+<script src="cards.js?v=6.91"></script>
+<script src="data.js?v=6.91"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.90"></script>
-<script src="decks.js?v=6.90"></script>
+<script src="auth.js?v=6.91"></script>
+<script src="decks.js?v=6.91"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.90"></script>
-<script src="collection.js?v=6.90"></script>
+<script src="social.js?v=6.91"></script>
+<script src="collection.js?v=6.91"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.90"></script>
-<script src="news-ui.js?v=6.90"></script>
+<script src="news.js?v=6.91"></script>
+<script src="news-ui.js?v=6.91"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.90"></script>
+<script src="home-ui.js?v=6.91"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.90"></script>
-<script src="set-ui.js?v=6.90"></script>
+<script src="spoilers.js?v=6.91"></script>
+<script src="set-ui.js?v=6.91"></script>
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.90"></script>
+<script src="tournaments.js?v=6.91"></script>
 <!-- v6.88 — pop-up iklan carousel (kampanye Era of Spiders + Asia Peak Invitational).
      "defer" = tidak menahan render; CSS-nya disuntik oleh skripnya sendiri saat tampil.
      Aturan tampil & tanggal berakhir ada di PROMO (atas promo-popup.js). Pratinjau: /?promo=preview -->
@@ -2372,6 +2372,20 @@ const RARITY_INFO = {R:'Rare', SR:'Super Rare', GR:'Grand Rare', UR:'Ultimate Ra
   MR:'Alternate Art tingkat 1', SEC:'Alternate Art tingkat 2', HR:'Alternate Art tingkat 3',
   LR:'Legendary Alternate Art', PR:'Promotional Rare', ER:'Event Rare', TR:'Treasure Rare', C:'Common'};
 const RARITY_ORDER = ['R','SR','GR','UR','MR','SEC','HR','LR','PR','ER','TR','C'];
+/* v6.91 — versi berbeda dengan kode rarity SAMA (dicek ke gambar resmi & folder
+   Database Image Kartu): kodenya diberi akhiran "_TAG" di cards.js, mis. HR_616.
+   rarBase() = kode rarity aslinya (dipakai filter & arti rarity), rarLabel() =
+   teks yang ditampilkan. Kalau kartu punya versi bertag, versi tanpa tag ikut
+   diberi label pembeda (HR → "HR /99", ER → "ER Top 4", TR → "TR Gold"). */
+const VARIANT_LABEL = {HR_616:'HR /616', ER_CHAMPION:'ER Champion', TR_SILVER:'TR Silver', TR_FULLART:'TR Full Art'};
+const VARIANT_BASE_LABEL = {HR_616:['HR','HR /99'], ER_CHAMPION:['ER','ER Top 4'], TR_SILVER:['TR','TR Gold']};
+function rarBase(r){ return String(r||'').split('_')[0]; }
+function rarLabel(r, c){
+  if(VARIANT_LABEL[r]) return VARIANT_LABEL[r];
+  if(c && Array.isArray(c.ra)) for(const k of c.ra){ const b = VARIANT_BASE_LABEL[k]; if(b && b[0]===r) return b[1]; }
+  return r;
+}
+function rarTitle(r, c){ const b = rarBase(r); return `${rarLabel(r,c)} — ${RARITY_INFO[b]||b}`; }
 function rarityCmp(a,b){
   const x = RARITY_ORDER.indexOf(a), y = RARITY_ORDER.indexOf(b);
   return (x<0?99:x) - (y<0?99:y) || a.localeCompare(b);
@@ -2394,7 +2408,7 @@ function isiDropdown(){
   uniq(DB.filter(cardVisible).map(c=>c.s)).sort().forEach(v=>$('#fSeries').insertAdjacentHTML('beforeend',`<option>${v}</option>`));
   uniq(DB.map(c=>c.l)).sort((a,b)=>a-b).forEach(v=>$('#fLevel').insertAdjacentHTML('beforeend',`<option value="${v}">${t('levelLbl')} ${v}</option>`));
   uniq(DB.map(c=>c.r)).sort((a,b)=>a-b).forEach(v=>$('#fRange').insertAdjacentHTML('beforeend',`<option value="${v}">${t('rangeLbl')} ${v}</option>`));
-  uniq(DB.filter(cardVisible).flatMap(c=>c.ra)).sort(rarityCmp).forEach(v=>$('#fRarity').insertAdjacentHTML('beforeend',`<option value="${v}">${v} — ${RARITY_INFO[v]||v}</option>`));
+  uniq(DB.filter(cardVisible).flatMap(c=>c.ra.map(rarBase))).sort(rarityCmp).forEach(v=>$('#fRarity').insertAdjacentHTML('beforeend',`<option value="${v}">${v} — ${RARITY_INFO[v]||v}</option>`));
   uniq(DB.filter(cardVisible).flatMap(traitsOf)).sort().forEach(v=>$('#fTrait').insertAdjacentHTML('beforeend',`<option>${v}</option>`));
   /* Kemampuan kunci (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE/UNIQUE — masing-
      masing cuma 1-6 kartu, digabung satu dropdown alih-alih lima tombol mechBar.
@@ -2430,7 +2444,7 @@ function filtered(){
     (!state.series || c.s===state.series) &&
     (!state.level  || String(c.l)===state.level) &&
     (state.range==='' || String(c.r)===state.range) &&
-    (!state.rarity || c.ra.includes(state.rarity)) &&
+    (!state.rarity || c.ra.some(r=>rarBase(r)===state.rarity)) &&
     (!state.trait || traitsOf(c).includes(state.trait)) &&
     (!state.keyAbil || (MECH[state.keyAbil] && (MECH[state.keyAbil].test(c.e) || MECH[state.keyAbil].test(c.e_en||'')))) &&
     (!state.onlyDeck || (state.deck[c.no]||0) > 0) &&
@@ -2531,7 +2545,7 @@ function cardListHTML(c,q){
           <div class="card-top">
             <span class="card-name" data-zoom="${c.no}">${cardName(c)}</span>
             <span class="card-no">${c.no}</span>
-            ${c.ra.map(r=>`<span class="rar${r===artOf(c.no)&&c.ra.length>1?' alt':''}" title="${r} — ${RARITY_INFO[r]||r}">${r}</span>`).join('')}
+            ${c.ra.map(r=>`<span class="rar${r===artOf(c.no)&&c.ra.length>1?' alt':''}" title="${rarTitle(r,c)}">${rarLabel(r,c)}</span>`).join('')}
             ${errataBadgeHTML(c)}
             ${counterBadgeHTML(c)}
             ${cardLangBadgeHTML(c)}
@@ -4782,7 +4796,7 @@ function openLightbox(no){
     </div>
     <div class="lb-info">
       <h3>${cardName(c)}</h3>
-      <div class="no">${c.no} · ${c.s} · ${c.ra.join(' / ')} ${errataBadgeHTML(c)} ${counterBadgeHTML(c)} ${cardLangBadgeHTML(c)}</div>
+      <div class="no">${c.no} · ${c.s} · ${c.ra.map(r=>rarLabel(r,c)).join(' / ')} ${errataBadgeHTML(c)} ${counterBadgeHTML(c)} ${cardLangBadgeHTML(c)}</div>
       <div class="lb-stats">
         <div>${t('levelLbl')} <b>${c.l}</b></div>
         <div>${t('cAttack')} <b>${c.r}</b></div>
@@ -4797,7 +4811,7 @@ function openLightbox(no){
       <div class="lb-var">
         <div class="t">${t('cArtwork')}</div>
         <div class="chips">${c.ra.map(r=>
-          `<button data-var="${r}" aria-pressed="${r===aktif}" title="${r} — ${RARITY_INFO[r]||r}">${r}${r===c.ra[0]?' · '+t('cMain'):''}</button>`).join('')}</div>
+          `<button data-var="${r}" aria-pressed="${r===aktif}" title="${rarTitle(r,c)}">${rarLabel(r,c)}${r===c.ra[0]?' · '+t('cMain'):''}</button>`).join('')}</div>
         <div class="msg" id="lbVarMsg"></div>
       </div>`:''}
       <button class="lb-add" id="lbAdd">${t('cAddDeck')}${q?` (${t('cNow')} ×${q})`:''}</button>
@@ -4837,12 +4851,12 @@ function pilihVarian(no, rar, tombol){
       b.setAttribute('aria-pressed', String(b.dataset.var === rar)));
     if(msg) msg.textContent = rar === c.ra[0]
       ? t('cUseMain')
-      : `${t('artVersion')} ${rar} ${t('artUsed')}`;
+      : `${t('artVersion')} ${rarLabel(rar,c)} ${t('artUsed')}`;
     renderCards();
   };
   probe.onerror = ()=>{
     if(tombol) tombol.classList.add('na');
-    if(msg) msg.textContent = `${t('artVersion')} ${rar} ${t('artMissing')} (${berkas.split('/').pop()}).`;
+    if(msg) msg.textContent = `${t('artVersion')} ${rarLabel(rar,c)} ${t('artMissing')} (${berkas.split('/').pop()}).`;
   };
   probe.src = berkas;
 }
@@ -8015,7 +8029,7 @@ function pxTextCard(c){
   };
   wrap(cardName(c), 'bold 27px Arial, sans-serif', 33, 250, '#14181D');
   y += 6;
-  wrap(`${c.f || '-'} · ${(c.ra||[]).join('/') || '-'}`, '19px Arial, sans-serif', 25, 300, '#5A6673');
+  wrap(`${c.f || '-'} · ${(c.ra||[]).map(r=>rarLabel(r,c)).join('/') || '-'}`, '19px Arial, sans-serif', 25, 300, '#5A6673');
   y += 10;
   x.strokeStyle = '#C9C3B4'; x.lineWidth = 2;
   x.beginPath(); x.moveTo(35,y); x.lineTo(W-35,y); x.stroke();

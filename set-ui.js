@@ -98,7 +98,9 @@
 
   /* ---------------- satu set ---------------- */
   function rarityChips(prints){
-    const cnt = {}; prints.forEach(p=>cnt[p.ra]=(cnt[p.ra]||0)+1);
+    /* v6.91 — versi bertag (HR_616, TR_SILVER, ...) dihitung ke rarity aslinya */
+    const base = r => (typeof rarBase === 'function') ? rarBase(r) : r;
+    const cnt = {}; prints.forEach(p=>{ const b = base(p.ra); cnt[b]=(cnt[b]||0)+1; });
     const ord = (typeof RARITY_ORDER !== 'undefined') ? RARITY_ORDER : [];
     const idx = r => { const i = ord.indexOf(r); return i<0 ? 99 : i; };
     return Object.entries(cnt).sort((a,b)=>idx(a[0])-idx(b[0]))
@@ -154,7 +156,7 @@
       <div class="hm-sec-h" style="margin-top:6px"><h2>Card list</h2><span class="st-muted">${shown.length} images</span></div>
       <div class="st-cards">${shown.map(p=>`<button class="st-card" data-${p.spoiler?'spoil':'card'}="${E(p.no)}" data-ra="${E(p.ra)}">
           <img src="${E(p.img)}" alt="${E(p.no+' '+p.nm)}" loading="lazy">
-          <span><b>${E(p.no)}</b> ${E(p.ra)}</span>
+          <span><b>${E(p.no)}</b> ${E((!p.spoiler && typeof rarLabel === 'function') ? rarLabel(p.ra, (DB||[]).find(c=>c.no===p.no)) : p.ra)}</span>
         </button>`).join('')}</div>`;
   }
 

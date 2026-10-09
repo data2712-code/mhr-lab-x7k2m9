@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.90** · 9 Oktober 2026
+**Versi saat ini: v6.91** · 9 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,36 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.91 — 7 versi kartu yang sebelumnya tergabung kini terpisah: HR /616 & /99, EB01-014 Champion, TB01-001 Silver & Full Art — 9 Oktober 2026 *(`cards.js`, `index.html`, `set-ui.js`, `images/` & `images/en/` (12 berkas baru))*
+
+Hasil pencocokan folder `Database Image Kartu` dengan daftar resmi: beberapa kartu punya lebih dari satu versi
+dengan kode rarity yang SAMA (daftar resmi Inggris mencatatnya sebagai entri ganda), tetapi situs baru mengenal
+satu versi. Dicek ke gambar resmi:
+
+- **SP01-021, SP01-022, SP01-063 — HR bernomor seri /616 (bingkai perak) dan /99 (bingkai emas).** Gambar HR
+  yang sudah ada di situs ternyata versi /99, jadi kode `HR` tetap dipakai untuk /99 (pilihan artwork pengguna
+  yang tersimpan tidak berubah) dan versi baru `HR_616` ditambahkan. Gambar: `images/` (printing Indonesia) dan
+  `images/en/` (printing Inggris) dari folder Database, 568×793 seperti gambar SP01 lain.
+- **EB01-014 — ER versi "Champion Regionals 2026"** (`ER_CHAMPION`), di samping versi "Top 4" (`ER`, utama).
+- **TB01-001 — TR versi bingkai perak (`TR_SILVER`) dan full art tanpa bingkai (`TR_FULLART`)**, di samping
+  versi bingkai emas (`TR`, utama).
+  Ketiga gambar baru ini diambil dari daftar kartu resmi (sudah ber-watermark SAMPLE), 450×620, disalin ke
+  `images/` dan `images/en/`. Salinan resolusi asli juga disimpan di `Database Image Kartu\English\EB01_English`
+  dan `TB01_English`.
+- **Konvensi kode varian:** akhiran `_TAG` pada kode rarity di `ra` (`cards.js`). `rarBase()` mengembalikan
+  rarity aslinya (filter rarity, arti rarity di tooltip, hitungan rarity halaman Set), `rarLabel()` teks yang
+  ditampilkan: `HR /616`, `HR /99`, `ER Top 4`, `ER Champion`, `TR Gold`, `TR Silver`, `TR Full Art`. Dipakai di
+  lencana rarity daftar kartu, popup (baris info + tombol versi + pesan), gambar kartu yang diunduh, dan
+  `set-ui.js`. Filter rarity tidak memunculkan opsi baru.
+- Cache-buster 12 tag `<script>` dinaikkan ke `?v=6.91` (`cards.js` dan `set-ui.js` berubah);
+  `promo-popup.js?v=6.89` tidak diubah.
+
+**Verifikasi:** `node --check` pada `cards.js` dan `set-ui.js`. Diuji di Chromium headless: opsi filter rarity
+tetap R/SR/GR/UR/MR/SEC/HR/PR/ER/TR, filter HR = 3 kartu SP01, filter TR = TB01-001, label lencana & tombol
+versi benar, memilih "TR Full Art" memuat `TB01-001_TR_FULLART.jpg`, halaman Set SP01 menghitung HR 6 dan
+menampilkan "HR /616" / "HR /99", tanpa error JavaScript. Excel database kartu (folder Claude outputs) sudah
+memuat ketujuh versi ini (448 baris = jumlah entri daftar resmi Inggris).
 
 ### v6.90 — Seri "PR" dihapus: seri kartu selalu mengikuti awalan nomor; cross-check ulang situs resmi — 9 Oktober 2026 *(`cards.js`, `index.html`)*
 
