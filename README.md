@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.87** · 9 Oktober 2026
+**Versi saat ini: v6.88** · 9 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -35,9 +35,11 @@ mhr-lab-x7k2m9/
 ├── sw.js                 ← PWA: service worker, cache offline (sejak v6.6)
 ├── icons/               ← ikon PWA berbagai ukuran (sejak v6.6)
 ├── og-image.jpg      ← gambar preview saat link dibagikan
+├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.88; hapus saat kampanye turun, lihat README § v6.88)
 ├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
 ├── sitemap.xml           ← SEO: sitemap untuk Google Search Console (sejak v6.21)
 ├── robots.txt            ← SEO: izinkan semua crawler + rujuk ke sitemap.xml (sejak v6.21)
+├── images/promo/        ← gambar slide pop-up kampanye (v6.88; sementara)
 └── images/ · images/en/  ← gambar kartu, nama = nomor kartu (BP01-001.jpg)
 ```
 
@@ -513,6 +515,41 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.88 — Pop-up iklan carousel: Era of Spiders (SP01) + Asia Peak Invitational — 9 Oktober 2026 *(`promo-popup.js` baru, `index.html`, `sw.js`, `images/promo/`)*
+
+Dikerjakan ulang di atas v6.87 setelah pemilik menarik (pull) perubahan dari perangkat lain.
+
+Permintaan pemilik: bahan promosi dari staf MHR Indonesia (banner Era of Spiders "NOW AVAILABLE", foto "The Champions Go to ASCC",
+key art Marvel Hero Rush) tampil sebagai pop-up carousel 3 slide di situs, plus satu artikel News (kategori `rilis`) yang
+**diterbitkan sendiri oleh pemilik lewat editor admin** — artikelnya TIDAK ada di repo ini. Poster Asia Peak Invitational
+hanya dipakai di artikel (format potret).
+
+- **File baru `promo-popup.js`** (dimuat `defer`, `?v=6.88`): semua isi kampanye ada di objek `PROMO` paling atas (id, jendela tanggal,
+  3 slide berbahasa Inggris, kredit). CSS disuntik skripnya sendiri saat pop-up tampil (tidak menambah CSS di `index.html`).
+  Gambar baru diunduh saat pop-up benar-benar tampil.
+- **Aturan tampil:** sekali saat pengunjung baru masuk ke situs di halaman mana pun (sessionStorage; berpindah halaman di dalam situs atau
+  memuat ulang tab yang sama tidak memunculkannya lagi); paling cepat tiap 24 jam (localStorage `mhr_promo_<id>`); centang
+  "Don't show this again" = tidak muncul lagi untuk kampanye ini; muncul ±2 detik setelah halaman selesai dimuat; dilewati (dan tidak
+  dihitung tampil) kalau lightbox kartu / tampilan deck sedang terbuka; berhenti sendiri setelah `endsAt`. Storage diblokir → tetap jalan.
+- **Tombol:** slide 1 → `#set/SP01`; slide 2 → `#berita/era-of-spiders-arrives-in-indonesia-champions-head-to-macao` (artikel HARUS
+  sudah terbit dengan slug ini, kalau tidak tautannya menuju halaman berita kosong); slide 3 → `#build` (Deck Builder).
+- **Interaksi/aksesibilitas:** panah, titik, geser jari/mouse, autoplay 6 dtk (berhenti saat hover/fokus/setelah navigasi manual,
+  mati jika `prefers-reduced-motion`), ESC / klik luar / tombol X menutup, fokus terkunci di dalam dialog lalu dikembalikan, slide tak
+  aktif `inert`, di ponsel kotak tetap muat layar tanpa scroll horizontal.
+- **Pratinjau pemilik:** buka `https://mhrdecklab.com/?promo=preview` (mengabaikan tanggal & penyimpanan, tidak menyimpan apa pun).
+- **Gambar:** `images/promo/promo-sp01.webp` (91 KB), `promo-champions.webp` (74 KB), `promo-keyart.webp` (170 KB, 1280×720). Sumber & izin:
+  dari staf MHR Indonesia; kredit di pop-up "Images courtesy of MHR Indonesia. © Marvel © Jason."
+- **Jendela kampanye (sementara):** `startsAt` 9 Okt 2026, `endsAt` **23 Okt 2026 23:59 WIB** (14 hari). Kalau tanggal push berbeda, ubah kedua nilai itu.
+- **MENURUNKAN KAMPANYE (hari ke-14):** hapus tag `<script src="promo-popup.js…">` di `index.html`, hapus `promo-popup.js`, folder `images/promo/`,
+  dan baris `./promo-popup.js` di `sw.js`; lepas pin artikel di editor News. (Tanpa itu pun pop-up sudah berhenti sendiri setelah `endsAt`.)
+- `sw.js`: `./promo-popup.js` ditambahkan ke `STATIC_ASSETS` (untuk mode offline). `CACHE_VERSION` **sengaja tidak dinaikkan** — berkas lokal non-gambar
+  sudah network-first, jadi tidak ada risiko versi lama; menaikkannya akan menghapus cache gambar kartu semua pengunjung.
+- Penanda versi `index.html` (komentar header + `<meta name="version">`) dinaikkan dari 6.87 ke 6.88; tag `?v=` skrip lama tidak diubah (tidak ada JS lama yang berubah), skrip baru memakai `?v=6.88`.
+- Diuji Playwright (28 pemeriksaan, desktop 1280 & ponsel 390): muncul setelah ±2 dtk, gambar ter-load, autoplay, panah, drag, fokus-trap, ESC,
+  tidak muncul ulang saat pindah halaman/reload/tab baru <24 jam, muncul lagi setelah 24 jam, "Don't show again", kedaluwarsa (jam palsu 24 Okt),
+  dilewati saat lightbox terbuka, storage diblokir, CTA slide 1 menutup & menuju `#set/SP01`. Satu-satunya pesan konsol adalah SDK Supabase yang
+  diblokir di lingkungan uji (bukan dari kode ini).
 
 ### v6.87 — Halaman share untuk EB01-010 s.d. EB01-014 dan 59 Rush Point, tombol share Rush Point — 9 Oktober 2026 *(`tools/generate_card_pages.py`, `cards/` (64 berkas baru), `sitemap.xml`, `index.html`)*
 

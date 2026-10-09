@@ -46,6 +46,7 @@ const STATIC_ASSETS = [
   './spoilers.js', // v6.64 — kartu yang diungkap tapi belum rilis
   './set-ui.js', // v6.64 — halaman Set & Spoiler
   './tournaments.js', // v6.65 — servis data Turnamen (Supabase public.tournaments, Fase 4)
+  './promo-popup.js', // v6.88 — pop-up iklan carousel (CACHE_VERSION sengaja tidak dinaikkan: berkas lokal non-gambar sudah network-first, daftar ini hanya untuk mode offline)
 ];
 
 self.addEventListener('install', e=>{
