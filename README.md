@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.65** · 26 September 2026
+**Versi saat ini: v6.83** · 8 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -513,6 +513,26 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.83 — EB01-006 s.d. EB01-009: teks & gambar versi Inggris resmi — 8 Oktober 2026 *(`cards.js`, `images/en/`, `cards/EB01-006.html`, `index.html`)*
+
+Bagian pertama perbaikan hasil cross-check situs resmi marvelherorush.com vs mhrdecklab.com (8 Oktober 2026).
+Empat kartu ini sebelumnya cuma punya teks dan gambar printing Indonesia; nama dan efek Inggrisnya kosong.
+
+- **Teks Inggris** (`nm_en`, `e_en`) EB01-006 Hulk, EB01-007 Vision, EB01-008 Scarlet Witch, EB01-009 Winter
+  Soldier diisi dari daftar kartu resmi versi Inggris (API `server.marvelherorush.com`). Satu salah ketik di
+  data resmi EB01-007 (`ONCR PER TURN`) ditulis `ONCE PER TURN`, sesuai yang tercetak di kartunya.
+- **Trait EB01-006** diubah dari `-` ke `Human/Avengers` (sesuai data resmi dan cetakan kartu). Halaman statis
+  `cards/EB01-006.html` ikut diperbarui.
+- **Gambar printing Inggris** baru di `images/en/EB01-006.jpg` .. `EB01-009.jpg`: dibuat dari berkas resmi di
+  `Database Image Kartu/English/EB01_English/` (dicek SHA-256 sama persis dengan gambar di situs resmi),
+  sudut transparan diratakan ke #1F1F1F, di-resize ke 450×620, JPEG kualitas 90. Watermark SAMPLE bawaan kartu
+  tetap ada. Sebelumnya mode Inggris memakai gambar Indonesia lewat `imgFallback()`.
+- Cache-buster skrip dinaikkan ke `?v=6.83` (12 tag `<script>`) karena `cards.js` berubah; `<meta name="version">`
+  dan komentar kepala `index.html` ikut diperbarui.
+
+**Verifikasi:** `node --check` pada `cards.js`; `DB.length` tetap 293; keempat kartu punya `nm_en`/`e_en` yang
+sama dengan data resmi EN.
 
 ### v6.82 — SEO: tag canonical + og:url, supaya Google tahu alamat utama situs — 8 Oktober 2026 *(`index.html`)*
 
