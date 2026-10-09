@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.83  ·  8 Oktober 2026
+     MHR DECK LAB  ·  versi 6.87  ·  9 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.83">
+<meta name="version" content="6.87">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -491,6 +491,20 @@
   body.page-cards .deck{display:none}
   body.page-cards .layout{grid-template-columns:minmax(0,1fr)}
   body.page-cards .cards.grid{grid-template-columns:repeat(auto-fill,minmax(196px,1fr))}
+  /* v6.86 — pengalih tipe kartu & mode Rush Point (lihat renderRushPoints()) */
+  .typetog{flex:none}
+  body:not(.page-cards) .typetog{display:none}
+  .filters.rp-mode .fadv > :not(#fSeries):not(#btnReset){display:none}
+  @media (max-width:920px){ .typetog{flex:1 1 100%} .typetog button{flex:1} }
+  .cards.grid .rp-intro{grid-column:1/-1;font-size:12.5px;color:var(--muted);line-height:1.5;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .cards.grid .rp-card .g-wrap{cursor:zoom-in}
+  @media (max-width:640px){ body.page-cards .cards.grid.rp-grid{grid-template-columns:repeat(2,1fr);gap:10px} }
+  /* v6.86 — lencana jumlah filter: atribut hidden kalah dari display:inline-flex di .fbadge,
+     jadi "0" sempat tetap tampil di tombol Filter (HP) walau tidak ada filter aktif */
+  .fbadge[hidden]{display:none}
+  .cards.grid .rp-card .g-ph{justify-content:center;align-items:center;font-family:var(--disp);
+    font-weight:800;letter-spacing:.06em;color:var(--muted)}
   /* halaman: META */
   body:not(.page-meta) #metaPage{display:none}
   body.page-meta .filters, body.page-meta .cards, body.page-meta .deck{display:none}
@@ -1730,6 +1744,12 @@
 <div class="layout">
   <main>
     <div class="filters">
+      <!-- v6.86 — tipe kartu: Karakter / Rush Point. Cuma tampil di halaman Kartu
+           (body.page-cards); Deck Builder selalu menampilkan karakter (lihat rpMode()). -->
+      <div class="viewtog typetog" id="typeTog" role="group" data-i18n-title="typeTogT">
+        <button data-ctype="char" aria-pressed="true" data-i18n="typeChar">Karakter</button>
+        <button data-ctype="rp" aria-pressed="false" data-i18n="typeRp">Rush Point</button>
+      </div>
       <input id="q" type="search" data-i18n-ph="searchPh" placeholder="Cari nama, efek, atau trait…">
       <button class="fbtn" id="btnFilter" aria-expanded="false">
         <span data-i18n="filterBtn">⚙ Filter</span><span class="fbadge" id="fBadge" hidden>0</span>
@@ -1982,26 +2002,26 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.83"></script>
-<script src="data.js?v=6.83"></script>
+<script src="cards.js?v=6.87"></script>
+<script src="data.js?v=6.87"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.83"></script>
-<script src="decks.js?v=6.83"></script>
+<script src="auth.js?v=6.87"></script>
+<script src="decks.js?v=6.87"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.83"></script>
-<script src="collection.js?v=6.83"></script>
+<script src="social.js?v=6.87"></script>
+<script src="collection.js?v=6.87"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.83"></script>
-<script src="news-ui.js?v=6.83"></script>
+<script src="news.js?v=6.87"></script>
+<script src="news-ui.js?v=6.87"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.83"></script>
+<script src="home-ui.js?v=6.87"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.83"></script>
-<script src="set-ui.js?v=6.83"></script>
+<script src="spoilers.js?v=6.87"></script>
+<script src="set-ui.js?v=6.87"></script>
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.83"></script>
+<script src="tournaments.js?v=6.87"></script>
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -2297,6 +2317,7 @@ const state = {
   q:'', colors:new Set(COLORS),
   series:'', level:'', range:'', rarity:'', trait:'', keyAbil:'', sort:'no', view:'list',
   mech:new Set(), page:'cards', onlyDeck:false,
+  ctype:'char',  // v6.86 — tipe kartu di halaman Kartu: 'char' | 'rp' (tidak disimpan)
   area:'', effect:'', powMin:'', powMax:'',  // v6.73 (area/effect jadi dropdown tunggal di v6.77)
   /* v6.46 — bahasa TEKS kartu (nama & efek + gambar). state.lang (toggle bahasa
      chrome UI ID/EN) DIHAPUS TOTAL di v6.46 — teks UI sekarang satu set string
@@ -2587,6 +2608,9 @@ let renderCardsToken = 0;
    loading="lazy" pada <img> tetap jalan seperti biasa — batch ini hanya
    soal KAPAN elemen kartunya masuk DOM, bukan kapan gambarnya diunduh. */
 function renderCards(){
+  const fb = document.querySelector('.filters');
+  if(fb) fb.classList.toggle('rp-mode', rpMode());
+  if(rpMode()){ renderRushPoints(); return; }
   const arr = filtered();
   $('#hShown').textContent = arr.length;
   const nc = $('#navCard'); if(nc) nc.textContent = arr.length;
@@ -2611,6 +2635,97 @@ function renderCards(){
   };
   requestAnimationFrame(lanjut);
 }
+
+/* ==================== RUSH POINT (v6.86) ====================
+   Rush Point Card disimpan di window.RUSH_POINTS (cards.js), TERPISAH dari DB:
+   bukan karakter (tanpa nama/efek/warna/Lv/Power/R/trait) dan tidak masuk deck
+   utama, sedangkan semua kode yang membaca DB (deck, statistik, validasi,
+   koleksi, simulator) mengasumsikan isinya karakter. Tahap 1 (permintaan
+   pemilik 9 Oktober 2026): cuma ditampilkan di halaman Kartu lewat pengalih
+   Tipe (Karakter / Rush Point). Deck Builder tetap karakter saja; Rush Point
+   Deck belum didukung. Filter yang berlaku di mode ini cuma pencarian (nomor)
+   dan seri — filter karakter lain disembunyikan (.filters.rp-mode). */
+const RP = (typeof window !== 'undefined' && Array.isArray(window.RUSH_POINTS)) ? window.RUSH_POINTS : [];
+function rpMode(){ return state.ctype === 'rp' && state.page === 'cards'; }
+function rpFile(no, rar){
+  const r = RP.find(x=>x.no===no);
+  if(!r) return `images/${no}.jpg`;
+  const k = rar || r.ra[0];
+  return k === r.ra[0] ? `images/${no}.jpg` : `images/${no}_${k}.jpg`;
+}
+function rpFiltered(){
+  const q = state.q.trim().toLowerCase();
+  return RP.filter(r =>
+    (!state.series || r.s === state.series) &&
+    (!q || (r.no + ' rush point ' + r.ra.join(' ')).toLowerCase().includes(q))
+  ).sort((a,b)=>a.no.localeCompare(b.no));
+}
+function rpGridHTML(r){
+  return `<div class="card rp-card" data-rp="${r.no}">
+      <div class="g-wrap" data-rpzoom="${r.no}">
+        <div class="g-top-right">
+          <button class="btn-share-grid" data-act="share" title="${t('cShare')}" aria-label="${t('cShare')}">${SHARE_ICON}</button>
+        </div>
+        <img class="card-img" alt="Rush Point ${r.no}" src="${rpFile(r.no)}"
+          loading="lazy" decoding="async" width="450" height="629"
+          onerror="this.onerror=null;this.classList.add('failed');this.nextElementSibling.style.display='flex'"
+          onload="this.classList.add('loaded')">
+        <div class="g-ph" style="display:none">RUSH POINT</div>
+      </div>
+      <div class="g-cap">Rush Point</div>
+      <div class="g-sub">${r.no} · ${r.ra.join(' / ')}</div>
+    </div>`;
+}
+function renderRushPoints(){
+  ++renderCardsToken;                            // hentikan cicilan render karakter yang masih jalan
+  const arr = rpFiltered();
+  $('#hShown').textContent = arr.length;
+  const nc = $('#navCard'); if(nc) nc.textContent = arr.length;
+  updateFilterBadge();
+  $('#noteShown').textContent = `${arr.length} ${t('rpMatchCount')}.`;
+  const cardsEl = $('#cards');
+  cardsEl.className = 'cards grid rp-grid';
+  const intro = `<div class="rp-intro">${t('rpIntro')}</div>`;
+  cardsEl.innerHTML = intro + (arr.length ? arr.map(rpGridHTML).join('') : `<div class="empty">${t('noMatch')}</div>`);
+}
+function syncTypeTog(){
+  document.querySelectorAll('#typeTog [data-ctype]').forEach(b=>
+    b.setAttribute('aria-pressed', String(b.dataset.ctype === state.ctype)));
+}
+let lbRp = null;                                 // nomor Rush Point yang sedang tampil di popup
+function openRpLightbox(no, rar){
+  const r = RP.find(x=>x.no===no); if(!r) return;
+  lbNo = null; lbRp = no;
+  const aktif = (rar && r.ra.includes(rar)) ? rar : r.ra[0];
+  $('#lbInner').innerHTML = `
+    <div>
+      <img class="lb-img" alt="Rush Point ${r.no}" decoding="async" src="${rpFile(r.no, aktif)}"
+        onerror="this.onerror=null;this.classList.add('failed')">
+    </div>
+    <div class="lb-info">
+      <h3>Rush Point</h3>
+      <div class="no">${r.no} · ${r.s} · ${r.ra.join(' / ')}</div>
+      <div class="lb-eff">${t('rpInfo')}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">${r.id ? t('rpLangBoth') : t('rpLangEn')}</div>
+      ${r.ra.length>1 ? `
+      <div class="lb-var">
+        <div class="t">${t('cArtwork')}</div>
+        <div class="chips">${r.ra.map(x=>
+          `<button data-rpvar="${x}" aria-pressed="${x===aktif}" title="${x} — ${RARITY_INFO[x]||x}">${x}${x===r.ra[0]?' · '+t('cMain'):''}</button>`).join('')}</div>
+      </div>` : ''}
+    </div>`;
+  $('#lightbox').hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+$('#typeTog').addEventListener('click', e=>{
+  const b = e.target.closest('[data-ctype]'); if(!b) return;
+  if(state.ctype === b.dataset.ctype) return;
+  state.ctype = b.dataset.ctype;
+  syncTypeTog();
+  renderCards();
+  const fb = document.querySelector('.filters');            // bawa awal daftar ke bawah bar filter
+  if(fb && fb.getBoundingClientRect().top <= 50) window.scrollTo({top: Math.max(0, window.scrollY + $('#cards').getBoundingClientRect().top - fb.getBoundingClientRect().bottom - 8)});
+});
 
 /* --- deck --- */
 function deckCount(){ return Object.values(state.deck).reduce((a,b)=>a+b,0); }
@@ -2801,6 +2916,10 @@ $('#btnFilter').addEventListener('click', ()=>{
 /* jumlah filter yang sedang aktif — supaya tetap terlihat walau menu dilipat */
 function updateFilterBadge(){
   let n = 0;
+  if(rpMode()){                                 /* v6.86 — mode Rush Point cuma punya filter seri */
+    const b0 = $('#fBadge'); if(!b0) return;
+    n = state.series ? 1 : 0; b0.textContent = n; b0.hidden = n === 0; return;
+  }
   if(state.colors.size < COLORS.length) n++;
   ['series','level','range','trait','rarity','keyAbil'].forEach(k=>{ if(state[k]) n++; });
   n += state.mech.size;
@@ -2876,14 +2995,18 @@ $('#btnReset').addEventListener('click', ()=>{
       supaya link yang dikirim tetap muncul dengan gambar kartunya di WA,
       bukan cuma teks polos. */
 async function shareCard(no){
-  const c = DB.find(d=>d.no===no); if(!c) return;
-  const nama = cardName(c);
+  const c = DB.find(d=>d.no===no);
+  /* v6.87 — Rush Point juga bisa dibagikan (halaman cards/<no>.html-nya dibuat
+     generate_card_pages.py sejak v6.87). */
+  const rp = c ? null : RP.find(r=>r.no===no);
+  if(!c && !rp) return;
+  const nama = c ? cardName(c) : 'Rush Point';
   const teks = `${nama} (${no}) — MHR Deck Lab`;
   const pageUrl = `https://mhrdecklab.com/cards/${no}.html`;
 
   try{
     if(navigator.canShare){
-      const res = await fetch(artFile(no));
+      const res = await fetch(c ? artFile(no) : rpFile(no));
       if(res.ok){
         const blob = await res.blob();
         const file = new File([blob], `${no}.jpg`, {type: blob.type || 'image/jpeg'});
@@ -2902,6 +3025,10 @@ async function shareCard(no){
 }
 
 $('#cards').addEventListener('click', e=>{
+  const rs = e.target.closest('.rp-card [data-act="share"]');   /* v6.87 — share Rush Point */
+  if(rs){ shareCard(rs.closest('.rp-card').dataset.rp); return; }
+  const rz = e.target.closest('[data-rpzoom]');            /* v6.86 — kartu Rush Point */
+  if(rz){ openRpLightbox(rz.dataset.rpzoom); return; }
   const card=e.target.closest('.card'); if(!card) return;
   /* tombol share dicek LEBIH DULU: di mode grid ia bersarang di dalam
      .g-wrap yang punya data-zoom di dirinya sendiri, jadi kalau urutan
@@ -3022,6 +3149,15 @@ const T = {
   fPowBad: 'Min is higher than Max — nothing can match.',
   matchCount: 'cards match the filter',
   noMatch: 'No cards match. Try loosening the filter.',
+  /* v6.86 — Rush Point di halaman Kartu */
+  typeChar: 'Characters',
+  typeRp: 'Rush Point',
+  typeTogT: 'Card type shown on this page',
+  rpMatchCount: 'Rush Point cards',
+  rpIntro: 'Rush Point cards are not part of your main deck — they make up the separate Rush Point Deck. They are listed here for reference; the Deck Builder does not build Rush Point Decks yet. Search works on the card number.',
+  rpInfo: 'Rush Point card — goes in the Rush Point Deck, not in your main deck. It has no name, effect, Level, Power or Range.',
+  rpLangBoth: 'In the official card list in Indonesian and English.',
+  rpLangEn: 'In the official English card list (not in the Indonesian list yet).',
   levelLbl: 'Level',
   simLvSpread: 'Level spread',
   lbPrev: 'Previous card',
@@ -4705,7 +4841,7 @@ function pilihVarian(no, rar, tombol){
 }
 
 function closeLightbox(){
-  $('#lightbox').hidden = true; lbNo = null;
+  $('#lightbox').hidden = true; lbNo = null; lbRp = null;
   // layar "Lihat deck" bisa saja masih terbuka di belakang popup
   const adaOverlay = ($('#deckView') && !$('#deckView').hidden) ||
                      ($('#simView')  && !$('#simView').hidden);
@@ -4715,6 +4851,8 @@ $('#lbClose').addEventListener('click', closeLightbox);
 $('#lightbox').addEventListener('click', e=>{
   const rz = e.target.closest('.lb-related [data-zoom]');
   if(rz){ openLightbox(rz.dataset.zoom); return; }
+  const rv = e.target.closest('[data-rpvar]');              /* v6.86 — varian Rush Point */
+  if(rv && lbRp){ openRpLightbox(lbRp, rv.dataset.rpvar); return; }
   const bv = e.target.closest('[data-var]');
   if(bv){
     if(bv.classList.contains('na')) return;
@@ -4731,6 +4869,12 @@ $('#lightbox').addEventListener('click', e=>{
 /* navigasi ◀ ▶ di popup kartu: pindah ke kartu tetangga dalam daftar yang
    SEDANG tampil (menghormati filter aktif), muter balik di ujung daftar. */
 function lbNeighbor(arah){
+  if(lbRp){                                     /* v6.86 — popup Rush Point */
+    const ra = rpFiltered();
+    const ix = ra.findIndex(r=>r.no===lbRp);
+    if(ix !== -1 && ra.length) openRpLightbox(ra[(ix + arah + ra.length) % ra.length].no);
+    return;
+  }
   if(!lbNo) return;
   const arr = filtered();
   if(!arr.length) return;
@@ -5329,7 +5473,14 @@ function handleCardLink(){
   if(!h.startsWith('#c=')) return;
   const no = decodeURIComponent(h.slice(3)).toUpperCase();
   history.replaceState(null,'',location.pathname);   // bersihkan agar tidak terbaca ulang
-  if(!DB.some(d=>d.no===no)) return;                 // nomor tidak dikenal -> diam saja
+  if(!DB.some(d=>d.no===no)){
+    /* v6.86 — #c=<nomor Rush Point> membuka halaman Kartu mode Rush Point */
+    if(!RP.some(r=>r.no===no)) return;               // nomor tidak dikenal -> diam saja
+    state.ctype = 'rp'; syncTypeTog();
+    setPage('cards', true);
+    openRpLightbox(no);
+    return;
+  }
   setPage('cards', true);
   openLightbox(no);
 }

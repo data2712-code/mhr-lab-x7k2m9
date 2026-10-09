@@ -24,25 +24,42 @@ langsung ke satu folder). Tiap halaman itu:
      pengunjung asli tetap mendarat di app penuh (lightbox kartu itu
      otomatis terbuka lewat handleCardLink() di index.html).
 
+v6.87 (9 Oktober 2026):
+  - Rush Point Card (window.RUSH_POINTS di cards.js) ikut dibuatkan halaman,
+    dengan judul "Rush Point (<NO>)" dan deskripsi seri + rarity. Link
+    #c=<NO> Rush Point sudah ditangani handleCardLink() sejak v6.86.
+  - Halaman ditulis dengan akhir baris CRLF (sama dengan berkas lain di repo)
+    dan HANYA ditulis ulang kalau isinya berubah — berkas yang sama persis
+    tidak disentuh, jadi riwayat git cuma berisi halaman yang benar-benar
+    berubah.
+  - sitemap.xml: <lastmod> halaman yang isinya tidak berubah dipertahankan
+    dari sitemap lama; halaman baru/berubah dan halaman utama memakai tanggal
+    hari ini.
+
 PENTING — WAJIB dijalankan ulang setiap kali cards.js berubah (kartu baru,
-rarity diperbaiki, dsb). Skrip ini TIDAK dijalankan otomatis oleh apa pun;
-kalau lupa, halaman lama akan menampilkan data kartu yang sudah usang.
+nama/trait/statistik diperbaiki, Rush Point baru, dsb). Skrip ini TIDAK
+dijalankan otomatis oleh apa pun; kalau lupa, halaman lama akan menampilkan
+data kartu yang sudah usang dan kartu baru tidak punya preview share.
 
 Cara pakai:
     python3 tools/generate_card_pages.py
 (dijalankan dari root repo, mengharapkan cards.js ada di direktori yang
-sama, dan menulis ke ./cards/<NO>.html)
+sama, dan menulis ke ./cards/<NO>.html serta ./sitemap.xml)
 """
+import datetime
 import html
 import json
 import os
+import re
 import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CARDS_JS = os.path.join(ROOT, 'cards.js')
 OUT_DIR = os.path.join(ROOT, 'cards')
+SITEMAP = os.path.join(ROOT, 'sitemap.xml')
 SITE = 'https://mhrdecklab.com'
+NL = '\r\n'   # akhir baris berkas yang ditulis (sama dengan isi repo)
 
 def load_cards():
     """
@@ -52,36 +69,33 @@ def load_cards():
     dipakai sepanjang proyek ini: `global.window={}; require('./cards.js')`),
     lalu dump hasilnya sebagai JSON asli -- bukan coba tebak sintaksnya lewat
     regex yang gampang salah kalau ada koma/nilai bersarang.
+    Mengembalikan (karakter, rush_point).
     """
     node_script = (
         "global.window = {}; "
         f"require({json.dumps(CARDS_JS)}); "
         "const db = window.CARDS || window.DB || []; "
-        "process.stdout.write(JSON.stringify(db));"
+        "const rp = window.RUSH_POINTS || []; "
+        "process.stdout.write(JSON.stringify({db, rp}));"
     )
     result = subprocess.run(['node', '-e', node_script], capture_output=True, text=True)
     if result.returncode != 0:
         print('Gagal menjalankan cards.js lewat Node:', result.stderr, file=sys.stderr)
         sys.exit(1)
-    return json.loads(result.stdout)
+    data = json.loads(result.stdout)
+    return data['db'], data['rp']
 
 def esc(s):
     return html.escape(str(s), quote=True)
 
-def page_html(c):
-    no = c['no']
-    nm = c.get('nm') or no
-    l = c.get('l', '-')
-    r = c.get('r', '-')
-    p = c.get('p', '-')
-    f = c.get('f', '')
-    desc = f"Lv{l} · Range {r} · Power {p}" + (f" · {f}" if f else "") + " — Marvel Hero Rush TCG (MHR Deck Lab, fan-made)"
+def render(no, nm, desc, line2):
+    """Kerangka halaman yang sama untuk karakter maupun Rush Point."""
     img_url = f"{SITE}/images/{no}.jpg"
     page_url = f"{SITE}/cards/{no}.html"
     redirect_url = f"{SITE}/#c={no}"
     title = f"{nm} ({no}) — MHR Deck Lab"
 
-    return f"""<!DOCTYPE html>
+    text = f"""<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
@@ -107,47 +121,92 @@ def page_html(c):
 <body>
   <img src="{esc(img_url)}" alt="{esc(nm)}">
   <div>{esc(nm)} · {esc(no)}</div>
-  <div>Lv{esc(l)} · Range {esc(r)} · Power {esc(p)}</div>
+  <div>{esc(line2)}</div>
   <a href="{esc(redirect_url)}">Buka di MHR Deck Lab →</a>
   <script>location.replace({json.dumps(redirect_url)});</script>
 </body>
 </html>
 """
+    return text.replace('\n', NL)
 
-def write_sitemap(cards, today):
+def page_html(c):
+    no = c['no']
+    nm = c.get('nm') or no
+    l = c.get('l', '-')
+    r = c.get('r', '-')
+    p = c.get('p', '-')
+    f = c.get('f', '')
+    stats = f"Lv{l} · Range {r} · Power {p}"
+    desc = stats + (f" · {f}" if f else "") + " — Marvel Hero Rush TCG (MHR Deck Lab, fan-made)"
+    return render(no, nm, desc, stats)
+
+def rp_page_html(r):
+    no = r['no']
+    rar = ' / '.join(r.get('ra', []))
+    line2 = f"Rush Point Card · {r.get('s', '')} · {rar}"
+    desc = line2 + " — Marvel Hero Rush TCG (MHR Deck Lab, fan-made)"
+    return render(no, 'Rush Point', desc, line2)
+
+def read_text(path):
+    try:
+        with open(path, encoding='utf-8', newline='') as fh:
+            return fh.read()
+    except FileNotFoundError:
+        return None
+
+def old_lastmods():
+    """{loc: lastmod} dari sitemap.xml yang sekarang (kosong kalau belum ada)."""
+    s = read_text(SITEMAP) or ''
+    return dict(re.findall(r'<loc>([^<]+)</loc>\s*<lastmod>([^<]+)</lastmod>', s))
+
+def write_sitemap(nos, changed, today):
     """
-    Regenerasi sitemap.xml: URL utama situs + satu <url> per halaman kartu.
-    Sengaja menimpa seluruhnya (bukan menambah) supaya tidak ada duplikat
-    kalau skrip ini dijalankan berkali-kali setelah cards.js berubah.
+    Regenerasi sitemap.xml: URL utama situs + satu <url> per halaman kartu
+    (karakter dan Rush Point). Sengaja menimpa seluruhnya (bukan menambah)
+    supaya tidak ada duplikat kalau skrip ini dijalankan berkali-kali.
     """
-    urls = [("https://mhrdecklab.com/", "1.0", "weekly")]
-    for c in sorted(cards, key=lambda x: x['no']):
-        urls.append((f"https://mhrdecklab.com/cards/{c['no']}.html", "0.5", "monthly"))
+    lama = old_lastmods()
+    urls = [(f"{SITE}/", "1.0", "weekly", today)]
+    for no in sorted(nos):
+        loc = f"{SITE}/cards/{no}.html"
+        lm = today if (no in changed or loc not in lama) else lama[loc]
+        urls.append((loc, "0.5", "monthly", lm))
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    for loc, prio, freq in urls:
-        lines.append(f"  <url>\n    <loc>{esc(loc)}</loc>\n    <lastmod>{today}</lastmod>\n"
-                      f"    <changefreq>{freq}</changefreq>\n    <priority>{prio}</priority>\n  </url>")
+    for loc, prio, freq, lm in urls:
+        lines.append(f"  <url>{NL}    <loc>{esc(loc)}</loc>{NL}    <lastmod>{lm}</lastmod>{NL}"
+                     f"    <changefreq>{freq}</changefreq>{NL}    <priority>{prio}</priority>{NL}  </url>")
     lines.append('</urlset>')
-    with open(os.path.join(ROOT, 'sitemap.xml'), 'w', encoding='utf-8') as f:
-        f.write('\n'.join(lines) + '\n')
+    with open(SITEMAP, 'w', encoding='utf-8', newline='') as fh:
+        fh.write(NL.join(lines) + NL)
+    return len(urls)
 
 def main():
-    cards = load_cards()
-    print(f"Ditemukan {len(cards)} kartu di cards.js")
+    cards, rps = load_cards()
+    print(f"Ditemukan {len(cards)} kartu karakter dan {len(rps)} Rush Point di cards.js")
     os.makedirs(OUT_DIR, exist_ok=True)
-    written = 0
-    for c in cards:
-        no = c['no']
-        with open(os.path.join(OUT_DIR, f"{no}.html"), 'w', encoding='utf-8') as f:
-            f.write(page_html(c))
-        written += 1
-    print(f"Selesai: {written} halaman ditulis ke {OUT_DIR}/<NO>.html")
+    pages = [(c['no'], page_html(c)) for c in cards] + [(r['no'], rp_page_html(r)) for r in rps]
+    nos = [no for no, _ in pages]
+    if len(set(nos)) != len(nos):
+        print('Nomor kartu ganda antara CARDS dan RUSH_POINTS — periksa cards.js', file=sys.stderr)
+        sys.exit(1)
+    changed, baru = [], []
+    for no, text in pages:
+        path = os.path.join(OUT_DIR, f"{no}.html")
+        lama = read_text(path)
+        if lama == text:
+            continue
+        (baru if lama is None else changed).append(no)
+        with open(path, 'w', encoding='utf-8', newline='') as fh:
+            fh.write(text)
+    print(f"Halaman: {len(pages)} total, {len(baru)} baru, {len(changed)} diperbarui, "
+          f"{len(pages) - len(baru) - len(changed)} tidak berubah")
+    if baru: print('  baru      :', ' '.join(baru))
+    if changed: print('  diperbarui:', ' '.join(changed))
 
-    import datetime
     today = datetime.date.today().isoformat()
-    write_sitemap(cards, today)
-    print(f"sitemap.xml diperbarui ({len(cards)+1} URL, lastmod {today})")
+    n = write_sitemap(nos, set(baru) | set(changed), today)
+    print(f"sitemap.xml diperbarui ({n} URL, lastmod halaman baru/berubah {today})")
 
 if __name__ == '__main__':
     main()

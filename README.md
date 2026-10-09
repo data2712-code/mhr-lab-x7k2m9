@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.83** · 8 Oktober 2026
+**Versi saat ini: v6.87** · 9 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -513,6 +513,115 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.87 — Halaman share untuk EB01-010 s.d. EB01-014 dan 59 Rush Point, tombol share Rush Point — 9 Oktober 2026 *(`tools/generate_card_pages.py`, `cards/` (64 berkas baru), `sitemap.xml`, `index.html`)*
+
+- **64 halaman share baru** di `cards/<NO>.html` (halaman statis dengan og:title/og:image supaya link yang
+  dibagikan ke WhatsApp dsb. tampil dengan gambar kartu): EB01-010 s.d. EB01-014 — yang ternyata belum pernah
+  dibuatkan sejak kartu itu ditambahkan, jadi link share-nya tampil tanpa preview — serta 59 Rush Point Card.
+  Halaman Rush Point berjudul "Rush Point (<NO>)" dengan deskripsi seri + rarity, dan mengarah ke `#c=<NO>`
+  yang membuka popup Rush Point (sudah didukung sejak v6.86).
+- **`tools/generate_card_pages.py` diperbarui:** ikut membaca `window.RUSH_POINTS`; menulis berkas dengan akhir
+  baris CRLF seperti isi repo; hanya menulis halaman yang isinya berubah (halaman yang sama persis tidak
+  disentuh); `sitemap.xml` mempertahankan `<lastmod>` halaman yang tidak berubah. Dijalankan pada repo: 288
+  halaman lama identik byte-per-byte dengan keluaran generator (tidak ada yang berubah), 64 halaman baru.
+- **`sitemap.xml`**: 289 → 353 URL. `<lastmod>` 2026-10-09 untuk halaman utama dan 64 halaman baru; 288 halaman
+  lama tetap 2026-09-08.
+- **Tombol share di kartu Rush Point** (mode Rush Point halaman Kartu, pojok kanan atas gambar). `shareCard()`
+  kini juga menerima nomor Rush Point: share-sheet HP dengan gambar kartu, atau link WhatsApp ke
+  `cards/<NO>.html` sebagai cadangan.
+- Cache-buster skrip dinaikkan ke `?v=6.87` (12 tag `<script>`); `<meta name="version">` dan komentar kepala
+  `index.html` ikut diperbarui.
+
+**Verifikasi:** diuji di Chromium headless: tombol share Rush Point membuka link WhatsApp yang benar tanpa
+membuka popup, share kartu karakter tetap normal, klik gambar Rush Point tetap membuka popup, tanpa error
+JavaScript. Preview link di WhatsApp baru bisa dicek setelah push.
+
+**Catatan:** setiap kali `cards.js` berubah, jalankan `python3 tools/generate_card_pages.py` dari root repo.
+
+### v6.86 — Rush Point Card tampil di halaman Kartu (59 kartu, 72 gambar) — 9 Oktober 2026 *(`cards.js`, `index.html`, `images/`)*
+
+Tahap 1 penambahan Rush Point Card (item G01 checklist cross-check). Keputusan pemilik: data + tampil di halaman
+Kartu dulu; Deck Builder belum diubah.
+
+- **Data baru `window.RUSH_POINTS`** di akhir `cards.js` — 59 Rush Point Card dari daftar kartu resmi
+  marvelherorush.com: SD01-019 s.d. SD04-019 (4), BP01-121 s.d. BP01-150 (30), EB01-001 s.d. EB01-005 (5),
+  SP01-081 s.d. SP01-100 (20). Field: `no`, `s`, `ra` (rarity pertama = versi utama), `id` (1 = juga ada di
+  daftar resmi versi Indonesia; 34 kartu SD/BP01). Sengaja **dipisah dari `window.CARDS`**: Rush Point bukan
+  karakter (tanpa nama/efek/warna/Lv/Power/R/trait) dan seluruh kode yang membaca `DB` (deck, statistik,
+  validasi, koleksi, simulator) mengasumsikan isinya karakter — jadi tidak ada fitur lama yang tersentuh.
+- **72 gambar baru** di `images/`: `<NO>.jpg` untuk rarity utama dan `<NO>_<RAR>.jpg` untuk varian (SP01-081 dan
+  SP01-090: C/MR/SEC; SP01-082 s.d. SP01-089 dan SP01-091: C/MR; EB01-001 s.d. EB01-005: ER). Diambil dari gambar
+  resmi (sudah ber-watermark SAMPLE), 450×620, JPG kualitas 90. Gambar Rush Point tidak berteks bahasa, jadi
+  tidak ada salinan di `images/en/`.
+- **Halaman Kartu: pengalih Tipe "Characters / Rush Point"** di kiri kotak pencarian (`#typeTog`, hanya tampil
+  di halaman Kartu). Mode Rush Point (`renderRushPoints()`): selalu tampilan grid (2 kolom di HP), kotak
+  penjelasan singkat di atas daftar, pencarian berdasarkan nomor kartu, dan filter seri; filter karakter lain
+  disembunyikan (`.filters.rp-mode`). Klik kartu membuka popup Rush Point (`openRpLightbox()`): nomor, seri,
+  rarity, keterangan daftar resmi (ID+EN atau EN saja), pilihan varian artwork, dan navigasi ◀ ▶ / panah
+  keyboard di antara Rush Point yang sedang tampil. Tidak ada tombol tambah ke deck.
+- Deck Builder (`#build`) memakai daftar kartu yang sama tetapi **selalu menampilkan karakter** (`rpMode()`
+  hanya aktif di halaman Kartu). Pilihan tipe tidak disimpan — setiap kunjungan mulai dari Characters.
+- Link kartu `#c=<nomor Rush Point>` (mis. `#c=SP01-090`) membuka halaman Kartu mode Rush Point dan popup-nya.
+- **Perbaikan kecil:** lencana jumlah filter di tombol Filter (HP) tetap menampilkan "0" walau tidak ada filter
+  aktif karena atribut `hidden` kalah dari `display:inline-flex` — ditambah `.fbadge[hidden]{display:none}`.
+- Cache-buster skrip dinaikkan ke `?v=6.86` (12 tag `<script>`); `<meta name="version">` dan komentar kepala
+  `index.html` ikut diperbarui.
+
+**Verifikasi:** `node --check` pada `cards.js` (293 karakter + 59 Rush Point, 72 berkas gambar cocok dengan
+`ra`). Diuji di Chromium headless (desktop 1280px dan HP 390px) dengan server lokal: pengalih tipe, filter seri,
+pencarian, Reset, popup + varian + navigasi, link `#c=`, halaman Deck Builder tetap 293 karakter, tambah kartu ke
+deck dan popup karakter tetap normal, tanpa error JavaScript. Belum dites di situs live.
+
+**Belum (tahap berikutnya):** Rush Point Deck di Deck Builder; halaman statis `cards/<NO>.html` untuk
+Rush Point (preview share WhatsApp); teks bahasa Indonesia untuk kotak penjelasan (UI saat ini satu set teks
+Inggris).
+
+### v6.85 — Trait BP01-044, BP01-109, SD03-018 mengikuti data resmi Inggris — 9 Oktober 2026 *(`cards.js`, `cards/BP01-044.html`, `cards/BP01-109.html`, `cards/SD03-018.html`, `index.html`)*
+
+Keputusan pemilik atas temuan cross-check (item F01–F05 di checklist).
+
+- **Trait diganti** (`f`) sesuai daftar kartu resmi versi Inggris. Daftar resmi versi Indonesia menulis trait yang
+  berbeda untuk ketiga kartu ini; pemilik memutuskan memakai versi Inggris:
+  - BP01-044 War Machine: `Machine/Avengers` → `Human/Avengers`
+  - BP01-109 Daredevil: `Human/Avengers` → `Human/The Defenders`
+  - SD03-018 Scarlet Witch: `Human/Avengers` → `Mutant/Avengers`
+  Meta description halaman `cards/<NO>.html` ketiga kartu ikut diperbarui. Filter trait di halaman Kartu langsung
+  mengikuti karena daftar trait dibentuk dari `cards.js`.
+- **Tidak diubah, sesuai keputusan pemilik:** SP01-005 tetap merujuk `[Buster]` (situs resmi Indonesia menulis
+  `[Armor]`, dianggap salah ketik); SD04-005 tetap `AIR STRIKE` (situs resmi Inggris menulis `AIR ATTACK`, dianggap
+  salah ketik karena kartu Inggris lain memakai `AIR STRIKE`).
+- Cache-buster skrip dinaikkan ke `?v=6.85` (12 tag `<script>`); `<meta name="version">` dan komentar kepala
+  `index.html` ikut diperbarui.
+
+**Verifikasi:** `node --check` pada `cards.js`; `DB.length` tetap 293; diff hanya tiga baris kartu tersebut.
+
+### v6.84 — Teks Inggris PB01 & TB01, 4 teks Inggris direvisi resmi, BP01-094 dilengkapi, 18 gambar baru — 9 Oktober 2026 *(`cards.js`, `images/en/`, `images/BP01-061_MR.jpg`, `index.html`)*
+
+Lanjutan perbaikan hasil cross-check situs resmi marvelherorush.com (8 Oktober 2026).
+
+- **Teks Inggris baru** (`nm_en`, `e_en`) untuk PB01-001 s.d. PB01-011 dan TB01-001, diambil dari daftar kartu
+  resmi versi Inggris. Statistik (Lv, R, Power, trait, warna) keduabelas kartu sudah dicek sama dengan data resmi.
+  Dengan ini **semua 293 kartu** di `cards.js` punya nama dan efek Inggris.
+- **Teks efek Inggris diganti ke versi resmi terbaru**: BP01-062 (`can not affected` jadi `cannot be affected`),
+  SD01-002 (ditambah `except this card`), SD01-006 (`1 of your characters in BASE` jadi `1 of your cards in BASE`),
+  SD02-006 (`separate` jadi `remove`).
+- **BP01-094 teks Indonesia dilengkapi** dengan kalimat definisi X yang hilang: "X adalah jumlah karakter Anda di
+  BATTLE yang tidak menyerang pada giliran ini." Situs resmi versi Indonesia juga terpotong di kalimat ini, jadi
+  kalimatnya diterjemahkan dari teks resmi Inggris ("X is the number of your characters that did not attack in
+  BATTLE in this turn"). Ganti dengan teks resmi Indonesia kalau sudah tersedia.
+- **17 gambar printing Inggris baru** di `images/en/`: EB01-010 s.d. EB01-014, PB01-001 s.d. PB01-011, dan
+  TB01-001. Sebelumnya kartu-kartu ini menampilkan gambar printing Indonesia saat bahasa Inggris dipilih (lewat
+  `imgFallback()`). Sumbernya PNG ber-watermark SAMPLE di folder `Database Image Kartu\English\` (EB01_English,
+  PB01-A_English, PB01-B_English, TB01_English), diratakan ke latar #1F1F1F dan diubah ke JPG 450×620 kualitas 90.
+- **Gambar BP01-061 MR printing Indonesia** (`images/BP01-061_MR.jpg`) ditambahkan dari
+  `Database Image Kartu\Indonesia\BP01_Indonesia\BP01-061_MR.png` (watermark SAMPLE diagonal), dengan proses
+  yang sama. Sebelumnya varian MR ini belum punya gambar sendiri.
+- Cache-buster skrip dinaikkan ke `?v=6.84` (12 tag `<script>`) karena `cards.js` berubah; `<meta name="version">`
+  dan komentar kepala `index.html` ikut diperbarui.
+
+**Verifikasi:** `node --check` pada `cards.js`; `DB.length` tetap 293; tidak ada lagi kartu tanpa `nm_en`;
+18 gambar baru dicek visual (nomor kartu, bahasa, watermark SAMPLE).
 
 ### v6.83 — EB01-006 s.d. EB01-009: teks & gambar versi Inggris resmi — 8 Oktober 2026 *(`cards.js`, `images/en/`, `cards/EB01-006.html`, `index.html`)*
 
