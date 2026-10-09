@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.89  ·  9 Oktober 2026
+     MHR DECK LAB  ·  versi 6.90  ·  9 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.89">
+<meta name="version" content="6.90">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2002,26 +2002,26 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.87"></script>
-<script src="data.js?v=6.87"></script>
+<script src="cards.js?v=6.90"></script>
+<script src="data.js?v=6.90"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.87"></script>
-<script src="decks.js?v=6.87"></script>
+<script src="auth.js?v=6.90"></script>
+<script src="decks.js?v=6.90"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.87"></script>
-<script src="collection.js?v=6.87"></script>
+<script src="social.js?v=6.90"></script>
+<script src="collection.js?v=6.90"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.87"></script>
-<script src="news-ui.js?v=6.87"></script>
+<script src="news.js?v=6.90"></script>
+<script src="news-ui.js?v=6.90"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.87"></script>
+<script src="home-ui.js?v=6.90"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.87"></script>
-<script src="set-ui.js?v=6.87"></script>
+<script src="spoilers.js?v=6.90"></script>
+<script src="set-ui.js?v=6.90"></script>
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.87"></script>
+<script src="tournaments.js?v=6.90"></script>
 <!-- v6.88 — pop-up iklan carousel (kampanye Era of Spiders + Asia Peak Invitational).
      "defer" = tidak menahan render; CSS-nya disuntik oleh skripnya sendiri saat tampil.
      Aturan tampil & tanggal berakhir ada di PROMO (atas promo-popup.js). Pratinjau: /?promo=preview -->
@@ -3549,6 +3549,9 @@ function t(k){
    v6.53 — 5 kartu promo turnamen baru (EB01-010..014, scan bahasa Inggris dari
    folder "Database Image Kartu", tidak ada scan Indonesia sama sekali) memakai
    kode seri BARU "EB01" (BUKAN "PR" seperti EB01-006..009 yang scan resminya
+   [catatan v6.90: seri "PR" sudah dihapus — EB01-006..009 kini juga s:"EB01" dan
+   TB01-001 s:"TB01"; seri selalu = awalan nomor kartu. Penanda fan-translation
+   sudah per kartu (field fan) sejak v6.60, jadi penggabungan ini aman]
    memang Indonesia) justru supaya bisa ditambahkan ke FAN_TRANSLATED_ID_SETS di
    sini tanpa ikut menandai EB01-006..009 (yang resmi, bukan fan-translation).
    Field nm/e kelima kartu ini adalah hasil fan-translation sesi Claude dari teks

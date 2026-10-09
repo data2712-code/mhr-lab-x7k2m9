@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.89** · 9 Oktober 2026
+**Versi saat ini: v6.90** · 9 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,37 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.90 — Seri "PR" dihapus: seri kartu selalu mengikuti awalan nomor; cross-check ulang situs resmi — 9 Oktober 2026 *(`cards.js`, `index.html`)*
+
+Dikerjakan ulang di atas v6.89 (sempat dibuat sebagai "v6.88" di salinan repo yang belum menarik v6.88/v6.89
+dari origin, sehingga nomornya bentrok dan perubahannya tertimpa saat pull).
+
+- **Seri kartu = awalan nomor kartu** (permintaan pemilik): EB01-006 s.d. EB01-009 dari `PR` → `EB01` (sekarang
+  satu seri dengan EB01-010 s.d. EB01-014), TB01-001 dari `PR` → `TB01`. Rarity tidak berubah (ER / TR). Filter
+  seri di halaman Kartu tidak lagi memuat opsi `PR`; halaman Set EB01 tidak lagi memecah kartunya ke dua seri.
+  Aturan ini dicatat di kepala `cards.js`. Tidak ada kode yang bergantung pada nilai `PR` (penanda
+  fan-translation sudah per kartu sejak v6.60).
+- **Cross-check ulang** seluruh database terhadap daftar kartu resmi marvelherorush.com (Inggris 448 entri,
+  Indonesia 383 entri; sama persis dengan data 8 Oktober — tidak ada kartu/teks resmi yang berubah). Hasil:
+  semua kartu karakter dan Rush Point resmi sudah ada, semua varian rarity cocok, semua gambar varian (ID & EN)
+  ada, statistik (Lv/Power/R/warna) cocok. Perbedaan yang tersisa semuanya sudah diketahui/diputuskan atau
+  kesalahan di data resmi:
+  - 12 kartu Errata V.1 (BP01-002/026/037/043/046/052/090, SD01-007/018, SD04-002/003/005): daftar resmi
+    Indonesia masih memuat teks sebelum errata; situs memakai teks errata yang sama maknanya dengan teks Inggris
+    resmi.
+  - Salah ketik / sisa OCR di daftar resmi Indonesia (mis. nama "Long Ranges", "Redirections", "Allys",
+    "Uninstal", trait "Symblote", nomor "SPO1-xxx", varian MR Mr. Negative tertulis SP01-081) — dicek ke
+    gambar kartu Indonesia, situs sudah benar. Salah ketik di daftar resmi Inggris ("charcater", "attched",
+    "ONCR") juga tidak diikuti.
+  - Keputusan pemilik sebelumnya tetap: trait BP01-044/BP01-109/SD03-018 versi Inggris (v6.85), SP01-005
+    `[Buster]`, SD04-005 `AIR STRIKE`.
+- Cache-buster 12 tag `<script>` dinaikkan dari `?v=6.87` ke `?v=6.90` karena `cards.js` berubah;
+  `promo-popup.js?v=6.89` tidak diubah (berkasnya tidak berubah). `<meta name="version">` dan komentar kepala
+  `index.html` ikut diperbarui. Halaman `cards/<NO>.html` tidak berubah (generator tidak memakai seri).
+
+**Verifikasi:** `node --check` pada `cards.js`; 293 karakter, 0 kartu yang seri-nya beda dengan awalan nomor;
+filter seri diuji di Chromium headless (EB01 = 9 kartu, TB01 = 1 kartu, tanpa opsi `PR`).
 
 ### v6.89 — Pop-up kampanye tampil setiap pengunjung masuk — 9 Oktober 2026 *(`promo-popup.js`, `index.html`)*
 
