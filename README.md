@@ -537,6 +537,7 @@ hanya dipakai di artikel (format potret).
 - **Interaksi/aksesibilitas:** panah, titik, geser jari/mouse, autoplay 6 dtk (berhenti saat hover/fokus/setelah navigasi manual,
   mati jika `prefers-reduced-motion`), ESC / klik luar / tombol X menutup, fokus terkunci di dalam dialog lalu dikembalikan, slide tak
   aktif `inert`, di ponsel kotak tetap muat layar tanpa scroll horizontal.
+- **Gambar artikel News** ada di repo, bukan bucket: `images/news/era-of-spiders-ascc/` (`cover.jpg` 1200×630, `sp01.webp`, `champions.webp`, `poster.jpg`, `keyart.webp`), dirujuk dari isi artikel lewat path relatif `images/news/era-of-spiders-ascc/…` (sama seperti artikel SD05/SD06). Karena itu gambar artikel baru tampil setelah di-push.
 - **Pratinjau pemilik:** buka `https://mhrdecklab.com/?promo=preview` (mengabaikan tanggal & penyimpanan, tidak menyimpan apa pun).
 - **Gambar:** `images/promo/promo-sp01.webp` (91 KB), `promo-champions.webp` (74 KB), `promo-keyart.webp` (170 KB, 1280×720). Sumber & izin:
   dari staf MHR Indonesia; kredit di pop-up "Images courtesy of MHR Indonesia. © Marvel © Jason."
