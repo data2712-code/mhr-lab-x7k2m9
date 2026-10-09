@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR DECK LAB — promo-popup.js (v6.88)
+   MHR DECK LAB — promo-popup.js (v6.89)
    Pop-up iklan berbentuk carousel (3 slide) untuk kampanye di Beranda/semua
    halaman aplikasi. Seluruh teks pop-up berbahasa Inggris (UI situs satu
    bahasa saja). Mengganti kampanye = ubah objek PROMO di bawah, lalu naikkan
@@ -10,7 +10,9 @@
    - Hanya SEKALI saat pengunjung baru masuk ke situs (di halaman mana pun).
      sessionStorage menandai sesi tab ini sudah dievaluasi, jadi berpindah
      halaman di dalam situs (hash-routing) tidak memunculkannya lagi.
-   - Paling cepat sekali per 24 jam (localStorage 'last').
+   - Jeda minimum antar-tampil = PROMO.minGapHours (sejak v6.89: 0 = setiap
+     pengunjung masuk ke situs / membuka tab baru; isi 24 untuk kembali ke
+     aturan sekali per 24 jam). Memuat ulang tab yang sama tidak mengulang.
    - "Don't show this again" -> tidak muncul lagi untuk kampanye ini.
    - Hanya selama jendela kampanye: PROMO.startsAt .. PROMO.endsAt (14 hari).
      Setelah endsAt pop-up berhenti sendiri walau kodenya belum dihapus.
@@ -30,7 +32,7 @@
     /* jendela kampanye: 14 hari sejak naik ke situs (WIB, UTC+7) */
     startsAt: '2026-10-09T00:00:00+07:00',
     endsAt:   '2026-10-23T23:59:59+07:00',
-    minGapHours: 24,
+    minGapHours: 0,   /* v6.89: 0 = tampil tiap kali pengunjung masuk (sekali per sesi tab); 24 = maks. sekali/hari */
     delayMs: 2000,
     autoMs: 6000,
     slides: [

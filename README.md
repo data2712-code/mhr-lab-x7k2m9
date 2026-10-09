@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.88** · 9 Oktober 2026
+**Versi saat ini: v6.89** · 9 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -35,7 +35,7 @@ mhr-lab-x7k2m9/
 ├── sw.js                 ← PWA: service worker, cache offline (sejak v6.6)
 ├── icons/               ← ikon PWA berbagai ukuran (sejak v6.6)
 ├── og-image.jpg      ← gambar preview saat link dibagikan
-├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.88; hapus saat kampanye turun, lihat README § v6.88)
+├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.89; hapus saat kampanye turun, lihat README § v6.88)
 ├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
 ├── sitemap.xml           ← SEO: sitemap untuk Google Search Console (sejak v6.21)
 ├── robots.txt            ← SEO: izinkan semua crawler + rujuk ke sitemap.xml (sejak v6.21)
@@ -515,6 +515,15 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.89 — Pop-up kampanye tampil setiap pengunjung masuk — 9 Oktober 2026 *(`promo-popup.js`, `index.html`)*
+
+Permintaan pemilik: pop-up harus muncul setiap kali pengunjung mengakses mhrdecklab.com (bukan sekali per 24 jam).
+
+- **`promo-popup.js`:** `PROMO.minGapHours` diubah dari `24` menjadi `0`. Pop-up kini tampil setiap pengunjung masuk ke situs (tab/sesi baru); berpindah halaman di dalam situs atau memuat ulang tab yang sama tetap tidak mengulang karena penanda sessionStorage tidak diubah. Untuk kembali ke aturan sekali per hari, isi `minGapHours: 24`.
+- Tidak berubah: tombol "Don't show this again" (permanen per browser), jendela kampanye sampai 23 Oktober 2026 23:59 WIB, dan dilewati bila lightbox/deck sedang terbuka.
+- `index.html`: versi 6.89 dan `promo-popup.js?v=6.89` (supaya browser/Cloudflare mengambil file baru). `sw.js` tidak diubah.
+- Pengujian: 28 pemeriksaan otomatis di lingkungan uji lokal + pemeriksaan khusus aturan baru (muncul di kunjungan kedua tanpa jeda; tidak muncul lagi di tab yang sama; "never" tetap berlaku).
 
 ### v6.88 — Pop-up iklan carousel: Era of Spiders (SP01) + Asia Peak Invitational — 9 Oktober 2026 *(`promo-popup.js` baru, `index.html`, `sw.js`, `images/promo/`)*
 
