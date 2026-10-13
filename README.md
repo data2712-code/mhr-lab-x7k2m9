@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.91** · 9 Oktober 2026
+**Versi saat ini: v6.92** · 13 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,31 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.92 — Errata V.2: BP01-061 「Follow Shadow」 New Black Panther (teks efek + gambar kartu) — 13 Oktober 2026 *(`cards.js`, `index.html`, `sw.js`, `images/BP01-061.jpg`, `images/BP01-061_MR.jpg`, `images/en/BP01-061.jpg`, `images/en/BP01-061_MR.jpg`)*
+
+Errata resmi baru untuk **BP01-061**: biaya COUNTER·ACTI tidak lagi khusus kartu tertutup (set card) — sekarang
+RETREAT 2 kartu apa saja milik Anda di BASE. Berbeda dari Errata V.1, kali ini teks **Indonesia dan Inggris**
+sama-sama berubah.
+
+- **Sebelum** — EN: `You retreat 2 of your set cards in BASE. ...` · ID: `RETREAT 2 kartu tertutup milik Anda di BASE. ...`
+- **Sesudah** — EN: `You retreat 2 of your cards in BASE. ...` · ID: `RETREAT 2 kartu milik Anda di BASE. ...`
+  (sisa kalimat tidak berubah)
+- `cards.js`: `e` dan `e_en` BP01-061 diganti, ditambah field `er:"V.2"` sehingga lencana **Errata** muncul dengan
+  tooltip "(Errata V.2)". Komentar format `er` di kepala berkas menyebut contoh "V.2".
+- **Gambar kartu ikut diedit** (4 berkas: UR & MR, printing Indonesia `images/` dan Inggris `images/en/`): kata
+  "tertutup" / "set" dihapus dari baris pertama teks efek, kata sesudahnya digeser ke kiri, dan latar artwork di
+  ujung baris direkonstruksi (inpainting). Edit dimasukkan blok-per-blok ke JPEG asli (`jpegtran -drop`) dengan
+  tabel kuantisasi asli, jadi seluruh piksel di luar baris yang diedit identik bit-per-bit dengan gambar lama.
+- `sw.js`: `CACHE_VERSION` **v8 → v9**. Gambar kartu di-cache cache-first permanen, jadi tanpa ini HP/browser yang
+  pernah membuka BP01-061 tetap menampilkan gambar lama. Efek samping: kunjungan pertama tiap pengguna setelah
+  update mengunduh ulang gambar kartu sekali.
+- Cache-buster tag `<script>` dinaikkan ke `?v=6.92`; `promo-popup.js?v=6.89` tidak diubah. Halaman statis
+  `cards/BP01-061.html` tidak memuat teks efek, jadi tidak perlu diubah.
+
+**Verifikasi:** `node --check` pada `cards.js` dan `sw.js`. Diuji di Chromium headless (situs lokal): popup
+`#c=BP01-061` menampilkan teks baru, lencana Errata dengan tooltip "Errata V.2", lencana Counter tetap muncul,
+gambar baru termuat. Diff piksel gambar: perubahan hanya di area baris pertama teks efek.
 
 ### v6.91 — 7 versi kartu yang sebelumnya tergabung kini terpisah: HR /616 & /99, EB01-014 Champion, TB01-001 Silver & Full Art — 9 Oktober 2026 *(`cards.js`, `index.html`, `set-ui.js`, `images/` & `images/en/` (12 berkas baru))*
 
@@ -4988,6 +5013,9 @@ berbeda (sudah dipecah di UI sejak v6.15):
   teksnya — baik di database (`cards.js`, field `er:"V.1"`) maupun di **gambar
   kartunya sendiri**. Ditandai badge "Errata" di UI. Gambar versi Inggris tidak diubah
   (errata bersumber Bahasa Indonesia).
+- **Errata V.2** (diterapkan v6.92, 13 Oktober 2026): `BP01-061` 「Follow Shadow」 New Black Panther —
+  "set cards" / "kartu tertutup" menjadi "cards" / "kartu" (biaya RETREAT 2 kartu apa saja di BASE). Teks Indonesia
+  **dan** Inggris diubah, di `cards.js` (`er:"V.2"`) maupun di 4 gambar kartu (UR & MR, `images/` dan `images/en/`).
 
 ### Field yang belum diimplementasikan / masih terbuka
 

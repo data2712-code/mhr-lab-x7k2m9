@@ -26,7 +26,7 @@
    supaya versi baru langsung dipakai tanpa perlu semua tab ditutup dulu.
    =================================================================== */
 
-const CACHE_VERSION = 'v8'; // v6.65 — tournaments.js ditambahkan ke STATIC_ASSETS (jadi wajib naik)
+const CACHE_VERSION = 'v9'; // v6.92 — gambar BP01-061 (ID/EN, UR & MR) diedit untuk errata V.2; gambar cache-first, jadi wajib naik supaya HP lama ambil ulang (v8: v6.65 tournaments.js)
 const CACHE_STATIC = `mhr-shell-${CACHE_VERSION}`;
 const CACHE_IMAGES = `mhr-images-${CACHE_VERSION}`;
 
