@@ -516,6 +516,36 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### API data kartu v1 (read-only, statis) untuk mitra LGS — 15 Oktober 2026 *(baru: `api/index.html`, `api/v1/cards.json`, `api/v1/cards.csv`, `api/v1/sets.json`, `tools/generate_api.js`)*
+
+Permintaan kerja sama dari LGS Ogre Neverland (ogreneverland.com, situs Next.js) yang akan menjual kartu single
+per versi rarity dan butuh database kartu berbahasa Indonesia. MHR Indonesia sudah mengizinkan penggunaan data
+kartu (menurut pemilik). Tidak ada perubahan pada aplikasi (`index.html` dll. tidak disentuh, versi tetap v6.92).
+
+- **Bentuk:** berkas statis di GitHub Pages lewat Cloudflare — tanpa server, tanpa API key, tanpa biaya, dan tidak
+  menyentuh Supabase (data akun/deck/koleksi/komentar tidak pernah ikut).
+- **`api/v1/cards.json` / `cards.csv`:** satu baris per **versi cetak** (448 baris = 376 versi karakter + 72 versi
+  Rush Point, dari 9 set berstatus `rilis` di `window.SETS`; set spoiler SD05/SD06/PB02 otomatis tidak ikut).
+  Kolom: `id` (= `<no>-<varian>`, stabil, dipakai mitra sebagai SKU), `card_no`, `set`, `type`, `rarity`,
+  `variant`, `variant_label` (HR /99, HR /616, ER Top 4, dst. — sama dengan label di situs), `is_main`, `name`,
+  `color`, `level`, `range`, `power`, `traits`, `effect` (semuanya bahasa Indonesia), `errata`,
+  `fan_translation`, `indonesian_print` (Rush Point), `image` (URL absolut printing Indonesia), `url`.
+  CSV pakai BOM UTF-8 supaya Excel membaca dengan benar.
+- **`api/v1/sets.json`:** set yang sudah rilis + jumlah kartu dan versi per set.
+- **`api/index.html`:** dokumentasi untuk mitra (endpoint, arti kolom, contoh Next.js, syarat pemakaian:
+  atribusi "Data kartu: MHR Deck Lab", hak cipta MARVEL/JASON, tidak dijual ulang sebagai dataset, tanpa jaminan,
+  perubahan format lewat `/api/v2/`).
+- **`tools/generate_api.js`:** pembuat berkas di atas dari `cards.js` + `data.js`. **Wajib dijalankan ulang**
+  (`node tools/generate_api.js`) setiap kali `cards.js` atau `window.SETS` berubah (set baru, errata, perbaikan
+  data), lalu commit folder `api/`. Berkas hanya ditulis ulang kalau isinya berubah; tanggal `updated` dan
+  `data_hash` hanya berganti kalau data kartu benar-benar berubah — mitra memakai `data_hash` untuk tahu kapan
+  harus impor ulang.
+
+**Verifikasi:** JSON dan CSV dibaca ulang dan dibandingkan baris per baris (448 = 448, id/nama/efek identik);
+tidak ada `id` ganda; ke-448 URL gambar dicocokkan dengan isi folder `images/` di repo (semua ada); jumlah 448 sama
+dengan jumlah entri daftar resmi yang dicatat di v6.91. Halaman dokumentasi diuji di Chromium headless (1280 px dan
+390 px, tanpa scroll horizontal).
+
 ### v6.92 — Errata V.2: BP01-061 「Follow Shadow」 New Black Panther (teks efek + gambar kartu) — 13 Oktober 2026 *(`cards.js`, `index.html`, `sw.js`, `images/BP01-061.jpg`, `images/BP01-061_MR.jpg`, `images/en/BP01-061.jpg`, `images/en/BP01-061_MR.jpg`)*
 
 Errata resmi baru untuk **BP01-061**: biaya COUNTER·ACTI tidak lagi khusus kartu tertutup (set card) — sekarang

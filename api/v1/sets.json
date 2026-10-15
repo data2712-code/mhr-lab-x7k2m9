@@ -1,0 +1,69 @@
+{
+  "api_version": 1,
+  "updated": "2026-10-15",
+  "sets": [
+    {
+      "code": "SP01",
+      "name": "Era of Spiders",
+      "type": "Expansion Pack",
+      "cards": 100,
+      "versions": 152
+    },
+    {
+      "code": "EB01",
+      "name": "Event Pack",
+      "type": "Other",
+      "cards": 14,
+      "versions": 15
+    },
+    {
+      "code": "TB01",
+      "name": "Treasure Booster",
+      "type": "Other",
+      "cards": 1,
+      "versions": 3
+    },
+    {
+      "code": "PB01",
+      "name": "Promotion Pack",
+      "type": "Other",
+      "cards": 11,
+      "versions": 11
+    },
+    {
+      "code": "BP01",
+      "name": "The Avengers",
+      "type": "Expansion Pack",
+      "cards": 150,
+      "versions": 183
+    },
+    {
+      "code": "SD01",
+      "name": "REALITY",
+      "type": "Starter Deck",
+      "cards": 19,
+      "versions": 21
+    },
+    {
+      "code": "SD02",
+      "name": "MIND",
+      "type": "Starter Deck",
+      "cards": 19,
+      "versions": 21
+    },
+    {
+      "code": "SD03",
+      "name": "SPACE",
+      "type": "Starter Deck",
+      "cards": 19,
+      "versions": 21
+    },
+    {
+      "code": "SD04",
+      "name": "TIME",
+      "type": "Starter Deck",
+      "cards": 19,
+      "versions": 21
+    }
+  ]
+}

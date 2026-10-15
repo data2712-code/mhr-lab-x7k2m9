@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Data Kartu — MHR Deck Lab</title>
+<meta name="description" content="API data kartu Marvel Hero Rush (bahasa Indonesia) dari MHR Deck Lab: JSON dan CSV, satu baris per versi rarity, untuk katalog toko dan aplikasi komunitas.">
+<link rel="canonical" href="https://mhrdecklab.com/api/">
+<style>
+  :root{--bg:#0E1216;--panel:#151A20;--line:#262C36;--ink:#E8ECF1;--muted:#8A94A3;--accent:#F2B01E}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+  main{max-width:880px;margin:0 auto;padding:32px 16px 64px}
+  a{color:var(--accent)}
+  h1{font-size:28px;margin:8px 0 4px} h2{font-size:20px;margin:36px 0 10px;padding-top:12px;border-top:1px solid var(--line)}
+  .sub{color:var(--muted);margin:0 0 20px}
+  code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px}
+  code{background:#1B2129;border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;line-height:1.45}
+  pre code{background:none;border:0;padding:0}
+  table{width:100%;border-collapse:collapse;font-size:14px;display:block;overflow-x:auto}
+  th,td{text-align:left;vertical-align:top;padding:7px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;white-space:nowrap}
+  td:first-child{white-space:nowrap}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+  .ep{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline}
+  .ep b{color:var(--accent);font-family:ui-monospace,Consolas,monospace;font-size:12px}
+  ol li,ul li{margin:4px 0}
+  .muted{color:var(--muted)}
+  .back{color:var(--muted);text-decoration:none;font-size:14px}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="https://mhrdecklab.com/">← MHR Deck Lab</a>
+<h1>API Data Kartu Marvel Hero Rush</h1>
+<p class="sub">Versi 1 · data bahasa Indonesia · baca saja (read-only) · gratis</p>
+
+<p>MHR Deck Lab menyediakan data kartu Marvel Hero Rush dalam format JSON dan CSV untuk toko kartu (LGS) dan proyek komunitas, misalnya katalog toko yang menjual kartu single per versi rarity. Data yang sama dipakai di situs ini: nama dan teks efek resmi Marvel Hero Rush Indonesia, statistik, trait, dan gambar printing Indonesia.</p>
+<p>API ini berupa berkas statis. Tidak perlu API key dan tidak ada batas permintaan khusus, tapi mohon unduh/cache datanya di sisi Anda (lihat <a href="#pakai">Cara memakai</a>), jangan mengambilnya di setiap kunjungan halaman.</p>
+
+<h2 id="endpoint">Endpoint</h2>
+<div class="card ep"><b>GET</b><code>https://mhrdecklab.com/api/v1/cards.json</code><span class="muted">semua versi kartu (JSON)</span></div>
+<div class="card ep"><b>GET</b><code>https://mhrdecklab.com/api/v1/cards.csv</code><span class="muted">isi yang sama, untuk impor lewat spreadsheet (UTF-8)</span></div>
+<div class="card ep"><b>GET</b><code>https://mhrdecklab.com/api/v1/sets.json</code><span class="muted">daftar set yang sudah rilis + jumlah kartu dan versi</span></div>
+
+<p>Isinya hanya set yang <b>sudah rilis</b>. Kartu spoiler/pratinjau yang belum rilis tidak dimasukkan. Data akun, deck, koleksi, dan komentar pengguna situs tidak pernah ada di API ini.</p>
+
+<h2 id="struktur">Struktur data</h2>
+<p><code>cards.json</code> berisi metadata di bagian atas lalu daftar <code>cards</code>. <b>Satu baris = satu versi cetak</b>: kartu yang punya beberapa rarity (mis. UR, MR, SEC, HR) muncul sebagai beberapa baris, masing-masing dengan gambar sendiri — cocok dijadikan produk terpisah di toko.</p>
+<pre><code>{
+  "api_version": 1,
+  "updated": "2026-10-15",        // tanggal data terakhir berubah
+  "data_hash": "79c6cc813677a5a0", // berubah kalau isi data berubah
+  "count": 448,
+  "cards": [
+    {
+      "id": "SP01-021-HR_616",
+      "card_no": "SP01-021",
+      "set": "SP01",
+      "type": "karakter",
+      "rarity": "HR",
+      "variant": "HR_616",
+      "variant_label": "HR /616",
+      "is_main": false,
+      "name": "[The Web of Destiny] Spider-Man",
+      "color": "Kuning",
+      "level": 3, "range": 2, "power": 2000,
+      "traits": "Human/Web/Anchor Being",
+      "effect": "[UNIQUE](...) [TRIG](BASE/ONCE PER TURN) ...",
+      "errata": null,
+      "fan_translation": false,
+      "image": "https://mhrdecklab.com/images/SP01-021_HR_616.jpg",
+      "url": "https://mhrdecklab.com/cards/SP01-021.html"
+    }
+  ]
+}</code></pre>
+
+<table>
+<tr><th>Kolom</th><th>Isi</th></tr>
+<tr><td><code>id</code></td><td>ID unik versi = <code>&lt;card_no&gt;-&lt;variant&gt;</code>. <b>Stabil</b> — aman dipakai sebagai SKU. Tidak akan berubah selama API v1.</td></tr>
+<tr><td><code>card_no</code></td><td>Nomor kartu, mis. <code>BP01-001</code>. Semua versi rarity dari satu kartu punya <code>card_no</code> yang sama.</td></tr>
+<tr><td><code>set</code></td><td>Kode set (= awalan nomor): BP01, SP01, SD01–SD04, PB01, EB01, TB01.</td></tr>
+<tr><td><code>type</code></td><td><code>karakter</code> atau <code>rush_point</code>. Rush Point tidak punya nama, warna, statistik, dan efek.</td></tr>
+<tr><td><code>rarity</code></td><td>Rarity dasar: R, SR, GR, UR, MR, SEC, HR, PR, ER, TR, C.</td></tr>
+<tr><td><code>variant</code></td><td>Kode versi. Biasanya sama dengan <code>rarity</code>; beberapa kartu punya dua versi dengan rarity sama dan diberi akhiran: <code>HR_616</code>, <code>ER_CHAMPION</code>, <code>TR_SILVER</code>, <code>TR_FULLART</code>.</td></tr>
+<tr><td><code>variant_label</code></td><td>Label siap tampil, mis. <code>HR /99</code>, <code>HR /616</code>, <code>ER Top 4</code>, <code>ER Champion</code>, <code>TR Gold</code>.</td></tr>
+<tr><td><code>is_main</code></td><td><code>true</code> untuk versi utama (versi standar) kartu itu.</td></tr>
+<tr><td><code>name</code></td><td>Nama kartu bahasa Indonesia, mis. <code>[Antimatter] Iron Man</code>.</td></tr>
+<tr><td><code>color</code></td><td>Merah, Biru, Hijau, Kuning (kosong untuk Rush Point).</td></tr>
+<tr><td><code>level</code>, <code>range</code>, <code>power</code></td><td>Lv, jarak serangan (R), dan Power. <code>null</code> untuk Rush Point.</td></tr>
+<tr><td><code>traits</code></td><td>Trait dipisah garis miring, mis. <code>Human/Avengers</code>.</td></tr>
+<tr><td><code>effect</code></td><td>Teks efek bahasa Indonesia.</td></tr>
+<tr><td><code>errata</code></td><td>Versi errata resmi terakhir (mis. <code>V.1</code>, <code>V.2</code>), <code>null</code> kalau tidak pernah errata. Teks di API sudah versi setelah errata.</td></tr>
+<tr><td><code>fan_translation</code></td><td><code>true</code> kalau teks Indonesia kartu itu masih terjemahan komunitas (belum teks resmi).</td></tr>
+<tr><td><code>indonesian_print</code></td><td>Khusus Rush Point: <code>true</code> kalau ada di daftar resmi versi Indonesia, <code>false</code> kalau baru ada di versi Inggris.</td></tr>
+<tr><td><code>image</code></td><td>URL gambar kartu versi itu (printing Indonesia bila ada; ber-watermark SAMPLE).</td></tr>
+<tr><td><code>url</code></td><td>Halaman kartu di MHR Deck Lab.</td></tr>
+</table>
+
+<h2 id="pakai">Cara memakai</h2>
+<ol>
+  <li>Ambil <code>cards.json</code> (atau <code>cards.csv</code>) dan simpan di database/katalog Anda. Gunakan <code>id</code> sebagai kunci produk.</li>
+  <li>Cek pembaruan secara berkala, misalnya sehari sekali atau saat ada pengumuman set baru: kalau <code>data_hash</code> berbeda dari yang Anda simpan, impor ulang. Data biasanya hanya berubah saat set baru rilis atau ada errata.</li>
+  <li>Harga, stok, kondisi kartu, dan transaksi sepenuhnya dikelola di sistem Anda — API ini tidak memuat dan tidak menerima data tersebut.</li>
+  <li>Untuk gambar, sebaiknya simpan salinan di server/CDN Anda sendiri (atau lewat optimizer gambar framework Anda), jangan memuat langsung dari mhrdecklab.com di setiap kunjungan.</li>
+</ol>
+<p>Contoh (Next.js, server-side, diperbarui maksimal sehari sekali):</p>
+<pre><code>const res = await fetch('https://mhrdecklab.com/api/v1/cards.json', { next: { revalidate: 86400 } });
+const { cards, data_hash } = await res.json();
+const karakter = cards.filter(c =&gt; c.type === 'karakter');
+const singlesSP01 = karakter.filter(c =&gt; c.set === 'SP01');   // satu item per versi rarity</code></pre>
+<p class="muted">Setelah data di situs ini diperbarui, file API bisa butuh beberapa jam sampai versi terbaru terbaca dari cache Cloudflare.</p>
+
+<h2 id="syarat">Syarat pemakaian</h2>
+<ol>
+  <li><b>Atribusi wajib.</b> Tampilkan teks <i>"Data kartu: MHR Deck Lab"</i> dengan tautan ke <a href="https://mhrdecklab.com/">mhrdecklab.com</a> di halaman yang memakai data ini (cukup di footer atau halaman katalog).</li>
+  <li><b>Hak cipta tetap milik pemiliknya.</b> Marvel Hero Rush, gambar kartu, dan karakternya © MARVEL © JASON. Teks kartu resmi berasal dari Marvel Hero Rush Indonesia. MHR Deck Lab adalah situs komunitas tidak resmi; jangan menyebut data ini sebagai data resmi.</li>
+  <li><b>Boleh ditampilkan, tidak boleh dijual ulang sebagai dataset.</b> Data boleh dipakai untuk menampilkan katalog, kartu, dan deck di situs/aplikasi Anda, tetapi tidak boleh dijual, disewakan, atau dibagikan ulang sebagai kumpulan data.</li>
+  <li><b>Tanpa jaminan.</b> API disediakan apa adanya, tanpa jaminan ketersediaan atau ketepatan. Selalu cocokkan kartu fisik saat jual-beli.</li>
+  <li><b>Perubahan format.</b> Format v1 dijaga stabil. Perubahan yang tidak kompatibel akan dirilis sebagai versi baru (<code>/api/v2/</code>) dan diumumkan lebih dulu.</li>
+  <li>MHR Deck Lab dapat menghentikan akses atau API ini bila terjadi penyalahgunaan.</li>
+</ol>
+
+<h2 id="kontak">Kontak & riwayat</h2>
+<p>Pertanyaan, laporan data yang salah, atau ingin bekerja sama: Instagram/TikTok <a href="https://www.instagram.com/deteprtm/">@deteprtm</a>.</p>
+<ul>
+  <li><b>15 Oktober 2026</b> — API v1 dirilis: <code>cards.json</code>, <code>cards.csv</code>, <code>sets.json</code> (448 versi kartu dari 9 set).</li>
+</ul>
+</main>
+</body>
+</html>
