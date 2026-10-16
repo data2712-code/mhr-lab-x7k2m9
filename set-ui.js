@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR DECK LAB — set-ui.js (halaman Set & Spoiler, v6.64)
+   MHR DECK LAB — set-ui.js (halaman Set & Spoiler, v6.64; v6.93 label "Released in China")
    ===================================================================
    Rute:
      #set          daftar set: "Segera rilis" (spoiler) + "Sudah rilis"
@@ -55,6 +55,13 @@
     const pick = d.uniq.slice().sort((a,b)=>b.l-a.l)[0];
     return pick ? pick.img : '';
   }
+  /* v6.93 — set spoiler yang tanggal rilis China-nya sudah lewat: sudah beredar
+     di China tapi belum di Indonesia. Tetap SPOILER + fan translation (kartunya
+     masih di spoilers.js), cuma diberi label & catatan tambahan. */
+  function cnOut(s){
+    const t = s && s.rilis && s.rilis.cn;
+    return !!t && Date.parse(t+'T00:00:00+08:00') <= Date.now();
+  }
   function daysTo(s){
     const t = s.rilis && (s.rilis.id || s.rilis.cn);
     if(!t) return null;
@@ -72,11 +79,12 @@
   function tile(s){
     const d = setData(s);
     const dd = daysTo(s);
-    const rel = s.rilis ? [s.rilis.id?`ID ${tgl(s.rilis.id)}`:'', s.rilis.cn?`China ${tgl(s.rilis.cn)}`:''].filter(Boolean).join(' · ') : '';
+    const out = cnOut(s);
+    const rel = s.rilis ? [s.rilis.id?`ID ${tgl(s.rilis.id)}`:'', s.rilis.cn?`China ${tgl(s.rilis.cn)}${out?' (out now)':''}`:''].filter(Boolean).join(' · ') : '';
     return `<a class="st-tile${d.spoiler?' st-sp':''}" href="#set/${E(s.kode)}">
       <div class="st-img">${coverImg(d)?`<img src="${E(coverImg(d))}" alt="" loading="lazy">`:''}</div>
       <div class="st-b">
-        <div class="st-top"><span class="st-code">${E(s.kode)}</span>${d.spoiler?'<span class="st-badge">SPOILER</span>':''}</div>
+        <div class="st-top"><span class="st-code">${E(s.kode)}</span>${d.spoiler?'<span class="st-badge">SPOILER</span>':''}${d.spoiler&&out?'<span class="st-badge st-cn">OUT IN CHINA</span>':''}</div>
         <b>${E(title(s))}</b>
         <span class="st-muted">${E(s.tipe||'')} · ${d.spoiler?`${d.uniq.length} cards revealed`:`${d.uniq.length} cards`}</span>
         ${rel?`<span class="st-muted">${E(rel)}${dd?` · <b class="st-dd">${dd} days left</b>`:''}</span>`:''}
@@ -92,7 +100,7 @@
         <h2 class="nw-title">Set & Spoiler</h2>
         <p class="nw-lead">Every Marvel Hero Rush product: contents, colour & rarity stats, and its card list. Cards from a set that hasn't released yet are marked SPOILER.</p>
       </div>
-      ${sp.length?`<section><div class="hm-sec-h"><h2>Coming soon</h2></div><div class="st-grid">${sp.map(tile).join('')}</div></section>`:''}
+      ${sp.length?`<section><div class="hm-sec-h"><h2>Coming soon to Indonesia</h2></div><div class="st-grid">${sp.map(tile).join('')}</div></section>`:''}
       <section><div class="hm-sec-h"><h2>Released</h2></div><div class="st-grid">${rl.map(tile).join('')}</div></section>`;
   }
 
@@ -122,6 +130,7 @@
     if(!s){ w.innerHTML = `<a class="nw-back" href="#set">← All sets</a><div class="nw-empty">Set ${E(kode)} not found.</div>`; return; }
     const d = setData(s);
     const dd = daysTo(s);
+    const out = d.spoiler && cnOut(s);
     const shown = d.prints.slice().sort((a,b)=>a.no.localeCompare(b.no) || (b.base-a.base));
     const series = !d.spoiler ? [...new Set((DB||[]).filter(c=>c.no.startsWith(kode)).map(c=>c.s))] : [];
     document.title = `${kode} ${title(s)} — Marvel Hero Rush Set — MHR Deck Lab`;
@@ -130,7 +139,7 @@
       <div class="st-hero">
         <div class="st-hero-img">${coverImg(d)?`<img src="${E(coverImg(d))}" alt="">`:''}</div>
         <div class="st-hero-b">
-          <div class="st-top"><span class="st-code">${E(s.kode)}</span>${d.spoiler?'<span class="st-badge">SPOILER · NOT YET RELEASED</span>':''}</div>
+          <div class="st-top"><span class="st-code">${E(s.kode)}</span>${d.spoiler?`<span class="st-badge">SPOILER · NOT YET RELEASED${out?' IN INDONESIA':''}</span>`:''}${out?'<span class="st-badge st-cn">RELEASED IN CHINA</span>':''}</div>
           <h1>${E(title(s))}</h1>
           ${!s.nama?'<span class="st-muted">Working title — the official product name hasn\'t been announced yet.</span>':''}
           <div class="st-facts">
@@ -138,7 +147,8 @@
             <div><i>${d.spoiler?'Cards revealed':'Card count'}</i><b>${d.uniq.length}</b></div>
             <div><i>Prints (including variants)</i><b>${d.prints.length}</b></div>
             ${s.rilis&&s.rilis.id?`<div><i>Indonesia release</i><b>${tgl(s.rilis.id)}</b></div>`:''}
-            ${s.rilis&&s.rilis.cn?`<div><i>China release</i><b>${tgl(s.rilis.cn)}${dd?` <small>(${dd} days left)</small>`:''}</b></div>`:''}
+            ${s.rilis&&s.rilis.cn?`<div><i>China release</i><b>${tgl(s.rilis.cn)}${out?' <small class="st-ok">Released</small>':dd?` <small>(${dd} days left)</small>`:''}</b></div>`:''}
+            ${out&&!(s.rilis&&s.rilis.id)?'<div><i>Indonesia release</i><b>TBA</b></div>':''}
           </div>
           ${s.deskripsi?`<p class="st-desc">${E(s.deskripsi)}</p>`:''}
           <div class="st-actions">
@@ -152,6 +162,7 @@
         <div class="hm-box"><h3 class="st-h3">Rarity (all prints)</h3><div class="st-chips">${rarityChips(d.prints)}</div></div>
         <div class="hm-box"><h3 class="st-h3">Level spread</h3>${levelBars(d.uniq)}</div>
       </div>`:''}
+      ${out?`<div class="st-note st-note-cn"><b>Released in China on ${E(tgl(s.rilis.cn))}.</b> ${s.rilis.id?`Indonesian release: ${E(tgl(s.rilis.id))}.`:'Not released in Indonesia yet; the Indonesian release date hasn\'t been announced.'} Until then this set stays a spoiler on MHR Deck Lab.</div>`:''}
       ${d.spoiler?'<div class="st-note">Spoiler card text is a <b>fan translation</b> from Chinese product sheets and may differ from the official version. These cards can\'t be used in the Deck Builder yet.</div>':''}
       <div class="hm-sec-h" style="margin-top:6px"><h2>Card list</h2><span class="st-muted">${shown.length} images</span></div>
       <div class="st-cards">${shown.map(p=>`<button class="st-card" data-${p.spoiler?'spoil':'card'}="${E(p.no)}" data-ra="${E(p.ra)}">
@@ -172,7 +183,7 @@
       <button class="st-sp-x" data-stclose>✕</button>
       <img src="${E(c.img)}" alt="">
       <div class="st-sp-b">
-        <span class="st-badge">SPOILER · FAN TRANSLATION</span>
+        <div class="st-top"><span class="st-badge">SPOILER · FAN TRANSLATION</span>${cnOut(SETS().find(x=>c.no.startsWith(x.kode)))?'<span class="st-badge st-cn">RELEASED IN CHINA</span>':''}</div>
         <h3>${E(c.nm)}</h3>
         <div class="st-muted"><i class="st-dot" style="background:${hex(c.c)}"></i>${E(WARNA_ID(c.c)||c.c)} · ${E(c.no)} ${E(c.ra)} · Lv${c.l} · R-${c.r} · Power ${c.p}</div>
         <div class="st-muted">Trait: ${E(c.f)}</div>

@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.92** · 13 Oktober 2026
+**Versi saat ini: v6.93** · 16 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,34 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.93 — Halaman Set: SD05, SD06 & PB02 lengkap + label "Released in China" — 16 Oktober 2026 *(`spoilers.js`, `data.js`, `set-ui.js`, `index.html`)*
+
+SD05 (Orange) dan SD06 (Purple) beserta PB02 rilis di China pada 16 Oktober 2026, belum di Indonesia. Ketiganya
+**tetap berstatus `spoiler`** (kartu di `spoilers.js`, tidak masuk deck builder, teks = fan translation), tapi
+sekarang daftar kartunya lengkap dan halaman Set menandai bahwa produknya sudah beredar di China.
+
+- `spoilers.js`: +31 cetakan → **58 total** (SD05-001..018, SD06-001..018 + SD06-001 SEC, PB02-001..021).
+  Teks dari PDF terjemahan fan (sama dengan artikel `sd05-sd06-china-release-all-cards`). Gambar memakai berkas
+  yang sudah ada di repo: `images/news/sd05-sd06-pb02/`, `images/news/sd05-sd06-new-spoilers/`,
+  `images/news/sd05-sd06-china-release-all-cards/` (semua ber-watermark SAMPLE, tidak ada gambar baru).
+- `data.js` (`window.SETS`): nama sementara SD05 **SOUL** / SD06 **POWER** (nama produk China; tetap tampil
+  "Working title" karena `nama` resmi masih kosong), deskripsi diperbarui ("released in China on 16 Oct 2026,
+  Indonesian release date TBA"), tautan berita → `sd05-sd06-china-release-all-cards`.
+- `set-ui.js`: fungsi `cnOut(s)` — set `spoiler` yang tanggal `rilis.cn`-nya sudah lewat (zona UTC+8) otomatis
+  mendapat: lencana hijau **OUT IN CHINA** di daftar set, **RELEASED IN CHINA** + "SPOILER · NOT YET RELEASED IN
+  INDONESIA" di halaman set, fakta "China release … Released" dan "Indonesia release TBA", kotak catatan hijau
+  "Released in China on …", serta lencana yang sama di panel kartu spoiler. Catatan fan translation (ungu) tetap
+  ada. Judul seksi "Coming soon" → "Coming soon to Indonesia". Tidak perlu ubah kode lagi untuk set berikutnya —
+  cukup isi `rilis.cn`.
+- `index.html`: CSS `.st-badge.st-cn`, `.st-ok`, `.st-note-cn`; versi 6.93 dan cache-buster `?v=6.93`.
+  `sw.js` tidak diubah (tidak ada gambar yang berubah; berkas JS lokal sudah network-first).
+- Begitu teks resmi Indonesia keluar: pindahkan kartu ke `cards.js`, hapus dari `spoilers.js`, ubah `status` ke
+  `'rilis'`, isi `rilis.id` dan `nama`, lalu jalankan `node tools/generate_api.js`.
+
+**Verifikasi:** `node --check` ketiga berkas JS. Diuji di Chromium headless (1280 px & 390 px): `#set` menampilkan
+3 set di "Coming soon to Indonesia" dengan lencana OUT IN CHINA; `#set/SD05` 18 gambar, `#set/SD06` 19 (termasuk
+SEC), `#set/PB02` 21; panel kartu spoiler SD05-003 menampilkan teks lengkap; tanpa scroll horizontal.
 
 ### API data kartu v1 (read-only, statis) untuk mitra LGS — 15 Oktober 2026 *(baru: `api/index.html`, `api/v1/cards.json`, `api/v1/cards.csv`, `api/v1/sets.json`, `tools/generate_api.js`)*
 
