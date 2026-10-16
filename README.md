@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.95** · 16 Oktober 2026
+**Versi saat ini: v6.96** · 16 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,47 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.96 — Tahap 1 riset fitur: koleksi di Deck Builder, bandingkan deck, statistik turnamen per kartu — 16 Oktober 2026 *(`index.html`)*
+
+Hasil riset situs sejenis (Moxfield, Archidekt, Dreamborn, Limitless TCG, alat Star Wars Unlimited): fondasi MHR
+Deck Lab sudah lengkap, celahnya ada di fitur yang menyambungkan data yang sudah ada. Tiga fitur tahap 1 — tanpa
+tabel/RLS Supabase baru:
+
+**1. Koleksi di Deck Builder** (pengguna login)
+- Koleksi akun (`MHRCollection.get()`) dimuat saat login; badge `dimiliki/dibutuhkan` di tiap kartu daftar deck
+  (List & Grid): hijau lengkap, kuning kurang, merah belum punya. Ringkasan "📦 From your collection 41 / 50" + bar.
+- "Show missing only" memfilter daftar ke kartu yang kurang. "🛒 Missing cards (n)" membuka daftar kartu yang
+  kurang (gambar, nomor, rarity, dimiliki, kurang) dengan aksi: Salin daftar (teks WhatsApp), "I bought these —
+  add to my collection" (konfirmasi, lalu menambah jumlah ke koleksi akun via `MHRCollection.save()`), dan buka
+  koleksi di Dashboard. Jumlah dihitung per nomor kartu (semua versi rarity digabung, sama seperti koleksi).
+- Dashboard ↔ Deck Builder memakai peta koleksi yang sama (`collMap` / `deckColl.map`), jadi edit di Dashboard
+  langsung tercermin di badge. Logout menyembunyikan semuanya.
+
+**2. Bandingkan dua deck**
+- Tombol "⇄ Compare decks" di panel deck, dan "⇄ Compare" di tiap deck Tournament Decks, User Decks (publik), dan
+  deck komunitas. A = deck aktif; B = deck yang diklik, deck lokal lain, atau link/kode deck yang ditempel.
+- Ringkasan: kartu sama, overlap %, jumlah kartu hanya di A / hanya di B; tiga kolom (hanya A · keduanya, termasuk
+  beda jumlah `1→2` · hanya B). Klik kartu membuka lightbox di atas modal. Aksi: tukar A/B, simpan B sebagai deck
+  baru (atau buka B di Deck Builder kalau B deck lokal), salin perbandingan sebagai teks.
+
+**3. Statistik turnamen di lightbox kartu**
+- Dari `TOURNAMENTS` (dimuat sekali, dipakai ulang): jumlah deck Top-cut yang memakai kartu ini (k / N dan %),
+  rata-rata salinan, pemakaian 90 hari terakhir, 4 deck terbaru yang memakainya (tombol View → tampilan visual deck),
+  dan kartu yang sering dipakai bersama (≥50% deck yang sama). Catatan "small sample" kalau N < 10; kartu yang
+  belum pernah dipakai menampilkan "Not in any recorded Top-cut deck yet".
+
+**Lain-lain:** modal bersama `#mxModal` (z-index 55: di atas Lihat deck, di bawah lightbox; Esc/klik latar menutup;
+`closeLightbox()` tidak membuka scroll halaman selama modal masih terbuka). Teks baru di kamus T (`dlColl*`,
+`miss*`, `cmp*`, `lbTny*`, `mxCopied`, `mxCopyManual`). Versi 6.96, cache-buster `?v=6.96`. `sw.js` tidak diubah.
+
+**Verifikasi:** Chromium headless 1440 px & 390 px dengan auth/koleksi/turnamen tiruan (data 5 deck Top-cut asli):
+16 skenario × 2 ukuran layar lulus — tanpa login tidak ada kotak koleksi; badge 18 kartu + ringkasan; filter
+"missing only"; badge di Grid; daftar kartu kurang; "I bought these" menyimpan koleksi sekali dan semua jadi hijau;
+5 tombol Compare di Tournament Decks; Yogie vs Luoyula = 10 kartu sama / 20%; kartu di modal membuka lightbox di
+atasnya; simpan B jadi deck baru; tempel link sebagai B; statistik SD04-001 = 3/5 deck, rata-rata 3.0; View membuka
+tampilan deck; logout menyembunyikan koleksi; tanpa error JavaScript. Tes sinkron otomatis v6.95 (27 skenario) tetap
+lulus.
 
 ### v6.95 — Sinkron otomatis deck ⇄ akun (tombol "Save active deck to account" dihapus) — 16 Oktober 2026 *(`index.html`)*
 
