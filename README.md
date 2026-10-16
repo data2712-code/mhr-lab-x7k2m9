@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.94** · 16 Oktober 2026
+**Versi saat ini: v6.95** · 16 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,47 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.95 — Sinkron otomatis deck ⇄ akun (tombol "Save active deck to account" dihapus) — 16 Oktober 2026 *(`index.html`)*
+
+Masukan komunitas: pengguna lupa menekan "☁️ Save active deck to account", lalu deck-nya tidak ada saat membuka
+situs di perangkat lain. Sekarang, selama login, semua deck tersinkron otomatis dua arah. Keputusan pemilik:
+sinkron dua arah; hapus deck di satu tempat = terhapus di semua perangkat; deck publik ikut ter-update.
+
+- **Push otomatis:** tiap perubahan deck (tambah/kurang kartu, Clear, deck baru, duplikat, rename, impor, simpan
+  deck dari link) dikirim ke akun ~2,5 detik sesudah perubahan terakhir, dan langsung saat tab disembunyikan /
+  ditutup. Deck kosong yang belum pernah tersimpan tidak dikirim. Hook: `persist()` → `MHRCloudSync.mark()`,
+  tombol ✎ → `onRename()` (baris akun yang SAMA ikut di-rename — memperbaiki catatan lama "rename = baris baru"),
+  tombol 🗑 → `onDelete()` (konfirmasi menyebut "also deleted from your account on all devices").
+- **Pull otomatis:** saat halaman dibuka dalam keadaan login, saat baru login, saat tab kembali aktif (paling cepat
+  tiap 60 detik), dan saat koneksi kembali online. Deck baru dari perangkat lain langsung masuk ke pilihan deck;
+  deck yang di-rename/dihapus di perangkat lain ikut berubah/hilang. Sinkron pertama di perangkat baru membuang
+  deck bawaan kosong ("Deck 1" dst.) kalau akun sudah punya deck.
+- **Konflik:** versi yang terakhir disimpan menang (waktu edit lokal vs `updated_at` server). Data lama dari sebelum
+  v6.95 (punya `cloudLink` tapi tanpa info sinkron) yang isinya beda dari akun TIDAK ditimpa: dua-duanya disimpan,
+  salinan dari akun diberi akhiran " (2)".
+- **Ganti akun di browser yang sama:** tautan akun sebelumnya direset; deck lokal yang sudah ada tidak otomatis
+  dikirim ke akun baru (hanya deck yang diedit sesudah login). Sinkron pertama sebuah browser (belum pernah
+  login) mengirim semua deck berisi ke akun — menggantikan kotak tawaran "impor deck dari browser ini".
+- **Gagal/offline:** status merah "Couldn't reach your account…", deck tetap aman di localStorage, coba ulang
+  otomatis tiap 30 detik / saat online. Perubahan yang belum terkirim tetap tercatat setelah reload.
+- **UI:** di kotak "☁️ My Decks (Account)" tombol simpan diganti baris status ("☁️ All decks saved to your account ·
+  14:02") + tombol "↻ Sync now". Catatan singkat "☁️ Synced to your account" muncul di dekat pilihan deck setelah
+  tiap sinkron berhasil. Tombol Load di Dashboard sekarang membuka deck yang sudah ada (bukan membuat salinan
+  lokal baru); Delete di Dashboard ikut menghapus deck itu di Deck Builder.
+- Status sinkron disimpan di `store`: `cloudLink`, `cloudCode`, `cloudAt`, `localAt`, `cloudPending`, `cloudDel`,
+  `cloudOwner` (lihat komentar blok "SINKRON OTOMATIS DECK ⇄ AKUN"). `decks.js` dan skema/RLS Supabase **tidak
+  diubah** — memakai `save()`/`listMine()`/`remove()` yang sudah ada. Kamus T: `syncSaving`, `syncOk`, `syncErr`,
+  `syncNowBtn`, `syncNote`, `mDelConfirmCloud`; teks `cloudHintLoggedOut`, `cloudDeleteConfirm`, `cloudLoadOk`
+  diperbarui.
+- Versi 6.95, cache-buster `?v=6.95`. `sw.js` tidak diubah.
+
+**Verifikasi:** simulasi dua perangkat di Chromium headless dengan server Supabase tiruan (auth.js/decks.js diganti
+versi in-memory), 27/27 skenario lulus: deck lokal terkirim saat login pertama; debounce; perangkat B menerima deck
+tanpa duplikat dan tanpa "Deck 1" kosong; edit + deck baru dari B sampai ke A; rename = baris akun yang sama; hapus
+merambat ke server dan perangkat lain; last-write-wins konvergen; offline → status error → pulih otomatis; deck
+kosong tidak dikirim; Load Dashboard tidak menduplikasi; data lama berbeda isi disimpan dua-duanya; ganti akun
+tidak membocorkan deck akun sebelumnya; reload tidak membuat baris ganda; tanpa error JavaScript.
 
 ### v6.94 — Deck Builder: daftar kartu deck pakai gambar (List strip artwork + Grid) dan dipindah ke atas — 16 Oktober 2026 *(`index.html`)*
 

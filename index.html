@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.94  ·  16 Oktober 2026
+     MHR DECK LAB  ·  versi 6.95  ·  16 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.94">
+<meta name="version" content="6.95">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1504,6 +1504,13 @@
   /* v6.35 — "Deck Saya (Akun)" (Phase 2): daftar deck tersimpan di akun,
      dan kotak tawaran impor deck localStorage -> akun. */
   #cloudImportBox .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  /* v6.95 — status sinkron otomatis deck ⇄ akun */
+  .sync-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .sync-status{flex:1;min-width:0;font-size:12px;line-height:1.45;color:var(--muted)}
+  .sync-status[data-s="ok"]{color:var(--hijau)}
+  .sync-status[data-s="error"]{color:var(--merah)}
+  .sync-row .btn2{flex:none;padding:6px 10px;font-size:12px}
+  .sync-row .btn2[hidden],.sync-status[hidden]{display:none}
   .cloud-deck-row{display:flex;align-items:center;justify-content:space-between;gap:8px;
     padding:8px 0;border-bottom:1px solid var(--line)}
   .cloud-deck-row:last-child{border-bottom:none}
@@ -1951,10 +1958,15 @@
          sini, ditambah tautan ke Dashboard. -->
     <div class="deck-sec-title" data-i18n="cloudTitle">☁️ Deck Saya (Akun)</div>
     <div id="cloudBox">
-      <p class="auth-note" id="cloudHint" data-i18n="cloudHintLoggedOut">Masuk ke akun untuk menyimpan deck supaya bisa dibuka lagi dari perangkat mana pun.</p>
-      <button class="btn2 main" id="btnCloudSave" hidden style="width:100%" data-i18n="cloudSaveBtn">☁️ Simpan deck aktif ke akun</button>
+      <p class="auth-note" id="cloudHint" data-i18n="cloudHintLoggedOut">Masuk ke akun supaya deck tersimpan otomatis dan bisa dibuka dari perangkat mana pun.</p>
+      <!-- v6.95 — tombol "Simpan deck aktif ke akun" diganti sinkron otomatis
+           (lihat blok "SINKRON OTOMATIS DECK ⇄ AKUN" di bawah). Yang tersisa:
+           baris status + tombol "Sync now" opsional. -->
+      <div class="sync-row">
+        <span class="sync-status" id="cloudSyncStatus" hidden aria-live="polite"></span>
+        <button class="btn2" id="btnCloudSync" hidden data-i18n="syncNowBtn">↻ Sync now</button>
+      </div>
       <div id="cloudNote" class="savenote"></div>
-      <div id="cloudImportBox" hidden></div>
       <p class="auth-note" id="cloudDashHint" hidden data-i18n="cloudDashHint">Lihat, muat, atau hapus deck tersimpan di halaman <a href="#dashboard">🗂 Dashboard Saya</a>.</p>
     </div>
 
@@ -2048,26 +2060,26 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.94"></script>
-<script src="data.js?v=6.94"></script>
+<script src="cards.js?v=6.95"></script>
+<script src="data.js?v=6.95"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.94"></script>
-<script src="decks.js?v=6.94"></script>
+<script src="auth.js?v=6.95"></script>
+<script src="decks.js?v=6.95"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.94"></script>
-<script src="collection.js?v=6.94"></script>
+<script src="social.js?v=6.95"></script>
+<script src="collection.js?v=6.95"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.94"></script>
-<script src="news-ui.js?v=6.94"></script>
+<script src="news.js?v=6.95"></script>
+<script src="news-ui.js?v=6.95"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.94"></script>
+<script src="home-ui.js?v=6.95"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.94"></script>
-<script src="set-ui.js?v=6.94"></script>
+<script src="spoilers.js?v=6.95"></script>
+<script src="set-ui.js?v=6.95"></script>
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.94"></script>
+<script src="tournaments.js?v=6.95"></script>
 <!-- v6.88 — pop-up iklan carousel (kampanye Era of Spiders + Asia Peak Invitational).
      "defer" = tidak menahan render; CSS-nya disuntik oleh skripnya sendiri saat tampil.
      Aturan tampil & tanggal berakhir ada di PROMO (atas promo-popup.js). Pratinjau: /?promo=preview -->
@@ -2393,6 +2405,7 @@ state.deck = store.decks[store.active];
 let saveTmr=null;
 function persist(){
   store.decks[store.active] = state.deck;
+  if(window.MHRCloudSync) window.MHRCloudSync.mark();   // v6.95 — tandai untuk sinkron otomatis ke akun
   store.size = parseInt($('#setSize').value)||50;
   store.max  = parseInt($('#setMax').value)||3;
   store.view = state.view;
@@ -3554,7 +3567,13 @@ const T = {
 
   /* --- v6.35: Deck Saya (Akun) — simpan/muat/hapus deck ke akun (Phase 2) --- */
   cloudTitle: '☁️ My Decks (Account)',
-  cloudHintLoggedOut: 'Log in to save decks so you can open them again from any device.',
+  cloudHintLoggedOut: 'Log in and your decks save automatically, so you can open them on any device.',
+  syncSaving: '☁️ Saving to your account…',
+  syncOk: '☁️ All decks saved to your account',
+  syncErr: '⚠ Couldn\'t reach your account. Your decks are safe in this browser and will sync automatically when the connection is back.',
+  syncNowBtn: '↻ Sync now',
+  syncNote: '☁️ Synced to your account',
+  mDelConfirmCloud: 'It will also be deleted from your account on all devices.',
   cloudSaveBtn: '☁️ Save active deck to account',
   cloudSaving: 'Saving…',
   cloudSaveOk: 'Saved to your account.',
@@ -3570,9 +3589,9 @@ const T = {
   cloudUnpubLbl: 'Unpublish',
   cloudLoadLbl: 'Load',
   cloudDelLbl: 'Delete',
-  cloudDeleteConfirm: 'Delete this deck from your account? The copy in this browser (if any) won\'t be deleted.',
+  cloudDeleteConfirm: 'Delete this deck from your account? It will also be removed from the Deck Builder on all your devices.',
   cloudDeleteErr: 'Failed to delete this deck.',
-  cloudLoadOk: 'Loaded as a new local deck.',
+  cloudLoadOk: 'Opened in the Deck Builder.',
   cloudUpdatedLbl: 'Updated',
   cloudImportQuestion: 'You have {n} deck(s) in this browser that aren\'t in this account yet. Import them now so you can open them from other devices too?',
   cloudImportYes: 'Import all',
@@ -4805,7 +4824,9 @@ $('#btnDupDeck').addEventListener('click', ()=>{
 });
 $('#btnDelDeck').addEventListener('click', ()=>{
   if(Object.keys(store.decks).length<=1){ alert(t('mMinOne')); return; }
-  if(!confirm(`${t('mDelConfirm')} "${store.active}"?`)) return;
+  const ikutAkun = window.MHRCloudSync && window.MHRCloudSync.isLinked(store.active);
+  if(!confirm(`${t('mDelConfirm')} "${store.active}"?${ikutAkun ? '\n\n' + t('mDelConfirmCloud') : ''}`)) return;
+  if(window.MHRCloudSync) window.MHRCloudSync.onDelete(store.active);   // v6.95 — ikut dihapus di akun
   delete store.decks[store.active];
   store.active = Object.keys(store.decks)[0];
   state.deck = store.decks[store.active];
@@ -4820,6 +4841,7 @@ $('#btnRenDeck').addEventListener('click', ()=>{
   if(store.decks[nama]){ alert(t('mNameUsed')); return; }
   store.decks[nama] = state.deck;
   delete store.decks[store.active];
+  if(window.MHRCloudSync) window.MHRCloudSync.onRename(store.active, nama);   // v6.95 — baris akun yang sama ikut di-rename
   store.active = nama;
   renderDeckSelect(); renderAll();
 });
@@ -8574,14 +8596,41 @@ window.addEventListener('hashchange', ()=>{
 (function(){
   if(!window.MHRDecks || !window.MHRDecks.ready) return; // decks.js gagal termuat
 
+  /* ================= v6.95 — SINKRON OTOMATIS DECK ⇄ AKUN =================
+     Masukan komunitas: orang lupa menekan "Save active deck to account", lalu
+     deck-nya tidak ada saat membuka situs di perangkat lain. Sejak v6.95 tombol
+     itu tidak diperlukan lagi:
+       • PUSH — tiap kali deck berubah (tambah/kurang kartu, rename, duplikat,
+         deck baru, impor), perubahan dikirim ke akun otomatis ~2,5 detik
+         sesudah perubahan terakhir (debounce), plus saat tab disembunyikan /
+         ditutup. Deck kosong yang belum pernah tersimpan tidak dikirim (supaya
+         akun tidak penuh "Deck 1" kosong).
+       • PULL — saat halaman dibuka dalam keadaan login, saat baru login, dan
+         saat tab kembali aktif (paling cepat tiap 60 detik), daftar deck akun
+         diambil dan digabung ke daftar deck di browser ini: deck baru dari
+         perangkat lain otomatis muncul di pilihan deck.
+       • Konflik (deck sama diedit di dua perangkat sebelum sempat tersinkron):
+         versi yang terakhir disimpan menang (waktu edit lokal vs updated_at
+         di server). Data lama tanpa info waktu (pengguna sebelum v6.95) yang
+         isinya berbeda TIDAK ditimpa — dua-duanya disimpan, salinan dari akun
+         diberi akhiran " (2)".
+       • Hapus deck di satu tempat = terhapus di semua perangkat (keputusan
+         pemilik, 16 Okt 2026). Deck publik ikut ter-update (galeri User Decks
+         selalu menampilkan versi terbaru).
+     Penyimpanan localStorage (STORE_KEY) tetap sumber utama di browser; akun
+     adalah salinan kedua yang disinkronkan. Status sinkron per deck disimpan
+     di `store` (ikut persist()):
+       store.cloudLink    nama deck lokal → id baris di tabel decks
+       store.cloudCode    nama deck lokal → deck_code terakhir yang sama dengan server
+       store.cloudAt      id baris → updated_at server terakhir yang diketahui
+       store.localAt      nama deck lokal → waktu edit lokal terakhir (ISO)
+       store.cloudPending nama deck lokal belum tertaut yang perlu dibuat di akun
+       store.cloudDel     id baris yang dihapus di browser ini, menunggu dihapus di server
+       store.cloudOwner   id akun pemilik tautan di atas (ganti akun = tautan direset) */
   const cloudHint = $('#cloudHint');
-  const btnCloudSave = $('#btnCloudSave');
+  const cloudStatus = $('#cloudSyncStatus');
+  const btnSyncNow = $('#btnCloudSync');
   const cloudNote = $('#cloudNote');
-  const cloudImportBox = $('#cloudImportBox');
-  /* v6.37 — daftar deck tersimpan dipindah ke halaman Dashboard Saya
-     (#dashCloudList), keluar dari panel Deck Builder (dulu #cloudList) —
-     lihat catatan di HTML #cloudBox. Fungsi renderCloudList() di bawah
-     TIDAK berubah sama sekali, cuma target elemennya. */
   const cloudListEl = $('#dashCloudList');
   const cloudDashHint = $('#cloudDashHint');
 
@@ -8593,19 +8642,247 @@ window.addEventListener('hashchange', ()=>{
     cloudNoteTmr = setTimeout(()=>{ cloudNote.textContent=''; }, 2600);
   }
 
-  /* deck lokal mana sudah "terhubung" ke baris mana di akun, supaya tombol
-     "Simpan ke akun" meng-UPDATE deck yang sama alih-alih membuat duplikat
-     tiap kali dipencet berulang. Disimpan lewat `store` yang sudah ada
-     (persist() menulis ulang SELURUH `store` ke localStorage tiap dipanggil,
-     jadi field baru ini otomatis ikut tersimpan tanpa perlu ubah persist()).
-     CATATAN: tautan ini berdasarkan NAMA deck lokal saat disimpan pertama
-     kali — kalau deck itu di-rename sesudahnya, tautan lama tidak nyambung
-     lagi dan "Simpan ke akun" berikutnya akan membuat baris baru di akun,
-     bukan meng-update yang lama (bukan bug fatal, deck lama itu masih bisa
-     dihapus manual dari daftar akun). */
   store.cloudLink = store.cloudLink || {};
+  store.cloudCode = store.cloudCode || {};
+  store.cloudAt = store.cloudAt || {};
+  store.localAt = store.localAt || {};
+  store.cloudPending = store.cloudPending || {};
+  store.cloudDel = Array.isArray(store.cloudDel) ? store.cloudDel : [];
 
-  function deckIsEmpty(d){ return !d || !Object.keys(d).length; }
+  let uid = null;              // akun yang sedang login (null = tidak sinkron)
+  let firstSync = false;       // sinkron pertama browser ini untuk akun ini
+  let pushTmr = null, retryTmr = null, lastPull = 0, lastOkAt = null;
+  const renamed = {};          // nama lama → nama baru selama request berjalan
+  let chain = Promise.resolve();
+  const enqueue = fn => (chain = chain.then(fn).catch(err=>{ console.error('[MHR sync]', err); setStatus('error'); }));
+
+  const deckIsEmpty = d => !d || !Object.keys(d).length;
+  const codeOf = name => encodeDeck(store.decks[name] || {}, name);
+  /* updated_at Postgres bisa berpresisi mikrodetik (.123456+00:00) — dipotong ke
+     milidetik supaya Date.parse konsisten di semua browser (termasuk Safari lama) */
+  const ts = x => { const n = x ? Date.parse(String(x).replace(/(\.\d{3})\d+/, '$1')) : NaN; return isNaN(n) ? 0 : n; };
+  const linkedName = id => Object.keys(store.cloudLink).find(n=>store.cloudLink[n]===id);
+  const resolveName = n => { let x = n, g = 0; while(renamed[x] && g++ < 20) x = renamed[x]; return x; };
+  function writeStore(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){} }
+
+  function needsPush(name){
+    const d = store.decks[name]; if(!d) return false;
+    if(store.cloudLink[name]) return codeOf(name) !== store.cloudCode[name];
+    return !!store.cloudPending[name] && !deckIsEmpty(d);
+  }
+  function anyPending(){
+    return store.cloudDel.length > 0 || Object.keys(store.decks).some(needsPush);
+  }
+
+  function setStatus(s){
+    if(!cloudStatus) return;
+    cloudStatus.dataset.s = s;
+    if(s === 'saving') cloudStatus.textContent = t('syncSaving');
+    else if(s === 'error') cloudStatus.textContent = t('syncErr');
+    else if(s === 'ok'){
+      lastOkAt = new Date();
+      const jam = lastOkAt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      cloudStatus.textContent = `${t('syncOk')} · ${jam}`;
+    } else cloudStatus.textContent = '';
+  }
+
+  /* ---- dipanggil dari luar IIFE (persist, rename, hapus) ---- */
+  function mark(){
+    if(!uid) return;
+    const name = store.active; if(!store.decks[name]) return;
+    if(codeOf(name) !== store.cloudCode[name]){
+      store.localAt[name] = new Date().toISOString();
+      if(!store.cloudLink[name]) store.cloudPending[name] = true;
+      schedule();
+    }
+  }
+  function onRename(oldN, newN){
+    renamed[oldN] = newN;
+    for(const k of ['cloudLink','cloudCode','localAt','cloudPending']){
+      if(oldN in store[k]){ store[k][newN] = store[k][oldN]; delete store[k][oldN]; }
+    }
+    if(!store.cloudLink[newN]) store.cloudPending[newN] = true;
+    store.localAt[newN] = new Date().toISOString();
+    schedule();
+  }
+  function onDelete(name){
+    const id = store.cloudLink[name];
+    if(id && !store.cloudDel.includes(id)) store.cloudDel.push(id);
+    for(const k of ['cloudLink','cloudCode','localAt','cloudPending']) delete store[k][name];
+    schedule();
+  }
+  const isLinked = name => !!(uid && store.cloudLink[name]);
+
+  function schedule(ms){
+    if(!uid) return;
+    clearTimeout(pushTmr);
+    pushTmr = setTimeout(()=>enqueue(push), ms == null ? 2500 : ms);
+  }
+
+  /* ---- PUSH: kirim perubahan lokal ke akun ---- */
+  async function push(){
+    if(!uid) return;
+    if(!anyPending()){ if(cloudStatus && cloudStatus.dataset.s !== 'ok') setStatus('ok'); return; }
+    setStatus('saving');
+    let gagal = false;
+    for(const id of [...store.cloudDel]){
+      const { error } = await window.MHRDecks.remove(id);
+      if(error){ gagal = true; continue; }
+      store.cloudDel = store.cloudDel.filter(x=>x!==id);
+      delete store.cloudAt[id];
+    }
+    for(const name0 of Object.keys(store.decks)){
+      if(!needsPush(name0)) continue;
+      const code = codeOf(name0);
+      const id = store.cloudLink[name0] || null;
+      let { data, error } = await window.MHRDecks.save({ id, name: name0, deckCode: code });
+      /* baris sudah tidak ada di akun (dihapus dari perangkat lain) padahal deck
+         ini diedit di sini sesudahnya → buat ulang, edit terbaru jangan hilang */
+      if(!error && !data && id) ({ data, error } = await window.MHRDecks.save({ id:null, name: name0, deckCode: code }));
+      if(error || !data){ gagal = true; continue; }
+      const name = resolveName(name0);
+      if(!store.decks[name]) continue;
+      store.cloudLink[name] = data.id;
+      store.cloudCode[name] = (name === name0) ? code : (store.cloudCode[name] || code);
+      delete store.cloudPending[name];
+      store.cloudAt[data.id] = data.updated_at;
+    }
+    for(const k of Object.keys(renamed)) delete renamed[k];
+    writeStore();
+    if(gagal){
+      setStatus('error');
+      clearTimeout(retryTmr); retryTmr = setTimeout(()=>schedule(0), 30000);
+    } else {
+      setStatus('ok');
+      /* konfirmasi singkat di dekat pilihan deck (tempat yang sama dengan "Saved automatically") */
+      const n = $('#saveNote'); if(n){ n.textContent = t('syncNote'); clearTimeout(saveTmr); saveTmr = setTimeout(()=>n.textContent='', 1800); }
+      if(anyPending()) schedule(300);       // ada perubahan baru selama request
+    }
+    if(state.page === 'dashboard') renderCloudList();
+  }
+
+  /* ---- PULL: ambil deck akun dan gabungkan ke browser ini ---- */
+  async function pull(){
+    if(!uid) return;
+    const { data, error } = await window.MHRDecks.listMine();
+    if(error){ setStatus('error'); return; }
+    lastPull = Date.now();
+    let changed = false;
+    const ids = new Set(data.map(r=>r.id));
+    const nowIso = new Date().toISOString();
+
+    /* 1) deck tertaut yang barisnya sudah hilang = dihapus di perangkat lain */
+    for(const [name, id] of Object.entries(store.cloudLink)){
+      if(ids.has(id) || store.cloudDel.includes(id)) continue;
+      delete store.cloudLink[name]; delete store.cloudAt[id];
+      if(store.decks[name] && codeOf(name) !== store.cloudCode[name] && store.cloudCode[name] !== undefined){
+        store.cloudPending[name] = true;    // diedit di sini sesudahnya → simpan ulang
+      } else if(store.cloudCode[name] !== undefined){
+        delete store.decks[name]; changed = true;
+      } else {
+        store.cloudPending[name] = true;    // data lama tanpa info sinkron → jangan dihapus
+      }
+      delete store.cloudCode[name];
+    }
+
+    /* 2) baris dari akun */
+    for(const row of data){
+      if(store.cloudDel.includes(row.id)) continue;
+      const res = decodeDeck(row.deck_code || ''); if(!res) continue;
+      const rowName = (row.name || res.nama || 'Deck').trim() || 'Deck';
+      const name = linkedName(row.id);
+      if(name && store.decks[name]){
+        const legacy = store.cloudCode[name] === undefined;
+        if(legacy){
+          if(encodeDeck(store.decks[name], rowName) === encodeDeck(res.deck, rowName)){
+            store.cloudCode[name] = row.deck_code;
+            store.cloudAt[row.id] = row.updated_at;
+            continue;
+          }
+          /* isi beda & tidak tahu mana yang lebih baru → simpan dua-duanya */
+          delete store.cloudLink[name]; store.cloudPending[name] = true; store.localAt[name] = nowIso;
+          let nm = `${rowName} (2)`, i = 3; while(store.decks[nm]) nm = `${rowName} (${i++})`;
+          store.decks[nm] = res.deck; store.cloudLink[nm] = row.id; store.cloudCode[nm] = row.deck_code;
+          store.cloudAt[row.id] = row.updated_at; changed = true;
+          continue;
+        }
+        if(ts(row.updated_at) <= ts(store.cloudAt[row.id])) continue;     // tidak berubah di server
+        const localDirty = codeOf(name) !== store.cloudCode[name];
+        if(localDirty && ts(store.localAt[name]) > ts(row.updated_at)) continue; // lokal lebih baru → di-push
+        let target = name;
+        if(rowName !== name && !store.decks[rowName]){                    // di-rename di perangkat lain
+          target = rowName;
+          for(const k of ['cloudLink','cloudCode','localAt','cloudPending']){
+            if(name in store[k]){ store[k][target] = store[k][name]; delete store[k][name]; }
+          }
+          delete store.decks[name];
+          if(store.active === name) store.active = target;
+        }
+        store.decks[target] = res.deck;
+        store.cloudLink[target] = row.id;
+        store.cloudCode[target] = row.deck_code;
+        store.cloudAt[row.id] = row.updated_at;
+        delete store.cloudPending[target];
+        changed = true;
+      } else {
+        if(name) delete store.cloudLink[name];
+        /* deck lokal belum tertaut dengan nama sama: isinya sama / kosong → tautkan */
+        if(store.decks[rowName] && !store.cloudLink[rowName]){
+          const local = store.decks[rowName];
+          if(deckIsEmpty(local) || encodeDeck(local, rowName) === encodeDeck(res.deck, rowName)){
+            store.decks[rowName] = res.deck; store.cloudLink[rowName] = row.id;
+            store.cloudCode[rowName] = row.deck_code; store.cloudAt[row.id] = row.updated_at;
+            delete store.cloudPending[rowName]; changed = true;
+            continue;
+          }
+        }
+        let nm = rowName, i = 2; while(store.decks[nm]) nm = `${rowName} (${i++})`;
+        store.decks[nm] = res.deck; store.cloudLink[nm] = row.id;
+        store.cloudCode[nm] = row.deck_code; store.cloudAt[row.id] = row.updated_at;
+        changed = true;
+      }
+    }
+
+    /* 3) sinkron pertama di perangkat ini: buang deck bawaan kosong ("Deck 1"
+          dst.) kalau akun sudah punya deck, supaya pilihan deck tidak berantakan */
+    if(firstSync && data.length){
+      for(const name of Object.keys(store.decks)){
+        if(Object.keys(store.decks).length <= 1) break;
+        if(!store.cloudLink[name] && deckIsEmpty(store.decks[name]) && /^Deck \d+$/.test(name)){
+          delete store.decks[name]; delete store.cloudPending[name]; changed = true;
+        }
+      }
+    }
+    firstSync = false;
+    if(!Object.keys(store.decks).length){ store.decks['Deck 1'] = {}; changed = true; }
+    if(!store.decks[store.active]){ store.active = Object.keys(store.decks)[0]; changed = true; }
+
+    if(changed){
+      state.deck = store.decks[store.active];
+      renderDeckSelect(); renderAll();          // renderAll → persist() → simpan store
+    } else writeStore();
+    if(!anyPending()) setStatus('ok');
+  }
+
+  const syncAll = () => { enqueue(pull); enqueue(push); };
+
+  function onLogin(newUid){
+    if(store.cloudOwner && store.cloudOwner !== newUid){
+      /* akun lain login di browser ini: tautan milik akun sebelumnya direset.
+         Deck lokal yang sudah ada TIDAK otomatis dikirim ke akun baru ini —
+         hanya deck yang diedit sesudah login (lihat mark()). */
+      store.cloudLink = {}; store.cloudCode = {}; store.cloudAt = {};
+      store.localAt = {}; store.cloudPending = {}; store.cloudDel = [];
+      firstSync = true;
+    } else if(!store.cloudOwner){
+      /* sinkron pertama browser ini → semua deck berisi ikut disimpan ke akun
+         (menggantikan kotak "impor deck dari browser ini" versi lama) */
+      for(const n of Object.keys(store.decks)) if(!store.cloudLink[n]) store.cloudPending[n] = true;
+      firstSync = true;
+    }
+    store.cloudOwner = newUid;
+    writeStore();
+  }
 
   async function renderCloudList(){
     if(!cloudListEl) return;
@@ -8632,27 +8909,35 @@ window.addEventListener('hashchange', ()=>{
     const row = btn.closest('.cloud-deck-row'); const id = row && row.dataset.id;
     if(!id) return;
     if(btn.dataset.act === 'load'){
-      const { data, error } = await window.MHRDecks.listMine();
-      const deckRow = !error && data.find(d=>d.id===id);
-      if(!deckRow) return;
-      const res = decodeDeck(deckRow.deck_code);
-      if(!res){ showCloudNote(t('cloudListErr')); return; }
+      /* v6.95 — deck akun sudah ada di browser ini lewat sinkron otomatis:
+         cukup jadikan deck aktif dan buka Deck Builder (dulu: dibuat salinan
+         lokal baru tiap kali tombol ini ditekan). */
+      await chain;
+      let name = linkedName(id);
+      if(!name || !store.decks[name]){ await enqueue(pull); name = linkedName(id); }
+      if(!name || !store.decks[name]){ showCloudNote(t('cloudListErr')); return; }
       store.decks[store.active] = state.deck;
-      const asli = deckRow.name || res.nama || 'Deck';
-      let nama = asli, i = 2;
-      while(store.decks[nama]) nama = `${asli} ${i++}`;
-      store.decks[nama] = res.deck;
-      store.active = nama;
-      store.cloudLink[nama] = deckRow.id;
-      state.deck = store.decks[nama];
+      store.active = name;
+      state.deck = store.decks[name];
       renderDeckSelect(); renderAll();
+      setPage('build');
       showCloudNote(t('cloudLoadOk'));
     } else if(btn.dataset.act === 'del'){
       if(!confirm(t('cloudDeleteConfirm'))) return;
       const { error } = await window.MHRDecks.remove(id);
       if(error){ showCloudNote(t('cloudDeleteErr')); return; }
-      for(const [nm,cid] of Object.entries(store.cloudLink)){ if(cid===id) delete store.cloudLink[nm]; }
-      persist();
+      const name = linkedName(id);
+      delete store.cloudAt[id];
+      if(name){
+        for(const k of ['cloudLink','cloudCode','localAt','cloudPending']) delete store[k][name];
+        if(Object.keys(store.decks).length > 1){
+          delete store.decks[name];
+          if(store.active === name){ store.active = Object.keys(store.decks)[0]; state.deck = store.decks[store.active]; }
+        } else {
+          store.decks[name] = {}; if(store.active === name) state.deck = store.decks[name];
+        }
+        renderDeckSelect(); renderAll();
+      } else writeStore();
       renderCloudList();
     } else if(btn.dataset.act === 'pub'){
       /* v6.36 (Phase 3) — toggle publikasi. Auto-publish + moderasi reaktif
@@ -8674,82 +8959,38 @@ window.addEventListener('hashchange', ()=>{
       if(error){ showCloudNote(t('pubErr')); return; }
       showCloudNote(t(willPublish ? 'pubPublishOk' : 'pubUnpublishOk'));
       renderCloudList();
-      // kalau halaman User Decks kebetulan sedang terbuka juga, segarkan
-      // galeri publiknya sekarang juga alih-alih menunggu navigasi ulang
       if(state.page === 'meta' && typeof renderPubGrid === 'function') renderPubGrid();
     }
   });
 
-  if(btnCloudSave) btnCloudSave.addEventListener('click', async ()=>{
-    if(!deckCount()){ alert(t('mDeckEmpty')); return; }
-    btnCloudSave.disabled = true;
-    showCloudNote(t('cloudSaving'));
-    const nama = store.active;
-    const kode = encodeDeck(state.deck, nama);
-    const id = store.cloudLink[nama] || null;
-    const { data, error } = await window.MHRDecks.save({ id, name: nama, deckCode: kode });
-    btnCloudSave.disabled = false;
-    if(error || !data){ showCloudNote(t('cloudSaveErr')); return; }
-    store.cloudLink[nama] = data.id;
-    persist();
-    showCloudNote(t('cloudSaveOk'));
-    renderCloudList();
-  });
-
-  /* Tawaran impor SEKALI SAJA (per browser, lewat store.importOffered) — kalau
-     browser ini punya deck berisi kartu dan akun yang baru login belum punya
-     deck sama sekali, tawarkan pindahkan semuanya sekaligus. Tidak pernah
-     menawarkan ulang sesudah dijawab (Ya ATAU Lewati keduanya menandai sudah
-     ditawarkan), dan tidak pernah menawarkan kalau akun sudah punya deck
-     sendiri (supaya tidak mengganggu pengguna yang memang sudah lama pakai
-     akunnya di perangkat lain). */
-  async function offerImportIfNeeded(){
-    if(store.importOffered) return;
-    const isian = Object.entries(store.decks).filter(([,d])=>!deckIsEmpty(d));
-    if(!isian.length){ store.importOffered = true; persist(); return; }
-    const { data, error } = await window.MHRDecks.listMine();
-    if(error) return; // coba lagi di kesempatan login berikutnya
-    store.importOffered = true; persist();
-    if(data.length) return; // akun sudah punya deck sendiri, jangan tawarkan
-    if(!cloudImportBox) return;
-    cloudImportBox.hidden = false;
-    cloudImportBox.innerHTML = `
-      <p class="auth-note">${t('cloudImportQuestion').replace('{n}', isian.length)}</p>
-      <div class="row">
-        <button class="btn2 main" id="btnCloudImportYes">${t('cloudImportYes')}</button>
-        <button class="btn2" id="btnCloudImportNo" style="flex:none;padding:9px 12px">${t('cloudImportNo')}</button>
-      </div>`;
-    const yesBtn = $('#btnCloudImportYes'), noBtn = $('#btnCloudImportNo');
-    if(yesBtn) yesBtn.addEventListener('click', async ()=>{
-      yesBtn.disabled = true;
-      const decksToImport = isian.map(([nama,d])=>({ name:nama, deckCode: encodeDeck(d, nama) }));
-      const { data: saved, error: err2 } = await window.MHRDecks.importMany(decksToImport);
-      if(err2 || !saved){ showCloudNote(t('cloudImportErr')); yesBtn.disabled = false; return; }
-      saved.forEach(row=>{ store.cloudLink[row.name] = row.id; });
-      persist();
-      cloudImportBox.hidden = true;
-      showCloudNote(t('cloudImportOk'));
-      renderCloudList();
-    });
-    if(noBtn) noBtn.addEventListener('click', ()=>{ cloudImportBox.hidden = true; });
-  }
+  if(btnSyncNow) btnSyncNow.addEventListener('click', ()=>{ clearTimeout(pushTmr); syncAll(); });
 
   async function renderCloudBox(session){
-    const loggedIn = !!(session && session.user);
-    if(cloudHint) cloudHint.hidden = loggedIn;
-    if(btnCloudSave) btnCloudSave.hidden = !loggedIn;
-    if(cloudDashHint) cloudDashHint.hidden = !loggedIn;
-    if(!loggedIn){
+    const newUid = (session && session.user) ? session.user.id : null;
+    if(cloudHint) cloudHint.hidden = !!newUid;
+    if(cloudStatus) cloudStatus.hidden = !newUid;
+    if(btnSyncNow) btnSyncNow.hidden = !newUid;
+    if(cloudDashHint) cloudDashHint.hidden = !newUid;
+    if(!newUid){
+      uid = null; clearTimeout(pushTmr); setStatus('');
       if(cloudListEl) cloudListEl.innerHTML = '';
-      if(cloudImportBox) cloudImportBox.hidden = true;
       return;
     }
-    await renderCloudList();
-    await offerImportIfNeeded();
+    const baru = newUid !== uid;
+    uid = newUid;
+    if(baru){ onLogin(newUid); syncAll(); }
+    renderCloudList();
   }
-  /* v6.37 — diekspos supaya renderDashboardPage() (di luar IIFE ini) bisa
-     menyegarkan daftar deck tersimpan saat halaman Dashboard dibuka, tanpa
-     menunggu event login/logout berikutnya. */
+
+  document.addEventListener('visibilitychange', ()=>{
+    if(!uid) return;
+    if(document.visibilityState === 'hidden'){
+      if(anyPending()){ clearTimeout(pushTmr); enqueue(push); }
+    } else if(Date.now() - lastPull > 60000) syncAll();
+  });
+  window.addEventListener('online', ()=>{ if(uid) syncAll(); });
+
+  window.MHRCloudSync = { mark, onRename, onDelete, isLinked, syncNow: syncAll };
   window.MHRUI = window.MHRUI || {};
   window.MHRUI.renderCloudList = renderCloudList;
 
