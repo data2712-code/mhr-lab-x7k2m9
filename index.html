@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.96  ·  16 Oktober 2026
+     MHR DECK LAB  ·  versi 6.97  ·  16 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.96">
+<meta name="version" content="6.97">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -444,6 +444,24 @@
   .cmp-r .q{font:700 12px var(--mono);flex:none}
   .cmp-r .q.ca{color:#ff7a66} .cmp-r .q.cb{color:#5fd38b} .cmp-r .q.cd{color:var(--accent)}
   .cmp-empty{color:var(--muted);font-size:12px}
+  /* v6.97 — riwayat versi deck */
+  .mx-box.mx-hist{max-width:760px}
+  .hist-now,.hist-row{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+    background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+  .hist-now{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+  .hist-main{flex:1;min-width:220px}
+  .hist-when{font-size:13px} .hist-when span{color:var(--muted);font-size:11.5px;margin-left:6px}
+  .hist-lbl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;margin:4px 0 6px}
+  .hist-tag{background:rgba(242,176,30,.15);color:var(--accent);border-radius:5px;padding:1px 7px;font-weight:700}
+  .hist-auto{color:var(--muted)}
+  .hist-n{font-family:var(--mono);color:#C9CFD8}
+  .hist-diff{color:var(--muted)} .hist-diff b.p{color:#5fd38b} .hist-diff b.m{color:#ff7a66}
+  .hist-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--line);max-width:320px}
+  .hist-acts{display:flex;gap:6px;flex-wrap:wrap}
+  .hist-acts .btn2{padding:6px 10px;font-size:12px;flex:none}
+  .hist-acts .btn2.main{border-color:var(--accent);color:var(--accent);font-weight:700}
+  .hist-acts .btn2:disabled{opacity:.4;cursor:default}
+  .hist-empty{color:var(--muted);font-size:12.5px;padding:8px 2px}
   /* v6.96 — statistik turnamen di lightbox kartu */
   .lb-tny{margin:12px 0 10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
   .lb-tny .t{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
@@ -2000,6 +2018,7 @@
 
     <button class="btn2" id="btnSim" style="width:100%;margin-top:14px" data-i18n="simBtn">🎴 Simulasi draw 6 kartu</button>
     <button class="btn2" id="btnCompare" style="width:100%;margin-top:8px" data-i18n="cmpBtn">⇄ Bandingkan deck</button>
+    <button class="btn2" id="btnHistory" style="width:100%;margin-top:8px" data-i18n="histBtn">🕘 Riwayat versi</button>
     <button class="btn2" id="btnDeckView"
       style="width:100%;margin-top:8px;border-color:var(--accent);color:var(--accent);font-weight:700">
       <span data-i18n="viewDeckBtn">🖼 Lihat deck — tampilan untuk dibagikan</span></button>
@@ -2136,26 +2155,26 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.96"></script>
-<script src="data.js?v=6.96"></script>
+<script src="cards.js?v=6.97"></script>
+<script src="data.js?v=6.97"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.96"></script>
-<script src="decks.js?v=6.96"></script>
+<script src="auth.js?v=6.97"></script>
+<script src="decks.js?v=6.97"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.96"></script>
-<script src="collection.js?v=6.96"></script>
+<script src="social.js?v=6.97"></script>
+<script src="collection.js?v=6.97"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.96"></script>
-<script src="news-ui.js?v=6.96"></script>
+<script src="news.js?v=6.97"></script>
+<script src="news-ui.js?v=6.97"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.96"></script>
+<script src="home-ui.js?v=6.97"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.96"></script>
-<script src="set-ui.js?v=6.96"></script>
+<script src="spoilers.js?v=6.97"></script>
+<script src="set-ui.js?v=6.97"></script>
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.96"></script>
+<script src="tournaments.js?v=6.97"></script>
 <!-- v6.88 — pop-up iklan carousel (kampanye Era of Spiders + Asia Peak Invitational).
      "defer" = tidak menahan render; CSS-nya disuntik oleh skripnya sendiri saat tampil.
      Aturan tampil & tanggal berakhir ada di PROMO (atas promo-popup.js). Pratinjau: /?promo=preview -->
@@ -2924,7 +2943,9 @@ try{ if(localStorage.getItem(DL_VIEW_KEY) === 'grid') deckListView = 'grid'; }ca
 /* v6.96 — koleksi kartu akun (dari MHRCollection) untuk badge "dimiliki/dibutuhkan"
    di daftar kartu deck. null = belum login / belum termuat → fitur disembunyikan. */
 const deckColl = { map:null, missingOnly:false };
-function setDeckCollection(map){ deckColl.map = map || null; if(!deckColl.map) deckColl.missingOnly = false; renderDeck(); }
+/* v6.97 — koleksi yang masih kosong (belum pernah dipakai) dianggap tidak ada, supaya
+   pengguna yang tidak memakai fitur koleksi tidak melihat badge merah 0/3 di semua kartu */
+function setDeckCollection(map){ deckColl.map = (map && Object.keys(map).length) ? map : null; if(!deckColl.map) deckColl.missingOnly = false; renderDeck(); }
 /* warna kartu yang terang: angka level di strip pakai teks gelap supaya terbaca */
 const DARK_TXT = new Set(['Kuning','Orange']);
 function syncDeckListToggle(){
@@ -3532,6 +3553,36 @@ const T = {
   lbTnyWith: 'Often played with:',
   lbTnyNone: 'Not in any recorded Top-cut deck yet ({n} decks recorded).',
   lbTnySmall: 'Based on {n} Top-cut decks — still a small sample.',
+  /* --- v6.97: riwayat versi deck --- */
+  histBtn: '🕘 Version history',
+  histLbl: 'History',
+  histTitle: '🕘 Version history',
+  histSub: 'Earlier versions of “{deck}”. A version is saved automatically before you change the deck (at most one every 30 minutes), and you can save your own named versions.',
+  histLogin: 'Log in to keep a version history of your decks. Versions are saved automatically in your account.',
+  histLoading: 'Loading versions…',
+  histNotSaved: 'This deck isn\'t saved to your account yet. Please try again in a moment.',
+  histEmptyDeck: 'Add some cards first — the history starts once this deck is saved to your account.',
+  histMissing: 'Version history isn\'t switched on yet on this site. Please try again later.',
+  histErr: 'Couldn\'t load or save the version history. Please try again.',
+  histNow: 'Now',
+  histAuto: 'Auto-saved before editing',
+  histSame: 'Same as now',
+  histVsNow: 'vs now:',
+  histCompare: '⇄ Compare',
+  histRestore: '↩ Restore',
+  histDelete: 'Delete this version',
+  histDeleteConfirm: 'Delete this version from the history?',
+  histSaveNow: '📌 Save current as version',
+  histLabelPrompt: 'Name this version (e.g. “Before Jakarta Qualifier”):',
+  histLabelDefault: 'Saved version',
+  histBeforeRestore: 'Before restore',
+  histRestoreConfirm: 'Restore the version from {when}? Your current list is saved in the history first, so you can undo this.',
+  histRestoreNoBackup: 'Couldn\'t back up the current list to the history. Restore anyway?',
+  histRestored: '↩ Version restored',
+  histVersionOf: 'Version',
+  histNone: 'No earlier versions yet. They appear here after you edit this deck.',
+  histNote: 'Up to 30 automatic and 20 named versions are kept per deck. Deleting a deck also deletes its history.',
+  histJustNow: 'just now', histMinAgo: '{n} min ago', histHourAgo: '{n} h ago', histDayAgo: '{n} days ago',
   metaNone: 'No community decks match this filter yet.',
   metaAvgLv: 'average Lv',
 
@@ -7475,7 +7526,7 @@ function collQueueSave(){
 function collSetQty(no, v){
   v = Math.max(0, Math.min(COLL_MAX, Math.round(v)||0));
   if(v <= 0) delete collMap[no]; else collMap[no] = v;
-  if(deckColl.map === collMap) renderDeck();   // v6.96
+  setDeckCollection(collMap);   // v6.96/v6.97 — badge koleksi di Deck Builder ikut segar
   renderCollectionProgress();
   const card = $(`.coll-card[data-no="${no}"]`);
   const c = DB.find(d=>d.no===no);
@@ -9068,6 +9119,7 @@ window.addEventListener('hashchange', ()=>{
         <div class="cloud-deck-actions">
           <button class="qbtn" data-act="pub" title="${t(row.is_public?'pubUnpublishBtn':'pubPublishBtn')}" aria-label="${t(row.is_public?'pubUnpublishBtn':'pubPublishBtn')}">${row.is_public?'🌐':'📢'}<span class="qlbl">${t(row.is_public?'cloudUnpubLbl':'cloudPubLbl')}</span></button>
           <button class="qbtn" data-act="load" title="${t('cloudLoadBtn')}" aria-label="${t('cloudLoadBtn')}">📥<span class="qlbl">${t('cloudLoadLbl')}</span></button>
+          <button class="qbtn" data-act="hist" title="${t('histTitle')}" aria-label="${t('histTitle')}">🕘<span class="qlbl">${t('histLbl')}</span></button>
           <button class="qbtn" data-act="del" title="${t('cloudDeleteBtn')}" aria-label="${t('cloudDeleteBtn')}">🗑<span class="qlbl">${t('cloudDelLbl')}</span></button>
         </div>
       </div>`).join('');
@@ -9077,6 +9129,18 @@ window.addEventListener('hashchange', ()=>{
     const btn = e.target.closest('button[data-act]'); if(!btn) return;
     const row = btn.closest('.cloud-deck-row'); const id = row && row.dataset.id;
     if(!id) return;
+    if(btn.dataset.act === 'hist'){
+      /* v6.97 — buka riwayat versi deck ini (dijadikan deck aktif dulu) */
+      await chain;
+      let name = linkedName(id);
+      if(!name || !store.decks[name]){ await enqueue(pull); name = linkedName(id); }
+      if(!name || !store.decks[name]){ showCloudNote(t('cloudListErr')); return; }
+      store.decks[store.active] = state.deck;
+      store.active = name; state.deck = store.decks[name];
+      renderDeckSelect(); renderAll(); setPage('build');
+      openHistory();
+      return;
+    }
     if(btn.dataset.act === 'load'){
       /* v6.95 — deck akun sudah ada di browser ini lewat sinkron otomatis:
          cukup jadikan deck aktif dan buka Deck Builder (dulu: dibuat salinan
@@ -9165,7 +9229,11 @@ window.addEventListener('hashchange', ()=>{
   });
   window.addEventListener('online', ()=>{ if(uid) syncAll(); });
 
-  window.MHRCloudSync = { mark, onRename, onDelete, isLinked, syncNow: syncAll };
+  window.MHRCloudSync = { mark, onRename, onDelete, isLinked, syncNow: syncAll,
+    /* v6.97 — dipakai riwayat versi */
+    isOn: () => !!uid,
+    linkOf: name => store.cloudLink[name] || null,
+    flush: () => { clearTimeout(pushTmr); return enqueue(push); } };
   window.MHRUI = window.MHRUI || {};
   window.MHRUI.renderCloudList = renderCloudList;
 
@@ -9409,6 +9477,143 @@ $('#lightbox').addEventListener('click', e=>{
 }, true);
 
 $('#btnCompare').addEventListener('click', ()=>{ CMP.ext = null; openCompare(); });
+
+/* =====================================================================
+   v6.97 — TAHAP 2: RIWAYAT VERSI DECK
+   Versi otomatis dibuat database (trigger decks_snapshot_version, lihat
+   mhr_decklab_v697_deck_versions.sql): isi deck sebelum diubah, maks. satu
+   per 30 menit. Di sini: lihat daftar versi, simpan versi manual berlabel,
+   bandingkan versi dengan deck sekarang (openCompare), kembalikan (restore),
+   hapus. Hanya untuk deck yang tersimpan di akun (login).
+   ===================================================================== */
+function waktuRelatif(iso){
+  const ms = Date.now() - Date.parse(String(iso).replace(/(\.\d{3})\d+/, '$1'));
+  const m = Math.round(ms/60000);
+  if(m < 1) return t('histJustNow');
+  if(m < 60) return t('histMinAgo').replace('{n}', m);
+  const h = Math.round(m/60);
+  if(h < 24) return t('histHourAgo').replace('{n}', h);
+  const d = Math.round(h/24);
+  if(d < 30) return t('histDayAgo').replace('{n}', d);
+  return new Date(iso).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+}
+function waktuLengkap(iso){
+  try{ return new Date(String(iso).replace(/(\.\d{3})\d+/, '$1')).toLocaleString('en-GB', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}); }
+  catch(e){ return iso; }
+}
+function deckColorBar(deck){
+  const tot = Object.values(deck).reduce((s,q)=>s+q,0) || 1;
+  const col = {};
+  Object.entries(deck).forEach(([no,q])=>{ const c = DB.find(d=>d.no===no); if(c) col[c.c] = (col[c.c]||0) + q; });
+  return Object.entries(col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]])
+    .map(([c,n])=>`<i style="width:${n/tot*100}%;background:${CMAP[c]}" title="${t(c)}: ${n}"></i>`).join('');
+}
+function deckDiffCount(a, b){
+  let plus = 0, minus = 0;
+  new Set([...Object.keys(a), ...Object.keys(b)]).forEach(no=>{
+    const d = (b[no]||0) - (a[no]||0);
+    if(d > 0) plus += d; else minus -= d;
+  });
+  return {plus, minus};
+}
+const HIST = { rows:[], deckName:null, deckId:null };
+
+async function openHistory(){
+  const sync = window.MHRCloudSync;
+  if(!sync || !sync.isOn()){
+    mxOpen(`<h3>${t('histTitle')}</h3><div class="mx-sub">${t('histLogin')}</div>`);
+    return;
+  }
+  mxOpen(`<h3>${t('histTitle')}</h3><div class="mx-sub">${t('histLoading')}</div>`);
+  await sync.flush();                                   // pastikan deck aktif sudah tersimpan & tertaut
+  const id = sync.linkOf(store.active);
+  if(!id){
+    mxOpen(`<h3>${t('histTitle')}</h3><div class="mx-sub">${t(deckCount() ? 'histNotSaved' : 'histEmptyDeck')}</div>`);
+    return;
+  }
+  HIST.deckName = store.active; HIST.deckId = id;
+  const { data, error } = await window.MHRDecks.listVersions(id);
+  if(error){
+    mxOpen(`<h3>${t('histTitle')}</h3><div class="mx-sub">${t(error.missing ? 'histMissing' : 'histErr')}</div>`);
+    return;
+  }
+  HIST.rows = data.map(r=>({...r, deck: (decodeDeck(r.deck_code)||{deck:{}}).deck}));
+  renderHistory();
+}
+
+function renderHistory(){
+  const now = state.deck;
+  const tot = deckCount();
+  const items = HIST.rows.map((r,i)=>{
+    const n = Object.values(r.deck).reduce((s,q)=>s+q,0);
+    const df = deckDiffCount(r.deck, now);
+    const sama = !df.plus && !df.minus;
+    return `<div class="hist-row">
+      <div class="hist-main">
+        <div class="hist-when"><b>${escHtml(waktuRelatif(r.created_at))}</b> <span>${escHtml(waktuLengkap(r.created_at))}</span></div>
+        <div class="hist-lbl">${r.label ? `<span class="hist-tag">📌 ${escHtml(r.label)}</span>` : `<span class="hist-auto">${t('histAuto')}</span>`}
+          <span class="hist-n">${n} ${t('cards')}</span>
+          <span class="hist-diff">${sama ? t('histSame') : `${t('histVsNow')} <b class="p">+${df.plus}</b> <b class="m">−${df.minus}</b>`}</span></div>
+        <div class="hist-bar">${deckColorBar(r.deck)}</div>
+      </div>
+      <div class="hist-acts">
+        <button class="btn2" data-hist="cmp" data-i="${i}" ${sama?'disabled':''}>${t('histCompare')}</button>
+        <button class="btn2 main" data-hist="restore" data-i="${i}" ${sama?'disabled':''}>${t('histRestore')}</button>
+        <button class="btn2" data-hist="del" data-i="${i}" title="${t('histDelete')}" aria-label="${t('histDelete')}">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+  const m = mxOpen(`<h3>${t('histTitle')}</h3>
+    <div class="mx-sub">${t('histSub').replace('{deck}', escHtml(HIST.deckName))}</div>
+    <div class="hist-now">
+      <div class="hist-main"><div class="hist-when"><b>${t('histNow')}</b></div>
+        <div class="hist-lbl"><span class="hist-n">${tot} ${t('cards')}</span></div>
+        <div class="hist-bar">${deckColorBar(now)}</div></div>
+      <div class="hist-acts"><button class="btn2 main" data-hist="save" ${tot?'':'disabled'}>${t('histSaveNow')}</button></div>
+    </div>
+    ${items || `<div class="hist-empty">${t('histNone')}</div>`}
+    <p class="mx-note">${t('histNote')}</p>`, 'mx-hist');
+  m.querySelector('.mx-box').addEventListener('click', async e=>{
+    const b = e.target.closest('[data-hist]'); if(!b || b.disabled) return;
+    const act = b.dataset.hist, r = HIST.rows[parseInt(b.dataset.i)];
+    if(store.active !== HIST.deckName){ mxClose(); return; }      // deck aktif sudah berganti
+    if(act === 'save'){
+      const label = prompt(t('histLabelPrompt'), '');
+      if(label === null) return;
+      b.disabled = true;
+      await window.MHRCloudSync.flush();
+      const { data, error } = await window.MHRDecks.saveVersion({ deckId: HIST.deckId, name: store.active,
+        deckCode: encodeDeck(state.deck, store.active), label: label.trim() || t('histLabelDefault') });
+      if(error || !data){ b.disabled = false; alert(t(error && error.missing ? 'histMissing' : 'histErr')); return; }
+      HIST.rows.unshift({...data, deck:{...state.deck}});
+      renderHistory();
+    } else if(act === 'cmp' && r){
+      CMP.ext = null;
+      openCompare(r.deck, `${t('histVersionOf')} ${waktuLengkap(r.created_at)}${r.label?` · ${r.label}`:''}`);
+    } else if(act === 'restore' && r){
+      if(!confirm(t('histRestoreConfirm').replace('{when}', waktuLengkap(r.created_at)))) return;
+      b.disabled = true;
+      /* simpan dulu isi sekarang sebagai versi "Before restore" supaya bisa dibatalkan */
+      if(deckCount()){
+        await window.MHRCloudSync.flush();
+        const { error } = await window.MHRDecks.saveVersion({ deckId: HIST.deckId, name: store.active,
+          deckCode: encodeDeck(state.deck, store.active), label: t('histBeforeRestore') });
+        if(error && !confirm(t('histRestoreNoBackup'))){ b.disabled = false; return; }
+      }
+      state.deck = {...r.deck};
+      store.decks[store.active] = state.deck;
+      mxClose(); renderAll();
+      const n = $('#saveNote'); if(n){ n.textContent = t('histRestored'); clearTimeout(saveTmr); saveTmr = setTimeout(()=>n.textContent='', 2400); }
+    } else if(act === 'del' && r){
+      if(!confirm(t('histDeleteConfirm'))) return;
+      const { error } = await window.MHRDecks.removeVersion(r.id);
+      if(error){ alert(t('histErr')); return; }
+      HIST.rows = HIST.rows.filter(x=>x !== r);
+      renderHistory();
+    }
+  });
+}
+$('#btnHistory').addEventListener('click', openHistory);
 
 /* --- PWA: daftarkan service worker (lihat sw.js) ---
    Dibungkus try/catch dan dicek dulu dukungannya — kalau gagal (mis. dibuka

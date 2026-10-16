@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.96** · 16 Oktober 2026
+**Versi saat ini: v6.97** · 16 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,40 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.97 — Tahap 2: riwayat versi deck (lihat, bandingkan, kembalikan versi lama) — 16 Oktober 2026 *(`index.html`, `decks.js`, migrasi SQL baru `mhr_decklab_v697_deck_versions.sql` di folder internal)*
+
+**⚠️ WAJIB sekali di Supabase:** buka Dashboard Supabase → SQL Editor → New query → tempel isi
+`mhr-deck-lab-internal/mhr_decklab_v697_deck_versions.sql` → Run. Aman dijalankan ulang. Sebelum migrasi
+dijalankan, tombol riwayat hanya menampilkan pesan "Version history isn't switched on yet" (tidak ada error).
+
+- **Database:** tabel `public.deck_versions` (`id, deck_id → decks on delete cascade, owner_id, name, deck_code,
+  label, created_at`) + RLS: hanya pemilik yang bisa baca/tambah/hapus versi deck miliknya; versi tidak bisa diubah
+  (tidak ada policy update). Trigger `decks_snapshot_version` (BEFORE UPDATE di `decks`, security definer): tiap
+  `deck_code` berubah, isi SEBELUMNYA disimpan sebagai versi otomatis — maksimal satu per 30 menit per deck,
+  supaya sinkron otomatis v6.95 (tiap ~2,5 detik) tidak membanjiri tabel; rename saja / ubah publik tidak membuat
+  versi. Disimpan 30 versi otomatis + 20 versi bernama terbaru per deck (trigger `deck_versions_trim_manual`).
+- **decks.js:** `listVersions(deckId)`, `saveVersion({deckId,name,deckCode,label})`, `removeVersion(id)`; error
+  tabel belum ada (PGRST205/42P01) ditandai `missing:true`.
+- **UI:** tombol "🕘 Version history" di panel deck dan "🕘 History" di daftar deck Dashboard. Modal menampilkan
+  "Now" + daftar versi (waktu relatif & lengkap, label 📌 atau "Auto-saved before editing", jumlah kartu, selisih
+  `+x −y` vs sekarang, bar warna). Aksi: "📌 Save current as version" (nama bebas), "⇄ Compare" (memakai fitur
+  bandingkan v6.96), "↩ Restore" (isi sekarang otomatis disimpan dulu sebagai versi "Before restore", lalu deck
+  diganti dan tersinkron ke akun), 🗑 hapus versi. Hanya untuk pengguna login; deck kosong / belum tersimpan diberi
+  pesan yang jelas.
+- **Perbaikan v6.96:** koleksi yang masih kosong (pengguna yang belum pernah memakai Koleksi di Dashboard) tidak lagi
+  menampilkan kotak koleksi dan badge merah `0/3` di semua kartu; begitu satu kartu dicatat di Dashboard, fitur
+  koleksi di Deck Builder langsung aktif.
+- Versi 6.97, cache-buster `?v=6.97`. `sw.js` tidak diubah.
+
+**Verifikasi:** migrasi diuji di PostgreSQL 16 lokal dengan skema `decks` dan peniruan `auth.uid()`/role
+`authenticated` Supabase, dijalankan 2× (idempotent): 2 edit cepat = 1 versi; rename saja = tanpa versi; edit setelah
+jeda 31 menit = versi baru; pengguna lain tidak bisa melihat / menambah (termasuk memalsukan owner_id) / menghapus
+versi; versi tidak bisa di-update; retensi 30 otomatis & 20 bernama; hapus deck menghapus versinya. UI diuji di
+Chromium headless 1440 px & 390 px dengan server tiruan yang meniru trigger: 16 skenario × 2 lulus (pesan belum
+login, versi otomatis & aturan 30 menit, daftar + selisih, simpan versi bernama, bandingkan, restore + cadangan
+"Before restore" + tersinkron, hapus, tombol History di Dashboard, pesan tabel belum ada, deck kosong, tanpa error
+JS). Tes v6.95 (27) dan v6.96 (32) tetap lulus.
 
 ### v6.96 — Tahap 1 riset fitur: koleksi di Deck Builder, bandingkan deck, statistik turnamen per kartu — 16 Oktober 2026 *(`index.html`)*
 

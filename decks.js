@@ -234,5 +234,66 @@
         return { data:null, error:{ message:'SET_PUBLIC_FAILED' } };
       }
     },
+
+    /* ============== v6.97 (Tahap 2) — riwayat versi deck ==============
+       Tabel `public.deck_versions` (migrasi mhr_decklab_v697_deck_versions.sql
+       di folder internal — WAJIB dijalankan sekali di Supabase SQL Editor).
+       Versi otomatis dibuat oleh TRIGGER database `decks_snapshot_version`
+       (isi deck SEBELUM diubah, maks. satu per 30 menit per deck) — klien
+       tidak perlu melakukan apa pun untuk itu. Klien hanya: membaca daftar
+       versi, menyimpan versi manual (berlabel), dan menghapus versi.
+       Kalau migrasi belum dijalankan, semua fungsi di bawah mengembalikan
+       error dengan `missing:true` supaya index.html bisa menampilkan pesan
+       "belum aktif" alih-alih error umum. */
+    async listVersions(deckId){
+      const c = client();
+      if(!c) return { data:[], error:{ message:'AUTH_NOT_READY' } };
+      try{
+        const { data, error } = await c
+          .from('deck_versions')
+          .select('id,name,deck_code,label,created_at')
+          .eq('deck_id', deckId)
+          .order('created_at', { ascending:false })
+          .limit(60);
+        return { data: data || [], error: versionErr(error) };
+      }catch(e){
+        return { data:[], error:{ message:'LIST_VERSIONS_FAILED' } };
+      }
+    },
+    async saveVersion({ deckId, name, deckCode, label }){
+      const c = client();
+      if(!c) return { data:null, error:{ message:'AUTH_NOT_READY' } };
+      const uid = await currentUserId();
+      if(!uid) return { data:null, error:{ message:'NOT_LOGGED_IN' } };
+      try{
+        const { data, error } = await c
+          .from('deck_versions')
+          .insert({ deck_id: deckId, owner_id: uid, name: name || '', deck_code: deckCode, label: (label || '').trim() || 'Saved version' })
+          .select('id,name,deck_code,label,created_at')
+          .maybeSingle();
+        return { data, error: versionErr(error) };
+      }catch(e){
+        return { data:null, error:{ message:'SAVE_VERSION_FAILED' } };
+      }
+    },
+    async removeVersion(id){
+      const c = client();
+      if(!c) return { error:{ message:'AUTH_NOT_READY' } };
+      try{
+        const { error } = await c.from('deck_versions').delete().eq('id', id);
+        return { error: versionErr(error) };
+      }catch(e){
+        return { error:{ message:'DELETE_VERSION_FAILED' } };
+      }
+    },
   };
+
+  /* tabel deck_versions belum ada (migrasi v6.97 belum dijalankan):
+     PostgREST membalas PGRST205 / Postgres 42P01 */
+  function versionErr(error){
+    if(!error) return null;
+    const txt = `${error.code||''} ${error.message||''}`;
+    if(/PGRST205|42P01|deck_versions/.test(txt)) return { ...error, missing:true };
+    return error;
+  }
 })();
