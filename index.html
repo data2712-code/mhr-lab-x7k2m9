@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.97  ·  16 Oktober 2026
+     MHR DECK LAB  ·  versi 6.98  ·  16 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.97">
+<meta name="version" content="6.98">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1231,6 +1231,77 @@
   body:not(.page-set) #setPage{display:none}
   body.page-set .filters, body.page-set .cards, body.page-set .deck{display:none}
   body.page-set .layout{grid-template-columns:minmax(0,1fr)}
+
+/* ================= v6.98 — HALAMAN EVENTS (turnamen LGS) ================= */
+  body:not(.page-event) #eventPage{display:none}
+  body.page-event .filters, body.page-event .cards, body.page-event .deck{display:none}
+  body.page-event .layout{grid-template-columns:minmax(0,1fr)}
+  .ev-wrap{padding:22px 20px 70px;max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+  .ev-head .ev-actions{margin-top:12px}
+  .nw-btn.ev-main{border-color:var(--accent);color:var(--accent);font-weight:700}
+  .ev-muted{color:var(--muted);font-size:12px}
+  .ev-warn{color:#ff8a76;font-size:11.5px;font-weight:700}
+  .ev-empty{color:var(--muted);font-size:13px;padding:14px 2px}
+  .ev-sec{display:flex;flex-direction:column;gap:10px}
+  .ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+  .ev-card{display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 14px;text-decoration:none;color:inherit;transition:.15s}
+  .ev-card:hover{border-color:#46546a;transform:translateY(-2px)}
+  .ev-card.st-running{border-color:color-mix(in srgb,#E4442E 55%,var(--line))}
+  .ev-card.st-registration{border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+  .ev-card>b{font-family:var(--disp);font-size:17px;line-height:1.2}
+  .ev-card-top{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .ev-date{font-family:var(--mono);font-size:11.5px;color:#C9CFD8}
+  .ev-badge{font-family:var(--disp);font-weight:800;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:3px 7px;color:#fff;background:#3a4352}
+  .ev-badge.b-running{background:#C9341F} .ev-badge.b-registration{background:var(--accent);color:#1A1206}
+  .ev-badge.b-finished{background:#1E8E5A} .ev-badge.b-draft{background:#4b5566}
+  .ev-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .ev-chips i{font-style:normal;font-size:11.5px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:#C9CFD8}
+  .ev-hero{display:flex;flex-direction:column;gap:8px}
+  .ev-hero h1{font-family:var(--disp);font-size:30px;line-height:1.1}
+  .ev-notes{color:#C9CFD8;font-size:13px;line-height:1.6;white-space:pre-line;max-width:720px}
+  .ev-pub{background:rgba(30,142,90,.12);border:1px solid color-mix(in srgb,#1E8E5A 55%,var(--line));border-radius:9px;padding:8px 12px;font-size:12.5px}
+  .ev-pub a{color:var(--accent)}
+  .ev-org-bar,.ev-admin{background:var(--panel);border:1px dashed color-mix(in srgb,var(--accent) 55%,var(--line));border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+  .ev-org-t{font-family:var(--disp);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+  .ev-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .ev-row .btn2{flex:none;padding:8px 12px;font-size:12.5px}
+  .ev-row .btn2.main{border-color:var(--accent);color:var(--accent);font-weight:700}
+  .ev-row input{background:var(--panel2);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;min-width:0;flex:1}
+  .ev-org{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px;color:var(--paper)}
+  .ev-org .btn2{flex:none;padding:4px 10px;font-size:11.5px}
+  .ev-box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;display:flex;flex-direction:column;gap:8px}
+  .ev-box.ok{border-color:color-mix(in srgb,#1E8E5A 60%,var(--line));background:linear-gradient(135deg,rgba(30,142,90,.10),var(--panel) 60%)}
+  .ev-box a{color:var(--accent)}
+  .ev-form,.ev-deckpick{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+  .ev-f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+  .ev-f.full{grid-column:1/-1}
+  .ev-f input,.ev-f select,.ev-f textarea{background:var(--panel2);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px}
+  .ev-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+  .ev-tabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+  .ev-tabs button[aria-selected="true"]{color:var(--paper);border-bottom-color:var(--accent)}
+  .ev-tabbody{display:flex;flex-direction:column;gap:12px}
+  .ev-tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  .ev-tbl{width:100%;border-collapse:collapse;font-size:13px}
+  .ev-tbl th{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;background:var(--panel2);white-space:nowrap}
+  .ev-tbl td{padding:8px 10px;border-top:1px solid var(--line);vertical-align:middle}
+  .ev-tbl td.tn{font-family:var(--mono);color:var(--muted);width:46px}
+  .ev-tbl td.vs{color:var(--muted);font-size:11px;width:24px;text-align:center}
+  .ev-tbl td.win{color:#6ee09a;font-weight:700}
+  .ev-tbl tr.drop td{opacity:.55}
+  .ev-tbl tr.me td{background:rgba(242,176,30,.08)}
+  .ev-pts{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:4px}
+  .ev-acts{display:flex;gap:5px;flex-wrap:wrap}
+  .ev-acts .btn2{flex:none;padding:4px 8px;font-size:11.5px}
+  .ev-res{display:inline-flex;gap:4px;flex-wrap:wrap}
+  .ev-res button,.ev-rounds button{background:var(--panel2);border:1px solid var(--line);color:var(--paper);border-radius:6px;padding:4px 8px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+  .ev-res button[aria-pressed="true"],.ev-rounds button[aria-pressed="true"]{border-color:var(--accent);color:#1A1206;background:var(--accent)}
+  .ev-res button:disabled{opacity:.5}
+  .ev-rounds{display:flex;gap:6px;flex-wrap:wrap}
+  @media (max-width:640px){
+    .ev-wrap{padding:16px 12px 90px}
+    .ev-hero h1{font-size:24px}
+    .ev-tbl{font-size:12.5px} .ev-tbl td,.ev-tbl th{padding:7px 7px}
+  }
   a.hm-ser{text-decoration:none}
   .st-wrap{padding:22px 20px 60px;max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
   .st-muted{color:var(--muted);font-size:12px}
@@ -1759,6 +1830,7 @@
   <button data-page="build" aria-current="false">🛠 <span class="tl" data-i18n="navBuild">Deck Builder</span><span class="ts" data-i18n="navBuildS">Builder</span> <span class="cnt" id="navDeck">0</span></button>
   <button data-page="meta" aria-current="false">🏆 <span class="tl" data-i18n="navMeta">User Decks</span><span class="ts" data-i18n="navMetaS">User Decks</span> <span class="cnt" id="navMeta">0</span></button>
   <button data-page="tourney" aria-current="false">🥇 <span class="tl" data-i18n="navTourney">Tournament Decks</span><span class="ts" data-i18n="navTourneyS">Tournament Decks</span> <span class="cnt" id="navTourney">0</span></button>
+  <button data-page="event" aria-current="false">🏟 <span class="tl">Events</span><span class="ts">Events</span></button>
   <button data-page="lgs" aria-current="false">📅 <span class="tl" data-i18n="navLgs">Weekly Rush LGS</span><span class="ts" data-i18n="navLgsS">Weekly Rush LGS</span> <span class="cnt" id="navLgs">0</span></button>
   <button data-page="panduan" aria-current="false">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span></button>
   <button data-page="dashboard" aria-current="false">🗂 <span class="tl" data-i18n="navDashboard">Dashboard Saya</span><span class="ts" data-i18n="navDashboardS">Dashboard</span></button>
@@ -1766,6 +1838,8 @@
 
 <!-- v6.64 — halaman Set & Spoiler (isi digambar set-ui.js: renderSet) -->
 <section id="setPage"><div class="st-wrap" id="setWrap"></div></section>
+<!-- v6.98 — halaman Events (turnamen LGS: Swiss + Top cut), lihat events.js & events-ui.js -->
+<section id="eventPage"><div class="ev-wrap" id="eventWrap"></div></section>
 
 <!-- v6.63 — halaman Beranda (isi digambar home-ui.js: renderBeranda) -->
 <section id="berandaPage"><div class="hm-wrap" id="berandaWrap"></div></section>
@@ -1855,6 +1929,7 @@
       <p data-i18n="tourneyIntro">Deck-deck dari babak Top di turnamen resmi Marvel Hero Rush. Muat salah satunya ke
         Deck Builder untuk dilihat isinya — deck yang sedang Anda susun tidak tertimpa.</p>
     </div>
+    <a class="nw-btn" href="#event" style="align-self:flex-start;margin-bottom:12px">🏟 Store tournaments, live pairings & registration → Events</a>
     <div id="tnyAdminBox"></div>
     <div id="tnyStats"></div>
     <div id="tourneyList"></div>
@@ -2155,26 +2230,28 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.97"></script>
-<script src="data.js?v=6.97"></script>
+<script src="cards.js?v=6.98"></script>
+<script src="data.js?v=6.98"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.97"></script>
-<script src="decks.js?v=6.97"></script>
+<script src="auth.js?v=6.98"></script>
+<script src="decks.js?v=6.98"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.97"></script>
-<script src="collection.js?v=6.97"></script>
+<script src="social.js?v=6.98"></script>
+<script src="collection.js?v=6.98"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.97"></script>
-<script src="news-ui.js?v=6.97"></script>
+<script src="news.js?v=6.98"></script>
+<script src="news-ui.js?v=6.98"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.97"></script>
+<script src="home-ui.js?v=6.98"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.97"></script>
-<script src="set-ui.js?v=6.97"></script>
+<script src="spoilers.js?v=6.98"></script>
+<script src="set-ui.js?v=6.98"></script>
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.97"></script>
+<script src="tournaments.js?v=6.98"></script>
+<script src="events.js?v=6.98"></script>
+<script src="events-ui.js?v=6.98"></script>
 <!-- v6.88 — pop-up iklan carousel (kampanye Era of Spiders + Asia Peak Invitational).
      "defer" = tidak menahan render; CSS-nya disuntik oleh skripnya sendiri saat tampil.
      Aturan tampil & tanggal berakhir ada di PROMO (atas promo-popup.js). Pratinjau: /?promo=preview -->
@@ -7062,13 +7139,14 @@ function renderPanduan(){
 }
 
 /* ==================== NAVIGASI HALAMAN ==================== */
-const PAGES = ['beranda','berita','cards','set','build','meta','tourney','lgs','panduan','dukung','dashboard'];
+const PAGES = ['beranda','berita','cards','set','build','meta','tourney','event','lgs','panduan','dukung','dashboard'];
 const TITLE_AWAL = document.title;
 function setPage(p, dariHash){
   /* v6.62 — 'berita/<slug>' = satu artikel (lihat news-ui.js) */
   let sub = null;
   if(typeof p === 'string' && p.startsWith('berita/')){ sub = p.slice(7); p = 'berita'; }
   if(typeof p === 'string' && p.startsWith('set/')){ sub = p.slice(4).toUpperCase(); p = 'set'; }  /* v6.64 */
+  if(typeof p === 'string' && p.startsWith('event/')){ sub = p.slice(6).toLowerCase(); p = 'event'; }  /* v6.98 */
   if(!PAGES.includes(p)) p = 'cards';
   if(p !== 'berita') document.title = TITLE_AWAL;
   /* v6.46 — semua tab (termasuk LGS/Tournament Decks/User Decks) SELALU
@@ -7087,6 +7165,7 @@ function setPage(p, dariHash){
   if(p === 'berita' && typeof renderBerita === 'function') renderBerita(sub);
   if(p === 'meta') renderMeta();
   if(p === 'tourney') renderTourney();
+  if(p === 'event' && typeof renderEvents === 'function') renderEvents(sub);   /* v6.98 */
   if(p === 'lgs') renderLgs();
   if(p === 'panduan') renderPanduan();
   if(p === 'dukung') renderDukungPage();
@@ -8576,6 +8655,8 @@ if(hashAwal.startsWith('#d=')){
   handleSharedLink();
 } else if(hashAwal.startsWith('#c=')){
   handleCardLink();
+} else if(hashAwal.startsWith('#event/') && window.eventIdFromHash && window.eventIdFromHash(hashAwal)){
+  setPage('event/' + window.eventIdFromHash(hashAwal), true);
 } else if(hashAwal.startsWith('#set/') && window.setKodeFromHash && window.setKodeFromHash(hashAwal)){
   setPage('set/' + window.setKodeFromHash(hashAwal), true);
 } else if(hashAwal.startsWith('#berita/') && window.beritaSlugFromHash && window.beritaSlugFromHash(hashAwal)){
@@ -8591,6 +8672,10 @@ window.addEventListener('hashchange', ()=>{
   const h = location.hash;
   if(h.startsWith('#d=')){ setPage('build', true); handleSharedLink(); return; }
   if(h.startsWith('#c=')){ handleCardLink(); return; }
+  if(h === '#event' || h.startsWith('#event/')){                     /* v6.98 */
+    const id = window.eventIdFromHash ? window.eventIdFromHash(h) : null;
+    setPage(id ? 'event/'+id : 'event', true); return;
+  }
   if(h === '#set' || h.startsWith('#set/')){
     const kode = window.setKodeFromHash ? window.setKodeFromHash(h) : null;
     setPage(kode ? 'set/'+kode : 'set', true); return;

@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.97** · 16 Oktober 2026
+**Versi saat ini: v6.98** · 16 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,55 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.98 — Tahap 3: Events — turnamen LGS (pendaftaran, decklist, pairing Swiss, Top cut, klasemen) — 16 Oktober 2026 *(`index.html`, berkas BARU `events.js` & `events-ui.js`, migrasi SQL baru `mhr_decklab_v698_events.sql` di folder internal)*
+
+**⚠️ WAJIB sekali di Supabase:** SQL Editor → New query → tempel isi `mhr-deck-lab-internal/mhr_decklab_v698_events.sql`
+→ Run (aman dijalankan ulang). Sebelum itu halaman Events hanya menampilkan "Events aren't switched on yet".
+Harga/stok toko mitra sengaja BELUM dikerjakan (keputusan pemilik).
+
+Keputusan pemilik: penyelenggara = admin + akun **Organizer** (pemilik/staf LGS, ditunjuk admin); pendaftaran online
+(akun) + walk-in tanpa akun; hasil match diisi organizer; decklist wajib dan rahasia sampai event selesai, lalu deck
+Top-cut dipublikasikan ke Tournament Decks.
+
+- **Halaman baru `#event`** (tab "🏟 Events" + tautan di Tournament Decks): daftar event Live / Registration open /
+  Drafts (hanya pemiliknya) / Finished. Admin melihat kotak **Organizers** (tambah lewat username + nama toko, hapus).
+- **`#event/<id>`**: info event (tanggal, jam, toko, lokasi, Bo1/Bo3, jumlah ronde, Top cut, kuota, catatan), kotak
+  pemain (daftar dengan nama + deck dari "Deck Saya" atau tempel link/kode; lihat/ganti decklist; batal daftar; saat
+  event berjalan: "Round 3 · Table 5 — you vs Sari"), tab **Players · Pairings · Standings**. Halaman memuat ulang
+  sendiri tiap 20 detik selama event Live (dilewati kalau ada form yang sedang diisi / modal terbuka).
+- **Kontrol organizer:** Edit · Open registration · Start event (pairing ronde 1, pendaftaran ditutup, jumlah ronde
+  dikunci — "Auto" = ⌈log₂ pemain⌉) · isi hasil per meja (Bo1: P1 wins / Draw / P2 wins / DL; Bo3: 2-0 2-1 1-1 1-2
+  0-2 / DL; ✕ hapus hasil) · Pair next round · Re-pair (kalau belum ada hasil) · Undo round · Drop/Undrop pemain ·
+  tambah walk-in (decklist wajib) · Set deck / Rename / hapus pemain · Start Top N · Pair next top-cut round · Finish
+  · 📋 Copy pairings (teks WhatsApp + link live) · **Publish Top decks to Tournament Decks** (bisa diulang = update
+  baris yang sama) · Reopen · Delete.
+- **Mesin Swiss (`MHRSwiss` di events.js, fungsi murni):** menang 3 / seri 1 / kalah 0, bye = menang (2-0 Bo3);
+  tiebreaker poin → OMW% → GW% → OGW% (minimum 33%, bye bukan lawan); ronde 1 acak, berikutnya urut klasemen tanpa
+  rematch (backtracking), bye ke peringkat terbawah yang belum pernah bye, pemain drop tidak dipasangkan. Top cut
+  1v8 4v5 2v7 3v6 / 1v4 2v3 / 1v2, tanpa seri; peringkat akhir 1st, 2nd, Top 4, Top 8, lalu 9th… dari Swiss.
+  Publikasi: deck Top cut (atau Top 4 / Top 8 kalau tanpa cut, tergantung jumlah pemain), nama deck otomatis dari
+  warna ("Red - Green"), `cr` = nama pemain.
+- **Database (`mhr_decklab_v698_events.sql`):** tabel `organizers`, `events`, `event_players`, `event_decklists`,
+  `event_matches` + RLS: event draft hanya terlihat oleh pembuatnya/admin; peserta & pairing terlihat publik setelah
+  draft; **decklist hanya bisa dibaca pemiliknya, organizer event, dan admin** (anon tidak punya akses sama sekali);
+  tulis peserta/pairing/hasil hanya organizer event/admin. RPC security definer: `mhr_register_for_event`
+  (cek status, kuota, dobel, decklist wajib), `mhr_update_registration`, `mhr_withdraw_from_event`,
+  `mhr_publish_event` (organizer tidak perlu hak tulis `tournaments` — deck diambil dari tabel decklist di server).
+  Memakai `mhr_is_admin()` dan `set_updated_at()` yang sudah ada.
+- Versi 6.98, cache-buster `?v=6.98` (termasuk 2 berkas baru). `sw.js` tidak diubah (berkas JS lokal network-first).
+
+**Verifikasi:** migrasi diuji di PostgreSQL 16 lokal dengan peniruan Supabase (`auth.uid()`, role anon/authenticated,
+`mhr_is_admin`, tabel `tournaments` dengan RLS admin) dan dijalankan 2×: 19 skenario RLS/RPC lulus (non-organizer
+tidak bisa membuat event / mengangkat diri jadi organizer, draft tersembunyi, daftar ditolak saat tutup / dobel /
+tanpa decklist / penuh, pemain tidak bisa melihat decklist orang lain atau menulis pairing, anon ditolak membaca
+decklist, publish ditolak sebelum selesai & untuk orang lain, publish ulang meng-update baris yang sama, organizer
+tidak bisa mengubah event orang lain, hapus event menghapus semua turunannya tapi tidak menghapus Tournament Decks).
+Mesin Swiss diuji unit (Node): 7 ukuran event 3–27 pemain tanpa rematch, satu bye per pemain, drop dihormati, bracket
+Top 8 & peringkat akhir. Alur penuh di Chromium headless (server tiruan): admin menunjuk organizer → event dibuat →
+7 pendaftaran online + batal + 2 walk-in → start (bye) → 3 ronde dengan drop & re-pair → Top 4 → final → finish →
+publish 4 deck → publish ulang → privasi decklist → tampilan HP 390 px tanpa scroll horizontal: 29/29 lulus, tanpa
+error JS. Tes v6.95 (27), v6.96 (32), v6.97 (32) tetap lulus.
 
 ### v6.97 — Tahap 2: riwayat versi deck (lihat, bandingkan, kembalikan versi lama) — 16 Oktober 2026 *(`index.html`, `decks.js`, migrasi SQL baru `mhr_decklab_v697_deck_versions.sql` di folder internal)*
 
