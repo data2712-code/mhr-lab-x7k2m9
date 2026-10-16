@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.93  ·  16 Oktober 2026
+     MHR DECK LAB  ·  versi 6.94  ·  16 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.93">
+<meta name="version" content="6.94">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -347,6 +347,40 @@
     color:var(--paper);cursor:pointer;font-size:13px;line-height:1;flex:none}
   .qbtn:hover{border-color:var(--accent);color:var(--accent)}
   .qty{font-family:var(--mono);font-size:12.5px;width:16px;text-align:center;flex:none}
+
+  /* v6.94 — daftar kartu deck: strip artwork (List) & gambar kartu (Grid) */
+  .dl-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .dl-view{display:inline-flex;gap:4px;text-transform:none;letter-spacing:0}
+  .dl-vbtn{background:none;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:2px 8px;
+    font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+  .dl-vbtn:hover{color:var(--paper)}
+  .dl-vbtn.on{border-color:var(--accent);color:var(--accent)}
+  .dl-strip{display:flex;flex-direction:column;gap:4px}
+  .ds{position:relative;display:flex;align-items:center;height:44px;border-radius:8px;overflow:hidden;
+    border:1px solid var(--line);background:#11151b}
+  .ds-art{position:absolute;top:0;right:0;width:66%;height:100%;object-fit:cover;object-position:50% 26%;pointer-events:none}
+  .ds-art.failed{display:none}
+  .ds::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(90deg,#11151b 34%,rgba(17,21,27,.85) 52%,rgba(17,21,27,.2) 78%,rgba(17,21,27,.6))}
+  .ds-hit{position:relative;z-index:1;flex:1;min-width:0;align-self:stretch;display:flex;align-items:center;gap:9px;cursor:zoom-in}
+  .ds-lv{width:28px;align-self:stretch;flex:none;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-weight:800;font-size:13px;color:#fff}
+  .ds-lv.dk{color:#1A1206}
+  .ds-nm{flex:1;min-width:0;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000}
+  .ds-hit:hover .ds-nm{color:var(--accent)}
+  .ds-q{position:relative;z-index:1;display:flex;align-items:center;gap:4px;margin:0 6px 0 4px;
+    background:rgba(10,12,15,.8);border-radius:7px;padding:2px}
+  .ds-q .qbtn{background:rgba(14,18,22,.6)}
+  .dl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .dg{min-width:0}
+  .dg-img{position:relative;display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in}
+  .dg-img img{width:100%;aspect-ratio:63/88;object-fit:cover;border-radius:6px;display:block;background:var(--panel)}
+  .dg-q{position:absolute;top:4px;right:4px;background:#fff;color:#111;font:800 12px var(--mono);border-radius:6px;padding:1px 6px}
+  .dg-ctl{display:flex;align-items:center;justify-content:space-between;gap:2px;margin-top:4px}
+  .dg-no{font:9.5px var(--mono);letter-spacing:-.02em;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media (hover:none){
+    .ds-q .qbtn,.dg-ctl .qbtn{width:28px;height:28px;font-size:15px}
+  }
 
   .deck-settings{display:flex;gap:8px;margin:10px 0}
   .deck-settings label{font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:3px;flex:1}
@@ -1842,6 +1876,28 @@
 
     <div id="ruleBox"></div>
 
+    <!-- v6.94 — daftar kartu dipindah ke atas (tepat di bawah validasi deck, sebelum
+         statistik) dan diberi pilihan tampilan: List (strip artwork) / Grid (gambar
+         kartu). Pilihan disimpan di localStorage 'mhr_decklist_view'. -->
+    <div class="deck-sec-title dl-head"><span data-i18n="cardList">Daftar kartu</span>
+      <span class="dl-view" role="group" aria-label="Card list view">
+        <button type="button" class="dl-vbtn" data-dlview="list" aria-pressed="true">☰ <span data-i18n="dlList">List</span></button>
+        <button type="button" class="dl-vbtn" data-dlview="grid" aria-pressed="false">▦ <span data-i18n="dlGrid">Grid</span></button>
+      </span></div>
+    <!-- v6.20 — fix CLS: #deckList sengaja diberi visibility:hidden sejak HTML
+         awal (bukan "hidden" biasa, supaya ruangnya tetap dipesan sesuai
+         placeholder kosong ini). Kalau deck belum pernah dipakai (kasus paling
+         umum, terutama pengunjung baru), renderDeck() cuma menampakkan ulang
+         teks yang sama persis — nol pergeseran. Untuk pengunjung lama yang
+         deck-nya sudah tersimpan di localStorage, renderDeck() menukar isinya
+         DULU baru menampakkannya (lihat "renderPertamaDeckList" di bawah),
+         supaya penukaran ukuran terjadi sebelum elemen ini pernah terlihat —
+         ini penyumbang CLS "#deckList" di laporan Cloudflare, lihat
+         analitik-agustus-2026.md. Render berikutnya (tambah/kurang kartu)
+         TIDAK memakai teknik sembunyi/tampilkan ini lagi supaya tetap terasa
+         instan. -->
+    <div id="deckList" style="visibility:hidden"><div class="empty">Deck masih kosong.<br>Klik <b>+ Deck</b> pada kartu untuk menambahkan.</div></div>
+
     <div class="deck-sec-title" data-i18n="statistics">Statistik</div>
     <div class="stats2" id="stats2"></div>
 
@@ -1859,20 +1915,6 @@
     <div class="deck-sec-title" data-i18n="topTraits">Trait terbanyak</div>
     <div class="traits" id="traits"></div>
 
-    <div class="deck-sec-title" data-i18n="cardList">Daftar kartu</div>
-    <!-- v6.20 — fix CLS: #deckList sengaja diberi visibility:hidden sejak HTML
-         awal (bukan "hidden" biasa, supaya ruangnya tetap dipesan sesuai
-         placeholder kosong ini). Kalau deck belum pernah dipakai (kasus paling
-         umum, terutama pengunjung baru), renderDeck() cuma menampakkan ulang
-         teks yang sama persis — nol pergeseran. Untuk pengunjung lama yang
-         deck-nya sudah tersimpan di localStorage, renderDeck() menukar isinya
-         DULU baru menampakkannya (lihat "renderPertamaDeckList" di bawah),
-         supaya penukaran ukuran terjadi sebelum elemen ini pernah terlihat —
-         ini penyumbang CLS "#deckList" di laporan Cloudflare, lihat
-         analitik-agustus-2026.md. Render berikutnya (tambah/kurang kartu)
-         TIDAK memakai teknik sembunyi/tampilkan ini lagi supaya tetap terasa
-         instan. -->
-    <div id="deckList" style="visibility:hidden"><div class="empty">Deck masih kosong.<br>Klik <b>+ Deck</b> pada kartu untuk menambahkan.</div></div>
 
     <button class="btn2" id="btnSim" style="width:100%;margin-top:14px" data-i18n="simBtn">🎴 Simulasi draw 6 kartu</button>
     <button class="btn2" id="btnDeckView"
@@ -2006,26 +2048,26 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.93"></script>
-<script src="data.js?v=6.93"></script>
+<script src="cards.js?v=6.94"></script>
+<script src="data.js?v=6.94"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.93"></script>
-<script src="decks.js?v=6.93"></script>
+<script src="auth.js?v=6.94"></script>
+<script src="decks.js?v=6.94"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.93"></script>
-<script src="collection.js?v=6.93"></script>
+<script src="social.js?v=6.94"></script>
+<script src="collection.js?v=6.94"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.93"></script>
-<script src="news-ui.js?v=6.93"></script>
+<script src="news.js?v=6.94"></script>
+<script src="news-ui.js?v=6.94"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.93"></script>
+<script src="home-ui.js?v=6.94"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.93"></script>
-<script src="set-ui.js?v=6.93"></script>
+<script src="spoilers.js?v=6.94"></script>
+<script src="set-ui.js?v=6.94"></script>
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.93"></script>
+<script src="tournaments.js?v=6.94"></script>
 <!-- v6.88 — pop-up iklan carousel (kampanye Era of Spiders + Asia Peak Invitational).
      "defer" = tidak menahan render; CSS-nya disuntik oleh skripnya sendiri saat tampil.
      Aturan tampil & tanggal berakhir ada di PROMO (atas promo-popup.js). Pratinjau: /?promo=preview -->
@@ -2786,8 +2828,31 @@ function decCard(no){
    sekali saat halaman pertama dibuka, tidak setiap kali kartu ditambah/
    dikurangi (lihat komentar di div#deckList). */
 let renderPertamaDeckList = true;
+/* v6.94 — tampilan daftar kartu di panel deck ('list' | 'grid'), per perangkat */
+const DL_VIEW_KEY = 'mhr_decklist_view';
+let deckListView = 'list';
+try{ if(localStorage.getItem(DL_VIEW_KEY) === 'grid') deckListView = 'grid'; }catch(e){}
+/* warna kartu yang terang: angka level di strip pakai teks gelap supaya terbaca */
+const DARK_TXT = new Set(['Kuning','Orange']);
+function syncDeckListToggle(){
+  document.querySelectorAll('[data-dlview]').forEach(b=>{
+    const on = b.dataset.dlview === deckListView;
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.title = t(b.dataset.dlview === 'grid' ? 'dlGridT' : 'dlListT');
+  });
+}
+document.addEventListener('click', e=>{
+  const b = e.target.closest('[data-dlview]'); if(!b) return;
+  if(b.dataset.dlview === deckListView) return;
+  deckListView = b.dataset.dlview;
+  try{ localStorage.setItem(DL_VIEW_KEY, deckListView); }catch(err){}
+  sembunyikanPratinjau();
+  syncDeckListToggle(); renderDeck();
+});
+
 function renderDeck(){
   const total = deckCount();
+  syncDeckListToggle();
   const target = Math.max(1, parseInt($('#setSize').value)||50);
   $('#hDeck').textContent = total;
   const nd = $('#navDeck'); if(nd) nd.textContent = total;
@@ -2876,15 +2941,37 @@ function renderDeck(){
     $('#deckList').innerHTML = `<div class="empty">${t('deckEmpty')}<br>${t('deckEmptyHint')}</div>`;
   } else {
     entries.sort((a,b)=>a.c.l-b.c.l || a.c.no.localeCompare(b.c.no));
-    $('#deckList').innerHTML = entries.map(({c,q})=>
-      `<div class="dline">
-        <span class="dot" style="background:${CMAP[c.c]}"></span>
-        <span class="lv">L${c.l}</span>
-        <span class="nm" title="${c.no} · ${c.f}" data-zoom="${c.no}" data-prev="${c.no}">${cardName(c)}</span>
-        <button class="qbtn" data-dec="${c.no}">−</button>
-        <span class="qty">${q}</span>
-        <button class="qbtn" data-inc="${c.no}">+</button>
-      </div>`).join('');
+    /* v6.94 — dua tampilan: 'list' = strip artwork (default), 'grid' = gambar
+       kartu 3 kolom. Atribut data-dec/data-inc/data-zoom/data-prev sama dengan
+       versi teks lama, jadi listener klik & pratinjau hover di bawah tetap dipakai. */
+    if(deckListView === 'grid'){
+      $('#deckList').innerHTML = `<div class="dl-grid">${entries.map(({c,q})=>
+        `<div class="dg">
+          <button type="button" class="dg-img" data-zoom="${c.no}" title="${cardName(c).replace(/"/g,'&quot;')} · ${c.no} · ${c.f}">
+            <img src="${artFile(c.no)}" alt="${cardName(c).replace(/"/g,'&quot;')}" loading="lazy" data-ext="0" onerror="imgFallback(this,'${c.no}')">
+            <span class="dg-q">×${q}</span>
+          </button>
+          <div class="dg-ctl">
+            <button class="qbtn" data-dec="${c.no}" aria-label="−1 ${c.no}">−</button>
+            <span class="dg-no">${c.no}</span>
+            <button class="qbtn" data-inc="${c.no}" aria-label="+1 ${c.no}">+</button>
+          </div>
+        </div>`).join('')}</div>`;
+    } else {
+      $('#deckList').innerHTML = `<div class="dl-strip">${entries.map(({c,q})=>
+        `<div class="ds">
+          <img class="ds-art" src="${artFile(c.no)}" alt="" loading="lazy" data-ext="0" onerror="imgFallback(this,'${c.no}')">
+          <div class="ds-hit" data-zoom="${c.no}" data-prev="${c.no}" title="${cardName(c).replace(/"/g,'&quot;')} · ${c.no} · ${c.f}">
+            <span class="ds-lv${DARK_TXT.has(c.c)?' dk':''}" style="background:${CMAP[c.c]}" aria-label="Lv${c.l}">${c.l}</span>
+            <span class="ds-nm">${cardName(c)}</span>
+          </div>
+          <span class="ds-q">
+            <button class="qbtn" data-dec="${c.no}" aria-label="−1 ${c.no}">−</button>
+            <span class="qty">${q}</span>
+            <button class="qbtn" data-inc="${c.no}" aria-label="+1 ${c.no}">+</button>
+          </span>
+        </div>`).join('')}</div>`;
+    }
   }
 
   // v6.20 — fix CLS: baru tampakkan #deckList di render pertama (lihat
@@ -3251,6 +3338,10 @@ const T = {
   rangeSpread: 'Attack range spread (R)',
   topTraits: 'Most common traits',
   cardList: 'Card list',
+  dlList: 'List',
+  dlGrid: 'Grid',
+  dlListT: 'List view: one row per card with its artwork',
+  dlGridT: 'Grid view: full card images',
   deckEmpty: 'Deck is still empty.',
   deckEmptyHint: 'Click <b>+ Deck</b> on a card to add it.',
   ruleColors: 'Deck uses',

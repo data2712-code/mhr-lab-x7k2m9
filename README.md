@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.93** · 16 Oktober 2026
+**Versi saat ini: v6.94** · 16 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,34 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.94 — Deck Builder: daftar kartu deck pakai gambar (List strip artwork + Grid) dan dipindah ke atas — 16 Oktober 2026 *(`index.html`)*
+
+Masukan komunitas: daftar kartu di panel "My Deck" sebelumnya teks saja, jadi kartu sulit dikenali saat
+menyusun deck. Tiga opsi disimulasikan dulu dengan deck Asia Peak Yogie (50 kartu, 18 kartu berbeda); pemilik
+memilih **strip artwork + tombol Grid**.
+
+- **List (default)** — satu baris 44 px per kartu: kotak warna kartu berisi angka level (teks gelap untuk
+  Kuning/Orange), nama kartu, potongan artwork di latar (gradien gelap di kiri supaya nama terbaca), dan tombol
+  − jumlah + di kanan. Klik nama/artwork membuka zoom kartu; pratinjau gambar saat hover (desktop) tetap jalan.
+  Tooltip kini berisi nama lengkap + nomor + trait (nama panjang terpotong di panel 340 px).
+- **Grid** — gambar kartu penuh 3 kolom, lencana putih ×jumlah, dan baris − nomor kartu + di bawahnya.
+- Tombol **☰ List / ▦ Grid** di judul "Card list"; pilihan disimpan per perangkat di localStorage
+  `mhr_decklist_view` (dibungkus try/catch — kalau storage diblokir, selalu mulai dari List).
+- **"Card list" dipindah ke atas**, tepat di bawah kotak validasi deck dan sebelum Statistik. Dulu ada di paling
+  bawah setelah semua statistik, jadi di HP harus scroll jauh di bottom sheet.
+- Tombol −/+ di perangkat sentuh (`hover:none`) diperbesar ke 28 px.
+- Gambar memakai `artFile()` yang sama dengan grid kartu (ikut bahasa kartu ID/EN, fallback `imgFallback()`),
+  `loading="lazy"`, jadi praktis tidak ada unduhan tambahan — gambarnya sudah ter-cache dari grid kartu.
+- Atribut `data-dec` / `data-inc` / `data-zoom` / `data-prev` sama dengan versi lama, jadi listener klik dan
+  pratinjau hover tidak diubah. Teks baru di kamus T: `dlList`, `dlGrid`, `dlListT`, `dlGridT`.
+- Versi 6.94, cache-buster `?v=6.94`. `sw.js` tidak diubah.
+
+**Verifikasi:** Chromium headless 1440 px dan 390 px (mode sentuh): deck kosong tetap menampilkan teks kosong;
+18 baris strip; tombol − lalu + mengubah total 50 → 49 → 50; klik nama membuka lightbox; ganti ke Grid → 18
+gambar, `aria-pressed` benar, pilihan tetap Grid setelah reload; hover nama di desktop memunculkan pratinjau;
+tanpa scroll horizontal (juga dicek di 360 px dan 921 px); nomor kartu di Grid tidak terpotong; tidak ada error
+JavaScript.
 
 ### v6.93 — Halaman Set: SD05, SD06 & PB02 lengkap + label "Released in China" — 16 Oktober 2026 *(`spoilers.js`, `data.js`, `set-ui.js`, `index.html`)*
 
