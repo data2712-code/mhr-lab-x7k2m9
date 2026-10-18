@@ -38,5 +38,16 @@ jobs:
             git config user.name "mhr-news-bot"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git commit -m "Berita: perbarui halaman statis"
-            git push
+            # main bisa berubah selama workflow berjalan (mis. push dari GitHub Desktop),
+            # jadi tarik dulu perubahan terbaru lalu push; coba ulang sampai 3 kali.
+            for i in 1 2 3; do
+              if git pull --rebase origin main; then
+                git push && exit 0
+              else
+                git rebase --abort || true
+              fi
+              echo "Push gagal (percobaan $i), coba lagi..."
+              sleep 10
+            done
+            exit 1
           fi
