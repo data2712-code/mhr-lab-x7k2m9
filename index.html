@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 6.98  ·  16 Oktober 2026
+     MHR DECK LAB  ·  versi 6.99  ·  19 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="6.98">
+<meta name="version" content="6.99">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1297,6 +1297,14 @@
   .ev-res button[aria-pressed="true"],.ev-rounds button[aria-pressed="true"]{border-color:var(--accent);color:#1A1206;background:var(--accent)}
   .ev-res button:disabled{opacity:.5}
   .ev-rounds{display:flex;gap:6px;flex-wrap:wrap}
+  /* v6.99 — QR code event & penjelasan tiebreaker */
+  .ev-qr{display:flex;justify-content:center;margin:4px 0 6px}
+  .ev-qr img{width:100%;max-width:380px;border-radius:12px;display:block;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+  .mx-btns a.btn2{text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center}
+  .ev-help{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:12.5px;color:#C9CFD8;line-height:1.6}
+  .ev-help summary{cursor:pointer;font-weight:700;color:var(--paper)}
+  .ev-help ol{margin:6px 0 6px 18px;display:flex;flex-direction:column;gap:4px}
+  .ev-help p{margin-top:6px}
   @media (max-width:640px){
     .ev-wrap{padding:16px 12px 90px}
     .ev-hero h1{font-size:24px}
@@ -2230,28 +2238,28 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=6.98"></script>
-<script src="data.js?v=6.98"></script>
+<script src="cards.js?v=6.99"></script>
+<script src="data.js?v=6.99"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=6.98"></script>
-<script src="decks.js?v=6.98"></script>
+<script src="auth.js?v=6.99"></script>
+<script src="decks.js?v=6.99"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=6.98"></script>
-<script src="collection.js?v=6.98"></script>
+<script src="social.js?v=6.99"></script>
+<script src="collection.js?v=6.99"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=6.98"></script>
-<script src="news-ui.js?v=6.98"></script>
+<script src="news.js?v=6.99"></script>
+<script src="news-ui.js?v=6.99"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=6.98"></script>
+<script src="home-ui.js?v=6.99"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=6.98"></script>
-<script src="set-ui.js?v=6.98"></script>
+<script src="spoilers.js?v=6.99"></script>
+<script src="set-ui.js?v=6.99"></script>
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=6.98"></script>
-<script src="events.js?v=6.98"></script>
-<script src="events-ui.js?v=6.98"></script>
+<script src="tournaments.js?v=6.99"></script>
+<script src="events.js?v=6.99"></script>
+<script src="events-ui.js?v=6.99"></script>
 <!-- v6.88 — pop-up iklan carousel (kampanye Era of Spiders + Asia Peak Invitational).
      "defer" = tidak menahan render; CSS-nya disuntik oleh skripnya sendiri saat tampil.
      Aturan tampil & tanggal berakhir ada di PROMO (atas promo-popup.js). Pratinjau: /?promo=preview -->
@@ -2281,7 +2289,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.68</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v6.99</div>
 </footer>
 
 <div class="dview" id="simView" hidden>

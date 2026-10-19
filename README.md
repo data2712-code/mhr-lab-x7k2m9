@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.98** · 16 Oktober 2026
+**Versi saat ini: v6.99** · 19 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,24 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v6.99 — Events: QR code event + penjelasan tiebreaker (OMW/GW/OGW) — 19 Oktober 2026 *(`index.html`, `events-ui.js`, berkas BARU `qrcode.js`)*
+
+- **QR code event:** tombol **📱 QR code** dan **🔗 Copy link** di kepala halaman event (tampil untuk semua orang
+  setelah event keluar dari draft; organizer/admin juga melihatnya saat draft). QR code membuka modal berisi kartu
+  1080×1350 (judul "SCAN FOR LIVE PAIRINGS & STANDINGS", nama event, tanggal · LGS, QR, URL) dengan tombol
+  **Download PNG**, **Print** (iframe tersembunyi), dan **Copy link**. Isi QR = `https://mhrdecklab.com/#event/<id>`.
+  Pustaka QR `qrcode.js` = qrcode-generator 1.4.4 (Kazuhiko Arase, lisensi MIT), dimuat lazy hanya saat tombol diklik.
+- **Penjelasan tiebreaker:** di tab Standings ada panel lipat "How are the tiebreakers calculated?" yang menjelaskan
+  match points (3/1/0, bye = menang), OMW% (min. 33%), GW% (min. 33%), OGW%, bye bukan lawan — standar MTG Tournament
+  Rules Appendix C yang dipakai mesin `MHRSwiss` sejak v6.98.
+- Catatan nomor meja (tidak berubah, sudah begitu sejak v6.98): ronde 1 acak; mulai ronde 2 pairing diurutkan dari
+  klasemen sehingga **meja 1 = pemain dengan poin tertinggi**; bye selalu di meja terakhir; Top cut meja 1 = seed 1 vs 8 (atau 1 vs 4).
+- Teks versi di footer diperbarui (sebelumnya masih v6.68). Versi 6.99, cache-buster `?v=6.99`.
+
+**Verifikasi:** uji Playwright alur penuh event (33 cek lulus, tanpa error JS) + cek baru: panel tiebreaker ada,
+kartu QR 1080×1350 PNG, nama file unduhan `.png`, Copy link menyalin URL event; QR hasil render didekode OpenCV
+kembali ke URL event yang benar. Tampilan modal dicek di desktop & mobile 390px.
 
 ### v6.98 — Tahap 3: Events — turnamen LGS (pendaftaran, decklist, pairing Swiss, Top cut, klasemen) — 16 Oktober 2026 *(`index.html`, berkas BARU `events.js` & `events-ui.js`, migrasi SQL baru `mhr_decklab_v698_events.sql` di folder internal)*
 

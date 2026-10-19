@@ -223,6 +223,7 @@
         <div class="ev-chips"><i>Best of ${ev.best_of}</i><i>${ev.rounds ? ev.rounds + ' Swiss rounds' : 'Swiss rounds: auto'}</i><i>${ev.top_cut ? 'Top ' + ev.top_cut + ' cut' : 'No top cut'}</i><i>👥 ${players.length}${ev.max_players?` / ${ev.max_players}`:''} players</i></div>
         ${ev.notes ? `<p class="ev-notes">${E(ev.notes)}</p>` : ''}
         ${ev.tournament_id ? `<div class="ev-pub">✓ Top-cut decks are published on <a href="#tourney">Tournament Decks</a>.</div>` : ''}
+        ${ev.status !== 'draft' || mgr ? `<div class="ev-row"><button class="btn2" data-ev="qr">📱 QR code</button><button class="btn2" data-ev="link">🔗 Copy link</button></div>` : ''}
       </div>
       ${mgr ? orgBar(ev, R, active) : ''}
       ${playerBox(ev, mine)}
@@ -355,7 +356,15 @@
     const rows = order.filter(x=>x.s).map(({s, place})=>`<tr class="${s.dropped?'drop':''}"><td class="tn">${E(place)}</td><td><b>${E(s.name)}</b>${s.dropped?' <span class="ev-warn">dropped</span>':''}</td>
       <td><b>${s.mp}</b></td><td>${s.w}-${s.l}-${s.d}</td><td>${pct(s.omw)}</td><td>${pct(s.gw)}</td><td>${pct(s.ogw)}</td></tr>`).join('');
     return `<div class="ev-tblwrap"><table class="ev-tbl"><tr><th>${fin?'Place':'Rank'}</th><th>Player</th><th>Pts</th><th>W-L-D</th><th>OMW%</th><th>GW%</th><th>OGW%</th></tr>${rows}</table></div>
-      <p class="ev-muted">Swiss tiebreakers in order: match points → opponents' match-win % (OMW) → game-win % (GW) → opponents' game-win % (OGW); percentages have a 33% minimum and byes don't count as opponents.${ev.top_cut?' Final places come from the top-cut bracket.':''}</p>`;
+      <details class="ev-help"><summary>ⓘ How are the tiebreakers calculated?</summary>
+        <p>Players are ranked by <b>match points</b> (win 3 · draw 1 · loss 0 · bye 3). Players on the same points are separated, in this order, by:</p>
+        <ol>
+          <li><b>OMW% — opponents' match-win %.</b> For each opponent you played: their match points ÷ (3 × rounds they played), with a minimum of 33%. OMW% is the average over all your opponents. A tougher schedule = higher OMW%.</li>
+          <li><b>GW% — your game-win %.</b> Your game points (3 per game won, 1 per drawn game) ÷ (3 × games played), minimum 33%. In Best of 1 every match is one game; a bye counts as ${ev.best_of===3?'a 2-0 win':'a 1-0 win'}.</li>
+          <li><b>OGW% — opponents' game-win %.</b> The average of your opponents' GW%.</li>
+        </ol>
+        <p>Byes are not opponents, so they don't affect OMW% or OGW%. These are the standard tiebreakers used by most TCG organised play (e.g. Magic: The Gathering Tournament Rules, Appendix C).${ev.top_cut?' After the Swiss rounds, final places come from the top-cut bracket.':''}</p>
+      </details>`;
   }
 
   /* ================= aksi ================= */
@@ -375,7 +384,85 @@
     return true;
   }
 
+  /* ================= v6.99 — QR code event =================
+     Pustaka qrcode-generator (Kazuhiko Arase, MIT) disimpan lokal di qrcode.js
+     dan baru dimuat saat tombol QR pertama kali ditekan. Kartu QR digambar di
+     canvas (1080×1350, latar putih supaya mudah dipindai & dicetak), bisa
+     diunduh PNG, dicetak, atau ditampilkan di layar/meja toko. */
+  const eventUrl = ev => `${location.origin}/#event/${ev.id}`;
+  let qrLoading = null;
+  function loadQr(){
+    if(window.qrcode) return Promise.resolve();
+    if(!qrLoading) qrLoading = new Promise((ok, fail)=>{
+      const sc = document.createElement('script'); sc.src = 'qrcode.js?v=6.99';
+      sc.onload = ok; sc.onerror = ()=>{ qrLoading = null; fail(new Error('QR library failed to load')); };
+      document.head.appendChild(sc);
+    });
+    return qrLoading;
+  }
+  function wrapText(ctx, text, maxW){
+    const words = String(text).split(/\s+/); const lines = []; let cur = '';
+    words.forEach(w=>{ const t2 = cur ? cur + ' ' + w : w; if(ctx.measureText(t2).width > maxW && cur){ lines.push(cur); cur = w; } else cur = t2; });
+    if(cur) lines.push(cur); return lines;
+  }
+  function qrCard(ev){
+    const url = eventUrl(ev);
+    const qr = window.qrcode(0, 'M'); qr.addData(url); qr.make();
+    const n = qr.getModuleCount();
+    const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const c = cv.getContext('2d');
+    const font = getComputedStyle(document.body).fontFamily || 'sans-serif';
+    c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H);
+    c.fillStyle = '#0E1216'; c.fillRect(0, 0, W, 150);
+    c.fillStyle = '#F2B01E'; c.font = `800 46px ${font}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText('SCAN FOR LIVE PAIRINGS & STANDINGS', W/2, 75);
+    c.fillStyle = '#0E1216'; c.font = `800 54px ${font}`;
+    const titleLines = wrapText(c, ev.name, W - 140).slice(0, 2);
+    titleLines.forEach((l,i)=>c.fillText(l, W/2, 225 + i*64));
+    c.fillStyle = '#4a5260'; c.font = `500 32px ${font}`;
+    const meta = [tgl(ev.event_date) + (ev.start_time ? ` · ${ev.start_time}` : ''), ev.lgs_name].filter(Boolean).join(' · ');
+    c.fillText(meta, W/2, 225 + titleLines.length*64 + 4);
+    const size = 760, top = 380, cell = Math.floor(size / (n + 8)), real = cell * (n + 8), x0 = (W - real)/2 + cell*4, y0 = top + cell*4;
+    c.fillStyle = '#000000';
+    for(let r=0; r<n; r++) for(let k=0; k<n; k++) if(qr.isDark(r, k)) c.fillRect(x0 + k*cell, y0 + r*cell, cell, cell);
+    c.fillStyle = '#4a5260'; c.font = `500 26px ${font}`;
+    c.fillText(url.replace(/^https?:\/\//, ''), W/2, top + real + 40);
+    c.fillStyle = '#0E1216'; c.font = `700 30px ${font}`;
+    c.fillText('Register · Your table · Pairings · Standings', W/2, top + real + 100);
+    c.fillStyle = '#8A94A3'; c.font = `500 26px ${font}`;
+    c.fillText('mhrdecklab.com — fan-made Marvel Hero Rush tools', W/2, H - 48);
+    return cv;
+  }
+  async function openQr(){
+    const ev = V.data && V.data.event; if(!ev) return;
+    try{ await loadQr(); }catch(e){ alert('Couldn\'t load the QR code generator. Please check your connection and try again.'); return; }
+    const png = qrCard(ev).toDataURL('image/png');
+    const fname = 'MHR_Event_QR_' + ev.name.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 40) + '.png';
+    const m = mxOpen(`<h3>📱 QR code</h3>
+      <div class="mx-sub">Players scan this to open the live pairings, standings and registration for <b>${E(ev.name)}</b>. Show it on a screen or print it for the tables.</div>
+      <div class="ev-qr"><img src="${png}" alt="QR code for ${E(ev.name)}"></div>
+      <div class="mx-btns">
+        <a class="btn2 main" download="${E(fname)}" href="${png}">⬇ Download PNG</a>
+        <button class="btn2" data-x="print">🖨 Print</button>
+        <button class="btn2" data-x="link">🔗 Copy link</button>
+      </div>`);
+    m.querySelector('[data-x="print"]').addEventListener('click', ()=>{
+      const fr = document.createElement('iframe'); fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+      document.body.appendChild(fr);
+      const d = fr.contentWindow.document;
+      d.open(); d.write(`<!doctype html><html><head><title>${E(ev.name)}</title><style>@page{margin:12mm}html,body{margin:0;height:100%}body{display:flex;align-items:center;justify-content:center}img{max-width:100%;max-height:100vh}</style></head><body><img src="${png}"></body></html>`); d.close();
+      fr.onload = ()=>{ try{ fr.contentWindow.focus(); fr.contentWindow.print(); }catch(e){} setTimeout(()=>fr.remove(), 60000); };
+    });
+    m.querySelector('[data-x="link"]').addEventListener('click', e=>copyLink(e.currentTarget));
+  }
+  function copyLink(btn){
+    const url = eventUrl(V.data.event);
+    if(typeof salinTeks === 'function') salinTeks(url, btn); else prompt('Copy:', url);
+  }
+
   const handlers = {
+    async qr(){ openQr(); },
+    async link(b){ copyLink(b); },
     async new(){ openEventForm(null); },
     async edit(){ openEventForm(V.data.event); },
     async open(){ await act(()=>setStatus({ status:'registration' })); },
