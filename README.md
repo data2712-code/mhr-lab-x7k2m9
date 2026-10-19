@@ -536,6 +536,8 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
   (bisa diketuk untuk melihat alasan), kotak peringatan di tab Players, dan peringatan saat Start event. Cek dilakukan di
   browser (database belum punya data kartu); server tetap memeriksa format kode deck (`BAD_DECKLIST`).
 - Pesan error baru: NAME_TAKEN, NAME_REQUIRED, GUESTS_NOT_ALLOWED, BAD_DECKLIST, BAD_TOKEN. Versi 7.01, cache-buster `?v=7.01`.
+  Catatan deploy: `events.js` & `events-ui.js` memakai `?v=7.01b` karena URL `?v=7.01` sempat ter-cache Cloudflare
+  (4 jam) dengan isi lama — dipanggil sebelum GitHub Pages selesai deploy.
 
 **Verifikasi:** migrasi dijalankan 2× di PostgreSQL 16 lokal + 31 skenario (default event lama, tamu ditolak bila
 dimatikan, nama dobel ditolak termasuk beda huruf besar/kecil, kode deck rusak ditolak, kode tamu salah ditolak, anon tidak
