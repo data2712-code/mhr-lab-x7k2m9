@@ -49,7 +49,11 @@ require(path.join(ROOT, 'cards.js'));
 require(path.join(ROOT, 'data.js'));
 const CARDS = window.CARDS || [];
 const RPS = window.RUSH_POINTS || [];
-const SETS = (window.SETS || []).filter((s) => s.status === 'rilis');
+/* v7.02 — set PRE-RELEASE (status 'rilis' tapi rilis.id belum lewat, mis. SD05/SD06/PB02
+   sebelum 14 Nov 2026, teksnya masih fan-translation) TIDAK ikut. Jalankan ulang skrip
+   ini setelah tanggal rilis Indonesia supaya set itu masuk API. */
+const belumRilis = (s) => !!(s.rilis && s.rilis.id && Date.parse(s.rilis.id + 'T00:00:00+07:00') > Date.now());
+const SETS = (window.SETS || []).filter((s) => s.status === 'rilis' && !belumRilis(s));
 const RELEASED = new Set(SETS.map((s) => s.kode));
 
 /* label varian — sama dengan VARIANT_LABEL / VARIANT_BASE_LABEL di index.html */

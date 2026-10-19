@@ -9,6 +9,9 @@
      window.SETS      (data.js)     — info produk, urutan, status, tanggal
      DB               (cards.js)    — kartu yang sudah rilis
      window.SPOILERS  (spoilers.js) — kartu yang baru diungkap (belum rilis)
+   v7.02: set 'rilis' yang tanggal rilis Indonesia-nya belum lewat (preRel) ikut
+   "Coming soon to Indonesia" + lencana PRE-RELEASE; set berisi kartu fan:2
+   mendapat catatan "Unofficial translation".
    Klik kartu rilis → lightbox biasa (openLightbox). Klik kartu spoiler →
    panel spoiler sendiri (gambar + terjemahan fan), karena kartu spoiler
    tidak ada di DB dan tidak bisa dipakai di deck builder.
@@ -42,7 +45,7 @@
         .map(c=>({no:c.no, ra:c.ra, c:c.c, l:c.l, nm:c.nm, img:c.img, spoiler:true, base: c.ra !== 'SEC'}));
     } else {
       (typeof DB !== 'undefined' ? DB : []).filter(c=>c.no.startsWith(s.kode)).forEach(c=>{
-        c.ra.forEach((r,i)=>prints.push({no:c.no, ra:r, c:c.c, l:c.l, nm:(typeof cardName==='function'?cardName(c):c.nm), img:artFile(c.no, r), base:i===0}));
+        c.ra.forEach((r,i)=>prints.push({no:c.no, ra:r, c:c.c, l:c.l, nm:(typeof cardName==='function'?cardName(c):c.nm), img:artFile(c.no, r), base:i===0, fan2:c.fan===2}));
       });
     }
     const uniq = [...new Map(prints.map(p=>[p.no,p])).values()];
@@ -62,6 +65,13 @@
     const t = s && s.rilis && s.rilis.cn;
     return !!t && Date.parse(t+'T00:00:00+08:00') <= Date.now();
   }
+  /* v7.02 — set yang kartunya SUDAH di cards.js (status 'rilis', bisa dipakai di Deck
+     Builder) tapi tanggal rilis Indonesia (rilis.id) belum lewat, mis. SD05/SD06/PB02
+     sebelum 14 Nov 2026: tampil di "Coming soon to Indonesia" dengan lencana PRE-RELEASE. */
+  function preRel(s){
+    const t = s && s.status !== 'spoiler' && s.rilis && s.rilis.id;
+    return !!t && Date.parse(t+'T00:00:00+07:00') > Date.now();
+  }
   function daysTo(s){
     const t = s.rilis && (s.rilis.id || s.rilis.cn);
     if(!t) return null;
@@ -80,11 +90,12 @@
     const d = setData(s);
     const dd = daysTo(s);
     const out = cnOut(s);
+    const pre = preRel(s);
     const rel = s.rilis ? [s.rilis.id?`ID ${tgl(s.rilis.id)}`:'', s.rilis.cn?`China ${tgl(s.rilis.cn)}${out?' (out now)':''}`:''].filter(Boolean).join(' · ') : '';
-    return `<a class="st-tile${d.spoiler?' st-sp':''}" href="#set/${E(s.kode)}">
+    return `<a class="st-tile${(d.spoiler||pre)?' st-sp':''}" href="#set/${E(s.kode)}">
       <div class="st-img">${coverImg(d)?`<img src="${E(coverImg(d))}" alt="" loading="lazy">`:''}</div>
       <div class="st-b">
-        <div class="st-top"><span class="st-code">${E(s.kode)}</span>${d.spoiler?'<span class="st-badge">SPOILER</span>':''}${d.spoiler&&out?'<span class="st-badge st-cn">OUT IN CHINA</span>':''}</div>
+        <div class="st-top"><span class="st-code">${E(s.kode)}</span>${d.spoiler?'<span class="st-badge">SPOILER</span>':''}${pre?'<span class="st-badge">PRE-RELEASE</span>':''}${(d.spoiler||pre)&&out?'<span class="st-badge st-cn">OUT IN CHINA</span>':''}</div>
         <b>${E(title(s))}</b>
         <span class="st-muted">${E(s.tipe||'')} · ${d.spoiler?`${d.uniq.length} cards revealed`:`${d.uniq.length} cards`}</span>
         ${rel?`<span class="st-muted">${E(rel)}${dd?` · <b class="st-dd">${dd} days left</b>`:''}</span>`:''}
@@ -94,7 +105,7 @@
   }
   function renderList(w){
     const all = SETS();
-    const sp = all.filter(s=>s.status==='spoiler'), rl = all.filter(s=>s.status!=='spoiler');
+    const sp = all.filter(s=>s.status==='spoiler' || preRel(s)), rl = all.filter(s=>s.status!=='spoiler' && !preRel(s));
     w.innerHTML = `
       <div class="st-head">
         <h2 class="nw-title">Set & Spoiler</h2>
@@ -130,7 +141,9 @@
     if(!s){ w.innerHTML = `<a class="nw-back" href="#set">← All sets</a><div class="nw-empty">Set ${E(kode)} not found.</div>`; return; }
     const d = setData(s);
     const dd = daysTo(s);
-    const out = d.spoiler && cnOut(s);
+    const pre = preRel(s);
+    const fan2 = d.prints.some(p=>p.fan2);
+    const out = (d.spoiler || pre) && cnOut(s);
     const shown = d.prints.slice().sort((a,b)=>a.no.localeCompare(b.no) || (b.base-a.base));
     const series = !d.spoiler ? [...new Set((DB||[]).filter(c=>c.no.startsWith(kode)).map(c=>c.s))] : [];
     document.title = `${kode} ${title(s)} — Marvel Hero Rush Set — MHR Deck Lab`;
@@ -139,7 +152,7 @@
       <div class="st-hero">
         <div class="st-hero-img">${coverImg(d)?`<img src="${E(coverImg(d))}" alt="">`:''}</div>
         <div class="st-hero-b">
-          <div class="st-top"><span class="st-code">${E(s.kode)}</span>${d.spoiler?`<span class="st-badge">SPOILER · NOT YET RELEASED${out?' IN INDONESIA':''}</span>`:''}${out?'<span class="st-badge st-cn">RELEASED IN CHINA</span>':''}</div>
+          <div class="st-top"><span class="st-code">${E(s.kode)}</span>${d.spoiler?`<span class="st-badge">SPOILER · NOT YET RELEASED${out?' IN INDONESIA':''}</span>`:''}${pre?'<span class="st-badge">PRE-RELEASE · NOT YET RELEASED IN INDONESIA</span>':''}${out?'<span class="st-badge st-cn">RELEASED IN CHINA</span>':''}</div>
           <h1>${E(title(s))}</h1>
           ${!s.nama?'<span class="st-muted">Working title — the official product name hasn\'t been announced yet.</span>':''}
           <div class="st-facts">
@@ -162,7 +175,8 @@
         <div class="hm-box"><h3 class="st-h3">Rarity (all prints)</h3><div class="st-chips">${rarityChips(d.prints)}</div></div>
         <div class="hm-box"><h3 class="st-h3">Level spread</h3>${levelBars(d.uniq)}</div>
       </div>`:''}
-      ${out?`<div class="st-note st-note-cn"><b>Released in China on ${E(tgl(s.rilis.cn))}.</b> ${s.rilis.id?`Indonesian release: ${E(tgl(s.rilis.id))}.`:'Not released in Indonesia yet; the Indonesian release date hasn\'t been announced.'} Until then this set stays a spoiler on MHR Deck Lab.</div>`:''}
+      ${out?`<div class="st-note st-note-cn"><b>Released in China on ${E(tgl(s.rilis.cn))}.</b> ${s.rilis.id?`Indonesian release: ${E(tgl(s.rilis.id))}.`:'Not released in Indonesia yet; the Indonesian release date hasn\'t been announced.'} ${pre ? 'Its cards are already in the Cards page and the Deck Builder, but they aren\'t tournament-legal in Events until the Indonesian release.' : 'Until then this set stays a spoiler on MHR Deck Lab.'}</div>`:''}
+      ${fan2?'<div class="st-note"><b>Unofficial translation.</b> The Indonesian and English card text of this set is a fan-made translation of the official Chinese cards, and the images are the Chinese print. It will be updated regularly once the official Indonesian and English text is published on the official website.</div>':''}
       ${d.spoiler?'<div class="st-note">Spoiler card text is a <b>fan translation</b> from Chinese product sheets and may differ from the official version. These cards can\'t be used in the Deck Builder yet.</div>':''}
       <div class="hm-sec-h" style="margin-top:6px"><h2>Card list</h2><span class="st-muted">${shown.length} images</span></div>
       <div class="st-cards">${shown.map(p=>`<button class="st-card" data-${p.spoiler?'spoil':'card'}="${E(p.no)}" data-ra="${E(p.ra)}">

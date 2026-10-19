@@ -109,7 +109,7 @@
         const c = cards.slice().sort((a,b)=>b.l-a.l)[0];
         return `<a class="hm-ser" href="#set/${E(s.kode)}">
           <img src="${E(artFile(c.no))}" alt="" loading="lazy">
-          <span><b>${E(s.kode)}</b><i>${E(s.nama||s.tipe||'')} · ${cards.length} cards</i></span>
+          <span><b>${E(s.kode)}</b><i>${E(s.nama||s.tipe||'')} · ${cards.length} cards${typeof setBelumRilis==='function' && setBelumRilis(s.kode) ? ' · pre-release' : ''}</i></span>
         </a>`; }).join('')}</div>
     </section>`;
   }

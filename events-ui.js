@@ -83,6 +83,14 @@
       const c = DB.find(d=>d.no===no); if(!c) continue;
       cols.add(c.c); per[c.nm] = (per[c.nm]||0) + q;
     }
+    /* v7.02 — kartu dari set yang belum rilis di Indonesia (SETS.rilis.id di data.js belum
+       lewat, mis. SD05/SD06/PB02 sebelum 14 Nov 2026) belum legal di turnamen */
+    const pre = {};
+    for(const no of Object.keys(deck||{})){
+      const c = DB.find(d=>d.no===no); const tg = c && typeof setBelumRilis === 'function' ? setBelumRilis(c.s) : '';
+      if(tg) (pre[tg] = pre[tg] || new Set()).add(c.s);
+    }
+    Object.entries(pre).forEach(([tg, ss])=>out.push(`it uses ${[...ss].join('/')} cards, which aren't released in Indonesia until ${typeof tglRilis === 'function' ? tglRilis(tg) : tg}`));
     if(cols.size > 2) out.push(`it uses ${cols.size} colours (${[...cols].map(x=>t(x)).join(', ')}) — max 2 (rule 101.1.c)`);
     const over = Object.entries(per).filter(([,q])=>q > 3).map(([nm,q])=>{ const c = DB.find(d=>d.nm===nm); return `${c ? cardName(c) : nm} ×${q}`; });
     if(over.length) out.push(`more than 3 cards with the same character name: ${over.join(', ')} (rule 101.1.d)`);
@@ -190,7 +198,7 @@
       </div>
       <div class="mx-btns"><button class="btn2 main" data-ef="save">${ev ? 'Save changes' : 'Create as draft'}</button></div>
       <p class="mx-note">New events start as a draft that only you can see. Open registration when you're ready.
-        A required decklist must be legal: exactly 50 cards, max 2 colours, max 3 cards with the same character name, released cards only.
+        A required decklist must be legal: exactly 50 cards, max 2 colours, max 3 cards with the same character name, cards released in Indonesia only.
         Guests register with just a name (and decklist if needed) and are marked "Guest" in your player list.</p>`);
     m.querySelector('[data-ef="save"]').addEventListener('click', async b=>{
       const btn = b.currentTarget;
@@ -336,7 +344,7 @@
   /* ---------- kotak pemain (daftar / status) ---------- */
   function playerBox(ev, mine){
     const mode = deckMode(ev);
-    const privacy = mode === 'none' ? '' : `<p class="ev-muted">Your decklist stays private — only the organizer can see it until the event is over.${mode === 'required' ? ' It must be legal: exactly 50 cards, max 2 colours, max 3 cards with the same character name, released cards only.' : ''}</p>`;
+    const privacy = mode === 'none' ? '' : `<p class="ev-muted">Your decklist stays private — only the organizer can see it until the event is over.${mode === 'required' ? ' It must be legal: exactly 50 cards, max 2 colours, max 3 cards with the same character name, cards released in Indonesia only.' : ''}</p>`;
     if(ev.status === 'registration'){
       if(!mine && !V.me){
         if(!ev.allow_guests) return `<div class="ev-box">📝 Registration is open. <a href="#" data-ev="login">Log in</a> to register${mode === 'none' ? '' : ' with your decklist'}.</div>`;

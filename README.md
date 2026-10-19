@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.01** · 19 Oktober 2026
+**Versi saat ini: v7.02** · 19 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -505,7 +505,7 @@ bersifat case-sensitive.
 | Nama repository | diacak (`mhr-lab-x7k2m9`) — sisa dari fase uji coba awal, sekarang cuma kosmetik karena `robots.txt` sudah dihapus (situs boleh diindeks penuh, lihat § Riwayat Update 2 September 2026) |
 
 **Kode link deck:** 1 huruf seri + 3 digit nomor + jumlah (basis36).
-Seri: `A`=BP01, `B`=PB01, `C`=EB01, `D`=TB01, `E`=SD01, `F`=SD02, `G`=SD03, `H`=SD04, `I`=SP01.
+Seri: `A`=BP01, `B`=PB01, `C`=EB01, `D`=TB01, `E`=SD01, `F`=SD02, `G`=SD03, `H`=SD04, `I`=SP01, `J`=SD05, `K`=SD06, `L`=PB02 (J–L sejak v7.02).
 Angka versi di depan wajib dipertahankan — kalau format berubah, naikkan ke 2
 dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
@@ -515,6 +515,55 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.02 — SD05, SD06 & PB02 masuk halaman Kartu & Deck Builder (pre-release, terjemahan belum resmi) — 19 Oktober 2026 *(`cards.js`, `index.html`, `set-ui.js`, `events-ui.js`, `home-ui.js`, `data.js`, `spoilers.js`, `tools/generate_api.js`, 63 gambar baru di `images/`, 59 halaman baru di `cards/`, `sitemap.xml`)*
+
+Permintaan pemilik: SD05/SD06/PB02 sudah bisa dilihat di halaman Kartu dan dipakai di Deck Builder, dengan catatan
+bahwa teksnya masih terjemahan belum resmi dan akan diperbarui berkala begitu teks resmi Indonesia & Inggris terbit di
+situs resmi. Per 19 Okt 2026 daftar kartu resmi versi Indonesia & Inggris (API `server.marvelherorush.com`) belum memuat
+ketiga set ini — baru versi China.
+
+- **`cards.js`: +57 kartu (61 cetakan)** — SD05-001..018 (Orange), SD06-001..018 (Purple), PB02-001..021 (10 Orange,
+  10 Purple, 1 Kuning). SD05-001 & SD06-001 `ra:["UR","MR","SEC"]`. Statistik/trait sama dengan audit sebelumnya
+  (versi final PB02-002 & PB02-004). Field baru **`fan:2`** = `nm/e` (Indonesia) DAN `nm_en/e_en` (Inggris) dua-duanya
+  fan-translation dari teks resmi China (dicek ke gambar kartu). Gaya teks mengikuti kartu resmi yang sudah ada
+  (`[TRIG](FIELD) …`, `TRIG【FIELD】:…`, pengingat [UNIQUE]/[COUNTER]/[BLOCK] seperti SP01). Kata kunci baru tanpa
+  nama resmi: 猛袭 = **RAMPAGE** (SD06-001), 速攻 = **QUICK STRIKE** (SD05-003), lengkap dengan teks pengingatnya.
+  `RUSH_POINTS` + SD05-019 & SD06-019 dengan field baru `cn:1` (baru ada di daftar resmi China).
+- **Gambar:** 63 berkas `images/<no>.jpg` / `images/<no>_<RAR>.jpg` (500×698) dari daftar kartu resmi China
+  marvelherorush.com/cn, ber-watermark SAMPLE. Tidak ada `images/en/`; `artDir()` langsung memakai `images/` untuk
+  kartu `fan:2` supaya mode EN tidak menembak 404 dulu.
+- **`index.html`:** `isFanEn()`; `cardLangInfo()` + `fanEn`; lencana **"ID*+EN*"** (tooltip `langFan2Tip`); catatan
+  merah `langFan2Note` di lightbox + baris "Indonesian release: 14 November 2026. Not tournament-legal in Events until
+  then." (`setBelumRilis()`, `tglRilis()`); kotak catatan **`#fan2Note`** di atas daftar kartu (halaman Kartu & Deck
+  Builder) setiap kali hasil filter memuat kartu `fan:2` (`fan2BannerUpdate()`). Kode link deck: **J=SD05, K=SD06,
+  L=PB02** (`SER2L`; huruf lama tidak berubah). Kemampuan kunci + RAMPAGE* / QUICK STRIKE* (MECH, KEY_ABIL,
+  `fxStripReminders`). Label Rush Point `rpLangCn`. Versi 7.02, cache-buster `?v=7.02` (termasuk events*.js).
+- **`data.js`:** SD05/SD06/PB02 `status:'rilis'` (kartunya kini di cards.js) dengan `rilis.id:'2026-11-14'` →
+  PRE-RELEASE. Deskripsi "All 18 cards revealed" → "18 cards".
+- **`set-ui.js`:** `preRel(s)` — set `rilis` yang `rilis.id`-nya belum lewat tampil di "Coming soon to Indonesia"
+  dengan lencana PRE-RELEASE (+ OUT IN CHINA), catatan "cards are already in the Cards page and the Deck Builder, but
+  aren't tournament-legal…", dan kotak "Unofficial translation" untuk set yang memuat kartu `fan:2`. Otomatis pindah
+  ke "Released" mulai 14 Nov 2026 (catatan terjemahan tetap ada selama `fan:2`).
+- **`events-ui.js`:** cek legalitas decklist menolak kartu dari set yang belum rilis di Indonesia ("it uses SD05/SD06
+  cards, which aren't released in Indonesia until 14 November 2026"); teks aturan → "cards released in Indonesia only".
+  Otomatis legal mulai 14 Nov 2026.
+- **`home-ui.js`:** "Browse by set" memberi label "· pre-release".
+- **`spoilers.js`:** dikosongkan (`window.SPOILERS = []`), siap untuk spoiler set berikutnya.
+- **`tools/generate_api.js`:** set PRE-RELEASE tidak ikut API mitra (api/v1 tidak berubah). **Jalankan ulang
+  `node tools/generate_api.js` setelah 14 Nov 2026** supaya SD05/SD06/PB02 masuk API.
+- `python3 tools/generate_card_pages.py`: 59 halaman baru di `cards/` (57 karakter + 2 Rush Point), sitemap 412 URL.
+- **Perlu dicek (server):** fungsi SQL Events memeriksa format kode deck (`BAD_DECKLIST`). Kalau pola regex-nya
+  membatasi huruf seri ke `A–I`, perluas ke `A–L` supaya decklist berisi SD05/SD06/PB02 tidak ditolak setelah 14 Nov.
+  Berkas migrasi Events tidak ada di folder internal yang bisa dicek sesi ini.
+- **Begitu teks resmi terbit:** ganti `nm/e` dan/atau `nm_en/e_en`, ubah `fan:2` → `fan:1` (kalau baru EN yang
+  resmi) atau hapus `fan`, ganti gambar (dan isi `images/en/`), lalu jalankan kedua skrip generator.
+
+**Verifikasi:** `node --check` semua JS yang diubah. Chromium headless (1280 px & 390 px): DB 350 kartu; filter seri
+memuat PB02/SD05/SD06; SD05 = 18 kartu + kotak catatan; lightbox SD06-001 (lencana ID*+EN*, catatan merah, baris rilis
+Indonesia, varian UR/MR/SEC); mode EN PB02-002 teks Inggris + gambar `images/` tanpa 404; kode deck
+`1.VGVzdA.J0011K0103L0212A0013` di-decode utuh (unknown 0); `#set` 3 set PRE-RELEASE; `#set/SD06` 20 cetakan + catatan;
+Deck Builder filter PB02 = 21 kartu; Rush Point SD05-019 berlabel versi China; tanpa error JS, tanpa scroll horizontal.
 
 ### Data — Audit SD05, SD06 & PB02 vs daftar kartu resmi China + hitung mundur rilis Indonesia 14 November (SD05, SD06 & PB02) — 19 Oktober 2026 *(`spoilers.js`, `data.js`, 5 gambar baru di `images/news/sd05-sd06-china-release-all-cards/`)*
 

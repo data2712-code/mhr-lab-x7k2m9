@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.01  ·  19 Oktober 2026
+     MHR DECK LAB  ·  versi 7.02  ·  19 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.01">
+<meta name="version" content="7.02">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -151,6 +151,10 @@
   }
   .reset:hover{color:var(--paper);border-color:var(--paper)}
   .count-note{width:100%;color:var(--muted);font-size:12px}
+  /* v7.02 — catatan fan-translation SD05/SD06/PB02 */
+  .fan2-note{width:100%;font-size:12px;line-height:1.45;color:var(--paper);background:var(--panel2);
+    border:1px dashed var(--merah);border-radius:8px;padding:7px 10px;margin-top:4px}
+  .fan2-note b{color:var(--merah)}
   /* tombol filter "hanya kartu di deck" */
   .onlydeck[aria-pressed="true"]{background:var(--accent);color:#1A1206;
     border-color:var(--accent);font-weight:700}
@@ -2038,6 +2042,8 @@
       </div>
       </div>
       <div class="count-note" id="noteShown"></div>
+      <!-- v7.02 — catatan fan-translation SD05/SD06/PB02 (kartu fan:2), lihat fan2BannerUpdate() -->
+      <div class="fan2-note" id="fan2Note" hidden></div>
     </div>
     <div class="cards" id="cards"></div>
   </main>
@@ -2245,28 +2251,28 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=7.01"></script>
-<script src="data.js?v=7.01"></script>
+<script src="cards.js?v=7.02"></script>
+<script src="data.js?v=7.02"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=7.01"></script>
-<script src="decks.js?v=7.01"></script>
+<script src="auth.js?v=7.02"></script>
+<script src="decks.js?v=7.02"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
-<script src="social.js?v=7.01"></script>
-<script src="collection.js?v=7.01"></script>
+<script src="social.js?v=7.02"></script>
+<script src="collection.js?v=7.02"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=7.01"></script>
-<script src="news-ui.js?v=7.01"></script>
+<script src="news.js?v=7.02"></script>
+<script src="news-ui.js?v=7.02"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=7.01"></script>
+<script src="home-ui.js?v=7.02"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
-<script src="spoilers.js?v=7.01"></script>
-<script src="set-ui.js?v=7.01"></script>
+<script src="spoilers.js?v=7.02"></script>
+<script src="set-ui.js?v=7.02"></script>
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
-<script src="tournaments.js?v=7.01"></script>
-<script src="events.js?v=7.01b"></script>
-<script src="events-ui.js?v=7.01b"></script>
+<script src="tournaments.js?v=7.02"></script>
+<script src="events.js?v=7.02"></script>
+<script src="events-ui.js?v=7.02"></script>
 <!-- v6.88 — pop-up iklan carousel (kampanye Era of Spiders + Asia Peak Invitational).
      "defer" = tidak menahan render; CSS-nya disuntik oleh skripnya sendiri saat tampil.
      Aturan tampil & tanggal berakhir ada di PROMO (atas promo-popup.js). Pratinjau: /?promo=preview -->
@@ -2296,7 +2302,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.01</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.02</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -2482,8 +2488,11 @@ const MECH = {
   assault:      /\[ASSAULT\]/,
   airstrike:    /\[AIR STRIKE\]/,
   unique:       /\[UNIQUE\]|\[UNIQUE COUNTER\]/,
+  /* v7.02 — kata kunci baru SD05/SD06 (nama sementara, belum ada nama resmi) */
+  rampage:      /\[RAMPAGE\]/,
+  quickstrike:  /\[QUICK STRIKE\]/,
 };
-const KEY_ABIL = ['block','doubleattack','assault','airstrike','unique'];
+const KEY_ABIL = ['block','doubleattack','assault','airstrike','unique','rampage','quickstrike'];
 
 /* ---- v6.73: filter "Game area" / "Effect" (permintaan pemilik 5 Oktober 2026) ----
    Keduanya dihitung dari teks efek kartu (e = Indonesia, e_en = Inggris; kartu
@@ -2525,7 +2534,7 @@ const FX_EFFECTS = [
 /* buang "[KATA KUNCI](...pengingat...)" / "KATA KUNCI(...pengingat...)" dengan
    kurung seimbang — pengingat BLOCK memuat kurung bersarang "(BATTLE/ONCE PER TURN)". */
 function fxStripReminders(s){
-  const re = /\[(?:UNIQUE COUNTER|UNIQUE|COUNTER|BLOCK|DOUBLE ATTACK|ASSAULT|AIR STRIKE)\]\(|\b(?:UNIQUE COUNTER|UNIQUE|COUNTER|BLOCK|DOUBLE ATTACK|ASSAULT|AIR STRIKE)\(/g;
+  const re = /\[(?:UNIQUE COUNTER|UNIQUE|COUNTER|BLOCK|DOUBLE ATTACK|ASSAULT|AIR STRIKE|RAMPAGE|QUICK STRIKE)\]\(|\b(?:UNIQUE COUNTER|UNIQUE|COUNTER|BLOCK|DOUBLE ATTACK|ASSAULT|AIR STRIKE|RAMPAGE|QUICK STRIKE)\(/g;
   let out = '', last = 0, m;
   while((m = re.exec(s))){
     let depth = 1, i = re.lastIndex;
@@ -2729,6 +2738,9 @@ function artOf(no){
    images/en/ tidak punya berkasnya sama sekali — makanya imgFallback() di
    bawah mencoba direktori LAIN dulu sebelum menyerah ke ekstensi lain. */
 function artDir(c){
+  /* v7.02 — kartu fan:2 (SD05/SD06/PB02) baru punya cetakan China di images/, belum ada
+     images/en/ — langsung ke images/ supaya mode EN tidak menembak 404 dulu. */
+  if(c && c.fan === 2) return 'images/';
   const lang = c ? cardLangInfo(c).shown : state.cardLang;
   return lang === 'en' ? 'images/en/' : 'images/';
 }
@@ -2871,6 +2883,22 @@ let renderCardsToken = 0;
    supaya browser sempat bernapas (mengecat, merespons ketukan) di antaranya.
    loading="lazy" pada <img> tetap jalan seperti biasa — batch ini hanya
    soal KAPAN elemen kartunya masuk DOM, bukan kapan gambarnya diunduh. */
+/* v7.02 — kotak catatan di atas daftar kartu (halaman Kartu & Deck Builder) setiap
+   kali hasil filter memuat kartu fan:2 (teks ID & EN belum resmi). */
+function tglRilis(iso){
+  const [y,m,d] = String(iso).split('-').map(Number);
+  return new Date(Date.UTC(y, m-1, d)).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric', timeZone:'UTC'});
+}
+function fan2BannerUpdate(arr){
+  const el = $('#fan2Note'); if(!el) return;
+  const ada = (arr||[]).some(isFanEn);
+  el.hidden = !ada;
+  if(ada){
+    const s = (window.SETS||[]).find(x=>x.kode==='SD05');
+    const d = s && s.rilis && s.rilis.id;
+    el.innerHTML = t('fan2Banner').replace('{d}', d ? tglRilis(d) : 'TBA');
+  }
+}
 function renderCards(){
   const fb = document.querySelector('.filters');
   if(fb) fb.classList.toggle('rp-mode', rpMode());
@@ -2880,6 +2908,7 @@ function renderCards(){
   const nc = $('#navCard'); if(nc) nc.textContent = arr.length;
   updateFilterBadge();
   $('#noteShown').textContent = `${arr.length} ${t('matchCount')}.`;
+  fan2BannerUpdate(arr);
   const grid = state.view === 'grid';
   const myToken = ++renderCardsToken;
   const cardsEl = $('#cards');
@@ -2947,6 +2976,7 @@ function renderRushPoints(){
   const nc = $('#navCard'); if(nc) nc.textContent = arr.length;
   updateFilterBadge();
   $('#noteShown').textContent = `${arr.length} ${t('rpMatchCount')}.`;
+  fan2BannerUpdate([]);
   const cardsEl = $('#cards');
   cardsEl.className = 'cards grid rp-grid';
   const intro = `<div class="rp-intro">${t('rpIntro')}</div>`;
@@ -2970,7 +3000,7 @@ function openRpLightbox(no, rar){
       <h3>Rush Point</h3>
       <div class="no">${r.no} · ${r.s} · ${r.ra.join(' / ')}</div>
       <div class="lb-eff">${t('rpInfo')}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:8px">${r.id ? t('rpLangBoth') : t('rpLangEn')}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">${r.id ? t('rpLangBoth') : r.cn ? t('rpLangCn') : t('rpLangEn')}</div>
       ${r.ra.length>1 ? `
       <div class="lb-var">
         <div class="t">${t('cArtwork')}</div>
@@ -3431,7 +3461,7 @@ const T = {
   allTrait: 'All traits',
   allRarity: 'All rarities',
   allKeyAbil: 'Key ability',
-  fKeyAbilT: 'Key ability filter (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE (in the rulebook: AIR-ATTACK)/UNIQUE — combined into one dropdown since each only has 1-6 cards',
+  fKeyAbilT: 'Key ability filter (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE (in the rulebook: AIR-ATTACK)/UNIQUE, plus RAMPAGE*/QUICK STRIKE* from SD05/SD06 (* = unofficial name until the official English text is out) — combined into one dropdown since each only has a few cards',
   mk_block: 'BLOCK',
   mk_doubleattack: 'DOUBLE ATTACK',
   mk_assault: 'ASSAULT',
@@ -3446,6 +3476,14 @@ const T = {
   langBothTip: 'Available in Indonesian & English',
   langBothFanTip: 'This card\'s Indonesian text is still a fan-made translation (NOT yet official from MHR Indonesia/CARDFUN) — the English text is official.',
   langFanNote: '⚠ The Indonesian text above is still a fan-made translation, not yet official from MHR Indonesia/CARDFUN.',
+  /* v7.02 — fan:2 (SD05/SD06/PB02) */
+  langFan2Tip: 'Unofficial translation: both the Indonesian and English text are fan-made translations of the official Chinese card text. They will be updated once the official text is published on the official website.',
+  langFan2Note: '⚠ Unofficial translation: the Indonesian and English text of this card are fan-made translations of the official Chinese card text (the image is the Chinese print). They will be updated regularly once the official Indonesian and English text is published on the official website.',
+  preRelNote: 'Indonesian release: {d}. Not tournament-legal in Events until then.',
+  fan2Banner: '⚠ <b>SD05, SD06 & PB02</b>: card text is an <b>unofficial translation</b> from the official Chinese cards and images are the Chinese print. We\'ll update them regularly once the official Indonesian and English text is out on the official website. Indonesian release: {d}.',
+  rpLangCn: 'Only in the official Chinese card list so far (Indonesian release: 14 November 2026).',
+  mk_rampage: 'RAMPAGE*',
+  mk_quickstrike: 'QUICK STRIKE*',
   langEnOnlyTip: 'This card is currently only available in English',
   langIdOnlyTip: 'This card is currently only available in Indonesian',
   metaAll: 'All',
@@ -3980,6 +4018,18 @@ function t(k){
    Indonesia (dari gambar kartu resmi MHR Indonesia), tinggal SP01-029 dan
    EB01-010..014 yang masih fan-translation. */
 function isFanId(c){ return !!(c && c.fan); }
+/* v7.02 — fan:2 = teks Inggris JUGA fan-translation (SD05/SD06/PB02: baru ada teks
+   resmi China). Dipakai cardLangInfo() (fanEn), cardLangBadgeHTML() ("ID*+EN*") dan
+   catatan di lightbox. */
+function isFanEn(c){ return !!(c && c.fan === 2); }
+/* v7.02 — set yang tanggal rilis Indonesia-nya (SETS.rilis.id di data.js) belum
+   lewat: kartunya sudah bisa dilihat & dipakai di Deck Builder, tapi belum legal di
+   Events. Mengembalikan 'YYYY-MM-DD' kalau belum rilis, '' kalau sudah/tidak diatur. */
+function setBelumRilis(seri){
+  const s = (window.SETS||[]).find(x=>x.kode===seri);
+  const t = s && s.rilis && s.rilis.id;
+  return (t && Date.parse(t+'T00:00:00+07:00') > Date.now()) ? t : '';
+}
 function cardLangInfo(c){
   const hasId = !!c.nm, hasEn = !!c.nm_en;
   const want = state.cardLang;
@@ -3987,7 +4037,8 @@ function cardLangInfo(c){
   if(want === 'en' && !hasEn) shown = hasId ? 'id' : 'en';
   else if(want === 'id' && !hasId) shown = hasEn ? 'en' : 'id';
   const fanId = shown === 'id' && isFanId(c);
-  return { hasId, hasEn, shown, fallback: shown !== want, fanId };
+  const fanEn = shown === 'en' && isFanEn(c);
+  return { hasId, hasEn, shown, fallback: shown !== want, fanId, fanEn };
 }
 function cardName(c){ const li = cardLangInfo(c); return li.shown==='en' ? (c.nm_en||c.nm) : (c.nm||c.nm_en); }
 function cardEff(c){  const li = cardLangInfo(c); return li.shown==='en' ? (c.e_en||c.e)   : (c.e||c.e_en); }
@@ -4006,6 +4057,7 @@ function cardLangBadgeHTML(c, cls){
   const base = cls || 'langtag';
   const fanId = isFanId(c);
   if(hasId && hasEn){
+    if(isFanEn(c)) return `<span class="${base} both fan" title="${t('langFan2Tip')}">ID*+EN*</span>`;
     return fanId
       ? `<span class="${base} both fan" title="${t('langBothFanTip')}">ID*+EN</span>`
       : `<span class="${base} both" title="${t('langBothTip')}">ID+EN</span>`;
@@ -5211,7 +5263,9 @@ function openLightbox(no){
       </div>
       <div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:10px">${c.f}</div>
       <div class="lb-eff">${cardEff(c)}</div>
-      ${li.fanId ? `<div class="lb-fan-note" style="font-size:11px;color:var(--merah);margin:6px 0 0">${t('langFanNote')}</div>` : ''}
+      ${isFanEn(c) ? `<div class="lb-fan-note" style="font-size:11px;color:var(--merah);margin:6px 0 0">${t('langFan2Note')}</div>`
+        : li.fanId ? `<div class="lb-fan-note" style="font-size:11px;color:var(--merah);margin:6px 0 0">${t('langFanNote')}</div>` : ''}
+      ${setBelumRilis(c.s) ? `<div class="lb-fan-note" style="font-size:11px;color:var(--muted);margin:4px 0 0">${t('preRelNote').replace('{d}', tglRilis(setBelumRilis(c.s)))}</div>` : ''}
       ${relatedHTML(c)}
       ${c.ra.length>1?`
       <div class="lb-var">
@@ -5746,7 +5800,8 @@ function tanggalDMY(iso){
    Kode kartu: 1 huruf seri + 3 digit nomor + jumlah (basis36, 1 karakter).
    Angka "1" di depan adalah versi format — jangan diubah artinya; kalau nanti
    formatnya berganti, naikkan jadi 2 dan tetap dukung pembacaan versi 1. */
-const SER2L = {BP01:'A', PB01:'B', EB01:'C', TB01:'D', SD01:'E', SD02:'F', SD03:'G', SD04:'H', SP01:'I'};
+/* v7.02 — + SD05 'J', SD06 'K', PB02 'L'. Huruf lama JANGAN diubah (link deck lama). */
+const SER2L = {BP01:'A', PB01:'B', EB01:'C', TB01:'D', SD01:'E', SD02:'F', SD03:'G', SD04:'H', SP01:'I', SD05:'J', SD06:'K', PB02:'L'};
 const L2SER = Object.fromEntries(Object.entries(SER2L).map(([k,v])=>[v,k]));
 
 function b64urlEncode(str){
