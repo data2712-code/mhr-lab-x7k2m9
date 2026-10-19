@@ -16,6 +16,11 @@
    daftar online (akun) + walk-in; hasil match diisi organizer; decklist
    wajib & rahasia sampai event selesai, lalu deck Top-cut dipublikasikan
    ke Tournament Decks.
+   v7.01 (19 Okt 2026): pendaftaran tamu tanpa akun (opsi per event,
+   allow_guests), pengaturan decklist per event (decklist_mode: required /
+   optional / none), dan cek legalitas decklist (50 kartu, maks. 2 warna,
+   maks. 3 per nama karakter, semua kartu ada di database) — pemain ditolak,
+   organizer diberi peringatan + tanda "Not legal" di tab Players.
    =================================================================== */
 (function(){
   'use strict';
@@ -33,12 +38,16 @@
     DECKLIST_REQUIRED:'A decklist is required.', NOT_REGISTERED:'You are not registered for this event.',
     EVENT_NOT_FINISHED:'Finish the event before publishing.', NOT_ALLOWED:'You are not allowed to do this.',
     NO_DECKLISTS:'None of the selected players has a decklist.', USER_NOT_FOUND:'No account with that username.',
+    NAME_TAKEN:'That player name is already used in this event. Please add your initial or surname.',
+    NAME_REQUIRED:'Please enter a player name.', GUESTS_NOT_ALLOWED:'This event only accepts registrations from MHR Deck Lab accounts.',
+    BAD_DECKLIST:'That deck link / code isn\'t valid.', BAD_TOKEN:'This registration was not made on this device.',
   };
   const errMsg = e => e ? (e.missing ? 'Events aren\'t switched on yet on this site.' : (ERR[e.code] || ERR[e.message] || ('Something went wrong: ' + (e.message || e.code || 'error')))) : '';
 
   const V = {                  // state halaman
     id: null, data: null, decks: {}, tab: null, round: null,
     me: null, myName: '', organizer: false, list: null, timer: null, busy: false,
+    guest: null,               // v7.01 — pendaftaran tamu dari browser ini {player_id, display_name, deck_code, token}
   };
   const isAdmin = () => (typeof isAccountAdmin !== 'undefined' && !!isAccountAdmin);
   const canManage = ev => !!ev && (isAdmin() || (V.me && ev.organizer_id === V.me));
@@ -57,10 +66,44 @@
     if(raw){
       const kode = (typeof cariKodeDeckDibagikan === 'function' && cariKodeDeckDibagikan(raw)) || raw.replace(/^.*#d=/, '');
       const r = kode ? decodeDeck(decodeURIComponent(kode)) : null;
-      return r && Object.keys(r.deck).length ? { deck:r.deck, name:r.nama } : null;
+      return r && (Object.keys(r.deck).length || r.unknown) ? { deck:r.deck, name:r.nama, unknown:r.unknown||0 } : { bad:true };
     }
-    if(sel && store.decks[sel] && Object.keys(store.decks[sel]).length) return { deck: sel === store.active ? state.deck : store.decks[sel], name: sel };
+    if(sel && store.decks[sel] && Object.keys(store.decks[sel]).length) return { deck: sel === store.active ? state.deck : store.decks[sel], name: sel, unknown:0 };
     return null;
+  }
+  /* v7.01 — legalitas decklist (Comprehensive Rules 101.1.b–d) + semua kartu harus ada
+     di database kartu situs (kartu yang belum rilis / kode rusak = tidak legal) */
+  function deckIssues(deck, unknown){
+    const out = [];
+    const tot = deckTotal(deck);
+    if(unknown) out.push(`it contains ${unknown} card entr${unknown>1?'ies':'y'} that aren't in the card database (unreleased or invalid cards)`);
+    if(tot !== 50) out.push(`it has ${tot} cards — a deck must have exactly 50 (rule 101.1.b)`);
+    const cols = new Set(), per = {};
+    for(const [no,q] of Object.entries(deck||{})){
+      const c = DB.find(d=>d.no===no); if(!c) continue;
+      cols.add(c.c); per[c.nm] = (per[c.nm]||0) + q;
+    }
+    if(cols.size > 2) out.push(`it uses ${cols.size} colours (${[...cols].map(x=>t(x)).join(', ')}) — max 2 (rule 101.1.c)`);
+    const over = Object.entries(per).filter(([,q])=>q > 3).map(([nm,q])=>{ const c = DB.find(d=>d.nm===nm); return `${c ? cardName(c) : nm} ×${q}`; });
+    if(over.length) out.push(`more than 3 cards with the same character name: ${over.join(', ')} (rule 101.1.d)`);
+    return out;
+  }
+  function codeIssues(code){ const r = code ? decodeDeck(code) : null; return r ? deckIssues(r.deck, r.unknown) : ['the decklist code is unreadable']; }
+  const issuesText = list => list.map(x=>'• ' + x).join('\n');
+  /* baca input decklist pada form. Hasil: {code:''} (tanpa decklist), {code, issues} atau {err} */
+  function readDecklist(prefix, mode){
+    if(mode === 'none') return { code:'' };
+    const d = deckFromInput(q('#'+prefix+'Sel') && q('#'+prefix+'Sel').value, q('#'+prefix+'Paste') && q('#'+prefix+'Paste').value);
+    if(d && d.bad) return { err:'That deck link / code couldn\'t be read. Copy the link again from the Deck Builder (Share).' };
+    if(!d) return mode === 'required' ? { err:'A decklist is required: choose one of your decks or paste a deck link / code.' } : { code:'' };
+    return { code: encodeDeck(d.deck, d.name), issues: deckIssues(d.deck, d.unknown) };
+  }
+  /* pemain: decklist tidak legal ditolak. organizer: boleh lanjut setelah konfirmasi */
+  function legalOk(r, who){
+    if(!r.issues || !r.issues.length) return true;
+    if(who === 'organizer') return confirm(`This decklist is not legal:\n${issuesText(r.issues)}\n\nSave it anyway? It will be marked "Not legal" in the player list.`);
+    alert(`This decklist can't be registered because:\n${issuesText(r.issues)}\n\nFix it in the Deck Builder, then try again.`);
+    return false;
   }
   const deckTotal = d => Object.values(d||{}).reduce((s,x)=>s+x, 0);
   function archetype(deck){
@@ -74,10 +117,13 @@
       return tot ? `<option value="${E(n)}"${n===store.active?' selected':''}>${E(n)} · ${tot} cards</option>` : '';
     }).join('');
   }
-  function deckPicker(prefix){
-    const opts = myDeckOptions();
+  function deckPicker(prefix, mode){
+    if(mode === 'none') return '';
+    let opts = myDeckOptions();
+    const opt = mode === 'optional';
+    if(opt) opts = `<option value="" selected>— No decklist —</option>` + opts.replace(' selected', '');
     return `<div class="ev-deckpick">
-      <label class="ev-f"><span>Decklist</span>
+      <label class="ev-f"><span>Decklist${opt ? ' (optional)' : ''}</span>
         <select id="${prefix}Sel">${opts || '<option value="">— no decks with cards —</option>'}</select></label>
       <label class="ev-f"><span>…or paste a deck link / code</span>
         <input id="${prefix}Paste" type="text" placeholder="https://mhrdecklab.com/#d=1.…"></label>
@@ -88,7 +134,7 @@
   async function renderList(w){
     document.title = 'Events — MHR Deck Lab';
     w.innerHTML = `<div class="ev-head"><h2 class="nw-title">Events</h2>
-      <p class="nw-lead">Swiss tournaments run by local game stores. Register online with your decklist, follow pairings and standings live, and the Top-cut decks go straight to Tournament Decks.</p></div>
+      <p class="nw-lead">Swiss tournaments run by local game stores. Register online, follow pairings and standings live, and the Top-cut decks go straight to Tournament Decks.</p></div>
       <div class="ev-empty">Loading events…</div>`;
     if(!API() || !API().ready){ w.querySelector('.ev-empty').textContent = 'Events need an internet connection.'; return; }
     await whoAmI();
@@ -102,11 +148,11 @@
         <div class="ev-card-top"><span class="ev-badge b-${e.status}">${STATUS[e.status]}</span><span class="ev-date">${E(tgl(e.event_date))}${e.start_time?` · ${E(e.start_time)}`:''}</span></div>
         <b>${E(e.name)}</b>
         <span class="ev-muted">${E([e.lgs_name, e.location].filter(Boolean).join(' · ') || '—')}</span>
-        <span class="ev-chips"><i>Bo${e.best_of}</i><i>${e.top_cut ? 'Top ' + e.top_cut : 'Swiss only'}</i>${e.rounds?`<i>${e.rounds} rounds</i>`:''}<i>👥 ${e.player_count||0}${e.max_players?` / ${e.max_players}`:''}</i></span>
+        <span class="ev-chips"><i>Bo${e.best_of}</i><i>${e.top_cut ? 'Top ' + e.top_cut : 'Swiss only'}</i>${e.rounds?`<i>${e.rounds} rounds</i>`:''}<i>👥 ${e.player_count||0}${e.max_players?` / ${e.max_players}`:''}</i>${e.allow_guests && e.status === 'registration' ? '<i>No account needed</i>' : ''}</span>
       </a>`;
     const sec = (title, arr, note) => arr.length ? `<section class="ev-sec"><div class="hm-sec-h"><h2>${title}</h2>${note||''}</div><div class="ev-grid">${arr.map(card).join('')}</div></section>` : '';
     w.innerHTML = `<div class="ev-head"><h2 class="nw-title">Events</h2>
-      <p class="nw-lead">Swiss tournaments run by local game stores. Register online with your decklist, follow pairings and standings live, and the Top-cut decks go straight to Tournament Decks.</p>
+      <p class="nw-lead">Swiss tournaments run by local game stores. Register online, follow pairings and standings live, and the Top-cut decks go straight to Tournament Decks.</p>
       ${V.organizer ? `<div class="ev-actions"><button class="nw-btn ev-main" data-ev="new">＋ New event</button></div>` : ''}</div>
       ${isAdmin() ? `<div class="ev-admin" id="evAdmin"><b>🛡 Organizers</b> <span class="ev-muted">Accounts that can create and run events.</span><div id="evOrgList" class="ev-muted">Loading…</div>
         <div class="ev-row"><input id="evOrgUser" placeholder="Username"><input id="evOrgLgs" placeholder="Store name (LGS)"><button class="btn2" data-ev="orgAdd">Add organizer</button></div></div>` : ''}
@@ -126,7 +172,7 @@
 
   /* ================= form event (baru / edit) ================= */
   function openEventForm(ev){
-    const e = ev || { name:'', event_date:new Date().toISOString().slice(0,10), start_time:'', location:'', lgs_name:'', notes:'', best_of:1, rounds:0, top_cut:0, max_players:null };
+    const e = ev || { name:'', event_date:new Date().toISOString().slice(0,10), start_time:'', location:'', lgs_name:'', notes:'', best_of:1, rounds:0, top_cut:0, max_players:null, decklist_mode:'required', allow_guests:false };
     const m = mxOpen(`<h3>${ev ? '✏️ Edit event' : '＋ New event'}</h3>
       <div class="ev-form">
         <label class="ev-f full"><span>Event name *</span><input id="efName" maxlength="120" value="${E(e.name)}" placeholder="Weekly Rush — Ogre Neverland"></label>
@@ -138,15 +184,20 @@
         <label class="ev-f"><span>Swiss rounds</span><select id="efRounds"><option value="0">Auto (by player count)</option>${[1,2,3,4,5,6,7,8,9].map(n=>`<option value="${n}"${e.rounds==n?' selected':''}>${n}</option>`).join('')}</select></label>
         <label class="ev-f"><span>Top cut</span><select id="efTop">${[0,2,4,8,16].map(n=>`<option value="${n}"${e.top_cut==n?' selected':''}>${n?'Top '+n:'None (Swiss only)'}</option>`).join('')}</select></label>
         <label class="ev-f"><span>Max players</span><input id="efMax" type="number" min="2" max="512" value="${e.max_players||''}" placeholder="No limit"></label>
+        <label class="ev-f"><span>Decklist</span><select id="efDeck">${[['required','Required — legal 50-card deck'],['optional','Optional'],['none','Not used']].map(([v,l])=>`<option value="${v}"${(e.decklist_mode||'required')===v?' selected':''}>${l}</option>`).join('')}</select></label>
+        <label class="ev-f ev-chk"><input type="checkbox" id="efGuests"${e.allow_guests?' checked':''}><span>Allow registration without an account (guests)</span></label>
         <label class="ev-f full"><span>Notes (entry fee, prizes, rules…)</span><textarea id="efNotes" rows="3" maxlength="1000">${E(e.notes)}</textarea></label>
       </div>
       <div class="mx-btns"><button class="btn2 main" data-ef="save">${ev ? 'Save changes' : 'Create as draft'}</button></div>
-      <p class="mx-note">New events start as a draft that only you can see. Open registration when you're ready.</p>`);
+      <p class="mx-note">New events start as a draft that only you can see. Open registration when you're ready.
+        A required decklist must be legal: exactly 50 cards, max 2 colours, max 3 cards with the same character name, released cards only.
+        Guests register with just a name (and decklist if needed) and are marked "Guest" in your player list.</p>`);
     m.querySelector('[data-ef="save"]').addEventListener('click', async b=>{
       const btn = b.currentTarget;
       const row = { name:q('#efName').value.trim(), event_date:q('#efDate').value, start_time:q('#efTime').value.trim(),
         lgs_name:q('#efLgs').value.trim(), location:q('#efLoc').value.trim(), best_of:+q('#efBo').value,
         rounds:+q('#efRounds').value, top_cut:+q('#efTop').value, max_players: q('#efMax').value ? +q('#efMax').value : null,
+        decklist_mode:q('#efDeck').value, allow_guests:q('#efGuests').checked,
         notes:q('#efNotes').value.trim() };
       if(!row.name || !row.event_date){ alert('Please fill in the event name and date.'); return; }
       if(ev) row.id = ev.id;
@@ -178,6 +229,16 @@
       const r = await API().decklists(id);
       (r.data||[]).forEach(d=>{ V.decks[d.player_id] = d.deck_code; });
     }
+    /* v7.01 — pendaftaran tamu dari browser ini */
+    V.guest = null;
+    if(API().guestOf && API().guestOf(id)){
+      const g = await API().guestGet(id);
+      if(g.data && data.players.some(p=>p.id === g.data.player_id)){
+        V.guest = g.data;
+        if(g.data.deck_code) V.decks[g.data.player_id] = g.data.deck_code;
+      }
+      if(V.id !== id) return;
+    }
     if(!V.tab) V.tab = data.event.status === 'finished' ? 'standings' : data.event.status === 'running' ? 'pairings' : 'players';
     renderEvent();
     schedule();
@@ -205,13 +266,19 @@
     return n === 2 ? 'Final' : n === 4 ? 'Semifinals' : n === 8 ? 'Quarterfinals' : 'Top ' + n;
   }
   const opt = () => ({ bestOf: V.data.event.best_of });
+  /* pemain milik pengunjung ini: lewat akun, atau lewat pendaftaran tamu di browser ini */
+  function myPlayer(){
+    if(!V.data) return null;
+    return (V.me && V.data.players.find(p=>p.user_id === V.me)) || (V.guest && V.data.players.find(p=>p.id === V.guest.player_id)) || null;
+  }
+  const deckMode = ev => ev.decklist_mode || 'required';
   function plannedRounds(ev){ return ev.rounds || S().recommendedRounds(V.data.players.filter(p=>!p.dropped).length); }
 
   function renderEvent(){
     const w = q('#eventWrap'); if(!w || !V.data) return;
     const { event:ev, players } = V.data;
     const mgr = canManage(ev);
-    const mine = V.me ? players.find(p=>p.user_id === V.me) : null;
+    const mine = myPlayer();
     document.title = `${ev.name} — Events — MHR Deck Lab`;
     const R = rounds();
     const active = players.filter(p=>!p.dropped).length;
@@ -220,7 +287,7 @@
         <div class="ev-card-top"><span class="ev-badge b-${ev.status}">${STATUS[ev.status]}${ev.status==='running' && R.length?` · ${E(roundLabel(R[R.length-1]))}`:''}</span></div>
         <h1>${E(ev.name)}</h1>
         <div class="ev-muted">${E([tgl(ev.event_date) + (ev.start_time?` · ${ev.start_time}`:''), ev.lgs_name, ev.location].filter(Boolean).join(' · '))}</div>
-        <div class="ev-chips"><i>Best of ${ev.best_of}</i><i>${ev.rounds ? ev.rounds + ' Swiss rounds' : 'Swiss rounds: auto'}</i><i>${ev.top_cut ? 'Top ' + ev.top_cut + ' cut' : 'No top cut'}</i><i>👥 ${players.length}${ev.max_players?` / ${ev.max_players}`:''} players</i></div>
+        <div class="ev-chips"><i>Best of ${ev.best_of}</i><i>${ev.rounds ? ev.rounds + ' Swiss rounds' : 'Swiss rounds: auto'}</i><i>${ev.top_cut ? 'Top ' + ev.top_cut + ' cut' : 'No top cut'}</i><i>👥 ${players.length}${ev.max_players?` / ${ev.max_players}`:''} players</i><i>${deckMode(ev)==='required'?'Decklist required':deckMode(ev)==='optional'?'Decklist optional':'No decklists'}</i>${ev.allow_guests?'<i>No account needed</i>':''}</div>
         ${ev.notes ? `<p class="ev-notes">${E(ev.notes)}</p>` : ''}
         ${ev.tournament_id ? `<div class="ev-pub">✓ Top-cut decks are published on <a href="#tourney">Tournament Decks</a>.</div>` : ''}
         ${ev.status !== 'draft' || mgr ? `<div class="ev-row"><button class="btn2" data-ev="qr">📱 QR code</button><button class="btn2" data-ev="link">🔗 Copy link</button></div>` : ''}
@@ -259,7 +326,7 @@
       if(last) main += btn('undo', `Undo ${E(roundLabel(last))}`);
       main += btn('copy', '📋 Copy pairings');
     } else if(ev.status === 'finished'){
-      main = btn('publish', ev.tournament_id ? '📤 Update Tournament Decks' : '📤 Publish Top decks to Tournament Decks', 'main') + btn('reopen', 'Reopen event');
+      main = (deckMode(ev) === 'none' ? '' : btn('publish', ev.tournament_id ? '📤 Update Tournament Decks' : '📤 Publish Top decks to Tournament Decks', 'main')) + btn('reopen', 'Reopen event');
     }
     const edit = ev.status !== 'finished' ? btn('edit', '✏️ Edit') : '';
     const del = (ev.status === 'draft' || ev.status === 'registration' || ev.status === 'finished') ? btn('del', '🗑 Delete') : '';
@@ -268,17 +335,30 @@
 
   /* ---------- kotak pemain (daftar / status) ---------- */
   function playerBox(ev, mine){
+    const mode = deckMode(ev);
+    const privacy = mode === 'none' ? '' : `<p class="ev-muted">Your decklist stays private — only the organizer can see it until the event is over.${mode === 'required' ? ' It must be legal: exactly 50 cards, max 2 colours, max 3 cards with the same character name, released cards only.' : ''}</p>`;
     if(ev.status === 'registration'){
-      if(!V.me) return `<div class="ev-box">📝 Registration is open. <a href="#" data-ev="login">Log in</a> to register with your decklist.</div>`;
+      if(!mine && !V.me){
+        if(!ev.allow_guests) return `<div class="ev-box">📝 Registration is open. <a href="#" data-ev="login">Log in</a> to register${mode === 'none' ? '' : ' with your decklist'}.</div>`;
+        return `<div class="ev-box"><b>📝 Register for this event</b> <span class="ev-muted">— no account needed</span>
+          <div class="ev-form">
+            <label class="ev-f"><span>Player name</span><input id="egName" maxlength="40" placeholder="Name the organizer will call out"></label>
+          </div>${deckPicker('eg', mode)}
+          <div class="mx-btns"><button class="btn2 main" data-ev="guestReg">Register</button></div>
+          ${privacy}<p class="ev-muted">Registering as a guest keeps your registration on this device only. Have an account? <a href="#" data-ev="login">Log in</a> instead to manage it from anywhere.</p></div>`;
+      }
       if(!mine) return `<div class="ev-box"><b>📝 Register for this event</b>
         <div class="ev-form">
           <label class="ev-f"><span>Player name</span><input id="erName" maxlength="40" value="${E(V.myName)}"></label>
-        </div>${deckPicker('er')}
+        </div>${deckPicker('er', mode)}
         <div class="mx-btns"><button class="btn2 main" data-ev="register">Register</button></div>
-        <p class="ev-muted">Your decklist stays private — only the organizer can see it until the event is over.</p></div>`;
-      const code = V.decks[mine.id]; const d = code ? (decodeDeck(code)||{deck:{}}).deck : {};
-      return `<div class="ev-box ok"><b>✓ You're registered as ${E(mine.display_name)}</b> · decklist: ${deckTotal(d)} cards${deckTotal(d)!==50?' <span class="ev-warn">(not 50)</span>':''}
-        <div class="ev-row"><button class="btn2" data-ev="myview">👁 View my decklist</button><button class="btn2" data-ev="myedit">Change decklist</button><button class="btn2" data-ev="withdraw">Withdraw</button></div></div>`;
+        ${privacy}</div>`;
+      const code = V.decks[mine.id]; const d = code ? (decodeDeck(code)||{deck:{}}).deck : null;
+      const deckTxt = mode === 'none' ? '' : (d ? ` · decklist: ${deckTotal(d)} cards` : ' · <span class="ev-muted">no decklist</span>');
+      const isGuest = !mine.user_id;
+      return `<div class="ev-box ok"><b>✓ You're registered as ${E(mine.display_name)}</b>${isGuest ? ' <span class="ev-tag">Guest</span>' : ''}${deckTxt}
+        <div class="ev-row">${d ? `<button class="btn2" data-ev="myview">👁 View my decklist</button>` : ''}<button class="btn2" data-ev="myedit">${mode === 'none' ? 'Change name' : 'Change name / decklist'}</button><button class="btn2" data-ev="withdraw">Withdraw</button></div>
+        ${isGuest ? `<p class="ev-muted">Guest registration: use this same device and browser to see your table or make changes. Not ${E(mine.display_name)}? <a href="#" data-ev="guestForget">Register someone else on this device</a>.</p>` : ''}</div>`;
     }
     if(ev.status === 'running' && mine){
       const R = rounds(); const last = R[R.length-1];
@@ -292,19 +372,29 @@
   }
 
   /* ---------- tab Players ---------- */
+  function deckCell(p){
+    const code = V.decks[p.id];
+    if(!code) return deckMode(V.data.event) === 'required' ? '<span class="ev-warn">missing</span>' : '<span class="ev-muted">—</span>';
+    const iss = codeIssues(code);
+    const n = deckTotal((decodeDeck(code)||{deck:{}}).deck);
+    return iss.length ? `<button class="ev-illegal" data-pl="why" data-id="${p.id}" title="${E(iss.join(' · '))}">⚠ Not legal</button> <span class="ev-muted">${n}</span>` : `✓ ${n}`;
+  }
   function playersTab(ev, mgr){
     const ps = V.data.players;
+    const mode = deckMode(ev), showDeck = mode !== 'none';
     const rows = ps.map((p,i)=>`<tr class="${p.dropped?'drop':''}">
-      <td>${i+1}</td><td><b>${E(p.display_name)}</b>${p.user_id?'':' <span class="ev-muted">(walk-in)</span>'}${p.dropped?` <span class="ev-warn">dropped${p.dropped_after?' after R'+p.dropped_after:''}</span>`:''}</td>
-      ${mgr ? `<td>${V.decks[p.id] ? `✓ ${deckTotal((decodeDeck(V.decks[p.id])||{deck:{}}).deck)}` : '<span class="ev-warn">missing</span>'}</td>
-      <td class="ev-acts">${V.decks[p.id]?`<button class="btn2" data-pl="view" data-id="${p.id}">👁 Deck</button>`:''}<button class="btn2" data-pl="deck" data-id="${p.id}">Set deck</button><button class="btn2" data-pl="rename" data-id="${p.id}">Rename</button>
+      <td>${i+1}</td><td><b>${E(p.display_name)}</b>${p.is_guest?' <span class="ev-tag">Guest</span>':p.user_id?'':' <span class="ev-muted">(walk-in)</span>'}${p.dropped?` <span class="ev-warn">dropped${p.dropped_after?' after R'+p.dropped_after:''}</span>`:''}</td>
+      ${mgr && showDeck ? `<td>${deckCell(p)}</td>` : ''}
+      ${mgr ? `<td class="ev-acts">${V.decks[p.id]?`<button class="btn2" data-pl="view" data-id="${p.id}">👁 Deck</button>`:''}${showDeck?`<button class="btn2" data-pl="deck" data-id="${p.id}">Set deck</button>`:''}<button class="btn2" data-pl="rename" data-id="${p.id}">Rename</button>
         ${ev.status === 'running' ? `<button class="btn2" data-pl="${p.dropped?'undrop':'drop'}" data-id="${p.id}">${p.dropped?'Undrop':'Drop'}</button>` : ''}
         ${ev.status !== 'running' && ev.status !== 'finished' ? `<button class="btn2" data-pl="remove" data-id="${p.id}">🗑</button>` : ''}</td>` : ''}
     </tr>`).join('');
+    const illegal = mgr && showDeck ? ps.filter(p=>V.decks[p.id] && codeIssues(V.decks[p.id]).length).length : 0;
     const add = mgr && ev.status !== 'finished' ? `<div class="ev-box"><b>＋ Add a walk-in player</b>
-      <div class="ev-form"><label class="ev-f"><span>Player name</span><input id="ewName" maxlength="40"></label></div>${deckPicker('ew')}
+      <div class="ev-form"><label class="ev-f"><span>Player name</span><input id="ewName" maxlength="40"></label></div>${deckPicker('ew', mode)}
       <div class="mx-btns"><button class="btn2 main" data-ev="walkin">Add player</button></div></div>` : '';
-    return `${ps.length ? `<div class="ev-tblwrap"><table class="ev-tbl"><tr><th>#</th><th>Player</th>${mgr?'<th>Decklist</th><th></th>':''}</tr>${rows}</table></div>` : '<div class="ev-empty">No players yet.</div>'}${add}`;
+    const warn = illegal ? `<div class="ev-box ev-box-warn">⚠ ${illegal} decklist${illegal>1?'s are':' is'} not legal. Tap “Not legal” to see why, then use “Set deck” to fix ${illegal>1?'them':'it'}.</div>` : '';
+    return `${warn}${ps.length ? `<div class="ev-tblwrap"><table class="ev-tbl"><tr><th>#</th><th>Player</th>${mgr && showDeck?'<th>Decklist</th>':''}${mgr?'<th></th>':''}</tr>${rows}</table></div>` : '<div class="ev-empty">No players yet.</div>'}${add}`;
   }
 
   /* ---------- tab Pairings ---------- */
@@ -477,8 +567,12 @@
     async start(){
       const ev = V.data.event; const act_ = V.data.players.filter(p=>!p.dropped);
       if(act_.length < 2){ alert('You need at least 2 players to start.'); return; }
-      const missing = act_.filter(p=>!V.decks[p.id]).length;
-      if(missing && !confirm(`${missing} player(s) have no decklist yet. Start anyway?`)) return;
+      if(deckMode(ev) === 'required'){
+        const missing = act_.filter(p=>!V.decks[p.id]).length;
+        const illegal = act_.filter(p=>V.decks[p.id] && codeIssues(V.decks[p.id]).length).length;
+        const parts = [missing ? `${missing} player(s) have no decklist` : '', illegal ? `${illegal} decklist(s) are not legal` : ''].filter(Boolean);
+        if(parts.length && !confirm(`${parts.join(' and ')}. Start anyway?`)) return;
+      }
       const planned = ev.rounds || S().recommendedRounds(act_.length);
       if(!confirm(`Start "${ev.name}" with ${act_.length} players, ${planned} Swiss round${planned>1?'s':''}${ev.top_cut?` and a Top ${ev.top_cut} cut`:''}? Registration will close.`)) return;
       await act(async()=>{
@@ -550,33 +644,59 @@
     },
     async login(){ const b = q('#btnAccount'); if(b) b.click(); },
     async register(){
+      const ev = V.data.event;
       const name = (q('#erName').value || '').trim();
-      const d = deckFromInput(q('#erSel') && q('#erSel').value, q('#erPaste') && q('#erPaste').value);
       if(!name){ alert('Please enter your player name.'); return; }
-      if(!d){ alert('Choose one of your decks or paste a deck link — a decklist is required.'); return; }
-      if(deckTotal(d.deck) !== 50 && !confirm(`This deck has ${deckTotal(d.deck)} cards, not 50. Register anyway?`)) return;
-      await act(async()=>{ const { error } = await API().register(V.data.event.id, name, '', encodeDeck(d.deck, d.name)); if(error) alert(errMsg(error)); });
+      const r = readDecklist('er', deckMode(ev));
+      if(r.err){ alert(r.err); return; }
+      if(!legalOk(r, 'player')) return;
+      await act(async()=>{ const { error } = await API().register(ev.id, name, '', r.code); if(error) alert(errMsg(error)); });
     },
-    async myview(){ const me = V.data.players.find(p=>p.user_id === V.me); const c = me && V.decks[me.id]; if(c) openDeckView({...decodeDeck(c).deck}, `My decklist — ${V.data.event.name}`); },
+    async guestReg(){
+      const ev = V.data.event;
+      const name = (q('#egName').value || '').trim();
+      if(!name){ alert('Please enter your player name.'); return; }
+      const r = readDecklist('eg', deckMode(ev));
+      if(r.err){ alert(r.err); return; }
+      if(!legalOk(r, 'player')) return;
+      await act(async()=>{ const { error } = await API().registerGuest(ev.id, name, r.code); if(error) alert(errMsg(error)); });
+    },
+    async guestForget(){
+      const me = myPlayer(); if(!me) return;
+      if(!confirm(`This device will forget ${me.display_name}'s registration so someone else can register here. ${me.display_name} stays registered, but can only change or withdraw through the organizer. Continue?`)) return;
+      API().forgetGuest(V.data.event.id); V.guest = null; renderEvent();
+    },
+    async myview(){ const me = myPlayer(); const c = me && V.decks[me.id]; if(c) openDeckView({...decodeDeck(c).deck}, `My decklist — ${V.data.event.name}`); },
     async myedit(){
-      const me = V.data.players.find(p=>p.user_id === V.me); if(!me) return;
-      const m = mxOpen(`<h3>Change decklist</h3><div class="ev-form"><label class="ev-f"><span>Player name</span><input id="eeName" maxlength="40" value="${E(me.display_name)}"></label></div>${deckPicker('ee')}
+      const me = myPlayer(); if(!me) return;
+      const ev = V.data.event, mode = deckMode(ev), guest = !me.user_id;
+      const m = mxOpen(`<h3>${mode === 'none' ? 'Change name' : 'Change name / decklist'}</h3><div class="ev-form"><label class="ev-f"><span>Player name</span><input id="eeName" maxlength="40" value="${E(me.display_name)}"></label></div>${deckPicker('ee', mode)}
+        ${mode !== 'none' && V.decks[me.id] ? '<p class="mx-note">Leave the paste box empty and pick a deck to replace your decklist' + (mode === 'optional' ? ', or choose “No decklist” to remove it.' : '.') + '</p>' : ''}
         <div class="mx-btns"><button class="btn2 main" data-x="save">Save</button></div>`);
       m.querySelector('[data-x="save"]').addEventListener('click', async ()=>{
-        const d = deckFromInput(q('#eeSel').value, q('#eePaste').value); const name = q('#eeName').value.trim();
-        if(!d || !name){ alert('Choose a deck and enter your name.'); return; }
-        const { error } = await API().updateRegistration(V.data.event.id, name, '', encodeDeck(d.deck, d.name));
+        const name = q('#eeName').value.trim();
+        if(!name){ alert('Please enter your player name.'); return; }
+        const r = readDecklist('ee', mode);
+        if(r.err){ alert(r.err); return; }
+        if(!legalOk(r, 'player')) return;
+        const { error } = guest ? await API().guestUpdate(ev.id, name, r.code) : await API().updateRegistration(ev.id, name, '', r.code);
         if(error){ alert(errMsg(error)); return; }
         mxClose(); loadEvent(V.id, true);
       });
     },
-    async withdraw(){ if(confirm('Withdraw from this event?')) await act(async()=>{ const { error } = await API().withdraw(V.data.event.id); if(error) alert(errMsg(error)); }); },
+    async withdraw(){
+      const me = myPlayer(); if(!me || !confirm('Withdraw from this event?')) return;
+      await act(async()=>{ const { error } = me.user_id ? await API().withdraw(V.data.event.id) : await API().guestWithdraw(V.data.event.id); if(error) alert(errMsg(error)); });
+    },
     async walkin(){
+      const ev = V.data.event;
       const name = (q('#ewName').value || '').trim();
-      const d = deckFromInput(q('#ewSel') && q('#ewSel').value, q('#ewPaste') && q('#ewPaste').value);
       if(!name){ alert('Please enter the player name.'); return; }
-      if(!d){ alert('A decklist is required: choose a deck or paste a deck link / code.'); return; }
-      await act(async()=>{ const { error } = await API().addWalkIn(V.data.event.id, name, '', encodeDeck(d.deck, name)); if(error) alert(errMsg(error)); });
+      if(V.data.players.some(p=>p.display_name.trim().toLowerCase() === name.toLowerCase()) && !confirm(`There is already a player called "${name}". Add another one with the same name?`)) return;
+      const r = readDecklist('ew', deckMode(ev));
+      if(r.err){ alert(r.err); return; }
+      if(!legalOk(r, 'organizer')) return;
+      await act(async()=>{ const { error } = await API().addWalkIn(ev.id, name, '', r.code); if(error) alert(errMsg(error)); });
     },
     async orgAdd(){
       const u = q('#evOrgUser').value.trim(); if(!u) return;
@@ -587,13 +707,27 @@
     async orgDel(b){ if(confirm('Remove this organizer? Their existing events stay.')){ const { error } = await API().removeOrganizer(b.dataset.uid); if(error) alert(errMsg(error)); renderOrganizers(); } },
   };
   const playerActs = {
+    why(p){ const c = V.decks[p.id]; if(c) alert(`${p.display_name}'s decklist is not legal:\n${issuesText(codeIssues(c))}`); },
     view(p){ const c = V.decks[p.id]; if(c) openDeckView({...decodeDeck(c).deck}, `${p.display_name} — ${V.data.event.name}`); },
     async deck(p){
-      const m = mxOpen(`<h3>Decklist for ${E(p.display_name)}</h3>${deckPicker('ed')}<div class="mx-btns"><button class="btn2 main" data-x="save">Save decklist</button></div>`);
+      const ev = V.data.event, mode = deckMode(ev);
+      const cur = V.decks[p.id], iss = cur ? codeIssues(cur) : [];
+      const m = mxOpen(`<h3>Decklist for ${E(p.display_name)}</h3>
+        ${iss.length ? `<div class="ev-box ev-box-warn">⚠ The current decklist is not legal:<br>${iss.map(x=>'• ' + E(x)).join('<br>')}</div>` : ''}
+        ${deckPicker('ed', mode)}<div class="mx-btns"><button class="btn2 main" data-x="save">Save decklist</button>${cur && mode === 'optional' ? '<button class="btn2" data-x="rm">Remove decklist</button>' : ''}</div>`);
       m.querySelector('[data-x="save"]').addEventListener('click', async ()=>{
-        const d = deckFromInput(q('#edSel').value, q('#edPaste').value);
-        if(!d){ alert('Choose a deck or paste a deck link.'); return; }
-        const { error } = await API().setDecklist(V.data.event.id, p.id, encodeDeck(d.deck, p.display_name));
+        const r = readDecklist('ed', 'required');
+        if(r.err){ alert(r.err); return; }
+        if(!legalOk(r, 'organizer')) return;
+        const d = decodeDeck(r.code);
+        const { error } = await API().setDecklist(ev.id, p.id, encodeDeck(d.deck, p.display_name));
+        if(error){ alert(errMsg(error)); return; }
+        mxClose(); loadEvent(V.id, true);
+      });
+      const rm = m.querySelector('[data-x="rm"]');
+      if(rm) rm.addEventListener('click', async ()=>{
+        if(!confirm(`Remove ${p.display_name}'s decklist?`)) return;
+        const { error } = await API().removeDecklist(p.id);
         if(error){ alert(errMsg(error)); return; }
         mxClose(); loadEvent(V.id, true);
       });

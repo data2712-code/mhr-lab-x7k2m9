@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.00** · 19 Oktober 2026
+**Versi saat ini: v7.01** · 19 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,36 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.01 — Events: daftar tanpa akun (tamu), pengaturan decklist, cek legalitas decklist — 19 Oktober 2026 *(`index.html`, `events.js`, `events-ui.js`, migrasi SQL baru `mhr_decklab_v701_guests_decklist.sql` di folder internal)*
+
+- **Daftar tanpa akun (opsi per event):** form event punya centang *Allow registration without an account (guests)*.
+  Kalau aktif, pengunjung yang belum login melihat form daftar tamu (nama + decklist bila dipakai). Server
+  (`mhr_register_guest`) mengembalikan kode rahasia yang disimpan di localStorage browser tamu
+  (`mhr_event_guest`), sedangkan database hanya menyimpan hash SHA-256-nya di tabel `event_guest_tokens` (tanpa akses
+  anon/authenticated). Dengan kode itu tamu bisa melihat meja & decklist sendiri, ganti nama/decklist, atau batal
+  daftar (`mhr_guest_get/update/withdraw`) dari perangkat yang sama. Tamu diberi label **Guest** di daftar pemain.
+  Tautan *Register someone else on this device* untuk tablet toko yang dipakai bergantian (pendaftaran lama tetap ada).
+  Pengaman: harus diaktifkan organizer, kuota (`max_players`, maks. 512), nama tidak boleh dobel dalam satu event
+  (berlaku juga untuk pendaftaran akun), organizer bisa menghapus pemain.
+- **Decklist per event:** *Required — legal 50-card deck* / *Optional* / *Not used* (`events.decklist_mode`). Optional:
+  pilihan default "— No decklist —", organizer melihat "—" (bukan "missing") dan bisa *Remove decklist*. Not used: kolom
+  decklist, tombol Set deck dan tombol Publish ke Tournament Decks disembunyikan. Event lama otomatis *Required*, tanpa tamu.
+- **Cek legalitas decklist:** 50 kartu tepat (101.1.b), maks. 2 warna (101.1.c), maks. 3 kartu dengan nama karakter
+  sama (101.1.d), semua kartu ada di database (kartu belum rilis / kode rusak ditolak). Pemain (akun & tamu): pendaftaran
+  ditolak dengan alasan per poin. Organizer (walk-in / Set deck): peringatan + konfirmasi, lalu ditandai **⚠ Not legal**
+  (bisa diketuk untuk melihat alasan), kotak peringatan di tab Players, dan peringatan saat Start event. Cek dilakukan di
+  browser (database belum punya data kartu); server tetap memeriksa format kode deck (`BAD_DECKLIST`).
+- Pesan error baru: NAME_TAKEN, NAME_REQUIRED, GUESTS_NOT_ALLOWED, BAD_DECKLIST, BAD_TOKEN. Versi 7.01, cache-buster `?v=7.01`.
+
+**Verifikasi:** migrasi dijalankan 2× di PostgreSQL 16 lokal + 31 skenario (default event lama, tamu ditolak bila
+dimatikan, nama dobel ditolak termasuk beda huruf besar/kecil, kode deck rusak ditolak, kode tamu salah ditolak, anon tidak
+bisa membaca token/decklist atau memanggil helper, mode optional/none, kuota penuh, batal daftar setelah event mulai ditolak,
+orang lain tidak bisa menyalakan tamu). Dijalankan di Supabase produksi 19 Okt 2026 dan dicek: 3 kolom baru, 8 fungsi, RLS
+token aktif, anon tidak punya akses token/helper/RPC akun, 2/2 event lama tetap required tanpa tamu. Playwright 35 cek
+lulus tanpa error JS (form tamu, deck 51 kartu / 3 warna / link rusak ditolak, nama dobel, edit tamu, tablet bersama,
+walk-in tidak legal ditandai, peringatan Start, tamu melihat mejanya, mode none & optional, mobile 390px); uji v6.99 (33)
+dan Top 16 (9) tetap lulus.
 
 ### v7.00 — Events: pilihan Top 16 — 19 Oktober 2026 *(`index.html`, `events.js`, `events-ui.js`, migrasi SQL baru `mhr_decklab_v700_top16.sql` di folder internal)*
 

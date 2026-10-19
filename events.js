@@ -221,7 +221,8 @@
     const s = await window.MHRAuth.getSession(); return s && s.user ? s.user.id : null;
   }
   const off = { message:'offline' };
-  const EV_COLS = 'id,organizer_id,name,event_date,start_time,location,lgs_name,notes,best_of,rounds,top_cut,max_players,status,phase,current_round,tournament_id,created_at,updated_at';
+  const GUEST_KEY = 'mhr_event_guest';
+  const EV_COLS = 'id,organizer_id,name,event_date,start_time,location,lgs_name,notes,best_of,rounds,top_cut,max_players,allow_guests,decklist_mode,status,phase,current_round,tournament_id,created_at,updated_at';
   /* error tabel belum ada (migrasi v6.98 belum dijalankan) */
   const miss = e => e ? (/PGRST205|42P01|PGRST202|42883/.test(`${e.code||''} ${e.message||''}`) ? {...e, missing:true} : e) : null;
   /* pesan dari RAISE EXCEPTION di RPC (mis. EVENT_FULL) */
@@ -252,7 +253,7 @@
       const c = client(); if(!c) return { data:null, error:off };
       const [ev, ps, ms] = await Promise.all([
         c.from('events').select(EV_COLS).eq('id', id).maybeSingle(),
-        c.from('event_players').select('id,event_id,user_id,display_name,deck_name,dropped,dropped_after,created_at').eq('event_id', id).order('created_at'),
+        c.from('event_players').select('id,event_id,user_id,is_guest,display_name,deck_name,dropped,dropped_after,created_at').eq('event_id', id).order('created_at'),
         c.from('event_matches').select('id,event_id,round,stage,table_no,player1,player2,result,p1_games,p2_games').eq('event_id', id).order('round').order('table_no'),
       ]);
       const error = ev.error || ps.error || ms.error;
@@ -268,7 +269,7 @@
     },
     async saveEvent(row){
       const c = client(); if(!c) return { data:null, error:off };
-      const keys = ['name','event_date','start_time','location','lgs_name','notes','best_of','rounds','top_cut','max_players','status','phase','current_round'];
+      const keys = ['name','event_date','start_time','location','lgs_name','notes','best_of','rounds','top_cut','max_players','allow_guests','decklist_mode','status','phase','current_round'];
       const clean = {}; keys.forEach(k=>{ if(k in row) clean[k] = row[k]; });
       const q = row.id ? c.from('events').update(clean).eq('id', row.id) : c.from('events').insert(clean);
       const { data, error } = await q.select(EV_COLS).single();
@@ -282,6 +283,7 @@
       const c = client(); if(!c) return { data:null, error:off };
       const { data, error } = await c.from('event_players').insert({ event_id:eventId, display_name:name, deck_name:deckName||'' }).select('id').single();
       if(error) return { data:null, error:miss(error) };
+      if(!deckCode) return { data, error:null };          /* v7.01 — decklist opsional / tidak dipakai */
       const r2 = await c.from('event_decklists').insert({ player_id:data.id, event_id:eventId, deck_code:deckCode });
       if(r2.error){ await c.from('event_players').delete().eq('id', data.id); return { data:null, error:miss(r2.error) }; }
       return { data, error:null };
@@ -295,6 +297,10 @@
       const c = client(); if(!c) return { error:off };
       const { error } = await c.from('event_decklists').upsert({ player_id:playerId, event_id:eventId, deck_code:deckCode, updated_at:new Date().toISOString() }, { onConflict:'player_id' });
       return { error:miss(error) };
+    },
+    async removeDecklist(playerId){
+      const c = client(); if(!c) return { error:off };
+      const { error } = await c.from('event_decklists').delete().eq('player_id', playerId); return { error:miss(error) };
     },
     async removePlayer(id){
       const c = client(); if(!c) return { error:off };
@@ -328,6 +334,48 @@
     async withdraw(eventId){
       const c = client(); if(!c) return { error:off };
       const { error } = await c.rpc('mhr_withdraw_from_event', { p_event:eventId });
+      return { error:rpcErr(error) };
+    },
+    /* ---- v7.01 — pendaftaran tamu (tanpa akun) ----
+       Kode rahasia tamu hanya disimpan di browser tamu (localStorage), per event.
+       Server hanya menyimpan hash-nya (tabel event_guest_tokens). */
+    guestOf(eventId){
+      try{ const m = JSON.parse(localStorage.getItem(GUEST_KEY) || '{}'); return m[eventId] || null; }catch(e){ return null; }
+    },
+    _setGuest(eventId, v){
+      try{
+        const m = JSON.parse(localStorage.getItem(GUEST_KEY) || '{}');
+        if(v) m[eventId] = v; else delete m[eventId];
+        localStorage.setItem(GUEST_KEY, JSON.stringify(m));
+      }catch(e){}
+    },
+    /* lupakan pendaftaran tamu di browser ini (pemainnya tetap terdaftar) — mis. tablet toko dipakai bergantian */
+    forgetGuest(eventId){ this._setGuest(eventId, null); },
+    async registerGuest(eventId, name, deckCode){
+      const c = client(); if(!c) return { error:off };
+      const { data, error } = await c.rpc('mhr_register_guest', { p_event:eventId, p_name:name, p_deck_code:deckCode||'' });
+      if(error) return { data:null, error:rpcErr(error) };
+      this._setGuest(eventId, { pid:data.player_id, token:data.token });
+      return { data, error:null };
+    },
+    /* data tamu milik browser ini untuk event tsb. (null kalau tidak ada / kode tidak berlaku lagi) */
+    async guestGet(eventId){
+      const g = this.guestOf(eventId); const c = client(); if(!g || !c) return { data:null, error:null };
+      const { data, error } = await c.rpc('mhr_guest_get', { p_player:g.pid, p_token:g.token });
+      if(error){ const e = rpcErr(error); if(e.code === 'BAD_TOKEN') this._setGuest(eventId, null); return { data:null, error:e.code === 'BAD_TOKEN' ? null : e }; }
+      return { data:{ ...data, token:g.token }, error:null };
+    },
+    async guestUpdate(eventId, name, deckCode){
+      const g = this.guestOf(eventId); const c = client(); if(!c) return { error:off };
+      if(!g) return { error:{ code:'NOT_REGISTERED', message:'NOT_REGISTERED' } };
+      const { error } = await c.rpc('mhr_guest_update', { p_player:g.pid, p_token:g.token, p_name:name, p_deck_code:deckCode||'' });
+      return { error:rpcErr(error) };
+    },
+    async guestWithdraw(eventId){
+      const g = this.guestOf(eventId); const c = client(); if(!c) return { error:off };
+      if(!g) return { error:null };
+      const { error } = await c.rpc('mhr_guest_withdraw', { p_player:g.pid, p_token:g.token });
+      if(!error) this._setGuest(eventId, null);
       return { error:rpcErr(error) };
     },
     async publish(eventId, top){
