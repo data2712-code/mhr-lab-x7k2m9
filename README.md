@@ -516,6 +516,13 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Jadwal Weekly Rush LGS: tambah Draagoons Hobby Shop (Tangerang Selatan) — 19 Oktober 2026 *(`data.js`)*
+
+- Toko baru **Draagoons Hobby Shop** (Ruko Kav 31A no 2, Jl. Sutera Utama, Pakualam, Serpong Utara, Tangerang Selatan):
+  Rabu 19:30, Jumat 19:30, Minggu 16:00 WIB, format Constructed (dari poster Weekly Events toko). Instagram
+  `@draagoonshobbyshop`, tombol "Chat store" ke WhatsApp toko 0858-9998-7769 (field `hp`).
+- `LGS_UPDATE` → 19 October 2026.
+
 ### v6.99 — Events: QR code event + penjelasan tiebreaker (OMW/GW/OGW) — 19 Oktober 2026 *(`index.html`, `events-ui.js`, berkas BARU `qrcode.js`)*
 
 - **QR code event:** tombol **📱 QR code** dan **🔗 Copy link** di kepala halaman event (tampil untuk semua orang
