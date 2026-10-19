@@ -149,7 +149,10 @@
     return out;
   }
 
-  const BRACKET = { 2:[[1,2]], 4:[[1,4],[2,3]], 8:[[1,8],[4,5],[2,7],[3,6]] };
+  /* v7.00 — Top 16 ditambahkan. Urutan meja dibuat supaya pemenang meja 1+2, 3+4, … langsung
+     bertemu di ronde berikutnya (pairTopNext) dan hasilnya sama dengan bracket Top 8: 1v8 4v5 2v7 3v6. */
+  const BRACKET = { 2:[[1,2]], 4:[[1,4],[2,3]], 8:[[1,8],[4,5],[2,7],[3,6]],
+    16:[[1,16],[8,9],[4,13],[5,12],[2,15],[7,10],[3,14],[6,11]] };
   function topSeeds(players, matches, n, opt){
     return standings(players, matches, opt).filter(s=>!s.dropped).slice(0, n).map(s=>s.id);
   }

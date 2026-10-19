@@ -136,7 +136,7 @@
         <label class="ev-f"><span>Location</span><input id="efLoc" maxlength="120" value="${E(e.location)}" placeholder="City / address"></label>
         <label class="ev-f"><span>Match format</span><select id="efBo"><option value="1"${e.best_of==1?' selected':''}>Best of 1</option><option value="3"${e.best_of==3?' selected':''}>Best of 3</option></select></label>
         <label class="ev-f"><span>Swiss rounds</span><select id="efRounds"><option value="0">Auto (by player count)</option>${[1,2,3,4,5,6,7,8,9].map(n=>`<option value="${n}"${e.rounds==n?' selected':''}>${n}</option>`).join('')}</select></label>
-        <label class="ev-f"><span>Top cut</span><select id="efTop">${[0,2,4,8].map(n=>`<option value="${n}"${e.top_cut==n?' selected':''}>${n?'Top '+n:'None (Swiss only)'}</option>`).join('')}</select></label>
+        <label class="ev-f"><span>Top cut</span><select id="efTop">${[0,2,4,8,16].map(n=>`<option value="${n}"${e.top_cut==n?' selected':''}>${n?'Top '+n:'None (Swiss only)'}</option>`).join('')}</select></label>
         <label class="ev-f"><span>Max players</span><input id="efMax" type="number" min="2" max="512" value="${e.max_players||''}" placeholder="No limit"></label>
         <label class="ev-f full"><span>Notes (entry fee, prizes, rules…)</span><textarea id="efNotes" rows="3" maxlength="1000">${E(e.notes)}</textarea></label>
       </div>
@@ -202,7 +202,7 @@
   function roundLabel(R){
     if(R.stage !== 'top') return 'Round ' + R.r;
     const n = R.ms.length * 2;
-    return n === 2 ? 'Final' : n === 4 ? 'Semifinals' : 'Top ' + n;
+    return n === 2 ? 'Final' : n === 4 ? 'Semifinals' : n === 8 ? 'Quarterfinals' : 'Top ' + n;
   }
   const opt = () => ({ bestOf: V.data.event.best_of });
   function plannedRounds(ev){ return ev.rounds || S().recommendedRounds(V.data.players.filter(p=>!p.dropped).length); }

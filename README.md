@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v6.99** · 19 Oktober 2026
+**Versi saat ini: v7.00** · 19 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -515,6 +515,24 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.00 — Events: pilihan Top 16 — 19 Oktober 2026 *(`index.html`, `events.js`, `events-ui.js`, migrasi SQL baru `mhr_decklab_v700_top16.sql` di folder internal)*
+
+- Pilihan **Top cut** di form event sekarang: None / Top 2 / Top 4 / Top 8 / **Top 16**.
+- Bracket Top 16 (`MHRSwiss.BRACKET[16]`): meja 1–8 = 1v16, 8v9, 4v13, 5v12, 2v15, 7v10, 3v14, 6v11 — urutannya dibuat
+  supaya pemenang meja 1+2, 3+4, … bertemu di ronde berikutnya, jadi Top 8 berikutnya tetap 1v8 4v5 2v7 3v6 (kalau
+  seed tertinggi selalu menang). Peringkat akhir: 1st, 2nd, Top 4, Top 8, Top 16, lalu 17th… dari Swiss.
+- Label ronde top cut: Top 16 → **Quarterfinals** (sebelumnya tertulis "Top 8") → Semifinals → Final.
+- Publikasi ke Tournament Decks memakai jumlah top cut event (16 deck untuk Top 16; batas RPC 64 baris, aman).
+- **Migrasi DB:** batas `events_top_cut_check` diganti jadi `top_cut in (0, 2, 4, 8, 16)`. Tanpa migrasi ini, menyimpan
+  event Top 16 akan ditolak database.
+- Versi 7.00, cache-buster `?v=7.00` (kecuali `qrcode.js?v=6.99` yang tidak berubah).
+
+**Verifikasi:** migrasi dijalankan 2× di PostgreSQL 16 lokal (idempotent; 16 diterima, 32 ditolak). Uji Node 20 pemain
+5 ronde Swiss → Top 16 → QF → SF → Final: pairing dan label peringkat sesuai; kurang dari 16 pemain aktif → `null`
+(UI menampilkan "Not enough active players"). Playwright: 18 pemain walk-in, 4 ronde Swiss → Top 16 (8 meja) →
+Quarterfinals → Semifinals → Final → klasemen 1st/2nd/2× Top 4/4× Top 8/8× Top 16/17th/18th → publish 16 deck, tanpa
+error JS (9 cek); uji alur v6.99 (33 cek) tetap lulus.
 
 ### Data — Jadwal Weekly Rush LGS: tambah Draagoons Hobby Shop (Tangerang Selatan) — 19 Oktober 2026 *(`data.js`)*
 
