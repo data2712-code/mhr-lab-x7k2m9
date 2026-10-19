@@ -130,14 +130,14 @@ window.TOURNAMENTS = [
      berita    : opsional, slug artikel Berita terkait
    Nama resmi diambil dari halaman produk marvelherorush.com (September 2026). */
 window.SETS = [
-  { kode:'SD05', nama:'', namaSementara:'SOUL', tipe:'Starter Deck', status:'spoiler', rilis:{ cn:'2026-10-16' },
-    deskripsi:'Orange starter deck, released in China on 16 Oct 2026 (Indonesian release date TBA). All 18 cards revealed: Asgard (Odin, Hela, Heimdall, Sif, Valkyrie), Kamar-Taj (Ancient One, Wong, Doctor Strange) and Captain Marvel.',
+  { kode:'SD05', nama:'', namaSementara:'SOUL', tipe:'Starter Deck', status:'spoiler', rilis:{ id:'2026-11-14', cn:'2026-10-16' },
+    deskripsi:'Orange starter deck, released in China on 16 Oct 2026; official Indonesian release on 14 Nov 2026. All 18 cards revealed, with Odin in UR, MR and SEC versions: Asgard (Odin, Hela, Heimdall, Sif, Valkyrie), Kamar-Taj (Ancient One, Wong, Doctor Strange) and Captain Marvel.',
     berita:'sd05-sd06-china-release-all-cards' },
-  { kode:'SD06', nama:'', namaSementara:'POWER', tipe:'Starter Deck', status:'spoiler', rilis:{ cn:'2026-10-16' },
-    deskripsi:'Purple starter deck, released in China on 16 Oct 2026 (Indonesian release date TBA). All 18 cards revealed, plus an SEC alternate art of Thanos: Thanos, the Black Order and Cabal cards.',
+  { kode:'SD06', nama:'', namaSementara:'POWER', tipe:'Starter Deck', status:'spoiler', rilis:{ id:'2026-11-14', cn:'2026-10-16' },
+    deskripsi:'Purple starter deck, released in China on 16 Oct 2026; official Indonesian release on 14 Nov 2026. All 18 cards revealed, with Thanos in UR, MR and SEC versions: Thanos, the Black Order and Cabal cards.',
     berita:'sd05-sd06-china-release-all-cards' },
-  { kode:'PB02', nama:'', namaSementara:'Promo Pack', tipe:'Other', status:'spoiler', rilis:{ cn:'2026-10-16' },
-    deskripsi:'Promo pack included in every SD05/SD06 box, released in China on 16 Oct 2026 (Indonesian release date TBA): 21 PR cards (10 Orange, 10 Purple, 1 Yellow).',
+  { kode:'PB02', nama:'', namaSementara:'Promo Pack', tipe:'Other', status:'spoiler', rilis:{ id:'2026-11-14', cn:'2026-10-16' },
+    deskripsi:'Promo pack, not sold separately: you get it when buying SD05/SD06 or by playing Weekly Rush tournaments at LGS. Released in China on 16 Oct 2026; in Indonesia from 14 Nov 2026. 21 PR cards (10 Orange, 10 Purple, 1 Yellow).',
     berita:'sd05-sd06-china-release-all-cards' },
   { kode:'SP01', nama:'Era of Spiders', tipe:'Expansion Pack', status:'rilis',
     berita:'sp01-teks-resmi-bahasa-indonesia' },
@@ -168,6 +168,8 @@ window.RILIS = [
     wilayah:'Indonesia', berita:'sp01-teks-resmi-bahasa-indonesia' },
   { nama:'SD05 & SD06 Starter Deck + PB02 (Orange & Purple)', tanggal:'2026-10-16',
     wilayah:'China', zona:'+08:00', berita:'preview-sd05-sd06-pb02-orange-purple' },
+  { nama:'SD05 & SD06 Starter Deck + PB02 (Orange & Purple)', tanggal:'2026-11-14',
+    wilayah:'Indonesia', link:'#set' },
 ];
 
 /* ========== DUKUNGAN SUKARELA ==========

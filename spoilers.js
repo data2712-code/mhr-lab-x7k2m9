@@ -11,7 +11,13 @@
    l (Lv), r (Range), p (Power), nm (nama), f (trait), e (daftar efek),
    img (gambar ber-watermark SAMPLE).
    v6.93 (16 Okt 2026): SD05/SD06/PB02 sudah rilis di China, belum di Indonesia.
-   Semua 36 nomor SD05/SD06 + SEC Thanos + 21 PB02 = 58 cetakan. Gambar dari
+   Semua 36 nomor SD05/SD06 + SEC Thanos + 21 PB02 = 58 cetakan.
+   Audit 19 Okt 2026 vs daftar kartu resmi marvelherorush.com/cn: +3 cetakan
+   (SD05-001 UR & SEC, SD06-001 MR) → 61. PB02-002 & PB02-004 diganti ke versi
+   final (teks/Power berubah dari spoiler). Kartu RUSH POINT (SD05-019, SD06-019)
+   sengaja tidak dimasukkan. Catatan: teks di database situs resmi utk SD05-001
+   MR/SEC ("抽2/3张") dan SD06-001 MR/SEC ("Lv5/Lv6") TIDAK sesuai gambar kartunya
+   (semua tertulis 抽1张 / Lv4) — yang dipakai di sini teks pada gambar. Gambar dari
    images/news/sd05-sd06-pb02/, .../sd05-sd06-new-spoilers/ dan
    .../sd05-sd06-china-release-all-cards/ (semua ber-watermark SAMPLE).
    =================================================================== */
@@ -38,15 +44,15 @@ window.SPOILERS = [
   "c": "Orange",
   "l": 3,
   "r": 2,
-  "p": 1000,
+  "p": 2000,
   "nm": "[Sweet and Obedient] Goose",
   "f": "Flerken",
   "e": [
    "UNIQUE",
    "AUTO【HAND】: If you have characters with 【Nick Fury】 or 【Captain Marvel】 in their names in VOID, this card gets the ability 【COUNTER】.",
-   "COUNTER·ACTI【FIELD/ONCE PER TURN】: In your opponent's turn, you prune 1 of your characters with Lv3 or below in BATTLE except this card. If you do, you place that character into your field."
+   "TRIG【BATTLE】: When this card enters the field, if you have fewer Rush Points in your Timeline than your opponent, you may attach 1 of your opponent's characters with Lv3 or below in BATTLE to this card."
   ],
-  "img": "images/news/sd05-sd06-pb02/PB02-002.jpg"
+  "img": "images/news/sd05-sd06-china-release-all-cards/PB02-002.jpg"
  },
  {
   "no": "PB02-003",
@@ -75,9 +81,9 @@ window.SPOILERS = [
   "f": "GOTG",
   "e": [
    "AUTO【HAND】: This card can not be called.",
-   "ACTI【HAND】: If the total Power of your characters in BATTLE is 6500, you place this card from HAND into your field."
+   "ACTI【HAND】: If the total Power of your characters in BATTLE is 6500, you place this card from HAND into your BATTLE."
   ],
-  "img": "images/news/sd05-sd06-pb02/PB02-004.jpg"
+  "img": "images/news/sd05-sd06-china-release-all-cards/PB02-004.jpg"
  },
  {
   "no": "PB02-005",
@@ -326,7 +332,7 @@ window.SPOILERS = [
  },
  {
   "no": "SD05-001",
-  "ra": "MR",
+  "ra": "UR",
   "c": "Orange",
   "l": 6,
   "r": 2,
@@ -337,7 +343,35 @@ window.SPOILERS = [
    "UNIQUE",
    "TRIG【BACK】: When your turn ends, 1 of your opponent's characters in BASE gets Power-X in this turn. X is the Power of this card. If that character retreats because of this effect, you draw 1 more card."
   ],
+  "img": "images/news/sd05-sd06-china-release-all-cards/SD05-001_UR.jpg"
+ },
+ {
+  "no": "SD05-001",
+  "ra": "MR",
+  "c": "Orange",
+  "l": 6,
+  "r": 2,
+  "p": 4000,
+  "nm": "[Guardian of the Nine Realms] Odin",
+  "f": "Asgard",
+  "e": [
+   "Alternate art of SD05-001 — same text as the UR version above."
+  ],
   "img": "images/news/sd05-sd06-pb02/SD05-001.jpg"
+ },
+ {
+  "no": "SD05-001",
+  "ra": "SEC",
+  "c": "Orange",
+  "l": 6,
+  "r": 2,
+  "p": 4000,
+  "nm": "[Guardian of the Nine Realms] Odin",
+  "f": "Asgard",
+  "e": [
+   "Alternate art of SD05-001 — same text as the UR version above."
+  ],
+  "img": "images/news/sd05-sd06-china-release-all-cards/SD05-001_SEC.jpg"
  },
  {
   "no": "SD05-002",
@@ -435,7 +469,7 @@ window.SPOILERS = [
   "l": 3,
   "r": 3,
   "p": 2000,
-  "nm": "[Hidden Mirror Guardian] Doctor Strange",
+  "nm": "[Secret Realm Guardian] Doctor Strange",
   "f": "Human/Avengers/Kamar-Taj",
   "e": [
    "TRIG【FIELD/ONCE PER TURN】: When 1 of your orange characters enters the field, you may move 1 of your characters with 【Human】 in their features from RETREAT back to the bottom of your deck."
@@ -496,7 +530,7 @@ window.SPOILERS = [
   "nm": "[Shield of Asgard] Sif",
   "f": "Asgard/Avengers",
   "e": [
-   "UNIQUE",
+   "BLOCK",
    "AUTO【HAND】: This card can not be called.",
    "ACTI【HAND】: You show this card in HAND. If you do, you move this card from HAND back to the top of your deck."
   ],
@@ -601,6 +635,20 @@ window.SPOILERS = [
    "TRIG【BATTLE】: When this card enters the field by calling, you may prune 1 of your purple characters in RETREAT. If you do, you retreat 1 of your opponent's characters with Lv4 or below in BATTLE."
   ],
   "img": "images/news/sd05-sd06-pb02/SD06-001.jpg"
+ },
+ {
+  "no": "SD06-001",
+  "ra": "MR",
+  "c": "Purple",
+  "l": 6,
+  "r": 1,
+  "p": 5500,
+  "nm": "[Curse of Wisdom] Thanos",
+  "f": "Eternal Titan",
+  "e": [
+   "Alternate art of SD06-001 — same text as the UR version above."
+  ],
+  "img": "images/news/sd05-sd06-china-release-all-cards/SD06-001_MR.jpg"
  },
  {
   "no": "SD06-001",
@@ -763,7 +811,7 @@ window.SPOILERS = [
   "l": 2,
   "r": 1,
   "p": 3000,
-  "nm": "[Colossal Palm Slam] Leviathan",
+  "nm": "[Colossal Ram] Leviathan",
   "f": "Chitauri/Cabal",
   "e": [
    "TRIG【BATTLE】: When this card enters the field, you may discard the top card of your deck. If you do, you move 1 of your opponent's characters with Lv3 or below from BATTLE to your opponent's BASE."

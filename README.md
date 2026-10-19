@@ -516,6 +516,38 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Audit SD05, SD06 & PB02 vs daftar kartu resmi China + hitung mundur rilis Indonesia 14 November (SD05, SD06 & PB02) — 19 Oktober 2026 *(`spoilers.js`, `data.js`, 5 gambar baru di `images/news/sd05-sd06-china-release-all-cards/`)*
+
+Dibandingkan dengan daftar kartu resmi marvelherorush.com/cn (API `server.marvelherorush.com/marvel/card/list`, 19 Okt
+2026): nomor, rarity, warna, Lv, R, Power, trait, teks efek dan gambar tiap cetakan. Kalau teks di database situs resmi
+berbeda dengan gambar kartunya, yang dipakai teks pada gambar.
+
+- **Cetakan yang belum ada (+3 → 61 total):** SD05-001 Odin **UR** dan **SEC** (sebelumnya cuma MR), SD06-001 Thanos
+  **MR** (sebelumnya UR + SEC). Teks sama dengan versi UR; versi UR jadi entri dengan teks lengkap. Catatan: database
+  situs resmi menulis "抽2/3张" (Odin MR/SEC) dan "Lv5/Lv6" (Thanos MR/SEC), padahal di gambar kartunya semua
+  "抽1张" / "Lv4" — dianggap salah input situs resmi.
+- **PB02-002 Goose berubah dari versi spoiler:** Power 1000 → **2000**, efek ke-2 sekarang TRIG【BATTLE】 (masuk
+  field, kalau Rush Point di Timeline kita lebih sedikit dari lawan, boleh attach 1 karakter lawan Lv3 ke bawah di
+  BATTLE ke kartu ini). Gambar diganti versi final.
+- **PB02-004 Gamora:** versi final menaruh kartu ke **BATTLE** (战区), bukan ke field. Gambar diganti versi final.
+- **SD05-012 Sif:** kata kunci di kartu **BLOCK** (拦截), sebelumnya salah tertulis UNIQUE.
+- **Nama (salah baca karakter):** SD05-008 「秘境守护」 → *[Secret Realm Guardian]* (sebelumnya "Hidden Mirror");
+  SD06-012 「巨擎冲撞」 → *[Colossal Ram]* (sebelumnya "Colossal Palm Slam").
+- Sisanya (PB02 lain, SD05-002..018, SD06-002..018) cocok. Kartu RUSH POINT SD05-019 / SD06-019 sengaja tidak
+  dimasukkan. "Kuning" pada PB02-021 memang kunci warna internal (bukan salah).
+- **`data.js`:** `SETS` SD05 & SD06 → `rilis.id: '2026-11-14'` + deskripsi ("official Indonesian release on 14 Nov
+  2026", versi UR/MR/SEC). PB02 juga `rilis.id: '2026-11-14'` — promo pack, tidak dijual umum: didapat saat membeli
+  SD05/SD06 atau bermain Weekly Rush di LGS (deskripsi diperbarui). `RILIS` + entri "SD05 & SD06 Starter Deck + PB02
+  (Orange & Purple)" 14 Nov 2026, wilayah Indonesia, tombol "See details" → `#set` — kotak hitung mundur di
+  Beranda otomatis menampilkannya (rilis terdekat yang belum lewat).
+- Gambar baru (dari daftar kartu resmi, tetap ber-watermark SAMPLE): `SD05-001_UR.jpg`, `SD05-001_SEC.jpg`,
+  `SD06-001_MR.jpg`, `PB02-002.jpg`, `PB02-004.jpg`. Gambar lama PB02-002/004 di `images/news/sd05-sd06-pb02/`
+  dibiarkan (masih dipakai artikel berita lama). `sw.js` tidak diubah (nama berkas gambar baru).
+
+**Verifikasi:** `node --check`; Chromium headless: Beranda menampilkan "Next release · Indonesia — SD05 & SD06 Starter
+Deck + PB02 — 14 Nov 2026"; `#set/SD05` & `#set/SD06` 20 cetakan dan `#set/PB02` 21, ketiganya "Indonesia release 14 Nov 2026";
+panel kartu SD05-001 SEC & PB02-002 menampilkan teks baru; tanpa error JS.
+
 ### v7.01 — Events: daftar tanpa akun (tamu), pengaturan decklist, cek legalitas decklist — 19 Oktober 2026 *(`index.html`, `events.js`, `events-ui.js`, migrasi SQL baru `mhr_decklab_v701_guests_decklist.sql` di folder internal)*
 
 - **Daftar tanpa akun (opsi per event):** form event punya centang *Allow registration without an account (guests)*.
