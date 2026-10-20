@@ -227,7 +227,7 @@ window.DUKUNG = {
    SELALU tampil: kalau ig kosong, tombolnya membuka pencarian Google
    "<nama toko> <kota> instagram" (jadi toko baru langsung punya tombol).
    Nomor hp tanpa tanda + dan tanpa spasi, contoh: 6281234567890 */
-window.LGS_UPDATE = '19 October 2026';
+window.LGS_UPDATE = '20 October 2026';
 window.LGS = [
   /* ---------- JAKARTA ---------- */
   { nm:'Ogre Gandaria Neverland', kota:'Jakarta', tz:'WIB',
@@ -282,6 +282,9 @@ window.LGS = [
     ig:'hobi.quarter',
     map:'https://maps.app.goo.gl/sC5ajRoVNXTZbrnP7',
     jd:[ {h:1, w:'19:15', n:'Starter deck only'}, {h:4, w:'19:15'} ] },
+  { nm:'Gameopoly Board Game Cafe', kota:'Tangerang', tz:'WIB',
+    map:'https://maps.app.goo.gl/NQ416aFN7tot1D2J9',
+    jd:[ {h:2, w:'19:30 - Close'} ] },
 
   /* ---------- TANGERANG SELATAN ---------- */
   { nm:'Catnie Hobbies & Games', kota:'Tangerang Selatan', tz:'WIB',
@@ -298,6 +301,30 @@ window.LGS = [
     ig:'savepointdpk',
     map:'https://maps.app.goo.gl/truvxqDEXS1Wgoo58?g_st=ic',
     jd:[ {h:5, w:'19:30 - Close'}, {h:7, w:'16:00 - Close', n:'Starter deck only'} ] },
+
+  /* ---------- BANDUNG ---------- */
+  { nm:'Vega Toys & Hobbies', kota:'Bandung', tz:'WIB',
+    ig:'vegatoys',
+    map:'https://maps.app.goo.gl/38MA6A2bUwLozKaF6',
+    jd:[ {h:2, w:'18:30 - Close'}, {h:4, w:'18:30 - Close'} ] },
+  { nm:'Castle Hobby Shop (Pista de Padel)', kota:'Bandung', tz:'WIB',
+    ig:'castlehobbyshop',
+    map:'https://maps.app.goo.gl/2UEaWH5hX1QibbHa6',
+    jd:[ {h:4, w:'19:00 - Close'}, {h:6, w:'19:00 - Close'} ] },
+  { nm:'Brotherhood Game Store', kota:'Bandung', tz:'WIB',
+    ig:'bgs_bandung62',
+    map:'https://maps.app.goo.gl/PjhGFLToUxEP4Hj58',
+    jd:[ {h:3, w:'19:00 - Close'} ] },
+  { nm:'The Maple', kota:'Bandung', tz:'WIB',
+    ig:'maplehobbies',
+    map:'https://maps.app.goo.gl/H5rCvcH3hFydCGr26',
+    jd:[ {h:6, w:'13:00 - Close'} ] },
+
+  /* ---------- KUNINGAN ---------- */
+  { nm:'Arc Entry', kota:'Kuningan', tz:'WIB',
+    ig:'arc.entry.kuningan',
+    map:'https://maps.app.goo.gl/yo67XvzXbtUywsVZ9',
+    jd:[ {h:5, w:'17:00 - Close'} ] },
 
    /* ---------- MEDAN ---------- */
   { nm:'Exordium TCG', kota:'Medan', tz:'WIB',

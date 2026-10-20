@@ -597,6 +597,16 @@ berbeda dengan gambar kartunya, yang dipakai teks pada gambar.
 Deck + PB02 — 14 Nov 2026"; `#set/SD05` & `#set/SD06` 20 cetakan dan `#set/PB02` 21, ketiganya "Indonesia release 14 Nov 2026";
 panel kartu SD05-001 SEC & PB02-002 menampilkan teks baru; tanpa error JS.
 
+### Data — Jadwal Weekly Rush LGS: tambah 6 toko (Bandung, Kuningan, Tangerang) — 20 Oktober 2026 *(`data.js`)*
+
+- **Bandung (kota baru):** Vega Toys & Hobbies (Jl. Banda, Selasa & Kamis 18:30), Castle Hobby Shop di Pista de Padel
+  (Jl. Soekarno-Hatta, Kamis & Sabtu 19:00), Brotherhood Game Store (Sukajadi, Rabu 19:00), The Maple (Maple Board Game
+  Cafe, Kopo Mas Regency, Sabtu 13:00).
+- **Kuningan (kota baru):** Arc Entry (Jumat 17:00). Link Maps dari toko mengarah ke titik "Highland Bakery & Cafe", Kuningan.
+- **Tangerang:** Gameopoly Board Game Cafe (Gading Serpong, Selasa 19:30) — belum ada Instagram, tombol Instagram
+  memakai pencarian Google otomatis.
+- Semua WIB, Instagram dari link yang dikirim pemilik (parameter pelacak dibuang). `LGS_UPDATE` → 20 October 2026.
+
 ### v7.01 — Events: daftar tanpa akun (tamu), pengaturan decklist, cek legalitas decklist — 19 Oktober 2026 *(`index.html`, `events.js`, `events-ui.js`, migrasi SQL baru `mhr_decklab_v701_guests_decklist.sql` di folder internal)*
 
 - **Daftar tanpa akun (opsi per event):** form event punya centang *Allow registration without an account (guests)*.
