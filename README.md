@@ -553,9 +553,10 @@ ketiga set ini — baru versi China.
 - **`tools/generate_api.js`:** set PRE-RELEASE tidak ikut API mitra (api/v1 tidak berubah). **Jalankan ulang
   `node tools/generate_api.js` setelah 14 Nov 2026** supaya SD05/SD06/PB02 masuk API.
 - `python3 tools/generate_card_pages.py`: 59 halaman baru di `cards/` (57 karakter + 2 Rush Point), sitemap 412 URL.
-- **Perlu dicek (server):** fungsi SQL Events memeriksa format kode deck (`BAD_DECKLIST`). Kalau pola regex-nya
-  membatasi huruf seri ke `A–I`, perluas ke `A–L` supaya decklist berisi SD05/SD06/PB02 tidak ditolak setelah 14 Nov.
-  Berkas migrasi Events tidak ada di folder internal yang bisa dicek sesi ini.
+- **Server (dicek langsung di Supabase, 19 Okt 2026):** kode deck TIDAK dibatasi huruf seri — fungsi
+  `mhr_event_apply_decklist` cuma mensyaratkan awalan `1.` dan maks. 2000 karakter (`BAD_DECKLIST`), constraint
+  `event_decklists_deck_code_check` sama (`^1\.` + ≤ 2000), `decks_code_len` ≤ 1000. Huruf J/K/L aman, tidak perlu
+  migrasi SQL.
 - **Begitu teks resmi terbit:** ganti `nm/e` dan/atau `nm_en/e_en`, ubah `fan:2` → `fan:1` (kalau baru EN yang
   resmi) atau hapus `fan`, ganti gambar (dan isi `images/en/`), lalu jalankan kedua skrip generator.
 
