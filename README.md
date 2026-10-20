@@ -79,6 +79,19 @@ Git Bash), bukan lagi upload lewat web.
 > Jangan pakai **Add file → Upload files** di web GitHub untuk menghapus/memindah berkas —
 > cara itu cuma bisa menambah/menimpa, tidak bisa menghapus.
 
+> **Aturan cache-buster `?v=` (wajib, sejak 20 Oktober 2026):** Cloudflare & browser menyimpan
+> berkas JS ±4 jam **per alamat lengkap**, termasuk `?v=`. Jadi:
+> 1. **Setiap kali isi berkas JS lokal berubah** — `data.js` (jadwal LGS, deck komunitas, hasil
+>    turnamen, SETS), `cards.js`, `spoilers.js`, `events.js`, dll. — angka `?v=` berkas itu di tag
+>    `<script>` `index.html` **wajib diganti di commit yang sama**, walau versi situs tidak naik.
+>    Cukup tambah akhiran, mis. `data.js?v=7.02` → `data.js?v=7.02-lgs1020` (tanggal/isi singkat).
+>    Kalau lupa, pengunjung tetap mendapat isi lama sampai cache kedaluwarsa (±4 jam).
+> 2. **Jangan membuka alamat `?v=` yang baru di situs live sebelum GitHub Pages selesai deploy.**
+>    Kalau terbuka terlalu cepat, Cloudflare menyimpan isi LAMA di alamat baru itu selama ±4 jam.
+>    Cek dulu `index.html` live sudah memuat `?v=` baru (header `last-modified` berubah), baru
+>    buka/cek berkas JS-nya.
+> 3. Kalau sudah terlanjur: ganti lagi akhiran `?v=` lalu push, atau Purge URL berkas itu di Cloudflare.
+
 > **Aturan tetap proyek ini — berlaku untuk sesi Claude mana pun, kapan pun:**
 > **setiap** perubahan atau pembaruan, sekecil apa pun — baik `index.html`, `cards.js`,
 > `data.js` saja, atau cuma teks — **wajib** dicatat sebagai entri baru di § **Riwayat
@@ -387,7 +400,9 @@ hapus satu objek event-nya. Commit changes seperti biasa.
 ### Cara mengubah jadwal Weekly Rush LGS
 
 Semua jadwal ada di **`data.js`** (bukan `index.html`), jadi aman saat aplikasi
-diperbarui. Format tiap toko:
+diperbarui. **Setelah mengubah jadwal, ganti juga `?v=` pada `<script src="data.js?v=...">` di
+`index.html`** (lihat aturan cache-buster di § Cara update) — kalau tidak, jadwal baru baru
+muncul untuk pengunjung setelah ±4 jam. Format tiap toko:
 
 ```javascript
   { nm:'Nama Toko', kota:'Batam', tz:'WIB',
@@ -597,6 +612,14 @@ berbeda dengan gambar kartunya, yang dipakai teks pada gambar.
 **Verifikasi:** `node --check`; Chromium headless: Beranda menampilkan "Next release · Indonesia — SD05 & SD06 Starter
 Deck + PB02 — 14 Nov 2026"; `#set/SD05` & `#set/SD06` 20 cetakan dan `#set/PB02` 21, ketiganya "Indonesia release 14 Nov 2026";
 panel kartu SD05-001 SEC & PB02-002 menampilkan teks baru; tanpa error JS.
+
+### Data — Cache `data.js` diperbarui + aturan cache-buster di README — 20 Oktober 2026 *(`index.html`, `README.md`)*
+
+- Masalah: 6 toko baru (entri di bawah) sudah ter-push, tapi pengunjung masih melihat jadwal lama karena
+  `index.html` tetap memanggil `data.js?v=7.02` dan Cloudflare menyimpan isi lama di alamat itu (cache ±4 jam).
+- Perbaikan: `index.html` sekarang memanggil `data.js?v=7.02-lgs1020`. Hanya baris itu yang berubah.
+- README: aturan wajib cache-buster `?v=` di § Cara update (ganti `?v=` setiap kali isi berkas JS berubah, jangan
+  membuka alamat `?v=` baru sebelum deploy selesai), plus pengingat di § Cara mengubah jadwal Weekly Rush LGS.
 
 ### Data — Jadwal Weekly Rush LGS: tambah 6 toko (Bandung, Kuningan, Tangerang) — 20 Oktober 2026 *(`data.js`)*
 
