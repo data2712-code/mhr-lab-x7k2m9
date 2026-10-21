@@ -549,6 +549,14 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Jadwal Weekly Rush LGS: tambah Goblin Hut Tabletop & Midgard Games (Jakarta) — 21 Oktober 2026 *(`data.js`, `index.html`)*
+
+- **Goblin Hut Tabletop** (Goblin Hut Board Game Ground, Jl. Puri Indah Raya, Kembangan, Jakarta Barat): Rabu 19:30 WIB,
+  Instagram `@goblinhut.tabletop`. Nama dari pemilik tertulis "Tabtletop" — dianggap salah ketik, dipakai "Tabletop" sesuai Instagram.
+- **Midgard Games** (Midgard Games and Cafe, Jl. Krekot Bunder Raya, Sawah Besar, Jakarta Pusat): Kamis 19:00 WIB,
+  Instagram `@midgardgames.id`.
+- `LGS_UPDATE` → 21 October 2026; sesuai aturan cache-buster `index.html` → `data.js?v=7.02-lgs1021`.
+
 ### Data — Catatan aturan Supabase: tabel baru wajib `GRANT` mulai 30 Oktober 2026 — 21 Oktober 2026 *(`README.md`)*
 
 - Email Supabase 20 Okt 2026: mulai 30 Okt 2026, tabel baru di schema `public` tidak otomatis bisa diakses Data API.
