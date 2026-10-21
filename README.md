@@ -92,6 +92,24 @@ Git Bash), bukan lagi upload lewat web.
 >    buka/cek berkas JS-nya.
 > 3. Kalau sudah terlanjur: ganti lagi akhiran `?v=` lalu push, atau Purge URL berkas itu di Cloudflare.
 
+> **Aturan migrasi database Supabase — tabel baru wajib `GRANT` (berlaku sejak 30 Oktober 2026):**
+> Supabase tidak lagi otomatis memberi akses Data API (supabase-js / PostgREST) ke tabel **baru** di
+> schema `public` (email "Final notice: new tables in public need grants from October 30", 20 Okt 2026).
+> Tabel yang sudah ada tidak terpengaruh. Jadi setiap migrasi yang membuat tabel baru **wajib**:
+> 1. `alter table ... enable row level security;` + policy yang dibutuhkan (seperti biasa).
+> 2. Menulis izin secara eksplisit di migrasi yang sama — hanya yang benar-benar dibutuhkan, contoh:
+>    ```sql
+>    grant select on public.nama_tabel to anon;                                   -- hanya kalau pengunjung tanpa login perlu membaca
+>    grant select, insert, update, delete on public.nama_tabel to authenticated;  -- sesuaikan, mis. tanpa update
+>    grant select, insert, update, delete on public.nama_tabel to service_role;
+>    ```
+>    Tabel rahasia (mis. `event_guest_tokens`) justru di-`revoke all ... from public, anon, authenticated`
+>    dan hanya disentuh lewat fungsi RPC `security definer`.
+> 3. Fungsi RPC baru: `revoke execute ... from public` lalu `grant execute ... to` role yang memang perlu.
+> 4. Saat uji lokal, cek dengan `has_table_privilege('anon', 'public.nama_tabel', 'select')` dst. Tanpa
+>    `GRANT`, situs akan mendapat error *permission denied* walau RLS-nya benar.
+> Migrasi v6.97, v6.98 dan v7.01 sudah mengikuti pola ini (lihat berkas `.sql` di folder internal).
+
 > **Aturan tetap proyek ini — berlaku untuk sesi Claude mana pun, kapan pun:**
 > **setiap** perubahan atau pembaruan, sekecil apa pun — baik `index.html`, `cards.js`,
 > `data.js` saja, atau cuma teks — **wajib** dicatat sebagai entri baru di § **Riwayat
@@ -531,6 +549,14 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Catatan aturan Supabase: tabel baru wajib `GRANT` mulai 30 Oktober 2026 — 21 Oktober 2026 *(`README.md`)*
+
+- Email Supabase 20 Okt 2026: mulai 30 Okt 2026, tabel baru di schema `public` tidak otomatis bisa diakses Data API.
+  Tidak ada perubahan yang dibutuhkan untuk tabel yang sudah ada; semua migrasi sejak v6.97 sudah menulis `grant`
+  secara eksplisit.
+- README § Cara update: aturan tetap untuk migrasi berikutnya (RLS + `grant` eksplisit per role, `revoke` untuk
+  tabel rahasia & RPC, cek `has_table_privilege` saat uji lokal).
+
 ### v7.02 — SD05, SD06 & PB02 masuk halaman Kartu & Deck Builder (pre-release, terjemahan belum resmi) — 19 Oktober 2026 *(`cards.js`, `index.html`, `set-ui.js`, `events-ui.js`, `home-ui.js`, `data.js`, `spoilers.js`, `tools/generate_api.js`, 63 gambar baru di `images/`, 59 halaman baru di `cards/`, `sitemap.xml`)*
 
 Permintaan pemilik: SD05/SD06/PB02 sudah bisa dilihat di halaman Kartu dan dipakai di Deck Builder, dengan catatan
@@ -612,6 +638,12 @@ berbeda dengan gambar kartunya, yang dipakai teks pada gambar.
 **Verifikasi:** `node --check`; Chromium headless: Beranda menampilkan "Next release · Indonesia — SD05 & SD06 Starter
 Deck + PB02 — 14 Nov 2026"; `#set/SD05` & `#set/SD06` 20 cetakan dan `#set/PB02` 21, ketiganya "Indonesia release 14 Nov 2026";
 panel kartu SD05-001 SEC & PB02-002 menampilkan teks baru; tanpa error JS.
+
+### Data — Jadwal Weekly Rush LGS: tambah Hobby Kore (Cirebon) — 20 Oktober 2026 *(`data.js`, `index.html`)*
+
+- **Cirebon (kota baru):** Hobby Kore (Jl. Perjuangan No.10, Karyamulya, Kesambi, Kota Cirebon), Sabtu 15:00 WIB,
+  Instagram `@hobbykore.cirebon` (parameter pelacak di link dibuang).
+- Sesuai aturan cache-buster: `index.html` → `data.js?v=7.02-lgs1020b`.
 
 ### Data — Cache `data.js` diperbarui + aturan cache-buster di README — 20 Oktober 2026 *(`index.html`, `README.md`)*
 

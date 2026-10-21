@@ -326,6 +326,12 @@ window.LGS = [
     map:'https://maps.app.goo.gl/yo67XvzXbtUywsVZ9',
     jd:[ {h:5, w:'17:00 - Close'} ] },
 
+  /* ---------- CIREBON ---------- */
+  { nm:'Hobby Kore', kota:'Cirebon', tz:'WIB',
+    ig:'hobbykore.cirebon',
+    map:'https://maps.app.goo.gl/QWwEaizPwnYq7Sto6',
+    jd:[ {h:6, w:'15:00 - Close'} ] },
+
    /* ---------- MEDAN ---------- */
   { nm:'Exordium TCG', kota:'Medan', tz:'WIB',
     ig:'exordiumtcg',
