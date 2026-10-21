@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.02  ·  19 Oktober 2026
+     MHR DECK LAB  ·  versi 7.03  ·  21 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -16,17 +16,17 @@
 <meta property="og:url" content="https://mhrdecklab.com/">
 <meta property="og:title" content="MHR Deck Lab — Marvel Hero Rush Deck Builder">
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
-<meta property="og:image" content="https://mhrdecklab.com/og-image.jpg">
+<meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.02">
+<meta name="version" content="7.03">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
      tinggal timpa berkas di folder icons/ (ukurannya harus tetap sama). -->
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png?v=7.03" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png?v=7.03" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=7.03">
 <meta name="theme-color" content="#0E1216">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1817,7 +1817,7 @@
 
 <header>
   <div class="brand">
-    <h1><a href="#beranda" title="Home" style="display:block"><img class="logo" src="icons/logo-header.png" alt="MHR Deck Lab — Marvel Hero Rush TCG Deck Builder" width="759" height="220"></a></h1>
+    <h1><a href="#beranda" title="Home" style="display:block"><img class="logo" src="icons/logo-header.png?v=7.03" alt="MHR Deck Lab — Marvel Hero Rush TCG Deck Builder" width="801" height="220"></a></h1>
   </div>
   <div class="hdr-stats">
     <div class="pill"><span data-i18n="statUnique">Total kartu</span> <b id="hTotal">288</b></div>
@@ -2302,7 +2302,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.02</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.03</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -4553,8 +4553,11 @@ function tanggalCetak(){
    gelap yang tipis (~1,5 px dari 759 px), jadi di kertas putih hampir hilang.
    Karena itu kontur gelapnya DITEBALKAN khusus untuk cetak: siluet logo diwarnai
    gelap lalu distempel di sekeliling logo (lingkaran berjari-jari PDF_LOGO_KONTUR
-   px) sebelum logo aslinya digambar di atasnya. Berkas logo aslinya tidak diubah. */
-const PDF_LOGO_KONTUR = 4;          /* px pada logo 759 px lebar; naikkan = kontur lebih tebal */
+   px) sebelum logo aslinya digambar di atasnya. Berkas logo aslinya tidak diubah.
+   v7.03 — logo baru (kipas 6 kartu). Kop PDF sekarang memakai versi latar
+   terang icons/logo-light.png (tulisan gelap), jadi kontur tambahan tidak
+   diperlukan lagi: PDF_LOGO_KONTUR = 0 melewati langkah siluet sepenuhnya. */
+const PDF_LOGO_KONTUR = 0;          /* 0 = tanpa kontur (logo-light.png); >0 hanya untuk logo latar gelap */
 let PDF_LOGO = null;
 function pdfMuatLogo(){
   if(PDF_LOGO) return Promise.resolve(PDF_LOGO);
@@ -4587,14 +4590,14 @@ function pdfMuatLogo(){
             cx.drawImage(sil, pad + Math.cos(a)*ring, pad + Math.sin(a)*ring);
           }
         }
-        cx.drawImage(sil, pad, pad);
+        if(r > 0) cx.drawImage(sil, pad, pad);
         cx.drawImage(img, pad, pad);
         PDF_LOGO = {data: cv.toDataURL('image/png'), w: cv.width, h: cv.height, pad, iw, ih};
       } catch(e){ PDF_LOGO = null; }
       res(PDF_LOGO);
     };
     img.onerror = ()=>res(null);
-    img.src = 'icons/logo-header.png';
+    img.src = 'icons/logo-light.png?v=7.03';
   });
 }
 

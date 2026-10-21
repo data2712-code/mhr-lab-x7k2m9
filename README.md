@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.02** · 19 Oktober 2026
+**Versi saat ini: v7.03** · 21 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -548,6 +548,29 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.03 — Logo baru: kipas 6 kartu warna + huruf M (header, favicon, ikon app, preview link, kop PDF) — 21 Oktober 2026 *(`index.html`, `og-image.jpg`, `icons/logo-header.png`, `icons/favicon-16.png`, `icons/favicon-32.png`, `icons/apple-touch-icon.png`, `icons/icon-192.png`, `icons/icon-512.png`, `icons/icon-maskable-512.png`, berkas BARU `icons/logo-light.png`)*
+
+- Logo final pemilik (6 kartu: merah, kuning, biru, hijau, oranye, ungu + huruf M di kartu ungu, wordmark "MHR DECK LAB")
+  menggantikan logo lama. Panduan pemakaian: dokumen "MHR Deck Lab — Panduan Logo" (Claude Docs). Sumber gambar & semua
+  varian: Google Drive `TCG/Marvel Hero Rush/MHR Deck Lab/Icon MHR Deck Lab/MHR Deck Lab Icon (New)/` (MASTER, 1–9, `7.jpg`);
+  berkas siap pakai ada di subfolder **`Web Ready/`** (juga versi transparan latar gelap/terang, watermark putih, foto profil 1080).
+- Cara membuat berkas web (semua sumber AI berformat JPG tanpa transparansi): latar gelap #0E1319 dihapus jadi alpha
+  (jarak warna per piksel + un-premultiply), lalu dipotong rapat:
+  - `icons/logo-header.png` 801×220 (dari MASTER) — `<img>` header diubah ke `width="801" height="220"`.
+  - `icons/logo-light.png` 801×220 (dari varian latar terang folder 4, latar putih dihapus) — dipakai **kop PDF decklist**:
+    `pdfMuatLogo()` sekarang memuat berkas ini dan `PDF_LOGO_KONTUR = 0` (langkah kontur gelap dilewati; `if(r > 0)`).
+  - Favicon 16/32 dari `7.jpg` (kartu ungu + M, sudut putih JPG diganti latar gelap + sudut membulat transparan);
+    `apple-touch-icon.png` 180 penuh tanpa transparansi; `icon-192/512` & `icon-maskable-512` dari ikon kipas tanpa tulisan
+    (maskable: ikon ±62% di tengah, aman untuk potongan lingkaran Android).
+  - `og-image.jpg` 1200×630 (dipotong dari varian preview 1200×896 folder 8). `og:image` → `og-image.jpg?v=7.03`.
+- Cache-buster `?v=7.03` ditambahkan ke favicon, apple-touch-icon dan logo header (Cloudflare menyimpan gambar ±4 jam per
+  alamat). `manifest.json` tidak diubah (nama berkas ikon sama). Versi 7.03 (komentar, meta, footer).
+- **Belum diubah:** halaman statis `cards/*.html` & `news/*.html` memakai og-image/ikon dengan nama yang sama, jadi otomatis
+  ikut baru setelah cache habis; logo di template konten sosmed (folder internal `Icon MHR Deck Lab`) masih logo lama.
+
+**Verifikasi:** Playwright lokal — logo header 801×220 tampil 204×56 (desktop) / 160×44 (mobile), tanpa error JS;
+`pdfMuatLogo()` menghasilkan logo 803×222 tulisan gelap di latar putih. Berkas di folder Web Ready dicek ulang per piksel.
 
 ### Data — Jadwal Weekly Rush LGS: tambah Goblin Hut Tabletop & Midgard Games (Jakarta) — 21 Oktober 2026 *(`data.js`, `index.html`)*
 
