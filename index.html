@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.03  ·  21 Oktober 2026
+     MHR DECK LAB  ·  versi 7.04  ·  22 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.03">
+<meta name="version" content="7.04">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1483,10 +1483,16 @@
   .card-name:hover{color:var(--accent)}
   /* --- popup gambar --- */
   .lb{position:fixed;inset:0;z-index:60;background:rgba(6,8,11,.93);display:flex;
-    align-items:center;justify-content:center;padding:22px;cursor:zoom-out}
+    align-items:center;justify-content:center;padding:22px;cursor:zoom-out;
+    /* v7.04 — konten panjang (efek + related + Tournament usage) melebihi tinggi layar dan tidak
+       bisa di-scroll (body dikunci overflow:hidden saat popup terbuka). Popup sendiri sekarang
+       bisa di-scroll; margin:auto di .lb-inner = tetap di tengah kalau muat, mulai dari atas
+       kalau lebih tinggi dari layar (align-items:center saja memotong bagian atas). */
+    overflow-y:auto;overscroll-behavior:contain}
   .lb[hidden]{display:none}
   .lb-inner{display:flex;gap:22px;align-items:flex-start;max-width:960px;width:100%;
-    justify-content:center;cursor:auto}
+    justify-content:center;cursor:auto;margin:auto}
+  @media (min-width:761px){.lb-inner>:first-child{position:sticky;top:0}} /* v7.04 — gambar kartu tetap terlihat saat info di-scroll */
   .lb-img{max-height:82vh;max-width:min(430px,60vw);border-radius:12px;
     border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.6)}
   .lb-ph{width:330px;aspect-ratio:63/88;border-radius:12px;border:3px solid var(--lbc);
@@ -2302,7 +2308,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.03</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.04</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -3009,6 +3015,7 @@ function openRpLightbox(no, rar){
       </div>` : ''}
     </div>`;
   $('#lightbox').hidden = false;
+  $('#lightbox').scrollTop = 0;   /* v7.04 — mulai dari atas setiap buka / pindah kartu */
   document.body.style.overflow = 'hidden';
 }
 $('#typeTog').addEventListener('click', e=>{
@@ -5281,6 +5288,7 @@ function openLightbox(no){
       <button class="lb-add" id="lbAdd">${t('cAddDeck')}${q?` (${t('cNow')} ×${q})`:''}</button>
     </div>`;
   $('#lightbox').hidden = false;
+  $('#lightbox').scrollTop = 0;   /* v7.04 — mulai dari atas setiap buka / pindah kartu */
   document.body.style.overflow = 'hidden';
   if(typeof fillLbTny === 'function') fillLbTny(no);   // v6.96 — statistik turnamen kartu ini
 }

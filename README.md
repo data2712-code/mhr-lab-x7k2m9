@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.03** · 21 Oktober 2026
+**Versi saat ini: v7.04** · 22 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -482,6 +482,44 @@ Jadwal saat ini — **19 toko, 25 sesi/minggu, 9 kota**:
 | Minggu | Gale Force Games | Batam | 16.00 WIB – Selesai |
 | Minggu | Arnando Garage | Bali | 18.00 WITA – Selesai |
 
+### Logo & aset brand
+
+**Logo resmi sejak v7.03 (Oktober 2026):** kipas 6 kartu (dari belakang: merah, kuning, biru, hijau, oranye, ungu)
+dengan huruf **M** tegak di kartu ungu paling depan, di sebelah tulisan "MHR DECK" putih + "LAB" emas.
+Panduan lengkap (varian, warna, ukuran per platform, ruang kosong, larangan, prompt AI) ada di dokumen
+**MHR Deck Lab — Panduan Logo**: https://claude.ai/code/artifact/bd3f81db-0de9-4c79-8370-00c3bfe0a6d5
+
+**Lokasi file:**
+
+| Tempat | Isi |
+|---|---|
+| Repo ini: `icons/` + `og-image.jpg` | Hanya file yang dipakai situs (tabel di bawah) |
+| Drive: `Marvel Hero Rush > MHR Deck Lab > Icon MHR Deck Lab > MHR Deck Lab Icon (New) > Web Ready` | Set lengkap dengan nama standar — **sumber utama**. File master & hasil generate per varian ada di subfolder lain di `MHR Deck Lab Icon (New)` |
+| Repo internal `mhr-deck-lab-internal`: `Icon MHR Deck Lab/` | Untuk konten sosmed/teaser. Logo lama di `Logo lama (sebelum Okt 2026)/` |
+
+**File yang dipakai situs:**
+
+| File | Ukuran | Dipakai di |
+|---|---|---|
+| `icons/logo-header.png` | 801 × 220, transparan | Logo header (`<img class="logo">`) |
+| `icons/logo-light.png` | horizontal, transparan, untuk latar terang | Kop decklist PDF (`PDF_LOGO_KONTUR = 0`, tanpa kontur) |
+| `icons/favicon-16.png`, `icons/favicon-32.png` | 16 / 32 px | Ikon tab browser |
+| `icons/apple-touch-icon.png` | 180 × 180 | "Add to Home Screen" iPhone |
+| `icons/icon-192.png`, `icons/icon-512.png`, `icons/icon-maskable-512.png` | 192 / 512 | `manifest.json` (PWA) |
+| `og-image.jpg` | 1200 × 630 | Preview link WhatsApp/FB/X (`og:image`) |
+
+**File lain (di Drive `Web Ready`, tidak dipakai situs):** `mhr-logo-horizontal-transparent.png` (latar gelap),
+`mhr-logo-horizontal-light-transparent.png` (latar terang), `mhr-logo-watermark-white.png` (watermark),
+`mhr-icon-transparent.png` (ikon saja), `mhr-profile-1080.png` (foto profil IG/TikTok/WA), `favicon-48.png`, `favicon.ico`.
+Belum ada: versi mono emas transparan, mono hitam, bertumpuk, wordmark saja, dan master vektor (SVG).
+
+**Cara mengganti logo di situs:**
+1. Timpa file di `icons/` (atau `og-image.jpg`) dengan **nama yang sama**.
+2. Naikkan `?v=` di semua tag yang memuatnya di `index.html`: logo header, favicon, apple-touch-icon,
+   `og:image`, dan `img.src` logo PDF (sekarang semua `?v=7.03`). Cloudflare menyimpan gambar ±4 jam per URL,
+   jadi tanpa `?v=` baru pengunjung masih melihat logo lama.
+3. Jangan generate ulang logo dengan AI dari nol; turunkan varian dari file master supaya bentuknya identik.
+
 ### Statistik pengunjung (Cloudflare Web Analytics)
 
 **Sudah aktif sejak v2.7.** Lihat datanya di https://dash.cloudflare.com →
@@ -548,6 +586,29 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### Data — README: bagian baru "Logo & aset brand" + Panduan Logo dilengkapi daftar file — 22 Oktober 2026 *(`README.md`)*
+
+- Bagian baru **§ Cara update → Logo & aset brand**: lokasi file logo (repo `icons/`, Drive `Web Ready`, folder internal),
+  tabel file yang dipakai situs, file lain yang tersedia, dan cara mengganti logo (nama file sama + naikkan `?v=`).
+- Dokumen **MHR Deck Lab — Panduan Logo** ditambah bagian "File logo siap pakai" (contoh gambar tiap varian + tabel
+  nama file & lokasi); dua catatan lama di tabel ukuran disesuaikan dengan file yang sudah jadi.
+- `mhr-icon-transparent.png` disalin ke Drive `Web Ready` (sebelumnya hanya ada di folder internal sebagai
+  `Icon MHR Deck Lab.png`). Tidak ada perubahan kode, versi tetap v7.04.
+
+### v7.04 — Perbaikan: popup detail kartu bisa di-scroll kalau isinya lebih tinggi dari layar — 22 Oktober 2026 *(`index.html`)*
+
+- Laporan pemilik (screenshot BP01-107 「Freedom Radiance」 Captain America di desktop): isi popup (efek + Related cards +
+  Tournament usage + tombol Add to deck) melebihi tinggi layar dan tidak bisa di-scroll. Penyebab: `.lb` memakai
+  `align-items:center` tanpa `overflow`, sementara body dikunci `overflow:hidden` saat popup terbuka — bagian atas & bawah
+  terpotong. Di mobile (≤760px) sudah ada `overflow-y:auto`, jadi masalahnya hanya di layar lebar.
+- `.lb` sekarang `overflow-y:auto; overscroll-behavior:contain` di semua ukuran layar; `.lb-inner` diberi `margin:auto`
+  (tetap di tengah kalau muat, mulai dari atas kalau lebih tinggi dari layar).
+- Desktop (≥761px): kolom gambar kartu `position:sticky; top:0`, jadi gambar tetap terlihat saat info di-scroll.
+- `scrollTop = 0` setiap popup dibuka / pindah kartu (popup kartu & popup Rush Point). Versi 7.04.
+
+**Verifikasi:** Playwright lokal 1900×860, 1366×640 dan 390×844 dengan isi Tournament usage panjang: popup bisa di-scroll
+sampai tombol Add to deck, atas popup tetap terlihat saat scroll 0, gambar menempel di desktop, tanpa error JS.
 
 ### v7.03 — Logo baru: kipas 6 kartu warna + huruf M (header, favicon, ikon app, preview link, kop PDF) — 21 Oktober 2026 *(`index.html`, `og-image.jpg`, `icons/logo-header.png`, `icons/favicon-16.png`, `icons/favicon-32.png`, `icons/apple-touch-icon.png`, `icons/icon-192.png`, `icons/icon-512.png`, `icons/icon-maskable-512.png`, berkas BARU `icons/logo-light.png`)*
 
