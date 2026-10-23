@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.04  ·  22 Oktober 2026
+     MHR DECK LAB  ·  versi 7.05  ·  23 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.04">
+<meta name="version" content="7.05">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1795,6 +1795,145 @@
   .coll-qty-input::-webkit-outer-spin-button,.coll-qty-input::-webkit-inner-spin-button{
     -webkit-appearance:none;margin:0}
   .coll-qty-input{-moz-appearance:textfield}
+  /* ===== v7.05 — My Dashboard v2: tab ringkasan, My Decks grid/list, koleksi per set + per versi ===== */
+  .dt-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px;
+    padding-bottom:14px;border-bottom:1px solid var(--line);max-width:760px}
+  .dt-tab{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px;cursor:pointer;
+    text-align:left;color:var(--paper);font:inherit;display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:baseline}
+  .dt-tab:hover{border-color:#3a4658}
+  .dt-tab[aria-selected="true"]{border-color:var(--accent);background:linear-gradient(180deg,rgba(242,176,30,.10),rgba(242,176,30,.02))}
+  .dt-k{grid-column:1/-1;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+  .dt-tab[aria-selected="true"] .dt-k{color:var(--accent)}
+  .dt-v{font-family:var(--disp);font-size:24px;margin-top:2px}
+  .dt-s{font-size:12px;color:var(--muted)}
+  .dt-bar{grid-column:1/-1;height:5px;background:var(--ink);border-radius:9px;overflow:hidden;margin-top:6px;display:block}
+  .dt-bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:9px}
+  .dt-panel{padding-top:16px}
+  .dt-panel[hidden]{display:none}
+  /* toolbar deck */
+  .dk-tool{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  .dk-tool input{flex:1 1 220px;min-width:160px;background:var(--panel);border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:8px 12px;font-size:13px;outline:none}
+  .dk-tool input:focus{border-color:var(--accent)}
+  .dk-tool select{background:var(--panel);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:8px 10px;font-size:12.5px}
+  .dk-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .dk-seg button{background:var(--panel);border:none;color:var(--muted);padding:7px 11px;font-size:13px;cursor:pointer}
+  .dk-seg button[aria-pressed="true"]{background:var(--panel2);color:var(--accent)}
+  .dk-new{flex:none !important;padding:8px 13px;text-decoration:none;font-size:12.5px;text-align:center}
+  .dk-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
+  .dk-chip{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:5px 11px;
+    font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .dk-chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:rgba(242,176,30,.08)}
+  .dk-chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .dk-h{font-family:var(--disp);font-size:14px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:2px 0 10px}
+  .dk-h + .dk-grid{margin-bottom:18px}
+  .dk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:14px}
+  .dk{background:var(--panel);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;position:relative}
+  .dk:hover{border-color:#3a4658}
+  .dk-cover{height:104px;position:relative;overflow:hidden;background:var(--panel2);border-radius:11px 11px 0 0;cursor:pointer}
+  .dk-cover img{position:absolute;width:100%;top:50%;left:0;transform:translateY(-34%)}  /* jendela di bagian artwork kartu */
+  .dk-cover img.failed{display:none}
+  .dk-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(23,29,36,.95))}
+  .dk-cols{position:absolute;left:10px;bottom:8px;display:flex;gap:4px;z-index:1}
+  .dk-cols span{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;color:#fff}
+  .dk-cols span.dk-dark{color:#1A1206}
+  .dk-pub{position:absolute;top:8px;right:8px;z-index:1;background:rgba(14,18,22,.82);border:1px solid var(--line);
+    font-size:10.5px;padding:2px 7px;border-radius:999px;font-weight:700}
+  .dk-pin{position:absolute;top:7px;left:7px;z-index:2;background:rgba(14,18,22,.82);border:1px solid var(--line);border-radius:999px;
+    width:26px;height:26px;display:grid;place-items:center;font-size:13px;color:var(--muted);cursor:pointer;padding:0}
+  .dk-pin[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
+  .dk-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+  .dk-body b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dk-meta{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+  .dk-meta .bad{color:var(--merah)}
+  .dk-act{display:flex;gap:6px;margin-top:auto;padding-top:9px}
+  .dk-act .btn2{padding:6px 10px;font-size:12px}
+  .dk-act .btn2.main{flex:1;background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:800}
+  .dk-act .btn2.dk-more{flex:none;width:34px;padding:6px 0}
+  .dk-menu{position:absolute;right:10px;top:calc(100% - 8px);background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);padding:5px;z-index:20;min-width:200px;display:flex;flex-direction:column}
+  .dk-menu[hidden]{display:none}
+  .dk-menu button{background:none;border:none;color:var(--paper);text-align:left;padding:8px 10px;font-size:12.5px;border-radius:7px;cursor:pointer;font:inherit;font-size:12.5px}
+  .dk-menu button:hover{background:var(--panel)}
+  .dk-menu button.red{color:var(--merah)}
+  .dk-more-row{text-align:center;margin-top:16px}
+  .dk-more-row .btn2{flex:none;display:inline-block;padding:8px 16px;border-color:var(--accent);color:var(--accent)}
+  .dk-empty{color:var(--muted);font-size:13px;padding:20px 0}
+  /* tampilan daftar ringkas */
+  .dk-list{border:1px solid var(--line);border-radius:12px}
+  .dk-list .dk{flex-direction:row;align-items:center;gap:10px;border:none;border-bottom:1px solid var(--line);border-radius:0;
+    padding:7px 12px;background:var(--panel)}
+  .dk-list .dk:first-child{border-radius:12px 12px 0 0}
+  .dk-list .dk:last-child{border-bottom:none;border-radius:0 0 12px 12px}
+  .dk-list .dk:only-child{border-radius:12px}
+  .dk-list .dk-pin{position:static;flex:none;width:24px;height:24px;font-size:12px}
+  .dk-list .dk-thumb{width:46px;height:34px;border-radius:5px;object-fit:cover;object-position:50% 22%;flex:none;cursor:pointer;background:var(--panel2)}
+  .dk-list .dk-body{flex-direction:row;align-items:center;gap:12px;padding:0}
+  .dk-list .dk-body b{flex:1;min-width:0;font-size:13px}
+  .dk-list .dk-cl{display:flex;gap:4px;flex:none}
+  .dk-list .dk-cl i{width:10px;height:10px;border-radius:50%}
+  .dk-list .dk-meta{flex:none;width:170px;text-align:right}
+  .dk-list .dk-act{padding-top:0;margin-top:0;flex:none}
+  .dk-list .dk-act .btn2.main{flex:none}
+  .dk-list .dk-menu{top:calc(100% - 4px)}
+  /* koleksi: pilih set */
+  .cs-strip{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;margin:4px 0 2px}
+  .cs-grp{display:flex;flex-direction:column;gap:6px;flex:none}
+  .cs-grp>span{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700;padding-left:2px}
+  .cs-grp>div{display:flex;gap:6px}
+  .cs-tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 8px;width:88px;cursor:pointer;
+    text-align:left;color:var(--paper);font:inherit;overflow:hidden}
+  .cs-tile b{font-family:var(--mono);font-size:13px;display:block}
+  .cs-tile small{display:block;font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .cs-tile .cs-bar{display:block;height:4px;background:var(--ink);border-radius:9px;overflow:hidden;margin-top:6px}
+  .cs-tile .cs-bar i{display:block;height:100%;background:var(--accent)}
+  .cs-tile[aria-pressed="true"]{border-color:var(--accent);background:rgba(242,176,30,.07)}
+  .cs-tile.cs-done .cs-bar i{background:var(--hijau)}
+  .coll-hero{display:flex;gap:16px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;margin:12px 0 4px;flex-wrap:wrap}
+  .coll-ring{width:64px;height:64px;border-radius:50%;flex:none;display:grid;place-items:center;
+    background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--ink) 0)}
+  .coll-ring span{width:50px;height:50px;border-radius:50%;background:var(--panel);display:grid;place-items:center;font-family:var(--disp);font-size:16px}
+  .coll-hero h3{font-family:var(--disp);font-size:20px;letter-spacing:.02em}
+  .coll-hero h3 small{font-family:var(--body);font-size:12px;color:var(--muted);font-weight:400;margin-left:6px}
+  .coll-mini{display:flex;gap:14px;flex-wrap:wrap;margin-top:4px;font-size:12px;color:var(--muted)}
+  .coll-mini b{color:var(--paper)}
+  .coll-hero-acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .coll-hero-acts .btn2{flex:none;padding:7px 12px;font-size:12px}
+  /* koleksi: kartu */
+  .coll-card.miss .coll-card-img img{filter:grayscale(1) brightness(.45)}
+  .coll-spare{position:absolute;top:6px;left:6px;background:var(--hijau);color:#fff;font-weight:800;font-size:10px;padding:2px 6px;border-radius:6px;line-height:1.4}
+  .coll-vbtn{margin-top:7px;background:none;border:1px dashed var(--line);color:var(--muted);border-radius:7px;padding:4px 6px;
+    font-size:11px;font-weight:600;cursor:pointer;width:100%}
+  .coll-vbtn:hover,.coll-vbtn[aria-expanded="true"]{border-color:var(--accent);color:var(--accent)}
+  .coll-vbtn b{color:var(--paper)}
+  .coll-vers{margin-top:6px;display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--line);padding-top:6px}
+  .coll-vrow{display:flex;align-items:center;gap:6px}
+  .coll-rl{font-size:10.5px;font-family:var(--mono);color:var(--muted);font-weight:700;min-width:24px;text-align:right}
+  .coll-vrow img{width:24px;height:33px;object-fit:cover;border-radius:3px;cursor:zoom-in;background:var(--panel)}
+  .coll-vrow img.failed{visibility:hidden}
+  .coll-vrow span{flex:1;font-size:11px;font-weight:700;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .coll-vrow .coll-qty-input{width:40px;padding:2px}
+  .coll-vrow .qbtn{width:20px;height:20px;flex:none}
+  @media (max-width:640px){
+    .dt-tabs{gap:6px;margin-top:12px}
+    .dt-tab{padding:8px 10px}
+    .dt-k{font-size:9.5px;letter-spacing:.04em}
+    .dt-v{font-size:20px}
+    .dt-s{font-size:10.5px}
+    .dk-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .dk-cover{height:76px}
+    .dk-body{padding:8px 9px 10px}
+    .dk-body b{font-size:13px}
+    .dk-meta{font-size:10.5px}
+    .dk-chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+    .dk-list .dk-meta,.dk-list .dk-cl{display:none}
+    .dk-ob{display:none}
+    .dk-list .dk-act .btn2.main{padding:6px 9px}
+    .cs-tile{width:80px}
+    .coll-hero-acts{margin-left:0}
+    .coll-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -1899,22 +2038,48 @@
     <p class="auth-note" id="dashLoginHint" data-i18n="dashLoginHint">Masuk ke akun untuk melihat deck tersimpan dan koleksi kartumu.</p>
     <button class="btn2 main" id="dashLoginBtn" style="max-width:220px" data-i18n="dashLoginBtn">👤 Masuk / Daftar</button>
     <div id="dashLoggedIn" hidden>
-      <div class="dash-sec">
-        <h3 data-i18n="dashDeckHead">☁️ Deck Saya</h3>
+      <!-- v7.05 — tab dashboard: kotak ringkasan sekaligus tombol tab (My Decks / Card Collection).
+           Binders menyusul (Tahap B). Tab terakhir diingat di localStorage (DASH_TAB_KEY). -->
+      <div class="dt-tabs" id="dashTabs" role="tablist">
+        <button class="dt-tab" data-dtab="decks" role="tab" aria-selected="true">
+          <span class="dt-k">☁️ My Decks</span><span class="dt-v" id="dtDecksV">–</span><span class="dt-s" id="dtDecksS">decks</span></button>
+        <button class="dt-tab" data-dtab="coll" role="tab" aria-selected="false">
+          <span class="dt-k">🎴 Card Collection</span><span class="dt-v" id="dtCollV">–</span><span class="dt-s" id="dtCollS">cards</span>
+          <span class="dt-bar"><i id="dtCollBar"></i></span></button>
+      </div>
+
+      <div class="dt-panel" id="dashPanelDecks">
+        <div class="dk-tool">
+          <input type="text" id="dkQ" placeholder="Search deck name or card…" autocomplete="off">
+          <select id="dkSort" aria-label="Sort decks">
+            <option value="upd">Last updated</option>
+            <option value="name">Name A–Z</option>
+            <option value="old">Oldest first</option>
+          </select>
+          <div class="dk-seg" role="group" aria-label="View">
+            <button type="button" data-dkview="grid" aria-pressed="true" title="Grid">▦</button>
+            <button type="button" data-dkview="list" aria-pressed="false" title="Compact list">☰</button>
+          </div>
+          <a class="btn2 main dk-new" href="#build">＋ New deck</a>
+        </div>
+        <div class="dk-chips" id="dkChips"></div>
         <div id="dashCloudList"></div>
       </div>
-      <div class="dash-sec">
-        <h3 data-i18n="dashCollHead">🎴 Koleksi Kartu Saya</h3>
-        <p class="auth-note" data-i18n="dashCollIntro">Catat berapa salinan tiap kartu yang sudah kamu punya (ketik langsung atau pakai tombol +/-, sampai 1000 salinan) — datanya tersimpan ke akun, bukan cuma di perangkat ini. Klik gambar atau nama kartu untuk lihat detail lengkapnya.</p>
+
+      <div class="dt-panel" id="dashPanelColl" hidden>
+        <p class="auth-note" data-i18n="dashCollIntro">Catat berapa salinan tiap kartu yang sudah kamu punya.</p>
+        <div class="cs-strip" id="collSets"></div>
+        <div id="collHero"></div>
         <div class="coll-toolbar">
-          <input type="text" id="collQ" data-i18n-ph="dashCollSearchPh" placeholder="Cari nama/nomor kartu...">
+          <input type="text" id="collQ" placeholder="Search card name or number…" autocomplete="off">
           <select id="collOwnFilter">
-            <option value="all" data-i18n="dashCollFilterAll">Semua kartu</option>
-            <option value="owned" data-i18n="dashCollFilterOwned">Sudah dimiliki</option>
-            <option value="missing" data-i18n="dashCollFilterMissing">Belum dimiliki</option>
+            <option value="all">All cards</option>
+            <option value="owned">Owned</option>
+            <option value="missing">Missing</option>
+            <option value="spare">Has spare copies (more than 3)</option>
+            <option value="vers">Missing versions</option>
           </select>
         </div>
-        <div class="coll-progress" id="collProgress"></div>
         <div class="coll-list" id="collList"></div>
       </div>
     </div>
@@ -2278,11 +2443,10 @@
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
 <script src="tournaments.js?v=7.02"></script>
 <script src="events.js?v=7.02"></script>
-<script src="events-ui.js?v=7.02"></script>
-<!-- v6.88 — pop-up iklan carousel (kampanye Era of Spiders + Asia Peak Invitational).
-     "defer" = tidak menahan render; CSS-nya disuntik oleh skripnya sendiri saat tampil.
-     Aturan tampil & tanggal berakhir ada di PROMO (atas promo-popup.js). Pratinjau: /?promo=preview -->
-<script src="promo-popup.js?v=6.89" defer></script>
+<script src="events-ui.js?v=7.05"></script>
+<!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
+     Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
+     berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
 
 <footer>
   <!-- Sama seperti #btnDukung di header: ruang paragraf ini sudah dipesan sejak
@@ -2308,7 +2472,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.04</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.05</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -3071,10 +3235,18 @@ let deckListView = 'list';
 try{ if(localStorage.getItem(DL_VIEW_KEY) === 'grid') deckListView = 'grid'; }catch(e){}
 /* v6.96 — koleksi kartu akun (dari MHRCollection) untuk badge "dimiliki/dibutuhkan"
    di daftar kartu deck. null = belum login / belum termuat → fitur disembunyikan. */
-const deckColl = { map:null, missingOnly:false };
+const deckColl = { map:null, raw:null, missingOnly:false };
 /* v6.97 — koleksi yang masih kosong (belum pernah dipakai) dianggap tidak ada, supaya
    pengguna yang tidak memakai fitur koleksi tidak melihat badge merah 0/3 di semua kartu */
-function setDeckCollection(map){ deckColl.map = (map && Object.keys(map).length) ? map : null; if(!deckColl.map) deckColl.missingOnly = false; renderDeck(); }
+/* v7.05 — koleksi per versi: deckColl.raw = peta asli (kunci per versi), deckColl.map = total
+   semua versi per nomor kartu (collTotals) — Deck Builder tetap membaca deckColl.map[no]. */
+function setDeckCollection(map){
+  const has = !!(map && Object.keys(map).length);
+  deckColl.raw = has ? map : null;
+  deckColl.map = has ? collTotals(map) : null;
+  if(!deckColl.map) deckColl.missingOnly = false;
+  renderDeck();
+}
 /* warna kartu yang terang: angka level di strip pakai teks gelap supaya terbaca */
 const DARK_TXT = new Set(['Kuning','Orange']);
 function syncDeckListToggle(){
@@ -3666,7 +3838,7 @@ const T = {
   missBoughtConfirm: 'Add these {n} card(s) to your collection?',
   missSaveErr: 'Couldn\'t save to your collection. Please try again.',
   missOpenColl: '🗂 Open my collection',
-  missNote: 'Counts are based on the card collection in My Dashboard (all printings of a card number count together).',
+  missNote: 'Counts are based on the card collection in My Dashboard (all versions of a card number count together). “I bought these” adds them as the main version.',
   mxCopied: '✓ Copied',
   mxCopyManual: 'Copy this text:',
   cmpBtn: '⇄ Compare decks',
@@ -3953,12 +4125,12 @@ const T = {
   navDashboard: 'My Dashboard',
   navDashboardS: 'Dashboard',
   dashHead: '🗂 My Dashboard',
-  dashIntro: 'Decks saved to your account, and the card collection you already own.',
+  dashIntro: 'Your saved decks and the cards you own, saved to your account.',
   dashLoginHint: 'Log in to see your saved decks and card collection.',
   dashLoginBtn: '👤 Log In / Sign Up',
   dashDeckHead: '☁️ My Decks',
   dashCollHead: '🎴 My Card Collection',
-  dashCollIntro: 'Track how many copies of each card you own (type directly or use the +/- buttons, up to 1000 copies) — this data is saved to your account, not just this device. Click a card\'s image or name to see full details.',
+  dashCollIntro: 'Pick a set, then type or use +/- to record how many copies you own. Cards with several versions (UR, MR, SEC…) have a Versions button so you can count each one. Saved to your account; the Deck Builder counts all versions together.',
   dashCollSearchPh: 'Search card name/number...',
   /* v6.44: dropdown 3-state (ganti checkbox "hanya belum punya" tunggal) */
   dashCollFilterAll: 'All cards',
@@ -7572,6 +7744,7 @@ async function renderDashboardPage(){
   if(loginBtn) loginBtn.hidden = loggedIn;
   if(body) body.hidden = !loggedIn;
   if(!loggedIn) return;
+  setDashTab(dashTab);   // v7.05
   if(window.MHRUI && window.MHRUI.renderCloudList) window.MHRUI.renderCloudList();
   renderCollectionGrid();
 }
@@ -7609,53 +7782,156 @@ if(window.MHRAuth && window.MHRAuth.ready){
    ugal-ugalan / kepencet), SAMA SEKALI TIDAK berkaitan dengan batas
    salinan legal deck builder (maxCopy(), tetap 3 sesuai aturan 101.1.d
    resmi) — koleksi ini soal berapa banyak kartu FISIK yang benar-benar
-   dimiliki pemain, dua hal yang sengaja dipisah. */
+   dimiliki pemain, dua hal yang sengaja dipisah.
+
+   v7.05 — My Dashboard v2 (permintaan pemilik 23 Okt 2026):
+   (1) TAB: kotak ringkasan "My Decks" / "Card Collection" di atas sekaligus
+       tombol tab (setDashTab), tab terakhir diingat di localStorage.
+   (2) KOLEKSI PER SET: deretan kotak set (dikelompokkan Starter / Expansion /
+       Promo & other dari window.SETS) dengan progres masing-masing + kotak
+       "All". Ringkasan set: % dimiliki, jumlah belum punya, versi dimiliki,
+       salinan "spare" (di atas 3 = batas salinan per deck), tombol salin
+       daftar kartu yang belum punya / daftar spare.
+   (3) KOLEKSI PER VERSI (pilihan B pemilik): kunci collMap sekarang per versi.
+       Versi utama (ra[0]) tetap nomor polos "SD05-001" — SAMA dengan format
+       lama, jadi data lama otomatis terbaca sebagai versi utama tanpa migrasi.
+       Versi lain memakai akhiran kode rarity seperti nama berkas gambar:
+       "SD05-001_SEC", "SP01-021_HR_616". Deck Builder memakai total semua versi
+       per nomor kartu (collTotals() di setDeckCollection()). */
 let collMap = {};
 let collQ = '';
-let collOwnFilter = 'all'; /* v6.44: 'all' | 'owned' | 'missing' */
+let collOwnFilter = 'all'; /* 'all' | 'owned' | 'missing' | 'spare' | 'vers' */
 const COLL_MAX = 1000;
+const COLL_SPARE_KEEP = 3;           // salinan di atas ini dihitung "spare" (batas legal per deck)
+const COLL_SET_KEY = 'mhr_coll_set';
+const DASH_TAB_KEY = 'mhr_dash_tab';
+let collSet = null;                  // kode set terpilih, 'ALL' = semua set
+const collOpenV = new Set();         // nomor kartu yang panel "Versions"-nya sedang terbuka
+let dashTab = 'decks';
+try{ collSet = localStorage.getItem(COLL_SET_KEY) || null; }catch(e){}
+try{ const v = localStorage.getItem(DASH_TAB_KEY); if(v === 'decks' || v === 'coll') dashTab = v; }catch(e){}
+
+function collKey(c, r){ return (!r || r === c.ra[0]) ? c.no : `${c.no}_${r}`; }
+function collQtyV(c, r){ return collMap[collKey(c, r)] || 0; }
+function collTotal(c){ let n = 0; c.ra.forEach(r=>{ n += collMap[collKey(c, r)] || 0; }); return n; }
+function collNoOfKey(k){ const i = k.indexOf('_'); return i < 0 ? k : k.slice(0, i); }
+/* total per nomor kartu (semua versi digabung) — dipakai Deck Builder */
+function collTotals(map){
+  const out = {};
+  if(!map) return out;
+  for(const [k, v] of Object.entries(map)){ if(v > 0){ const no = collNoOfKey(k); out[no] = (out[no] || 0) + v; } }
+  return out;
+}
+
+const COLL_GRP = [['Starter Deck', 'Starter Deck'], ['Expansion Pack', 'Expansion'], ['Other', 'Promo & other']];
+function collSetList(){
+  const have = new Set(DB.filter(cardVisible).map(c=>c.s));
+  const sets = (Array.isArray(window.SETS) ? window.SETS : []).filter(s=>have.has(s.kode));
+  have.forEach(k=>{ if(!sets.some(s=>s.kode === k)) sets.push({ kode:k, nama:'', tipe:'Other' }); });
+  return sets;
+}
+function collSetName(s){ return s ? (s.nama || s.namaSementara || '') : ''; }
+function collCurSet(){
+  const list = collSetList();
+  if(collSet === 'ALL' || list.some(s=>s.kode === collSet)) return collSet;
+  /* bawaan: set pertama di urutan tampilan (Starter → Expansion → Promo) */
+  for(const [tp] of COLL_GRP){ const s = list.find(x=>(COLL_GRP.some(g=>g[0] === x.tipe) ? x.tipe : 'Other') === tp); if(s) return s.kode; }
+  return 'ALL';
+}
+function collSetStat(code){
+  const cards = DB.filter(c=>cardVisible(c) && (code === 'ALL' || c.s === code));
+  let own = 0, spare = 0, vt = 0, vo = 0;
+  cards.forEach(c=>{
+    const tq = collTotal(c);
+    if(tq > 0) own++;
+    spare += Math.max(0, tq - COLL_SPARE_KEEP);
+    vt += c.ra.length;
+    c.ra.forEach(r=>{ if(collQtyV(c, r) > 0) vo++; });
+  });
+  return { cards, tot:cards.length, own, spare, vt, vo, pct: cards.length ? Math.floor(own / cards.length * 100) : 0 };
+}
 
 function collFiltered(){
   const q = collQ.trim().toLowerCase();
+  const code = collCurSet();
   return DB.filter(cardVisible).filter(c=>{
-    const qty = collMap[c.no]||0;
-    if(collOwnFilter === 'owned' && qty <= 0) return false;
-    if(collOwnFilter === 'missing' && qty > 0) return false;
+    if(code !== 'ALL' && c.s !== code) return false;
+    const tq = collTotal(c);
+    if(collOwnFilter === 'owned' && tq <= 0) return false;
+    if(collOwnFilter === 'missing' && tq > 0) return false;
+    if(collOwnFilter === 'spare' && tq <= COLL_SPARE_KEEP) return false;
+    if(collOwnFilter === 'vers' && !(c.ra.length > 1 && c.ra.some(r=>collQtyV(c, r) <= 0))) return false;
     if(!q) return true;
     return c.no.toLowerCase().includes(q) || cardName(c).toLowerCase().includes(q);
   });
 }
 
-/* data-zoom di gambar & nama (persis pola cardGridHTML()) supaya delegasi
-   klik yang sudah ada di #cards TIDAK dipakai di sini — #collList punya
-   listener klik sendiri (di bawah), yang sengaja mengecek [data-coll-inc]/
-   [data-coll-dec] LEBIH DULU sebelum jatuh ke data-zoom, supaya tombol
-   stepper tidak ikut kebuka lightbox-nya. */
+/* stepper untuk satu versi. mini = baris di panel "Versions" (dengan thumbnail) */
+function collStepHTML(c, r, mini){
+  const k = collKey(c, r), q = collMap[k] || 0, lbl = escHtml(rarLabel(r, c));
+  const ctl = `<button class="qbtn" data-coll-dec="${k}"${q<=0?' disabled':''} aria-label="Remove one ${lbl}">−</button>
+      <input class="coll-qty-input" type="number" inputmode="numeric" min="0" max="${COLL_MAX}" data-coll-input="${k}" value="${q}" aria-label="${lbl} copies">
+      <button class="qbtn" data-coll-inc="${k}"${q>=COLL_MAX?' disabled':''} aria-label="Add one ${lbl}">+</button>`;
+  if(mini) return `<div class="coll-vrow"><img alt="" loading="lazy" src="${artFile(c.no, r)}" data-zoom="${c.no}" onerror="this.onerror=null;this.classList.add('failed')"><span title="${escHtml(rarTitle(r, c))}">${lbl}</span>${ctl}</div>`;
+  return `<div class="coll-stepper">${c.ra.length > 1 ? `<span class="coll-rl" title="${escHtml(rarTitle(r, c))}">${lbl}</span>` : ''}${ctl}</div>`;
+}
+/* data-zoom di gambar & nama → openLightbox() (sama dengan halaman Kartu). Listener klik
+   #collList mengecek tombol stepper/versi LEBIH DULU sebelum jatuh ke data-zoom. */
 function collRowHTML(c){
-  const qty = collMap[c.no]||0;
-  return `<div class="coll-card" data-no="${c.no}">
+  const tot = collTotal(c);
+  const spare = Math.max(0, tot - COLL_SPARE_KEEP);
+  const multi = c.ra.length > 1;
+  const open = multi && collOpenV.has(c.no);
+  const vOwned = c.ra.filter(r=>collQtyV(c, r) > 0).length;
+  const nm = escHtml(cardName(c));
+  return `<div class="coll-card${tot>0?'':' miss'}" data-no="${c.no}">
     <div class="coll-card-img" data-zoom="${c.no}">
-      <img alt="" data-ext="0" src="${artFile(c.no)}" loading="lazy" decoding="async"
-        onerror="imgFallback(this,'${c.no}')">
-      ${qty>0?`<span class="coll-owned-badge">×${qty}</span>`:''}
+      <img alt="" data-ext="0" src="${artFile(c.no, c.ra[0])}" loading="lazy" decoding="async" onerror="imgFallback(this,'${c.no}')">
+      ${tot>0?`<span class="coll-owned-badge" title="All versions together">×${tot}</span>`:''}
+      ${spare>0?`<span class="coll-spare" title="Copies above ${COLL_SPARE_KEEP}, the most one deck can use">+${spare} spare</span>`:''}
     </div>
-    <div class="coll-cap" data-zoom="${c.no}" title="${cardName(c)}">${cardName(c)}</div>
+    <div class="coll-cap" data-zoom="${c.no}" title="${nm}">${nm}</div>
     <div class="coll-sub">${c.no} · L${c.l} · ${t(c.c)}</div>
-    <div class="coll-stepper">
-      <button class="qbtn" data-coll-dec="${c.no}"${qty<=0?' disabled':''}>−</button>
-      <input class="coll-qty-input" type="number" inputmode="numeric" min="0" max="${COLL_MAX}"
-        data-coll-input="${c.no}" value="${qty}">
-      <button class="qbtn" data-coll-inc="${c.no}"${qty>=COLL_MAX?' disabled':''}>+</button>
-    </div>
+    ${collStepHTML(c, c.ra[0], false)}
+    ${multi ? `<button type="button" class="coll-vbtn" data-coll-vers="${c.no}" aria-expanded="${open}">${open?'▴':'▾'} Versions <b>${vOwned}/${c.ra.length}</b></button>` : ''}
+    ${open ? `<div class="coll-vers">${c.ra.slice(1).map(r=>collStepHTML(c, r, true)).join('')}</div>` : ''}
   </div>`;
 }
 
-function renderCollectionProgress(){
-  const el = $('#collProgress'); if(!el) return;
-  const visible = DB.filter(cardVisible);
-  const owned = visible.filter(c=>(collMap[c.no]||0) > 0).length;
-  el.innerHTML = `<b>${owned}</b> / ${visible.length} ${t('dashCollProgressLbl')}`;
+function renderCollectionHead(){
+  const cur = collCurSet();
+  const list = collSetList();
+  /* kotak ringkasan di tab */
+  const all = collSetStat('ALL');
+  const v = $('#dtCollV'), s = $('#dtCollS'), bar = $('#dtCollBar');
+  if(v) v.textContent = all.own;
+  if(s) s.textContent = `/ ${all.tot} cards · ${all.pct}%`;
+  if(bar) bar.style.width = all.pct + '%';
+  /* deretan set */
+  const strip = $('#collSets');
+  if(strip){
+    const tile = (code, title, sub) => { const st = collSetStat(code);
+      return `<button type="button" class="cs-tile${st.tot && st.own===st.tot?' cs-done':''}" data-coll-set="${code}" aria-pressed="${code===cur}" title="${escHtml(title + (sub?' · '+sub:''))}">
+        <b>${escHtml(title)}</b><small>${escHtml(sub||' ')}</small><small>${st.own}/${st.tot}</small><span class="cs-bar"><i style="width:${st.pct}%"></i></span></button>`; };
+    const grp = tp => list.filter(x=>(COLL_GRP.some(g=>g[0] === x.tipe) ? x.tipe : 'Other') === tp);
+    strip.innerHTML = `<div class="cs-grp"><span>&nbsp;</span><div>${tile('ALL', 'All', 'All sets')}</div></div>` +
+      COLL_GRP.map(([tp, label])=>{ const arr = grp(tp); return arr.length ? `<div class="cs-grp"><span>${label}</span><div>${arr.map(x=>tile(x.kode, x.kode, collSetName(x))).join('')}</div></div>` : ''; }).join('');
+  }
+  /* ringkasan set terpilih */
+  const hero = $('#collHero');
+  if(hero){
+    const st = collSetStat(cur);
+    const so = list.find(x=>x.kode === cur);
+    const title = cur === 'ALL' ? 'All sets' : `${cur}${collSetName(so) ? ' · ' + collSetName(so) : ''}`;
+    hero.innerHTML = `<div class="coll-hero"><div class="coll-ring" style="--p:${st.pct}"><span>${st.pct}%</span></div>
+      <div><h3>${escHtml(title)}${so && so.tipe ? `<small>${escHtml(so.tipe === 'Other' ? 'Promo & other' : so.tipe)}</small>` : ''}</h3>
+        <div class="coll-mini"><span><b>${st.own}</b> / ${st.tot} cards owned</span><span><b>${st.tot - st.own}</b> missing</span>
+          <span title="UR, MR, SEC… each version counted separately"><b>${st.vo}</b> / ${st.vt} versions</span><span title="Copies above ${COLL_SPARE_KEEP}"><b>${st.spare}</b> spare copies</span></div></div>
+      <div class="coll-hero-acts">${st.tot - st.own ? `<button type="button" class="btn2" data-coll-act="missing">📋 Copy missing list</button>` : ''}${st.spare ? `<button type="button" class="btn2" data-coll-act="spare">📋 Copy spare list</button>` : ''}</div></div>`;
+  }
 }
+/* dipertahankan namanya (dipanggil dari tempat lain sebelum v7.05) */
+function renderCollectionProgress(){ renderCollectionHead(); }
 
 function renderCollectionList(){
   const grid = $('#collList'); if(!grid) return;
@@ -7669,7 +7945,7 @@ async function renderCollectionGrid(){
   const { data } = await window.MHRCollection.get();
   collMap = data || {};
   setDeckCollection(collMap);   // v6.96 — badge koleksi di Deck Builder ikut segar
-  renderCollectionProgress();
+  renderCollectionHead();
   renderCollectionList();
 }
 
@@ -7679,26 +7955,70 @@ function collQueueSave(){
   collSaveTmr = setTimeout(()=>{ if(window.MHRCollection) window.MHRCollection.save(collMap); }, 500);
 }
 
-/* Terapkan satu nilai baru (dari +/- ATAU dari mengetik langsung di
-   input) ke collMap, lalu re-render cuma satu kartu itu + progress bar —
-   dipakai bersama oleh listener 'click' dan 'change' di bawah supaya
-   logikanya tidak dobel. */
-function collSetQty(no, v){
+/* Terapkan satu nilai baru (dari +/- ATAU mengetik langsung) untuk SATU kunci versi,
+   lalu re-render kartu itu saja + ringkasan. */
+function collSetQty(key, v){
   v = Math.max(0, Math.min(COLL_MAX, Math.round(v)||0));
-  if(v <= 0) delete collMap[no]; else collMap[no] = v;
+  if(v <= 0) delete collMap[key]; else collMap[key] = v;
   setDeckCollection(collMap);   // v6.96/v6.97 — badge koleksi di Deck Builder ikut segar
-  renderCollectionProgress();
+  const no = collNoOfKey(key);
   const card = $(`.coll-card[data-no="${no}"]`);
   const c = DB.find(d=>d.no===no);
   if(card && c) card.outerHTML = collRowHTML(c);
+  renderCollectionHead();
   collQueueSave();
 }
 
+function collCopyList(kind, btn){
+  const code = collCurSet();
+  const st = collSetStat(code);
+  const label = code === 'ALL' ? 'all sets' : code;
+  let rows;
+  if(kind === 'missing') rows = st.cards.filter(c=>collTotal(c) <= 0).map(c=>`${c.no} ${cardName(c)}`);
+  else rows = st.cards.filter(c=>collTotal(c) > COLL_SPARE_KEEP).map(c=>{
+    const vers = c.ra.filter(r=>collQtyV(c, r) > 0).map(r=>`${rarLabel(r, c)} ×${collQtyV(c, r)}`).join(', ');
+    return `${collTotal(c) - COLL_SPARE_KEEP}x ${c.no} ${cardName(c)}${c.ra.length > 1 ? ` (I have: ${vers})` : ''}`;
+  });
+  if(!rows.length) return;
+  const head = kind === 'missing' ? `Cards I still need from ${label} (${rows.length}):` : `Spare cards from ${label}, for trade:`;
+  salinTeks(`${head}\n${rows.join('\n')}\n— mhrdecklab.com`, btn);
+}
+
+function setDashTab(tab){
+  dashTab = (tab === 'coll') ? 'coll' : 'decks';
+  try{ localStorage.setItem(DASH_TAB_KEY, dashTab); }catch(e){}
+  document.querySelectorAll('[data-dtab]').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.dtab === dashTab)));
+  const pd = $('#dashPanelDecks'), pc = $('#dashPanelColl');
+  if(pd) pd.hidden = dashTab !== 'decks';
+  if(pc) pc.hidden = dashTab !== 'coll';
+}
+if($('#dashTabs')) $('#dashTabs').addEventListener('click', e=>{
+  const b = e.target.closest('[data-dtab]'); if(b) setDashTab(b.dataset.dtab);
+});
+
+if($('#collSets')) $('#collSets').addEventListener('click', e=>{
+  const b = e.target.closest('[data-coll-set]'); if(!b) return;
+  collSet = b.dataset.collSet;
+  try{ localStorage.setItem(COLL_SET_KEY, collSet); }catch(err){}
+  renderCollectionHead(); renderCollectionList();
+});
+if($('#collHero')) $('#collHero').addEventListener('click', e=>{
+  const b = e.target.closest('[data-coll-act]'); if(b) collCopyList(b.dataset.collAct, b);
+});
 if($('#collList')) $('#collList').addEventListener('click', e=>{
   const inc = e.target.closest('[data-coll-inc]');
   const dec = e.target.closest('[data-coll-dec]');
   if(inc){ collSetQty(inc.dataset.collInc, (collMap[inc.dataset.collInc]||0) + 1); return; }
   if(dec){ collSetQty(dec.dataset.collDec, (collMap[dec.dataset.collDec]||0) - 1); return; }
+  const vb = e.target.closest('[data-coll-vers]');
+  if(vb){
+    const no = vb.dataset.collVers;
+    if(collOpenV.has(no)) collOpenV.delete(no); else collOpenV.add(no);
+    const card = vb.closest('.coll-card'); const c = DB.find(d=>d.no===no);
+    if(card && c) card.outerHTML = collRowHTML(c);
+    return;
+  }
+  if(e.target.closest('.coll-qty-input')) return;
   const z = e.target.closest('[data-zoom]');
   if(z){ openLightbox(z.dataset.zoom); }
 });
@@ -9270,31 +9590,155 @@ window.addEventListener('hashchange', ()=>{
     writeStore();
   }
 
+  /* v7.05 — My Decks v2: kartu deck (gambar sampul = kartu Lv tertinggi, label warna,
+     jumlah kartu, tanggal) dalam grid, atau daftar ringkas satu baris per deck.
+     Pencarian (nama deck ATAU nama/nomor kartu di dalamnya), filter warna / publik /
+     belum 50 kartu, urutan, pin ★ (disimpan di localStorage browser ini — DK_PIN_KEY),
+     hanya 8 deck tampil dulu + tombol "Show all". Aksi utama "Open in Builder";
+     aksi lain (publish, riwayat versi, bandingkan, hapus) di menu ⋯.
+     Data deck diambil SEKALI per render (listMine), filter/urut murni di klien. */
+  const DK_PIN_KEY = 'mhr_deck_pins', DK_VIEW_KEY = 'mhr_deck_view';
+  const DK_FIRST = 8;
+  const dk = { rows:[], q:'', sort:'upd', view:'grid', col:'', pub:false, bad:false, all:false, menu:null, pins:new Set() };
+  try{ dk.pins = new Set(JSON.parse(localStorage.getItem(DK_PIN_KEY) || '[]')); }catch(e){}
+  try{ if(localStorage.getItem(DK_VIEW_KEY) === 'list') dk.view = 'list'; }catch(e){}
+  function dkSavePins(){ try{ localStorage.setItem(DK_PIN_KEY, JSON.stringify([...dk.pins])); }catch(e){} }
+
+  function dkPrep(row){
+    const r = row.deck_code ? decodeDeck(row.deck_code) : null;
+    const deck = (r && r.deck) || {};
+    const st = deckStats(deck);
+    const cover = previewCards(deck, 1)[0] || null;
+    const words = Object.keys(deck).map(no=>{ const c = DB.find(d=>d.no===no); return c ? `${no} ${cardName(c)}` : no; }).join(' ');
+    return { row, deck, tot:st.tot, cols:st.warna, cover, hay:`${row.name} ${words}`.toLowerCase() };
+  }
+  function dkList(){
+    const q = dk.q.trim().toLowerCase();
+    let arr = dk.rows.filter(x=>{
+      if(q && !x.hay.includes(q)) return false;
+      if(dk.col && !x.cols.includes(dk.col)) return false;
+      if(dk.pub && !x.row.is_public) return false;
+      if(dk.bad && x.tot === 50) return false;
+      return true;
+    });
+    const tm = x => Date.parse(x.row.updated_at || x.row.created_at || 0) || 0;
+    if(dk.sort === 'name') arr.sort((a,b)=>a.row.name.localeCompare(b.row.name));
+    else if(dk.sort === 'old') arr.sort((a,b)=>tm(a) - tm(b));
+    else arr.sort((a,b)=>tm(b) - tm(a));
+    return arr;
+  }
+  const dkDate = iso => tanggalRingkas(iso).split(',')[0];   // tanggal saja, tanpa jam
+  function dkColsHTML(x){
+    return x.cols.map(c=>`<span class="${DARK_TXT.has(c)?'dk-dark':''}" style="background:${CMAP[c]}">${escHtml(t(c))}</span>`).join('');
+  }
+  function dkMenuHTML(x){
+    const id = x.row.id;
+    return `<div class="dk-menu" ${dk.menu === id ? '' : 'hidden'} role="menu">
+      <button type="button" data-act="pub" role="menuitem">${x.row.is_public ? '🌐 Unpublish from User Decks' : '📢 Publish to User Decks'}</button>
+      <button type="button" data-act="hist" role="menuitem">${escHtml(t('histTitle'))}</button>
+      <button type="button" data-act="cmp" role="menuitem">⇄ Compare with my active deck</button>
+      <button type="button" data-act="view" role="menuitem">👁 Preview deck</button>
+      <button type="button" data-act="del" role="menuitem" class="red">🗑 ${escHtml(t('cloudDeleteBtn'))}</button>
+    </div>`;
+  }
+  function dkTileHTML(x){
+    const r = x.row, pinned = dk.pins.has(r.id);
+    const img = x.cover ? `<img alt="" loading="lazy" data-ext="0" src="${artFile(x.cover.no)}" onerror="imgFallback(this,'${x.cover.no}')">` : '';
+    const cnt = x.tot === 50 ? '50 cards' : `<span class="bad">${x.tot}/50 cards</span>`;
+    const pin = `<button type="button" class="dk-pin" data-act="pin" aria-pressed="${pinned}" title="${pinned ? 'Unpin' : 'Pin to top'}">${pinned ? '★' : '☆'}</button>`;
+    const acts = `<div class="dk-act"><button type="button" class="btn2 main" data-act="load" title="Open in Deck Builder">Open<span class="dk-ob"> in Builder</span></button>
+        <button type="button" class="btn2 dk-more" data-act="menu" aria-label="More actions" aria-expanded="${dk.menu === r.id}">⋯</button></div>`;
+    if(dk.view === 'list'){
+      const thumb = x.cover ? `<img class="dk-thumb" data-act="view" alt="" loading="lazy" data-ext="0" src="${artFile(x.cover.no)}" onerror="imgFallback(this,'${x.cover.no}')">` : '<span class="dk-thumb"></span>';
+      return `<div class="dk" data-id="${r.id}">${pin}${thumb}<div class="dk-body"><b title="${escHtml(r.name)}">${escHtml(r.name)}${r.is_public ? ' <span title="Public">🌐</span>' : ''}</b>
+        <span class="dk-cl">${x.cols.map(c=>`<i style="background:${CMAP[c]}" title="${escHtml(t(c))}"></i>`).join('')}</span>
+        <span class="dk-meta">${cnt} · ${dkDate(r.updated_at)}</span>${acts}</div>${dkMenuHTML(x)}</div>`;
+    }
+    return `<div class="dk" data-id="${r.id}">
+      <div class="dk-cover" data-act="view" title="Preview deck">${img}<div class="dk-cols">${dkColsHTML(x)}</div>${r.is_public ? '<span class="dk-pub">🌐 Public</span>' : ''}</div>
+      ${pin}
+      <div class="dk-body"><b title="${escHtml(r.name)}">${escHtml(r.name)}</b>
+        <div class="dk-meta">${cnt} · ${dkDate(r.updated_at)}</div>${acts}</div>
+      ${dkMenuHTML(x)}</div>`;
+  }
+  function dkRenderChips(){
+    const box = $('#dkChips'); if(!box) return;
+    const present = new Set(); dk.rows.forEach(x=>x.cols.forEach(c=>present.add(c)));
+    const cols = Object.keys(CORDER).filter(c=>present.has(c)).sort((a,b)=>CORDER[a]-CORDER[b]);
+    box.innerHTML = `<button type="button" class="dk-chip" data-dkcol="" aria-pressed="${!dk.col}">All colours</button>` +
+      cols.map(c=>`<button type="button" class="dk-chip" data-dkcol="${c}" aria-pressed="${dk.col===c}"><i style="background:${CMAP[c]}"></i>${escHtml(t(c))}</button>`).join('') +
+      `<button type="button" class="dk-chip" data-dkflag="pub" aria-pressed="${dk.pub}">🌐 Public only</button>` +
+      `<button type="button" class="dk-chip" data-dkflag="bad" aria-pressed="${dk.bad}">⚠ Not 50 cards</button>`;
+  }
+  function dkRender(){
+    if(!cloudListEl) return;
+    document.querySelectorAll('[data-dkview]').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.dkview === dk.view)));
+    dkRenderChips();
+    const v = $('#dtDecksV'), s = $('#dtDecksS');
+    if(v) v.textContent = dk.rows.length;
+    if(s) s.textContent = `decks · ${dk.rows.filter(x=>x.row.is_public).length} public`;
+    if(!dk.rows.length){ cloudListEl.innerHTML = `<p class="auth-note">${t('cloudEmpty')}</p>`; return; }
+    const arr = dkList();
+    if(!arr.length){ cloudListEl.innerHTML = `<div class="dk-empty">No decks match these filters.</div>`; return; }
+    if(dk.view === 'list'){ cloudListEl.innerHTML = `<div class="dk-list">${arr.map(dkTileHTML).join('')}</div>`; return; }
+    const filtering = !!(dk.q.trim() || dk.col || dk.pub || dk.bad);
+    const pinned = arr.filter(x=>dk.pins.has(x.row.id));
+    const rest = arr.filter(x=>!dk.pins.has(x.row.id));
+    const limit = (dk.all || filtering) ? rest.length : Math.max(0, DK_FIRST - pinned.length);
+    const shown = rest.slice(0, limit);
+    let html = '';
+    if(pinned.length) html += `<div class="dk-h">★ Pinned</div><div class="dk-grid">${pinned.map(dkTileHTML).join('')}</div>`;
+    if(shown.length) html += `${pinned.length ? `<div class="dk-h">${dk.sort==='upd' ? 'Recently updated' : 'Other decks'}</div>` : ''}<div class="dk-grid">${shown.map(dkTileHTML).join('')}</div>`;
+    if(shown.length < rest.length) html += `<div class="dk-more-row"><button type="button" class="btn2" data-dkall="1">Show all ${arr.length} decks ▾</button></div>`;
+    else if(dk.all && arr.length > DK_FIRST && !filtering) html += `<div class="dk-more-row"><button type="button" class="btn2" data-dkall="0">Show fewer ▴</button></div>`;
+    cloudListEl.innerHTML = html;
+  }
   async function renderCloudList(){
     if(!cloudListEl) return;
-    cloudListEl.innerHTML = `<p class="auth-note">${t('cloudLoadingList')}</p>`;
+    if(!dk.rows.length) cloudListEl.innerHTML = `<p class="auth-note">${t('cloudLoadingList')}</p>`;
     const { data, error } = await window.MHRDecks.listMine();
     if(error){ cloudListEl.innerHTML = `<p class="auth-note" style="color:var(--merah)">${t('cloudListErr')}</p>`; return; }
-    if(!data.length){ cloudListEl.innerHTML = `<p class="auth-note">${t('cloudEmpty')}</p>`; return; }
-    cloudListEl.innerHTML = data.map(row=>`
-      <div class="cloud-deck-row" data-id="${row.id}">
-        <div class="cloud-deck-info">
-          <b>${escHtml(row.name)}</b>
-          <span class="cloud-deck-meta">${t('cloudUpdatedLbl')} ${tanggalRingkas(row.updated_at)}${row.is_public?` · 🌐`:''}</span>
-        </div>
-        <div class="cloud-deck-actions">
-          <button class="qbtn" data-act="pub" title="${t(row.is_public?'pubUnpublishBtn':'pubPublishBtn')}" aria-label="${t(row.is_public?'pubUnpublishBtn':'pubPublishBtn')}">${row.is_public?'🌐':'📢'}<span class="qlbl">${t(row.is_public?'cloudUnpubLbl':'cloudPubLbl')}</span></button>
-          <button class="qbtn" data-act="load" title="${t('cloudLoadBtn')}" aria-label="${t('cloudLoadBtn')}">📥<span class="qlbl">${t('cloudLoadLbl')}</span></button>
-          <button class="qbtn" data-act="hist" title="${t('histTitle')}" aria-label="${t('histTitle')}">🕘<span class="qlbl">${t('histLbl')}</span></button>
-          <button class="qbtn" data-act="del" title="${t('cloudDeleteBtn')}" aria-label="${t('cloudDeleteBtn')}">🗑<span class="qlbl">${t('cloudDelLbl')}</span></button>
-        </div>
-      </div>`).join('');
+    dk.rows = (data || []).map(dkPrep);
+    /* pin milik deck yang sudah dihapus ikut dibersihkan */
+    const ids = new Set(dk.rows.map(x=>x.row.id));
+    if(dk.rows.length && [...dk.pins].some(p=>!ids.has(p))){ dk.pins = new Set([...dk.pins].filter(p=>ids.has(p))); dkSavePins(); }
+    dk.menu = null;
+    dkRender();
   }
+  const dkQ = $('#dkQ'), dkSort = $('#dkSort');
+  if(dkQ) dkQ.addEventListener('input', ()=>{ dk.q = dkQ.value; dkRender(); });
+  if(dkSort) dkSort.addEventListener('change', ()=>{ dk.sort = dkSort.value; dkRender(); });
+  document.querySelectorAll('[data-dkview]').forEach(b=>b.addEventListener('click', ()=>{
+    dk.view = b.dataset.dkview; dk.menu = null;
+    try{ localStorage.setItem(DK_VIEW_KEY, dk.view); }catch(e){}
+    dkRender();
+  }));
+  if($('#dkChips')) $('#dkChips').addEventListener('click', e=>{
+    const c = e.target.closest('[data-dkcol]'); const f = e.target.closest('[data-dkflag]');
+    if(c) dk.col = c.dataset.dkcol;
+    else if(f) dk[f.dataset.dkflag] = !dk[f.dataset.dkflag];
+    else return;
+    dkRender();
+  });
+  /* klik di luar menu ⋯ menutupnya */
+  document.addEventListener('click', e=>{
+    if(dk.menu && !e.target.closest('.dk-menu') && !e.target.closest('[data-act="menu"]')){ dk.menu = null; dkRender(); }
+  });
 
   if(cloudListEl) cloudListEl.addEventListener('click', async e=>{
-    const btn = e.target.closest('button[data-act]'); if(!btn) return;
-    const row = btn.closest('.cloud-deck-row'); const id = row && row.dataset.id;
+    const more = e.target.closest('[data-dkall]');
+    if(more){ dk.all = more.dataset.dkall === '1'; dkRender(); return; }
+    const btn = e.target.closest('[data-act]'); if(!btn) return;
+    const row = btn.closest('[data-id]'); const id = row && row.dataset.id;
     if(!id) return;
+    /* v7.05 — aksi baru My Decks v2 */
+    const act = btn.dataset.act;
+    if(act === 'menu'){ dk.menu = dk.menu === id ? null : id; dkRender(); return; }
+    if(act === 'pin'){ if(dk.pins.has(id)) dk.pins.delete(id); else dk.pins.add(id); dkSavePins(); dkRender(); return; }
+    const x = dk.rows.find(r=>r.row.id === id);
+    if(dk.menu){ dk.menu = null; dkRender(); }
+    if(act === 'view'){ if(x && Object.keys(x.deck).length) openDeckView({...x.deck}, x.row.name); return; }
+    if(act === 'cmp'){ if(x) openCompare(x.deck, x.row.name); return; }
     if(btn.dataset.act === 'hist'){
       /* v6.97 — buka riwayat versi deck ini (dijadikan deck aktif dulu) */
       await chain;
@@ -9374,6 +9818,7 @@ window.addEventListener('hashchange', ()=>{
       uid = null; clearTimeout(pushTmr); setStatus('');
       if(deckColl.map) setDeckCollection(null);   // v6.96
       if(cloudListEl) cloudListEl.innerHTML = '';
+      dk.rows = []; dk.menu = null;   // v7.05
       return;
     }
     const baru = newUid !== uid;
@@ -9482,14 +9927,17 @@ function openMissing(){
       salinTeks(teks, b);
     } else if(b.dataset.miss === 'bought'){
       if(!confirm(t('missBoughtConfirm').replace('{n}', need))) return;
-      const map = deckColl.map;
+      /* v7.05 — tambahkan ke VERSI UTAMA (kunci nomor polos) di peta asli per versi */
+      const map = { ...(deckColl.raw || {}) };
       rows.forEach(x=>{ map[x.c.no] = Math.min(COLL_MAX, (map[x.c.no]||0) + (x.q - x.o)); });
       b.disabled = true;
       const { error } = window.MHRCollection ? await window.MHRCollection.save(map) : { error:{} };
       if(error){ b.disabled = false; alert(t('missSaveErr')); return; }
       try{ collMap = map; }catch(err){}
+      setDeckCollection(map);
       mxClose(); renderDeck();
     } else if(b.dataset.miss === 'dash'){
+      try{ dashTab = 'coll'; localStorage.setItem(DASH_TAB_KEY, 'coll'); }catch(err){}
       mxClose(); setPage('dashboard');
     }
   });

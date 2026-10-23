@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.04** · 22 Oktober 2026
+**Versi saat ini: v7.05** · 23 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -586,6 +586,52 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.05 — My Dashboard v2 (tab, My Decks grid/list, koleksi per set & per versi) + Events terbuka untuk semua akun + pop-up iklan dilepas — 23 Oktober 2026 *(`index.html`, `events-ui.js`, migrasi SQL baru `mhr_decklab_v705_open_events.sql` di folder internal)*
+
+**My Dashboard (Tahap A dari rencana Dashboard v2):**
+- Kotak ringkasan **My Decks** / **Card Collection** di atas sekaligus jadi tab; hanya satu bagian tampil
+  sekaligus. Tab terakhir diingat (`localStorage` `mhr_dash_tab`). Binders menyusul di Tahap B.
+- **My Decks:** kartu deck dengan gambar sampul (kartu Lv tertinggi), label warna, jumlah kartu (merah kalau
+  bukan 50), tanggal. Pencarian nama deck **atau** nama/nomor kartu di dalamnya, filter warna / Public only /
+  Not 50 cards, urutan (terbaru, A–Z, terlama), pin ★ ke atas (per browser, `mhr_deck_pins`), 8 deck dulu +
+  "Show all", tampilan daftar ringkas ☰ (`mhr_deck_view`). Tombol utama "Open in Builder"; aksi lain di menu ⋯
+  (publish/unpublish, riwayat versi, bandingkan dengan deck aktif, pratinjau, hapus). Klik gambar = pratinjau.
+- **Card Collection per set:** deretan kotak set (Starter / Expansion / Promo & other dari `window.SETS`, plus
+  "All") dengan progres, ringkasan set (% dimiliki, belum punya, versi dimiliki, salinan spare = di atas 3),
+  tombol **Copy missing list** dan **Copy spare list** (teks untuk WhatsApp). Filter baru: Has spare copies,
+  Missing versions. Set terakhir diingat (`mhr_coll_set`).
+- **Koleksi dicatat per versi** (keputusan pemilik: pilihan B). Kunci `collection.cards`: versi utama (`ra[0]`)
+  tetap nomor polos `SD05-001` (format lama, jadi **data lama otomatis = versi utama, tanpa migrasi**), versi
+  lain pakai akhiran kode rarity seperti nama berkas gambar: `SD05-001_SEC`, `SP01-021_HR_616`. Tidak ada
+  perubahan tabel Supabase. Kartu dengan >1 versi punya tombol **Versions** berisi penghitung per versi.
+- Deck Builder tetap menghitung total semua versi per nomor kartu (`setDeckCollection` → `collTotals`,
+  `deckColl.raw` = peta asli). "I bought these" menambah ke versi utama tanpa menghapus kunci versi lain.
+
+**Events — semua akun boleh membuat event** (keputusan pemilik, ditinjau ulang nanti):
+- Tombol "＋ New event" tampil untuk semua akun login (belum login: "Log in to create an event").
+- Rem anti-spam di Supabase: akun biasa maksimal **10 event yang belum selesai**; organizer terverifikasi
+  (tabel `organizers`) dan admin tanpa batas. Pesan error ramah kalau batas tercapai.
+- **Publish ke Tournament Decks tetap hanya organizer terverifikasi + admin** (supaya halaman Tournament Decks
+  tidak diisi turnamen palsu). Pembuat event biasa melihat catatan cara verifikasi (DM @deteprtm).
+- Kotak admin "Organizers" jadi "Verified organizers".
+- Migrasi `mhr_decklab_v705_open_events.sql` (folder internal) **sudah dijalankan di Supabase production
+  23 Okt 2026** (atas persetujuan pemilik) dan dicek: policy "events insert" baru aktif, publish punya cek
+  `NOT_VERIFIED`, `mhr_open_event_count` hanya untuk authenticated.
+
+**Pop-up iklan dilepas:** tag `promo-popup.js` dihapus dari `index.html` (kontrak kampanye Era of Spiders +
+Asia Peak Invitational selesai 23 Okt 2026). Berkasnya masih ada di repo untuk kampanye berikutnya.
+
+Cache-buster: `events-ui.js?v=7.05`. Versi 7.05 (komentar, meta, footer).
+
+**Verifikasi:** Playwright lokal (server tiruan) 50 cek lulus: tab & ingatan tab/set/pin setelah reload, 8 deck +
+Show all, pin, pencarian nama deck & nomor kartu, filter warna/publik, urutan, menu ⋯ (buka/tutup, compare,
+publish), pratinjau, tampilan daftar; koleksi per set (SD05 18 kartu, SP01, All + cari), panel versi, simpan kunci
+`SD05-001_MR`, ketik 0 menghapus kunci, filter missing/spare/versions, teks copy list; Deck Builder menjumlahkan
+versi, "I bought these" mempertahankan kunci versi; Events: akun biasa bisa membuat event, event ke-11 ditolak,
+tombol publish hanya untuk organizer terverifikasi; mobile 390 px tanpa scroll horizontal; tanpa error JS.
+Migrasi SQL diuji di PostgreSQL 16 lokal (emulasi `auth.uid()`): batas 10, `organizer_id` palsu ditolak, publish
+akun biasa → `NOT_VERIFIED`, organizer lolos, anon ditolak, aman dijalankan ulang.
 
 ### Data — README: bagian baru "Logo & aset brand" + Panduan Logo dilengkapi daftar file — 22 Oktober 2026 *(`README.md`)*
 

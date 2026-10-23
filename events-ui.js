@@ -21,6 +21,10 @@
    optional / none), dan cek legalitas decklist (50 kartu, maks. 2 warna,
    maks. 3 per nama karakter, semua kartu ada di database) — pemain ditolak,
    organizer diberi peringatan + tanda "Not legal" di tab Players.
+   v7.05 (23 Okt 2026): SEMUA akun login boleh membuat event (rem: maks. 10
+   event belum selesai per akun, lihat mhr_decklab_v705_open_events.sql).
+   V.organizer kini berarti "organizer terverifikasi": tanpa batas event dan
+   satu-satunya (selain admin) yang boleh publish ke Tournament Decks.
    =================================================================== */
 (function(){
   'use strict';
@@ -41,6 +45,8 @@
     NAME_TAKEN:'That player name is already used in this event. Please add your initial or surname.',
     NAME_REQUIRED:'Please enter a player name.', GUESTS_NOT_ALLOWED:'This event only accepts registrations from MHR Deck Lab accounts.',
     BAD_DECKLIST:'That deck link / code isn\'t valid.', BAD_TOKEN:'This registration was not made on this device.',
+    NOT_VERIFIED:'Publishing to Tournament Decks is only for verified organizers. Message @deteprtm on Instagram or TikTok to get your store verified.',
+    '42501':'You already have 10 events that aren\'t finished yet. Finish or delete one before creating a new event.',
   };
   const errMsg = e => e ? (e.missing ? 'Events aren\'t switched on yet on this site.' : (ERR[e.code] || ERR[e.message] || ('Something went wrong: ' + (e.message || e.code || 'error')))) : '';
 
@@ -160,15 +166,15 @@
       </a>`;
     const sec = (title, arr, note) => arr.length ? `<section class="ev-sec"><div class="hm-sec-h"><h2>${title}</h2>${note||''}</div><div class="ev-grid">${arr.map(card).join('')}</div></section>` : '';
     w.innerHTML = `<div class="ev-head"><h2 class="nw-title">Events</h2>
-      <p class="nw-lead">Swiss tournaments run by local game stores. Register online, follow pairings and standings live, and the Top-cut decks go straight to Tournament Decks.</p>
-      ${V.organizer ? `<div class="ev-actions"><button class="nw-btn ev-main" data-ev="new">＋ New event</button></div>` : ''}</div>
-      ${isAdmin() ? `<div class="ev-admin" id="evAdmin"><b>🛡 Organizers</b> <span class="ev-muted">Accounts that can create and run events.</span><div id="evOrgList" class="ev-muted">Loading…</div>
+      <p class="nw-lead">Swiss tournaments run by local game stores and players. Register online and follow pairings and standings live. Anyone with an account can create an event.</p>
+      <div class="ev-actions">${V.me ? `<button class="nw-btn ev-main" data-ev="new">＋ New event</button>` : `<button class="nw-btn ev-main" data-ev="login">👤 Log in to create an event</button>`}</div></div>
+      ${isAdmin() ? `<div class="ev-admin" id="evAdmin"><b>🛡 Verified organizers</b> <span class="ev-muted">Every account can create events (max 10 unfinished). Verified organizers have no limit and can publish Top-cut decks to Tournament Decks.</span><div id="evOrgList" class="ev-muted">Loading…</div>
         <div class="ev-row"><input id="evOrgUser" placeholder="Username"><input id="evOrgLgs" placeholder="Store name (LGS)"><button class="btn2" data-ev="orgAdd">Add organizer</button></div></div>` : ''}
       ${sec('🔴 Live now', grp('running'))}
       ${sec('📣 Registration open', grp('registration'))}
       ${sec('📝 Drafts', mine, '<span class="ev-muted">Only you can see these</span>')}
       ${sec('🏁 Finished', grp('finished'))}
-      ${data.length ? '' : `<div class="ev-empty">No events yet.${V.organizer ? ' Create the first one with “＋ New event”.' : ' Check back soon — stores will post their tournaments here.'}</div>`}`;
+      ${data.length ? '' : `<div class="ev-empty">No events yet.${V.me ? ' Create the first one with “＋ New event”.' : ' Check back soon, or log in to create the first one.'}</div>`}`;
     if(isAdmin()) renderOrganizers();
   }
   async function renderOrganizers(){
@@ -334,7 +340,10 @@
       if(last) main += btn('undo', `Undo ${E(roundLabel(last))}`);
       main += btn('copy', '📋 Copy pairings');
     } else if(ev.status === 'finished'){
-      main = (deckMode(ev) === 'none' ? '' : btn('publish', ev.tournament_id ? '📤 Update Tournament Decks' : '📤 Publish Top decks to Tournament Decks', 'main')) + btn('reopen', 'Reopen event');
+      /* v7.05 — membuat event terbuka untuk semua akun; publish ke Tournament Decks tetap organizer terverifikasi + admin */
+      if(deckMode(ev) !== 'none' && V.organizer) main = btn('publish', ev.tournament_id ? '📤 Update Tournament Decks' : '📤 Publish Top decks to Tournament Decks', 'main');
+      else if(deckMode(ev) !== 'none') info = 'Want the Top-cut decks on Tournament Decks? Only verified organizers can publish there. Message @deteprtm on Instagram or TikTok to get your store verified.';
+      main += btn('reopen', 'Reopen event');
     }
     const edit = ev.status !== 'finished' ? btn('edit', '✏️ Edit') : '';
     const del = (ev.status === 'draft' || ev.status === 'registration' || ev.status === 'finished') ? btn('del', '🗑 Delete') : '';
