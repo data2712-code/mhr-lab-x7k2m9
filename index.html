@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.06  ·  23 Oktober 2026
+     MHR DECK LAB  ·  versi 7.07  ·  23 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.06">
+<meta name="version" content="7.07">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2118,6 +2118,15 @@
     .bdp-h h2{font-size:21px}
     .bp-bar{font-size:10.5px}
   }
+  /* v7.07 — simpan halaman binder sebagai gambar */
+  .bd-chk.off{opacity:.55}
+  .bi-out .bd-btns{margin:6px 0 10px}
+  .bi-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));max-height:56vh;overflow-y:auto;padding:2px}
+  .bi-grid figure{margin:0;display:flex;flex-direction:column;gap:6px}
+  .bi-grid img{width:100%;border-radius:8px;border:1px solid var(--line);display:block;background:#0B0E12}
+  .bi-grid figcaption{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+  .bi-grid figcaption .btn2{flex:none;padding:5px 9px;font-size:11.5px}
+  @media (max-width:760px){ .bi-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -2636,7 +2645,7 @@
 <script src="events.js?v=7.02"></script>
 <script src="events-ui.js?v=7.05"></script>
 <script src="binders.js?v=7.06"></script>
-<script src="binders-ui.js?v=7.06"></script>
+<script src="binders-ui.js?v=7.07"></script>
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
@@ -2665,7 +2674,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.06</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.07</div>
 </footer>
 
 <div class="dview" id="simView" hidden>

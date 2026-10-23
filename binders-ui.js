@@ -16,6 +16,7 @@
    salinTeks, collMap, collQtyV, collTotal, collSetList, collSetName,
    COLL_SPARE_KEEP, isAccountAdmin, setPage) baru dipakai SAAT JALAN, jadi
    berkas ini aman dimuat sebelum skrip inline utama.
+   v7.07 (Tahap C): simpan halaman binder sebagai gambar (Story 9:16 / Post 4:5) — openImages().
    Keputusan pemilik (23 Okt 2026): link-only, kontak = WA/IG isian pemilik,
    harga boleh tampil + opsi nego, disclaimer wajib di binder jual-beli,
    report hanya akun login, sembunyi otomatis setelah 3 laporan.
@@ -327,6 +328,7 @@
           <p class="bd-mut">${b.is_public ? 'Anyone with the link can view this binder.' : 'Private: only you can see it.'}${b.kind === 'trade' && b.is_public && !b.contact_wa && !b.contact_ig ? ' Add your WhatsApp or Instagram in Settings so buyers can reach you.' : ''}</p>
           <div class="bd-stack"><button type="button" class="btn2" data-bact="share">🔗 ${b.is_public ? 'Copy link / share' : 'Turn on shared link'}</button>
             <button type="button" class="btn2" data-bact="copylist">📋 Copy list for WhatsApp</button>
+            <button type="button" class="btn2" data-bact="image">🖼 Save pages as image</button>
             ${b.is_public ? `<a class="btn2" href="#binder/${E(b.share_code)}">👁 View public page</a>` : ''}</div>
           <p class="bd-status" id="bdStatus">${E(S.status)}</p>
         </aside></div>`;
@@ -512,18 +514,20 @@
       ? `<h3>🔗 Share this binder</h3><p class="bd-mut">Anyone with this link can view the binder (no account needed). It doesn't appear in any public list.</p>
         <div class="bd-link"><input readonly id="bhLink" value="${E(linkOf(b.share_code))}"><button type="button" class="btn2 main" data-bh="copy">Copy link</button></div>
         <div class="bd-btns"><button type="button" class="btn2" data-bh="list">📋 Copy list for WhatsApp</button>
+          <button type="button" class="btn2" data-bh="image">🖼 Save as image (IG story)</button>
           ${navigator.share ? '<button type="button" class="btn2" data-bh="native">📤 Share…</button>' : ''}
           <a class="btn2" href="#binder/${E(b.share_code)}" data-mxclose>👁 View public page</a>
           <button type="button" class="btn2" data-bh="off">Turn off shared link</button></div>
         ${b.kind === 'trade' && !b.contact_wa && !b.contact_ig ? '<p class="bd-warn">Tip: add your WhatsApp or Instagram in ⚙ Settings so buyers can contact you from the shared page.</p>' : ''}
         ${b.hidden ? '<p class="bd-warn">This binder is hidden after reports, so the link won\'t open for other people until it is reviewed.</p>' : ''}`
       : `<h3>🔗 Share this binder</h3><p class="bd-mut">This binder is private. Turn on the shared link to get a link you can send on WhatsApp or post on Instagram. Only people with the link can see it.</p>
-        <div class="bd-btns"><button type="button" class="btn2 main" data-bh="on">Turn on shared link</button><button type="button" class="btn2" data-bh="list">📋 Copy list for WhatsApp</button></div>`;
+        <div class="bd-btns"><button type="button" class="btn2 main" data-bh="on">Turn on shared link</button><button type="button" class="btn2" data-bh="list">📋 Copy list for WhatsApp</button><button type="button" class="btn2" data-bh="image">🖼 Save as image</button></div>`;
     const m = mxOpen(`<div id="bhBody">${draw()}</div>`, 'bd-mx');
     const box = m.querySelector('.mx-box');
     box.addEventListener('click', async e=>{
       const a = e.target.closest('[data-bh]'); if(!a) return;
       const act = a.dataset.bh;
+      if(act === 'image'){ openImages(); return; }
       if(act === 'copy') salinTeks(linkOf(b.share_code), a);
       else if(act === 'list') salinTeks(listText(b), a);
       else if(act === 'native'){ try{ await navigator.share({ title:b.name, text:`${b.name} — MHR Deck Lab binder`, url:linkOf(b.share_code) }); }catch(err){} }
@@ -585,6 +589,7 @@
     else if(act === 'settings') openSettings();
     else if(act === 'share') openShare();
     else if(act === 'copylist') salinTeks(listText(S.cur), a);
+    else if(act === 'image') openImages();
     else if(act === 'addpage' && S.cur.pages < MAX_PAGES){
       S.cur.pages++; for(let k = 0; k < PER; k++) S.cur.slots.push(null);
       S.page = Math.floor((S.cur.pages - 1) / perSpread()) * perSpread(); queueSave(); renderEditor();
@@ -715,6 +720,276 @@
       const id = b.id; S.list = null; setPage('dashboard'); refresh().then(()=>{ const x = (S.list||[]).find(r=>r.id === id); if(x){ openBinder(id, true); } }); }
   });
 
+
+  /* =================== v7.07 — SIMPAN HALAMAN BINDER SEBAGAI GAMBAR (Tahap C) ===================
+     Digambar langsung di <canvas> (tanpa html2canvas) supaya hasilnya tajam dan konsisten:
+     Story 9:16 (1080×1920, aman untuk zona tombol IG/TikTok: 150 px atas, 175 px bawah) atau
+     Post 4:5 (1080×1350). Gaya mengikuti template konten sosmed MHR Deck Lab: latar #0B0E12,
+     dua cahaya lembut, logo kiri + chip emas kanan + nomor halaman, kartu berbingkai gelap.
+     Satu gambar = satu halaman binder (9 kantong). Gambar kartu dari images/ (origin yang sama,
+     canvas tidak "tainted"). QR code (qrcode.js, dimuat saat dibutuhkan) mengarah ke link binder
+     kalau link berbagi aktif. Hasil: pratinjau + unduh PNG per halaman / semua, atau Share
+     (Web Share API dengan berkas) di HP supaya bisa langsung ke Instagram / WhatsApp. */
+  const IMG_FMT = {
+    story: { W:1080, H:1920, top:150, bottom:175, pad:72, title:64, sub:30, gap:18, foot:130, label:'Story 9:16 (1080×1920)' },
+    post:  { W:1080, H:1350, top:74,  bottom:65,  pad:72, title:52, sub:27, gap:16, foot:112, label:'Post 4:5 (1080×1350)' },
+  };
+  const KIND_GLOW = { collection:'#E4442E', trade:'#33A45C', wishlist:'#8B5CF6' };
+  let qrLoading = null;
+  function loadQr(){
+    if(window.qrcode) return Promise.resolve();
+    if(!qrLoading) qrLoading = new Promise((ok, fail)=>{
+      const sc = document.createElement('script'); sc.src = 'qrcode.js?v=6.99';
+      sc.onload = ok; sc.onerror = ()=>{ qrLoading = null; fail(new Error('qr')); };
+      document.head.appendChild(sc);
+    });
+    return qrLoading;
+  }
+  const imgCache = new Map();
+  function loadImg(src){
+    if(!imgCache.has(src)) imgCache.set(src, new Promise(res=>{
+      const im = new Image(); im.decoding = 'async';
+      im.onload = () => res(im.naturalWidth ? im : null); im.onerror = () => res(null); im.src = src;
+    }));
+    return imgCache.get(src);
+  }
+  async function cardImage(c, v){
+    const tries = [artFile(c.no, v || c.ra[0])];
+    if(v && v !== c.ra[0]) tries.push(artFile(c.no, c.ra[0]));
+    if(typeof altArtFile === 'function'){ const alt = altArtFile(c.no); if(alt) tries.push(alt); }
+    for(const src of tries){ const im = await loadImg(src); if(im) return im; }
+    return null;
+  }
+  function rr(ctx, x, y, w, h, r){
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function wrapLines(ctx, text, maxW){
+    const words = String(text).split(/\s+/); const out = []; let cur = '';
+    words.forEach(w=>{ const t2 = cur ? cur + ' ' + w : w; if(ctx.measureText(t2).width > maxW && cur){ out.push(cur); cur = w; } else cur = t2; });
+    if(cur) out.push(cur); return out;
+  }
+  function fitText(ctx, text, maxW){
+    if(ctx.measureText(text).width <= maxW) return text;
+    let s = text; while(s.length > 1 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+    return s + '…';
+  }
+  const prettyWa = d => d ? '+' + d.replace(/^(\d{2})(\d{3})(\d{4})(\d+)$/, '$1 $2 $3 $4') : '';
+
+  /* satu halaman binder → canvas */
+  async function renderPageImage(b, pageIdx, fmtKey, opt){
+    const F = IMG_FMT[fmtKey] || IMG_FMT.story;
+    const { W, H, pad } = F;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d');
+    const bodyFont = getComputedStyle(document.body).fontFamily || 'sans-serif';
+    const dispFont = (getComputedStyle(document.documentElement).getPropertyValue('--disp') || '').trim() || bodyFont;
+    const monoFont = (getComputedStyle(document.documentElement).getPropertyValue('--mono') || '').trim() || 'monospace';
+    const k = KIND[b.kind] || KIND.collection;
+    const trade = b.kind === 'trade';
+    /* latar + cahaya */
+    ctx.fillStyle = '#0B0E12'; ctx.fillRect(0, 0, W, H);
+    const glow = (x, y, col) => { const g = ctx.createRadialGradient(x, y, 0, x, y, 900); g.addColorStop(0, col + '30'); g.addColorStop(1, col + '00'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); };
+    glow(W, 0, '#F2B01E'); glow(0, H, KIND_GLOW[b.kind] || '#E4442E');
+    /* header: logo + chip + nomor halaman */
+    let y = F.top;
+    const logo = await loadImg('icons/logo-header.png?v=7.03');
+    if(logo){ const lh = 55, lw = lh * logo.naturalWidth / logo.naturalHeight; ctx.drawImage(logo, pad, y, lw, lh); }
+    else { ctx.fillStyle = '#fff'; ctx.font = `800 40px ${dispFont}`; ctx.textBaseline = 'middle'; ctx.fillText('MHR DECK LAB', pad, y + 28); }
+    ctx.textBaseline = 'middle';
+    ctx.font = `600 28px ${bodyFont}`; ctx.fillStyle = '#8A94A3';
+    const counter = `${pageIdx + 1}/${b.pages}`;
+    const cw0 = ctx.measureText(counter).width;
+    ctx.textAlign = 'right'; ctx.fillText(counter, W - pad, y + 28);
+    ctx.font = `800 24px ${bodyFont}`;
+    const chipTxt = k.label.toUpperCase();
+    const chipW = ctx.measureText(chipTxt).width + 36;
+    const chipX = W - pad - cw0 - 18 - chipW;
+    ctx.fillStyle = '#F2B01E'; rr(ctx, chipX, y + 6, chipW, 44, 8); ctx.fill();
+    ctx.fillStyle = '#1A1200'; ctx.textAlign = 'center'; ctx.fillText(chipTxt, chipX + chipW / 2, y + 29);
+    ctx.textAlign = 'left';
+    y += 55;
+    /* judul + baris pemilik */
+    ctx.textBaseline = 'alphabetic';
+    let ts = F.title; ctx.font = `800 ${ts}px ${dispFont}`;
+    let lines = wrapLines(ctx, b.name, W - 2 * pad);
+    if(lines.length > 1){ ts = Math.round(F.title * 0.82); ctx.font = `800 ${ts}px ${dispFont}`; lines = wrapLines(ctx, b.name, W - 2 * pad).slice(0, 2); }
+    ctx.fillStyle = '#FFFFFF';
+    lines.forEach(l=>{ y += ts * 1.08; ctx.fillText(fitText(ctx, l, W - 2 * pad), pad, y); });
+    const sub = [`by @${opt.owner || 'me'}`, b.location ? `📍 ${b.location}` : ''].filter(Boolean).join('   ');
+    ctx.font = `500 ${F.sub}px ${bodyFont}`; ctx.fillStyle = '#C0C8D2';
+    y += F.sub * 1.45; ctx.fillText(fitText(ctx, sub, W - 2 * pad), pad, y);
+    /* area grid */
+    const gridTop = y + 30;
+    const footTop = H - F.bottom - F.foot;
+    const gridH = footTop - gridTop - 24;
+    const gap = F.gap;
+    let cw = (W - 2 * pad - 2 * gap) / 3, ch = cw * 88 / 63;
+    if(3 * ch + 2 * gap > gridH){ ch = (gridH - 2 * gap) / 3; cw = ch * 63 / 88; }
+    cw = Math.floor(cw); ch = Math.floor(ch);
+    const gx = Math.round((W - (3 * cw + 2 * gap)) / 2);
+    const gy = Math.round(gridTop + (gridH - (3 * ch + 2 * gap)) / 2);
+    const slots = b.slots.slice(pageIdx * PER, pageIdx * PER + PER);
+    const imgs = await Promise.all(slots.map(s=>{ if(!s || (opt.hideSold && s.sold)) return null; const c = card(s.no); return c ? cardImage(c, vOf(c, s)) : null; }));
+    const rad = Math.round(cw * 0.05);
+    for(let i = 0; i < PER; i++){
+      const s = slots[i] && !(opt.hideSold && slots[i].sold) ? slots[i] : null;
+      const x = gx + (i % 3) * (cw + gap), yy = gy + Math.floor(i / 3) * (ch + gap);
+      if(!s){
+        ctx.save(); ctx.setLineDash([12, 10]); ctx.lineWidth = 3; ctx.strokeStyle = '#2C3644'; rr(ctx, x + 2, yy + 2, cw - 4, ch - 4, rad); ctx.stroke(); ctx.restore();
+        continue;
+      }
+      const c = card(s.no);
+      /* bingkai + bayangan */
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 22; ctx.shadowOffsetY = 8;
+      ctx.fillStyle = '#050608'; rr(ctx, x, yy, cw, ch, rad); ctx.fill(); ctx.restore();
+      const bw = Math.max(4, Math.round(cw * 0.02));
+      ctx.save(); rr(ctx, x + bw, yy + bw, cw - 2 * bw, ch - 2 * bw, rad - 2); ctx.clip();
+      if(s.sold) ctx.filter = 'grayscale(1) brightness(.5)';
+      if(imgs[i]) ctx.drawImage(imgs[i], x + bw, yy + bw, cw - 2 * bw, ch - 2 * bw);
+      else { ctx.fillStyle = '#1F2731'; ctx.fillRect(x, yy, cw, ch); ctx.fillStyle = '#8A94A3'; ctx.font = `700 ${Math.round(cw*0.08)}px ${bodyFont}`; ctx.textAlign = 'center'; ctx.fillText(s.no, x + cw/2, yy + ch/2); ctx.textAlign = 'left'; }
+      ctx.filter = 'none';
+      /* bar bawah: versi + harga */
+      const vl = (s.v && s.v !== c.ra[0]) ? vLabel(c, s.v) : '';
+      let price = '', nego = false, muted = false;
+      if(trade){
+        const has = s.price != null && s.price !== '' && opt.prices;
+        if(has){ price = shortRp(+s.price); nego = !!s.nego; }
+        else if(s.nego){ price = 'Make offer'; muted = true; }
+      }
+      if(vl || price){
+        const bh = Math.round(ch * 0.13);
+        ctx.fillStyle = 'rgba(11,14,18,.9)'; ctx.fillRect(x, yy + ch - bh, cw, bh);
+        const fs = Math.round(bh * 0.5), cy = yy + ch - bh / 2;
+        ctx.textBaseline = 'middle';
+        const parts = [];
+        ctx.font = `800 ${Math.round(fs*0.72)}px ${bodyFont}`; const vw = vl ? ctx.measureText(vl).width + fs * 0.6 : 0;
+        ctx.font = `800 ${fs}px ${muted ? bodyFont : monoFont}`; const pw = price ? ctx.measureText(price).width : 0;
+        ctx.font = `800 ${Math.round(fs*0.58)}px ${bodyFont}`; const nw = nego ? ctx.measureText('NEGO').width : 0;
+        const total = vw + (vl && price ? fs * 0.35 : 0) + pw + (nego ? fs * 0.3 + nw : 0);
+        let cx = x + (cw - total) / 2;
+        if(vl){
+          const sec = /^(SEC|HR|TR)/.test(rarBase(s.v));
+          if(sec){ const g = ctx.createLinearGradient(cx, 0, cx + vw, 0); g.addColorStop(0, '#f9d976'); g.addColorStop(.5, '#e0a3ff'); g.addColorStop(1, '#7fd3ff'); ctx.fillStyle = g; }
+          else ctx.fillStyle = /^(MR|ER)/.test(rarBase(s.v)) ? '#c9cfd8' : '#F2B01E';
+          rr(ctx, cx, cy - fs * 0.48, vw, fs * 0.96, 5); ctx.fill();
+          ctx.fillStyle = '#111'; ctx.font = `800 ${Math.round(fs*0.72)}px ${bodyFont}`; ctx.textAlign = 'center'; ctx.fillText(vl, cx + vw / 2, cy + 1); ctx.textAlign = 'left';
+          cx += vw + (price ? fs * 0.35 : 0);
+        }
+        if(price){ ctx.font = `800 ${fs}px ${muted ? bodyFont : monoFont}`; ctx.fillStyle = muted ? '#C0C8D2' : '#F2B01E'; ctx.fillText(price, cx, cy + 1); cx += pw; }
+        if(nego){ cx += fs * 0.3; ctx.font = `800 ${Math.round(fs*0.58)}px ${bodyFont}`; ctx.fillStyle = '#33A45C'; ctx.fillText('NEGO', cx, cy + 1); }
+        ctx.textBaseline = 'alphabetic';
+      }
+      /* jumlah */
+      if((s.q || 1) > 1){
+        const t = `×${s.q}`, fs = Math.round(cw * 0.085);
+        ctx.font = `800 ${fs}px ${monoFont}`; const tw = ctx.measureText(t).width + fs * 0.7;
+        ctx.fillStyle = 'rgba(11,14,18,.9)'; rr(ctx, x + cw - tw - bw - 6, yy + bw + 6, tw, fs * 1.5, 7); ctx.fill();
+        ctx.strokeStyle = '#2C3644'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = '#FFFFFF'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center'; ctx.fillText(t, x + cw - tw / 2 - bw - 6, yy + bw + 6 + fs * 0.77); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      }
+      ctx.restore();
+      if(s.sold){
+        ctx.save(); ctx.translate(x + cw / 2, yy + ch * 0.45); ctx.rotate(-14 * Math.PI / 180);
+        const bh2 = ch * 0.12; ctx.fillStyle = 'rgba(228,68,46,.92)'; ctx.fillRect(-cw * 0.62, -bh2 / 2, cw * 1.24, bh2);
+        ctx.fillStyle = '#fff'; ctx.font = `800 ${Math.round(bh2 * 0.62)}px ${dispFont}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('SOLD', 0, 2);
+        ctx.restore();
+      }
+    }
+    /* footer: link + kontak + QR */
+    const qrS = F.foot - 6;
+    let left = pad, maxTxt = W - 2 * pad;
+    if(opt.qr && b.is_public && window.qrcode){
+      const url = linkOf(b.share_code);
+      const qr = window.qrcode(0, 'M'); qr.addData(url); qr.make();
+      const n = qr.getModuleCount(), cell = Math.floor((qrS - 16) / n), real = cell * n, qx = W - pad - qrS, qy = footTop + 2;
+      ctx.fillStyle = '#FFFFFF'; rr(ctx, qx, qy, qrS, qrS, 12); ctx.fill();
+      ctx.fillStyle = '#0B0E12';
+      const ox = qx + (qrS - real) / 2, oy = qy + (qrS - real) / 2;
+      for(let r = 0; r < n; r++) for(let c2 = 0; c2 < n; c2++) if(qr.isDark(r, c2)) ctx.fillRect(ox + c2 * cell, oy + r * cell, cell, cell);
+      maxTxt -= qrS + 24;
+    }
+    ctx.textBaseline = 'alphabetic';
+    let fy = footTop + 34;
+    ctx.fillStyle = '#FFFFFF'; ctx.font = `800 ${fmtKey === 'story' ? 30 : 27}px ${bodyFont}`;
+    ctx.fillText(fitText(ctx, b.is_public ? `mhrdecklab.com/#binder/${b.share_code}` : 'mhrdecklab.com', maxTxt), left, fy);
+    const contact = trade ? [b.contact_wa ? `WA ${prettyWa(b.contact_wa)}` : '', b.contact_ig ? `IG @${b.contact_ig}` : ''].filter(Boolean).join('  ·  ') : '';
+    if(contact){ fy += 38; ctx.fillStyle = '#F2B01E'; ctx.font = `700 ${fmtKey === 'story' ? 26 : 24}px ${bodyFont}`; ctx.fillText(fitText(ctx, contact, maxTxt), left, fy); }
+    fy += contact ? 34 : 38;
+    ctx.fillStyle = '#8A94A3'; ctx.font = `500 ${fmtKey === 'story' ? 21 : 19}px ${bodyFont}`;
+    ctx.fillText(fitText(ctx, trade ? 'Deals are made directly between buyer and seller.' : 'Made with MHR Deck Lab binders.', maxTxt), left, fy);
+    fy += 28;
+    ctx.fillText(fitText(ctx, 'Card art © MARVEL © JASON · fan-made content, unofficial', maxTxt), left, fy);
+    return cv;
+  }
+  const slug = s => String(s || 'binder').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'binder';
+  const toBlob = cv => new Promise(res => cv.toBlob(b => res(b), 'image/png'));
+
+  function openImages(){
+    const b = S.cur; if(!b) return;
+    const nonEmpty = []; for(let p = 0; p < b.pages; p++) if(b.slots.slice(p * PER, p * PER + PER).some(Boolean)) nonEmpty.push(p);
+    const curPage = S.page;
+    const trade = b.kind === 'trade';
+    const m = mxOpen(`<h3>🖼 Save pages as image</h3>
+      <p class="bd-mut">One image per binder page, ready for an Instagram / TikTok story or post, or to send on WhatsApp.</p>
+      <div class="bd-form">
+        <div class="bd-f"><span>Format</span><div class="bs-sets" id="biFmt">${Object.entries(IMG_FMT).map(([key, f], i)=>`<button type="button" data-bifmt="${key}" aria-pressed="${i===0}">${E(f.label)}</button>`).join('')}</div></div>
+        <div class="bd-f"><span>Pages</span><div class="bs-sets" id="biPages">
+          <button type="button" data-bipg="all" aria-pressed="true">All pages with cards (${nonEmpty.length})</button>
+          <button type="button" data-bipg="cur" aria-pressed="false">Page ${curPage + 1} only</button></div></div>
+        ${trade ? `<label class="bd-chk"><input type="checkbox" id="biPrice"${b.show_prices !== false ? ' checked' : ''}> Show prices</label>
+          <label class="bd-chk"><input type="checkbox" id="biSold" checked> Leave out sold cards</label>` : ''}
+        <label class="bd-chk${b.is_public ? '' : ' off'}"><input type="checkbox" id="biQr"${b.is_public ? ' checked' : ' disabled'}> Add a QR code to the binder link${b.is_public ? '' : ' (turn on the shared link first)'}</label>
+        <div class="bd-btns"><button type="button" class="btn2 main" id="biGo">Create images</button><button type="button" class="btn2" data-mxclose>Close</button></div>
+        <p class="bd-err" id="biErr"></p>
+        <div class="bi-out" id="biOut"></div>
+      </div>`, 'bd-mx bd-mx-wide');
+    const box = m.querySelector('.mx-box');
+    let fmt = 'story', which = 'all', made = [];
+    box.addEventListener('click', async e=>{
+      const f = e.target.closest('[data-bifmt]');
+      if(f){ fmt = f.dataset.bifmt; box.querySelectorAll('[data-bifmt]').forEach(x=>x.setAttribute('aria-pressed', String(x === f))); return; }
+      const pg = e.target.closest('[data-bipg]');
+      if(pg){ which = pg.dataset.bipg; box.querySelectorAll('[data-bipg]').forEach(x=>x.setAttribute('aria-pressed', String(x === pg))); return; }
+      const dl = e.target.closest('[data-bidl]');
+      if(dl){ const it = made[+dl.dataset.bidl]; if(it) downloadBlob(it.blob, it.name); return; }
+      if(e.target.closest('[data-biall]')){ for(const it of made){ downloadBlob(it.blob, it.name); await new Promise(r=>setTimeout(r, 450)); } return; }
+      if(e.target.closest('[data-bishare]')){
+        const files = made.map(it => new File([it.blob], it.name, { type:'image/png' }));
+        try{ await navigator.share({ files, title:b.name, text: b.is_public ? linkOf(b.share_code) : b.name }); }catch(err){}
+        return;
+      }
+      if(e.target.id !== 'biGo') return;
+      const btn = e.target; btn.disabled = true; btn.textContent = 'Creating…';
+      const out = box.querySelector('#biOut'); out.innerHTML = '';
+      const err = box.querySelector('#biErr'); err.textContent = '';
+      const chk = id => { const el = box.querySelector(id); return !!(el && el.checked && !el.disabled); };
+      const opt = { prices: trade ? chk('#biPrice') : false, hideSold: trade ? chk('#biSold') : false, qr: chk('#biQr'), owner: S.username || '' };
+      if(!opt.owner && window.MHRAuth && window.MHRAuth.getUsername){ try{ const ss = await window.MHRAuth.getSession(); opt.owner = S.username = (await window.MHRAuth.getUsername(ss)) || ''; }catch(er){} }
+      if(opt.qr){ try{ await loadQr(); }catch(er){ opt.qr = false; } }
+      const pages = which === 'cur' ? [curPage] : (nonEmpty.length ? nonEmpty : [0]);
+      made.forEach(it => URL.revokeObjectURL(it.url)); made = [];
+      try{
+        for(const p of pages){
+          const cv = await renderPageImage(b, p, fmt, opt);
+          const blob = await toBlob(cv);
+          if(!blob) throw new Error('blob');
+          const name = `${slug(b.name)}-page${p + 1}-${fmt}.png`;
+          made.push({ blob, name, url: URL.createObjectURL(blob), p });
+        }
+      }catch(er){ err.textContent = 'Couldn\'t create the images on this browser. Please try again, or use another browser.'; }
+      btn.disabled = false; btn.textContent = 'Create images again';
+      const canShare = !!(navigator.canShare && made.length && navigator.canShare({ files:[new File([made[0].blob], made[0].name, { type:'image/png' })] }));
+      out.innerHTML = made.length ? `<div class="bd-btns">${canShare ? '<button type="button" class="btn2 main" data-bishare="1">📤 Share to Instagram / WhatsApp…</button>' : ''}
+          ${made.length > 1 ? `<button type="button" class="btn2${canShare ? '' : ' main'}" data-biall="1">⬇ Download all (${made.length})</button>` : ''}</div>
+        <div class="bi-grid bi-${fmt}">${made.map((it, i)=>`<figure><img src="${it.url}" alt="Page ${it.p + 1}"><figcaption>Page ${it.p + 1} <button type="button" class="btn2" data-bidl="${i}">⬇ Download</button></figcaption></figure>`).join('')}</div>` : '';
+    });
+  }
+  function downloadBlob(blob, name){
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }
+
   if(window.MHRAuth && window.MHRAuth.ready && window.MHRAuth.onAuthChange){
     window.MHRAuth.onAuthChange(()=>{ if(typeof state !== 'undefined' && state.page === 'binder' && S.pubCode) renderPage(S.pubCode); });
   }
@@ -722,6 +997,6 @@
   window.MHRBindersUI = {
     renderTab, refresh, renderPage,
     reset(){ S.list = null; S.cur = null; S.edit = false; S.err = null; },
-    _state: S,
+    _state: S, _renderPageImage: renderPageImage,
   };
 })();

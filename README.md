@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.06** · 23 Oktober 2026
+**Versi saat ini: v7.07** · 23 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -588,6 +588,29 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.07 — Binders: simpan halaman binder sebagai gambar (IG/TikTok Story 9:16 & Post 4:5) — 23 Oktober 2026 *(`index.html`, `binders-ui.js`)*
+
+Tahap C dari rencana Dashboard v2.
+- Tombol **🖼 Save pages as image** di ringkasan editor binder dan di jendela Share (binder publik maupun privat).
+- Pilihan: format **Story 9:16 (1080×1920)** atau **Post 4:5 (1080×1350)**, semua halaman yang berisi kartu atau halaman
+  yang sedang dibuka saja, tampilkan harga, sembunyikan kartu terjual, dan **QR code** ke link binder (hanya kalau link
+  berbagi aktif; qrcode.js dimuat saat dibutuhkan).
+- Satu gambar per halaman binder (9 kantong), digambar langsung di `<canvas>` mengikuti template konten sosmed MHR
+  Deck Lab: latar #0B0E12 + dua cahaya, logo kiri, chip emas tipe binder + nomor halaman (mis. 1/3), judul, @pemilik +
+  lokasi, kartu berbingkai gelap dengan label versi (SEC/MR…), harga pendek + NEGO / "Make offer", ×jumlah, stempel
+  SOLD; footer: link binder, kontak WA/IG (binder jual-beli), "Deals are made directly between buyer and seller",
+  "Card art © MARVEL © JASON · fan-made content, unofficial". Zona aman Story: 150 px atas, 175 px bawah.
+- Hasil: pratinjau, **Download** per halaman / **Download all**, dan **📤 Share to Instagram / WhatsApp…** (Web Share
+  API dengan berkas, muncul otomatis di HP yang mendukung). Nama berkas: `<nama-binder>-page1-story.png`.
+- Gambar kartu dari `images/` (origin yang sama, canvas tidak "tainted"); versi yang dipilih → fallback versi utama →
+  folder bahasa lain.
+
+Cache-buster: `binders-ui.js?v=7.07`. Versi 7.07 (komentar, meta, footer). Tidak ada perubahan Supabase.
+
+**Verifikasi:** Playwright lokal desktop + mobile 390 px, 17 cek lulus: tombol & jendela opsi, 2 gambar Story 1080×1920
+untuk 2 halaman berisi, QR termuat, nama berkas unduhan, format Post 1080×1350 halaman saat ini, binder privat tanpa
+QR & binder koleksi tanpa harga, tombol dari jendela Share, tanpa error JS. Hasil gambar diperiksa visual.
 
 ### v7.06 — Binders: binder kartu 3×3 (koleksi, jual/tukar, wishlist), link berbagi, kontak penjual, disclaimer & report — 23 Oktober 2026 *(`index.html`, berkas BARU `binders.js` & `binders-ui.js`, migrasi SQL baru `mhr_decklab_v706_binders.sql` di folder internal)*
 
