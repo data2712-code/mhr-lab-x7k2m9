@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.05  ·  23 Oktober 2026
+     MHR DECK LAB  ·  versi 7.06  ·  23 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.05">
+<meta name="version" content="7.06">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1796,8 +1796,8 @@
     -webkit-appearance:none;margin:0}
   .coll-qty-input{-moz-appearance:textfield}
   /* ===== v7.05 — My Dashboard v2: tab ringkasan, My Decks grid/list, koleksi per set + per versi ===== */
-  .dt-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px;
-    padding-bottom:14px;border-bottom:1px solid var(--line);max-width:760px}
+  .dt-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px;
+    padding-bottom:14px;border-bottom:1px solid var(--line);max-width:1140px}
   .dt-tab{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px;cursor:pointer;
     text-align:left;color:var(--paper);font:inherit;display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:baseline}
   .dt-tab:hover{border-color:#3a4658}
@@ -1934,6 +1934,190 @@
     .coll-hero-acts{margin-left:0}
     .coll-list{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
+  /* ===== v7.06 — Binders (binder kartu 3×3) ===== */
+  body:not(.page-binder) #binderPage{display:none}
+  body.page-binder .filters, body.page-binder .cards, body.page-binder .deck{display:none}
+  body.page-binder .layout{grid-template-columns:minmax(0,1fr)}
+  .bdp-wrap{max-width:1180px;margin:0 auto;padding:22px 20px 90px}
+  .bd-mut{color:var(--muted);font-size:12px}
+  .bd-sp{flex:1}
+  .bd-intro{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between;margin-bottom:14px;color:var(--muted);font-size:12.5px;line-height:1.5}
+  .bd-intro span{flex:1 1 320px}
+  .bd-intro .btn2{flex:none;padding:8px 14px}
+  .bd-shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+  .bd-book{border:none;border-radius:6px 14px 14px 6px;padding:14px 14px 12px 22px;position:relative;min-height:168px;cursor:pointer;color:#fff;
+    text-align:left;font:inherit;box-shadow:inset 8px 0 0 rgba(0,0,0,.28),0 6px 18px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
+  .bd-book::before{content:"";position:absolute;left:4px;top:18px;bottom:18px;width:3px;background:repeating-linear-gradient(180deg,rgba(255,255,255,.35) 0 6px,transparent 6px 22px)}
+  .bd-book:hover{filter:brightness(1.08)}
+  .bd-kind{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;opacity:.88;margin-bottom:6px;position:relative;z-index:1}
+  .bd-ttl{font-family:var(--disp);font-size:19px;letter-spacing:.02em;line-height:1.12;position:relative;z-index:1;max-width:78%;word-break:break-word}
+  .bd-peek{position:absolute;right:-12px;bottom:-24px;display:flex}
+  .bd-peek img{width:62px;border-radius:5px;transform:rotate(-8deg);margin-left:-26px;box-shadow:0 4px 10px rgba(0,0,0,.5)}
+  .bd-peek img.failed{display:none}
+  .bd-inf{margin-top:auto;font-size:11.5px;position:relative;z-index:1;opacity:.92}
+  .bd-book.bd-new{background:none;border:2px dashed var(--line);box-shadow:none;align-items:center;justify-content:center;color:var(--muted);font-weight:700;text-align:center;gap:6px}
+  .bd-book.bd-new::before{display:none}
+  .bd-book.bd-new small{font-weight:400;font-size:11.5px}
+  .bd-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .bd-top h3{font-family:var(--disp);font-size:22px;letter-spacing:.02em;margin-right:4px}
+  .bd-top .btn2{flex:none;padding:7px 12px;font-size:12.5px}
+  .bd-back{background:none;border:none;color:var(--muted);font-size:12.5px;cursor:pointer;padding:4px 6px 4px 0}
+  .bd-back:hover{color:var(--accent)}
+  .bd-tag{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .bd-tag.warn{border-color:var(--merah);color:var(--merah)}
+  .btn2.bd-ghost{border-color:var(--accent);color:var(--accent)}
+  .btn2.bd-red{border-color:var(--merah);color:var(--merah)}
+  .bd-warn{background:rgba(228,68,46,.1);border:1px solid rgba(228,68,46,.5);border-radius:10px;padding:9px 12px;font-size:12.5px;margin:0 0 12px;line-height:1.45}
+  .bd-editbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:rgba(242,176,30,.09);border:1px solid var(--accent);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:12.5px}
+  .bd-editbar b{color:var(--accent)}
+  .bd-editbar .btn2{flex:none;padding:6px 11px;font-size:12px}
+  .bd-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:start}
+  .bd-side{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;position:sticky;top:60px}
+  .bd-side h4{font-family:var(--disp);font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px}
+  .bd-side h4:not(:first-child){margin-top:14px}
+  .bd-row{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--line)}
+  .bd-row b{font-family:var(--mono)}
+  .bd-stack{display:flex;flex-direction:column;gap:7px;margin-top:8px}
+  .bd-stack .btn2{text-align:left;padding:8px 11px;font-size:12.5px;text-decoration:none}
+  .bd-status{font-size:11.5px;color:var(--muted);margin-top:10px;min-height:1em}
+  /* halaman binder */
+  .bp-spread{display:grid;gap:0;background:#11161c;border:1px solid var(--line);border-radius:14px;padding:16px;position:relative}
+  .bp-spread.bp-per2{grid-template-columns:1fr 1fr}
+  .bp-spread.bp-per2::after{content:"";position:absolute;left:50%;top:10px;bottom:10px;width:2px;transform:translateX(-1px);
+    background:linear-gradient(180deg,transparent,#2c3644 15%,#2c3644 85%,transparent)}
+  .bp-spread.bp-per1{grid-template-columns:1fr;max-width:520px;margin:0 auto;padding:10px}
+  .bp-page{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:6px 16px;align-content:start}
+  .bp-per1 .bp-page{padding:4px;gap:7px}
+  .bp-no{grid-column:1/-1;text-align:center;font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+  .bp-pocket{aspect-ratio:63/88;border-radius:8px;position:relative;overflow:hidden;cursor:zoom-in;
+    background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.08)}
+  .bp-pocket img{width:100%;height:100%;object-fit:cover;display:block}
+  .bp-pocket img.failed{display:none}
+  .bp-pocket::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(125deg,rgba(255,255,255,.12),transparent 32%,transparent 70%,rgba(255,255,255,.05))}
+  .bp-pocket.empty{border:1.5px dashed #34404f;background:none;display:grid;place-items:center;color:#4d5a6b;font-size:22px;cursor:default}
+  .bp-pocket.empty::after{display:none}
+  .bp-pocket.empty.add{cursor:pointer}
+  .bp-pocket.empty.add:hover{border-color:var(--accent);color:var(--accent)}
+  .bp-pocket[draggable="true"]{cursor:grab}
+  .bp-pocket.drop{outline:2px solid var(--accent);outline-offset:2px}
+  .bp-pocket.miss img{filter:grayscale(1) brightness(.5)}
+  .bp-pocket.sold img{filter:grayscale(1) brightness(.45)}
+  .bp-q{position:absolute;top:5px;right:5px;z-index:1;background:rgba(14,18,22,.88);border:1px solid var(--line);color:var(--paper);font-family:var(--mono);font-weight:800;font-size:11px;padding:1px 6px;border-radius:6px}
+  .bp-bar{position:absolute;left:0;right:0;bottom:0;z-index:1;background:rgba(14,18,22,.9);display:flex;align-items:center;justify-content:center;gap:4px;padding:3px 2px;font-size:11.5px;min-height:20px;flex-wrap:wrap}
+  .bp-bar b{color:var(--accent);font-family:var(--mono)}
+  .bp-bar b.mut{color:var(--muted);font-family:var(--body);font-weight:600}
+  .bp-r{font-style:normal;font-size:9.5px;font-weight:800;padding:0 5px;border-radius:4px;color:#1A1206;background:#F2B01E}
+  .bp-r-sec,.bp-r-hr,.bp-r-tr{background:linear-gradient(90deg,#f9d976,#e0a3ff,#7fd3ff);color:#111}
+  .bp-r-mr,.bp-r-er{background:#c9cfd8}
+  .bp-n{font-style:normal;font-size:8.5px;font-weight:800;color:var(--hijau);letter-spacing:.04em}
+  .bp-sold{position:absolute;left:0;right:0;top:42%;z-index:1;text-align:center;font-family:var(--disp);font-size:16px;color:#fff;transform:rotate(-14deg);background:rgba(228,68,46,.88);letter-spacing:.1em}
+  .bp-pager{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0}
+  .bp-pager button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--paper);font-size:17px;cursor:pointer}
+  .bp-pager button:disabled{opacity:.35;cursor:default}
+  .bp-dots{display:flex;gap:5px}
+  .bp-dots i{width:8px;height:8px;border-radius:50%;background:var(--line);cursor:pointer}
+  .bp-dots i.on{background:var(--accent);width:20px;border-radius:9px}
+  .bd-tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px;background:var(--panel);border:1px solid var(--line)}
+  .bd-tbl th{text-align:left;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:7px 9px;background:var(--panel2)}
+  .bd-tbl td{padding:6px 9px;border-top:1px solid var(--line);cursor:zoom-in;vertical-align:top}
+  .bd-tbl td small{display:block;color:var(--muted);font-size:11px}
+  .bd-tbl .m{font-family:var(--mono)}
+  .bd-tbl .r{text-align:right}
+  .bd-tbl td.r{color:var(--accent);font-weight:700}
+  .bd-tbl tr.sold td{opacity:.45;text-decoration:line-through}
+  /* modal binder */
+  .mx-box.bd-mx{max-width:640px}
+  .mx-box.bd-mx-wide{max-width:820px}
+  .bd-mx h3{font-family:var(--disp);font-size:20px;margin:0 30px 10px 0}
+  .bd-form{display:flex;flex-direction:column;gap:12px}
+  .bd-f{display:flex;flex-direction:column;gap:5px;font-size:12px}
+  .bd-f>span{color:var(--muted);font-weight:700;font-size:11.5px}
+  .bd-f input,.bd-f select,.bd-f textarea,.bs-tool input,.bs-tool select,.bd-link input{background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;outline:none;width:100%}
+  .bd-f input:focus,.bd-f select:focus,.bd-f textarea:focus,.bs-tool input:focus{border-color:var(--accent)}
+  .bd-kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .bd-kopt{border:1px solid var(--line);border-radius:10px;padding:9px 10px;cursor:pointer;display:flex;flex-direction:column;gap:3px;font-size:12.5px}
+  .bd-kopt input{margin:0 0 3px}
+  .bd-kopt small{color:var(--muted);font-size:11px}
+  .bd-kopt:has(input:checked){border-color:var(--accent);background:rgba(242,176,30,.07)}
+  .bd-ropt{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;padding:6px 0}
+  .bd-ropt select{background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:7px;padding:5px 8px;font-size:12.5px}
+  .bd-ropt.off{opacity:.55}
+  .bd-chk{display:flex;gap:8px;align-items:center;font-size:13px;cursor:pointer}
+  .bd-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px}
+  .bd-btns .btn2{flex:none;padding:8px 14px;text-decoration:none;font-size:12.5px}
+  .bd-err{color:var(--merah);font-size:12.5px;min-height:1em;margin:0}
+  .bd-btns .btn2.main,.bd-intro .btn2.main,.bd-top .btn2.main,.bd-link .btn2.main{background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:800}
+  .bd-disc{font-size:12px;line-height:1.55;color:var(--paper);background:rgba(242,176,30,.07);border:1px solid rgba(242,176,30,.4);border-radius:10px;padding:10px 12px;margin:10px 0}
+  .bd-disc b{color:var(--accent)}
+  .bd-link{display:flex;gap:8px;margin:10px 0}
+  .bd-link .btn2{flex:none}
+  .bs-tool{display:flex;gap:8px;margin-bottom:8px}
+  .bs-tool select{width:auto;flex:none}
+  .bs-sets{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+  .bs-sets button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:700;cursor:pointer}
+  .bs-sets button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+  .bs-res{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;max-height:52vh;overflow-y:auto;padding:2px}
+  .bs-card{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px;cursor:pointer;color:var(--paper);text-align:left;font:inherit;position:relative;display:flex;flex-direction:column;gap:2px}
+  .bs-card:hover{border-color:var(--accent)}
+  .bs-card img{width:100%;aspect-ratio:63/88;object-fit:cover;border-radius:5px}
+  .bs-card b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bs-card small{font-size:10px;color:var(--muted);font-family:var(--mono)}
+  .bs-more{grid-column:1/-1;text-align:center;padding:8px}
+  .bs-form{display:grid;grid-template-columns:170px minmax(0,1fr);gap:16px}
+  .bs-prev{cursor:zoom-in}
+  .bs-prev img{width:100%;border-radius:8px;display:block}
+  .bs-fields{display:flex;flex-direction:column;gap:6px}
+  .bs-nm{font-size:15px}
+  .bs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+  .bs-wide{grid-column:1/-1}
+  /* halaman publik */
+  .bdp-own{background:rgba(59,135,232,.1);border:1px solid rgba(59,135,232,.5);border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:12px}
+  .bdp-own a{color:var(--accent)}
+  .bdp-top{display:flex;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;flex-wrap:wrap}
+  .bdp-ico{width:52px;height:52px;border-radius:12px;display:grid;place-items:center;font-size:24px;flex:none}
+  .bdp-h{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 300px}
+  .bdp-h h2{font-family:var(--disp);font-size:26px;letter-spacing:.02em;line-height:1.1}
+  .bdp-h b{color:var(--paper)}
+  .bdp-acts{display:flex;gap:8px;flex-wrap:wrap}
+  .bdp-acts .btn2{flex:none;padding:8px 13px;text-decoration:none;font-size:12.5px}
+  .btn2.bdp-wa{background:#25D366;border-color:#25D366;color:#06240f;font-weight:800}
+  .btn2.bdp-ig{border-color:#d6249f;color:#ff7ac8}
+  .bdp-note{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;margin:0 0 10px;white-space:pre-line}
+  .bdp-tool{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 2px}
+  .bdp-tip{text-align:center}
+  .bdp-foot{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+  .bdp-report{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;margin-left:auto}
+  .bdp-report:hover{color:var(--merah)}
+  .bdp-empty{text-align:center;padding:60px 16px;color:var(--muted)}
+  .bdp-empty h2{font-family:var(--disp);font-size:24px;color:var(--paper);margin-bottom:8px}
+  .bdp-empty .btn2{display:inline-block;margin-top:14px;flex:none;text-decoration:none;padding:8px 16px}
+  /* admin */
+  .bd-admin{margin-top:22px;border:1px dashed var(--line);border-radius:12px;padding:12px 14px;font-size:12.5px}
+  .bd-rep{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
+  .bd-rep a{color:var(--paper)}
+  .bd-rep ul{margin:6px 0 6px 18px;color:var(--muted)}
+  .bd-rep li b{color:var(--paper)}
+  @media (max-width:760px){
+    .bd-layout{grid-template-columns:minmax(0,1fr)}
+    .bd-side{position:static}
+    .bd-shelf{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .bd-book{min-height:140px;padding:12px 10px 10px 18px}
+    .bd-ttl{font-size:16px}
+    .bd-peek{right:-16px;bottom:-30px;opacity:.75}
+    .bd-peek img{width:46px;margin-left:-22px}
+    .bd-ttl,.bd-inf{text-shadow:0 1px 3px rgba(0,0,0,.7)}
+    .bd-top h3{font-size:19px;flex-basis:100%;order:-1}
+    .bd-back{order:-2}
+    .bd-tbl .hm{display:none}
+    .bd-kinds{grid-template-columns:1fr}
+    .bs-form{grid-template-columns:1fr}
+    .bs-prev{max-width:150px;margin:0 auto}
+    .bs-grid{grid-template-columns:1fr}
+    .bs-res{grid-template-columns:repeat(3,minmax(0,1fr));max-height:46vh}
+    .bdp-wrap{padding:16px 12px 110px}
+    .bdp-h h2{font-size:21px}
+    .bp-bar{font-size:10.5px}
+  }
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -2004,6 +2188,8 @@
 <section id="setPage"><div class="st-wrap" id="setWrap"></div></section>
 <!-- v6.98 — halaman Events (turnamen LGS: Swiss + Top cut), lihat events.js & events-ui.js -->
 <section id="eventPage"><div class="ev-wrap" id="eventWrap"></div></section>
+<!-- v7.06 — binder yang dibagikan lewat link (#binder/<kode>), binders-ui.js -->
+<section id="binderPage"><div class="bdp-wrap" id="binderWrap"></div></section>
 
 <!-- v6.63 — halaman Beranda (isi digambar home-ui.js: renderBeranda) -->
 <section id="berandaPage"><div class="hm-wrap" id="berandaWrap"></div></section>
@@ -2039,13 +2225,15 @@
     <button class="btn2 main" id="dashLoginBtn" style="max-width:220px" data-i18n="dashLoginBtn">👤 Masuk / Daftar</button>
     <div id="dashLoggedIn" hidden>
       <!-- v7.05 — tab dashboard: kotak ringkasan sekaligus tombol tab (My Decks / Card Collection).
-           Binders menyusul (Tahap B). Tab terakhir diingat di localStorage (DASH_TAB_KEY). -->
+           v7.06: + Binders. Tab terakhir diingat di localStorage (DASH_TAB_KEY). -->
       <div class="dt-tabs" id="dashTabs" role="tablist">
         <button class="dt-tab" data-dtab="decks" role="tab" aria-selected="true">
           <span class="dt-k">☁️ My Decks</span><span class="dt-v" id="dtDecksV">–</span><span class="dt-s" id="dtDecksS">decks</span></button>
         <button class="dt-tab" data-dtab="coll" role="tab" aria-selected="false">
           <span class="dt-k">🎴 Card Collection</span><span class="dt-v" id="dtCollV">–</span><span class="dt-s" id="dtCollS">cards</span>
           <span class="dt-bar"><i id="dtCollBar"></i></span></button>
+        <button class="dt-tab" data-dtab="bind" role="tab" aria-selected="false">
+          <span class="dt-k">📒 Binders</span><span class="dt-v" id="dtBindV">–</span><span class="dt-s" id="dtBindS">binders</span></button>
       </div>
 
       <div class="dt-panel" id="dashPanelDecks">
@@ -2082,6 +2270,9 @@
         </div>
         <div class="coll-list" id="collList"></div>
       </div>
+
+      <!-- v7.06 — Binders (binders-ui.js) -->
+      <div class="dt-panel" id="dashPanelBind" hidden><div id="bindWrap"></div></div>
     </div>
   </div>
 </section>
@@ -2444,6 +2635,8 @@
 <script src="tournaments.js?v=7.02"></script>
 <script src="events.js?v=7.02"></script>
 <script src="events-ui.js?v=7.05"></script>
+<script src="binders.js?v=7.06"></script>
+<script src="binders-ui.js?v=7.06"></script>
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
@@ -2472,7 +2665,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.05</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.06</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -7392,7 +7585,7 @@ function renderPanduan(){
 }
 
 /* ==================== NAVIGASI HALAMAN ==================== */
-const PAGES = ['beranda','berita','cards','set','build','meta','tourney','event','lgs','panduan','dukung','dashboard'];
+const PAGES = ['beranda','berita','cards','set','build','meta','tourney','event','lgs','panduan','dukung','dashboard','binder'];
 const TITLE_AWAL = document.title;
 function setPage(p, dariHash){
   /* v6.62 — 'berita/<slug>' = satu artikel (lihat news-ui.js) */
@@ -7400,6 +7593,8 @@ function setPage(p, dariHash){
   if(typeof p === 'string' && p.startsWith('berita/')){ sub = p.slice(7); p = 'berita'; }
   if(typeof p === 'string' && p.startsWith('set/')){ sub = p.slice(4).toUpperCase(); p = 'set'; }  /* v6.64 */
   if(typeof p === 'string' && p.startsWith('event/')){ sub = p.slice(6).toLowerCase(); p = 'event'; }  /* v6.98 */
+  if(typeof p === 'string' && p.startsWith('binder/')){ sub = p.slice(7); p = 'binder'; }  /* v7.06 — kode link binder (huruf besar/kecil dipertahankan) */
+  if(p === 'binder' && !sub) p = 'dashboard';
   if(!PAGES.includes(p)) p = 'cards';
   if(p !== 'berita') document.title = TITLE_AWAL;
   /* v6.46 — semua tab (termasuk LGS/Tournament Decks/User Decks) SELALU
@@ -7423,6 +7618,7 @@ function setPage(p, dariHash){
   if(p === 'panduan') renderPanduan();
   if(p === 'dukung') renderDukungPage();
   if(p === 'dashboard') renderDashboardPage();
+  if(p === 'binder' && window.MHRBindersUI) window.MHRBindersUI.renderPage(sub);   /* v7.06 */
   if(p === 'cards' || p === 'build') renderCards();
   if(!dariHash) history.replaceState(null,'','#'+p+(sub?'/'+sub:''));
   window.scrollTo({top:0});
@@ -7744,6 +7940,7 @@ async function renderDashboardPage(){
   if(loginBtn) loginBtn.hidden = loggedIn;
   if(body) body.hidden = !loggedIn;
   if(!loggedIn) return;
+  if(window.MHRBindersUI && dashTab !== 'bind') window.MHRBindersUI.refresh();   // v7.06 — angka di kotak Binders
   setDashTab(dashTab);   // v7.05
   if(window.MHRUI && window.MHRUI.renderCloudList) window.MHRUI.renderCloudList();
   renderCollectionGrid();
@@ -7809,7 +8006,7 @@ let collSet = null;                  // kode set terpilih, 'ALL' = semua set
 const collOpenV = new Set();         // nomor kartu yang panel "Versions"-nya sedang terbuka
 let dashTab = 'decks';
 try{ collSet = localStorage.getItem(COLL_SET_KEY) || null; }catch(e){}
-try{ const v = localStorage.getItem(DASH_TAB_KEY); if(v === 'decks' || v === 'coll') dashTab = v; }catch(e){}
+try{ const v = localStorage.getItem(DASH_TAB_KEY); if(v === 'decks' || v === 'coll' || v === 'bind') dashTab = v; }catch(e){}
 
 function collKey(c, r){ return (!r || r === c.ra[0]) ? c.no : `${c.no}_${r}`; }
 function collQtyV(c, r){ return collMap[collKey(c, r)] || 0; }
@@ -7985,12 +8182,15 @@ function collCopyList(kind, btn){
 }
 
 function setDashTab(tab){
-  dashTab = (tab === 'coll') ? 'coll' : 'decks';
+  dashTab = (tab === 'coll' || tab === 'bind') ? tab : 'decks';
   try{ localStorage.setItem(DASH_TAB_KEY, dashTab); }catch(e){}
   document.querySelectorAll('[data-dtab]').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.dtab === dashTab)));
   const pd = $('#dashPanelDecks'), pc = $('#dashPanelColl');
   if(pd) pd.hidden = dashTab !== 'decks';
   if(pc) pc.hidden = dashTab !== 'coll';
+  const pb = $('#dashPanelBind');                      // v7.06
+  if(pb) pb.hidden = dashTab !== 'bind';
+  if(dashTab === 'bind' && window.MHRBindersUI) window.MHRBindersUI.renderTab();
 }
 if($('#dashTabs')) $('#dashTabs').addEventListener('click', e=>{
   const b = e.target.closest('[data-dtab]'); if(b) setDashTab(b.dataset.dtab);
@@ -9058,6 +9258,8 @@ if(hashAwal.startsWith('#d=')){
   handleCardLink();
 } else if(hashAwal.startsWith('#event/') && window.eventIdFromHash && window.eventIdFromHash(hashAwal)){
   setPage('event/' + window.eventIdFromHash(hashAwal), true);
+} else if(hashAwal.startsWith('#binder/') && window.binderCodeFromHash && window.binderCodeFromHash(hashAwal)){   /* v7.06 */
+  setPage('binder/' + window.binderCodeFromHash(hashAwal), true);
 } else if(hashAwal.startsWith('#set/') && window.setKodeFromHash && window.setKodeFromHash(hashAwal)){
   setPage('set/' + window.setKodeFromHash(hashAwal), true);
 } else if(hashAwal.startsWith('#berita/') && window.beritaSlugFromHash && window.beritaSlugFromHash(hashAwal)){
@@ -9076,6 +9278,10 @@ window.addEventListener('hashchange', ()=>{
   if(h === '#event' || h.startsWith('#event/')){                     /* v6.98 */
     const id = window.eventIdFromHash ? window.eventIdFromHash(h) : null;
     setPage(id ? 'event/'+id : 'event', true); return;
+  }
+  if(h.startsWith('#binder/')){                                       /* v7.06 */
+    const code = window.binderCodeFromHash ? window.binderCodeFromHash(h) : null;
+    setPage(code ? 'binder/'+code : 'dashboard', true); return;
   }
   if(h === '#set' || h.startsWith('#set/')){
     const kode = window.setKodeFromHash ? window.setKodeFromHash(h) : null;

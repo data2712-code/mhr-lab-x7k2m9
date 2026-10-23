@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.05** · 23 Oktober 2026
+**Versi saat ini: v7.06** · 23 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -35,7 +35,9 @@ mhr-lab-x7k2m9/
 ├── sw.js                 ← PWA: service worker, cache offline (sejak v6.6)
 ├── icons/               ← ikon PWA berbagai ukuran (sejak v6.6)
 ├── og-image.jpg      ← gambar preview saat link dibagikan
-├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.89; hapus saat kampanye turun, lihat README § v6.88)
+├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.89; TIDAK dimuat sejak v7.05, disimpan untuk kampanye berikutnya)
+├── binders.js         ← servis Supabase binder kartu 3×3 (v7.06, tanpa DOM)
+├── binders-ui.js      ← tab Binders di My Dashboard + halaman publik #binder/<kode> (v7.06)
 ├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
 ├── sitemap.xml           ← SEO: sitemap untuk Google Search Console (sejak v6.21)
 ├── robots.txt            ← SEO: izinkan semua crawler + rujuk ke sitemap.xml (sejak v6.21)
@@ -586,6 +588,63 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.06 — Binders: binder kartu 3×3 (koleksi, jual/tukar, wishlist), link berbagi, kontak penjual, disclaimer & report — 23 Oktober 2026 *(`index.html`, berkas BARU `binders.js` & `binders-ui.js`, migrasi SQL baru `mhr_decklab_v706_binders.sql` di folder internal)*
+
+Tahap B dari rencana Dashboard v2. Keputusan pemilik: link-only (tidak ada galeri publik), kontak = WhatsApp /
+Instagram isian pemilik, harga boleh tampil + opsi nego / make offer, disclaimer penjualan wajib tampil, report
+hanya dari akun login, binder disembunyikan otomatis setelah 3 laporan sampai admin meninjau.
+
+**Tab 📒 Binders di My Dashboard** (kotak ketiga di atas: jumlah binder + salinan yang dijual):
+- Rak binder (sampul berwarna per tipe: 🗂 My collection, 🏷 For sale / trade, ⭐ Wishlist). Maks. 20 binder per
+  akun, maks. 50 halaman per binder (9 kantong per halaman).
+- **Buat binder:** halaman kosong, **semua kartu satu set** (mis. SD05 → 18 kantong urut nomor), atau **kartu spare
+  saya** (salinan di atas 3 dari Card Collection; versi paling langka yang disimpan, sisanya jadi spare —
+  mis. punya 2 UR + 2 SEC → 1 UR jadi spare). Tipe For sale / trade otomatis memilih "kartu spare".
+- **Editor 3×3:** desktop 2 halaman berdampingan seperti binder terbuka, HP 1 halaman; navigasi ‹ › + titik.
+  Mode ✏️ Edit: ketuk kantong kosong → pilih kartu (cari, filter set, sumber: kartu saya / spare / semua),
+  ketuk kartu → ubah versi (dengan jumlah yang dimiliki per versi), jumlah, **harga (Rp)**, **Open to offers
+  (nego)**, kondisi (Near mint / Lightly played / Played / Damaged), catatan, **Sold**; pindah ◀ ▶, hapus, seret-lepas
+  (desktop). Tambah / hapus halaman, "Add my spare cards". Disimpan otomatis ke akun.
+- Kantong: gambar versi yang dipilih (fallback ke versi utama), label versi (SEC/MR…), ×jumlah, harga pendek
+  (Rp350k) + NEGO, "Make offer" kalau tanpa harga, stempel SOLD. Binder koleksi: kartu yang belum ada di Card
+  Collection tampil abu-abu (hanya di tampilan pemilik). Tabel daftar di bawah binder.
+- Ringkasan: jumlah kartu, salinan, terjual, nilai listing. **Settings:** nama, tipe, link berbagi on/off,
+  tampilkan harga, nomor WhatsApp (dinormalkan ke 62…), Instagram (dari @nama atau URL), lokasi, catatan,
+  hapus binder. **Share:** salin link `mhrdecklab.com/#binder/<kode>`, salin daftar untuk WhatsApp, Web Share.
+- Admin: kotak "🛡 Binder reports" di tab Binders — daftar binder yang dilaporkan / disembunyikan, alasan, pelapor,
+  tombol Hide / Show again / Dismiss.
+
+**Halaman publik `#binder/<kode>`** (halaman baru `binder`, tidak ada di menu): judul, @pemilik, lokasi, tanggal,
+tombol **💬 Chat on WhatsApp** (wa.me dengan pesan pembuka + link binder) dan **📷 Instagram**, salin daftar, bagikan,
+tampilan binder / daftar, sembunyikan yang terjual, **disclaimer penjualan** (binder jual-beli), tombol **🚩 Report**
+(login dulu; alasan: scam, kartu palsu, konten tidak pantas, lainnya + catatan). Pemilik yang membuka link sendiri
+melihat banner + tombol ke editor. Link salah / binder privat / disembunyikan → "Binder not available".
+
+**Supabase (`mhr_decklab_v706_binders.sql`):** tabel `binders` (RLS: hanya pemilik + admin yang bisa membaca
+langsung — binder publik HANYA lewat RPC `mhr_binder_get(kode)`, jadi tidak bisa didaftar lewat API), trigger
+`binders_guard` (pemilik tidak bisa mengubah owner, kode link, atau status hidden), batas 20 binder, cek ukuran slots;
+tabel `binder_reports` (hanya admin yang bisa membaca, isi lewat RPC). RPC: `mhr_binder_get` (anon boleh; harga
+dibuang kalau pemilik mematikan harga; kontak hanya untuk binder jual-beli), `mhr_binder_report` (akun login, bukan
+binder sendiri, satu laporan per akun per binder, maks. 20 laporan/hari, otomatis hidden di laporan open ke-3),
+`mhr_admin_binder_reports`, `mhr_admin_binder_moderate`. GRANT ditulis eksplisit (aturan 30 Okt 2026).
+Format slot: `{"no","v","q","price","nego","cond","note","sold"}` atau `null` (lihat komentar di berkas SQL).
+
+Migrasi `mhr_decklab_v706_binders.sql` **sudah dijalankan di Supabase production 23 Okt 2026** (atas persetujuan
+pemilik) dan dicek: RLS aktif di kedua tabel, 5 policy, trigger pengaman, anon hanya bisa memanggil `mhr_binder_get`,
+authenticated hanya select/insert/update/delete di `binders` dan select di `binder_reports` (hak bawaan Supabase
+dirapikan dengan `revoke all ... from authenticated` lalu grant ulang).
+
+Cache-buster: `binders.js?v=7.06`, `binders-ui.js?v=7.06`. Versi 7.06 (komentar, meta, footer).
+
+**Verifikasi:** Playwright lokal (server tiruan yang meniru aturan SQL) 45 cek lulus — buat dari spare (versi langka
+disimpan), harga/nego/kondisi/catatan, pilih kartu + versi, sold, pindah, seret-lepas, tambah/hapus halaman,
+pengaturan (normalisasi WA/IG, tolak nomor salah), link & teks WhatsApp, binder dari set, rak & kotak tab, halaman publik
+anon (WA/IG, disclaimer, harga, list view, hide sold), binder privat/kode salah tidak tersedia, harga disembunyikan
+tidak terkirim, 3 laporan → hidden, tampilan pemilik binder hidden, antrean admin + unhide, mobile 390 px tanpa scroll
+horizontal; ditambah 50 cek v7.05 tetap lulus; tanpa error JS. Migrasi diuji di PostgreSQL 16 lokal (emulasi
+`auth.uid()`): RLS baca/ubah, trigger pengaman, batas slots & 20 binder, strip harga, laporan langsung ditolak,
+auto-hide, RPC admin, anon tidak bisa baca tabel / melapor, aman dijalankan ulang.
 
 ### v7.05 — My Dashboard v2 (tab, My Decks grid/list, koleksi per set & per versi) + Events terbuka untuk semua akun + pop-up iklan dilepas — 23 Oktober 2026 *(`index.html`, `events-ui.js`, migrasi SQL baru `mhr_decklab_v705_open_events.sql` di folder internal)*
 
