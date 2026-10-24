@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.10** · 24 Oktober 2026
+**Versi saat ini: v7.11** · 24 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -588,6 +588,23 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.11 — Binders: kolom Price otomatis memakai pemisah ribuan — 24 Oktober 2026 *(`index.html`, `binders-ui.js`)*
+
+Permintaan pemilik: harga lebih mudah dibaca saat diisi.
+- Kolom **Price** di form kantong (kartu database maupun kartu foto) memformat angka saat diketik dengan titik pemisah
+  ribuan gaya Indonesia: `150000` → `150.000`, `2500000` → `2.500.000`. Huruf/simbol yang diketik atau ditempel ikut
+  dibuang (`Rp 75.000` → `75.000`), nol di depan dibuang, maks 10 digit.
+- Posisi kursor dijaga saat mengetik/menyisipkan di tengah; Backspace/Delete tepat di sebelah titik menghapus digit di
+  sebelahnya (bukan "tersangkut" di titik). Placeholder jadi `e.g. 150.000`; harga lama tampil terformat saat kantong dibuka.
+- Yang disimpan tetap angka bulat tanpa titik (`1250000`), jadi data binder, riwayat `binder_sales`, tampilan harga
+  (`Rp1.250.000`, `Rp1.3M`) dan gambar IG tidak berubah. Tidak ada perubahan Supabase.
+
+Cache-buster: `binders-ui.js?v=7.11`. Versi 7.11 (komentar, meta, footer).
+
+**Verifikasi:** Playwright HP 390 px: ketik 150000 → `150.000`, tambah 0 → `1.500.000`, Backspace → `150.000`, Backspace
+setelah titik → `15.000` (kursor benar), sisip di depan → `12.500.000`, `Rp 75.000` → `75.000`, `007` → `7`, simpan
+`1.250.000` → tersimpan `1250000`, buka lagi → `1.250.000`; tanpa error JS.
 
 ### v7.10 — Binders: foto kartu (kartu yang belum ada di database) + riwayat harga kartu terjual — 24 Oktober 2026 *(`index.html`, `binders.js`, `binders-ui.js`, migrasi SQL baru `mhr_decklab_v710_binder_photos.sql` di folder internal)*
 

@@ -29,6 +29,8 @@
    DIHAPUS PERMANEN (keputusan pemilik 24 Okt 2026). Semua kantong punya "sid" (id unik)
    supaya trigger binders_sales_log di server bisa mencatat riwayat harga kartu terjual
    (tabel binder_sales, hanya untuk tim MHR Deck Lab, tidak tampil di web).
+   v7.11: kolom Price otomatis diberi pemisah ribuan saat diketik (150000 → 150.000, format
+   Indonesia); yang disimpan tetap angka bulat tanpa titik.
    Keputusan pemilik (23 Okt 2026): link-only, kontak = WA/IG isian pemilik,
    harga boleh tampil + opsi nego, disclaimer wajib di binder jual-beli,
    report hanya akun login, sembunyi otomatis setelah 3 laporan.
@@ -73,6 +75,8 @@
   const card = no => { if(!cardMap){ cardMap = new Map(); DB.forEach(c=>cardMap.set(c.no, c)); } return cardMap.get(no) || null; };
   const perSpread = () => (window.innerWidth >= 761 ? 2 : 1);
   const fmtRp = n => 'Rp' + Math.round(n).toLocaleString('id-ID');
+  /* v7.11 — pemisah ribuan untuk kolom harga: hanya digit, dikelompokkan per 3 dengan titik */
+  const fmtThou = v => { const d = String(v == null ? '' : v).replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '').slice(0, 10); return d.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
   const shortRp = n => n >= 1e6 ? 'Rp' + (Math.round(n / 1e5) / 10).toString() + 'M' : n >= 1000 ? 'Rp' + (Math.round(n / 100) / 10).toString() + 'k' : 'Rp' + n;
   const vOf = (c, s) => (s && s.v) ? s.v : c.ra[0];
   const vLabel = (c, v) => rarLabel(v || c.ra[0], c);
@@ -494,7 +498,7 @@
               <label class="bd-f"><span>Rarity</span><input id="bxRar" maxlength="12" list="bxRarList" value="${E(d.rar||'')}" placeholder="e.g. SR, UR, SEC"></label>
               <label class="bd-f"><span>Set</span><input id="bxSet" maxlength="16" list="bxSetList" value="${E(d.set||'')}" placeholder="e.g. SP01, LP01, Promo"></label>
               <label class="bd-f"><span>${trade ? 'Quantity for sale' : 'Quantity'}</span><input id="bsQty" type="number" min="1" max="99" inputmode="numeric" value="${d.q||1}"></label>
-              ${trade ? `<label class="bd-f"><span>Price (Rp, optional)</span><input id="bsPrice" inputmode="numeric" placeholder="e.g. 150000" value="${d.price != null && d.price !== '' ? d.price : ''}"></label>
+              ${trade ? `<label class="bd-f"><span>Price (Rp, optional)</span><input id="bsPrice" inputmode="numeric" autocomplete="off" placeholder="e.g. 150.000" value="${d.price != null && d.price !== '' ? fmtThou(d.price) : ''}"></label>
               <label class="bd-f"><span>Condition</span><select id="bsCond">${Object.entries(COND).map(([k2, l])=>`<option value="${k2}"${(d.cond||'NM')===k2?' selected':''}>${l}</option>`).join('')}</select></label>
               <label class="bd-chk"><input type="checkbox" id="bsNego"${d.nego ? ' checked' : ''}> Open to offers (nego)</label>
               <label class="bd-chk"><input type="checkbox" id="bsSold"${d.sold ? ' checked' : ''}> Sold</label>
@@ -521,7 +525,7 @@
             <div class="bs-grid">
               <label class="bd-f"><span>Version</span><select id="bsV">${vers}</select></label>
               <label class="bd-f"><span>${trade ? 'Copies for sale' : 'Copies'}</span><input id="bsQty" type="number" min="1" max="99" inputmode="numeric" value="${d.q||1}"></label>
-              ${trade ? `<label class="bd-f"><span>Price (Rp, optional)</span><input id="bsPrice" inputmode="numeric" placeholder="e.g. 150000" value="${d.price != null && d.price !== '' ? d.price : ''}"></label>
+              ${trade ? `<label class="bd-f"><span>Price (Rp, optional)</span><input id="bsPrice" inputmode="numeric" autocomplete="off" placeholder="e.g. 150.000" value="${d.price != null && d.price !== '' ? fmtThou(d.price) : ''}"></label>
               <label class="bd-f"><span>Condition</span><select id="bsCond">${Object.entries(COND).map(([k2, l])=>`<option value="${k2}"${(d.cond||'NM')===k2?' selected':''}>${l}</option>`).join('')}</select></label>
               <label class="bd-chk"><input type="checkbox" id="bsNego"${d.nego ? ' checked' : ''}> Open to offers (nego)</label>
               <label class="bd-chk"><input type="checkbox" id="bsSold"${d.sold ? ' checked' : ''}> Sold</label>` : ''}
@@ -560,6 +564,24 @@
       if(e.target.id === 'bsQ'){ P.q = e.target.value; body.querySelector('#bsRes').innerHTML = results(); }
       if(e.target.id === 'bxZoom' && P.C){ P.C.zoom = +e.target.value || 1; drawCv(); }
       if(e.target.id === 'bxName'){ const er = body.querySelector('.bs-fields .bd-err'); if(er) er.remove(); }
+      if(e.target.id === 'bsPrice'){
+        /* format ulang 150000 → 150.000 sambil menjaga posisi kursor (dihitung dari jumlah digit di kirinya) */
+        const el = e.target, pos = el.selectionStart == null ? el.value.length : el.selectionStart;
+        const digitsLeft = el.value.slice(0, pos).replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '').length;
+        const f = fmtThou(el.value);
+        if(f !== el.value){
+          el.value = f;
+          let p = 0, seen = 0; while(p < f.length && seen < digitsLeft){ if(/\d/.test(f[p])) seen++; p++; }
+          try{ el.setSelectionRange(p, p); }catch(er){}
+        }
+      }
+    });
+    /* v7.11: hapus melewati titik pemisah ribuan → yang terhapus digit di sebelahnya */
+    box.addEventListener('beforeinput', e=>{
+      const el = e.target; if(el.id !== 'bsPrice' || el.selectionStart !== el.selectionEnd) return;
+      const pos = el.selectionStart;
+      if(e.inputType === 'deleteContentBackward' && pos > 0 && el.value[pos - 1] === '.') el.setSelectionRange(pos - 1, pos - 1);
+      if(e.inputType === 'deleteContentForward' && el.value[pos] === '.') el.setSelectionRange(pos + 1, pos + 1);
     });
     /* geser foto di bingkai (mouse & sentuh) */
     box.addEventListener('pointerdown', e=>{
