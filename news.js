@@ -102,11 +102,13 @@
   function imgGallery(line){
     const out = [];
     line.replace(/\{\{img:([^|}]+)(?:\|([^}]*))?\}\}/g, (m,u,cap)=>{
-      out.push(`<figure class="nw-gcard"><img src="${esc(safeUrl(u.trim()))}" alt="${esc(cap||'')}" loading="lazy">`+
+      out.push(`<figure class="nw-gcard nw-gimg"><img src="${esc(safeUrl(u.trim()))}" alt="${esc(cap||'')}" loading="lazy">`+
                (cap?`<span>${inline(cap)}</span>`:'')+`</figure>`);
       return m;
     });
-    return `<div class="nw-gallery">${out.join('')}</div>`;
+    /* v7.08: galeri gambar bebas memakai rasio asli gambar (tidak dipotong ke rasio kartu);
+       satu gambar saja = tampil lebih besar (kelas nw-gallery-1) */
+    return `<div class="nw-gallery${out.length===1?' nw-gallery-1':''}">${out.join('')}</div>`;
   }
 
   function render(md, opt){

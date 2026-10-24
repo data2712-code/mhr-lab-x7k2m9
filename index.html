@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.07  ·  23 Oktober 2026
+     MHR DECK LAB  ·  versi 7.08  ·  24 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.07">
+<meta name="version" content="7.08">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1062,6 +1062,10 @@
   .nw-gcard span{font-size:12px;line-height:1.4;color:#AEB6C2;text-align:center}
   .nw-gcard-x{aspect-ratio:568/793;align-items:center;justify-content:center;background:var(--panel2);
     border-radius:8px;font-family:var(--mono);color:var(--muted)}
+  /* v7.08 — galeri {{img:…}}: rasio asli gambar, bukan rasio kartu */
+  .nw-gimg img{aspect-ratio:auto;height:auto;object-fit:contain}
+  .nw-gallery-1{grid-template-columns:minmax(0,1fr)!important}
+  .nw-gallery-1 .nw-gimg img{width:auto;max-width:100%;max-height:560px;margin:0 auto}
   .nw-source{margin-top:26px;font-size:12.5px;color:var(--muted);background:var(--panel);border:1px solid var(--line);
     border-radius:10px;padding:10px 13px}
   .nw-source a{color:var(--accent)}
@@ -2633,7 +2637,7 @@
 <script src="social.js?v=7.02"></script>
 <script src="collection.js?v=7.02"></script>
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
-<script src="news.js?v=7.02"></script>
+<script src="news.js?v=7.08"></script>
 <script src="news-ui.js?v=7.02"></script>
 <!-- v6.63 — halaman Beranda (#beranda) -->
 <script src="home-ui.js?v=7.02"></script>
@@ -2674,7 +2678,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.07</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.08</div>
 </footer>
 
 <div class="dview" id="simView" hidden>

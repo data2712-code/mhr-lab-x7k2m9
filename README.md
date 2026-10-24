@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.07** · 23 Oktober 2026
+**Versi saat ini: v7.08** · 24 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -588,6 +588,24 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.08 — Perbaikan: galeri gambar di Berita tidak lagi dipotong ke rasio kartu — 24 Oktober 2026 *(`index.html`, `news.js`, `tools/generate_news_pages.js`)*
+
+Masalah: di artikel `my-dashboard-binders-collection-update`, 6 screenshot (900×900, persegi) ditulis dengan sintaks
+galeri `{{img:url|keterangan}}`. CSS galeri `.nw-gcard img` selalu memaksa rasio kartu **568/793** dengan
+`object-fit:cover`, sehingga gambar persegi terpotong kiri-kanan ±28% dan tampil kecil (±181×253 px, satu gambar
+per galeri di kolom 150 px).
+- `news.js` (`imgGallery`): figure galeri bebas diberi kelas `nw-gimg`; galeri yang isinya cuma 1 gambar diberi kelas
+  `nw-gallery-1`. Galeri kartu `[[...]]` (`cardGallery`) tidak diubah, tetap rasio kartu.
+- CSS (di `index.html` dan di CSS halaman statis `tools/generate_news_pages.js`, keduanya harus sama):
+  `.nw-gimg img` memakai rasio asli gambar (`aspect-ratio:auto; height:auto; object-fit:contain`);
+  `.nw-gallery-1` satu kolom penuh, gambarnya di tengah dengan tinggi maks 560 px.
+- Dampak ke artikel lain: semua galeri `{{img:…}}` lain (3 artikel SD05/SD06/PB02) berisi gambar kartu rasio 0,72
+  (dicek 24 Okt 2026 dari tabel `news`), jadi tampilannya tetap sama.
+- Isi artikel di Supabase tidak diubah. Halaman statis `news/*.html` ikut berubah saat workflow "Halaman Berita"
+  berjalan berikutnya (tiap 3 jam, atau Run workflow manual).
+
+Cache-buster: `news.js?v=7.08`. Versi 7.08 (komentar, meta, footer). Tidak ada perubahan Supabase.
 
 ### v7.07 — Binders: simpan halaman binder sebagai gambar (IG/TikTok Story 9:16 & Post 4:5) — 23 Oktober 2026 *(`index.html`, `binders-ui.js`)*
 
