@@ -3,7 +3,7 @@
    ===================================================================
    Tampilan:
      • Tab "📒 Binders" di My Dashboard (#bindWrap): rak binder, buat binder
-       (kosong / dari satu set / dari kartu spare), editor halaman 3×3
+       (kosong / dari satu set), editor halaman 3×3
        (desktop 2 halaman berdampingan, HP 1 halaman), pilih kartu per kantong
        (versi, jumlah, harga + nego, kondisi, catatan, terjual), pengaturan
        (link berbagi, harga, kontak WhatsApp/Instagram, lokasi), bagikan
@@ -14,9 +14,21 @@
    mhr_decklab_v706_binders.sql. Semua global index.html (DB, artFile,
    imgFallback, cardName, rarLabel, escHtml, mxOpen, mxClose, openLightbox,
    salinTeks, collMap, collQtyV, collTotal, collSetList, collSetName,
-   COLL_SPARE_KEEP, isAccountAdmin, setPage) baru dipakai SAAT JALAN, jadi
+   isAccountAdmin, setPage) baru dipakai SAAT JALAN, jadi
    berkas ini aman dimuat sebelum skrip inline utama.
    v7.07 (Tahap C): simpan halaman binder sebagai gambar (Story 9:16 / Post 4:5) — openImages().
+   v7.09: konsep kartu "spare" (salinan di atas 3) dihapus — tidak ada lagi "mulai dari kartu
+   spare", tombol "Add my spare cards", maupun sumber "My spare cards" di pemilih kartu.
+   "Open to offers (nego)" default MATI untuk kartu baru; pemilik binder yang memutuskan.
+   v7.10: FOTO KARTU untuk kartu yang belum ada di database (hanya di binder, tidak di Card
+   Collection). Kantong foto = { sid, x:1, nm, rar, set, q, price, nego, cond, note, sold,
+   ph, th, pd } — ph/th = path berkas utama/thumbnail di bucket "binder-photos", pd = foto
+   sudah dihapus karena terjual. Foto dipotong ke rasio kartu & dikecilkan di browser
+   (860×1200 + thumbnail 300×419, WebP atau JPEG, ±150–300 KB) sebelum diunggah. Maks 20
+   foto per akun (juga ditegakkan server). Kantong foto yang dicentang Sold → fotonya
+   DIHAPUS PERMANEN (keputusan pemilik 24 Okt 2026). Semua kantong punya "sid" (id unik)
+   supaya trigger binders_sales_log di server bisa mencatat riwayat harga kartu terjual
+   (tabel binder_sales, hanya untuk tim MHR Deck Lab, tidak tampil di web).
    Keputusan pemilik (23 Okt 2026): link-only, kontak = WA/IG isian pemilik,
    harga boleh tampil + opsi nego, disclaimer wajib di binder jual-beli,
    report hanya akun login, sembunyi otomatis setelah 3 laporan.
@@ -73,37 +85,38 @@
     if(c && !img.dataset.base){ img.dataset.base = '1'; img.dataset.ext = '0'; img.src = artFile(no, c.ra[0]); return; }
     imgFallback(img, no);
   };
+  /* ---------- v7.10 foto kartu ---------- */
+  const MAX_PHOTOS = 20, MAX_IN_MB = 20;
+  const PH_W = 860, PH_H = 1200, TH_W = 300, TH_H = 419;
+  const RARS = ['C','R','SR','GR','UR','MR','SEC','ER','PR','TR','HR'];
+  const isX = s => !!(s && s.x);
+  const rid = () => { try{ if(crypto.randomUUID) return crypto.randomUUID().replace(/-/g, '').slice(0, 20); }catch(e){} return (Math.random().toString(36).slice(2) + Date.now().toString(36)).slice(0, 20); };
+  const purl = path => (path && API() && API().photoUrl) ? API().photoUrl(path) : '';
+  const xName = s => (s && s.nm) || 'Card';
+  const xPaths = s => isX(s) ? [s.ph, s.th].filter(Boolean) : [];
+  const PHOTO_NOTE = `Photos are for cards that aren't in our database yet. Take or pick any photo — it is cropped and
+    made smaller on your device before upload, so you don't need to convert it. Up to ${MAX_PHOTOS} photos per account.
+    <b>When you mark a photo card as Sold, its photo is deleted for good</b> to free up space; the card name, price and
+    other details stay in your binder. Only upload photos of your own cards. Photos that break the rules can be removed.`;
+  const xImg = s => (s.th || s.ph)
+    ? `<img alt="" loading="lazy" decoding="async" src="${E(purl(s.th || s.ph))}" onerror="this.classList.add('failed')">`
+    : `<span class="bp-xph">${s.pd ? '<i>Photo removed<br>after sale</i>' : '<i>📷</i>'}<b>${E(xName(s))}</b></span>`;
   const imgTag = (c, v, cls) => `<img ${cls?`class="${cls}"`:''} alt="" loading="lazy" decoding="async" data-ext="0" src="${artFile(c.no, v || c.ra[0])}" onerror="mhrBinderImgErr(this,'${c.no}')">`;
 
   function norm(b){
     const n = Math.max(1, Math.min(MAX_PAGES, b.pages|0 || 1));
     const slots = Array.isArray(b.slots) ? b.slots.slice(0, n * PER) : [];
     while(slots.length < n * PER) slots.push(null);
-    return { ...b, pages:n, slots: slots.map(s => (s && s.no && card(s.no)) ? s : null) };
+    return { ...b, pages:n, slots: slots.map(s => {
+      if(!s || typeof s !== 'object') return null;
+      if(s.x){ if(!s.nm) return null; }
+      else if(!(s.no && card(s.no))) return null;
+      if(!s.sid) s.sid = rid();      // v7.10 — id kantong untuk riwayat penjualan
+      return s;
+    }) };
   }
   const filled = b => b.slots.filter(Boolean);
   const liveCopies = b => filled(b).filter(s=>!s.sold).reduce((a,s)=>a + (s.q||1), 0);
-
-  /* ---------- kartu spare dari koleksi (salinan di atas 3, simpan versi paling langka) ---------- */
-  function spareSlots(){
-    if(typeof collMap === 'undefined') return [];
-    const out = [];
-    DB.filter(cardVisible).forEach(c=>{
-      if(collTotal(c) <= COLL_SPARE_KEEP) return;
-      let keep = COLL_SPARE_KEEP;
-      [...c.ra].reverse().forEach(r=>{
-        const qv = collQtyV(c, r); const k = Math.min(keep, qv); keep -= k;
-        const sp = qv - k;
-        if(sp > 0) out.push({ no:c.no, v: r === c.ra[0] ? '' : r, q:sp, price:null, nego:true, cond:'NM', note:'', sold:false });
-      });
-    });
-    return out;
-  }
-  function spareOf(c, v){
-    let keep = COLL_SPARE_KEEP, res = 0;
-    [...c.ra].reverse().forEach(r=>{ const qv = collQtyV(c, r); const k = Math.min(keep, qv); keep -= k; if(r === v) res = qv - k; });
-    return res;
-  }
 
   /* ---------- simpan ---------- */
   function setStatus(t){ S.status = t; const el = q1('#bdStatus'); if(el) el.textContent = t; }
@@ -139,7 +152,7 @@
   async function ensureUser(){
     const ss = (window.MHRAuth && window.MHRAuth.ready) ? await window.MHRAuth.getSession() : null;
     const u = (ss && ss.user) ? ss.user.id : null;
-    if(u !== S.uid){ S.uid = u; S.list = null; S.cur = null; S.edit = false; S.err = null; S.reports = null; }
+    if(u !== S.uid){ S.uid = u; S.list = null; S.cur = null; S.edit = false; S.err = null; S.reports = null; S.photoCount = null; S.cleaned = false; }
     return u;
   }
   async function refresh(){
@@ -148,6 +161,7 @@
     const { data, error } = await API().listMine();
     S.list = error ? (S.list || []) : data; S.err = error;
     updateTile();
+    if(!error) cleanOrphans().catch(()=>{});
     return { data, error };
   }
 
@@ -164,7 +178,7 @@
 
   function bookHTML(b){
     const k = KIND[b.kind] || KIND.collection; const nb = norm(b);
-    const peek = filled(nb).slice(0, 3).map(s=>{ const c = card(s.no); return c ? imgTag(c, s.v) : ''; }).join('');
+    const peek = filled(nb).slice(0, 3).map(s=>{ if(isX(s)) return (s.th || s.ph) ? `<img alt="" loading="lazy" src="${E(purl(s.th || s.ph))}">` : ''; const c = card(s.no); return c ? imgTag(c, s.v) : ''; }).join('');
     const st = b.hidden ? '⚠ hidden' : b.is_public ? '🔗 shared' : '🔒 private';
     return `<button type="button" class="bd-book" data-bopen="${E(b.id)}" style="background:${k.bg}">
       <span class="bd-kind">${k.icon} ${E(k.label)} · ${st}</span><span class="bd-ttl">${E(b.name)}</span>
@@ -176,11 +190,11 @@
     if(S.err && S.err.missing){ w.innerHTML = `<p class="auth-note">${errMsg(S.err)}</p>`; return; }
     const list = S.list || [];
     w.innerHTML = `<div class="bd-intro"><span>A binder is your own card page with 9 pockets per page, like a real 3×3 binder. Keep it private,
-        share a link to show off your collection, or list your spare cards for sale or trade.</span>
+        share a link to show off your collection, or list cards for sale or trade.</span>
         ${list.length < MAX_BINDERS ? '<button type="button" class="btn2 main" data-bact="new">＋ New binder</button>' : ''}</div>
       ${S.err ? `<p class="auth-note" style="color:var(--merah)">${E(errMsg(S.err))}</p>` : ''}
       <div class="bd-shelf">${list.map(bookHTML).join('')}
-        ${list.length < MAX_BINDERS ? `<button type="button" class="bd-book bd-new" data-bact="new">＋ New binder<small>Blank, a whole set, or your spare cards</small></button>` : ''}</div>
+        ${list.length < MAX_BINDERS ? `<button type="button" class="bd-book bd-new" data-bact="new">＋ New binder<small>Blank pages or a whole set</small></button>` : ''}</div>
       ${list.length >= MAX_BINDERS ? `<p class="auth-note">You have reached the limit of ${MAX_BINDERS} binders.</p>` : ''}
       ${isAccountAdmin ? '<div class="bd-admin" id="bdAdmin"><b>🛡 Binder reports</b> <span class="bd-mut">Loading…</span></div>' : ''}`;
     if(isAccountAdmin) renderAdmin();
@@ -189,27 +203,20 @@
   /* ---------- buat binder ---------- */
   function openCreate(){
     const sets = collSetList();
-    const spares = spareSlots();
     const m = mxOpen(`<h3>📒 New binder</h3>
       <div class="bd-form">
-        <label class="bd-f"><span>Name</span><input id="bnName" maxlength="60" placeholder="e.g. Spider-Verse master set, Spare cards for sale"></label>
+        <label class="bd-f"><span>Name</span><input id="bnName" maxlength="60" placeholder="e.g. Spider-Verse master set, Cards for sale"></label>
         <div class="bd-f"><span>Type</span><div class="bd-kinds">${Object.entries(KIND).map(([k, v], i)=>`<label class="bd-kopt"><input type="radio" name="bnKind" value="${k}"${i===0?' checked':''}><b>${v.icon} ${E(v.label)}</b><small>${
           k === 'collection' ? 'Show off cards you own' : k === 'trade' ? 'Cards you want to sell or swap, with prices' : 'Cards you are looking for'}</small></label>`).join('')}</div></div>
         <div class="bd-f"><span>Start with</span>
           <label class="bd-ropt"><input type="radio" name="bnStart" value="blank" checked> Empty pages <select id="bnPages">${[1,2,3,4,6,8,10].map(n=>`<option value="${n}"${n===2?' selected':''}>${n} page${n>1?'s':''} (${n*PER} pockets)</option>`).join('')}</select></label>
           <label class="bd-ropt"><input type="radio" name="bnStart" value="set"> Every card of a set <select id="bnSet">${sets.map(s=>`<option value="${s.kode}">${E(s.kode)}${collSetName(s) ? ' · ' + E(collSetName(s)) : ''}</option>`).join('')}</select></label>
-          <label class="bd-ropt${spares.length ? '' : ' off'}"><input type="radio" name="bnStart" value="spares"${spares.length ? '' : ' disabled'}> My spare cards ${spares.length ? `<span class="bd-mut">(${spares.reduce((a,s)=>a+s.q,0)} copies above ${COLL_SPARE_KEEP} in your Card Collection)</span>` : '<span class="bd-mut">(none yet — record your cards in Card Collection first)</span>'}</label>
         </div>
         <p class="bd-err" id="bnErr"></p>
         <div class="bd-btns"><button type="button" class="btn2 main" id="bnGo">Create binder</button><button type="button" class="btn2" data-mxclose>Cancel</button></div>
       </div>`, 'bd-mx');
     const box = m.querySelector('.mx-box');
-    let startTouched = false;
     box.addEventListener('change', e=>{
-      if(e.target.name === 'bnStart' || e.target.tagName === 'SELECT') startTouched = true;
-      if(e.target.name === 'bnKind' && e.target.value === 'trade' && !startTouched){
-        const sp = box.querySelector('input[name="bnStart"][value="spares"]'); if(sp && !sp.disabled) sp.checked = true;
-      }
       if(e.target.id === 'bnPages') box.querySelector('input[value="blank"]').checked = true;
       if(e.target.id === 'bnSet') box.querySelector('input[value="set"]').checked = true;
     });
@@ -221,11 +228,8 @@
       if(start === 'blank') pages = parseInt(box.querySelector('#bnPages').value, 10) || 2;
       else if(start === 'set'){
         const code = box.querySelector('#bnSet').value;
-        slots = DB.filter(c=>cardVisible(c) && c.s === code).sort((a,b)=>a.no.localeCompare(b.no)).map(c=>({ no:c.no, v:'', q:1 }));
+        slots = DB.filter(c=>cardVisible(c) && c.s === code).sort((a,b)=>a.no.localeCompare(b.no)).map(c=>({ sid:rid(), no:c.no, v:'', q:1 }));
         if(!name){ const so = sets.find(s=>s.kode === code); name = `${code}${so && collSetName(so) ? ' ' + collSetName(so) : ''} set`; }
-      } else if(start === 'spares'){
-        slots = spareSlots();
-        if(!name) name = 'Spare cards';
       }
       if(slots.length > MAX_PAGES * PER) slots = slots.slice(0, MAX_PAGES * PER);
       if(slots.length) pages = Math.max(1, Math.ceil(slots.length / PER));
@@ -256,19 +260,29 @@
   function pocketHTML(s, i, mode, b){
     const own = mode === 'own';
     if(!s) return `<div class="bp-pocket empty${own && S.edit ? ' add' : ''}" data-bslot="${i}">${own && S.edit ? '＋' : ''}</div>`;
+    const drag = own && S.edit ? ' draggable="true"' : '';
+    const qty = (s.q||1) > 1 ? `<span class="bp-q">×${s.q}</span>` : '';
+    const soldTag = s.sold ? '<span class="bp-sold">SOLD</span>' : '';
+    if(isX(s)){
+      const vlx = s.rar ? `<i class="bp-r bp-r-${E(String(s.rar).toLowerCase())}">${E(s.rar)}</i>` : '';
+      return `<div class="bp-pocket bp-x${s.sold ? ' sold' : ''}" data-bslot="${i}"${drag} title="${E(xName(s))}${s.set ? ' · ' + E(s.set) : ''}${s.rar ? ' · ' + E(s.rar) : ''} · photo by the binder owner">
+      ${xImg(s)}<span class="bp-cam" title="Photo uploaded by the binder owner">📷</span>${qty}${barHTML(s, b, vlx)}${soldTag}</div>`;
+    }
     const c = card(s.no);
     const v = vOf(c, s);
-    const trade = b.kind === 'trade';
     const miss = own && b.kind === 'collection' && collQtyV(c, v) <= 0;
-    let bar = '';
     const vl = (s.v && s.v !== c.ra[0]) ? `<i class="bp-r bp-r-${E(String(s.v).split('_')[0].toLowerCase())}">${E(vLabel(c, s.v))}</i>` : '';
-    if(trade){
-      const hasPrice = s.price != null && s.price !== '' && b.show_prices !== false;
-      const txt = hasPrice ? shortRp(+s.price) : (s.nego ? 'Make offer' : (b.show_prices === false ? 'Ask' : ''));
-      bar = `<span class="bp-bar">${vl}${txt ? `<b class="${hasPrice ? '' : 'mut'}">${E(txt)}</b>` : ''}${hasPrice && s.nego ? '<i class="bp-n">NEGO</i>' : ''}</span>`;
-    } else if(vl) bar = `<span class="bp-bar">${vl}</span>`;
+    const bar = barHTML(s, b, vl);
     return `<div class="bp-pocket${s.sold ? ' sold' : ''}${miss ? ' miss' : ''}" data-bslot="${i}"${own && S.edit ? ' draggable="true"' : ''} title="${E(cardName(c))} · ${E(c.no)} · ${E(vLabel(c, v))}${miss ? ' · not in your Card Collection yet' : ''}">
       ${imgTag(c, v)}${(s.q||1) > 1 ? `<span class="bp-q">×${s.q}</span>` : ''}${bar}${s.sold ? '<span class="bp-sold">SOLD</span>' : ''}</div>`;
+  }
+  function barHTML(s, b, vl){
+    if(b.kind === 'trade'){
+      const hasPrice = s.price != null && s.price !== '' && b.show_prices !== false;
+      const txt = hasPrice ? shortRp(+s.price) : (s.nego ? 'Make offer' : (b.show_prices === false ? 'Ask' : ''));
+      return `<span class="bp-bar">${vl}${txt ? `<b class="${hasPrice ? '' : 'mut'}">${E(txt)}</b>` : ''}${hasPrice && s.nego ? '<i class="bp-n">NEGO</i>' : ''}</span>`;
+    }
+    return vl ? `<span class="bp-bar">${vl}</span>` : '';
   }
   function spreadHTML(b, start, mode){
     const per = perSpread();
@@ -288,8 +302,10 @@
     if(!rows.length) return '';
     const trade = b.kind === 'trade';
     return `<table class="bd-tbl"><tr><th>#</th><th>Card</th><th class="hm">No.</th><th>Version</th><th>Qty</th>${trade ? `<th class="hm">Condition</th><th class="r">Price</th>` : ''}</tr>
-      ${rows.map(({s, i})=>{ const c = card(s.no);
+      ${rows.map(({s, i})=>{
         const price = !trade ? '' : (s.price != null && s.price !== '' && b.show_prices !== false) ? fmtRp(+s.price) + (s.nego ? ' · nego' : '') : (s.nego ? 'Make offer' : '–');
+        if(isX(s)) return `<tr class="${s.sold ? 'sold' : ''}" data-bxv="${i}"><td class="m">${i+1}</td><td>📷 ${E(xName(s))}${s.note ? `<small>${E(s.note)}</small>` : ''}</td><td class="m hm">${E(s.set || '–')}</td><td class="m">${E(s.rar || '–')}</td><td class="m">${s.q||1}</td>${trade ? `<td class="hm">${E(COND[s.cond] || '')}</td><td class="m r">${s.sold ? 'SOLD' : E(price)}</td>` : ''}</tr>`;
+        const c = card(s.no);
         return `<tr class="${s.sold ? 'sold' : ''}" data-bzoom="${E(s.no)}"><td class="m">${i+1}</td><td>${E(cardName(c))}${s.note ? `<small>${E(s.note)}</small>` : ''}</td><td class="m hm">${E(s.no)}</td><td class="m">${E(vLabel(c, s.v))}</td><td class="m">${s.q||1}</td>${trade ? `<td class="hm">${E(COND[s.cond] || '')}</td><td class="m r">${s.sold ? 'SOLD' : E(price)}</td>` : ''}</tr>`; }).join('')}</table>`;
   }
   function statusTag(b){
@@ -314,8 +330,7 @@
       ${b.hidden ? `<div class="bd-warn">⚠ ${E(b.hidden_reason || 'This binder is hidden.')} Other people can't open the link until our team reviews it. You can still edit it.</div>` : ''}
       ${S.edit ? `<div class="bd-editbar"><b>Edit mode</b><span>Tap an empty pocket to add a card, tap a card to change it${per > 1 ? ', drag to move it' : ''}.</span><span class="bd-sp"></span>
         ${b.pages < MAX_PAGES ? '<button type="button" class="btn2" data-bact="addpage">＋ Add page</button>' : ''}
-        ${b.pages > 1 && lastEmpty ? '<button type="button" class="btn2" data-bact="delpage">− Remove last page</button>' : ''}
-        ${b.kind === 'trade' ? '<button type="button" class="btn2" data-bact="fillspares">⤓ Add my spare cards</button>' : ''}</div>` : ''}
+        ${b.pages > 1 && lastEmpty ? '<button type="button" class="btn2" data-bact="delpage">− Remove last page</button>' : ''}</div>` : ''}
       <div class="bd-layout"><div class="bd-main">${spreadHTML(b, S.page, 'own')}
           ${!S.edit && !f.length ? '<p class="auth-note" style="text-align:center">This binder is empty. Press ✏️ Edit, then tap a pocket to add a card.</p>' : ''}
           ${tableHTML(b, 'own')}</div>
@@ -334,12 +349,106 @@
         </aside></div>`;
   }
 
+  /* ---------- v7.10: lihat foto kartu ---------- */
+  function openPhoto(s, b){
+    if(!isX(s)) return;
+    const trade = b && b.kind === 'trade';
+    const price = !trade ? '' : (s.sold ? 'Sold' : (s.price != null && s.price !== '' && b.show_prices !== false) ? fmtRp(+s.price) + (s.nego ? ' · nego' : '') : (s.nego ? 'Make offer' : ''));
+    const row = (k, v) => v ? `<div class="bd-row"><span>${k}</span><b>${E(v)}</b></div>` : '';
+    mxOpen(`<h3>📷 ${E(xName(s))}</h3>
+      <div class="bx-view"><div class="bx-img${s.sold ? ' sold' : ''}">${s.ph ? `<img alt="${E(xName(s))}" src="${E(purl(s.ph))}" onerror="this.classList.add('failed')">` : `<span class="bp-xph">${s.pd ? '<i>Photo removed after sale</i>' : '<i>📷</i>'}<b>${E(xName(s))}</b></span>`}</div>
+        <div class="bx-info">${row('Set', s.set)}${row('Rarity', s.rar)}${row('Copies', String(s.q || 1))}${trade ? row('Condition', COND[s.cond] || '') + row('Price', price) : ''}
+          ${s.note ? `<p class="bdp-note">${E(s.note)}</p>` : ''}
+          <p class="bd-mut">Photo and card details were added by the binder owner. This card isn't in the MHR Deck Lab database yet, so we haven't checked it.</p></div></div>`, 'bd-mx');
+  }
+
+  /* ---------- v7.10: olah foto di browser (potong rasio kartu, kecilkan, WebP/JPEG) ---------- */
+  async function loadPhotoFile(file){
+    if(!file) throw new Error('none');
+    if(file.size > MAX_IN_MB * 1024 * 1024) throw new Error('big');
+    let src = null;
+    try{ src = await createImageBitmap(file); }catch(e){ src = null; }
+    if(!src){
+      const url = URL.createObjectURL(file);
+      try{
+        src = await new Promise((ok, fail)=>{ const im = new Image(); im.decoding = 'async'; im.onload = () => ok(im); im.onerror = fail; im.src = url; });
+      }catch(e){ URL.revokeObjectURL(url); throw new Error('type'); }
+    }
+    const w = src.width || src.naturalWidth, h = src.height || src.naturalHeight;
+    if(!w || !h) throw new Error('type');
+    const k = Math.min(1, 2400 / Math.max(w, h));      // foto 48 MP → maks 2400 px supaya ringan di HP
+    if(k >= 1) return src;
+    const cv = document.createElement('canvas'); cv.width = Math.round(w * k); cv.height = Math.round(h * k);
+    const ctx = cv.getContext('2d'); ctx.imageSmoothingQuality = 'high'; ctx.drawImage(src, 0, 0, cv.width, cv.height);
+    if(src.close) try{ src.close(); }catch(e){}
+    return cv;
+  }
+  /* gambar sumber ke kanvas W×H dengan posisi C = { rot, zoom, ox, oy } (ox/oy = pecahan lebar/tinggi bingkai) */
+  function cropGeom(src, C, W, H){
+    const iw = src.width || src.naturalWidth, ih = src.height || src.naturalHeight;
+    const rw = C.rot % 2 ? ih : iw, rh = C.rot % 2 ? iw : ih;
+    const sc = Math.max(W / rw, H / rh) * C.zoom;
+    const mx = Math.max(0, (rw * sc - W) / 2 / W), my = Math.max(0, (rh * sc - H) / 2 / H);
+    C.ox = Math.max(-mx, Math.min(mx, C.ox)); C.oy = Math.max(-my, Math.min(my, C.oy));
+    return { iw, ih, sc };
+  }
+  function drawCrop(cv, src, C){
+    const W = cv.width, H = cv.height, g = cropGeom(src, C, W, H);
+    const ctx = cv.getContext('2d');
+    ctx.save(); ctx.fillStyle = '#0B0E12'; ctx.fillRect(0, 0, W, H);
+    ctx.imageSmoothingQuality = 'high';
+    ctx.translate(W / 2 + C.ox * W, H / 2 + C.oy * H); ctx.rotate(C.rot * Math.PI / 2); ctx.scale(g.sc, g.sc);
+    ctx.drawImage(src, -g.iw / 2, -g.ih / 2);
+    ctx.restore();
+  }
+  async function encodeCanvas(cv, q){
+    const as = (type, qq) => new Promise(res => cv.toBlob(b => res(b), type, qq));
+    let b = await as('image/webp', q);
+    if(!b || b.type !== 'image/webp') b = await as('image/jpeg', Math.min(.9, q + .04));   // Safari lama: tidak bisa WebP
+    return b;
+  }
+  async function makePhotoBlobs(src, C){
+    const main = document.createElement('canvas'); main.width = PH_W; main.height = PH_H; drawCrop(main, src, C);
+    let mb = null;
+    for(const q of [.82, .72, .6]){ mb = await encodeCanvas(main, q); if(mb && mb.size <= 900 * 1024) break; }
+    const th = document.createElement('canvas'); th.width = TH_W; th.height = TH_H;
+    const tctx = th.getContext('2d'); tctx.imageSmoothingQuality = 'high'; tctx.drawImage(main, 0, 0, TH_W, TH_H);
+    const tb = await encodeCanvas(th, .74);
+    if(!mb || !tb || mb.size > 1024 * 1024) throw new Error('encode');
+    return { main:mb, thumb:tb, type:mb.type, ext: mb.type === 'image/webp' ? 'webp' : 'jpg', url: URL.createObjectURL(tb) };
+  }
+  async function photoCount(force){
+    if(S.photoCount != null && !force) return S.photoCount;
+    if(!API() || !API().photoList) return null;
+    const { data, error } = await API().photoList();
+    if(error) return null;
+    S.photoCount = data.filter(f=>!/_t\.(webp|jpg)$/.test(f.name)).length;
+    return S.photoCount;
+  }
+  async function removePhotos(paths){
+    const list = (paths || []).filter(Boolean); if(!list.length || !API() || !API().photoRemove) return;
+    await API().photoRemove(list);
+    S.photoCount = null;                 // dihitung ulang dari Storage saat dibutuhkan
+  }
+  /* berkas di folder akun yang tidak dipakai binder mana pun (mis. unggahan gagal disimpan) → hapus, sekali per sesi */
+  async function cleanOrphans(){
+    if(S.cleaned || !S.list || !API() || !API().photoList) return;
+    S.cleaned = true;
+    const { data, error } = await API().photoList(); if(error) return;
+    const used = new Set(); S.list.forEach(b=>(Array.isArray(b.slots) ? b.slots : []).forEach(s=>xPaths(s).forEach(p=>used.add(p))));
+    const old = Date.now() - 60 * 60 * 1000;
+    const orphan = data.filter(f=>!used.has(f.path) && (!f.created_at || new Date(f.created_at).getTime() < old)).map(f=>f.path);
+    if(orphan.length) await API().photoRemove(orphan);
+    S.photoCount = data.filter(f=>!orphan.includes(f.path) && !/_t\.(webp|jpg)$/.test(f.name)).length;
+  }
+
   /* ---------- kantong: pilih / ubah kartu ---------- */
   function openSlot(i){
     const b = S.cur; if(!b) return;
     const s = b.slots[i];
-    const P = { i, step: s ? 'form' : 'pick', q:'', set:'ALL', src: (typeof collMap !== 'undefined' && Object.keys(collMap).length) ? (b.kind === 'trade' ? 'spare' : b.kind === 'wishlist' ? 'all' : 'own') : 'all',
-      d: s ? { ...s } : null };
+    const P = { i, step: s ? 'form' : 'pick', q:'', set:'ALL', src: (typeof collMap !== 'undefined' && Object.keys(collMap).length) ? (b.kind === 'wishlist' ? 'all' : 'own') : 'all',
+      d: s ? { ...s } : null, pend:null, img:null, C:null, err:'' };
+    const dropPend = () => { if(P.pend && P.pend.url) URL.revokeObjectURL(P.pend.url); P.pend = null; };
     const m = mxOpen('<div id="bsBody"></div>', 'bd-mx bd-mx-wide');
     const box = m.querySelector('.mx-box');
     const body = box.querySelector('#bsBody');
@@ -348,22 +457,64 @@
       const q = P.q.trim().toLowerCase();
       let arr = DB.filter(c=>cardVisible(c) && (P.set === 'ALL' || c.s === P.set));
       if(P.src === 'own') arr = arr.filter(c=>collTotal(c) > 0);
-      if(P.src === 'spare') arr = arr.filter(c=>collTotal(c) > COLL_SPARE_KEEP);
       if(q) arr = arr.filter(c=>c.no.toLowerCase().includes(q) || cardName(c).toLowerCase().includes(q));
       const more = arr.length > 60; arr = arr.slice(0, 60);
       return arr.length ? arr.map(c=>{ const t = collTotal(c); return `<button type="button" class="bs-card" data-bspick="${c.no}">${imgTag(c, c.ra[0])}${t ? `<span class="bp-q">×${t}</span>` : ''}<b>${E(cardName(c))}</b><small>${E(c.no)}</small></button>`; }).join('') + (more ? '<p class="bd-mut bs-more">Showing the first 60 — type to narrow it down.</p>' : '')
-        : `<p class="bd-mut bs-more">${P.src === 'all' ? 'No cards found.' : P.src === 'spare' ? 'No spare cards found. Choose “All cards” to pick any card.' : 'No cards from your collection found. Choose “All cards” to pick any card.'}</p>`;
+        : `<p class="bd-mut bs-more">${P.src === 'all' ? 'No cards found.' : 'No cards from your collection found. Choose “All cards” to pick any card.'}</p>`;
     };
     const pickHTML = () => `<h3>Add a card · page ${pageNo}, pocket ${pos}</h3>
+      <div class="bs-photo"><button type="button" class="btn2" data-bs="photo">📷 Card not listed? Upload a photo</button>
+        <span class="bd-mut"><b id="bsPhCnt">…</b> of ${MAX_PHOTOS} photos used</span></div>
       <div class="bs-tool"><input type="text" id="bsQ" placeholder="Search card name or number…" value="${E(P.q)}" autocomplete="off">
-        <select id="bsSrc"><option value="own"${P.src==='own'?' selected':''}>Cards I own</option><option value="spare"${P.src==='spare'?' selected':''}>My spare cards</option><option value="all"${P.src==='all'?' selected':''}>All cards</option></select></div>
+        <select id="bsSrc"><option value="own"${P.src==='own'?' selected':''}>Cards I own</option><option value="all"${P.src==='all'?' selected':''}>All cards</option></select></div>
       <div class="bs-sets"><button type="button" data-bsset="ALL" aria-pressed="${P.set==='ALL'}">All sets</button>${collSetList().map(x=>`<button type="button" data-bsset="${x.kode}" aria-pressed="${P.set===x.kode}">${E(x.kode)}</button>`).join('')}</div>
       <div class="bs-res" id="bsRes">${results()}</div>`;
+    const setCodes = () => { try{ return collSetList().map(x=>x.kode); }catch(e){ return []; } };
+    const photoPickHTML = () => `<h3>📷 Upload a card photo · page ${pageNo}, pocket ${pos}</h3>
+      <div class="bx-up"><label class="bx-drop"><input type="file" id="bxFile" accept="image/*"><b>Choose or take a photo</b>
+        <span class="bd-mut">JPG, PNG, WebP or a phone camera photo, up to ${MAX_IN_MB} MB</span></label>
+        ${P.err ? `<p class="bd-err">${E(P.err)}</p>` : ''}
+        <div class="bd-disc">${PHOTO_NOTE}</div>
+        <div class="bd-btns"><button type="button" class="btn2" data-bs="${P.d && P.d.x ? 'backform' : 'change'}">‹ Back</button></div></div>`;
+    const cropHTML = () => `<h3>📷 Fit the card in the frame</h3>
+      <div class="bx-crop"><div class="bx-frame"><canvas id="bxCv" width="430" height="600"></canvas></div>
+        <div class="bx-ctl"><p class="bd-mut">Drag the photo to move it. Use the slider to zoom so the card fills the frame.</p>
+          <label class="bd-f"><span>Zoom</span><input type="range" id="bxZoom" min="1" max="4" step="0.01" value="${P.C ? P.C.zoom : 1}"></label>
+          <div class="bd-btns"><button type="button" class="btn2" data-bs="rotate">⟳ Rotate</button></div>
+          ${P.err ? `<p class="bd-err">${E(P.err)}</p>` : ''}
+          <div class="bd-btns"><button type="button" class="btn2 main" data-bs="usecrop">Use this photo</button><button type="button" class="btn2" data-bs="photo">Choose another</button></div></div></div>`;
+    const xFormHTML = () => {
+      const d = P.d, trade = b.kind === 'trade';
+      const prev = P.pend ? `<img alt="" src="${P.pend.url}">` : xImg(d);
+      return `<h3>${s ? 'Edit pocket' : 'Add a card'} · page ${pageNo}, pocket ${pos}</h3>
+        <div class="bs-form"><div class="bs-prev bx-prev${d.sold ? ' sold' : ''}">${prev}<button type="button" class="btn2" data-bs="photo">${(P.pend || d.ph) ? '📷 Change photo' : '📷 Add photo'}</button></div>
+          <div class="bs-fields"><b class="bs-nm">📷 Card from your photo</b><span class="bd-mut">Not in the MHR Deck Lab database yet — fill in the details yourself.</span>
+            <div class="bs-grid">
+              <label class="bd-f bs-wide"><span>Card name *</span><input id="bxName" maxlength="60" value="${E(d.nm||'')}" placeholder="e.g. Spider-Man «Hero of Queens»"></label>
+              <label class="bd-f"><span>Rarity</span><input id="bxRar" maxlength="12" list="bxRarList" value="${E(d.rar||'')}" placeholder="e.g. SR, UR, SEC"></label>
+              <label class="bd-f"><span>Set</span><input id="bxSet" maxlength="16" list="bxSetList" value="${E(d.set||'')}" placeholder="e.g. SP01, LP01, Promo"></label>
+              <label class="bd-f"><span>${trade ? 'Quantity for sale' : 'Quantity'}</span><input id="bsQty" type="number" min="1" max="99" inputmode="numeric" value="${d.q||1}"></label>
+              ${trade ? `<label class="bd-f"><span>Price (Rp, optional)</span><input id="bsPrice" inputmode="numeric" placeholder="e.g. 150000" value="${d.price != null && d.price !== '' ? d.price : ''}"></label>
+              <label class="bd-f"><span>Condition</span><select id="bsCond">${Object.entries(COND).map(([k2, l])=>`<option value="${k2}"${(d.cond||'NM')===k2?' selected':''}>${l}</option>`).join('')}</select></label>
+              <label class="bd-chk"><input type="checkbox" id="bsNego"${d.nego ? ' checked' : ''}> Open to offers (nego)</label>
+              <label class="bd-chk"><input type="checkbox" id="bsSold"${d.sold ? ' checked' : ''}> Sold</label>
+              <p class="bd-warn bs-wide bx-soldnote">⚠ When you mark a photo card as Sold, its photo is deleted for good. The name, price and other details stay.</p>` : ''}
+              <label class="bd-f bs-wide"><span>Note (optional)</span><input id="bsNote" maxlength="80" value="${E(d.note||'')}" placeholder="${trade ? 'e.g. sleeved since opening, tiny edge wear' : 'e.g. signed, from a local event'}"></label>
+            </div>
+            <datalist id="bxRarList">${RARS.map(r=>`<option value="${r}">`).join('')}</datalist>
+            <datalist id="bxSetList">${setCodes().map(k2=>`<option value="${E(k2)}">`).join('')}</datalist>
+            ${P.err ? `<p class="bd-err">${E(P.err)}</p>` : ''}
+            <div class="bd-btns"><button type="button" class="btn2 main" data-bs="save">${s ? 'Save' : 'Put in pocket'}</button>
+              <button type="button" class="btn2" data-bs="change">Pick from database instead</button>
+              ${s ? `<button type="button" class="btn2" data-bs="left" ${i<=0?'disabled':''}>◀ Move</button><button type="button" class="btn2" data-bs="right" ${i>=b.pages*PER-1?'disabled':''}>Move ▶</button><button type="button" class="btn2 bd-red" data-bs="remove">Remove</button>` : ''}</div>
+          </div></div>`;
+    };
     const formHTML = () => {
+      if(P.d && P.d.x) return xFormHTML();
       const d = P.d, c = card(d.no), trade = b.kind === 'trade';
       const v = vOf(c, d);
       const vers = c.ra.map(r=>{ const own = collQtyV(c, r); return `<option value="${E(r === c.ra[0] ? '' : r)}"${r === v ? ' selected' : ''}>${E(rarLabel(r, c))}${own ? ` · you own ${own}` : ''}</option>`; }).join('');
-      const own = collQtyV(c, v), sp = spareOf(c, v);
+      const own = collQtyV(c, v);
       return `<h3>${s ? 'Edit pocket' : 'Add a card'} · page ${pageNo}, pocket ${pos}</h3>
         <div class="bs-form"><div class="bs-prev" data-bszoom="${c.no}">${imgTag(c, v)}</div>
           <div class="bs-fields"><b class="bs-nm">${E(cardName(c))}</b><span class="bd-mut">${E(c.no)} · L${c.l}</span>
@@ -376,24 +527,71 @@
               <label class="bd-chk"><input type="checkbox" id="bsSold"${d.sold ? ' checked' : ''}> Sold</label>` : ''}
               <label class="bd-f bs-wide"><span>Note (optional)</span><input id="bsNote" maxlength="80" value="${E(d.note||'')}" placeholder="${trade ? 'e.g. sleeved since opening, tiny edge wear' : 'e.g. signed, from my first booster box'}"></label>
             </div>
-            <p class="bd-mut" id="bsOwn">Card Collection: you own ${own} of this version${trade && sp ? ` (${sp} spare)` : ''}.${trade ? ' Leave the price empty and tick “Open to offers” to show “Make offer”.' : ''}</p>
+            <p class="bd-mut" id="bsOwn">Card Collection: you own ${own} of this version.${trade ? ' Leave the price empty and tick “Open to offers” to show “Make offer”.' : ''}</p>
             <div class="bd-btns"><button type="button" class="btn2 main" data-bs="save">${s ? 'Save' : 'Put in pocket'}</button>
               <button type="button" class="btn2" data-bs="change">Change card</button>
               ${s ? `<button type="button" class="btn2" data-bs="left" ${i<=0?'disabled':''}>◀ Move</button><button type="button" class="btn2" data-bs="right" ${i>=b.pages*PER-1?'disabled':''}>Move ▶</button><button type="button" class="btn2 bd-red" data-bs="remove">Remove</button>` : ''}</div>
           </div></div>`;
     };
-    const draw = () => { body.innerHTML = P.step === 'pick' ? pickHTML() : formHTML(); if(P.step === 'pick'){ const qi = body.querySelector('#bsQ'); if(qi) qi.focus(); } };
+    /* simpan isian form foto sebelum pindah langkah (ganti foto) supaya tidak hilang */
+    const keepX = () => {
+      if(!P.d || !P.d.x || P.step !== 'form') return;
+      const v = id => { const el = body.querySelector(id); return el ? el.value : null; };
+      const ck = id => { const el = body.querySelector(id); return el ? el.checked : null; };
+      const set = (k, val) => { if(val != null) P.d[k] = val; };
+      set('nm', v('#bxName')); set('rar', v('#bxRar')); set('set', v('#bxSet')); set('note', v('#bsNote'));
+      const q = v('#bsQty'); if(q != null) P.d.q = Math.max(1, Math.min(99, parseInt(q, 10) || 1));
+      const pr = v('#bsPrice'); if(pr != null){ const raw = pr.replace(/[^\d]/g, ''); P.d.price = raw ? Math.min(1e9, parseInt(raw, 10)) : null; }
+      set('cond', v('#bsCond')); set('nego', ck('#bsNego')); set('sold', ck('#bsSold'));
+    };
+    let drag = null;
+    const drawCv = () => { const cv = body.querySelector('#bxCv'); if(cv && P.img) drawCrop(cv, P.img, P.C); };
+    const draw = () => {
+      body.innerHTML = P.step === 'pick' ? pickHTML() : P.step === 'xpick' ? photoPickHTML() : P.step === 'crop' ? cropHTML() : formHTML();
+      if(P.step === 'pick'){
+        const qi = body.querySelector('#bsQ'); if(qi) qi.focus();
+        photoCount().then(n=>{ const el = body.querySelector('#bsPhCnt'); if(el) el.textContent = n == null ? '?' : n; });
+      }
+      if(P.step === 'crop') drawCv();
+      P.err = '';
+    };
     draw();
     box.addEventListener('input', e=>{
       if(e.target.id === 'bsQ'){ P.q = e.target.value; body.querySelector('#bsRes').innerHTML = results(); }
+      if(e.target.id === 'bxZoom' && P.C){ P.C.zoom = +e.target.value || 1; drawCv(); }
+      if(e.target.id === 'bxName'){ const er = body.querySelector('.bs-fields .bd-err'); if(er) er.remove(); }
     });
+    /* geser foto di bingkai (mouse & sentuh) */
+    box.addEventListener('pointerdown', e=>{
+      const cv = e.target.closest('#bxCv'); if(!cv || !P.C) return;
+      e.preventDefault(); drag = { x:e.clientX, y:e.clientY, ox:P.C.ox, oy:P.C.oy, w:cv.getBoundingClientRect().width || 1, h:cv.getBoundingClientRect().height || 1 };
+      try{ cv.setPointerCapture(e.pointerId); }catch(err){}
+    });
+    box.addEventListener('pointermove', e=>{
+      if(!drag || !P.C) return;
+      P.C.ox = drag.ox + (e.clientX - drag.x) / drag.w; P.C.oy = drag.oy + (e.clientY - drag.y) / drag.h; drawCv();
+    });
+    const endDrag = () => { drag = null; };
+    box.addEventListener('pointerup', endDrag); box.addEventListener('pointercancel', endDrag);
     box.addEventListener('change', e=>{
       if(e.target.id === 'bsSrc'){ P.src = e.target.value; body.querySelector('#bsRes').innerHTML = results(); }
+      if(e.target.id === 'bxFile'){
+        const f = e.target.files && e.target.files[0]; if(!f) return;
+        const lbl = body.querySelector('.bx-drop b'); if(lbl) lbl.textContent = 'Opening photo…';
+        loadPhotoFile(f).then(img=>{
+          if(P.img && P.img.close) try{ P.img.close(); }catch(er){}
+          P.img = img; P.C = { rot:0, zoom:1, ox:0, oy:0 }; P.step = 'crop'; draw();
+        }).catch(er=>{
+          P.err = er && er.message === 'big' ? `This photo is bigger than ${MAX_IN_MB} MB. Please choose a smaller one.`
+            : 'This photo format can\'t be opened in this browser. Please choose a JPG or PNG photo.';
+          draw();
+        });
+      }
       if(e.target.id === 'bsV' && P.d){
         P.d.v = e.target.value;
         const c = card(P.d.no), v = vOf(c, P.d);
         const prev = body.querySelector('.bs-prev'); if(prev) prev.innerHTML = imgTag(c, v);
-        const o = body.querySelector('#bsOwn'); if(o){ const sp = spareOf(c, v); o.textContent = `Card Collection: you own ${collQtyV(c, v)} of this version${b.kind === 'trade' && sp ? ` (${sp} spare)` : ''}.`; }
+        const o = body.querySelector('#bsOwn'); if(o) o.textContent = `Card Collection: you own ${collQtyV(c, v)} of this version.`;
       }
     });
     box.addEventListener('click', e=>{
@@ -402,17 +600,42 @@
       if(pk){
         const c = card(pk.dataset.bspick);
         let v = '';
-        if(P.src === 'spare'){ const r = [...c.ra].reverse().find(r=>spareOf(c, r) > 0); if(r) v = r === c.ra[0] ? '' : r; }
-        else if(P.src === 'own'){ const r = c.ra.find(r=>collQtyV(c, r) > 0); if(r) v = r === c.ra[0] ? '' : r; }
-        const sp = spareOf(c, v || c.ra[0]);
-        P.d = { ...(P.d || {}), no:c.no, v, q: b.kind === 'trade' && sp ? sp : (P.d && P.d.q) || 1, cond:(P.d && P.d.cond) || 'NM', nego: P.d ? !!P.d.nego : b.kind === 'trade', price: P.d ? P.d.price : null, note: P.d ? P.d.note : '', sold:false };
-        P.step = 'form'; draw(); return;
+        if(P.src === 'own'){ const r = c.ra.find(r=>collQtyV(c, r) > 0); if(r) v = r === c.ra[0] ? '' : r; }
+        P.d = { sid: rid(), no:c.no, v, q: (P.d && P.d.q) || 1, cond:(P.d && P.d.cond) || 'NM', nego: P.d ? !!P.d.nego : false, price: P.d ? P.d.price : null, note: P.d ? (P.d.note || '') : '', sold:false };
+        dropPend(); P.step = 'form'; draw(); return;
       }
       const z = e.target.closest('[data-bszoom]'); if(z){ openLightbox(z.dataset.bszoom); return; }
       const a = e.target.closest('[data-bs]'); if(!a) return;
       const act = a.dataset.bs;
-      if(act === 'change'){ P.step = 'pick'; draw(); return; }
-      if(act === 'remove'){ b.slots[i] = null; mxClose(); queueSave(); renderEditor(); return; }
+      if(act === 'change'){ keepX(); P.step = 'pick'; draw(); return; }
+      if(act === 'photo'){
+        keepX();
+        (async ()=>{
+          const hasOwn = (P.d && P.d.x && P.d.ph) || P.pend;   // ganti foto kantong ini tidak menambah jumlah
+          const n = await photoCount(true);
+          if(!hasOwn && n != null && n >= MAX_PHOTOS){ P.err = `You have used all ${MAX_PHOTOS} photos. Remove a photo card (or mark one as sold) to upload a new one.`; P.step = 'xpick'; draw(); return; }
+          P.step = 'xpick'; draw();
+        })();
+        return;
+      }
+      if(act === 'backform'){ P.step = 'form'; draw(); return; }
+      if(act === 'rotate' && P.C){ P.C.rot = (P.C.rot + 1) % 4; P.C.ox = 0; P.C.oy = 0; drawCv(); return; }
+      if(act === 'usecrop' && P.img){
+        a.disabled = true; a.textContent = 'Preparing…';
+        makePhotoBlobs(P.img, P.C).then(pend=>{
+          dropPend(); P.pend = pend;
+          if(!(P.d && P.d.x)) P.d = { sid: rid(), x:1, nm:'', rar:'', set:'', q: (P.d && P.d.q) || 1, cond:'NM', nego:false, price:null, note:'', sold:false };
+          P.step = 'form'; draw();
+        }).catch(()=>{ P.err = 'Couldn\'t prepare this photo in this browser. Please try another photo or browser.'; P.step = 'crop'; draw(); });
+        return;
+      }
+      if(act === 'remove'){
+        const old = xPaths(s);
+        if(old.length && !confirm('Remove this card? Its photo is deleted for good.')) return;
+        b.slots[i] = null; dropPend(); mxClose(); renderEditor();
+        if(old.length){ saveNow().then(()=>removePhotos(old)); } else queueSave();
+        return;
+      }
       if(act === 'left' || act === 'right'){
         const j = act === 'left' ? i - 1 : i + 1;
         [b.slots[i], b.slots[j]] = [b.slots[j], b.slots[i]];
@@ -423,17 +646,75 @@
         const val = id => { const el = body.querySelector(id); return el ? el.value : ''; };
         const chk = id => { const el = body.querySelector(id); return !!(el && el.checked); };
         const d = P.d;
-        const out = { no:d.no, v: val('#bsV'), q: Math.max(1, Math.min(99, parseInt(val('#bsQty'), 10) || 1)) };
+        if(d.x){ saveX(a, val, chk); return; }
+        const out = { sid: d.sid || rid(), no:d.no, v: val('#bsV'), q: Math.max(1, Math.min(99, parseInt(val('#bsQty'), 10) || 1)) };
         if(b.kind === 'trade'){
           const raw = val('#bsPrice').replace(/[^\d]/g, '');
           out.price = raw ? Math.min(1e9, parseInt(raw, 10)) : null;
           out.nego = chk('#bsNego'); out.cond = val('#bsCond') || 'NM'; out.sold = chk('#bsSold');
         }
         const note = val('#bsNote').trim().slice(0, 80); if(note) out.note = note;
-        b.slots[i] = out;
-        mxClose(); queueSave(); renderEditor();
+        const old = xPaths(s);               // kantong foto diganti kartu database → foto lama dihapus
+        b.slots[i] = out; dropPend();
+        mxClose(); renderEditor();
+        if(old.length) saveNow().then(()=>removePhotos(old)); else queueSave();
       }
     });
+    /* simpan kantong foto: unggah foto baru (kalau ada) → simpan binder → hapus foto lama / foto terjual */
+    async function saveX(btn, val, chk){
+      const d = P.d, trade = b.kind === 'trade';
+      const nm = val('#bxName').trim().slice(0, 60);
+      if(!nm){ keepX(); P.err = 'Please type the card name.'; draw(); return; }
+      const out = { sid: d.sid || rid(), x:1, nm, q: Math.max(1, Math.min(99, parseInt(val('#bsQty'), 10) || 1)) };
+      const rar = val('#bxRar').trim().slice(0, 12); if(rar) out.rar = rar;
+      const set = val('#bxSet').trim().slice(0, 16); if(set) out.set = set;
+      if(trade){
+        const raw = val('#bsPrice').replace(/[^\d]/g, '');
+        out.price = raw ? Math.min(1e9, parseInt(raw, 10)) : null;
+        out.nego = chk('#bsNego'); out.cond = val('#bsCond') || 'NM'; out.sold = chk('#bsSold');
+      }
+      const note = val('#bsNote').trim().slice(0, 80); if(note) out.note = note;
+      const before = xPaths(s);
+      let keep = d.ph ? { ph:d.ph, th:d.th } : null;
+      if(d.pd && !P.pend) out.pd = 1;
+      const soldNow = trade && out.sold;
+      if(soldNow && (P.pend || keep)){
+        if(!confirm('Mark this card as sold? Its photo will be deleted for good. The name, price and other details stay in your binder.')) return;
+        dropPend(); keep = null; out.pd = 1;
+      }
+      if(P.pend){
+        btn.disabled = true; btn.textContent = 'Uploading photo…';
+        const uid = API().me ? await API().me() : null;
+        if(!uid){ btn.disabled = false; btn.textContent = s ? 'Save' : 'Put in pocket'; keepX(); P.err = 'Please log in again to upload photos.'; draw(); return; }
+        const n = await photoCount(true);
+        if(!before.length && n != null && n >= MAX_PHOTOS){ btn.disabled = false; btn.textContent = s ? 'Save' : 'Put in pocket'; keepX(); P.err = `You have used all ${MAX_PHOTOS} photos. Remove a photo card (or mark one as sold) to upload a new one.`; draw(); return; }
+        const id = rid(), base = `${uid}/${id}`;
+        const ph = `${base}.${P.pend.ext}`, th = `${base}_t.${P.pend.ext}`;
+        const r1 = await API().photoUpload(ph, P.pend.main, P.pend.type);
+        const r2 = r1.error ? r1 : await API().photoUpload(th, P.pend.thumb, P.pend.type);
+        if(r1.error || r2.error){
+          if(!r1.error) removePhotos([ph]);
+          const m = String((r1.error || r2.error).message || '');
+          btn.disabled = false; btn.textContent = s ? 'Save' : 'Put in pocket'; keepX();
+          P.err = /row-level|policy|403|Unauthorized/i.test(m) ? `Couldn't upload: you may have reached the limit of ${MAX_PHOTOS} photos.`
+            : /exceed|size|413/i.test(m) ? 'Couldn\'t upload: the photo is still too large. Please try another photo.'
+            : /bucket|not found/i.test(m) ? 'Photo upload isn\'t switched on yet on this site.'
+            : 'Couldn\'t upload the photo. Check your connection and try again.';
+          draw(); return;
+        }
+        S.photoCount = null;
+        keep = { ph, th };
+      }
+      if(keep){ out.ph = keep.ph; if(keep.th) out.th = keep.th; delete out.pd; }
+      const now = xPaths(out);
+      const gone = before.filter(p=>!now.includes(p));
+      b.slots[i] = out; dropPend();
+      if(P.img && P.img.close) try{ P.img.close(); }catch(er){}
+      mxClose(); renderEditor();
+      await saveNow();
+      if(gone.length) removePhotos(gone);
+      renderEditor();
+    }
   }
 
   /* ---------- pengaturan ---------- */
@@ -482,11 +763,13 @@
       mxClose(); renderEditor(); await saveNow(); renderEditor();
     });
     box.querySelector('#bgDel').addEventListener('click', async ()=>{
-      if(!confirm(`Delete “${b.name}”? The binder and its shared link are removed for good. Your Card Collection is not changed.`)) return;
+      if(!confirm(`Delete “${b.name}”? The binder, its shared link${b.slots.some(x=>xPaths(x).length) ? ' and the card photos you uploaded to it' : ''} are removed for good. Your Card Collection is not changed.`)) return;
       const { error } = await API().remove(b.id);
       if(error){ box.querySelector('#bgErr').textContent = errMsg(error); return; }
       mxClose(); clearTimeout(S.saveTmr); S.saveTmr = null;
+      const photos = b.slots.flatMap(xPaths);
       S.list = (S.list || []).filter(x=>x.id !== b.id); S.cur = null; updateTile(); renderShelf();
+      if(photos.length) removePhotos(photos);
     });
   }
 
@@ -494,12 +777,14 @@
   function listText(b, owner){
     const k = KIND[b.kind] || KIND.collection;
     const rows = filled(b).filter(s=>!s.sold).map(s=>{
-      const c = card(s.no); const vl = (s.v && s.v !== c.ra[0]) ? ` (${vLabel(c, s.v)})` : '';
+      const c = isX(s) ? null : card(s.no);
+      const vl = isX(s) ? (s.rar ? ` (${s.rar})` : '') : (s.v && s.v !== c.ra[0]) ? ` (${vLabel(c, s.v)})` : '';
       let price = '';
       if(b.kind === 'trade'){
         if(s.price != null && s.price !== '' && b.show_prices !== false) price = ` — ${fmtRp(+s.price)}${s.nego ? ' (nego)' : ''}`;
         else if(s.nego) price = ' — make an offer';
       }
+      if(isX(s)) return `• ${s.set ? s.set + ' ' : ''}${xName(s)}${vl} ×${s.q||1}${price}`;
       return `• ${s.no} ${cardName(c)}${vl} ×${s.q||1}${price}`;
     });
     const head = `📒 ${b.name} — ${k.label}${owner ? ` by @${owner}` : ''}`;
@@ -537,18 +822,6 @@
     });
   }
 
-  async function fillSpares(){
-    const b = S.cur; if(!b) return;
-    const have = new Set(filled(b).map(s=>s.no + '|' + (s.v||'')));
-    const add = spareSlots().filter(s=>!have.has(s.no + '|' + (s.v||'')));
-    if(!add.length){ alert('No new spare cards to add. Spare cards are copies above 3 in your Card Collection that aren\'t in this binder yet.'); return; }
-    let j = 0;
-    for(let i = 0; i < b.slots.length && j < add.length; i++) if(!b.slots[i]) b.slots[i] = add[j++];
-    while(j < add.length && b.pages < MAX_PAGES){ b.pages++; for(let k = 0; k < PER; k++) b.slots.push(j < add.length ? add[j++] : null); }
-    queueSave(); renderEditor();
-    setStatus(`Added ${j} spare card${j>1?'s':''}. Set prices by tapping each card.`);
-  }
-
   /* ---------- admin ---------- */
   async function renderAdmin(){
     const box = q1('#bdAdmin'); if(!box) return;
@@ -573,11 +846,13 @@
       let cur = Math.floor(S.page / per); cur = pgto ? +pgto.dataset.bpgto : cur + (+pg.dataset.bpg);
       S.page = Math.max(0, Math.min(nSp - 1, cur)) * per; renderEditor(); return;
     }
+    const xv = e.target.closest('[data-bxv]'); if(xv && S.cur){ openPhoto(S.cur.slots[+xv.dataset.bxv], S.cur); return; }
     const z = e.target.closest('[data-bzoom]'); if(z){ openLightbox(z.dataset.bzoom); return; }
     const slot = e.target.closest('[data-bslot]');
     if(slot && S.cur){
       const i = +slot.dataset.bslot;
       if(S.edit) openSlot(i);
+      else if(isX(S.cur.slots[i])) openPhoto(S.cur.slots[i], S.cur);
       else if(S.cur.slots[i]) openLightbox(S.cur.slots[i].no);
       return;
     }
@@ -595,7 +870,6 @@
       S.page = Math.floor((S.cur.pages - 1) / perSpread()) * perSpread(); queueSave(); renderEditor();
     }
     else if(act === 'delpage' && S.cur.pages > 1){ S.cur.pages--; S.cur.slots = S.cur.slots.slice(0, S.cur.pages * PER); queueSave(); renderEditor(); }
-    else if(act === 'fillspares') fillSpares();
   });
   /* seret-lepas antarkantong (desktop, mode edit) */
   let dragFrom = null;
@@ -705,8 +979,9 @@
     const pg = e.target.closest('[data-bppg]'), pgto = e.target.closest('[data-bppgto]');
     if(pg || pgto){ const nSp = Math.ceil(b.pages / per); let cur = Math.floor(S.pubPage / per); cur = pgto ? +pgto.dataset.bppgto : cur + (+pg.dataset.bppg); S.pubPage = Math.max(0, Math.min(nSp - 1, cur)) * per; drawPublic(); return; }
     const vw = e.target.closest('[data-bpview]'); if(vw){ S.pubView = vw.dataset.bpview; drawPublic(); return; }
+    const xv = e.target.closest('[data-bxv]'); if(xv){ openPhoto(b.slots[+xv.dataset.bxv], b); return; }
     const z = e.target.closest('[data-bzoom]'); if(z){ openLightbox(z.dataset.bzoom); return; }
-    const slot = e.target.closest('[data-bslot]'); if(slot){ const s = b.slots[+slot.dataset.bslot]; if(s) openLightbox(s.no); return; }
+    const slot = e.target.closest('[data-bslot]'); if(slot){ const s = b.slots[+slot.dataset.bslot]; if(isX(s)) openPhoto(s, b); else if(s) openLightbox(s.no); return; }
     const a = e.target.closest('[data-bpub]'); if(!a) return;
     const act = a.dataset.bpub;
     if(act === 'list') salinTeks(listText(b, b.owner), a);
@@ -752,6 +1027,15 @@
       im.onload = () => res(im.naturalWidth ? im : null); im.onerror = () => res(null); im.src = src;
     }));
     return imgCache.get(src);
+  }
+  /* foto kartu dari Storage (origin lain): crossOrigin supaya kanvas tidak "tainted" */
+  function loadImgCors(src){
+    const key = 'cors:' + src;
+    if(!imgCache.has(key)) imgCache.set(key, new Promise(res=>{
+      const im = new Image(); im.crossOrigin = 'anonymous'; im.decoding = 'async';
+      im.onload = () => res(im.naturalWidth ? im : null); im.onerror = () => res(null); im.src = src;
+    }));
+    return imgCache.get(key);
   }
   async function cardImage(c, v){
     const tries = [artFile(c.no, v || c.ra[0])];
@@ -830,7 +1114,7 @@
     const gx = Math.round((W - (3 * cw + 2 * gap)) / 2);
     const gy = Math.round(gridTop + (gridH - (3 * ch + 2 * gap)) / 2);
     const slots = b.slots.slice(pageIdx * PER, pageIdx * PER + PER);
-    const imgs = await Promise.all(slots.map(s=>{ if(!s || (opt.hideSold && s.sold)) return null; const c = card(s.no); return c ? cardImage(c, vOf(c, s)) : null; }));
+    const imgs = await Promise.all(slots.map(s=>{ if(!s || (opt.hideSold && s.sold)) return null; if(isX(s)) return s.ph ? loadImgCors(purl(s.ph)) : null; const c = card(s.no); return c ? cardImage(c, vOf(c, s)) : null; }));
     const rad = Math.round(cw * 0.05);
     for(let i = 0; i < PER; i++){
       const s = slots[i] && !(opt.hideSold && slots[i].sold) ? slots[i] : null;
@@ -839,7 +1123,7 @@
         ctx.save(); ctx.setLineDash([12, 10]); ctx.lineWidth = 3; ctx.strokeStyle = '#2C3644'; rr(ctx, x + 2, yy + 2, cw - 4, ch - 4, rad); ctx.stroke(); ctx.restore();
         continue;
       }
-      const c = card(s.no);
+      const c = isX(s) ? null : card(s.no);
       /* bingkai + bayangan */
       ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 22; ctx.shadowOffsetY = 8;
       ctx.fillStyle = '#050608'; rr(ctx, x, yy, cw, ch, rad); ctx.fill(); ctx.restore();
@@ -847,10 +1131,18 @@
       ctx.save(); rr(ctx, x + bw, yy + bw, cw - 2 * bw, ch - 2 * bw, rad - 2); ctx.clip();
       if(s.sold) ctx.filter = 'grayscale(1) brightness(.5)';
       if(imgs[i]) ctx.drawImage(imgs[i], x + bw, yy + bw, cw - 2 * bw, ch - 2 * bw);
-      else { ctx.fillStyle = '#1F2731'; ctx.fillRect(x, yy, cw, ch); ctx.fillStyle = '#8A94A3'; ctx.font = `700 ${Math.round(cw*0.08)}px ${bodyFont}`; ctx.textAlign = 'center'; ctx.fillText(s.no, x + cw/2, yy + ch/2); ctx.textAlign = 'left'; }
+      else {
+        ctx.fillStyle = '#1F2731'; ctx.fillRect(x, yy, cw, ch); ctx.fillStyle = '#8A94A3'; ctx.textAlign = 'center';
+        if(isX(s)){
+          ctx.font = `700 ${Math.round(cw*0.075)}px ${bodyFont}`;
+          wrapLines(ctx, xName(s), cw * 0.8).slice(0, 3).forEach((l, n)=>ctx.fillText(l, x + cw/2, yy + ch*0.42 + n * cw * 0.1));
+        } else { ctx.font = `700 ${Math.round(cw*0.08)}px ${bodyFont}`; ctx.fillText(s.no, x + cw/2, yy + ch/2); }
+        ctx.textAlign = 'left';
+      }
       ctx.filter = 'none';
       /* bar bawah: versi + harga */
-      const vl = (s.v && s.v !== c.ra[0]) ? vLabel(c, s.v) : '';
+      const vl = isX(s) ? String(s.rar || '') : (s.v && s.v !== c.ra[0]) ? vLabel(c, s.v) : '';
+      const vbase = isX(s) ? String(s.rar || '').toUpperCase() : rarBase(s.v);
       let price = '', nego = false, muted = false;
       if(trade){
         const has = s.price != null && s.price !== '' && opt.prices;
@@ -869,9 +1161,9 @@
         const total = vw + (vl && price ? fs * 0.35 : 0) + pw + (nego ? fs * 0.3 + nw : 0);
         let cx = x + (cw - total) / 2;
         if(vl){
-          const sec = /^(SEC|HR|TR)/.test(rarBase(s.v));
+          const sec = /^(SEC|HR|TR)/.test(vbase);
           if(sec){ const g = ctx.createLinearGradient(cx, 0, cx + vw, 0); g.addColorStop(0, '#f9d976'); g.addColorStop(.5, '#e0a3ff'); g.addColorStop(1, '#7fd3ff'); ctx.fillStyle = g; }
-          else ctx.fillStyle = /^(MR|ER)/.test(rarBase(s.v)) ? '#c9cfd8' : '#F2B01E';
+          else ctx.fillStyle = /^(MR|ER)/.test(vbase) ? '#c9cfd8' : '#F2B01E';
           rr(ctx, cx, cy - fs * 0.48, vw, fs * 0.96, 5); ctx.fill();
           ctx.fillStyle = '#111'; ctx.font = `800 ${Math.round(fs*0.72)}px ${bodyFont}`; ctx.textAlign = 'center'; ctx.fillText(vl, cx + vw / 2, cy + 1); ctx.textAlign = 'left';
           cx += vw + (price ? fs * 0.35 : 0);

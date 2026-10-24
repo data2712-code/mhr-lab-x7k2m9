@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.08  ·  24 Oktober 2026
+     MHR DECK LAB  ·  versi 7.10  ·  24 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.08">
+<meta name="version" content="7.10">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1906,7 +1906,6 @@
   .coll-hero-acts .btn2{flex:none;padding:7px 12px;font-size:12px}
   /* koleksi: kartu */
   .coll-card.miss .coll-card-img img{filter:grayscale(1) brightness(.45)}
-  .coll-spare{position:absolute;top:6px;left:6px;background:var(--hijau);color:#fff;font-weight:800;font-size:10px;padding:2px 6px;border-radius:6px;line-height:1.4}
   .coll-vbtn{margin-top:7px;background:none;border:1px dashed var(--line);color:var(--muted);border-radius:7px;padding:4px 6px;
     font-size:11px;font-weight:600;cursor:pointer;width:100%}
   .coll-vbtn:hover,.coll-vbtn[aria-expanded="true"]{border-color:var(--accent);color:var(--accent)}
@@ -2131,6 +2130,37 @@
   .bi-grid figcaption{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
   .bi-grid figcaption .btn2{flex:none;padding:5px 9px;font-size:11.5px}
   @media (max-width:760px){ .bi-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  /* v7.10 — foto kartu di binder (kartu yang belum ada di database) */
+  .bp-xph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px;
+    text-align:center;background:linear-gradient(160deg,#1F2731,#11161c);color:var(--paper)}
+  .bp-xph i{font-style:normal;font-size:11px;color:var(--muted);line-height:1.3}
+  .bp-xph b{font-size:11.5px;line-height:1.3;word-break:break-word}
+  .bp-cam{position:absolute;top:5px;left:5px;z-index:1;font-size:10px;background:rgba(14,18,22,.88);border:1px solid var(--line);
+    border-radius:6px;padding:0 4px;line-height:1.6}
+  .bs-photo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 0 10px;padding:8px 10px;border:1px dashed var(--line);border-radius:10px}
+  .bx-up{display:flex;flex-direction:column;gap:12px}
+  .bx-drop{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:28px 14px;border:2px dashed var(--line);
+    border-radius:12px;cursor:pointer;text-align:center}
+  .bx-drop:hover,.bx-drop:focus-within{border-color:var(--accent)}
+  .bx-drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+  .bx-drop b{font-size:15px}
+  .bx-crop{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:16px;align-items:start}
+  .bx-frame{border-radius:10px;overflow:hidden;border:2px solid var(--accent);background:#0B0E12}
+  .bx-frame canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+  .bx-ctl{display:flex;flex-direction:column;gap:10px}
+  .bx-ctl input[type=range]{width:100%;accent-color:var(--accent);padding:0}
+  .bs-prev.bx-prev{display:flex;flex-direction:column;gap:8px;cursor:default}
+  .bx-prev .bp-xph,.bx-img .bp-xph{position:relative;aspect-ratio:63/88;border-radius:8px}
+  .bx-prev.sold img,.bx-img.sold img{filter:grayscale(1) brightness(.5)}
+  .bx-prev img.failed,.bx-img img.failed{display:none}
+  .bx-soldnote{margin:0;font-size:12px}
+  .bx-view{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start}
+  .bx-img img{width:100%;border-radius:10px;display:block}
+  .bx-info{display:flex;flex-direction:column;gap:6px}
+  @media (max-width:760px){
+    .bx-crop,.bx-view{grid-template-columns:1fr}
+    .bx-frame,.bx-img{max-width:260px;width:100%;margin:0 auto}
+  }
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -2277,7 +2307,6 @@
             <option value="all">All cards</option>
             <option value="owned">Owned</option>
             <option value="missing">Missing</option>
-            <option value="spare">Has spare copies (more than 3)</option>
             <option value="vers">Missing versions</option>
           </select>
         </div>
@@ -2648,8 +2677,8 @@
 <script src="tournaments.js?v=7.02"></script>
 <script src="events.js?v=7.02"></script>
 <script src="events-ui.js?v=7.05"></script>
-<script src="binders.js?v=7.06"></script>
-<script src="binders-ui.js?v=7.07"></script>
+<script src="binders.js?v=7.10"></script>
+<script src="binders-ui.js?v=7.10"></script>
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
@@ -2678,7 +2707,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.08</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.10</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -8000,8 +8029,9 @@ if(window.MHRAuth && window.MHRAuth.ready){
    (2) KOLEKSI PER SET: deretan kotak set (dikelompokkan Starter / Expansion /
        Promo & other dari window.SETS) dengan progres masing-masing + kotak
        "All". Ringkasan set: % dimiliki, jumlah belum punya, versi dimiliki,
-       salinan "spare" (di atas 3 = batas salinan per deck), tombol salin
-       daftar kartu yang belum punya / daftar spare.
+       tombol salin daftar kartu yang belum punya. (v7.09: konsep salinan
+       "spare" di atas 3 dihapus atas permintaan pemilik — koleksi cukup
+       mencatat jumlah kartu yang dimiliki.)
    (3) KOLEKSI PER VERSI (pilihan B pemilik): kunci collMap sekarang per versi.
        Versi utama (ra[0]) tetap nomor polos "SD05-001" — SAMA dengan format
        lama, jadi data lama otomatis terbaca sebagai versi utama tanpa migrasi.
@@ -8010,9 +8040,8 @@ if(window.MHRAuth && window.MHRAuth.ready){
        per nomor kartu (collTotals() di setDeckCollection()). */
 let collMap = {};
 let collQ = '';
-let collOwnFilter = 'all'; /* 'all' | 'owned' | 'missing' | 'spare' | 'vers' */
+let collOwnFilter = 'all'; /* 'all' | 'owned' | 'missing' | 'vers' */
 const COLL_MAX = 1000;
-const COLL_SPARE_KEEP = 3;           // salinan di atas ini dihitung "spare" (batas legal per deck)
 const COLL_SET_KEY = 'mhr_coll_set';
 const DASH_TAB_KEY = 'mhr_dash_tab';
 let collSet = null;                  // kode set terpilih, 'ALL' = semua set
@@ -8050,15 +8079,14 @@ function collCurSet(){
 }
 function collSetStat(code){
   const cards = DB.filter(c=>cardVisible(c) && (code === 'ALL' || c.s === code));
-  let own = 0, spare = 0, vt = 0, vo = 0;
+  let own = 0, vt = 0, vo = 0;
   cards.forEach(c=>{
     const tq = collTotal(c);
     if(tq > 0) own++;
-    spare += Math.max(0, tq - COLL_SPARE_KEEP);
     vt += c.ra.length;
     c.ra.forEach(r=>{ if(collQtyV(c, r) > 0) vo++; });
   });
-  return { cards, tot:cards.length, own, spare, vt, vo, pct: cards.length ? Math.floor(own / cards.length * 100) : 0 };
+  return { cards, tot:cards.length, own, vt, vo, pct: cards.length ? Math.floor(own / cards.length * 100) : 0 };
 }
 
 function collFiltered(){
@@ -8069,7 +8097,6 @@ function collFiltered(){
     const tq = collTotal(c);
     if(collOwnFilter === 'owned' && tq <= 0) return false;
     if(collOwnFilter === 'missing' && tq > 0) return false;
-    if(collOwnFilter === 'spare' && tq <= COLL_SPARE_KEEP) return false;
     if(collOwnFilter === 'vers' && !(c.ra.length > 1 && c.ra.some(r=>collQtyV(c, r) <= 0))) return false;
     if(!q) return true;
     return c.no.toLowerCase().includes(q) || cardName(c).toLowerCase().includes(q);
@@ -8089,7 +8116,6 @@ function collStepHTML(c, r, mini){
    #collList mengecek tombol stepper/versi LEBIH DULU sebelum jatuh ke data-zoom. */
 function collRowHTML(c){
   const tot = collTotal(c);
-  const spare = Math.max(0, tot - COLL_SPARE_KEEP);
   const multi = c.ra.length > 1;
   const open = multi && collOpenV.has(c.no);
   const vOwned = c.ra.filter(r=>collQtyV(c, r) > 0).length;
@@ -8098,7 +8124,6 @@ function collRowHTML(c){
     <div class="coll-card-img" data-zoom="${c.no}">
       <img alt="" data-ext="0" src="${artFile(c.no, c.ra[0])}" loading="lazy" decoding="async" onerror="imgFallback(this,'${c.no}')">
       ${tot>0?`<span class="coll-owned-badge" title="All versions together">×${tot}</span>`:''}
-      ${spare>0?`<span class="coll-spare" title="Copies above ${COLL_SPARE_KEEP}, the most one deck can use">+${spare} spare</span>`:''}
     </div>
     <div class="coll-cap" data-zoom="${c.no}" title="${nm}">${nm}</div>
     <div class="coll-sub">${c.no} · L${c.l} · ${t(c.c)}</div>
@@ -8136,8 +8161,8 @@ function renderCollectionHead(){
     hero.innerHTML = `<div class="coll-hero"><div class="coll-ring" style="--p:${st.pct}"><span>${st.pct}%</span></div>
       <div><h3>${escHtml(title)}${so && so.tipe ? `<small>${escHtml(so.tipe === 'Other' ? 'Promo & other' : so.tipe)}</small>` : ''}</h3>
         <div class="coll-mini"><span><b>${st.own}</b> / ${st.tot} cards owned</span><span><b>${st.tot - st.own}</b> missing</span>
-          <span title="UR, MR, SEC… each version counted separately"><b>${st.vo}</b> / ${st.vt} versions</span><span title="Copies above ${COLL_SPARE_KEEP}"><b>${st.spare}</b> spare copies</span></div></div>
-      <div class="coll-hero-acts">${st.tot - st.own ? `<button type="button" class="btn2" data-coll-act="missing">📋 Copy missing list</button>` : ''}${st.spare ? `<button type="button" class="btn2" data-coll-act="spare">📋 Copy spare list</button>` : ''}</div></div>`;
+          <span title="UR, MR, SEC… each version counted separately"><b>${st.vo}</b> / ${st.vt} versions</span></div></div>
+      <div class="coll-hero-acts">${st.tot - st.own ? `<button type="button" class="btn2" data-coll-act="missing">📋 Copy missing list</button>` : ''}</div></div>`;
   }
 }
 /* dipertahankan namanya (dipanggil dari tempat lain sebelum v7.05) */
@@ -8183,14 +8208,10 @@ function collCopyList(kind, btn){
   const code = collCurSet();
   const st = collSetStat(code);
   const label = code === 'ALL' ? 'all sets' : code;
-  let rows;
-  if(kind === 'missing') rows = st.cards.filter(c=>collTotal(c) <= 0).map(c=>`${c.no} ${cardName(c)}`);
-  else rows = st.cards.filter(c=>collTotal(c) > COLL_SPARE_KEEP).map(c=>{
-    const vers = c.ra.filter(r=>collQtyV(c, r) > 0).map(r=>`${rarLabel(r, c)} ×${collQtyV(c, r)}`).join(', ');
-    return `${collTotal(c) - COLL_SPARE_KEEP}x ${c.no} ${cardName(c)}${c.ra.length > 1 ? ` (I have: ${vers})` : ''}`;
-  });
+  if(kind !== 'missing') return;
+  const rows = st.cards.filter(c=>collTotal(c) <= 0).map(c=>`${c.no} ${cardName(c)}`);
   if(!rows.length) return;
-  const head = kind === 'missing' ? `Cards I still need from ${label} (${rows.length}):` : `Spare cards from ${label}, for trade:`;
+  const head = `Cards I still need from ${label} (${rows.length}):`;
   salinTeks(`${head}\n${rows.join('\n')}\n— mhrdecklab.com`, btn);
 }
 

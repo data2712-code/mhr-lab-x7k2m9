@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.08** · 24 Oktober 2026
+**Versi saat ini: v7.10** · 24 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -588,6 +588,81 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.10 — Binders: foto kartu (kartu yang belum ada di database) + riwayat harga kartu terjual — 24 Oktober 2026 *(`index.html`, `binders.js`, `binders-ui.js`, migrasi SQL baru `mhr_decklab_v710_binder_photos.sql` di folder internal)*
+
+**Migrasi Supabase SUDAH dijalankan di produksi 24 Okt 2026** (atas persetujuan pemilik) dari
+`mhr-deck-lab-internal/mhr_decklab_v710_binder_photos.sql` (aman diulang). Dicek setelahnya: bucket `binder-photos`
+(publik, 1 MB, WebP/JPEG), 3 policy `binder_photo_*`, tabel `binder_sales` (RLS aktif, 0 baris), trigger
+`binders_sales_log`. Sebelumnya dijalankan sekali sebagai uji coba di database produksi lalu di-rollback (hasil sama
+dengan uji lokal di bawah).
+
+Keputusan pemilik (24 Okt 2026): upload foto **hanya di Binders** (tidak di Card Collection), maks **20 foto per akun**,
+kartu foto yang dicentang **Sold → fotonya dihapus** (dengan pemberitahuan), isian kartu foto = Nama Kartu, Rarity,
+Set, Quantity, Price, Condition, Note, Open to Offers, Sold; harga kartu terjual dicatat untuk tim saja.
+- **Alur:** mode ✏️ Edit → ketuk kantong → "📷 Card not listed? Upload a photo" (menampilkan "x of 20 photos used") →
+  pilih/ambil foto (maks 20 MB, format apa saja yang bisa dibuka browser; foto HP tidak perlu dikonversi) → atur posisi
+  di bingkai kartu (geser, zoom, putar) → isi data kartu → simpan. Teks aturan foto + peringatan "Sold = foto dihapus"
+  tampil di layar upload dan di form.
+- **Olah di browser:** foto dikecilkan ke maks 2400 px saat dibuka, dipotong rasio kartu 63:88, disimpan **860×1200**
+  + thumbnail **300×419** sebagai WebP (JPEG kalau browser tidak bisa WebP). Uji: foto 4000×3000 berisi noise (11 MB,
+  kasus terburuk) → 451 KB + 26 KB. Data lokasi GPS (EXIF) otomatis ikut terbuang.
+- **Storage** (`binder-photos`, publik-baca): berkas `<user_id>/<id>.webp` + `<id>_t.webp`, maks 1 MB per berkas,
+  hanya WebP/JPEG; kebijakan Storage: tulis/hapus hanya di folder sendiri, nama berkas harus pola di atas, maks 20 berkas
+  utama + 20 thumbnail per akun (admin boleh menghapus apa saja). Tidak ada UPDATE (ganti foto = unggah baru + hapus lama).
+- **Kantong foto** di `slots`: `{ sid, x:1, nm, rar, set, q, price, nego, cond, note, sold, ph, th, pd }`. Tampil di
+  binder dengan lencana 📷, di tabel (No. = set, Version = rarity), di teks WhatsApp, di halaman publik, dan di gambar IG
+  (foto dimuat dengan `crossOrigin`). Klik kartu foto → jendela foto + detail + catatan "belum dicek MHR Deck Lab".
+- **Sold:** kantong foto yang dicentang Sold → konfirmasi → binder disimpan → foto & thumbnail dihapus dari Storage;
+  kantong tetap ada (nama, harga, dll.) dengan tulisan "Photo removed after sale" (`pd:1`).
+- **Hapus foto lain:** hapus kantong, ganti foto, ganti ke kartu database, dan hapus binder ikut menghapus fotonya. Sekali
+  per sesi, berkas di folder akun yang tidak dipakai binder mana pun dan berumur > 1 jam dihapus (unggahan yatim).
+- **`sid`:** semua kantong (kartu database maupun foto) sekarang punya id unik `sid` (kantong lama otomatis diberi saat
+  binder dibuka dan tersimpan pada penyimpanan berikutnya).
+- **Riwayat harga terjual (internal):** tabel `public.binder_sales` diisi trigger `binders_sales_log` (AFTER INSERT/UPDATE
+  OF slots) setiap kali kantong ber-`sid` **baru** berstatus sold: binder, pemilik, kartu (`card_no`/versi atau nama,
+  rarity, set kartu foto), qty, harga, nego, kondisi, catatan, salinan kantong, `sold_at`. Centang sold dibuka lagi →
+  `unsold_at` diisi; dijual lagi → baris baru. RLS aktif tanpa policy → **tidak bisa dibaca dari situs**; buka lewat
+  Table Editor / SQL Editor. Kegagalan pencatatan tidak pernah menggagalkan simpan binder (exception ditangkap). Kantong
+  sold lama yang belum punya `sid` tercatat saat binder itu pertama kali disimpan setelah v7.10 (tanggal = saat itu).
+
+Cache-buster: `binders.js?v=7.10`, `binders-ui.js?v=7.10`. Versi 7.10 (komentar, meta, footer).
+
+**Verifikasi:** migrasi dijalankan di PostgreSQL 16 lokal dengan peniruan Supabase (role anon/authenticated, `auth.uid()`
+dari JWT, `storage.objects` + `storage.foldername` + RLS): 20 foto utama & 20 thumbnail diterima, ke-21 ditolak (42501),
+folder akun lain & nama berkas salah ditolak, hapus 1 → boleh unggah lagi, `binder_sales` tidak terbaca oleh pengguna;
+trigger: sold → 1 baris, pindah posisi tidak dobel, unsold → `unsold_at`, jual lagi → baris baru, nilai aneh (q/price
+teks, sid angka) tetap tersimpan tanpa error, update oleh pengguna biasa tetap tercatat. Playwright desktop 1280 px &
+HP 390 px dengan Storage tiruan: hitungan foto, upload (WebP utama + thumbnail), nego default mati, nama wajib, simpan
+kantong foto, tabel, gambar IG 1080×1920, jendela foto, Sold → konfirmasi → 2 berkas terhapus & `pd:1`, batas 20 foto
+→ pesan, tanpa error JS. Uji coba di database produksi (di-rollback): hasil identik; satu catatan — Supabase menolak
+`DELETE` langsung ke `storage.objects` lewat SQL ("Use the Storage API"), jadi penghapusan foto selalu lewat Storage
+API (seperti yang dilakukan situs). Unggah foto sungguhan dari akun login belum diuji — cek sekali setelah push.
+
+**Artikel Berita** `my-dashboard-binders-collection-update` (Supabase, 24 Okt 2026): 6 penyebutan "spare" di body + 1 di
+excerpt dihapus/diganti sesuai v7.09 (ringkasan set tanpa "spare copies", tanpa "Copy spare list", binder mulai dari
+halaman kosong atau satu set). Halaman statis `news/*.html` ikut diperbarui saat workflow "Halaman Berita" berjalan.
+
+### v7.09 — Card Collection & Binders: konsep "spare" dihapus, "Open to offers" default mati — 24 Oktober 2026 *(`index.html`, `binders-ui.js`)*
+
+Permintaan pemilik (24 Okt 2026): katalog koleksi cukup mencatat **jumlah kartu yang dimiliki**; tidak perlu ada
+hitungan "spare" (salinan di atas 3 = playset), dan opsi nego di binder jual-beli diputuskan sendiri oleh pengguna.
+- **Card Collection** (`index.html`): filter "Has spare copies (more than 3)" dihapus; lencana "+N spare" di kartu,
+  angka "spare copies" di ringkasan set, dan tombol "Copy spare list" dihapus. Konstanta `COLL_SPARE_KEEP` dan CSS
+  `.coll-spare` dihapus. Yang tetap: jumlah dimiliki (×N, semua versi), filter All/Owned/Missing/Missing versions,
+  "Copy missing list".
+- **Binders** (`binders-ui.js`): pilihan "Start with → My spare cards" saat membuat binder, tombol "⤓ Add my spare
+  cards" di mode edit, dan sumber "My spare cards" di pemilih kartu dihapus (fungsi `spareSlots`, `spareOf`,
+  `fillSpares`). Pemilih kartu binder For sale / trade sekarang mulai dari "Cards I own"; jumlah salinan awal = 1.
+- **Open to offers (nego)**: kartu baru di binder For sale / trade sekarang **default tidak dicentang** (sebelumnya
+  otomatis dicentang). Kartu yang sudah ada di binder tidak berubah.
+- Data akun tidak berubah (koleksi per versi dan isi binder tetap). Tidak ada perubahan Supabase.
+
+Cache-buster: `binders-ui.js?v=7.09`. Versi 7.09 (komentar, meta, footer).
+
+**Verifikasi:** cek sintaks semua skrip inline `index.html` dan `binders-ui.js` (Node); fungsi koleksi baru dijalankan
+di halaman live dengan koleksi contoh (SD05: 2/18 dimiliki, 3/20 versi, filter Owned, lencana ×6 tanpa "spare",
+teks Copy missing list). Alur binder belum diuji dengan akun login.
 
 ### v7.08 — Perbaikan: galeri gambar di Berita tidak lagi dipotong ke rasio kartu — 24 Oktober 2026 *(`index.html`, `news.js`, `tools/generate_news_pages.js`)*
 

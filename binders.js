@@ -10,6 +10,13 @@
    tidak ada daftar binder publik (keputusan pemilik 23 Okt 2026).
    Laporan (report) lewat RPC mhr_binder_report; antrean & tindakan admin
    lewat mhr_admin_binder_reports / mhr_admin_binder_moderate.
+
+   v7.10 — FOTO KARTU (hanya untuk binder): bucket Storage publik
+   "binder-photos", berkas di folder <user_id>/ (<id>.webp + <id>_t.webp
+   untuk thumbnail; .jpg kalau browser tidak bisa membuat WebP). Maks 1 MB
+   per berkas & maks 20 foto per akun ditegakkan oleh kebijakan Storage di
+   mhr_decklab_v710_binder_photos.sql. Foto dikecilkan di browser sebelum
+   diunggah (binders-ui.js), jadi pengguna tidak perlu mengonversi apa pun.
    =================================================================== */
 (function(){
   'use strict';
@@ -27,6 +34,8 @@
   const rpcErr = e => { if(!e) return null; const m = /([A-Z_]{5,})/.exec(e.message||''); return {...miss(e), code: m ? m[1] : (e.code||'ERROR')}; };
   const EDITABLE = ['name','kind','is_public','pages','slots','show_prices','contact_wa','contact_ig','location','note'];
   const pick = row => { const o = {}; EDITABLE.forEach(k=>{ if(row[k] !== undefined) o[k] = row[k]; }); return o; };
+  const BUCKET = 'binder-photos';
+  const store = () => { const c = client(); return c && c.storage ? c.storage.from(BUCKET) : null; };
 
   window.MHRBinders = {
     get ready(){ return !!client(); },
@@ -78,6 +87,34 @@
         const { data, error } = await c.rpc('mhr_admin_binder_reports');
         return { data:data||[], error:rpcErr(error) };
       }catch(e){ return { data:[], error:off }; }
+    },
+    /* ---------- v7.10 foto kartu binder ---------- */
+    async me(){ return uid(); },
+    photoUrl(path){
+      const st = store(); if(!st || !path) return '';
+      try{ return st.getPublicUrl(String(path)).data.publicUrl || ''; }catch(e){ return ''; }
+    },
+    /* semua berkas di folder akun ini: [{ path, name, created_at, size }] */
+    async photoList(){
+      const st = store(); if(!st) return { data:[], error:off };
+      const u = await uid(); if(!u) return { data:[], error:{ code:'NOT_LOGGED_IN' } };
+      try{
+        const { data, error } = await st.list(u, { limit:200, sortBy:{ column:'created_at', order:'asc' } });
+        return { data:(data||[]).filter(f=>f && f.name && f.id !== null).map(f=>({ path:`${u}/${f.name}`, name:f.name, created_at:f.created_at, size:(f.metadata && f.metadata.size) || 0 })), error };
+      }catch(e){ return { data:[], error:off }; }
+    },
+    async photoUpload(path, blob, type){
+      const st = store(); if(!st) return { error:off };
+      try{
+        const { error } = await st.upload(path, blob, { contentType:type, upsert:false, cacheControl:'31536000' });
+        return { error };
+      }catch(e){ return { error:off }; }
+    },
+    async photoRemove(paths){
+      const st = store(); const list = (paths||[]).filter(Boolean);
+      if(!st || !list.length) return { error: st ? null : off };
+      try{ const { error } = await st.remove(list); return { error }; }
+      catch(e){ return { error:off }; }
     },
     async adminModerate(id, action){
       const c = client(); if(!c) return { error:off };
