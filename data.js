@@ -227,7 +227,7 @@ window.DUKUNG = {
    SELALU tampil: kalau ig kosong, tombolnya membuka pencarian Google
    "<nama toko> <kota> instagram" (jadi toko baru langsung punya tombol).
    Nomor hp tanpa tanda + dan tanpa spasi, contoh: 6281234567890 */
-window.LGS_UPDATE = '21 October 2026';
+window.LGS_UPDATE = '25 October 2026';
 window.LGS = [
   /* ---------- JAKARTA ---------- */
   { nm:'Ogre Gandaria Neverland', kota:'Jakarta', tz:'WIB',
@@ -332,7 +332,7 @@ window.LGS = [
   { nm:'Arc Entry', kota:'Kuningan', tz:'WIB',
     ig:'arc.entry.kuningan',
     map:'https://maps.app.goo.gl/yo67XvzXbtUywsVZ9',
-    jd:[ {h:5, w:'17:00 - Close'} ] },
+    jd:[ {h:6, w:'14:00 - Close'} ] },
 
   /* ---------- CIREBON ---------- */
   { nm:'Hobby Kore', kota:'Cirebon', tz:'WIB',

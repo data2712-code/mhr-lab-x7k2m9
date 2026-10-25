@@ -589,6 +589,12 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Jadwal Weekly Rush LGS: Arc Entry (Kuningan) pindah ke Sabtu 14:00 — 25 Oktober 2026 *(`data.js`, `index.html`)*
+
+- **Arc Entry** (Kuningan): jadwal mingguan diganti dari **Jumat 17:00 - Close** menjadi **Sabtu 14:00 - Close** WIB
+  (`jd:[ {h:6, w:'14:00 - Close'} ]`), permintaan pemilik. Instagram & peta tidak berubah.
+- `LGS_UPDATE` → 25 October 2026; cache-buster `index.html` → `data.js?v=7.02-lgs1025`.
+
 ### v7.12 — Binders: pilihan mata uang harga (Rp, SGD, RM, THB, HKD) — 25 Oktober 2026 *(`index.html`, `binders-ui.js`, migrasi SQL baru `mhr_decklab_v712_binder_currency.sql` di folder internal)*
 
 Permintaan pemilik: pilihan mata uang saat mengisi Price di binder For sale / trade.
