@@ -31,6 +31,11 @@
    (tabel binder_sales, hanya untuk tim MHR Deck Lab, tidak tampil di web).
    v7.11: kolom Price otomatis diberi pemisah ribuan saat diketik (150000 → 150.000, format
    Indonesia); yang disimpan tetap angka bulat tanpa titik.
+   v7.12: pilihan MATA UANG per kantong di binder For sale / trade: Rp (IDR, default), SGD,
+   RM (MYR), THB, HKD. Disimpan di kantong sebagai "cur" (kode ISO; IDR tidak ditulis supaya
+   kantong lama tetap sah). Rp tanpa desimal & titik ribuan (150.000); mata uang lain koma
+   ribuan & titik desimal maks 2 angka (1,250.50). Mata uang terakhir dipakai jadi default
+   kantong baru (localStorage "mhr_bd_cur"). "Listed value" dijumlah per mata uang.
    Keputusan pemilik (23 Okt 2026): link-only, kontak = WA/IG isian pemilik,
    harga boleh tampil + opsi nego, disclaimer wajib di binder jual-beli,
    report hanya akun login, sembunyi otomatis setelah 3 laporan.
@@ -78,6 +83,54 @@
   /* v7.11 — pemisah ribuan untuk kolom harga: hanya digit, dikelompokkan per 3 dengan titik */
   const fmtThou = v => { const d = String(v == null ? '' : v).replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '').slice(0, 10); return d.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
   const shortRp = n => n >= 1e6 ? 'Rp' + (Math.round(n / 1e5) / 10).toString() + 'M' : n >= 1000 ? 'Rp' + (Math.round(n / 100) / 10).toString() + 'k' : 'Rp' + n;
+  /* v7.12 — mata uang harga binder jual-beli */
+  const CURS = {
+    IDR: { lbl:'Rp',  name:'Rupiah (Indonesia)',  dec:0, th:'.', ex:'150.000' },
+    SGD: { lbl:'SGD', name:'Dollar (Singapore)',  dec:2, th:',', ex:'25.50' },
+    MYR: { lbl:'RM',  name:'Ringgit (Malaysia)',  dec:2, th:',', ex:'45' },
+    THB: { lbl:'THB', name:'Baht (Thailand)',     dec:2, th:',', ex:'350' },
+    HKD: { lbl:'HKD', name:'Dollar (Hong Kong)',  dec:2, th:',', ex:'120' },
+  };
+  const curOf = s => (s && s.cur && CURS[s.cur]) ? s.cur : 'IDR';
+  const CUR_KEY = 'mhr_bd_cur';
+  const defCur = () => { try{ const c = localStorage.getItem(CUR_KEY); return CURS[c] ? c : 'IDR'; }catch(e){ return 'IDR'; } };
+  const rememberCur = c => { try{ localStorage.setItem(CUR_KEY, c); }catch(e){} };
+  const groupNum = (intStr, th) => intStr.replace(/\B(?=(\d{3})+(?!\d))/g, th);
+  const numText = (n, cur) => {
+    const C = CURS[cur] || CURS.IDR;
+    if(!C.dec) return groupNum(String(Math.round(n)), C.th);
+    const [i, d] = (Math.round(n * 100) / 100).toFixed(2).split('.');
+    return groupNum(i, C.th) + (d !== '00' ? '.' + d : '');
+  };
+  const fmtMoney = (n, cur) => cur && cur !== 'IDR' && CURS[cur] ? `${CURS[cur].lbl} ${numText(n, cur)}` : 'Rp' + numText(n, 'IDR');
+  const shortMoney = (n, cur) => {
+    if(!cur || cur === 'IDR' || !CURS[cur]) return shortRp(Math.round(n));
+    const L = CURS[cur].lbl + ' ';
+    return n >= 1e6 ? L + (Math.round(n / 1e5) / 10) + 'M' : n >= 1e4 ? L + (Math.round(n / 100) / 10) + 'k' : L + numText(n, cur);
+  };
+  /* isi kolom harga saat diketik: Rp = digit + titik ribuan; lainnya = koma ribuan + titik desimal (maks 2) */
+  const fmtPriceInput = (v, cur) => {
+    const C = CURS[cur] || CURS.IDR; let t = String(v == null ? '' : v);
+    if(!C.dec) return groupNum(t.replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '').slice(0, 10), C.th);
+    t = t.replace(/[^\d.]/g, '');
+    const k = t.indexOf('.');
+    let ip = (k < 0 ? t : t.slice(0, k)).replace(/^0+(?=\d)/, '').slice(0, 9);
+    const dp = k < 0 ? null : t.slice(k + 1).replace(/\./g, '').slice(0, 2);
+    if(ip === '' && dp !== null) ip = '0';
+    return groupNum(ip, C.th) + (dp === null ? '' : '.' + dp);
+  };
+  /* angka tersimpan → teks kolom harga (Rp tanpa desimal; lainnya tanpa koma, lalu diformat) */
+  const priceToInput = (n, cur) => n == null || n === '' ? '' : fmtPriceInput((CURS[cur] || CURS.IDR).dec ? String(+n) : String(Math.round(+n)), cur);
+  const parsePrice = (t, cur) => {
+    const C = CURS[cur] || CURS.IDR;
+    if(!C.dec){ const raw = String(t || '').replace(/[^\d]/g, ''); return raw ? Math.min(1e9, parseInt(raw, 10)) : null; }
+    const raw = String(t || '').replace(/[^\d.]/g, ''); if(!raw || raw === '.') return null;
+    const n = parseFloat(raw); return isFinite(n) ? Math.min(1e9, Math.round(n * 100) / 100) : null;
+  };
+  /* kolom harga + pilihan mata uang (dipakai form kartu database & kartu foto) */
+  const priceField = d => { const cur = d.price != null && d.price !== '' ? curOf(d) : (d.cur && CURS[d.cur] ? d.cur : defCur());
+    return `<label class="bd-f"><span>Price (optional)</span><span class="bs-price"><select id="bsCur" aria-label="Currency">${Object.entries(CURS).map(([k, C])=>`<option value="${k}"${k === cur ? ' selected' : ''} title="${E(C.name)}">${E(C.lbl)}</option>`).join('')}</select>
+      <input id="bsPrice" inputmode="decimal" autocomplete="off" data-cur="${cur}" placeholder="e.g. ${CURS[cur].ex}" value="${E(priceToInput(d.price, cur))}"></span></label>`; };
   const vOf = (c, s) => (s && s.v) ? s.v : c.ra[0];
   const vLabel = (c, v) => rarLabel(v || c.ra[0], c);
   const tglPendek = iso => { const d = new Date(iso); if(isNaN(d)) return ''; return `${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]} ${d.getFullYear()}`; };
@@ -283,7 +336,7 @@
   function barHTML(s, b, vl){
     if(b.kind === 'trade'){
       const hasPrice = s.price != null && s.price !== '' && b.show_prices !== false;
-      const txt = hasPrice ? shortRp(+s.price) : (s.nego ? 'Make offer' : (b.show_prices === false ? 'Ask' : ''));
+      const txt = hasPrice ? shortMoney(+s.price, curOf(s)) : (s.nego ? 'Make offer' : (b.show_prices === false ? 'Ask' : ''));
       return `<span class="bp-bar">${vl}${txt ? `<b class="${hasPrice ? '' : 'mut'}">${E(txt)}</b>` : ''}${hasPrice && s.nego ? '<i class="bp-n">NEGO</i>' : ''}</span>`;
     }
     return vl ? `<span class="bp-bar">${vl}</span>` : '';
@@ -307,7 +360,7 @@
     const trade = b.kind === 'trade';
     return `<table class="bd-tbl"><tr><th>#</th><th>Card</th><th class="hm">No.</th><th>Version</th><th>Qty</th>${trade ? `<th class="hm">Condition</th><th class="r">Price</th>` : ''}</tr>
       ${rows.map(({s, i})=>{
-        const price = !trade ? '' : (s.price != null && s.price !== '' && b.show_prices !== false) ? fmtRp(+s.price) + (s.nego ? ' · nego' : '') : (s.nego ? 'Make offer' : '–');
+        const price = !trade ? '' : (s.price != null && s.price !== '' && b.show_prices !== false) ? fmtMoney(+s.price, curOf(s)) + (s.nego ? ' · nego' : '') : (s.nego ? 'Make offer' : '–');
         if(isX(s)) return `<tr class="${s.sold ? 'sold' : ''}" data-bxv="${i}"><td class="m">${i+1}</td><td>📷 ${E(xName(s))}${s.note ? `<small>${E(s.note)}</small>` : ''}</td><td class="m hm">${E(s.set || '–')}</td><td class="m">${E(s.rar || '–')}</td><td class="m">${s.q||1}</td>${trade ? `<td class="hm">${E(COND[s.cond] || '')}</td><td class="m r">${s.sold ? 'SOLD' : E(price)}</td>` : ''}</tr>`;
         const c = card(s.no);
         return `<tr class="${s.sold ? 'sold' : ''}" data-bzoom="${E(s.no)}"><td class="m">${i+1}</td><td>${E(cardName(c))}${s.note ? `<small>${E(s.note)}</small>` : ''}</td><td class="m hm">${E(s.no)}</td><td class="m">${E(vLabel(c, s.v))}</td><td class="m">${s.q||1}</td>${trade ? `<td class="hm">${E(COND[s.cond] || '')}</td><td class="m r">${s.sold ? 'SOLD' : E(price)}</td>` : ''}</tr>`; }).join('')}</table>`;
@@ -321,7 +374,8 @@
     const k = KIND[b.kind] || KIND.collection;
     const f = filled(b);
     const sold = f.filter(s=>s.sold).length;
-    const value = f.filter(s=>!s.sold && s.price != null && s.price !== '').reduce((a,s)=>a + (+s.price)*(s.q||1), 0);
+    const vals = {}; f.filter(s=>!s.sold && s.price != null && s.price !== '').forEach(s=>{ const c = curOf(s); vals[c] = (vals[c] || 0) + (+s.price)*(s.q||1); });
+    const value = Object.keys(CURS).filter(c=>vals[c]).map(c=>fmtMoney(vals[c], c)).join(' + ');
     const per = perSpread();
     if(S.page >= b.pages) S.page = Math.max(0, Math.floor((b.pages - 1) / per) * per);
     const lastEmpty = b.slots.slice((b.pages-1)*PER).every(s=>!s);
@@ -341,7 +395,7 @@
         <aside class="bd-side"><h4>Summary</h4>
           <div class="bd-row"><span>Cards</span><b>${f.length}</b></div>
           <div class="bd-row"><span>Copies${b.kind === 'trade' ? ' (unsold)' : ''}</span><b>${liveCopies(b)}</b></div>
-          ${b.kind === 'trade' ? `<div class="bd-row"><span>Sold</span><b>${sold}</b></div><div class="bd-row"><span>Listed value</span><b>${value ? fmtRp(value) : '–'}</b></div>` : ''}
+          ${b.kind === 'trade' ? `<div class="bd-row"><span>Sold</span><b>${sold}</b></div><div class="bd-row"><span>Listed value</span><b>${value || '–'}</b></div>` : ''}
           <div class="bd-row"><span>Pages</span><b>${b.pages}</b></div>
           <h4>Sharing</h4>
           <p class="bd-mut">${b.is_public ? 'Anyone with the link can view this binder.' : 'Private: only you can see it.'}${b.kind === 'trade' && b.is_public && !b.contact_wa && !b.contact_ig ? ' Add your WhatsApp or Instagram in Settings so buyers can reach you.' : ''}</p>
@@ -357,7 +411,7 @@
   function openPhoto(s, b){
     if(!isX(s)) return;
     const trade = b && b.kind === 'trade';
-    const price = !trade ? '' : (s.sold ? 'Sold' : (s.price != null && s.price !== '' && b.show_prices !== false) ? fmtRp(+s.price) + (s.nego ? ' · nego' : '') : (s.nego ? 'Make offer' : ''));
+    const price = !trade ? '' : (s.sold ? 'Sold' : (s.price != null && s.price !== '' && b.show_prices !== false) ? fmtMoney(+s.price, curOf(s)) + (s.nego ? ' · nego' : '') : (s.nego ? 'Make offer' : ''));
     const row = (k, v) => v ? `<div class="bd-row"><span>${k}</span><b>${E(v)}</b></div>` : '';
     mxOpen(`<h3>📷 ${E(xName(s))}</h3>
       <div class="bx-view"><div class="bx-img${s.sold ? ' sold' : ''}">${s.ph ? `<img alt="${E(xName(s))}" src="${E(purl(s.ph))}" onerror="this.classList.add('failed')">` : `<span class="bp-xph">${s.pd ? '<i>Photo removed after sale</i>' : '<i>📷</i>'}<b>${E(xName(s))}</b></span>`}</div>
@@ -498,7 +552,7 @@
               <label class="bd-f"><span>Rarity</span><input id="bxRar" maxlength="12" list="bxRarList" value="${E(d.rar||'')}" placeholder="e.g. SR, UR, SEC"></label>
               <label class="bd-f"><span>Set</span><input id="bxSet" maxlength="16" list="bxSetList" value="${E(d.set||'')}" placeholder="e.g. SP01, LP01, Promo"></label>
               <label class="bd-f"><span>${trade ? 'Quantity for sale' : 'Quantity'}</span><input id="bsQty" type="number" min="1" max="99" inputmode="numeric" value="${d.q||1}"></label>
-              ${trade ? `<label class="bd-f"><span>Price (Rp, optional)</span><input id="bsPrice" inputmode="numeric" autocomplete="off" placeholder="e.g. 150.000" value="${d.price != null && d.price !== '' ? fmtThou(d.price) : ''}"></label>
+              ${trade ? `${priceField(d)}
               <label class="bd-f"><span>Condition</span><select id="bsCond">${Object.entries(COND).map(([k2, l])=>`<option value="${k2}"${(d.cond||'NM')===k2?' selected':''}>${l}</option>`).join('')}</select></label>
               <label class="bd-chk"><input type="checkbox" id="bsNego"${d.nego ? ' checked' : ''}> Open to offers (nego)</label>
               <label class="bd-chk"><input type="checkbox" id="bsSold"${d.sold ? ' checked' : ''}> Sold</label>
@@ -525,7 +579,7 @@
             <div class="bs-grid">
               <label class="bd-f"><span>Version</span><select id="bsV">${vers}</select></label>
               <label class="bd-f"><span>${trade ? 'Copies for sale' : 'Copies'}</span><input id="bsQty" type="number" min="1" max="99" inputmode="numeric" value="${d.q||1}"></label>
-              ${trade ? `<label class="bd-f"><span>Price (Rp, optional)</span><input id="bsPrice" inputmode="numeric" autocomplete="off" placeholder="e.g. 150.000" value="${d.price != null && d.price !== '' ? fmtThou(d.price) : ''}"></label>
+              ${trade ? `${priceField(d)}
               <label class="bd-f"><span>Condition</span><select id="bsCond">${Object.entries(COND).map(([k2, l])=>`<option value="${k2}"${(d.cond||'NM')===k2?' selected':''}>${l}</option>`).join('')}</select></label>
               <label class="bd-chk"><input type="checkbox" id="bsNego"${d.nego ? ' checked' : ''}> Open to offers (nego)</label>
               <label class="bd-chk"><input type="checkbox" id="bsSold"${d.sold ? ' checked' : ''}> Sold</label>` : ''}
@@ -545,7 +599,8 @@
       const set = (k, val) => { if(val != null) P.d[k] = val; };
       set('nm', v('#bxName')); set('rar', v('#bxRar')); set('set', v('#bxSet')); set('note', v('#bsNote'));
       const q = v('#bsQty'); if(q != null) P.d.q = Math.max(1, Math.min(99, parseInt(q, 10) || 1));
-      const pr = v('#bsPrice'); if(pr != null){ const raw = pr.replace(/[^\d]/g, ''); P.d.price = raw ? Math.min(1e9, parseInt(raw, 10)) : null; }
+      const cu = v('#bsCur'); if(cu != null && CURS[cu]) P.d.cur = cu;
+      const pr = v('#bsPrice'); if(pr != null) P.d.price = parsePrice(pr, curOf(P.d));
       set('cond', v('#bsCond')); set('nego', ck('#bsNego')); set('sold', ck('#bsSold'));
     };
     let drag = null;
@@ -565,13 +620,17 @@
       if(e.target.id === 'bxZoom' && P.C){ P.C.zoom = +e.target.value || 1; drawCv(); }
       if(e.target.id === 'bxName'){ const er = body.querySelector('.bs-fields .bd-err'); if(er) er.remove(); }
       if(e.target.id === 'bsPrice'){
-        /* format ulang 150000 → 150.000 sambil menjaga posisi kursor (dihitung dari jumlah digit di kirinya) */
-        const el = e.target, pos = el.selectionStart == null ? el.value.length : el.selectionStart;
-        const digitsLeft = el.value.slice(0, pos).replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '').length;
-        const f = fmtThou(el.value);
+        /* format ulang (150000 → 150.000, atau 1250.5 → 1,250.5) sambil menjaga posisi kursor:
+           dihitung dari jumlah digit (dan titik desimal) di kiri kursor */
+        const el = e.target, cur = el.dataset.cur || 'IDR', dec = !!(CURS[cur] || CURS.IDR).dec;
+        const sig = dec ? /[\d.]/ : /\d/;
+        const pos = el.selectionStart == null ? el.value.length : el.selectionStart;
+        const left = el.value.slice(0, pos).split('').filter(ch=>sig.test(ch)).join('');
+        const leftCount = fmtPriceInput(left, cur).split('').filter(ch=>sig.test(ch)).length;
+        const f = fmtPriceInput(el.value, cur);
         if(f !== el.value){
           el.value = f;
-          let p = 0, seen = 0; while(p < f.length && seen < digitsLeft){ if(/\d/.test(f[p])) seen++; p++; }
+          let p = 0, seen = 0; while(p < f.length && seen < leftCount){ if(sig.test(f[p])) seen++; p++; }
           try{ el.setSelectionRange(p, p); }catch(er){}
         }
       }
@@ -579,9 +638,9 @@
     /* v7.11: hapus melewati titik pemisah ribuan → yang terhapus digit di sebelahnya */
     box.addEventListener('beforeinput', e=>{
       const el = e.target; if(el.id !== 'bsPrice' || el.selectionStart !== el.selectionEnd) return;
-      const pos = el.selectionStart;
-      if(e.inputType === 'deleteContentBackward' && pos > 0 && el.value[pos - 1] === '.') el.setSelectionRange(pos - 1, pos - 1);
-      if(e.inputType === 'deleteContentForward' && el.value[pos] === '.') el.setSelectionRange(pos + 1, pos + 1);
+      const pos = el.selectionStart, th = (CURS[el.dataset.cur] || CURS.IDR).th;
+      if(e.inputType === 'deleteContentBackward' && pos > 0 && el.value[pos - 1] === th) el.setSelectionRange(pos - 1, pos - 1);
+      if(e.inputType === 'deleteContentForward' && el.value[pos] === th) el.setSelectionRange(pos + 1, pos + 1);
     });
     /* geser foto di bingkai (mouse & sentuh) */
     box.addEventListener('pointerdown', e=>{
@@ -597,6 +656,11 @@
     box.addEventListener('pointerup', endDrag); box.addEventListener('pointercancel', endDrag);
     box.addEventListener('change', e=>{
       if(e.target.id === 'bsSrc'){ P.src = e.target.value; body.querySelector('#bsRes').innerHTML = results(); }
+      if(e.target.id === 'bsCur'){
+        const inp = body.querySelector('#bsPrice'); const nc = CURS[e.target.value] ? e.target.value : 'IDR';
+        if(inp){ const n = parsePrice(inp.value, inp.dataset.cur || 'IDR'); inp.dataset.cur = nc; inp.placeholder = 'e.g. ' + CURS[nc].ex; inp.value = priceToInput(n, nc); }
+        if(P.d) P.d.cur = nc;
+      }
       if(e.target.id === 'bxFile'){
         const f = e.target.files && e.target.files[0]; if(!f) return;
         const lbl = body.querySelector('.bx-drop b'); if(lbl) lbl.textContent = 'Opening photo…';
@@ -623,7 +687,7 @@
         const c = card(pk.dataset.bspick);
         let v = '';
         if(P.src === 'own'){ const r = c.ra.find(r=>collQtyV(c, r) > 0); if(r) v = r === c.ra[0] ? '' : r; }
-        P.d = { sid: rid(), no:c.no, v, q: (P.d && P.d.q) || 1, cond:(P.d && P.d.cond) || 'NM', nego: P.d ? !!P.d.nego : false, price: P.d ? P.d.price : null, note: P.d ? (P.d.note || '') : '', sold:false };
+        P.d = { sid: rid(), no:c.no, v, q: (P.d && P.d.q) || 1, cond:(P.d && P.d.cond) || 'NM', nego: P.d ? !!P.d.nego : false, price: P.d ? P.d.price : null, cur: P.d ? P.d.cur : undefined, note: P.d ? (P.d.note || '') : '', sold:false };
         dropPend(); P.step = 'form'; draw(); return;
       }
       const z = e.target.closest('[data-bszoom]'); if(z){ openLightbox(z.dataset.bszoom); return; }
@@ -671,8 +735,10 @@
         if(d.x){ saveX(a, val, chk); return; }
         const out = { sid: d.sid || rid(), no:d.no, v: val('#bsV'), q: Math.max(1, Math.min(99, parseInt(val('#bsQty'), 10) || 1)) };
         if(b.kind === 'trade'){
-          const raw = val('#bsPrice').replace(/[^\d]/g, '');
-          out.price = raw ? Math.min(1e9, parseInt(raw, 10)) : null;
+          const cur = CURS[val('#bsCur')] ? val('#bsCur') : 'IDR';
+          out.price = parsePrice(val('#bsPrice'), cur);
+          if(out.price != null && cur !== 'IDR') out.cur = cur;
+          rememberCur(cur);
           out.nego = chk('#bsNego'); out.cond = val('#bsCond') || 'NM'; out.sold = chk('#bsSold');
         }
         const note = val('#bsNote').trim().slice(0, 80); if(note) out.note = note;
@@ -691,8 +757,10 @@
       const rar = val('#bxRar').trim().slice(0, 12); if(rar) out.rar = rar;
       const set = val('#bxSet').trim().slice(0, 16); if(set) out.set = set;
       if(trade){
-        const raw = val('#bsPrice').replace(/[^\d]/g, '');
-        out.price = raw ? Math.min(1e9, parseInt(raw, 10)) : null;
+        const cur = CURS[val('#bsCur')] ? val('#bsCur') : 'IDR';
+        out.price = parsePrice(val('#bsPrice'), cur);
+        if(out.price != null && cur !== 'IDR') out.cur = cur;
+        rememberCur(cur);
         out.nego = chk('#bsNego'); out.cond = val('#bsCond') || 'NM'; out.sold = chk('#bsSold');
       }
       const note = val('#bsNote').trim().slice(0, 80); if(note) out.note = note;
@@ -803,7 +871,7 @@
       const vl = isX(s) ? (s.rar ? ` (${s.rar})` : '') : (s.v && s.v !== c.ra[0]) ? ` (${vLabel(c, s.v)})` : '';
       let price = '';
       if(b.kind === 'trade'){
-        if(s.price != null && s.price !== '' && b.show_prices !== false) price = ` — ${fmtRp(+s.price)}${s.nego ? ' (nego)' : ''}`;
+        if(s.price != null && s.price !== '' && b.show_prices !== false) price = ` — ${fmtMoney(+s.price, curOf(s))}${s.nego ? ' (nego)' : ''}`;
         else if(s.nego) price = ' — make an offer';
       }
       if(isX(s)) return `• ${s.set ? s.set + ' ' : ''}${xName(s)}${vl} ×${s.q||1}${price}`;
@@ -1168,7 +1236,7 @@
       let price = '', nego = false, muted = false;
       if(trade){
         const has = s.price != null && s.price !== '' && opt.prices;
-        if(has){ price = shortRp(+s.price); nego = !!s.nego; }
+        if(has){ price = shortMoney(+s.price, curOf(s)); nego = !!s.nego; }
         else if(s.nego){ price = 'Make offer'; muted = true; }
       }
       if(vl || price){

@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.11** · 24 Oktober 2026
+**Versi saat ini: v7.12** · 25 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -588,6 +588,38 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.12 — Binders: pilihan mata uang harga (Rp, SGD, RM, THB, HKD) — 25 Oktober 2026 *(`index.html`, `binders-ui.js`, migrasi SQL baru `mhr_decklab_v712_binder_currency.sql` di folder internal)*
+
+Permintaan pemilik: pilihan mata uang saat mengisi Price di binder For sale / trade.
+- Kolom Price di form kantong (kartu database & kartu foto) sekarang punya pilihan mata uang di sebelah kiri:
+  **Rp** Rupiah (Indonesia, default), **SGD** Dollar (Singapore), **RM** Ringgit (Malaysia), **THB** Baht (Thailand),
+  **HKD** Dollar (Hong Kong). Per kantong, jadi satu binder boleh campur.
+- Format saat mengetik: Rp tanpa desimal dengan titik ribuan (`150.000`); mata uang lain koma ribuan + titik desimal
+  maks 2 angka (`1,250.50`, `.5` → `0.5`). Ganti mata uang memformat ulang angka yang sudah diketik; placeholder ikut
+  berubah. Backspace/Delete di sebelah pemisah ribuan menghapus digit di sebelahnya (v7.11) untuk semua mata uang.
+- Disimpan di kantong sebagai `cur` (kode ISO `SGD`/`MYR`/`THB`/`HKD`; IDR tidak ditulis, jadi kantong lama otomatis
+  Rupiah) dan `price` angka (boleh desimal untuk non-Rupiah). Mata uang terakhir yang dipakai jadi default kantong baru
+  (`localStorage` `mhr_bd_cur`).
+- Tampilan: kantong `Rp150k` / `SGD 25.50` / `RM 45` / `THB 1.2k`; tabel, jendela foto, teks WhatsApp memakai format
+  lengkap (`Rp150.000`, `SGD 25.50`); gambar IG/TikTok memakai format pendek; **Listed value** dijumlah per mata uang
+  (`Rp150.000 + SGD 25.50 + RM 45`).
+- **Supabase (riwayat penjualan internal):** `binder_sales` dapat kolom `currency` (default `IDR`), `price` jadi
+  `numeric(16,2)` (desimal tidak dibulatkan), trigger `binders_sales_log` ikut mencatat mata uang. **Sudah dijalankan
+  di Supabase produksi 25 Okt 2026** atas persetujuan pemilik (uji coba di-rollback dulu: SGD 25.50, IDR 150000.00,
+  MYR 45.00, kode tak dikenal → IDR; lalu dicek: kolom `currency` default `IDR`, `price numeric(16,2)`, trigger aktif).
+
+**Artikel Berita** (25 Okt 2026): 7 gambar artikel baru sudah live (`*-v2.jpg` + `photo-cards.jpg`, tanpa konten
+"spare") dan bagian "Card Not Listed Yet? Add a Photo" ditambahkan. Mata uang belum disebut di artikel (tunggu v7.12 live).
+
+Cache-buster: `binders-ui.js?v=7.12`. Versi 7.12 (komentar, meta, footer).
+
+**Verifikasi:** Playwright HP 390 px: pilihan `Rp* SGD RM THB HKD`, Rp `150000` → `150.000`, ganti ke SGD → `150,000`
+(placeholder `e.g. 25.50`), SGD `1250.505` → `1,250.50`, Backspace setelah koma → `250.50`, `.5` → `0.5`, tersimpan
+`{price:25.5, cur:"SGD"}` dan Rupiah tanpa `cur`, kantong baru default SGD (diingat), RM 45; bar kantong `Rp150k · SGD
+25.50 · RM 45`, tabel benar, Listed value `Rp150.000 + SGD 25.50 + RM 45`, buka lagi → SGD `25.5`, gambar Post
+1080×1350; tanpa error JS. Migrasi diuji di PostgreSQL 16 lokal (2× jalan = idempotent): SGD 25.50, IDR 150000.00,
+MYR 45.00, kode tak dikenal → IDR.
 
 ### v7.11 — Binders: kolom Price otomatis memakai pemisah ribuan — 24 Oktober 2026 *(`index.html`, `binders-ui.js`)*
 
