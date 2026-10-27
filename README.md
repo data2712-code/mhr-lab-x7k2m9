@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.12** · 25 Oktober 2026
+**Versi saat ini: v7.13** · 27 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -38,6 +38,8 @@ mhr-lab-x7k2m9/
 ├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.89; TIDAK dimuat sejak v7.05, disimpan untuk kampanye berikutnya)
 ├── binders.js         ← servis Supabase binder kartu 3×3 (v7.06, tanpa DOM)
 ├── binders-ui.js      ← tab Binders di My Dashboard + halaman publik #binder/<kode> (v7.06)
+├── perf.js            ← servis Supabase Performance Analytics: catatan match + daftar archetype (v7.13, tanpa DOM)
+├── perf-ui.js         ← tab Performance di My Dashboard: catat match, statistik, admin daftar archetype (v7.13)
 ├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
 ├── sitemap.xml           ← SEO: sitemap untuk Google Search Console (sejak v6.21)
 ├── robots.txt            ← SEO: izinkan semua crawler + rujuk ke sitemap.xml (sejak v6.21)
@@ -588,6 +590,45 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.13 — Performance Analytics Tahap 1: catat match & statistik di My Dashboard — 27 Oktober 2026 *(`index.html`, berkas BARU `perf.js` & `perf-ui.js`, migrasi SQL baru `mhr_decklab_v713_performance.sql` di folder internal)*
+
+Permintaan pemilik: fitur untuk mencatat hasil pertandingan deck sendiri, dari casual sampai turnamen besar, dengan konsep
+seperti trainingcourt.app (input menang/kalah berdasarkan deck lawan). Analisa + simulasi disetujui 27 Okt 2026 dengan
+keputusan: **deck lawan dari daftar kurasi admin + "Other"**, **Tahap 1 = inti dulu**, data komunitas nanti **opt-in & anonim**.
+- **Tab ke-4 "📈 Performance"** di My Dashboard (`#dashPanelPerf > #perfWrap`). Kotak tab menampilkan win rate sepanjang
+  waktu + jumlah match. Tab terakhir tetap diingat (`mhr_dash_tab` sekarang bisa `perf`). Di HP kotak tab jadi 2×2.
+- **Catat match** (modal): deck sendiri (deck akun, urut terakhir diubah; atau ketik nama deck yang tidak tersimpan), tanggal,
+  Casual / Store (Weekly Rush) / Tournament, deck lawan (tile bergambar dari daftar archetype, yang terakhir dilawan di depan,
+  kotak cari muncul kalau daftar > 8; atau **Other** + maks 2 warna + nama opsional), Best of 1 / Best of 3, nama lawan
+  (opsional, hanya terlihat pemilik), catatan. **Per game:** Win / Loss / Draw, **1st / 2nd** (siapa jalan duluan — penting
+  di MHR karena pemain pertama hanya 1 CALL & tanpa Battle Phase di giliran pertamanya), dan cara game berakhir
+  (9 Rush Points, Card effect, Deck out, Concede, Time). Bo3: game 3 otomatis disembunyikan kalau 2-0; default giliran game
+  berikutnya = yang kalah jalan duluan (bisa diganti). Deck, tempat & format terakhir diingat (`mhr_perf_last`).
+- **Statistik** (dihitung di browser): Matches (W-L-D), match win rate (menang ÷ match; seri = bukan menang), game win rate,
+  win rate jalan 1st vs 2nd (per game), streak, 3 insight otomatis (matchup terbaik/terburuk minimal 5 match, giliran minimal
+  10 game per sisi), per deck, cara game berakhir, **tabel matchup** (urut jumlah / win rate; < 5 match dipudarkan + "few";
+  warna sel biru ≥ 60%, abu-abu, merah ≤ 40%), match terakhir (10 + "Show all") dengan ✏️ edit & 🗑 hapus.
+  Filter: deck, 30 / 90 hari / semua (diingat `mhr_perf_filter`), konteks. **⬇ CSV** = match di filter aktif.
+- **My Decks ⋯ → "📈 Log a match with this deck"** membuka form dengan deck itu terpilih.
+- **Admin:** kelola daftar deck lawan di bawah tab Performance (nama, 1–2 warna, kartu kunci sebagai gambar, alias untuk
+  pencarian, urutan, tampil/tidak). Menyembunyikan/menghapus archetype tidak merusak log lama (nama disalin ke `opp_label`).
+- **Daftar awal archetype** = kombinasi warna yang muncul di Tournament Decks (saat ini semua deck turnamen dinamai per
+  warna): Red Blue, Red Green, Yellow Green, Blue Green, Red Yellow, Yellow Blue, + Orange & Purple (SD05/SD06).
+  Pemilik/admin bisa mengganti nama atau memecah (mis. "Red Blue Aggro") kapan saja lewat panel admin.
+- **Supabase** (`mhr_decklab_v713_performance.sql`): tabel `match_archetypes` (baca: semua; tulis: admin) & `match_logs`
+  (pribadi: hanya pemilik; admin hanya bisa membaca). Trigger `match_logs_guard` memvalidasi `games`, menghitung `result`
+  sendiri (klien tidak bisa memalsukan), menyalin nama archetype, melepas `deck_id` milik akun lain, menolak tanggal masa
+  depan. Snapshot `deck_code` disimpan per match (riwayat tetap utuh kalau deck diedit/dihapus — siap untuk statistik per
+  versi deck nanti). Batas 5.000 match per akun. GRANT eksplisit (anon hanya SELECT archetype).
+  **⚠ Migrasi ini harus dijalankan di Supabase sebelum/saat versi ini di-push** — tanpa itu tab Performance menampilkan
+  "Performance isn't switched on yet on this site." (tidak error).
+- Dicek: 66 tes Playwright dengan backend palsu (alur catat Bo1/Bo3/Other, validasi, edit, hapus, filter, CSV, angka statistik
+  dicocokkan dengan hitungan terpisah, admin archetype, menu My Decks, HP 390 px tanpa scroll samping, tab lain tidak
+  berubah, tanpa error JS) + tes SQL di PostgreSQL 16 lokal (RLS antar akun, spoof owner/result, validasi game, GRANT).
+- **Tahap 2 (belum):** Tournament runs (ronde + placement), import hasil dari Events, share hasil run sebagai gambar Story,
+  grafik tren, detail matchup. **Tahap 3:** data matchup komunitas (opt-in, anonim, minimal 20 game per sel), statistik per
+  versi deck.
 
 ### Data — Jadwal Weekly Rush LGS: Arc Entry (Kuningan) pindah ke Sabtu 14:00 — 25 Oktober 2026 *(`data.js`, `index.html`)*
 

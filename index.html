@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.12  ·  25 Oktober 2026
+     MHR DECK LAB  ·  versi 7.13  ·  27 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.12">
+<meta name="version" content="7.13">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1800,7 +1800,7 @@
     -webkit-appearance:none;margin:0}
   .coll-qty-input{-moz-appearance:textfield}
   /* ===== v7.05 — My Dashboard v2: tab ringkasan, My Decks grid/list, koleksi per set + per versi ===== */
-  .dt-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px;
+  .dt-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px;
     padding-bottom:14px;border-bottom:1px solid var(--line);max-width:1140px}
   .dt-tab{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px;cursor:pointer;
     text-align:left;color:var(--paper);font:inherit;display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:baseline}
@@ -1919,7 +1919,7 @@
   .coll-vrow .coll-qty-input{width:40px;padding:2px}
   .coll-vrow .qbtn{width:20px;height:20px;flex:none}
   @media (max-width:640px){
-    .dt-tabs{gap:6px;margin-top:12px}
+    .dt-tabs{gap:6px;margin-top:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
     .dt-tab{padding:8px 10px}
     .dt-k{font-size:9.5px;letter-spacing:.04em}
     .dt-v{font-size:20px}
@@ -2165,6 +2165,155 @@
     .bx-crop,.bx-view{grid-template-columns:1fr}
     .bx-frame,.bx-img{max-width:260px;width:100%;margin:0 auto}
   }
+  /* v7.13 — Performance Analytics (perf-ui.js) */
+  #perfWrap{--pf-fav:#3987e5;--pf-unf:#e66767;--pf-mid:#383835}
+  .pf-tool{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .pf-tool select{background:var(--panel);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px}
+  .pf-tool .btn2{flex:none;padding:8px 14px}
+  .pf-tool .btn2.main,.pf-empty .btn2.main{background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:800}
+  .pf-chips{display:flex;gap:6px;flex-wrap:wrap}
+  .pf-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+  .pf-kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 13px;display:flex;flex-direction:column;gap:3px;min-width:0}
+  .pf-kpi .k{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+  .pf-kpi>b,.pf-split b{font-family:var(--disp);font-size:28px;line-height:1.05}
+  .pf-kpi small{font-size:11.5px;color:var(--muted)}
+  .pf-kpi small b{color:var(--paper)}
+  .pf-split{display:grid;grid-template-columns:1fr 1fr;column-gap:8px}
+  .pf-split .k{grid-column:1/-1}
+  .pf-split div{display:flex;flex-direction:column;gap:2px}
+  .pf-split b{font-size:24px}
+  .pf-insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}
+  .pf-ins{background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:9px 12px;font-size:12.5px;line-height:1.45;color:#C3C8CF}
+  .pf-ins b{color:var(--paper)}
+  .pf-ins>span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:800;margin-bottom:2px}
+  .pf-ins.bad{border-left-color:var(--pf-unf)} .pf-ins.bad>span{color:#f1a3a3}
+  .pf-ins.info{border-left-color:var(--pf-fav)} .pf-ins.info>span{color:#9cc6f5}
+  .pf-grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-top:12px}
+  .pf-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-top:12px;min-width:0}
+  .pf-grid2 .pf-card{margin-top:0}
+  .pf-card h4{font-size:12.5px;letter-spacing:.07em;text-transform:uppercase;color:#C3C8CF;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .pf-card h4 small{text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)}
+  .pf-th{width:38px;height:38px;border-radius:8px;object-fit:cover;object-position:50% 18%;border:1px solid var(--line);background:var(--panel2);flex:none;display:block}
+  .pf-th-x{display:grid;place-items:center;color:var(--muted);font-weight:700}
+  .pf-dots{display:inline-flex;gap:3px;vertical-align:middle}
+  .pf-dots i{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .pf-drow{display:grid;grid-template-columns:38px minmax(0,1fr) 110px 52px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+  .pf-drow:first-of-type{border-top:0}
+  .pf-dn{min-width:0}
+  .pf-dn b{font-size:13.5px}
+  .pf-dn small{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+  .pf-bar{height:8px;background:var(--ink);border-radius:9px;overflow:hidden;position:relative;display:block}
+  .pf-bar i{position:absolute;left:0;top:0;bottom:0;background:var(--pf-fav);border-radius:9px}
+  .pf-bar:after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:#566274}
+  .pf-wr{font-family:var(--disp);font-size:19px;text-align:right}
+  .pf-end{display:grid;grid-template-columns:78px 1fr;gap:8px;align-items:center;margin-top:8px;font-size:12px;color:var(--muted)}
+  .pf-end div{display:flex;gap:2px;height:22px;border-radius:5px;overflow:hidden}
+  .pf-end i{display:grid;place-items:center;font-style:normal;font-size:10.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;min-width:3px}
+  .pf-end em{font-size:11.5px}
+  .pf-legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:11.5px;color:var(--muted);margin-top:10px}
+  .pf-legend i{display:inline-block;width:13px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .pf-tblwrap{overflow-x:auto}
+  .pf-tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  .pf-tbl th{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .pf-tbl th button{background:none;border:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer;padding:0}
+  .pf-tbl th button:hover{color:var(--accent)}
+  .pf-tbl td{padding:7px 8px;border-bottom:1px solid #232b36;vertical-align:middle;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .pf-tbl .r{text-align:right}
+  .pf-tbl tr.low{opacity:.55}
+  .pf-arch{display:flex;align-items:center;gap:9px}
+  .pf-arch b{font-size:13px}
+  .pf-arch small{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+  .pf-few{font-style:normal;font-size:10px;color:var(--muted);border:1px dashed #4a5564;border-radius:5px;padding:0 4px;margin-left:5px}
+  .pf-cell{display:inline-block;min-width:52px;text-align:center;border-radius:7px;padding:4px 6px;font-weight:700}
+  .pf-mrow{display:grid;grid-template-columns:30px 38px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #232b36}
+  .pf-res{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-family:var(--disp);font-size:16px;font-weight:700;border:1px solid var(--line)}
+  .pf-res.W{background:rgba(57,135,229,.18);color:#9cc6f5;border-color:#2d5d96}
+  .pf-res.L{background:rgba(230,103,103,.16);color:#f1a3a3;border-color:#8a3c3c}
+  .pf-res.D{background:#262d36;color:#C3C8CF}
+  .pf-mm{min-width:0}
+  .pf-mm b{font-size:13.5px}
+  .pf-mm small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis}
+  .pf-note{white-space:normal}
+  .pf-pips{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
+  .pf-pips i{font-style:normal;font-size:10px;font-family:var(--mono);border-radius:4px;padding:1px 4px;border:1px solid var(--line);color:#C3C8CF}
+  .pf-pips i.W{border-color:#2d5d96;color:#9cc6f5} .pf-pips i.L{border-color:#8a3c3c;color:#f1a3a3}
+  .pf-tag{font-size:10.5px;border:1px solid var(--line);border-radius:999px;padding:1px 7px;color:var(--muted);margin-left:6px;white-space:nowrap}
+  .pf-date{font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .pf-ma{display:flex;gap:4px}
+  .pf-ma .btn2{flex:none;padding:4px 7px;font-size:12px}
+  .pf-more{text-align:center;margin-top:10px}
+  .pf-more .btn2{flex:none;display:inline-block;padding:7px 16px;border-color:var(--accent);color:var(--accent)}
+  .pf-empty{background:var(--panel);border:1px dashed var(--line);border-radius:14px;padding:26px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .pf-empty h3{font-family:var(--disp);font-size:22px}
+  .pf-empty p{max-width:620px;color:#C3C8CF;font-size:13px;line-height:1.55}
+  .pf-empty .btn2{flex:none;padding:10px 18px}
+  /* form catat match */
+  .mx-box.pf-mx{max-width:640px}
+  .pf-form{display:flex;flex-direction:column;gap:12px}
+  .pf-form .bd-f em{font-style:normal;font-weight:400;color:var(--muted)}
+  .pf-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .pf-opps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .pf-opp{background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:6px;text-align:left;display:flex;gap:7px;align-items:center;font:inherit;font-size:12px;line-height:1.2;color:var(--paper);cursor:pointer;min-height:46px;min-width:0}
+  .pf-opp b{display:block;font-size:12px;overflow:hidden;text-overflow:ellipsis}
+  .pf-opp small{display:block;color:var(--muted);font-size:10.5px}
+  .pf-opp span{min-width:0}
+  .pf-opp[aria-pressed="true"]{border-color:var(--accent);background:rgba(242,176,30,.10)}
+  .pf-oimg{width:30px;height:30px;border-radius:7px;object-fit:cover;object-position:50% 18%;flex:none;background:var(--panel2)}
+  .pf-other{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+  .pf-cpick{display:flex;gap:6px;flex-wrap:wrap}
+  .pf-cpick button{background:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font:inherit;font-size:12px;color:var(--paper);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+  .pf-cpick button i{width:10px;height:10px;border-radius:50%}
+  .pf-cpick button[aria-pressed="true"]{border-color:var(--accent);background:rgba(242,176,30,.10)}
+  .pf-seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;flex:none;align-self:flex-start}
+  .pf-seg button{background:var(--ink);border:0;border-right:1px solid var(--line);padding:8px 12px;font:inherit;font-size:12.5px;font-weight:700;color:var(--paper);cursor:pointer}
+  .pf-seg button:last-child{border-right:0}
+  .pf-seg button[aria-pressed="true"]{background:var(--accent);color:#1A1206}
+  .pf-seg.res button[data-v="W"][aria-pressed="true"]{background:#2a78d6;color:#fff}
+  .pf-seg.res button[data-v="L"][aria-pressed="true"]{background:#d24b4b;color:#fff}
+  .pf-seg.res button[data-v="D"][aria-pressed="true"]{background:#5b6573;color:#fff}
+  .pf-seg.wide{display:flex;align-self:stretch}
+  .pf-seg.wide button{flex:1}
+  .pf-game{display:grid;grid-template-columns:58px auto auto minmax(0,1fr);gap:8px;align-items:center;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 9px;margin-top:6px}
+  .pf-game .pf-seg{align-self:center}
+  .pf-gl{font-weight:800;font-size:12px;color:#C3C8CF}
+  .pf-game select{background:var(--panel);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:7px;font:inherit;font-size:12.5px;min-width:0}
+  .pf-hint{font-size:11.5px;margin-top:4px;line-height:1.45}
+  .pf-err{color:#f1a3a3;font-size:12.5px;font-weight:700}
+  .pf-form .bd-btns .btn2{flex:none;padding:9px 16px}
+  .pf-form .bd-btns .btn2.main{background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:800}
+  .pf-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:70;background:#0b2a17;border:1px solid #1f6b3a;color:#bff0cf;padding:10px 16px;border-radius:10px;font-weight:700;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+  .pf-toast[hidden]{display:none}
+  /* admin daftar archetype */
+  .pf-atbl{border-collapse:collapse;font-size:12px;margin-top:8px;min-width:820px}
+  .pf-atbl th{font-size:10.5px;color:var(--muted);text-align:left;padding:4px 6px;text-transform:uppercase;letter-spacing:.06em}
+  .pf-atbl td{padding:4px 6px;border-top:1px solid var(--line);vertical-align:middle}
+  .pf-atbl input,.pf-atbl select{background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:6px;padding:5px 7px;font:inherit;font-size:12px;width:100%}
+  .pf-atbl input[type=checkbox]{width:auto}
+  .pf-acol{display:flex;gap:4px}
+  .pf-aact{display:flex;gap:4px}
+  .pf-aact .btn2{flex:none;padding:5px 9px;font-size:11.5px}
+  @media (max-width:760px){
+    .pf-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .pf-kpis .pf-kpi:first-child{grid-column:1/-1}
+    .pf-grid2{grid-template-columns:minmax(0,1fr)}
+    .pf-drow{grid-template-columns:38px minmax(0,1fr) 50px}
+    .pf-drow .pf-bar{display:none}
+    .pf-tbl .hm,.pf-tbl .pf-cn{display:none}
+    .pf-tbl td,.pf-tbl th{padding:7px 4px}
+    .pf-tbl .pf-cell{min-width:44px;padding:4px}
+    .pf-tbl .pf-arch b{white-space:normal}
+    .pf-mrow{grid-template-columns:30px 38px minmax(0,1fr) auto}
+    .pf-mrow .pf-ma{grid-column:3/-1;justify-content:flex-end}
+    .pf-opps{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .pf-row2{grid-template-columns:minmax(0,1fr)}
+    .pf-game{grid-template-columns:1fr auto}
+    .pf-game .pf-gl{grid-column:1/-1}
+    .pf-game select{grid-column:1/-1}
+    .pf-tool select{flex:1 1 140px}
+    .pf-chips{flex-wrap:nowrap;overflow-x:auto;width:100%;padding-bottom:2px}
+    .pf-tool .bd-sp{display:none}
+    .pf-tool .btn2.main{flex:1}
+  }
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -2266,13 +2415,13 @@
   <div class="dash-wrap">
     <div class="dash-head">
       <h2 data-i18n="dashHead">🗂 Dashboard Saya</h2>
-      <p data-i18n="dashIntro">Deck yang tersimpan di akunmu, dan koleksi kartu yang sudah kamu punya.</p>
+      <p data-i18n="dashIntro">Deck yang tersimpan di akunmu, koleksi kartu, binder, dan hasil pertandinganmu.</p>
     </div>
     <p class="auth-note" id="dashLoginHint" data-i18n="dashLoginHint">Masuk ke akun untuk melihat deck tersimpan dan koleksi kartumu.</p>
     <button class="btn2 main" id="dashLoginBtn" style="max-width:220px" data-i18n="dashLoginBtn">👤 Masuk / Daftar</button>
     <div id="dashLoggedIn" hidden>
       <!-- v7.05 — tab dashboard: kotak ringkasan sekaligus tombol tab (My Decks / Card Collection).
-           v7.06: + Binders. Tab terakhir diingat di localStorage (DASH_TAB_KEY). -->
+           v7.06: + Binders. v7.13: + Performance (perf-ui.js). Tab terakhir diingat di localStorage (DASH_TAB_KEY). -->
       <div class="dt-tabs" id="dashTabs" role="tablist">
         <button class="dt-tab" data-dtab="decks" role="tab" aria-selected="true">
           <span class="dt-k">☁️ My Decks</span><span class="dt-v" id="dtDecksV">–</span><span class="dt-s" id="dtDecksS">decks</span></button>
@@ -2281,6 +2430,8 @@
           <span class="dt-bar"><i id="dtCollBar"></i></span></button>
         <button class="dt-tab" data-dtab="bind" role="tab" aria-selected="false">
           <span class="dt-k">📒 Binders</span><span class="dt-v" id="dtBindV">–</span><span class="dt-s" id="dtBindS">binders</span></button>
+        <button class="dt-tab" data-dtab="perf" role="tab" aria-selected="false">
+          <span class="dt-k">📈 Performance</span><span class="dt-v" id="dtPerfV">–</span><span class="dt-s" id="dtPerfS">win rate</span></button>
       </div>
 
       <div class="dt-panel" id="dashPanelDecks">
@@ -2319,6 +2470,8 @@
 
       <!-- v7.06 — Binders (binders-ui.js) -->
       <div class="dt-panel" id="dashPanelBind" hidden><div id="bindWrap"></div></div>
+      <!-- v7.13 — Performance Analytics (perf-ui.js) -->
+      <div class="dt-panel" id="dashPanelPerf" hidden><div id="perfWrap"></div></div>
     </div>
   </div>
 </section>
@@ -2683,6 +2836,9 @@
 <script src="events-ui.js?v=7.05"></script>
 <script src="binders.js?v=7.10"></script>
 <script src="binders-ui.js?v=7.12"></script>
+<!-- v7.13 — Performance Analytics (Tahap 1): servis match_logs/match_archetypes (perf.js) + tab Performance (perf-ui.js) -->
+<script src="perf.js?v=7.13"></script>
+<script src="perf-ui.js?v=7.13"></script>
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
@@ -2711,7 +2867,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.12</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.13</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -4364,7 +4520,7 @@ const T = {
   navDashboard: 'My Dashboard',
   navDashboardS: 'Dashboard',
   dashHead: '🗂 My Dashboard',
-  dashIntro: 'Your saved decks and the cards you own, saved to your account.',
+  dashIntro: 'Your saved decks, your card collection, your binders and your match results.',
   dashLoginHint: 'Log in to see your saved decks and card collection.',
   dashLoginBtn: '👤 Log In / Sign Up',
   dashDeckHead: '☁️ My Decks',
@@ -7987,6 +8143,7 @@ async function renderDashboardPage(){
   if(body) body.hidden = !loggedIn;
   if(!loggedIn) return;
   if(window.MHRBindersUI && dashTab !== 'bind') window.MHRBindersUI.refresh();   // v7.06 — angka di kotak Binders
+  if(window.MHRPerfUI && dashTab !== 'perf') window.MHRPerfUI.refresh();         // v7.13 — angka di kotak Performance
   setDashTab(dashTab);   // v7.05
   if(window.MHRUI && window.MHRUI.renderCloudList) window.MHRUI.renderCloudList();
   renderCollectionGrid();
@@ -8052,7 +8209,7 @@ let collSet = null;                  // kode set terpilih, 'ALL' = semua set
 const collOpenV = new Set();         // nomor kartu yang panel "Versions"-nya sedang terbuka
 let dashTab = 'decks';
 try{ collSet = localStorage.getItem(COLL_SET_KEY) || null; }catch(e){}
-try{ const v = localStorage.getItem(DASH_TAB_KEY); if(v === 'decks' || v === 'coll' || v === 'bind') dashTab = v; }catch(e){}
+try{ const v = localStorage.getItem(DASH_TAB_KEY); if(v === 'decks' || v === 'coll' || v === 'bind' || v === 'perf') dashTab = v; }catch(e){}
 
 function collKey(c, r){ return (!r || r === c.ra[0]) ? c.no : `${c.no}_${r}`; }
 function collQtyV(c, r){ return collMap[collKey(c, r)] || 0; }
@@ -8220,7 +8377,7 @@ function collCopyList(kind, btn){
 }
 
 function setDashTab(tab){
-  dashTab = (tab === 'coll' || tab === 'bind') ? tab : 'decks';
+  dashTab = (tab === 'coll' || tab === 'bind' || tab === 'perf') ? tab : 'decks';
   try{ localStorage.setItem(DASH_TAB_KEY, dashTab); }catch(e){}
   document.querySelectorAll('[data-dtab]').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.dtab === dashTab)));
   const pd = $('#dashPanelDecks'), pc = $('#dashPanelColl');
@@ -8229,6 +8386,9 @@ function setDashTab(tab){
   const pb = $('#dashPanelBind');                      // v7.06
   if(pb) pb.hidden = dashTab !== 'bind';
   if(dashTab === 'bind' && window.MHRBindersUI) window.MHRBindersUI.renderTab();
+  const pp = $('#dashPanelPerf');                      // v7.13
+  if(pp) pp.hidden = dashTab !== 'perf';
+  if(dashTab === 'perf' && window.MHRPerfUI) window.MHRPerfUI.renderTab();
 }
 if($('#dashTabs')) $('#dashTabs').addEventListener('click', e=>{
   const b = e.target.closest('[data-dtab]'); if(b) setDashTab(b.dataset.dtab);
@@ -9882,6 +10042,7 @@ window.addEventListener('hashchange', ()=>{
       <button type="button" data-act="hist" role="menuitem">${escHtml(t('histTitle'))}</button>
       <button type="button" data-act="cmp" role="menuitem">⇄ Compare with my active deck</button>
       <button type="button" data-act="view" role="menuitem">👁 Preview deck</button>
+      <button type="button" data-act="perf" role="menuitem">📈 Log a match with this deck</button>
       <button type="button" data-act="del" role="menuitem" class="red">🗑 ${escHtml(t('cloudDeleteBtn'))}</button>
     </div>`;
   }
@@ -9983,6 +10144,7 @@ window.addEventListener('hashchange', ()=>{
     if(dk.menu){ dk.menu = null; dkRender(); }
     if(act === 'view'){ if(x && Object.keys(x.deck).length) openDeckView({...x.deck}, x.row.name); return; }
     if(act === 'cmp'){ if(x) openCompare(x.deck, x.row.name); return; }
+    if(act === 'perf'){ if(window.MHRPerfUI) window.MHRPerfUI.openLog({ deckId:id }); return; }   // v7.13
     if(btn.dataset.act === 'hist'){
       /* v6.97 — buka riwayat versi deck ini (dijadikan deck aktif dulu) */
       await chain;
