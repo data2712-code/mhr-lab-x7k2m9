@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.13** · 27 Oktober 2026
+**Versi saat ini: v7.14** · 27 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -38,8 +38,8 @@ mhr-lab-x7k2m9/
 ├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.89; TIDAK dimuat sejak v7.05, disimpan untuk kampanye berikutnya)
 ├── binders.js         ← servis Supabase binder kartu 3×3 (v7.06, tanpa DOM)
 ├── binders-ui.js      ← tab Binders di My Dashboard + halaman publik #binder/<kode> (v7.06)
-├── perf.js            ← servis Supabase Performance Analytics: catatan match + daftar archetype (v7.13, tanpa DOM)
-├── perf-ui.js         ← tab Performance di My Dashboard: catat match, statistik, admin daftar archetype (v7.13)
+├── perf.js            ← servis Supabase Performance Analytics: catatan match, daftar archetype, tournament runs (v7.13–v7.14, tanpa DOM)
+├── perf-ui.js         ← tab Performance di My Dashboard: catat match, statistik, tren, runs, import Events, share gambar run (v7.13–v7.14)
 ├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
 ├── sitemap.xml           ← SEO: sitemap untuk Google Search Console (sejak v6.21)
 ├── robots.txt            ← SEO: izinkan semua crawler + rujuk ke sitemap.xml (sejak v6.21)
@@ -590,6 +590,48 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.14 — Performance Analytics Tahap 2: Tournament runs, import dari Events, share gambar, tren & detail matchup — 27 Oktober 2026 *(`index.html`, `perf.js`, `perf-ui.js`, migrasi SQL baru `mhr_decklab_v714_performance_runs.sql` di folder internal)*
+
+Lanjutan v7.13 sesuai rencana yang disetujui pemilik ("kerjakan tahap 2").
+- **🏆 Tournament runs** — kartu baru di tab Performance + tombol "🏆 New run". Satu run = satu turnamen / event:
+  nama, tanggal, toko/venue (saran dari daftar Weekly Rush LGS), Store / Tournament / Casual, deck, Best of 1/3, jumlah
+  pemain, placement (saran: 1st, 2nd, Top 4/8/16/32, Swiss only, Dropped), jumlah bye, catatan. Modal run menampilkan
+  rekor Swiss (+ bye, + rekor Top cut), placement, semua ronde (R1, R2 … dan Top cut berlabel Quarterfinal / Semifinal /
+  Final) dengan ✏️/🗑 per ronde, tombol ＋ Add round (form catat match versi ronde: deck/tanggal/format ikut run, nomor
+  ronde otomatis, centang "Top cut round", tombol Back ke run), ✏️ Edit run, 🗑 Delete run (ronde ikut terhapus).
+  Ronde tetap dihitung di semua statistik; di daftar match terakhir diberi tag "🏆 R2 · nama run" (klik = buka run).
+- **🏟 Import dari Events** — kalau akun ini ikut event di halaman Events (terdaftar dengan akun, bukan tamu) dan event
+  sudah *finished*, muncul banner "Import". Import membuat run berisi: nama & tanggal event, toko, jumlah pemain,
+  **placement** (dari `MHRSwiss.finalPlacements`, atau "Dropped"), jumlah bye, deck (decklist pemain sendiri di event;
+  kalau isinya sama dengan deck di akun, ditautkan ke deck itu), dan setiap ronde (hasil, skor game Bo3, nama lawan,
+  Top cut). Deck lawan ditebak dari nama deck yang diisi lawan saat daftar (nama/alias archetype, lalu kata warna seperti
+  "Red Green"); kalau tidak bisa, ronde ditandai "Opponent deck not set" dan modal run mengingatkan untuk mengisinya.
+  Giliran & cara berakhir tidak dicatat Events → disimpan sebagai **tidak diketahui** (`f:null`, `e:'unk'` "Not
+  recorded"), tidak dihitung di statistik 1st/2nd sampai diisi. Satu event hanya bisa di-import sekali per akun (unik di DB).
+  Decklist lawan TIDAK pernah dibaca.
+- **📤 Share run sebagai gambar** — canvas Story 9:16 (1080×1920, aman zona IG/TikTok) atau Post 4:5 (1080×1350): logo,
+  chip placement, tanggal · pemain · toko, nama event, rekor Swiss besar + bye + Top cut, kotak deck (gambar kartu Lv
+  tertinggi + warna), daftar ronde (gambar kartu kunci archetype lawan, hasil + skor game), footer mhrdecklab.com + baris
+  hak cipta. Opsi: tampilkan deck (default nyala), tampilkan nama lawan (default **mati**). Unduh, atau Share ke
+  Instagram / WhatsApp di HP (Web Share API). Isi gambar otomatis di tengah kalau rondenya sedikit.
+- **📈 Win rate over time** — grafik garis rata-rata 10 match terakhir (muncul setelah ≥ 5 match di filter), garis 50%,
+  label bulan, tooltip saat hover / sentuh. Lebar SVG mengikuti lebar kartu supaya teks sumbu tetap terbaca.
+- **Detail matchup** — klik (atau Enter) baris tabel Matchups: rekor, win rate, 1st/2nd, per deck, cara game berakhir,
+  daftar match (maks 30) dengan edit/hapus, tombol "＋ Log a match vs …".
+- **CSV** + kolom `tournament_run` dan `round`. Form ronde hasil import menampilkan tombol "?" untuk giliran yang belum diketahui.
+- **Supabase** (`mhr_decklab_v714_performance_runs.sql`): tabel `match_runs` (pribadi, RLS pemilik; admin hanya baca;
+  maks 500 per akun; `event_id` tidak bisa diubah setelah dibuat; unik per akun+event), kolom baru `match_logs.run_id`
+  (FK, *on delete cascade*), `round_no`, `is_top`; `match_logs_guard` diganti (giliran boleh null, `unk`, `run_id`
+  hanya run milik sendiri, ronde tanpa run dibersihkan); trigger `match_runs_sync` menyamakan tanggal / tipe / deck ronde
+  saat run diubah. **Kalau v7.14 sudah di-push tapi migrasi belum jalan**, tab Performance tetap berfungsi seperti v7.13
+  (fitur run otomatis disembunyikan — `perf.js` jatuh balik ke kolom lama).
+- Dicek: 116 tes Playwright dengan backend palsu (66 tes Tahap 1 tetap lolos + import event 5 pemain dengan bye & Top 4,
+  tebakan archetype, placement, giliran tak diketahui tidak masuk statistik, edit ronde hasil import, run manual + validasi,
+  sinkron tanggal run → ronde, hapus ronde/run, gambar Story & Post, detail matchup, tooltip tren, CSV, HP 390 px, mode
+  sebelum migrasi) + tes SQL di PostgreSQL 16 lokal (import ganda ditolak, RLS antar akun, run_id akun lain dilepas,
+  sinkron, cascade, GRANT).
+- **Tahap 3 (belum):** data matchup komunitas (opt-in, anonim, minimal 20 game per sel), statistik per versi deck.
 
 ### v7.13 — Performance Analytics Tahap 1: catat match & statistik di My Dashboard — 27 Oktober 2026 *(`index.html`, berkas BARU `perf.js` & `perf-ui.js`, migrasi SQL baru `mhr_decklab_v713_performance.sql` di folder internal)*
 
