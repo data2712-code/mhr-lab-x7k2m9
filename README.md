@@ -591,6 +591,12 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Jadwal Weekly Rush LGS: Ogre Kelapa Gading (Jakarta) ditambahkan — 28 Oktober 2026 *(`data.js`, `index.html`)*
+
+- Toko baru **Ogre Kelapa Gading** (Jakarta, WIB): **Selasa 19:30 - Close** (`jd:[ {h:2, w:'19:30 - Close'} ]`),
+  Instagram `ogrekelapagading`, peta https://maps.app.goo.gl/yxaXVjzpZtRxx3oW6 — permintaan pemilik.
+- `LGS_UPDATE` → 28 October 2026; cache-buster `index.html` → `data.js?v=7.02-lgs1028`.
+
 ### v7.15 — Performance Analytics Tahap 3: data matchup komunitas (opt-in, anonim) + statistik per versi deck — 28 Oktober 2026 *(`index.html`, `perf.js`, `perf-ui.js`, migrasi SQL baru `mhr_decklab_v715_performance_community.sql` di folder internal)*
 
 Tahap terakhir dari rencana Performance Analytics ("lanjut tahap 3"), sesuai keputusan pemilik 27 Okt 2026: data komunitas
