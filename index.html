@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.15  ·  28 Oktober 2026
+     MHR DECK LAB  ·  versi 7.16  ·  28 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -10,15 +10,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MHR Deck Lab — Marvel Hero Rush Deck Builder</title>
-<meta name="description" content="Marvel Hero Rush TCG deck builder: all 288 cards with images, stats, and effect text — available in Indonesian and English. Build a deck, share it as a link or an image.">
+<meta name="description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <link rel="canonical" href="https://mhrdecklab.com/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mhrdecklab.com/">
 <meta property="og:title" content="MHR Deck Lab — Marvel Hero Rush Deck Builder">
-<meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
+<meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.15">
+<meta name="version" content="7.16">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2419,6 +2419,211 @@
     .pf-mshare{grid-template-columns:24px minmax(0,1fr) 40px}
     .pf-mshare .pf-bar{display:none}
   }
+  /* ================= v7.16 — HOME BARU (lihat home-ui.js) ================= */
+  .nh-sec-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:12px}
+  .nh-sec-h h2{font-family:var(--disp);font-size:22px;letter-spacing:.03em;text-transform:uppercase}
+  .nh-sec-h p{color:var(--muted);font-size:13px;margin-top:4px}
+  .nh-kick{font-family:var(--disp);font-weight:800;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  .nh-new{display:inline-block;font-family:var(--disp);font-weight:800;font-size:9.5px;letter-spacing:.08em;background:var(--accent);color:#1A1206;border-radius:4px;padding:2px 5px;vertical-align:2px;margin-left:6px}
+  .nh-acc{display:inline-block;font-size:10.5px;color:#9cc6f5;border:1px solid #2d5d96;border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:1px;font-weight:600}
+  .nh-btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:12px 20px;font:inherit;font-weight:800;font-size:14px;text-decoration:none;border:1px solid var(--line);color:var(--paper);background:var(--panel);white-space:nowrap;cursor:pointer}
+  .nh-btn:hover{border-color:var(--accent)}
+  .nh-btn.main:hover{filter:brightness(1.08)}
+  .nh-btn.main{background:var(--accent);border-color:var(--accent);color:#1A1206}
+  .nh-btn.ghost{background:none;border-color:transparent;color:var(--paper);text-decoration:underline;text-underline-offset:3px;padding:12px 6px}
+
+  /* hero */
+  .nh-hero{position:relative;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:24px;align-items:center;
+    border:1px solid var(--line);border-radius:20px;padding:40px 40px 36px;overflow:hidden;
+    background:radial-gradient(circle 520px at 100% 0%,rgba(228,68,46,.22),transparent),radial-gradient(circle 520px at 0% 100%,rgba(59,135,232,.18),transparent),#11161c}
+  .nh-hero .nh-h1{font-family:var(--disp);font-size:42px;line-height:1.02;letter-spacing:.01em;text-transform:uppercase;margin:12px 0 14px}
+  .nh-hero .nh-h1 em{font-style:normal;color:var(--accent)}
+  .nh-hero p.lead{font-size:15.5px;line-height:1.6;color:#C9CFD8;max-width:560px}
+  .nh-ctas{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;align-items:center}
+  .nh-trust{margin-top:16px;font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+  .nh-trust span::before{content:'✓ ';color:#33A45C;font-weight:800}
+  .nh-fan{position:relative;height:330px;width:380px;max-width:100%;margin:0 auto}
+  .nh-fan img{position:absolute;width:170px;aspect-ratio:568/793;object-fit:cover;border-radius:12px;border:5px solid #0b0e12;box-shadow:0 18px 40px rgba(0,0,0,.6)}
+  .nh-fan img:nth-child(1){left:0;top:58px;transform:rotate(-13deg)}
+  .nh-fan img:nth-child(2){left:68px;top:28px;transform:rotate(-5deg)}
+  .nh-fan img:nth-child(3){left:136px;top:14px;transform:rotate(4deg);z-index:2}
+  .nh-fan img:nth-child(4){left:206px;top:40px;transform:rotate(12deg)}
+
+  /* stats */
+  .nh-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .nh-stats div{padding:14px 16px;border-left:1px solid var(--line)}
+  .nh-stats div:first-child{border-left:0}
+  .nh-stats b{display:block;font-family:var(--disp);font-size:26px;color:var(--paper);line-height:1.05}
+  .nh-stats span{font-size:12px;color:var(--muted)}
+
+  /* feature grid */
+  .nh-feats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .nh-f{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;transition:.15s}
+  .nh-f:hover{border-color:#46546a;transform:translateY(-2px)}
+  .nh-pv{height:150px;background:linear-gradient(160deg,#1c232c,#12171d);border-bottom:1px solid var(--line);position:relative;overflow:hidden;padding:14px}
+  .nh-fb{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .nh-fb .grp{font-family:var(--disp);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .nh-fb b{font-family:var(--disp);font-size:18px;letter-spacing:.02em}
+  .nh-fb p{font-size:12.8px;line-height:1.5;color:#C3C8CF}
+  .nh-fb .go{margin-top:auto;padding-top:6px;color:var(--accent);font-weight:700;font-size:12.5px}
+  .nh-more{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .nh-more a{text-decoration:none;font-size:12.5px;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 12px;color:#C9CFD8}
+
+  /* mini previews */
+  .pv-search{display:flex;align-items:center;gap:8px;background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:11.5px;color:var(--muted)}
+  .pv-dots{display:flex;gap:5px;margin:9px 0}
+  .pv-dots i{width:14px;height:14px;border-radius:50%;display:block}
+  .pv-thumbs{display:flex;gap:7px}
+  .pv-thumbs img{width:52px;aspect-ratio:568/793;object-fit:cover;border-radius:5px;border:1px solid #000}
+  .pv-curve{position:absolute;right:16px;top:16px;bottom:30px;display:flex;align-items:flex-end;gap:6px}
+  .pv-curve i{display:block;width:16px;border-radius:3px 3px 0 0;background:linear-gradient(#E4442E,#3B87E8)}
+  .pv-curve-l{position:absolute;right:14px;bottom:10px;display:flex;gap:6px;font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+  .pv-curve-l span{width:16px;text-align:center}
+  .pv-stack{position:relative;width:120px;height:120px}
+  .pv-stack img{position:absolute;width:60px;aspect-ratio:568/793;object-fit:cover;border-radius:5px;border:2px solid #0b0e12;box-shadow:0 6px 14px rgba(0,0,0,.5)}
+  .pv-cnt{position:absolute;left:14px;bottom:10px;font-family:var(--mono);font-size:11px;background:var(--ink);border:1px solid var(--line);border-radius:6px;padding:3px 7px;color:var(--accent)}
+  .pv-rows{display:flex;flex-direction:column;gap:6px}
+  .pv-row{display:grid;grid-template-columns:24px minmax(0,1fr) 54px;gap:8px;align-items:center;background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-size:11.5px}
+  .pv-row b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pv-row .pl{font-family:var(--disp);font-weight:800;color:var(--accent)}
+  .pv-bar{display:flex;height:6px;border-radius:3px;overflow:hidden}
+  .pv-live{display:inline-block;font-size:10px;font-weight:800;background:#7a1d12;color:#ffb4a6;border-radius:4px;padding:2px 6px;letter-spacing:.06em;margin-bottom:7px}
+  .pv-binder{display:grid;grid-template-columns:repeat(3,38px);gap:5px;background:#0b0f13;border:1px solid var(--line);border-radius:8px;padding:7px;position:absolute;left:14px;top:12px}
+  .pv-binder div{position:relative}
+  .pv-binder img{width:38px;aspect-ratio:568/793;object-fit:cover;border-radius:3px;display:block}
+  .pv-binder small{position:absolute;left:1px;right:1px;bottom:1px;background:rgba(0,0,0,.78);color:#f3d48a;font-size:7.5px;text-align:center;border-radius:2px;font-weight:700}
+  .pv-prog{position:absolute;right:14px;top:18px;width:46%;display:flex;flex-direction:column;gap:9px}
+  .pv-prog div{font-size:10.5px;color:#C3C8CF}
+  .pv-prog div i{display:block;height:6px;border-radius:3px;background:var(--panel2);margin-top:4px;overflow:hidden}
+  .pv-prog div i u{display:block;height:100%;background:#33A45C}
+  .pv-ring{position:absolute;left:16px;top:18px;width:104px;height:104px}
+  .pv-mu{position:absolute;right:14px;top:16px;width:52%;display:flex;flex-direction:column;gap:9px}
+  .pv-mu div{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:6px;font-size:10.5px;color:#C3C8CF;align-items:center}
+  .pv-mu div i{grid-column:1/-1;display:block;height:6px;border-radius:3px;background:var(--panel2);overflow:hidden}
+  .pv-mu div i u{display:block;height:100%}
+  .pv-mu div b{text-align:right;font-family:var(--mono)}
+
+  /* paths */
+  .nh-paths{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .nh-p{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+  .nh-p .ic{font-size:22px}
+  .nh-p b{font-family:var(--disp);font-size:17px;letter-spacing:.02em}
+  .nh-p p{font-size:12.5px;color:var(--muted);line-height:1.45}
+  .nh-p ul{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:4px}
+  .nh-p li a{color:var(--paper);text-decoration:none;font-size:13px;font-weight:600}
+  .nh-p li a::after{content:' →';color:var(--accent)}
+
+  /* berita + LGS hari ini */
+  .nh-news{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:16px;align-items:start}
+  .nh-nl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .nh-right{display:flex;flex-direction:column;gap:16px}
+  .nh-n{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit}
+  .nh-n .im{aspect-ratio:1200/630;background:linear-gradient(135deg,#1F2731,#11161c)}
+  .nh-n .im{position:relative;overflow:hidden}
+  .nh-ncv{position:absolute;inset:0;display:flex;align-items:flex-end;padding:12px;font-family:var(--disp);font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase;color:var(--c);background:radial-gradient(circle 220px at 100% 0%,color-mix(in srgb,var(--c) 28%,transparent),transparent),linear-gradient(135deg,#1F2731,#11161c)}
+  .nh-n .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .nh-n .bd .nw-cat{align-self:flex-start}
+  .nh-n .bd{padding:10px 12px 12px;display:flex;flex-direction:column;gap:5px}
+  .nh-n b{font-size:13.5px;line-height:1.35}
+
+  /* account + faq */
+  .nh-acct{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+  .nh-steps{display:flex;flex-direction:column;gap:10px}
+  .nh-step{display:flex;gap:12px;align-items:flex-start}
+  .nh-step i{font-style:normal;flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#1A1206;font-family:var(--disp);font-weight:800;display:flex;align-items:center;justify-content:center}
+  .nh-step b{display:block;font-size:14px}
+  .nh-step span{font-size:12.5px;color:var(--muted)}
+  .nh-faq details{border-top:1px solid var(--line);padding:11px 0}
+  .nh-faq details:first-of-type{border-top:0}
+  .nh-faq summary{cursor:pointer;font-weight:700;font-size:13.5px;list-style:none}
+  .nh-faq summary::after{content:'+';float:right;color:var(--accent);font-weight:800}
+  .nh-faq details[open] summary::after{content:'–'}
+  .nh-faq p{font-size:12.8px;color:#C3C8CF;line-height:1.55;margin-top:7px}
+
+  /* final cta */
+  .nh-final{display:flex;align-items:center;gap:20px;justify-content:space-between;flex-wrap:wrap;border:1px solid #6b5212;border-radius:18px;padding:26px 28px;
+    background:radial-gradient(circle 420px at 100% 50%,rgba(242,176,30,.16),transparent),var(--panel)}
+  .nh-final h2{font-family:var(--disp);font-size:28px;text-transform:uppercase;line-height:1.05}
+  .nh-final p{color:#C3C8CF;font-size:13.5px;margin-top:6px}
+
+  /* sudah login: welcome back */
+  .nc-wb{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px 18px;align-items:center;border:1px solid var(--line);border-radius:18px;padding:20px 22px;
+    background:radial-gradient(circle 420px at 100% 0%,rgba(242,176,30,.12),transparent),var(--panel)}
+  .nc-wb .nh-h1{font-family:var(--disp);font-size:26px;text-transform:uppercase;margin-top:4px}
+  .nc-wb p{font-size:13px;color:var(--muted);margin-top:2px}
+  .nc-sc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .nc-s{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit;min-width:0}
+  .nc-s:hover{border-color:var(--accent)}
+  .nc-s img{width:44px;aspect-ratio:568/793;object-fit:cover;border-radius:5px;flex:none}
+  .nc-s .ic{width:44px;height:44px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+  .nc-s div{min-width:0}
+  .nc-s small{display:block;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+  .nc-s b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nc-s span{display:block;font-size:11.5px;color:#C3C8CF}
+  .nc-disc{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(57,135,229,.08);border:1px solid #2d5d96;border-radius:12px;padding:11px 14px;font-size:12.8px;color:#cfe2fa}
+  .nc-disc a{color:var(--paper);font-weight:700;border:1px solid #2d5d96;border-radius:999px;padding:5px 11px;text-decoration:none;font-size:12px}
+
+  @media (max-width:920px){
+    .nh-hero{grid-template-columns:minmax(0,1fr);padding:18px 16px 18px;gap:4px}
+    .nh-hero .nh-h1{font-size:28px;margin:8px 0 10px}
+    .nh-hero p.lead{font-size:13.5px}
+    .nh-fan{height:178px;width:250px;order:-1}
+    .nh-fan img{width:96px;border-width:3px;border-radius:7px}
+    .nh-fan img:nth-child(1){left:0;top:30px}
+    .nh-fan img:nth-child(2){left:46px;top:12px}
+    .nh-fan img:nth-child(3){left:96px;top:4px}
+    .nh-fan img:nth-child(4){left:146px;top:20px}
+    .nh-ctas{margin-top:16px;gap:8px}
+    .nh-ctas .nh-btn{padding:11px 15px;font-size:13.5px}
+    .nh-trust{margin-top:10px;gap:4px 12px}
+    .nh-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .nh-stats div{border-left:0;border-top:1px solid var(--line);padding:10px 12px}
+    .nh-stats div:nth-child(-n+3){border-top:0}
+    .nh-stats div:nth-child(5){grid-column:span 2}
+    .nh-stats b{font-size:20px}
+    .nh-stats span{font-size:11px}
+    /* fitur & jalur: geser horizontal di HP */
+    .nh-scroll{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;margin:0 -14px;padding:0 14px 6px;scrollbar-width:none}
+    .nh-scroll>*{flex:0 0 268px;scroll-snap-align:start}
+    .nh-swipe{display:block!important;font-size:11.5px;color:var(--muted);margin-top:6px}
+    .nh-paths>*{flex-basis:230px}
+    .nh-more{flex-wrap:nowrap;overflow-x:auto;margin:12px -14px 0;padding:0 14px;scrollbar-width:none}
+    .nh-more a{text-decoration:none;white-space:nowrap}
+    .nh-sec-h h2{font-size:19px}
+    .nh-news{grid-template-columns:minmax(0,1fr)}
+    .nh-nl{grid-template-columns:minmax(0,1fr)}
+    .nh-nl .nh-n{flex-direction:row}
+    .nh-nl .nh-n .im{width:116px;flex:none;aspect-ratio:auto;min-height:96px}
+    .nh-ncv{font-size:13px;padding:8px}
+    .nh-acct{grid-template-columns:minmax(0,1fr)}
+    .nh-final{padding:20px}
+    .nh-final h2{font-size:22px}
+    .nc-wb{padding:16px}
+    .nc-wb .nh-btn{padding:9px 14px;font-size:12.5px}
+    .nc-wb .nh-h1{font-size:21px}
+    .nc-sc{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .nc-s{flex-direction:column;align-items:flex-start;gap:8px}
+  }
+  .nh-swipe{display:none}
+
+  .nh-hide{display:block;margin-top:14px;background:none;border:0;padding:0;color:var(--muted);font:inherit;font-size:12px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .nh-hide:hover{color:var(--paper)}
+  .nh-short{display:flex;justify-content:space-between;align-items:center;gap:14px 20px;flex-wrap:wrap;border:1px solid var(--line);border-radius:16px;padding:16px 20px;
+    background:radial-gradient(circle 380px at 100% 0%,rgba(228,68,46,.16),transparent),radial-gradient(circle 380px at 0% 100%,rgba(59,135,232,.12),transparent),#11161c}
+  .nh-short b{display:block;font-size:15px;margin-top:4px;max-width:560px;line-height:1.4}
+  .nh-short .nh-ctas{margin-top:0}
+  .nh-news.solo{grid-template-columns:minmax(0,1fr)}
+  .pv-row b.pts{text-align:right}
+  .pv-stack img:nth-child(1){left:0;top:4px;transform:rotate(-8deg)}
+  .pv-stack img:nth-child(2){left:30px;top:0;z-index:2}
+  .pv-stack img:nth-child(3){left:60px;top:6px;transform:rotate(8deg)}
+  .nc-disc>span{margin-right:2px}
+  #hmMe{display:flex;flex-direction:column;gap:14px}
+  @media (max-width:920px){
+    .nh-short{padding:14px}
+    .nh-short b{font-size:14px}
+    .nh-short .nh-btn{padding:10px 14px;font-size:13px}
+  }
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -2930,8 +3135,8 @@
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
 <script src="news.js?v=7.08"></script>
 <script src="news-ui.js?v=7.02"></script>
-<!-- v6.63 — halaman Beranda (#beranda) -->
-<script src="home-ui.js?v=7.02"></script>
+<!-- v6.63 — halaman Beranda (#beranda). v7.16: home baru (perkenalan fitur, Welcome back untuk akun login) -->
+<script src="home-ui.js?v=7.16"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
 <script src="spoilers.js?v=7.02"></script>
 <script src="set-ui.js?v=7.02"></script>
@@ -2974,7 +3179,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.15</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.16</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -4318,7 +4523,7 @@ const T = {
   impMerge: 'Add to active deck',
   /* --- halaman & panel (v6.2) --- */
   metaTitle: 'MHR Deck Lab — Marvel Hero Rush Deck Builder',
-  metaDesc: 'Marvel Hero Rush TCG deck builder: all 288 cards with images, stats, and effect text — available in Indonesian and English. Build a deck, share it as a link or an image.',
+  metaDesc: 'Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.',   /* v7.16 — deskripsi baru (dulu masih menyebut 288 kartu) */
   metaHead: 'User Decks',
   metaIntro: 'Decks that are popular in the MHR community right now. Load one into the Deck Builder to see its contents or tweak it — the deck you\'re currently building won\'t be overwritten.',
   metaLoad: 'Load into Deck Builder',

@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.15** · 28 Oktober 2026
+**Versi saat ini: v7.16** · 28 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -36,6 +36,7 @@ mhr-lab-x7k2m9/
 ├── icons/               ← ikon PWA berbagai ukuran (sejak v6.6)
 ├── og-image.jpg      ← gambar preview saat link dibagikan
 ├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.89; TIDAK dimuat sejak v7.05, disimpan untuk kampanye berikutnya)
+├── home-ui.js         ← halaman Beranda (#beranda): perkenalan fitur untuk pengunjung baru, "Welcome back" untuk akun login (v6.63, dirombak v7.16)
 ├── binders.js         ← servis Supabase binder kartu 3×3 (v7.06, tanpa DOM)
 ├── binders-ui.js      ← tab Binders di My Dashboard + halaman publik #binder/<kode> (v7.06)
 ├── perf.js            ← servis Supabase Performance Analytics: catatan match, archetype, tournament runs, data komunitas (v7.13–v7.15, tanpa DOM)
@@ -596,6 +597,44 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 - Toko baru **Ogre Kelapa Gading** (Jakarta, WIB): **Selasa 19:30 - Close** (`jd:[ {h:2, w:'19:30 - Close'} ]`),
   Instagram `ogrekelapagading`, peta https://maps.app.goo.gl/yxaXVjzpZtRxx3oW6 — permintaan pemilik.
 - `LGS_UPDATE` → 28 October 2026; cache-buster `index.html` → `data.js?v=7.02-lgs1028`.
+
+### v7.16 — Home baru: perkenalan fitur untuk pengunjung baru + "Welcome back" untuk akun login — 28 Oktober 2026 *(`index.html`, `home-ui.js`)*
+
+Permintaan pemilik: pengunjung baru harus langsung paham situs ini bisa apa. Riset home Cardible (hero + grid fitur +
+"explore by role"), Archidekt/Limitless/Piltover Archive (konten terbaru di atas) dan Untapped (angka bukti sosial),
+lalu simulasi 3 varian; pemilik memilih **A + C** dengan semua bagian tambahan. Tidak ada tabel/SQL baru.
+- **Pengunjung baru (`full`)**, urutan: hero ("Build, play & track your Marvel Hero Rush decks", tombol Start building /
+  Browse cards / Create a free account, 4 kartu SEC) → deretan angka dari data asli (jumlah kartu, set, toko Weekly Rush,
+  deck siap pakai, EN · ID) → **"What you can do here"**: 6 kartu fitur (Card database, Deck builder, Tournament decks,
+  Weekly Rush & events, Collection & binders, Performance analytics) dengan **pratinjau mini** HTML/CSS + gambar kartu asli
+  (ilustrasi: nama pemain/angka contoh), tag NEW / free account, plus deretan tautan kecil (Compare, version history,
+  export, spoiler, rules guide, User decks) → countdown rilis → **"Where do you want to start?"** (New to the game,
+  Competitive player, Collector & trader, Store / organizer) → 3 berita terbaru + Weekly Rush hari ini (+ juara turnamen
+  kalau sudah dimuat) → deck populer → Browse by set → **Why make a free account?** + **Quick answers** (FAQ 4) →
+  CTA penutup.
+- **Pengunjung lama yang belum login (`short`)**: perkenalan jadi satu baris + tombol "What can I do here?" (menampilkan
+  versi lengkap sekali & menggulir ke fitur); berita & deck populer naik, fitur turun. Aktif otomatis mulai sesi browser
+  ke-3 (`mhr_home_visits`) atau lewat tautan "I've been here before — hide intro" (`mhr_home_intro = 'short'`).
+- **Sudah login (`user`)**: "Welcome back, <username>" + tombol My Dashboard, 4 pintasan dari data akun (deck aktif di
+  Deck Builder `n/50`, win rate game 30 hari terakhir dari Performance — atau semua waktu / "Log your first match",
+  jumlah kartu unik di koleksi, jumlah binder + nama binder terbaru), lalu **"You haven't tried yet"** (maks 3: fitur
+  akun yang belum dipakai, lalu Events / Tournament decks / User decks yang belum pernah dibuka — dicatat di
+  `mhr_seen_pages` dari kelas `page-*` di body). Hero, jalur, akun & FAQ disembunyikan; fitur tetap ada di bawah
+  ("Everything on MHR Deck Lab"). Status login dibaca sinkron dari token Supabase supaya tidak berkedip, lalu dipastikan
+  lewat `getSession()`; ganti akun/logout langsung mengganti tampilan (token refresh tidak memicu render ulang).
+- Tautan ke tab My Dashboard (Collection / Binders / Performance) memanggil `setDashTab()` dulu, jadi langsung ke tab itu.
+- HP: kartu fitur & jalur bisa digeser ke samping (scroll-snap, "Swipe to see all 6 →"), berita jadi daftar dengan
+  gambar kecil. Kotak "Search Cards / Build a Deck / User Decks / New to the game?" lama (`quickHTML`) dihapus — isinya
+  sudah tercakup di hero & kartu fitur.
+- **SEO**: judul tab home "MHR Deck Lab — Marvel Hero Rush Deck Builder, Cards, Tournaments & Collection"; meta
+  description & og:description baru (dulu masih menyebut 288 kartu). Judul hero memakai `<h2>` karena `<h1>` situs
+  tetap logo header.
+- Berita tanpa cover tampil sebagai panel warna kategori (bukan gambar kosong). CSS baru `.nh-*`/`.nc-*`/`.pv-*` di blok
+  "v7.16 — HOME BARU" sebelum `</style>`. `home-ui.js?v=7.16`.
+- Dicek: 45 tes Playwright (pengunjung baru desktop & HP 390 px tanpa scroll horizontal, angka & isi tiap bagian, gambar
+  hero termuat, tombol akun membuka modal login, kartu Performance → tab Performance, hide intro / "What can I do here?"
+  / kunjungan ke-3, akun login dengan & tanpa data, saran "belum dicoba" hilang setelah halaman dibuka, Continue deck →
+  Deck Builder, pintasan Collection → tab Collection, home tetap tampil kalau SDK Supabase gagal dimuat, tanpa error JS).
 
 ### v7.15 — Performance Analytics Tahap 3: data matchup komunitas (opt-in, anonim) + statistik per versi deck — 28 Oktober 2026 *(`index.html`, `perf.js`, `perf-ui.js`, migrasi SQL baru `mhr_decklab_v715_performance_community.sql` di folder internal)*
 
