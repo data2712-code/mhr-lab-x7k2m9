@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.14** · 27 Oktober 2026
+**Versi saat ini: v7.15** · 28 Oktober 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -38,8 +38,8 @@ mhr-lab-x7k2m9/
 ├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.89; TIDAK dimuat sejak v7.05, disimpan untuk kampanye berikutnya)
 ├── binders.js         ← servis Supabase binder kartu 3×3 (v7.06, tanpa DOM)
 ├── binders-ui.js      ← tab Binders di My Dashboard + halaman publik #binder/<kode> (v7.06)
-├── perf.js            ← servis Supabase Performance Analytics: catatan match, daftar archetype, tournament runs (v7.13–v7.14, tanpa DOM)
-├── perf-ui.js         ← tab Performance di My Dashboard: catat match, statistik, tren, runs, import Events, share gambar run (v7.13–v7.14)
+├── perf.js            ← servis Supabase Performance Analytics: catatan match, archetype, tournament runs, data komunitas (v7.13–v7.15, tanpa DOM)
+├── perf-ui.js         ← tab Performance di My Dashboard: catat match, statistik, tren, runs, import Events, share gambar, komunitas, versi deck (v7.13–v7.15)
 ├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
 ├── sitemap.xml           ← SEO: sitemap untuk Google Search Console (sejak v6.21)
 ├── robots.txt            ← SEO: izinkan semua crawler + rujuk ke sitemap.xml (sejak v6.21)
@@ -590,6 +590,43 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.15 — Performance Analytics Tahap 3: data matchup komunitas (opt-in, anonim) + statistik per versi deck — 28 Oktober 2026 *(`index.html`, `perf.js`, `perf-ui.js`, migrasi SQL baru `mhr_decklab_v715_performance_community.sql` di folder internal)*
+
+Tahap terakhir dari rencana Performance Analytics ("lanjut tahap 3"), sesuai keputusan pemilik 27 Okt 2026: data komunitas
+**opt-in & anonim**, sel matriks baru tampil kalau datanya cukup.
+- **🌐 Community matchups** — kartu baru di tab Performance (semua akun yang login bisa melihat; berbagi data tetap pilihan):
+  - **Opt-in**: kotak "Add your games to community data?" + tombol "Share my games anonymously". Default MATI. Bisa
+    dimatikan kapan saja ("Stop sharing" + konfirmasi) dan datanya langsung tidak dihitung (angka dihitung ulang tiap kali
+    dibaca, tidak ada salinan). Yang dihitung hanya: jenis deck sendiri, jenis deck lawan, siapa jalan duluan, hasil game.
+    Nama, nama lawan, catatan, dan deck list **tidak pernah** dikirim.
+  - **Matriks matchup** (maks 10 deck, urut yang paling sering dilawan): win rate game deck kiri vs deck atas, gabungan dua
+    arah (A mencatat vs B + B mencatat vs A). Sel baru menampilkan angka kalau ada **≥ 20 game dari ≥ 3 akun berbeda**;
+    kalau belum, tampil "–" + jumlah game. Mirror ditandai. Warna sel sama dengan tabel Matchups pribadi.
+  - **Most played decks** (meta share lawan, hanya deck yang dilaporkan ≥ 3 akun) dan **Going first** (win rate pemain
+    yang jalan duluan, ≥ 20 game dari ≥ 3 akun).
+  - Filter: 30 / 90 hari / semua, dan semua game atau Store & tournament saja (diingat di `mhr_perf_comm`).
+  - Kalau akun yang berbagi < 3, hanya tampil jumlah pemain & match ("Not enough shared games yet").
+- **Jenis deck sendiri (`my_archetype`)** ditentukan otomatis dari isi deck saat mencatat (warna harus sama persis dengan
+  archetype; kalau ada beberapa, yang kartu kuncinya ada di deck menang; seri → urutan terkecil). Catatan lama diisi sekali
+  saat pertama berbagi (RPC `mhr_set_my_archetypes`, hanya baris milik sendiri). Ronde hasil import Events ikut diisi; kalau
+  deck run diganti, ronde-rondenya ikut diklasifikasi ulang. **Catatan untuk admin:** kartu kunci archetype sekarang juga
+  dipakai untuk membedakan deck dengan warna yang sama (mis. "Red Blue" vs "Red Blue Aggro").
+- **Detail deck + versi** — klik deck di kartu "My decks" (atau di detail matchup): rekor, win rate, 1st/2nd, "counts as …"
+  di data komunitas, **Versions** (setiap isi deck berbeda yang pernah dicatat = satu versi, urut dari pertama dimainkan:
+  tanggal, jumlah match, rekor, win rate, perubahan kartu dibanding versi sebelumnya "+5 / −5 cards · +3 Ant-Man …"; label
+  versi diambil dari riwayat versi deck v6.97 kalau isinya sama; tag "current list" untuk isi deck saat ini), dan matchup
+  khusus deck itu.
+- **Supabase** (`mhr_decklab_v715_performance_community.sql`): tabel `perf_settings` (pribadi; `shared_since` diisi
+  otomatis), kolom `match_logs.my_archetype` (FK ke archetype), RPC `mhr_set_my_archetypes` (security invoker, maks 5.000
+  baris), `mhr_community_meta(hari, cakupan)` (security definer, hanya akun login; ambang 20 game / 3 akun ditegakkan di
+  server), fungsi bantu `mhr_community_src` tidak bisa dipanggil langsung oleh siapa pun. **Kalau v7.15 di-push sebelum
+  migrasi**, kartu komunitas otomatis disembunyikan dan sisanya tetap jalan seperti v7.14.
+- Dicek: 145 tes Playwright (semua tes Tahap 1–2 tetap lolos + opt-in/opt-out, backfill jenis deck, angka sel matriks
+  dicocokkan dengan hitungan terpisah untuk "semua game" dan "Store & tournament", nama & catatan tidak bocor, < 3 akun,
+  versi deck + label + perubahan kartu, HP 390 px, mode sebelum migrasi) + tes SQL di PostgreSQL 16 lokal (angka matriks,
+  meta share, going first, akun yang tidak berbagi tidak dihitung, opt-out langsung berlaku, RPC baris milik akun lain
+  ditolak, `mhr_community_src` tidak bisa dipanggil langsung, anon ditolak).
 
 ### v7.14 — Performance Analytics Tahap 2: Tournament runs, import dari Events, share gambar, tren & detail matchup — 27 Oktober 2026 *(`index.html`, `perf.js`, `perf-ui.js`, migrasi SQL baru `mhr_decklab_v714_performance_runs.sql` di folder internal)*
 

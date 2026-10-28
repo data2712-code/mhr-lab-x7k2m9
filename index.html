@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.14  ·  27 Oktober 2026
+     MHR DECK LAB  ·  versi 7.15  ·  28 Oktober 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Build a Marvel Hero Rush deck: 288 cards, full filters, level curve, and share your deck as a link or an image.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.14">
+<meta name="version" content="7.15">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2377,6 +2377,48 @@
     .pf-import{flex-direction:column;align-items:stretch}
     .pf-rrecbox{text-align:left}
   }
+  /* v7.15 — Performance Tahap 3: data komunitas, detail deck & versi */
+  .pf-dclick{cursor:pointer}
+  .pf-dclick:hover .pf-dn b{color:var(--accent)}
+  .pf-cmtools{display:flex;gap:6px;text-transform:none;letter-spacing:0}
+  .pf-cmtools select{background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:7px;padding:5px 8px;font:inherit;font-size:12px}
+  .pf-optin{display:flex;gap:14px;align-items:center;background:rgba(57,135,229,.08);border:1px solid #2d5d96;border-radius:12px;padding:12px 14px;margin:6px 0 10px;font-size:12.5px;color:#cfe2fa}
+  .pf-optin p{margin-top:4px;line-height:1.5;color:#b9cde6}
+  .pf-optin .btn2{flex:none;padding:9px 14px;background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:800}
+  .pf-share-on{font-size:12.5px;color:#9fd7b1;margin:4px 0 10px}
+  .pf-link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:12px;padding:0;margin-left:6px}
+  .pf-link:hover{color:var(--paper)}
+  .pf-cmempty{padding:6px 0}
+  .pf-cm{border-collapse:separate;border-spacing:3px;font-size:12px;margin-top:8px}
+  .pf-cm th{font-size:10.5px;color:var(--muted);font-weight:700;padding:3px;text-align:center;vertical-align:bottom;min-width:58px}
+  .pf-cm th span{display:block;margin-top:2px;white-space:nowrap}
+  .pf-cm th.pf-cmrh{text-align:right;white-space:nowrap;vertical-align:middle;padding-right:6px}
+  .pf-cm th.pf-cmrh .pf-cmth{vertical-align:middle;margin-left:4px}
+  .pf-cmth{width:24px;height:24px;border-radius:6px;object-fit:cover;object-position:50% 18%;display:inline-block}
+  .pf-cm td{width:62px;height:40px;text-align:center;border-radius:7px;font-weight:700;font-variant-numeric:tabular-nums}
+  .pf-cm td small{display:block;font-weight:400;font-size:10px;opacity:.8}
+  .pf-cm td.pf-cmna{background:#161b21;color:#56606d;border:1px dashed #2f3844}
+  .pf-cm td.pf-cmmir{background:#232b36;color:var(--muted);font-weight:600;font-size:11px}
+  .pf-cmgrid{margin-top:14px}
+  .pf-cmgrid h4{font-size:12px}
+  .pf-mshare{display:grid;grid-template-columns:24px minmax(0,1fr) 90px 40px;gap:8px;align-items:center;padding:4px 0;font-size:12.5px}
+  .pf-mshare b{text-align:right;font-family:var(--disp);font-size:16px}
+  .pf-mn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pf-cmfirst{display:flex;gap:12px;align-items:center;font-size:12.5px;color:#C3C8CF}
+  .pf-cmfirst b{font-family:var(--disp);font-size:34px;color:var(--paper)}
+  .pf-ver{display:grid;grid-template-columns:minmax(0,1fr) 110px 52px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid #232b36}
+  .pf-ver:first-child{border-top:0}
+  .pf-diff{color:#C3C8CF!important;white-space:normal!important}
+  .pf-diff b{color:var(--paper)}
+  @media (max-width:760px){
+    .pf-optin{flex-direction:column;align-items:stretch}
+    .pf-cmtools{flex-wrap:wrap}
+    .pf-card h4:has(.pf-cmtools){flex-wrap:wrap}
+    .pf-ver{grid-template-columns:minmax(0,1fr) 50px}
+    .pf-ver .pf-bar{display:none}
+    .pf-mshare{grid-template-columns:24px minmax(0,1fr) 40px}
+    .pf-mshare .pf-bar{display:none}
+  }
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -2900,9 +2942,10 @@
 <script src="binders.js?v=7.10"></script>
 <script src="binders-ui.js?v=7.12"></script>
 <!-- v7.13 — Performance Analytics (Tahap 1): servis match_logs/match_archetypes (perf.js) + tab Performance (perf-ui.js).
-     v7.14 (Tahap 2): tournament runs, import dari Events, share gambar run, grafik tren, detail matchup. -->
-<script src="perf.js?v=7.14"></script>
-<script src="perf-ui.js?v=7.14"></script>
+     v7.14 (Tahap 2): tournament runs, import dari Events, share gambar run, grafik tren, detail matchup.
+     v7.15 (Tahap 3): data matchup komunitas (opt-in, anonim), detail deck + statistik per versi deck. -->
+<script src="perf.js?v=7.15"></script>
+<script src="perf-ui.js?v=7.15"></script>
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
@@ -2931,7 +2974,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.14</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.15</div>
 </footer>
 
 <div class="dview" id="simView" hidden>

@@ -16,6 +16,10 @@
    turnamen/event; ronde = match_logs dengan run_id + round_no + is_top. Import dari Events:
    myEventEntries() membaca event_players milik akun ini + events-nya (RLS Events sudah
    mengizinkan baca event yang bukan draft); detail ronde lewat window.MHREvents.get().
+   v7.15 (Tahap 3) — mhr_decklab_v715_performance_community.sql: perf_settings (opt-in
+   share_community), match_logs.my_archetype (jenis deck sendiri, diisi browser), RPC
+   mhr_set_my_archetypes (isi catatan lama) & mhr_community_meta (angka gabungan komunitas).
+   Kolom yang belum ada (migrasi belum jalan) → otomatis memakai kolom versi sebelumnya.
    =================================================================== */
 (function(){
   'use strict';
@@ -30,10 +34,16 @@
   const miss = e => e ? (/PGRST205|42P01|PGRST202|42883/.test(`${e.code||''} ${e.message||''}`) ? {...e, missing:true} : e) : null;
   /* kode dari RAISE EXCEPTION (BAD_GAMES, BAD_DATE) */
   const rpcErr = e => { if(!e) return null; const m = /\b(BAD_[A-Z_]+)\b/.exec(e.message||''); return {...miss(e), code: m ? m[1] : (e.code||'ERROR')}; };
-  const LOG_COLS = 'id,played_on,context,best_of,deck_id,deck_name,deck_code,opp_archetype,opp_label,opp_colors,opp_name,games,result,notes,run_id,round_no,is_top,created_at,updated_at';
-  const LOG_EDIT = ['played_on','context','best_of','deck_id','deck_name','deck_code','opp_archetype','opp_label','opp_colors','opp_name','games','notes','run_id','round_no','is_top'];
-  const LOG_COLS_V13 = LOG_COLS.replace(',run_id,round_no,is_top', '');
-  const logCols = () => (window.MHRPerf && window.MHRPerf.runsMissing) ? LOG_COLS_V13 : LOG_COLS;
+  const LOG_COLS = 'id,played_on,context,best_of,deck_id,deck_name,deck_code,opp_archetype,opp_label,opp_colors,opp_name,games,result,notes,run_id,round_no,is_top,my_archetype,created_at,updated_at';
+  const LOG_EDIT = ['played_on','context','best_of','deck_id','deck_name','deck_code','opp_archetype','opp_label','opp_colors','opp_name','games','notes','run_id','round_no','is_top','my_archetype'];
+  const LOG_COLS_V14 = LOG_COLS.replace(',my_archetype', '');
+  const LOG_COLS_V13 = LOG_COLS_V14.replace(',run_id,round_no,is_top', '');
+  const P = () => window.MHRPerf || {};
+  const logCols = () => P().runsMissing ? LOG_COLS_V13 : P().myArchMissing ? LOG_COLS_V14 : LOG_COLS;
+  const colErr = e => e && /42703|PGRST204|column/.test(`${e.code||''} ${e.message||''}`);
+  /* buang kolom yang belum ada di database (migrasi belum dijalankan) */
+  const logBody = row => { const b = pick(row, LOG_EDIT); if(P().myArchMissing || P().runsMissing) delete b.my_archetype;
+    if(P().runsMissing){ delete b.run_id; delete b.round_no; delete b.is_top; } return b; };
   const RUN_COLS = 'id,name,played_on,context,best_of,deck_id,deck_name,deck_code,players,placement,venue,byes,event_id,notes,created_at,updated_at';
   const RUN_EDIT = ['name','played_on','context','best_of','deck_id','deck_name','deck_code','players','placement','venue','byes','notes'];
   const ARCH_COLS = 'id,name,colors,key_card,aliases,active,sort';
@@ -75,10 +85,11 @@
         const q = cols => c.from('match_logs').select(cols).eq('owner_id', u)
           .order('played_on', { ascending:false }).order('created_at', { ascending:false }).limit(5000);
         let { data, error } = await q(LOG_COLS);
-        /* migrasi v7.14 belum dijalankan: kolom ronde belum ada → pakai kolom v7.13 */
-        if(error && /42703|PGRST204|run_id|round_no|is_top/.test(`${error.code||''} ${error.message||''}`)){
-          ({ data, error } = await q(LOG_COLS_V13));
-          if(!error) window.MHRPerf.runsMissing = true;
+        /* migrasi v7.15 belum dijalankan: my_archetype belum ada → kolom v7.14; v7.14 belum → kolom v7.13 */
+        if(colErr(error)){
+          ({ data, error } = await q(LOG_COLS_V14));
+          if(!error) window.MHRPerf.myArchMissing = true;
+          else if(colErr(error)){ ({ data, error } = await q(LOG_COLS_V13)); if(!error){ window.MHRPerf.runsMissing = true; window.MHRPerf.myArchMissing = true; } }
         }
         return { data:data||[], error:miss(error) };
       }catch(e){ return { data:[], error:off }; }
@@ -87,7 +98,7 @@
       const c = client(); if(!c) return { data:null, error:off };
       const u = await uid(); if(!u) return { data:null, error:{ code:'NOT_LOGGED_IN' } };
       try{
-        const body = pick(row, LOG_EDIT);
+        const body = logBody(row);
         const q = row.id ? c.from('match_logs').update(body).eq('id', row.id)
                          : c.from('match_logs').insert({ ...body, owner_id:u });
         const { data, error } = await q.select(logCols()).single();
@@ -105,7 +116,7 @@
       const u = await uid(); if(!u) return { data:[], error:{ code:'NOT_LOGGED_IN' } };
       if(!rows.length) return { data:[], error:null };
       try{
-        const { data, error } = await c.from('match_logs').insert(rows.map(r=>({ ...pick(r, LOG_EDIT), owner_id:u }))).select(logCols());
+        const { data, error } = await c.from('match_logs').insert(rows.map(r=>({ ...logBody(r), owner_id:u }))).select(logCols());
         return { data:data||[], error:rpcErr(error) };
       }catch(e){ return { data:[], error:off }; }
     },
@@ -136,6 +147,44 @@
       try{ const { error } = await c.from('match_runs').delete().eq('id', id); return { error:miss(error) }; }
       catch(e){ return { error:off }; }
     },
+    /* ---------- v7.15 data komunitas ---------- */
+    async settings(){
+      const c = client(); if(!c) return { data:null, error:off };
+      const u = await uid(); if(!u) return { data:null, error:null };
+      try{
+        const { data, error } = await c.from('perf_settings').select('share_community,shared_since').eq('user_id', u).maybeSingle();
+        return { data: data || { share_community:false, shared_since:null }, error:miss(error) };
+      }catch(e){ return { data:null, error:off }; }
+    },
+    async setShare(on){
+      const c = client(); if(!c) return { data:null, error:off };
+      const u = await uid(); if(!u) return { data:null, error:{ code:'NOT_LOGGED_IN' } };
+      try{
+        const { data, error } = await c.from('perf_settings').upsert({ user_id:u, share_community:!!on }, { onConflict:'user_id' }).select('share_community,shared_since').single();
+        return { data, error:miss(error) };
+      }catch(e){ return { data:null, error:off }; }
+    },
+    async setMyArchetypes(rows){
+      const c = client(); if(!c) return { data:0, error:off };
+      if(!rows.length) return { data:0, error:null };
+      try{
+        let n = 0;
+        for(let i = 0; i < rows.length; i += 1000){
+          const { data, error } = await c.rpc('mhr_set_my_archetypes', { p_rows: rows.slice(i, i + 1000) });
+          if(error) return { data:n, error:rpcErr(error) };
+          n += data || 0;
+        }
+        return { data:n, error:null };
+      }catch(e){ return { data:0, error:off }; }
+    },
+    async community(days, scope){
+      const c = client(); if(!c) return { data:null, error:off };
+      try{
+        const { data, error } = await c.rpc('mhr_community_meta', { p_days: days, p_scope: scope || 'all' });
+        return { data, error:rpcErr(error) };
+      }catch(e){ return { data:null, error:off }; }
+    },
+
     /* event yang diikuti akun ini lewat Events (pemain terdaftar dengan akun, bukan tamu) */
     async myEventEntries(){
       const c = client(); if(!c) return { data:[], error:off };

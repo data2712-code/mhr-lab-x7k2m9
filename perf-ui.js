@@ -24,6 +24,11 @@
    diketahui → f:null / e:'unk'), share run sebagai gambar Story 9:16 / Post 4:5
    (canvas, pola sama dengan binders-ui.js v7.07), grafik tren win rate (rata-rata
    10 match terakhir), detail matchup (klik baris tabel Matchups).
+   v7.15 (Tahap 3): data matchup komunitas OPT-IN & ANONIM (kartu "🌐 Community matchups":
+   matriks win rate antar jenis deck, meta share, win rate jalan duluan — angka gabungan dari
+   RPC mhr_community_meta, sel baru tampil kalau >= 20 game dari >= 3 akun); jenis deck sendiri
+   (my_archetype) ditentukan otomatis dari isi deck (classifyDeck); detail deck + statistik per
+   VERSI deck (isi deck yang dicatat per match, label dari riwayat versi deck v6.97).
    =================================================================== */
 (function(){
   'use strict';
@@ -51,8 +56,10 @@
   const errMsg = e => e ? (e.missing ? 'Performance isn\'t switched on yet on this site.' : (ERR[e.code] || ERR[e.message] || ('Something went wrong: ' + (e.message || e.code || 'error')))) : '';
 
   const S = { uid:null, logs:null, arch:null, decks:null, err:null, sort:'n', all:false, runs:null, runsOff:false, entries:null, runsAll:false,
+    share:null, comm:null, commOff:false, backfilled:false, commF:{ days:'90', scope:'all' },
     f:{ deck:'', per:'90', ctx:'' } };
   try{ const f = JSON.parse(localStorage.getItem(FILT_KEY) || 'null'); if(f && typeof f === 'object') S.f = { ...S.f, per:f.per || '90', ctx:f.ctx || '' }; }catch(e){}
+  try{ const c = JSON.parse(localStorage.getItem('mhr_perf_comm') || 'null'); if(c && typeof c === 'object') S.commF = { days: ['30','90','0'].includes(c.days) ? c.days : '90', scope: c.scope === 'competitive' ? 'competitive' : 'all' }; }catch(e){}
   const saveFilt = () => { try{ localStorage.setItem(FILT_KEY, JSON.stringify({ per:S.f.per, ctx:S.f.ctx })); }catch(e){} };
   const lastPrefs = () => { try{ return JSON.parse(localStorage.getItem(LAST_KEY) || '{}') || {}; }catch(e){ return {}; } };
   const saveLast = o => { try{ localStorage.setItem(LAST_KEY, JSON.stringify(o)); }catch(e){} };
@@ -118,7 +125,7 @@
   async function ensureUser(){
     const ss = (window.MHRAuth && window.MHRAuth.ready) ? await window.MHRAuth.getSession() : null;
     const u = (ss && ss.user) ? ss.user.id : null;
-    if(u !== S.uid){ S.uid = u; S.logs = null; S.decks = null; S.err = null; S.f.deck = ''; S.all = false; S.runs = null; S.entries = null; }
+    if(u !== S.uid){ S.uid = u; S.logs = null; S.decks = null; S.err = null; S.f.deck = ''; S.all = false; S.runs = null; S.entries = null; S.share = null; S.comm = null; S.backfilled = false; }
     return u;
   }
   async function loadDecks(){
@@ -129,14 +136,19 @@
   async function refresh(){
     await ensureUser();
     if(!API() || !API().ready) return;
-    const [l, a, r, en] = await Promise.all([API().listMine(), API().archetypes(), API().listRuns ? API().listRuns() : { data:[], error:{ missing:true } }, API().myEventEntries ? API().myEventEntries() : { data:[] }, loadDecks()]);
+    const [l, a, r, en, st] = await Promise.all([API().listMine(), API().archetypes(), API().listRuns ? API().listRuns() : { data:[], error:{ missing:true } }, API().myEventEntries ? API().myEventEntries() : { data:[] },
+      API().settings ? API().settings() : { data:null, error:{ missing:true } }, loadDecks()]);
     S.logs = l.error ? (S.logs || []) : l.data; S.err = l.error || a.error || null;
     if(!a.error) S.arch = a.data;
     /* migrasi v7.14 belum dijalankan → fitur run disembunyikan, Tahap 1 tetap jalan */
     S.runsOff = !!(API().runsMissing || (r.error && r.error.missing));
     S.runs = r.error ? (S.runs || []) : r.data;
     S.entries = en.error ? (S.entries || []) : (en.data || []);
+    /* migrasi v7.15 belum dijalankan → kartu komunitas disembunyikan */
+    S.commOff = !!((st.error && st.error.missing) || API().myArchMissing);
+    if(!st.error && st.data) S.share = !!st.data.share_community;
     updateTile();
+    if(S.share) backfillMyArch().catch(()=>{});
   }
   function updateTile(){
     const v = q1('#dtPerfV'), s = q1('#dtPerfS'); if(!S.logs) return;
@@ -163,8 +175,8 @@
         MHR Deck Lab turns it into your win rate, your best and worst matchups, and whether you do better going first or second.</p>
         <div class="bd-btns" style="justify-content:center"><button type="button" class="btn2 main" data-pfact="log">＋ Log your first match</button>
           ${S.runsOff ? '' : '<button type="button" class="btn2" data-pfact="newrun">🏆 Log a tournament run</button>'}</div>
-        <p class="bd-mut">Your matches are private. Only you can see them.</p></div>${importBanner()}${adminHTML()}`;
-      wireAdmin(); return;
+        <p class="bd-mut">Your matches are private. Only you can see them.</p></div>${importBanner()}${communityShell()}${adminHTML()}`;
+      wireAdmin(); loadCommunity(); return;
     }
     const list = filtered(); const s = stats(list);
     /* pilihan deck untuk filter: deck yang pernah dicatat */
@@ -183,9 +195,10 @@
       ${importBanner()}
       ${list.length ? statsHTML(list, s) : '<div class="pf-card"><p class="bd-mut">No matches in this filter yet.</p></div>'}
       ${runsHTML()}
+      ${communityShell()}
       ${recentHTML(list)}
       ${adminHTML()}`;
-    wireAdmin(); wireTrend(list);
+    wireAdmin(); wireTrend(list); loadCommunity();
   }
   function statsHTML(list, s){
     return `<div class="pf-kpis">
@@ -225,8 +238,8 @@
     return `<div class="pf-insights">${out.join('')}</div>`;
   }
   function decksHTML(list){
-    const rows = [...groupBy(list, myKey).values()].map(l=>({ d:myDeck(l[0]), s:stats(l) })).sort((a,b)=>b.s.n - a.s.n);
-    return rows.map(r=>`<div class="pf-drow">${thumb(r.d.cover)}<div class="pf-dn"><b>${E(r.d.name)}</b> ${dots(r.d.cols)}
+    const rows = [...groupBy(list, myKey).entries()].map(([k, l])=>({ k, d:myDeck(l[0]), s:stats(l) })).sort((a,b)=>b.s.n - a.s.n);
+    return rows.map(r=>`<div class="pf-drow pf-dclick" data-pfdeck="${E(r.k)}" tabindex="0" title="Deck details & versions">${thumb(r.d.cover)}<div class="pf-dn"><b>${E(r.d.name)}</b> ${dots(r.d.cols)}
         <small>${r.s.n} match${r.s.n === 1 ? '' : 'es'} · ${rec(r.s)} · 1st ${pv(r.s.fwr)} · 2nd ${pv(r.s.swr)}</small></div>
         <span class="pf-bar" title="${pv(r.s.wr)}"><i style="width:${r.s.wr || 0}%"></i></span><b class="pf-wr">${pv(r.s.wr)}</b></div>`).join('');
   }
@@ -292,6 +305,7 @@
       return;
     }
     const rn = e.target.closest('[data-pfrun]'); if(rn){ openRun(rn.dataset.pfrun); return; }
+    const dk = e.target.closest('[data-pfdeck]'); if(dk){ openDeck(dk.dataset.pfdeck); return; }
     const mu = e.target.closest('[data-pfmu]'); if(mu && !e.target.closest('[data-pfsort]')){ openMu(mu.dataset.pfmu); return; }
     const cx = e.target.closest('[data-pfctx]'); if(cx){ S.f.ctx = cx.dataset.pfctx; saveFilt(); render(); return; }
     const so = e.target.closest('[data-pfsort]'); if(so){ S.sort = so.dataset.pfsort; render(); return; }
@@ -309,6 +323,7 @@
   document.addEventListener('keydown', e=>{
     if(e.key !== 'Enter') return;
     const mu = e.target.closest && e.target.closest('#perfWrap [data-pfmu]'); if(mu) openMu(mu.dataset.pfmu);
+    const dk = e.target.closest && e.target.closest('#perfWrap [data-pfdeck]'); if(dk) openDeck(dk.dataset.pfdeck);
   });
   document.addEventListener('change', e=>{
     if(e.target.id === 'pfDeck'){ S.f.deck = e.target.value; render(); }
@@ -476,10 +491,13 @@
       opp_name: L.name.trim(), notes: L.notes.trim(),
       games: gamesToSave().map(g=>({ r:g.r, f: g.f === true || g.f === false ? g.f : null, e:g.e })),
     };
+    /* v7.15 — jenis deck sendiri untuk data komunitas (dihitung ulang setelah kolom deck run diisi) */
+    const fixArch = () => { row.my_archetype = classifyDeck(row.deck_code) || null; };
     if(L.run){ const run = (S.runs || []).find(r=>r.id === L.run); row.run_id = L.run; row.round_no = +L.round; row.is_top = !!L.top;
       if(run){ row.played_on = run.played_on; row.context = run.context; row.deck_id = run.deck_id || null; row.deck_name = run.deck_name; row.deck_code = run.deck_code; } }
     /* saat edit, deck_code lama dipertahankan kalau deck tidak diganti (riwayat versi deck tetap utuh) */
     if(L.id){ const old = (S.logs || []).find(x=>x.id === L.id); if(old && old.deck_id && deck && old.deck_id === deck.id) row.deck_code = old.deck_code; }
+    fixArch();
     L.busy = true; drawLog();
     const { data, error } = await API().save(row);
     L.busy = false;
@@ -726,6 +744,12 @@
       S.runs = S.runs || []; if(i >= 0) S.runs[i] = data; else S.runs.unshift(data);
       /* trigger match_runs_sync sudah memperbarui ronde di server — samakan salinan lokal */
       (S.logs || []).forEach(l=>{ if(l.run_id === data.id){ l.played_on = data.played_on; l.context = data.context; l.deck_id = data.deck_id; l.deck_name = data.deck_name; l.deck_code = data.deck_code; } });
+      /* v7.15 — deck run berganti → jenis deck ronde-rondenya ikut */
+      if(run && run.deck_code !== data.deck_code && API().setMyArchetypes && !S.commOff){
+        const a = classifyDeck(data.deck_code) || '';
+        const rows = (S.logs || []).filter(l=>l.run_id === data.id && (l.my_archetype || '') !== a).map(l=>({ id:l.id, a }));
+        if(rows.length){ const r2 = await API().setMyArchetypes(rows); if(!r2.error) rows.forEach(x=>{ const l = S.logs.find(y=>y.id === x.id); if(l) l.my_archetype = x.a || null; }); }
+      }
       render(); openRun(data.id); toast(run ? 'Run updated ✓' : 'Run created ✓ Now add your rounds');
     });
   }
@@ -815,7 +839,8 @@
       return { run_id:run.id, round_no:m.round, is_top: m.stage === 'top', played_on:date, context:'store', best_of:run.best_of,
         deck_id:run.deck_id, deck_name:run.deck_name, deck_code:run.deck_code,
         opp_archetype: a ? a.id : null, opp_label: a ? a.name : (opp.deck_name || '').slice(0, 40), opp_colors: a ? (a.colors || []) : (g && g.colors ? g.colors : []),
-        opp_name: String(opp.display_name || '').slice(0, 40), notes:'', games: games.map(x=>({ r:x.r, f:null, e:'unk' })) };
+        opp_name: String(opp.display_name || '').slice(0, 40), notes:'', games: games.map(x=>({ r:x.r, f:null, e:'unk' })),
+        my_archetype: classifyDeck(run.deck_code) || null };
     });
     const ins = await API().saveMany(rows);
     if(ins.error){ await API().removeRun(run.id); return { error: errMsg(ins.error) || 'Could not import the rounds.' }; }
@@ -887,6 +912,7 @@
     m.querySelector('.mx-box').addEventListener('click', async e=>{
       if(e.target.closest('[data-muact="log"]')){ openLog({ opp:key }); return; }
       const rn = e.target.closest('[data-pfrun]'); if(rn){ openRun(rn.dataset.pfrun); return; }
+      const dk = e.target.closest('[data-pfdeck]'); if(dk){ openDeck(dk.dataset.pfdeck); return; }
       const ed = e.target.closest('[data-pfedit]'); if(ed){ const l = (S.logs || []).find(x=>x.id === ed.dataset.pfedit); if(l) openLog({ edit:l }); return; }
       const del = e.target.closest('[data-pfdel]');
       if(del){
@@ -1049,11 +1075,169 @@
     });
   }
 
+  /* =================== v7.15 — JENIS DECK SENDIRI =================== */
+  /* deck → archetype: warna harus sama persis; kalau ada beberapa, yang kartu kuncinya ada di deck menang; seri → urutan terkecil */
+  function classifyDeck(code){
+    if(!code || !S.arch) return null;
+    const r = decodeDeck(code); const deck = (r && r.deck) || {};
+    if(!Object.keys(deck).length) return null;
+    const cols = deckStats(deck).warna;
+    const cand = S.arch.filter(a=>a.active !== false && (a.colors || []).length === cols.length && cols.every(c=>a.colors.includes(c)));
+    if(!cand.length) return null;
+    const keyed = cand.filter(a=>a.key_card && deck[a.key_card]);
+    return (keyed.length ? keyed : cand).slice().sort((a,b)=>(a.sort ?? 100) - (b.sort ?? 100) || a.name.localeCompare(b.name))[0].id;
+  }
+  /* isi my_archetype catatan lama yang masih kosong (hanya saat berbagi aktif; sekali per sesi + saat opt-in) */
+  async function backfillMyArch(force){
+    if(S.commOff || !S.share || (S.backfilled && !force) || !S.logs || !API().setMyArchetypes) return;
+    S.backfilled = true;
+    const rows = []; S.logs.forEach(l=>{ if(!l.my_archetype && l.deck_code){ const a = classifyDeck(l.deck_code); if(a) rows.push({ id:l.id, a }); } });
+    if(!rows.length) return;
+    const { error } = await API().setMyArchetypes(rows);
+    if(!error) rows.forEach(r=>{ const l = S.logs.find(x=>x.id === r.id); if(l) l.my_archetype = r.a; });
+  }
+
+  /* =================== DATA KOMUNITAS =================== */
+  const commKey = () => S.commF.days + '|' + S.commF.scope;
+  function communityShell(){
+    if(S.commOff) return '';
+    return `<div class="pf-card" id="pfComm">${communityInner()}</div>`;
+  }
+  function optInHTML(){
+    if(S.share) return `<p class="pf-share-on">✓ You're adding your games to community data anonymously. <button type="button" class="pf-link" data-cmact="off">Stop sharing</button></p>`;
+    return `<div class="pf-optin"><div><b>Add your games to community data?</b>
+      <p>Only your deck type, your opponent's deck type, who went first and the results are counted, added together with other players'.
+      Your name, your opponents' names, your notes and your deck list are never shared. You can stop at any time and your games stop counting right away.</p></div>
+      <button type="button" class="btn2 main" data-cmact="on">Share my games anonymously</button></div>`;
+  }
+  function communityInner(){
+    const tools = `<select data-cmf="days" aria-label="Period">${[['30','Last 30 days'],['90','Last 90 days'],['0','All time']].map(([v,t])=>`<option value="${v}" ${S.commF.days === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      <select data-cmf="scope" aria-label="Games">${[['all','All games'],['competitive','Store & tournament only']].map(([v,t])=>`<option value="${v}" ${S.commF.scope === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
+    const head = `<h4>🌐 Community matchups <span class="bd-sp"></span><span class="pf-cmtools">${tools}</span></h4>`;
+    const d = S.comm && S.comm[commKey()];
+    let body;
+    if(!d) body = '<p class="bd-mut">Loading community data…</p>';
+    else if(d.error) body = `<p class="bd-mut">${E(errMsg(d.error))}</p>`;
+    else if(!d.data.enough) body = `<p class="bd-mut pf-cmempty">Not enough shared games yet: <b>${d.data.players}</b> player${d.data.players === 1 ? '' : 's'} sharing <b>${d.data.logs}</b> match${d.data.logs === 1 ? '' : 'es'} in this period.
+      Community numbers appear once at least ${d.data.min_players} players share their games${S.share ? '' : ', so yours would help'}.</p>`;
+    else body = communityData(d.data);
+    return head + optInHTML() + body;
+  }
+  function communityData(c){
+    const cells = c.cells || []; const by = new Map(cells.map(x=>[x.a + '|' + x.b, x]));
+    const tot = new Map(); cells.forEach(x=>{ tot.set(x.a, (tot.get(x.a) || 0) + x.games); });
+    const metaN = new Map((c.meta || []).map(m=>[m.arch, m.logs]));
+    const ids = [...tot.keys()].filter(id=>archById(id)).sort((a,b)=>(metaN.get(b) || 0) - (metaN.get(a) || 0) || tot.get(b) - tot.get(a)).slice(0, 10);
+    const short = a => a.name.length > 12 ? a.name.slice(0, 11) + '…' : a.name;
+    const head = ids.map(id=>{ const a = archById(id); return `<th title="${E(a.name)}">${thumb(a.key_card, 'pf-cmth')}<span>${E(short(a))}</span></th>`; }).join('');
+    const rows = ids.map(r=>{ const ra = archById(r);
+      return `<tr><th class="pf-cmrh">${E(ra.name)} ${thumb(ra.key_card, 'pf-cmth')}</th>${ids.map(col=>{
+        const x = by.get(r + '|' + col); const ca = archById(col);
+        if(r === col) return `<td class="pf-cmmir" title="Mirror match">mirror</td>`;
+        if(!x) return `<td class="pf-cmna" title="No games yet">–<small>0 games</small></td>`;
+        if(x.wins == null) return `<td class="pf-cmna" title="${E(ra.name)} vs ${E(ca.name)}: not enough games yet">–<small>${x.games} game${x.games === 1 ? '' : 's'}</small></td>`;
+        const wr = Math.round(x.wins / x.games * 100);
+        return `<td style="background:${cellBg(wr)}" title="${E(ra.name)} vs ${E(ca.name)}: ${wr}% of ${x.games} games">${wr}%<small>${x.games} games</small></td>`; }).join('')}</tr>`; }).join('');
+    const mt = c.meta_total || 0;
+    const meta = (c.meta || []).filter(m=>archById(m.arch)).slice(0, 8).map(m=>{ const a = archById(m.arch); const p = mt ? Math.round(m.logs / mt * 100) : 0;
+      return `<div class="pf-mshare">${thumb(a.key_card, 'pf-cmth')}<span class="pf-mn">${E(a.name)} ${dots(a.colors)}</span><span class="pf-bar"><i style="width:${p}%"></i></span><b>${p}%</b></div>`; }).join('');
+    const f = c.first ? Math.round(c.first.wins / c.first.games * 100) : null;
+    return `<p class="bd-mut">Game win rate of the deck on the left against the deck on top, from <b>${c.players}</b> players who share their games (${c.logs} matches since ${E(fmtDate(c.since))}).
+      A cell needs at least ${c.min_games} games from ${c.min_players} different players before it shows a number.</p>
+      ${ids.length ? `<div class="pf-tblwrap"><table class="pf-cm"><tr><th></th>${head}</tr>${rows}</table></div>
+      <div class="pf-legend"><span><i style="background:var(--pf-fav)"></i>Left deck favoured</span><span><i style="background:var(--pf-mid)"></i>Even</span><span><i style="background:var(--pf-unf)"></i>Left deck unfavoured</span><span>– = not enough games yet</span></div>` : '<p class="bd-mut">No matchups with known deck types yet.</p>'}
+      <div class="pf-grid2 pf-cmgrid"><div><h4>Most played decks <span class="bd-sp"></span><small>share of opponents faced</small></h4>${meta || '<p class="bd-mut">Not enough data yet.</p>'}</div>
+        <div><h4>Going first</h4>${f == null ? '<p class="bd-mut">Not enough games with turn order yet.</p>' : `<div class="pf-cmfirst"><b>${f}%</b><span>of games are won by the player who goes first (${c.first.games} games).</span></div>`}</div></div>`;
+  }
+  async function loadCommunity(force){
+    if(S.commOff || !API().community) return;
+    const key = commKey(); S.comm = S.comm || {};
+    if(S.comm[key] && !force){ paintCommunity(); return; }
+    const { data, error } = await API().community(+S.commF.days, S.commF.scope);
+    if(error && error.missing){ S.commOff = true; const el = q1('#pfComm'); if(el) el.remove(); return; }
+    S.comm[key] = error ? { error } : { data };
+    paintCommunity();
+  }
+  function paintCommunity(){ const el = q1('#pfComm'); if(el) el.innerHTML = communityInner(); }
+  document.addEventListener('change', e=>{
+    const f = e.target.dataset && e.target.dataset.cmf; if(!f || !e.target.closest('#pfComm')) return;
+    S.commF[f] = e.target.value; try{ localStorage.setItem('mhr_perf_comm', JSON.stringify(S.commF)); }catch(er){}
+    paintCommunity(); loadCommunity();
+  });
+  document.addEventListener('click', async e=>{
+    const b = e.target.closest('#pfComm [data-cmact]'); if(!b) return;
+    const on = b.dataset.cmact === 'on';
+    if(!on && !confirm('Stop adding your games to community data? They stop counting right away. You can turn it back on at any time.')) return;
+    b.disabled = true;
+    const { data, error } = await API().setShare(on);
+    b.disabled = false;
+    if(error || !data){ alert(errMsg(error) || 'Could not save. Please try again.'); return; }
+    S.share = !!data.share_community;
+    if(S.share) await backfillMyArch(true);
+    S.comm = {}; paintCommunity(); loadCommunity(true);
+    toast(S.share ? 'Thanks! Your games now count in community data ✓' : 'You stopped sharing. Your games no longer count.');
+  });
+
+  /* =================== DETAIL DECK & VERSI =================== */
+  const sigOf = code => { const r = code ? decodeDeck(code) : null; const d = (r && r.deck) || {}; const k = Object.keys(d).sort(); return k.length ? k.map(n=>n + 'x' + d[n]).join(',') : ''; };
+  function diffDecks(codeA, codeB){
+    const a = ((codeA && decodeDeck(codeA)) || {}).deck || {}, b = ((codeB && decodeDeck(codeB)) || {}).deck || {};
+    const out = []; new Set([...Object.keys(a), ...Object.keys(b)]).forEach(no=>{ const d = (b[no] || 0) - (a[no] || 0); if(d) out.push({ no, d }); });
+    const nm = no => { const c = DB.find(x=>x.no === no); return c ? (typeof cardName === 'function' ? cardName(c) : (c.nm_en || c.nm)) : no; };
+    out.sort((x, y)=>y.d - x.d);
+    return { add: out.filter(x=>x.d > 0).reduce((s, x)=>s + x.d, 0), rem: out.filter(x=>x.d < 0).reduce((s, x)=>s - x.d, 0),
+      txt: out.map(x=>`${x.d > 0 ? '+' : '−'}${Math.abs(x.d)} ${nm(x.no)}`) };
+  }
+  async function openDeck(key){
+    const list = filtered().filter(l=>myKey(l) === key); if(!list.length) return;
+    const d = myDeck(list[0]); const s = stats(list);
+    const deckId = list[0].deck_id; const cur = deckId && (S.decks || []).find(x=>x.id === deckId);
+    /* versi = isi deck yang sama persis; urut dari pertama dimainkan */
+    const groups = new Map();
+    chrono(list).forEach(l=>{ const k = sigOf(l.deck_code) || '?'; if(!groups.has(k)) groups.set(k, { k, code:l.deck_code, logs:[] }); groups.get(k).logs.push(l); });
+    const vers = [...groups.values()];
+    let labels = new Map();
+    const verRows = () => {
+      let prev = null; let num = 0;
+      return vers.map(v=>{ const st = stats(v.logs); const first = v.logs[0].played_on, last = v.logs[v.logs.length - 1].played_on;
+        const known = v.k !== '?'; if(known) num++;
+        const df = known && prev ? diffDecks(prev.code, v.code) : null; if(known) prev = v;
+        const isCur = cur && known && sigOf(cur.code) === v.k;
+        const name = !known ? 'List not saved' : (labels.get(v.k) || `Version ${num}`);
+        return `<div class="pf-ver"><div class="pf-mm"><b>${E(name)}</b>${isCur ? '<span class="pf-tag pf-ev">current list</span>' : ''}
+            <small>${E(fmtDate(first))}${first !== last ? ' – ' + E(fmtDate(last)) : ''} · ${st.n} match${st.n === 1 ? '' : 'es'} · ${rec(st)} · 1st ${pv(st.fwr)} · 2nd ${pv(st.swr)}</small>
+            ${df ? `<small class="pf-diff" title="${E(df.txt.join(', '))}">vs previous: <b>+${df.add}</b> / <b>−${df.rem}</b> cards${df.txt.length ? ' · ' + E(df.txt.slice(0, 6).join(', ')) + (df.txt.length > 6 ? ' …' : '') : ''}</small>` : ''}</div>
+          <span class="pf-bar" title="${pv(st.wr)}"><i style="width:${st.wr || 0}%"></i></span><b class="pf-wr">${pv(st.wr)}</b></div>`; }).join('');
+    };
+    const mu = [...groupBy(list, oppKey).entries()].map(([k, l])=>({ k, d:oppDeck(l[0]), s:stats(l) })).sort((a,b)=>b.s.n - a.s.n);
+    const myType = (()=>{ const code = (cur && cur.code) || list[list.length - 1].deck_code; const id = classifyDeck(code); const a = id && archById(id); return a ? a.name : ''; })();
+    const m = mxOpen(`<h3 class="pf-muh">${thumb(d.cover)} ${E(d.name)} ${dots(d.cols)}</h3>
+      <p class="bd-mut">In the current filter (${E(S.f.per === 'all' ? 'all time' : 'last ' + S.f.per + ' days')}${S.f.ctx ? ', ' + E(CTX[S.f.ctx].label) : ''})${myType ? ` · counts as <b>${E(myType)}</b> in community data` : ''}.</p>
+      <div class="pf-kpis pf-kpis4">
+        <div class="pf-kpi"><span class="k">Record</span><b>${rec(s)}</b><small>${s.n} match${s.n === 1 ? '' : 'es'}</small></div>
+        <div class="pf-kpi"><span class="k">Match win rate</span><b>${pv(s.wr)}</b><small>games ${s.gW}/${s.gN}</small></div>
+        <div class="pf-kpi"><span class="k">Going 1st</span><b>${pv(s.fwr)}</b><small>${s.fN} games</small></div>
+        <div class="pf-kpi"><span class="k">Going 2nd</span><b>${pv(s.swr)}</b><small>${s.sN} games</small></div></div>
+      <div class="pf-card"><h4>Versions <span class="bd-sp"></span><small>${vers.filter(v=>v.k !== '?').length} different list${vers.filter(v=>v.k !== '?').length === 1 ? '' : 's'}</small></h4>
+        <p class="bd-mut">Each time you change the cards, the next matches count for a new version, so you can see if a change helped.</p>
+        <div id="pfVers">${verRows()}</div></div>
+      <div class="pf-card"><h4>Matchups with this deck</h4><div class="pf-tblwrap"><table class="pf-tbl"><tr><th>Opponent deck</th><th class="r">Matches</th><th class="r">W-L-D</th><th class="r">Win rate</th><th class="r hm">1st</th><th class="r hm">2nd</th></tr>
+        ${mu.map(r=>`<tr class="${r.s.n < MIN_N ? 'low' : ''}"><td><div class="pf-arch">${thumb(r.d.cover)}<div><b>${E(r.d.name)}</b><small>${dots(r.d.cols)}</small></div></div></td><td class="r">${r.s.n}</td><td class="r">${rec(r.s)}</td>
+          <td class="r"><span class="pf-cell" style="background:${cellBg(r.s.n < MIN_N ? null : r.s.wr)}">${pv(r.s.wr)}</span></td><td class="r hm">${pv(r.s.fwr)}</td><td class="r hm">${pv(r.s.swr)}</td></tr>`).join('')}</table></div></div>`, 'pf-mx pf-mxw');
+    /* label versi yang disimpan manual di riwayat versi deck (v6.97) */
+    if(deckId && window.MHRDecks && window.MHRDecks.listVersions){
+      try{
+        const { data } = await window.MHRDecks.listVersions(deckId);
+        (data || []).forEach(v=>{ if(v.label){ const k = sigOf(v.deck_code); if(k && !labels.has(k)) labels.set(k, v.label); } });
+        const box = m.querySelector('#pfVers'); if(box && labels.size) box.innerHTML = verRows();
+      }catch(er){}
+    }
+  }
   if(window.MHRAuth && window.MHRAuth.ready && window.MHRAuth.onAuthChange){
-    window.MHRAuth.onAuthChange(()=>{ S.logs = null; S.decks = null; S.runs = null; S.entries = null; });
+    window.MHRAuth.onAuthChange(()=>{ S.logs = null; S.decks = null; S.runs = null; S.entries = null; S.share = null; S.comm = null; S.backfilled = false; });
   }
   window.MHRPerfUI = {
-    renderTab, refresh, openLog, openRun, openRunForm,
+    renderTab, refresh, openLog, openRun, openRunForm, openDeck, classifyDeck,
     reset(){ S.logs = null; S.decks = null; S.err = null; S.runs = null; S.entries = null; },
     _state: S, _stats: stats, _renderRunImage: renderRunImage,
   };
