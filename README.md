@@ -592,6 +592,13 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Jadwal Weekly Rush LGS: Hobi.Q (Tangerang) pindah lokasi & jadwal baru — 29 Oktober 2026 *(`data.js`, `index.html`)*
+
+- **Hobi.Q** pindah lokasi: peta baru https://share.google/PWrWDm28sTOzSiNEn (dulu `maps.app.goo.gl/sC5ajRoVNXTZbrnP7`).
+- Jadwal baru **Selasa 19:30 - Close** dan **Kamis 19:30 - Close** (`jd:[ {h:2, w:'19:30 - Close'}, {h:4, w:'19:30 - Close'} ]`), menggantikan Senin 19:15
+  (Starter deck only) dan Kamis 19:15 — permintaan pemilik. Kota tetap Tangerang, Instagram tetap `hobi.quarter`.
+- `LGS_UPDATE` → 29 October 2026; cache-buster `index.html` → `data.js?v=7.02-lgs1029b` (huruf `b`: jam diubah ke "- Close" di hari yang sama).
+
 ### Data — Jadwal Weekly Rush LGS: Ogre Kelapa Gading (Jakarta) ditambahkan — 28 Oktober 2026 *(`data.js`, `index.html`)*
 
 - Toko baru **Ogre Kelapa Gading** (Jakarta, WIB): **Selasa 19:30 - Close** (`jd:[ {h:2, w:'19:30 - Close'} ]`),
