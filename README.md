@@ -592,6 +592,24 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Errata V.2: SP01-026 「Vigil of Love」 Amazing Spider-Man (teks Inggris + gambar EN) — 29 Oktober 2026 *(`cards.js`, `index.html`, `sw.js`, `images/en/SP01-026.jpg`, `api/v1/`)*
+
+Errata resmi untuk teks Inggris **SP01-026** (permintaan pemilik): yang ditukar lewat COUNTER·ACTI bukan lagi khusus
+karakter, tapi kartu apa saja milik Anda dengan nama 【Ghost-Spider】/【Gwen】 di field.
+- **Sebelum** — EN: `...You swap this card in HAND and 1 of your characters with 【Ghost-Spider】 or 【Gwen】 in their names on the field. ...`
+- **Sesudah** — EN: `...You swap this card in HAND and 1 of your card with 【Ghost-Spider】 or 【Gwen】 in their names on the field. ...`
+  (sisa teks tidak berubah). Teks Indonesia (`e`) sudah berbunyi "1 kartu Anda di FIELD", jadi tidak diubah.
+- `cards.js`: `e_en` SP01-026 diganti + field `er:"V.2"` (satu gelombang dengan BP01-061) → lencana **Errata** muncul
+  dengan tooltip "Errata V.2". Cache-buster `index.html` → `cards.js?v=7.02-er1029`.
+- **Gambar `images/en/SP01-026.jpg` ikut diedit**: kata "characters" di baris COUNTER·ACTI diganti "card" — latar
+  dihapus dengan inpainting, huruf c/a/r diambil dari kata "characters" dan d dari "and" di gambar yang sama (font &
+  warna identik). Hanya blok JPEG area kata itu yang diganti (`jpegtran -drop`, tabel kuantisasi asli); piksel di luar
+  area 80×32 px itu identik dengan gambar lama. Gambar Indonesia `images/SP01-026.jpg` sudah benar, tidak disentuh.
+- `sw.js`: `CACHE_VERSION` **v9 → v10** supaya HP/browser yang pernah membuka kartu ini mengambil gambar baru
+  (efek samping: gambar kartu diunduh ulang sekali per pengguna).
+- `api/v1/` dibuat ulang (`node tools/generate_api.js`): hanya kolom `errata` SP01-026-GR (kosong → V.2) yang berubah;
+  `updated` 2026-10-29, `data_hash` baru. Halaman statis `cards/SP01-026.html` tidak memuat teks efek, jadi tidak diubah.
+
 ### Data — Jadwal Weekly Rush LGS: Hobi.Q (Tangerang) pindah lokasi & jadwal baru — 29 Oktober 2026 *(`data.js`, `index.html`)*
 
 - **Hobi.Q** pindah lokasi: peta baru https://share.google/PWrWDm28sTOzSiNEn (dulu `maps.app.goo.gl/sC5ajRoVNXTZbrnP7`).
