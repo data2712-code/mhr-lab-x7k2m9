@@ -592,6 +592,23 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Errata V.2: SP01-061 「Spider-Archenemy」 Mr. Negative (teks Indonesia + gambar ID) — 29 Oktober 2026 *(`cards.js`, `index.html`, `sw.js`, `images/SP01-061.jpg`, `images/SP01-061_MR.jpg`, `api/v1/`)*
+
+Errata teks Indonesia **SP01-061** (permintaan pemilik): syarat ACTI【HAND】 membandingkan kartu tertutup di BASE dengan
+jumlah karakter di **BASE**, bukan di BATTLE — sekarang sama dengan teks Inggris (`...the number of your characters in BASE...`),
+jadi `e_en` tidak diubah.
+- **Sebelum** — ID: `...jumlah kartu tertutup di BASE sama dengan jumlah karakter di BATTLE Anda, tempatkan kartu ini...`
+- **Sesudah** — ID: `...jumlah kartu tertutup di BASE sama dengan jumlah karakter di BASE Anda, tempatkan kartu ini...`
+  (sisa teks tidak berubah).
+- `cards.js`: `e` SP01-061 diganti + `er:"V.2"` → lencana **Errata** (tooltip "Errata V.2"). Cache-buster
+  `index.html` → `cards.js?v=7.02-er1029b`.
+- **Gambar Indonesia ikut diedit** (`images/SP01-061.jpg` UR dan `images/SP01-061_MR.jpg`): "BATTLE" di baris ke-2 efek
+  jadi "BASE" — huruf B & A asli dibiarkan di tempatnya, "TTLE" dihapus (inpainting), S & E diambil dari kata "BASE" di
+  baris ke-4 kartu yang sama (font, ukuran & warna identik, baseline disejajarkan). Hanya blok JPEG area kata itu
+  (64×32 px) yang diganti (`jpegtran -drop`, tabel kuantisasi asli); piksel di luarnya identik. Gambar Inggris sudah benar.
+- `sw.js`: `CACHE_VERSION` **v10 → v11** (gambar cache-first; sekalian aman kalau v10 dari errata SP01-026 sudah ter-push).
+- `api/v1/` dibuat ulang: kolom `effect` dan `errata` SP01-061-UR & SP01-061-MR berubah, `data_hash` baru.
+
 ### Data — Errata V.2: SP01-026 「Vigil of Love」 Amazing Spider-Man (teks Inggris + gambar EN) — 29 Oktober 2026 *(`cards.js`, `index.html`, `sw.js`, `images/en/SP01-026.jpg`, `api/v1/`)*
 
 Errata resmi untuk teks Inggris **SP01-026** (permintaan pemilik): yang ditukar lewat COUNTER·ACTI bukan lagi khusus

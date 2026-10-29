@@ -26,7 +26,7 @@
    supaya versi baru langsung dipakai tanpa perlu semua tab ditutup dulu.
    =================================================================== */
 
-const CACHE_VERSION = 'v10'; // 29 Okt 2026 — gambar images/en/SP01-026.jpg diedit untuk errata V.2 (v9: v6.92 gambar BP01-061; v8: v6.65 tournaments.js). Gambar cache-first, jadi wajib naik supaya HP lama ambil ulang
+const CACHE_VERSION = 'v11'; // 29 Okt 2026 — gambar images/SP01-061.jpg & SP01-061_MR.jpg diedit untuk errata V.2 (v10: images/en/SP01-026.jpg; v9: v6.92 gambar BP01-061; v8: v6.65 tournaments.js). Gambar cache-first, jadi wajib naik supaya HP lama ambil ulang
 const CACHE_STATIC = `mhr-shell-${CACHE_VERSION}`;
 const CACHE_IMAGES = `mhr-images-${CACHE_VERSION}`;
 
