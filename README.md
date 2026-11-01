@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.17** · 1 November 2026
+**Versi saat ini: v7.18** · 1 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -591,6 +591,28 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.18 — Performance: "＋ Log match" khusus casual, "🏆 New run" untuk Store / Weekly Rush, Tournament & Community Tournament — 1 November 2026 *(`index.html`, `perf-ui.js`)*
+
+Permintaan pemilik: dua fitur yang mirip membingungkan pengguna. Sekarang pembagiannya tegas.
+- **＋ Log match** hanya untuk match **casual**: pilihan "Where" (Casual / Store / Tournament) dihapus dari form, judul jadi
+  "＋ Log a casual match", dan ada catatan + tautan "🏆 New run" (langsung membuka form run) untuk store, Weekly Rush,
+  tournament atau community tournament. Tombol di detail matchup jadi "＋ Log a casual match vs …".
+- **🏆 New run** → pilihan **Type**: 🏪 Store / Weekly Rush · 🏆 Tournament · **👥 Community Tournament** (Casual dihapus).
+  Judul form "🏆 New run" (dulu "New tournament run"); tombol di layar kosong jadi "＋ Log a casual match" + "🏆 New run".
+- **Tanpa migrasi database.** Community Tournament disimpan sebagai `context = 'casual'` di `match_runs` (nilai yang sudah
+  ada), dan rondenya ikut `casual` lewat trigger `match_runs_sync`. Di tampilan (`runCtx` / `logCtx` / `dbCtx` di
+  `perf-ui.js`): run `casual` = Community Tournament, match `casual` yang punya `run_id` = Community Tournament, match
+  `casual` tanpa run = Casual. Run "Casual" lama otomatis tampil sebagai Community Tournament.
+  Catatan: di kartu Community matchups, cakupan "Store & tournament only" (RPC `mhr_community_meta`) tidak menghitung
+  Community Tournament (tetap seperti data casual).
+- **Data lama tetap utuh**: match lama tanpa run bertipe Store/Tournament tetap tersimpan apa adanya; saat diedit, form
+  menampilkan "… logged before runs existed, so it keeps its type" dan tipenya tidak diubah.
+- Filter di Performance: All · 🎲 Casual · 🏪 Store / Weekly Rush · 🏆 Tournament · 👥 Community Tournament. CSV ikut label baru.
+- CSS kecil `.pf-ctxnote` / `.pf-linkbtn`; `perf-ui.js?v=7.18`; versi 7.18 (komentar, meta, footer).
+- Dicek: 30 tes Playwright dengan backend palsu (desktop 1280 & HP 390): chip filter & isinya, form Log match tanpa pilihan
+  tipe + tersimpan `casual` tanpa run, tautan New run, pilihan tipe run, Community Tournament tersimpan `casual`, run lama
+  `casual` tampil Community Tournament, edit match Store lama tetap `store`, tanpa scroll horizontal, tanpa error JS.
 
 ### Data — Artikel News: Multiverse Battle October 2026 + gambar cover — 1 November 2026 *(`images/news/multiverse-battle-october-2026-results/cover.jpg`)*
 

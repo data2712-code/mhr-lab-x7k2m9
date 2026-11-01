@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR DECK LAB — perf-ui.js (v7.13, Performance Analytics Tahap 1; v7.14 Tahap 2)
+   MHR DECK LAB — perf-ui.js (v7.13, Performance Analytics Tahap 1; v7.14 Tahap 2; v7.18 Log match = casual)
    ===================================================================
    Tampilan tab "📈 Performance" di My Dashboard (#perfWrap):
      • Catat match (Bo1/Bo3): deck sendiri, deck lawan (daftar kurasi admin
@@ -41,7 +41,17 @@
     casual:     { icon:'🎲', label:'Casual',              short:'Casual' },
     store:      { icon:'🏪', label:'Store / Weekly Rush', short:'Store' },
     tournament: { icon:'🏆', label:'Tournament',          short:'Tour.' },
+    community:  { icon:'👥', label:'Community Tournament', short:'Community' },
   };
+  /* v7.18 — pemisahan "＋ Log match" (HANYA casual) vs "🏆 New run" (Store / Weekly Rush, Tournament,
+     Community Tournament). TANPA migrasi database: "Community Tournament" disimpan sebagai context
+     'casual' di match_runs (nilai yang sudah ada; run 'casual' lama otomatis tampil sebagai Community
+     Tournament) dan rondenya ikut 'casual' lewat trigger match_runs_sync. Di tampilan, match 'casual'
+     yang punya run_id dibaca sebagai 'community'; match 'casual' tanpa run = Casual biasa.
+     Match lama tanpa run dengan tipe store/tournament tetap disimpan apa adanya. */
+  const runCtx = r => r && r.context === 'casual' ? 'community' : (r && CTX[r.context] ? r.context : 'store');
+  const logCtx = l => l.context === 'casual' && l.run_id ? 'community' : (CTX[l.context] ? l.context : 'casual');
+  const dbCtx = k => k === 'community' ? 'casual' : k;
   const END = { rp:'9 Rush Points', eff:'Card effect', deck:'Deck out', con:'Concede', time:'Time', unk:'Not recorded' };
   const END_COL = { rp:'#3987e5', eff:'#d95926', deck:'#199e70', con:'#c98500', time:'#6b7684', unk:'#3a4350' };
   const PLACES = ['1st','2nd','3rd','4th','Top 4','Top 8','Top 16','Top 32','Swiss only','Dropped'];
@@ -114,7 +124,7 @@
     const lim = S.f.per === 'all' ? null : (()=>{ const d = new Date(); d.setDate(d.getDate() - (+S.f.per)); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); })();
     return (S.logs || []).filter(l=>{
       if(S.f.deck && myKey(l) !== S.f.deck) return false;
-      if(S.f.ctx && l.context !== S.f.ctx) return false;
+      if(S.f.ctx && logCtx(l) !== S.f.ctx) return false;
       if(lim && l.played_on < lim) return false;
       return true;
     });
@@ -171,10 +181,10 @@
     const logs = S.logs || [];
     if(!logs.length){
       w.innerHTML = `<div class="pf-empty"><h3>📈 Track how your decks really perform</h3>
-        <p>Log each match you play, from casual games with friends to big tournaments: your deck, your opponent's deck, who went first and how each game ended.
+        <p>Log each match you play: casual games with <b>＋ Log a casual match</b>, and store, Weekly Rush, tournament or community tournament rounds with <b>🏆 New run</b>. Your deck, your opponent's deck, who went first and how each game ended.
         MHR Deck Lab turns it into your win rate, your best and worst matchups, and whether you do better going first or second.</p>
-        <div class="bd-btns" style="justify-content:center"><button type="button" class="btn2 main" data-pfact="log">＋ Log your first match</button>
-          ${S.runsOff ? '' : '<button type="button" class="btn2" data-pfact="newrun">🏆 Log a tournament run</button>'}</div>
+        <div class="bd-btns" style="justify-content:center"><button type="button" class="btn2 main" data-pfact="log">＋ Log a casual match</button>
+          ${S.runsOff ? '' : '<button type="button" class="btn2" data-pfact="newrun">🏆 New run</button>'}</div>
         <p class="bd-mut">Your matches are private. Only you can see them.</p></div>${importBanner()}${communityShell()}${adminHTML()}`;
       wireAdmin(); loadCommunity(); return;
     }
@@ -189,8 +199,8 @@
         <div class="pf-chips">${[['', 'All']].concat(Object.entries(CTX).map(([k,c])=>[k, c.icon + ' ' + c.label])).map(([k,t])=>`<button type="button" class="dk-chip" data-pfctx="${k}" aria-pressed="${S.f.ctx === k}">${E(t)}</button>`).join('')}</div>
         <span class="bd-sp"></span>
         <button type="button" class="btn2" data-pfact="csv" title="Download the matches in this filter as a CSV file">⬇ CSV</button>
-        ${S.runsOff ? '' : '<button type="button" class="btn2" data-pfact="newrun" title="A tournament or store event with several rounds">🏆 New run</button>'}
-        <button type="button" class="btn2 main" data-pfact="log">＋ Log match</button>
+        ${S.runsOff ? '' : '<button type="button" class="btn2" data-pfact="newrun" title="Store / Weekly Rush, tournament or community tournament: an event with several rounds">🏆 New run</button>'}
+        <button type="button" class="btn2 main" data-pfact="log" title="A casual game, e.g. with friends">＋ Log match</button>
       </div>
       ${importBanner()}
       ${list.length ? statsHTML(list, s) : '<div class="pf-card"><p class="bd-mut">No matches in this filter yet.</p></div>'}
@@ -267,7 +277,7 @@
           <td class="r hm">${pv(r.s.fwr)}</td><td class="r hm">${pv(r.s.swr)}</td><td class="r hm">${r.s.gW}/${r.s.gN}</td></tr>`; }).join('');
   }
   function matchRow(l){
-    const o = oppDeck(l), d = myDeck(l), c = CTX[l.context] || CTX.casual;
+    const o = oppDeck(l), d = myDeck(l), c = CTX[logCtx(l)] || CTX.casual;
     const g = l.games || [];
     const sup = f => f === true ? '¹' : f === false ? '²' : '';
     const pips = l.best_of === 3 ? `<span class="pf-pips">${g.map(x=>`<i class="${x.r}">${x.r}${sup(x.f)}</i>`).join('')}</span>` : '';
@@ -356,7 +366,7 @@
     Object.assign(L, {
       id: ed ? ed.id : null,
       deck: deckSel, deckName: ed && deckSel === '__other' ? ed.deck_name : (last.deckName || ''),
-      ctx: ed ? ed.context : (CTX[last.ctx] ? last.ctx : 'casual'),
+      ctx: ed ? ed.context : 'casual',   /* v7.18 — Log match = casual saja */
       bo: ed ? ed.best_of : (last.bo === 3 ? 3 : 1),
       opp: ed ? (ed.opp_archetype || '__other') : (preset.opp || ''),
       oCols: ed && !ed.opp_archetype ? [...(ed.opp_colors || [])] : [], oLabel: ed && !ed.opp_archetype ? (ed.opp_label || '') : '',
@@ -371,7 +381,7 @@
     if(ed && ed.opp_archetype && !archById(ed.opp_archetype)){ L.opp = '__other'; L.oCols = [...(ed.opp_colors || [])]; L.oLabel = ed.opp_label || ''; }
     if(!L.opp){ const r = recentOpps(); L.opp = ''; if(r.length === 0) L.opp = '__other'; }
     normGames();
-    const m = mxOpen(`<h3>${L.id ? (run ? '✏️ Edit round' : '✏️ Edit match') : (run ? '＋ Add a round' : '＋ Log a match')}</h3><div id="pfLog"></div>`, 'pf-mx');
+    const m = mxOpen(`<h3>${L.id ? (run ? '✏️ Edit round' : '✏️ Edit match') : (run ? '＋ Add a round' : '＋ Log a casual match')}</h3><div id="pfLog"></div>`, 'pf-mx');
     drawLog();
     m.querySelector('#pfLog').addEventListener('click', onLogClick);
     m.querySelector('#pfLog').addEventListener('input', onLogInput);
@@ -417,7 +427,8 @@
           ${L.deck === '__other' ? `<input type="text" data-lf="deckName" maxlength="60" placeholder="Deck name, e.g. Red Blue Aggro" value="${E(L.deckName)}">` : ''}</label>
         <label class="bd-f"><span>Date</span><input type="date" data-lf="date" value="${E(L.date)}" max="${todayISO()}"></label>
       </div>
-      <div class="bd-f"><span>Where</span><div class="pf-seg wide" data-lseg="ctx">${Object.entries(CTX).map(([k,c])=>`<button type="button" data-v="${k}" aria-pressed="${L.ctx === k}">${c.icon} ${E(c.label)}</button>`).join('')}</div></div>`}
+      ${L.ctx === 'casual' ? `<p class="pf-ctxnote">🎲 <b>Casual match</b> · For a store, Weekly Rush, tournament or community tournament, use <button type="button" class="pf-linkbtn" data-lf-act="torun">🏆 New run</button> so all your rounds stay together.</p>`
+        : `<p class="pf-ctxnote">${CTX[L.ctx].icon} <b>${E(CTX[L.ctx].label)}</b> · logged before runs existed, so it keeps its type.</p>`}`}
       <div class="bd-f"><span>Opponent's deck</span>
         ${(S.arch || []).length > 8 ? `<input type="search" data-lf="q" placeholder="Search deck or colour…" value="${E(L.q)}">` : ''}
         <div class="pf-opps" id="pfOpps">${oppTiles()}</div>
@@ -451,6 +462,7 @@
     if(gf === 'e' && e.type === 'change'){ L.games[+e.target.dataset.g].e = e.target.value; }
   }
   function onLogClick(e){
+    if(e.target.closest('[data-lf-act="torun"]')){ openRunForm(null); return; }   /* v7.18 — pindah ke form New run */
     const op = e.target.closest('[data-opp]'); if(op){ L.opp = op.dataset.opp; L.err = ''; drawLog(); return; }
     const oc = e.target.closest('[data-ocol]');
     if(oc){ const c = oc.dataset.ocol; if(L.oCols.includes(c)) L.oCols = L.oCols.filter(x=>x !== c); else { L.oCols.push(c); if(L.oCols.length > 2) L.oCols.shift(); } drawLog(); return; }
@@ -523,7 +535,7 @@
     const esc = v => { const s = String(v == null ? '' : v); return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
     const head = ['date','where','best_of','my_deck','opponent_deck','opponent_colours','opponent_name','result','games','went_first_game1','tournament_run','round','notes'];
     const ft = f => f === true ? '1st' : f === false ? '2nd' : '?';
-    const rows = list.map(l=>[l.played_on, (CTX[l.context] || {}).label, 'Bo' + l.best_of, myDeck(l).name, oppDeck(l).name,
+    const rows = list.map(l=>[l.played_on, (CTX[logCtx(l)] || {}).label, 'Bo' + l.best_of, myDeck(l).name, oppDeck(l).name,
       (l.opp_colors || []).map(c=>WARNA_EN_SAFE(c)).join(' / '), l.opp_name, l.result,
       (l.games || []).map(g=>`${g.r} ${ft(g.f)} ${END[g.e] || ''}`).join(' | '), l.games && l.games[0] ? (l.games[0].f === true ? 'yes' : l.games[0].f === false ? 'no' : '') : '',
       ((S.runs || []).find(r=>r.id === l.run_id) || {}).name || '', l.run_id ? roundLabel(l) : '', l.notes]);
@@ -631,7 +643,7 @@
 
   function openRun(id){
     const run = (S.runs || []).find(r=>r.id === id); if(!run){ mxClose(); return; }
-    const st = runStats(run); const d = myDeck(run); const c = CTX[run.context] || CTX.store;
+    const st = runStats(run); const d = myDeck(run); const c = CTX[runCtx(run)];
     const info = [fmtDate(run.played_on), run.venue, run.players ? run.players + ' players' : '', 'Best of ' + run.best_of, c.label].filter(Boolean).map(E).join(' · ');
     const sup = f => f === true ? '1st' : f === false ? '2nd' : 'turn ?';
     const rows = st.rounds.map(l=>{ const o = oppDeck(l); const g = l.games || [];
@@ -688,9 +700,9 @@
     const decks = S.decks || []; const last = lastPrefs();
     const deckSel = run ? (run.deck_id && decks.some(d=>d.id === run.deck_id) ? run.deck_id : '__other')
       : (last.deck && decks.some(d=>d.id === last.deck) ? last.deck : (decks.length ? decks[0].id : '__other'));
-    const R = { ctx: run ? run.context : 'store', bo: run ? run.best_of : 1 };
+    const R = { ctx: run ? runCtx(run) : 'store', bo: run ? run.best_of : 1 };
     const lgs = (window.LGS || []).map(x=>x && x.nm).filter(Boolean);
-    const m = mxOpen(`<h3>${run ? '✏️ Edit run' : '🏆 New tournament run'}</h3>
+    const m = mxOpen(`<h3>${run ? '✏️ Edit run' : '🏆 New run'}</h3>
       <div class="pf-form" id="pfRunForm">
         <label class="bd-f"><span>Event name</span><input type="text" data-rf="name" maxlength="80" value="${E(run ? run.name : '')}" placeholder="e.g. Weekly Rush at Midgard Games"></label>
         <div class="pf-row2">
@@ -698,7 +710,7 @@
           <label class="bd-f"><span>Store / venue <em>(optional)</em></span><input type="text" data-rf="venue" maxlength="60" list="pfLgsList" value="${E(run ? run.venue : '')}" placeholder="e.g. Ogre Gandaria Neverland">
             <datalist id="pfLgsList">${lgs.map(n=>`<option value="${E(n)}">`).join('')}</datalist></label>
         </div>
-        <div class="bd-f"><span>Type</span><div class="pf-seg wide" data-rseg="ctx">${['store','tournament','casual'].map(k=>`<button type="button" data-v="${k}" aria-pressed="${R.ctx === k}">${CTX[k].icon} ${E(CTX[k].label)}</button>`).join('')}</div></div>
+        <div class="bd-f"><span>Type</span><div class="pf-seg wide" data-rseg="ctx">${['store','tournament','community'].map(k=>`<button type="button" data-v="${k}" aria-pressed="${R.ctx === k}">${CTX[k].icon} ${E(CTX[k].label)}</button>`).join('')}</div></div>
         <div class="pf-row2">
           <label class="bd-f"><span>My deck</span><select data-rf="deck">${decks.map(d=>`<option value="${E(d.id)}" ${deckSel === d.id ? 'selected' : ''}>${E(d.name)}</option>`).join('')}
             <option value="__other" ${deckSel === '__other' ? 'selected' : ''}>${decks.length ? 'A deck not saved on my account…' : 'Type the deck name…'}</option></select>
@@ -733,7 +745,7 @@
       if(!deck && !val('deckName').trim()){ err.textContent = 'Choose your deck, or type its name.'; return; }
       if(val('players') && !(players >= 2 && players <= 2048)){ err.textContent = 'Players must be a number from 2 to 2048.'; return; }
       if(byes < 0 || byes > 15){ err.textContent = 'Byes must be a number from 0 to 15.'; return; }
-      const row = { id: run ? run.id : undefined, name, played_on:date, context:R.ctx, best_of:R.bo,
+      const row = { id: run ? run.id : undefined, name, played_on:date, context:dbCtx(R.ctx), best_of:R.bo,
         deck_id: deck ? deck.id : null, deck_name: deck ? deck.name : val('deckName').trim(),
         deck_code: deck ? (run && run.deck_id === deck.id ? run.deck_code : deck.code) : '',
         players: val('players') ? players : null, placement: val('placement').trim(), venue: val('venue').trim(), byes, notes: val('notes').trim() };
@@ -908,7 +920,7 @@
         <div class="pf-kpi"><span class="k">Going 2nd</span><b>${pv(s.swr)}</b><small>${s.sN} games</small></div></div>
       <div class="pf-grid2"><div class="pf-card"><h4>By my deck</h4>${decksHTML(list)}</div><div class="pf-card"><h4>How games end</h4>${endsHTML(list)}</div></div>
       <div class="pf-card"><h4>Matches <span class="bd-sp"></span><small>${list.length}</small></h4>${c.slice(0, 30).map(l=>matchRow(l)).join('')}${c.length > 30 ? `<p class="bd-mut">+ ${c.length - 30} older matches (see Recent matches → Show all).</p>` : ''}</div>
-      ${arch && arch.active !== false ? `<div class="bd-btns"><span class="bd-sp"></span><button type="button" class="btn2 main" data-muact="log">＋ Log a match vs ${E(d.name)}</button></div>` : ''}`, 'pf-mx pf-mxw');
+      ${arch && arch.active !== false ? `<div class="bd-btns"><span class="bd-sp"></span><button type="button" class="btn2 main" data-muact="log">＋ Log a casual match vs ${E(d.name)}</button></div>` : ''}`, 'pf-mx pf-mxw');
     m.querySelector('.mx-box').addEventListener('click', async e=>{
       if(e.target.closest('[data-muact="log"]')){ openLog({ opp:key }); return; }
       const rn = e.target.closest('[data-pfrun]'); if(rn){ openRun(rn.dataset.pfrun); return; }
