@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.19** · 1 November 2026
+**Versi saat ini: v7.20** · 1 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -591,6 +591,19 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.20 — Kotak catatan "unofficial translation" SD05/SD06/PB02 dihapus; info cukup di tiap kartu — 1 November 2026 *(`index.html`)*
+
+Permintaan pemilik: kotak "⚠ SD05, SD06 & PB02: card text is an unofficial translation…" di atas daftar kartu (Deck Builder
+& Cards, v7.02) memakan ruang layar di HP dan tidak bisa ditutup.
+- Kotak `#fan2Note`, fungsi `fan2BannerUpdate()`, CSS `.fan2-note`, dan teks `fan2Banner` dihapus. `tglRilis()` tetap
+  (dipakai catatan pra-rilis di detail kartu).
+- Info per kartu: lencana kartu `fan:2` sekarang bertuliskan **UNOFFICIAL** (dulu "ID*+EN*", gaya garis putus merah sama,
+  tooltip sama) di daftar kartu dan di detail kartu; catatan "⚠ Unofficial translation…" + tanggal rilis Indonesia di
+  detail kartu tetap ada. Kartu `fan:1` (hanya teks ID yang belum resmi) tetap "ID*+EN".
+- Versi 7.20 (komentar, meta, footer).
+- Dicek: Playwright desktop 1280 & HP 390 (Deck Builder dan Cards): kotak catatan hilang, 57 kartu berlencana UNOFFICIAL,
+  tidak ada lagi "ID*+EN*", catatan di detail kartu tetap tampil, tanpa scroll horizontal, tanpa error JS.
 
 ### v7.19 — Ganti kata sandi saat sedang login — 1 November 2026 *(`index.html`, `auth.js`)*
 

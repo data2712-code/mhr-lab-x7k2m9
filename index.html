@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.19  ·  1 November 2026
+     MHR DECK LAB  ·  versi 7.20  ·  1 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.19">
+<meta name="version" content="7.20">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -151,10 +151,6 @@
   }
   .reset:hover{color:var(--paper);border-color:var(--paper)}
   .count-note{width:100%;color:var(--muted);font-size:12px}
-  /* v7.02 — catatan fan-translation SD05/SD06/PB02 */
-  .fan2-note{width:100%;font-size:12px;line-height:1.45;color:var(--paper);background:var(--panel2);
-    border:1px dashed var(--merah);border-radius:8px;padding:7px 10px;margin-top:4px}
-  .fan2-note b{color:var(--merah)}
   /* tombol filter "hanya kartu di deck" */
   .onlydeck[aria-pressed="true"]{background:var(--accent);color:#1A1206;
     border-color:var(--accent);font-weight:700}
@@ -2967,8 +2963,8 @@
       </div>
       </div>
       <div class="count-note" id="noteShown"></div>
-      <!-- v7.02 — catatan fan-translation SD05/SD06/PB02 (kartu fan:2), lihat fan2BannerUpdate() -->
-      <div class="fan2-note" id="fan2Note" hidden></div>
+      <!-- v7.20 — kotak catatan fan-translation SD05/SD06/PB02 (v7.02) DIHAPUS atas permintaan pemilik: memakan ruang
+           di HP dan tidak bisa ditutup. Info "unofficial" sekarang hanya per kartu (lencana UNOFFICIAL + catatan di detail kartu). -->
     </div>
     <div class="cards" id="cards"></div>
   </main>
@@ -3250,7 +3246,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.19</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.20</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -3831,21 +3827,10 @@ let renderCardsToken = 0;
    supaya browser sempat bernapas (mengecat, merespons ketukan) di antaranya.
    loading="lazy" pada <img> tetap jalan seperti biasa — batch ini hanya
    soal KAPAN elemen kartunya masuk DOM, bukan kapan gambarnya diunduh. */
-/* v7.02 — kotak catatan di atas daftar kartu (halaman Kartu & Deck Builder) setiap
-   kali hasil filter memuat kartu fan:2 (teks ID & EN belum resmi). */
+/* tanggal rilis "14 November 2026" (dipakai catatan pra-rilis di detail kartu) */
 function tglRilis(iso){
   const [y,m,d] = String(iso).split('-').map(Number);
   return new Date(Date.UTC(y, m-1, d)).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric', timeZone:'UTC'});
-}
-function fan2BannerUpdate(arr){
-  const el = $('#fan2Note'); if(!el) return;
-  const ada = (arr||[]).some(isFanEn);
-  el.hidden = !ada;
-  if(ada){
-    const s = (window.SETS||[]).find(x=>x.kode==='SD05');
-    const d = s && s.rilis && s.rilis.id;
-    el.innerHTML = t('fan2Banner').replace('{d}', d ? tglRilis(d) : 'TBA');
-  }
 }
 function renderCards(){
   const fb = document.querySelector('.filters');
@@ -3856,7 +3841,6 @@ function renderCards(){
   const nc = $('#navCard'); if(nc) nc.textContent = arr.length;
   updateFilterBadge();
   $('#noteShown').textContent = `${arr.length} ${t('matchCount')}.`;
-  fan2BannerUpdate(arr);
   const grid = state.view === 'grid';
   const myToken = ++renderCardsToken;
   const cardsEl = $('#cards');
@@ -3924,7 +3908,6 @@ function renderRushPoints(){
   const nc = $('#navCard'); if(nc) nc.textContent = arr.length;
   updateFilterBadge();
   $('#noteShown').textContent = `${arr.length} ${t('rpMatchCount')}.`;
-  fan2BannerUpdate([]);
   const cardsEl = $('#cards');
   cardsEl.className = 'cards grid rp-grid';
   const intro = `<div class="rp-intro">${t('rpIntro')}</div>`;
@@ -4434,10 +4417,10 @@ const T = {
   langBothFanTip: 'This card\'s Indonesian text is still a fan-made translation (NOT yet official from MHR Indonesia/CARDFUN) — the English text is official.',
   langFanNote: '⚠ The Indonesian text above is still a fan-made translation, not yet official from MHR Indonesia/CARDFUN.',
   /* v7.02 — fan:2 (SD05/SD06/PB02) */
+  langFan2Tag: 'UNOFFICIAL',   /* v7.20 — lencana kartu fan:2 (pengganti kotak catatan di atas daftar kartu) */
   langFan2Tip: 'Unofficial translation: both the Indonesian and English text are fan-made translations of the official Chinese card text. They will be updated once the official text is published on the official website.',
   langFan2Note: '⚠ Unofficial translation: the Indonesian and English text of this card are fan-made translations of the official Chinese card text (the image is the Chinese print). They will be updated regularly once the official Indonesian and English text is published on the official website.',
   preRelNote: 'Indonesian release: {d}. Not tournament-legal in Events until then.',
-  fan2Banner: '⚠ <b>SD05, SD06 & PB02</b>: card text is an <b>unofficial translation</b> from the official Chinese cards and images are the Chinese print. We\'ll update them regularly once the official Indonesian and English text is out on the official website. Indonesian release: {d}.',
   rpLangCn: 'Only in the official Chinese card list so far (Indonesian release: 14 November 2026).',
   mk_rampage: 'RAMPAGE*',
   mk_quickstrike: 'QUICK STRIKE*',
@@ -5033,7 +5016,7 @@ function cardLangBadgeHTML(c, cls){
   const base = cls || 'langtag';
   const fanId = isFanId(c);
   if(hasId && hasEn){
-    if(isFanEn(c)) return `<span class="${base} both fan" title="${t('langFan2Tip')}">ID*+EN*</span>`;
+    if(isFanEn(c)) return `<span class="${base} both fan" title="${t('langFan2Tip')}">${t('langFan2Tag')}</span>`;   /* v7.20 — dulu "ID*+EN*" */
     return fanId
       ? `<span class="${base} both fan" title="${t('langBothFanTip')}">ID*+EN</span>`
       : `<span class="${base} both" title="${t('langBothTip')}">ID+EN</span>`;
