@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.16** · 28 Oktober 2026
+**Versi saat ini: v7.17** · 1 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -591,6 +591,52 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### Data — Artikel News: Multiverse Battle October 2026 + gambar cover — 1 November 2026 *(`images/news/multiverse-battle-october-2026-results/cover.jpg`)*
+
+- Artikel baru (Supabase `news`, kategori Tournament), slug `multiverse-battle-october-2026-results`: "Multiverse Battle October 2026:
+  Yellow-Green Spiders Win, the Only Top 8 Deck Without Red". Isi dihitung dari 8 decklist di Tournament Decks (Gramedia
+  Matraman, 31 Okt 2026): klasemen + tautan deck, Red di 7 dari 8 deck, perbandingan deck juara dengan juara Asia Peak
+  Invitational, perubahan deck Adzuf dari September, dua jenis Red-Blue, dan Red-Yellow Ditya.
+- Cover 1200×630 dari foto pemilik (latar blur + foto utuh di tengah), path relatif `images/news/<slug>/cover.jpg` (tampil
+  setelah di-push). Naskah siap tempel + materi IG/TikTok 1:1 (11 slide + caption) disimpan di folder internal
+  `Konten Sosmed/Hasil Multiverse Battle Oct 2026/`.
+
+### v7.17 — "My Dashboard" jadi **My Lab** + sub-menu; nama warna Meta Statistics dalam bahasa Inggris — 1 November 2026 *(`index.html`, `home-ui.js`)*
+
+**My Lab.** Masukan pengguna ke pemilik: mereka tidak tahu Binders & Performance ada di dalam "My Dashboard". Pemilik
+memilih nama **My Lab** + sub-menu (dari 3 usulan: My Lab + sub-menu, My Collection & Stats, My Hub/Profile).
+- Tab nav "🗂 My Dashboard" → **"🧪 My Lab ▾"**, dipindah ke posisi **paling depan (sebelum Home)** atas permintaan pemilik — di HP
+  tab ini dulu paling ujung kanan bar bawah dan harus digeser dulu supaya terlihat. Tab ini sekarang membuka sub-menu berisi 4 fitur dengan keterangan
+  singkat: ☁️ My Decks, 🎴 Card Collection, 📒 Binders, 📈 Performance. Memilih salah satu = `setDashTab()` lalu
+  `setPage('dashboard')`, jadi langsung ke tab itu. Tab yang sedang dibuka diberi bingkai di menu. Kalau belum login
+  ada baris "Needs a free account · Log in / Sign up" (membuka modal login).
+- Desktop: menu terbuka saat kursor di atas tab (tertutup saat kursor keluar); klik juga membuka dan menahan menu.
+  Keyboard: panah bawah/atas pindah item, Enter memilih, Esc menutup. HP: ketuk "My Lab ▴" di bar bawah → menu 2×2
+  di atas bar; ketuk di luar untuk menutup.
+- Menu (`#labMenu`) sengaja di luar `<nav>` karena `nav.tabs` memakai `overflow-x:auto` (menu di dalamnya akan
+  terpotong); posisinya dihitung dari tombol (`position:fixed`). CSS di blok "v7.17 — MY LAB" sebelum `</style>`,
+  JS di blok "v7.17 — LAB MENU" (sebelum "HALAMAN DECK KOMUNITAS"); handler klik `#navTabs` mencegat tombol
+  `[data-labmenu]`.
+- **Hash tetap `#dashboard`** (dan `localStorage` `mhr_dash_tab` tetap), jadi tautan lama, berita lama, dan tombol di
+  Home tetap jalan. Judul halaman → "🧪 My Lab"; teks "My Dashboard" di petunjuk deck tersimpan, catatan "kartu yang
+  masih kurang", dan Home (Welcome back: "Open My Lab →", kartu fitur Performance) ikut diganti. `home-ui.js?v=7.17`.
+- Dicek: 25 tes Playwright (label, hover buka/tutup, klik menahan menu, Esc, panah & Enter → tab Performance, klik
+  Binders → tab tersimpan, tab lain tetap jalan, tombol login, HP 390 px: menu di atas bar bawah tanpa scroll
+  horizontal, ketuk Collection → tab Collection, ketuk di luar menutup), tanpa error JS.
+
+**Nama warna.**
+- Permintaan pemilik: **Tournament Decks › Meta Statistics › Colour Usage** masih menampilkan nama warna mentah dari data
+  (Merah, Kuning, Biru, Hijau). Sekarang lewat `t()` (kamus UI sudah punya Merah→Red, Kuning→Yellow, Biru→Blue,
+  Hijau→Green), jadi tampil **Red, Yellow, Blue, Green** (Orange & Purple tetap). Data/kunci warna di `cards.js` tidak
+  diubah.
+- Sekalian, tooltip warna yang masih bahasa Indonesia juga diterjemahkan: bar **Monthly Trend** (Meta Statistics), bar
+  distribusi warna di **Deck Builder**, kartu **Meta Decks**, **User Decks**, dan kartu deck di **Tournament Decks**
+  (`title="${escHtml(t(c))}: …"`).
+- Versi di header komentar, `<meta name="version">` dan footer → 7.17.
+- Dicek dengan Playwright (data turnamen tiruan, desktop 1280 px & HP 390 px): Colour Usage = Red/Yellow/Blue/Green/
+  Orange/Purple, tooltip Monthly Trend & Meta Decks berbahasa Inggris, tidak ada teks warna Indonesia yang terlihat,
+  tanpa error JS.
 
 ### Data — Errata V.2: SP01-061 「Spider-Archenemy」 Mr. Negative (teks Indonesia + gambar ID) — 29 Oktober 2026 *(`cards.js`, `index.html`, `sw.js`, `images/SP01-061.jpg`, `images/SP01-061_MR.jpg`, `api/v1/`)*
 

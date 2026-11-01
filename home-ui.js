@@ -316,7 +316,7 @@
         <div class="nh-steps">
           ${st(1,'Save your decks to the cloud','With version history, on every device — and publish them to User Decks.')}
           ${st(2,'Track your collection &amp; binders','Per set and per version; share a binder for sale or trade.')}
-          ${st(3,'Log matches &amp; see your stats','Win rate, matchups and tournament runs in My Dashboard.')}
+          ${st(3,'Log matches &amp; see your stats','Win rate, matchups and tournament runs in My Lab.')}
         </div>
         <button type="button" class="nh-btn main" data-hm="login">Create a free account</button>
       </div>
@@ -401,8 +401,8 @@
     if(!seen.includes('tourney')) tips.push(['#tourney','','🥇 Tournament decks']);
     if(!seen.includes('meta')) tips.push(['#meta','','🏆 User decks']);
     return `<section class="nc-wb">
-        <div><span class="nh-kick">My Dashboard</span><h2 class="nh-h1">Welcome back${name}</h2><p>Pick up where you left off.</p></div>
-        <a class="nh-btn" href="#dashboard">Open My Dashboard →</a>
+        <div><span class="nh-kick">My Lab</span><h2 class="nh-h1">Welcome back${name}</h2><p>Pick up where you left off.</p></div>
+        <a class="nh-btn" href="#dashboard">Open My Lab →</a>
       </section>
       <section class="nc-sc">
         ${sc('#build','', top ? cardImg(top.no) : ic('🛠'), tot ? 'Continue deck' : 'Deck builder', tot ? E(deckName) : 'Start a new deck', tot ? `${tot}/50 cards` : 'Curve, share, image &amp; PDF')}

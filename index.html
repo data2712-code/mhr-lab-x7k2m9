@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.16  ·  28 Oktober 2026
+     MHR DECK LAB  ·  versi 7.17  ·  1 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.16">
+<meta name="version" content="7.17">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2624,6 +2624,34 @@
     .nh-short b{font-size:14px}
     .nh-short .nh-btn{padding:10px 14px;font-size:13px}
   }
+  /* ================= v7.17 — MY LAB: sub-menu tab nav (dulu "My Dashboard") ================= */
+  nav.tabs .lab-caret{font-size:10px;margin-left:-3px;opacity:.75;transition:transform .15s}
+  nav.tabs button[aria-expanded="true"]{color:var(--paper)}
+  nav.tabs button[aria-expanded="true"] .lab-caret{transform:rotate(180deg)}
+  .lab-menu{position:fixed;z-index:60;width:340px;max-width:calc(100vw - 16px);background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.5);padding:10px}
+  .lab-menu[hidden]{display:none}
+  .lab-mh{font-weight:700;font-size:13px;color:var(--paper);padding:2px 6px 8px;display:flex;flex-direction:column;gap:1px}
+  .lab-mh span{font-weight:400;font-size:11.5px;color:var(--muted)}
+  .lab-grid{display:flex;flex-direction:column;gap:2px}
+  .lab-grid button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;
+    border:1px solid transparent;border-radius:9px;padding:8px;color:var(--paper);cursor:pointer;font:inherit}
+  .lab-grid button:hover,.lab-grid button:focus-visible{background:var(--ink);border-color:var(--line);outline:none}
+  .lab-grid button[aria-current="true"]{border-color:var(--accent)}
+  .lab-ic{font-size:18px;width:26px;text-align:center;flex:none}
+  .lab-tx{display:flex;flex-direction:column;min-width:0}
+  .lab-tx b{font-size:13.5px}
+  .lab-tx small{font-size:11.5px;color:var(--muted);line-height:1.3}
+  .lab-foot{margin-top:6px;padding:8px 6px 2px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted)}
+  .lab-foot button{background:none;border:none;padding:0;color:var(--accent);font:inherit;font-weight:600;cursor:pointer}
+  @media (max-width:920px){
+    nav.tabs .lab-caret{display:none}
+    nav.tabs button[data-labmenu] .ts::after{content:" ▴";font-size:9px}
+    .lab-menu{left:8px!important;right:8px;top:auto!important;width:auto;max-width:none;
+      bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+    .lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .lab-grid button{flex-direction:column;align-items:flex-start;gap:4px;background:var(--ink);border-color:var(--line);padding:10px}
+  }
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -2677,6 +2705,8 @@
 </header>
 
 <nav class="tabs" id="navTabs">
+  <!-- v7.17 — "My Dashboard" berganti nama jadi "My Lab" + sub-menu (lihat LAB MENU di JS); sengaja tab PERTAMA (sebelum Home) atas permintaan pemilik -->
+  <button data-page="dashboard" data-labmenu aria-current="false" aria-haspopup="menu" aria-expanded="false" aria-controls="labMenu">🧪 <span class="tl" data-i18n="navDashboard">My Lab</span><span class="ts" data-i18n="navDashboardS">My Lab</span><span class="lab-caret" aria-hidden="true">▾</span></button>
   <button data-page="beranda" aria-current="false">🏠 <span class="tl">Home</span><span class="ts">Home</span></button>
   <button data-page="berita" aria-current="false">📰 <span class="tl">News</span><span class="ts">News</span></button>
   <button data-page="cards" aria-current="true">🃏 <span class="tl" data-i18n="navCards">Kartu</span><span class="ts" data-i18n="navCardsS">Kartu</span> <span class="cnt" id="navCard">208</span></button>
@@ -2687,8 +2717,18 @@
   <button data-page="event" aria-current="false">🏟 <span class="tl">Events</span><span class="ts">Events</span></button>
   <button data-page="lgs" aria-current="false">📅 <span class="tl" data-i18n="navLgs">Weekly Rush LGS</span><span class="ts" data-i18n="navLgsS">Weekly Rush LGS</span> <span class="cnt" id="navLgs">0</span></button>
   <button data-page="panduan" aria-current="false">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span></button>
-  <button data-page="dashboard" aria-current="false">🗂 <span class="tl" data-i18n="navDashboard">Dashboard Saya</span><span class="ts" data-i18n="navDashboardS">Dashboard</span></button>
 </nav>
+<!-- v7.17 — sub-menu My Lab. Di luar <nav> karena nav.tabs overflow-x:auto (menu di dalamnya akan terpotong). -->
+<div class="lab-menu" id="labMenu" role="menu" aria-label="My Lab" hidden>
+  <div class="lab-mh">🧪 My Lab <span>Your decks, cards &amp; match stats</span></div>
+  <div class="lab-grid">
+    <button type="button" role="menuitem" data-labtab="decks"><span class="lab-ic">☁️</span><span class="lab-tx"><b>My Decks</b><small>Decks saved to your account</small></span></button>
+    <button type="button" role="menuitem" data-labtab="coll"><span class="lab-ic">🎴</span><span class="lab-tx"><b>Card Collection</b><small>Tick off the cards you own</small></span></button>
+    <button type="button" role="menuitem" data-labtab="bind"><span class="lab-ic">📒</span><span class="lab-tx"><b>Binders</b><small>Share cards for sale or trade</small></span></button>
+    <button type="button" role="menuitem" data-labtab="perf"><span class="lab-ic">📈</span><span class="lab-tx"><b>Performance</b><small>Log matches, win rate &amp; matchups</small></span></button>
+  </div>
+  <div class="lab-foot" id="labFoot" hidden>Needs a free account · <button type="button" data-labact="login">Log in / Sign up</button></div>
+</div>
 
 <!-- v6.64 — halaman Set & Spoiler (isi digambar set-ui.js: renderSet) -->
 <section id="setPage"><div class="st-wrap" id="setWrap"></div></section>
@@ -2724,7 +2764,7 @@
 <section id="dashboardPage">
   <div class="dash-wrap">
     <div class="dash-head">
-      <h2 data-i18n="dashHead">🗂 Dashboard Saya</h2>
+      <h2 data-i18n="dashHead">🧪 My Lab</h2>
       <p data-i18n="dashIntro">Deck yang tersimpan di akunmu, koleksi kartu, binder, dan hasil pertandinganmu.</p>
     </div>
     <p class="auth-note" id="dashLoginHint" data-i18n="dashLoginHint">Masuk ke akun untuk melihat deck tersimpan dan koleksi kartumu.</p>
@@ -3029,7 +3069,7 @@
         <button class="btn2" id="btnCloudSync" hidden data-i18n="syncNowBtn">↻ Sync now</button>
       </div>
       <div id="cloudNote" class="savenote"></div>
-      <p class="auth-note" id="cloudDashHint" hidden data-i18n="cloudDashHint">Lihat, muat, atau hapus deck tersimpan di halaman <a href="#dashboard">🗂 Dashboard Saya</a>.</p>
+      <p class="auth-note" id="cloudDashHint" hidden data-i18n="cloudDashHint">Lihat, muat, atau hapus deck tersimpan di halaman <a href="#dashboard">🧪 My Lab</a>.</p>
     </div>
 
     <div id="proxyBox"></div>
@@ -3135,8 +3175,8 @@
 <!-- v6.62 — halaman Berita: servis + renderer Markdown (news.js), tampilan & editor admin (news-ui.js) -->
 <script src="news.js?v=7.08"></script>
 <script src="news-ui.js?v=7.02"></script>
-<!-- v6.63 — halaman Beranda (#beranda). v7.16: home baru (perkenalan fitur, Welcome back untuk akun login) -->
-<script src="home-ui.js?v=7.16"></script>
+<!-- v6.63 — halaman Beranda (#beranda). v7.17: teks My Lab. v7.16: home baru (perkenalan fitur, Welcome back untuk akun login) -->
+<script src="home-ui.js?v=7.17"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
 <script src="spoilers.js?v=7.02"></script>
 <script src="set-ui.js?v=7.02"></script>
@@ -3179,7 +3219,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.16</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.17</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -3996,7 +4036,7 @@ function renderDeck(){
   // distribusi warna
   $('#cdist').innerHTML = total===0 ? '' :
     Object.entries(col).filter(([,n])=>n>0)
-      .map(([c,n])=>`<div style="width:${n/total*100}%;background:${CMAP[c]}" title="${c}: ${n}"></div>`).join('');
+      .map(([c,n])=>`<div style="width:${n/total*100}%;background:${CMAP[c]}" title="${escHtml(t(c))}: ${n}"></div>`).join('');
 
   // ---- validasi aturan deck ----
   const dipakai = Object.entries(col).filter(([,n])=>n>0).map(([c])=>c);
@@ -4545,7 +4585,7 @@ const T = {
   missBoughtConfirm: 'Add these {n} card(s) to your collection?',
   missSaveErr: 'Couldn\'t save to your collection. Please try again.',
   missOpenColl: '🗂 Open my collection',
-  missNote: 'Counts are based on the card collection in My Dashboard (all versions of a card number count together). “I bought these” adds them as the main version.',
+  missNote: 'Counts are based on the card collection in My Lab (all versions of a card number count together). “I bought these” adds them as the main version.',
   mxCopied: '✓ Copied',
   mxCopyManual: 'Copy this text:',
   cmpBtn: '⇄ Compare decks',
@@ -4811,7 +4851,7 @@ const T = {
   cloudImportNo: 'Skip',
   cloudImportOk: 'Successfully imported to your account.',
   cloudImportErr: 'Import failed. Try again one at a time using the "Save active deck to account" button.',
-  cloudDashHint: 'View, load, or delete saved decks on the <a href="#dashboard">🗂 My Dashboard</a> page.',
+  cloudDashHint: 'View, load, or delete saved decks in <a href="#dashboard">🧪 My Lab</a> (My Decks).',
 
   /* v6.37 — revamp galeri "Dari Pengguna": like + komentar */
   pubLikeTitle: 'Like',
@@ -4829,9 +4869,9 @@ const T = {
   pubCommentDeleteErr: 'Failed to delete the comment.',
 
   /* v6.37 — halaman Dashboard Saya (Phase 4/5) */
-  navDashboard: 'My Dashboard',
-  navDashboardS: 'Dashboard',
-  dashHead: '🗂 My Dashboard',
+  navDashboard: 'My Lab',          /* v7.17 — dulu 'My Dashboard' */
+  navDashboardS: 'My Lab',
+  dashHead: '🧪 My Lab',
   dashIntro: 'Your saved decks, your card collection, your binders and your match results.',
   dashLoginHint: 'Log in to see your saved decks and card collection.',
   dashLoginBtn: '👤 Log In / Sign Up',
@@ -8152,10 +8192,75 @@ function setPage(p, dariHash){
    tetap identik untuk pemanggil lain (routing hash, tombol "muat" meta). */
 $('#navTabs').addEventListener('click', e=>{
   const b = e.target.closest('[data-page]'); if(!b) return;
+  if(b.hasAttribute('data-labmenu')){ labMenuClick(b); return; }   /* v7.17 — My Lab membuka sub-menu */
   [...b.parentElement.children].forEach(x=>
     x.setAttribute('aria-current', String(x===b)));
   setTimeout(()=>setPage(b.dataset.page), 0);
 });
+
+/* ==================== v7.17 — LAB MENU ====================
+   Permintaan pemilik 1 Nov 2026: pengguna tidak tahu Binders & Performance ada di dalam
+   "My Dashboard". Tab nav diganti nama "My Lab" dan membuka sub-menu berisi 4 tab
+   (My Decks / Card Collection / Binders / Performance); memilih salah satu = setDashTab()
+   lalu setPage('dashboard'). Hash tetap #dashboard supaya tautan lama tetap jalan.
+   - Desktop (hover): menu terbuka saat kursor di atas tab, tertutup saat kursor keluar.
+   - Sentuh/keyboard: klik/Enter membuka & menutup; panah bawah/atas pindah item; Esc menutup.
+   - HP: menu tampil di atas bar navigasi bawah (2×2). */
+(function(){
+  const menu = $('#labMenu'), btn = $('#navTabs [data-labmenu]');
+  if(!menu || !btn) return;
+  const canHover = window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches;
+  let byHover = false, tOpen = 0, tClose = 0;
+  function place(){
+    if(innerWidth <= 920) return;            // posisi HP diatur CSS
+    const r = btn.getBoundingClientRect(), w = menu.offsetWidth || 340;
+    menu.style.top = Math.round(r.bottom + 6) + 'px';
+    menu.style.left = Math.round(Math.max(8, Math.min(r.left, innerWidth - w - 8))) + 'px';
+  }
+  function open(hover){
+    clearTimeout(tClose); clearTimeout(tOpen);
+    const cur = state.page === 'dashboard' ? dashTab : null;
+    menu.querySelectorAll('[data-labtab]').forEach(x=>x.setAttribute('aria-current', String(x.dataset.labtab === cur)));
+    const f = $('#labFoot'); if(f) f.hidden = !!isLoggedIn;
+    menu.hidden = false; btn.setAttribute('aria-expanded','true'); byHover = !!hover; place();
+  }
+  function close(){ clearTimeout(tOpen); menu.hidden = true; btn.setAttribute('aria-expanded','false'); byHover = false; }
+  window.closeLabMenu = close;
+  window.labMenuClick = function(){
+    if(menu.hidden) open(false);
+    else if(byHover) byHover = false;        // dibuka lewat hover: klik "mengunci" menu tetap terbuka
+    else close();
+  };
+  if(canHover){
+    const enter = ()=>{ clearTimeout(tClose); if(menu.hidden) tOpen = setTimeout(()=>{ if(menu.hidden) open(true); }, 120); };
+    const leave = ()=>{ clearTimeout(tOpen); if(byHover) tClose = setTimeout(close, 220); };
+    btn.addEventListener('mouseenter', enter); btn.addEventListener('mouseleave', leave);
+    menu.addEventListener('mouseenter', ()=>clearTimeout(tClose)); menu.addEventListener('mouseleave', leave);
+  }
+  menu.addEventListener('click', e=>{
+    const it = e.target.closest('[data-labtab]');
+    if(it){ close(); setDashTab(it.dataset.labtab); setPage('dashboard'); return; }
+    if(e.target.closest('[data-labact="login"]')){
+      close();
+      if(window.MHRUI && window.MHRUI.openAuthModal) window.MHRUI.openAuthModal(); else { const a = $('#btnAccount'); if(a) a.click(); }
+    }
+  });
+  btn.addEventListener('keydown', e=>{
+    if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){ e.preventDefault(); if(menu.hidden) open(false);
+      const its = [...menu.querySelectorAll('[data-labtab]')]; (e.key === 'ArrowDown' ? its[0] : its[its.length-1]).focus(); }
+  });
+  menu.addEventListener('keydown', e=>{
+    const its = [...menu.querySelectorAll('[data-labtab]')], i = its.indexOf(document.activeElement);
+    if(e.key === 'Escape'){ e.preventDefault(); close(); btn.focus(); }
+    else if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){ e.preventDefault();
+      its[(i + (e.key === 'ArrowDown' ? 1 : -1) + its.length) % its.length].focus(); }
+  });
+  document.addEventListener('click', e=>{ if(!menu.hidden && !menu.contains(e.target) && !btn.contains(e.target)) close(); });
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && !menu.hidden) close(); });
+  addEventListener('resize', ()=>{ if(!menu.hidden) place(); });
+  addEventListener('scroll', ()=>{ if(!menu.hidden && innerWidth > 920) place(); }, {passive:true});
+  $('#navTabs').addEventListener('scroll', ()=>{ if(!menu.hidden) close(); }, {passive:true});
+})();
 
 /* ==================== HALAMAN DECK KOMUNITAS ==================== */
 function deckStats(deck){
@@ -8202,7 +8307,7 @@ function renderMeta(){
         onerror="metaImgFallback(this,'${c.no}','${CMAP[c.c]}')">`).join('') ||
       `<div class="ph"></div>`;
     const bar = Object.entries(s.col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]])
-      .map(([c,n])=>`<div style="width:${n/s.tot*100}%;background:${CMAP[c]}" title="${c}: ${n}"></div>`).join('');
+      .map(([c,n])=>`<div style="width:${n/s.tot*100}%;background:${CMAP[c]}" title="${escHtml(t(c))}: ${n}"></div>`).join('');
     return `<div class="meta-card">
       <div class="meta-strip">${strip}</div>
       <div class="meta-body">
@@ -8267,7 +8372,7 @@ async function renderPubGrid(){
         onerror="metaImgFallback(this,'${c.no}','${CMAP[c.c]}')">`).join('') ||
       `<div class="ph"></div>`;
     const bar = Object.entries(s.col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]])
-      .map(([c,n])=>`<div style="width:${n/s.tot*100}%;background:${CMAP[c]}" title="${c}: ${n}"></div>`).join('');
+      .map(([c,n])=>`<div style="width:${n/s.tot*100}%;background:${CMAP[c]}" title="${escHtml(t(c))}: ${n}"></div>`).join('');
     /* v6.47 — tanggal publish (permintaan pemilik, format DD-MM-YYYY lewat
        tanggalDMY()). published_at diisi setPublic() (decks.js) tiap kali deck
        di-toggle jadi publik; fallback ke created_at untuk deck yang sudah
@@ -8956,7 +9061,7 @@ function renderTnyStats(){
   const trend = tourneyMonthlyTrend();
   const colorHtml = color.rows.map(r=>`<div class="tny-color-row">
       <span class="tny-color-dot" style="background:${CMAP[r.c]}"></span>
-      <span class="tny-color-nm">${escHtml(r.c)}</span>
+      <span class="tny-color-nm">${escHtml(t(r.c))}</span>
       <span class="tny-color-bar-wrap"><div class="tny-color-bar" style="width:${r.pct}%;background:${CMAP[r.c]}"></div></span>
       <span class="tny-color-pct">${r.pct}%</span>
     </div>`).join('');
@@ -8972,7 +9077,7 @@ function renderTnyStats(){
     </div>`).join('') : `<div class="tny-stats-empty">${t('tnyStatsCardNone')}</div>`;
   const trendHtml = trend.length > 1 ? trend.map(m=>`<div class="tny-trend-row">
       <span class="tny-trend-month">${escHtml(m.label)}</span>
-      <span class="tny-trend-bar">${m.warna.map(w=>`<span style="width:${w.pct}%;background:${CMAP[w.c]}" title="${w.c}: ${Math.round(w.pct)}%"></span>`).join('')}</span>
+      <span class="tny-trend-bar">${m.warna.map(w=>`<span style="width:${w.pct}%;background:${CMAP[w.c]}" title="${escHtml(t(w.c))}: ${Math.round(w.pct)}%"></span>`).join('')}</span>
       <span class="tny-trend-n">${m.totalDeck} ${t('tourneyUsageDeck')}</span>
     </div>`).join('') : `<div class="tny-stats-empty">${t('tnyStatsTrendNone')}</div>`;
   box.innerHTML = `<div class="tny-stats">
@@ -9019,7 +9124,7 @@ function renderTourneyBody(){
           onerror="metaImgFallback(this,'${c.no}','${CMAP[c.c]}')">`).join('') ||
         `<div class="ph"></div>`;
       const bar = Object.entries(s.col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]])
-        .map(([c,n])=>`<div style="width:${n/s.tot*100}%;background:${CMAP[c]}" title="${c}: ${n}"></div>`).join('');
+        .map(([c,n])=>`<div style="width:${n/s.tot*100}%;background:${CMAP[c]}" title="${escHtml(t(c))}: ${n}"></div>`).join('');
       return `<div class="meta-card">
         <div class="meta-strip">${strip}</div>
         <div class="meta-body">
