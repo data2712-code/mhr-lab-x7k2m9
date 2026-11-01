@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR DECK LAB — auth.js (login / signup / logout + status admin)
+   MHR DECK LAB — auth.js (login / signup / logout + status admin; v7.19 ganti kata sandi)
    ===================================================================
    Tipis di atas Supabase JS SDK (dimuat lewat <script> CDN di index.html
    SEBELUM berkas ini). Berkas ini TIDAK menyentuh DOM sama sekali — cuma
@@ -70,6 +70,7 @@
       signOut: async ()=>{},
       resetPassword: async ()=>({error:{message:'Supabase SDK failed to load'}}),
       updatePassword: async ()=>({error:{message:'Supabase SDK failed to load'}}),
+      changePassword: async ()=>({error:{message:'UPDATE_FAILED'}}),
       isAdmin: async ()=>false,
     };
     return;
@@ -222,6 +223,33 @@
        adalah sesi "pemulihan" dari link reset (event PASSWORD_RECOVERY) —
        itu aturan Supabase Auth sendiri, bukan sesuatu yang perlu dicek lagi
        di sini. Dipanggil dari form yang muncul lewat onPasswordRecovery(). */
+    /* v7.19 — GANTI kata sandi saat sedang login (bukan lewat link email).
+       1) kata sandi saat ini diverifikasi dengan signInWithPassword(email akun ini) —
+          kalau salah, Supabase TIDAK menghapus sesi yang sedang aktif; kalau benar,
+          sesinya diperbarui (jadi syarat "baru saja login" untuk setelan Secure
+          password change di Supabase ikut terpenuhi);
+       2) updateUser({ password }) menyimpan kata sandi baru.
+       Kode error yang dikembalikan: NOT_LOGGED_IN, WRONG_PASSWORD, SAME_PASSWORD,
+       WEAK_PASSWORD, REAUTH_NEEDED, UPDATE_FAILED (dipetakan ke teks di index.html). */
+    async changePassword(currentPassword, newPassword){
+      try{
+        const { data:{ session } } = await client.auth.getSession();
+        const email = session && session.user && session.user.email;
+        if(!email) return { error:{ message:'NOT_LOGGED_IN' } };
+        const chk = await client.auth.signInWithPassword({ email, password: currentPassword });
+        if(chk.error || !chk.data || !chk.data.session) return { error:{ message:'WRONG_PASSWORD' } };
+        const { error } = await client.auth.updateUser({ password: newPassword });
+        if(!error) return { error:null };
+        const msg = String(error.message || ''), code = String(error.code || '');
+        if(code === 'same_password' || /different from the old/i.test(msg)) return { error:{ message:'SAME_PASSWORD' } };
+        if(code === 'weak_password' || /weak|at least|should contain/i.test(msg)) return { error:{ message:'WEAK_PASSWORD', detail: msg } };
+        if(code === 'reauthentication_needed' || /reauth/i.test(msg)) return { error:{ message:'REAUTH_NEEDED' } };
+        return { error:{ message:'UPDATE_FAILED', detail: msg } };
+      }catch(e){
+        return { error:{ message:'UPDATE_FAILED' } };
+      }
+    },
+
     async updatePassword(newPassword){
       try{
         const { data, error } = await client.auth.updateUser({ password: newPassword });

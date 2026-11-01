@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.18** · 1 November 2026
+**Versi saat ini: v7.19** · 1 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -591,6 +591,27 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.19 — Ganti kata sandi saat sedang login — 1 November 2026 *(`index.html`, `auth.js`)*
+
+Permintaan pemilik: fitur ubah kata sandi di website. Tanpa perubahan database / Supabase.
+- Panel akun (tombol 👤) saat sudah login: judul modal jadi **"My account"** (dulu tetap "Log in to your account"), dan ada
+  tombol **🔑 Change password** di samping Logout. Form: *Current password*, *New password*, *Repeat new password*,
+  centang *Show passwords*, tombol Cancel / Save new password, dan tautan **"Forgot your current password? Email me a reset
+  link"** (memakai alur reset email v6.34, langsung ke email akun yang sedang login).
+- Validasi di browser dulu (semua terisi, minimal 6 karakter seperti saat daftar, dua kata sandi baru sama, berbeda dari
+  yang lama). Lalu `MHRAuth.changePassword()` baru di `auth.js`: verifikasi kata sandi saat ini dengan
+  `signInWithPassword(email akun)` — salah = sesi aktif tidak terganggu; benar = sesi diperbarui sehingga syarat "baru saja
+  login" setelan *Secure password change* Supabase ikut terpenuhi — lalu `updateUser({ password })`. Kode error
+  `WRONG_PASSWORD` / `SAME_PASSWORD` / `WEAK_PASSWORD` / `REAUTH_NEEDED` / `UPDATE_FAILED` dipetakan ke pesan yang jelas.
+  Pengguna tetap login setelah berhasil.
+- Kolom username tersembunyi (`autocomplete="username"`) + `current-password` / `new-password` supaya password manager
+  browser bisa menyimpan kata sandi baru dengan benar.
+- `auth.js?v=7.19`; versi 7.19 (komentar, meta, footer).
+- Dicek: 7 uji unit `changePassword()` dengan klien Supabase palsu (berhasil, salah, sama, lemah, perlu login ulang, error
+  lain, tanpa sesi) + 40 tes Playwright (desktop 1280 & HP 390: tampil/sembunyi form, fokus, semua validasi tanpa panggilan
+  server, show passwords, salah → kolom dikosongkan, berhasil → pesan & form tertutup, tautan reset ke email akun, Cancel,
+  buka ulang modal kembali ke tombol, tanpa scroll horizontal, tanpa error JS); tes My Lab & Performance tetap lolos.
 
 ### v7.18 — Performance: "＋ Log match" khusus casual, "🏆 New run" untuk Store / Weekly Rush, Tournament & Community Tournament — 1 November 2026 *(`index.html`, `perf-ui.js`)*
 

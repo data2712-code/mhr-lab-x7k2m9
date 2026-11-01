@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.18  ·  1 November 2026
+     MHR DECK LAB  ·  versi 7.19  ·  1 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.18">
+<meta name="version" content="7.19">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1676,11 +1676,21 @@
      menyembunyikan form yang sedang tidak aktif. v6.34 menambahkan dua form
      baru (forgot/reset) ke aturan yang sama supaya tidak mengulang bug yang
      sama. */
-  #authFormLogin[hidden],#authFormSignup[hidden],#authFormForgot[hidden],#authFormReset[hidden]{display:none}
-  #authFormLogin label,#authFormSignup label,#authFormForgot label,#authFormReset label{font-size:11.5px;color:var(--muted);margin-top:4px}
-  #authFormLogin input,#authFormSignup input,#authFormForgot input,#authFormReset input{background:var(--ink);border:1px solid var(--line);
+  #authFormLogin[hidden],#authFormSignup[hidden],#authFormForgot[hidden],#authFormReset[hidden],#authFormChange[hidden]{display:none}
+  #authFormLogin label,#authFormSignup label,#authFormForgot label,#authFormReset label,#authFormChange label{font-size:11.5px;color:var(--muted);margin-top:4px}
+  #authFormLogin input,#authFormSignup input,#authFormForgot input,#authFormReset input,#authFormChange input{background:var(--ink);border:1px solid var(--line);
     color:var(--paper);border-radius:8px;padding:9px 10px;font-size:13px;font-family:var(--body)}
-  #authFormLogin input:focus,#authFormSignup input:focus,#authFormForgot input:focus,#authFormReset input:focus{border-color:var(--accent);outline:none}
+  #authFormLogin input:focus,#authFormSignup input:focus,#authFormForgot input:focus,#authFormReset input:focus,#authFormChange input:focus{border-color:var(--accent);outline:none}
+  /* v7.19 — ganti kata sandi (di panel "sudah login") */
+  #authFormChange{display:flex;flex-direction:column;gap:8px;text-align:left;margin-top:4px}
+  #authFormChange input[hidden]{display:none}
+  #authFormChange .auth-show{display:flex;align-items:center;gap:7px;margin-top:2px;cursor:pointer}
+  #authFormChange .auth-show input{width:auto;padding:0}
+  .auth-acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .auth-acts[hidden]{display:none}
+  .auth-row{display:flex;gap:8px;margin-top:6px}
+  .auth-row .btn2{flex:1}
+  #authChangeForgot{margin:6px 0 0}
   /* v6.34 — tombol bergaya link teks, dipakai untuk "Lupa kata sandi?" dan
      "Kembali ke Masuk" di dalam form forgot. */
   .auth-link{background:none;border:none;color:var(--accent);font-size:12px;
@@ -3086,7 +3096,7 @@
 <div class="authview" id="authView" hidden>
   <div class="auth-sheet">
     <div class="auth-top">
-      <h2 data-i18n="acctModalTitleLogin">Masuk ke akun</h2>
+      <h2 id="authTitle" data-i18n="acctModalTitleLogin">Masuk ke akun</h2>
       <button class="btn2" id="authClose" type="button" style="flex:none;padding:9px 14px" data-i18n="close">✕ Tutup</button>
     </div>
 
@@ -3154,7 +3164,24 @@
 
     <div class="auth-loggedin" id="authLoggedIn" hidden>
       <p class="auth-hi"><span data-i18n="acctHi">Masuk sebagai</span> <b id="authWhoAmI"></b></p>
-      <button class="btn2 danger" id="authLogout" type="button" data-i18n="acctLogout">Keluar</button>
+      <!-- v7.19 — ganti kata sandi saat sedang login (lihat changePassword() di auth.js) -->
+      <div class="auth-acts" id="authActs">
+        <button class="btn2" id="authChangePwBtn" type="button" data-i18n="acctChangePw">🔑 Change password</button>
+        <button class="btn2 danger" id="authLogout" type="button" data-i18n="acctLogout">Keluar</button>
+      </div>
+      <form id="authFormChange" hidden novalidate>
+        <input type="text" id="authChangeUser" autocomplete="username" hidden tabindex="-1" aria-hidden="true">
+        <label for="authChangeCur" data-i18n="acctCurPassword">Current password</label>
+        <input type="password" id="authChangeCur" required autocomplete="current-password">
+        <label for="authChangeNew" data-i18n="acctNewPassword">Kata sandi baru</label>
+        <input type="password" id="authChangeNew" required minlength="6" autocomplete="new-password">
+        <label for="authChangeNew2" data-i18n="acctNewPassword2">Repeat new password</label>
+        <input type="password" id="authChangeNew2" required minlength="6" autocomplete="new-password">
+        <label class="auth-show"><input type="checkbox" id="authChangeShow"> <span data-i18n="acctShowPw">Show passwords</span></label>
+        <div class="auth-row"><button class="btn2" id="authChangeCancel" type="button" data-i18n="acctCancel">Cancel</button>
+          <button class="btn2 main" type="submit" data-i18n="acctChangeCta">Save new password</button></div>
+        <button class="auth-link" id="authChangeForgot" type="button" data-i18n="acctChangeForgot">Forgot your current password? Email me a reset link</button>
+      </form>
     </div>
   </div>
 </div>
@@ -3171,7 +3198,7 @@
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=7.02"></script>
+<script src="auth.js?v=7.19"></script>
 <script src="decks.js?v=7.02"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
 <script src="social.js?v=7.02"></script>
@@ -3223,7 +3250,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.18</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.19</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -4803,8 +4830,27 @@ const T = {
   acctNote: 'Your account is used to save & share decks, and to track your card collection (coming soon).',
   acctHi: 'Logged in as',
   acctLogout: 'Logout',
+  /* v7.19 — ganti kata sandi saat login */
+  acctChangePw: '🔑 Change password',
+  acctCurPassword: 'Current password',
+  acctNewPassword2: 'Repeat new password',
+  acctShowPw: 'Show passwords',
+  acctCancel: 'Cancel',
+  acctChangeCta: 'Save new password',
+  acctChangeForgot: 'Forgot your current password? Email me a reset link',
+  acctChangeOk: 'Password updated. Use your new password next time you log in.',
+  acctErrPwFill: 'Please fill in all three fields.',
+  acctErrPwShort: 'The new password needs at least 6 characters.',
+  acctErrPwMismatch: 'The two new passwords don\'t match.',
+  acctErrPwSameInput: 'The new password must be different from your current password.',
+  acctErrPwWrong: 'Your current password is incorrect.',
+  acctErrPwWeak: 'That password is too weak. Try a longer one with letters and numbers.',
+  acctErrPwReauth: 'For your security, please log out, log in again, then change your password.',
+  acctErrPwFailed: 'Could not change your password. Please try again.',
+  acctChangeMailOk: 'A reset link has been sent to the email on this account. Check your inbox (and spam folder).',
   acctLoginTitle: 'Log In / Sign Up',
   acctModalTitleLogin: 'Log in to your account',
+  acctModalTitleAccount: 'My account',   /* v7.19 — judul modal saat sudah login */
   acctErrGeneric: 'Something went wrong. Please try again.',
   acctErrInvalid: 'Incorrect username/password.',
   acctSignupOk: 'Account created! Check your email to verify it before logging in.',
@@ -9938,7 +9984,7 @@ window.addEventListener('hashchange', ()=>{
     authMsg.hidden = false;
   }
   function clearAuthMsg(){ if(authMsg){ authMsg.hidden = true; authMsg.textContent = ''; } }
-  function openAuthModal(){ clearAuthMsg(); if(authView) authView.hidden = false; }
+  function openAuthModal(){ clearAuthMsg(); const fc = $('#authFormChange'), ac = $('#authActs'); if(fc && !fc.hidden){ fc.reset(); fc.hidden = true; if(ac) ac.hidden = false; } if(authView) authView.hidden = false; }
   function closeAuthModal(){ if(authView) authView.hidden = true; }
   /* v6.37 — diekspos supaya kode LUAR IIFE ini (tombol "Masuk / Daftar" di
      halaman Dashboard Saya, dan tombol like galeri publik saat belum login)
@@ -9963,6 +10009,7 @@ window.addEventListener('hashchange', ()=>{
     }
     if(loggedInBlock) loggedInBlock.hidden = !loggedIn;
     if(loggedOutBlock) loggedOutBlock.hidden = loggedIn;
+    const ttl = $('#authTitle'); if(ttl) ttl.textContent = t(loggedIn ? 'acctModalTitleAccount' : 'acctModalTitleLogin');   // v7.19
 
     /* v6.31 — cek status admin akun (tabel admin_users di Supabase) tiap
        kali sesi berubah (login/logout/refresh token). v6.39 — isLoggedIn
@@ -10084,6 +10131,60 @@ window.addEventListener('hashchange', ()=>{
     if(formReset) formReset.hidden = true;
     const session = await window.MHRAuth.getSession();
     await refreshAccountUI(session);
+  });
+
+  /* ================= v7.19 — GANTI KATA SANDI (saat sudah login) =================
+     Form di panel "Logged in as …". Validasi di sini (isi, panjang >= 6, sama, beda dari
+     yang lama), lalu window.MHRAuth.changePassword() memverifikasi kata sandi saat ini
+     ke Supabase dan menyimpan yang baru. Pengguna tetap login sesudahnya. */
+  const formChange = $('#authFormChange'), authActs = $('#authActs');
+  function showChangeForm(on){
+    clearAuthMsg();
+    if(formChange){ formChange.hidden = !on; if(on) formChange.reset(); }
+    if(authActs) authActs.hidden = !!on;
+    const sh = $('#authChangeShow'); if(sh) sh.checked = false;
+    ['#authChangeCur','#authChangeNew','#authChangeNew2'].forEach(id=>{ const el = $(id); if(el) el.type = 'password'; });
+    if(on){ const u = $('#authChangeUser'), who = $('#authWhoAmI'); if(u && who) u.value = who.textContent; const c = $('#authChangeCur'); if(c) setTimeout(()=>c.focus(), 30); }
+  }
+  const changeBtn = $('#authChangePwBtn');
+  if(changeBtn) changeBtn.addEventListener('click', ()=>showChangeForm(true));
+  const changeCancel = $('#authChangeCancel');
+  if(changeCancel) changeCancel.addEventListener('click', ()=>showChangeForm(false));
+  const changeShow = $('#authChangeShow');
+  if(changeShow) changeShow.addEventListener('change', ()=>{
+    ['#authChangeCur','#authChangeNew','#authChangeNew2'].forEach(id=>{ const el = $(id); if(el) el.type = changeShow.checked ? 'text' : 'password'; });
+  });
+  const changeForgot = $('#authChangeForgot');
+  if(changeForgot) changeForgot.addEventListener('click', async ()=>{
+    clearAuthMsg();
+    const session = await window.MHRAuth.getSession();
+    const email = session && session.user && session.user.email;
+    if(!email){ showAuthMsg(t('acctErrPwFailed'), 'err'); return; }
+    changeForgot.disabled = true;
+    const { error } = await window.MHRAuth.resetPassword(email);
+    changeForgot.disabled = false;
+    showAuthMsg(error ? t('acctErrResetFailed') : t('acctChangeMailOk'), error ? 'err' : 'ok');
+  });
+  if(formChange) formChange.addEventListener('submit', async e=>{
+    e.preventDefault();
+    clearAuthMsg();
+    const cur = $('#authChangeCur').value, nw = $('#authChangeNew').value, nw2 = $('#authChangeNew2').value;
+    if(!cur || !nw || !nw2){ showAuthMsg(t('acctErrPwFill'), 'err'); return; }
+    if(nw.length < 6){ showAuthMsg(t('acctErrPwShort'), 'err'); return; }
+    if(nw !== nw2){ showAuthMsg(t('acctErrPwMismatch'), 'err'); return; }
+    if(nw === cur){ showAuthMsg(t('acctErrPwSameInput'), 'err'); return; }
+    const submitBtn = formChange.querySelector('button[type="submit"]');
+    if(submitBtn) submitBtn.disabled = true;
+    const { error } = await window.MHRAuth.changePassword(cur, nw);
+    if(submitBtn) submitBtn.disabled = false;
+    if(error){
+      const m = { WRONG_PASSWORD:'acctErrPwWrong', SAME_PASSWORD:'acctErrPwSameInput', WEAK_PASSWORD:'acctErrPwWeak', REAUTH_NEEDED:'acctErrPwReauth' }[error.message] || 'acctErrPwFailed';
+      showAuthMsg(t(m), 'err');
+      if(error.message === 'WRONG_PASSWORD'){ const c = $('#authChangeCur'); if(c){ c.value = ''; c.focus(); } }
+      return;
+    }
+    showChangeForm(false);
+    showAuthMsg(t('acctChangeOk'), 'ok');
   });
 
   const logoutBtn = $('#authLogout');
