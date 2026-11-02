@@ -593,6 +593,17 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Errata & Text Differences: TD-04 (BP01-035 Hulk Buster) disembunyikan sementara — 2 November 2026 *(`rules-faq.js`, `index.html`)*
+
+Permintaan pemilik: poin **TD-04** (BP01-035 「MK44-The Commander」 Hulk Buster — tercetak "BATTLE Move", menurut Head
+Judge maksudnya BATTLE-BASE MOVE) disembunyikan dulu karena pemilik sedang melakukan konfirmasi ulang.
+- `rules-faq.js`: daftar baru `HIDDEN = ['TD-04']` di awal renderer. Isi poin tetap tersimpan di `RF_DATA`; poin yang
+  ada di daftar ini tidak digambar dan nomornya tidak dikenali, jadi link lama `#errata/TD-04` cukup membuka halaman
+  Errata tanpa menyorot apa pun. Untuk menampilkan lagi: hapus `'TD-04'` dari `HIDDEN`. Nomor poin lain tidak berubah.
+- Cache-buster `index.html` → `rules-faq.js?v=7.24-td04`.
+- Dicek: halaman Errata tampil 23 poin tanpa TD-04, `#errata/TD-04` membuka halaman Errata tanpa error, TD-03/TD-05
+  tetap tampil.
+
 ### Data — Errata V.1 BP01-043 「Reinstall」 Vision dilengkapi (teks Indonesia + gambar ID) — 2 November 2026 *(`cards.js`, `index.html`, `sw.js`, `images/BP01-043.jpg`, `api/v1/`)*
 
 Temuan saat menyusun draf halaman **Errata & Text Differences**: teks Indonesia BP01-043 di situs baru memuat sebagian
