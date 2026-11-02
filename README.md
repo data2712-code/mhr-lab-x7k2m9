@@ -605,8 +605,10 @@ ended" di form match tinggal **9 Rush Points · Deck out · Concede · Time**. T
   recorded ending are not counted."). Saat match lama seperti itu diedit, pilihannya kosong (**Choose…**, tidak bisa
   dipilih ulang) sampai pemain memilih salah satu dari 4 cara; kalau dibiarkan, nilai lamanya tetap tersimpan apa adanya.
 - `perf-ui.js?v=7.21`; versi 7.21 (komentar, meta, footer).
-- Catatan: Rulebook 1.03 di halaman Guide (103.1.c) masih menyebut "card effect declares the winner" sebagai kondisi
-  menang; daftar di Performance mengikuti official ruling MHR Indonesia sesuai permintaan pemilik.
+- Catatan: Rulebook 1.03 (103.1.c) memang mengenal kondisi menang "card effect declares the winner", tapi **saat ini
+  belum ada kartu dengan efek yang langsung memenangkan permainan**, jadi opsinya dikeluarkan dulu (keputusan pemilik).
+  Kalau kartu seperti itu rilis nanti, cukup tambahkan lagi `eff:'Card effect'` ke `END` dan warnanya ke `END_COL` di
+  `perf-ui.js` — data lama ber-`eff` otomatis tampil dan terhitung lagi.
 - Dicek: Playwright desktop 1360 & HP 390 dengan data campuran (rp, eff, deck, unk, con): form baru hanya 4 pilihan, kartu
   "How games end" hanya 4 warna + catatan 2 game tidak dihitung, tidak ada label "Card effect"/"Not recorded" di halaman,
   edit match lama menampilkan "Choose…" dan tersimpan sebagai "Time" setelah dipilih, tanpa error JS.
