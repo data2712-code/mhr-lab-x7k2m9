@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.21** · 2 November 2026
+**Versi saat ini: v7.22** · 2 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -591,6 +591,30 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.22 — Binders: Duplicate (salin kartu beserta semua isiannya ke kantong kosong lain) — 2 November 2026 *(`index.html`, `binders-ui.js`)*
+
+Permintaan pemilik: kartu yang sudah ada di binder bisa di-copy / diduplikat ke kantong kosong lain di binder yang sama,
+membawa semua keterangannya. Tanpa perubahan database / Supabase.
+- **Cara pakai:** ✏️ Edit → ketuk kartu → tombol baru **⧉ Duplicate** (di sebelah Move ▶) → muncul bar biru
+  "⧉ Copying <nama kartu>" dan semua kantong kosong ditandai ⧉. Ketuk kantong kosong mana pun untuk menaruh salinan —
+  **boleh berkali-kali dan di halaman mana pun** (pindah halaman / ＋ Add page tetap bisa selama mode salin). Selesai
+  dengan **✓ Done copying**, tombol **✓ Done** (keluar dari Edit), atau **Esc**. Mengetuk kantong yang sudah terisi tidak
+  mengubah apa pun (status: "That pocket is taken — tap an empty pocket.").
+- **Isi salinan = salinan penuh kantong asal**: kartu & versi, jumlah, harga + mata uang, nego, kondisi, catatan; untuk
+  kartu foto (v7.10) juga nama, rarity, set dan **foto yang sama** (tidak mengunggah ulang, tidak menambah hitungan
+  20 foto). Dua pengecualian: salinan mendapat **`sid` baru** (id kantong untuk riwayat penjualan `binder_sales`), dan
+  salinan selalu mulai **belum terjual** (tanda SOLD tidak ikut, supaya tidak tercatat sebagai penjualan baru).
+- **Foto yang dipakai bersama aman:** `removePhotos()` sekarang melewati berkas yang masih dipakai kantong lain di binder
+  mana pun milik akun (`photoInUse()`), jadi menghapus salah satu salinan, menandai Sold, mengganti foto, atau menghapus
+  binder tidak menghapus foto yang masih dipakai salinan lain. Foto baru benar-benar dihapus saat kantong terakhir yang
+  memakainya hilang. Konfirmasi "Its photo is deleted for good" tidak muncul kalau fotonya masih dipakai kantong lain.
+- CSS `.bd-copybar`, `.bp-paste`, `.bp-pasted` (blok "v7.22 — mode Duplicate"). `binders-ui.js?v=7.22`; versi 7.22
+  (komentar, meta, footer).
+- Dicek: Playwright desktop 1360 & HP 390 (34 tes): tombol Duplicate, bar & 6 kantong kosong bertanda, dua salinan
+  tersimpan identik kecuali `sid`, `sid` unik, salinan kartu SOLD jadi belum terjual, kartu foto (harga SGD) ikut fotonya,
+  hapus kantong asal → foto tetap, hapus salinan terakhir → foto terhapus, ＋ Add page lalu salin ke halaman 2, Esc / Done
+  mengakhiri mode, tanpa scroll horizontal, tanpa error JS.
 
 ### v7.21 — Performance: cara game berakhir tinggal 4 sesuai official ruling (Card effect & Not recorded dihapus) — 2 November 2026 *(`index.html`, `perf-ui.js`)*
 

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.21  ·  2 November 2026
+     MHR DECK LAB  ·  versi 7.22  ·  2 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.21">
+<meta name="version" content="7.22">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2009,6 +2009,12 @@
   .bp-pocket.empty.add:hover{border-color:var(--accent);color:var(--accent)}
   .bp-pocket[draggable="true"]{cursor:grab}
   .bp-pocket.drop{outline:2px solid var(--accent);outline-offset:2px}
+  /* v7.22 — mode Duplicate */
+  .bd-copybar{background:rgba(57,135,229,.10);border-color:#3987e5}
+  .bd-copybar b{color:#9cc6f5}
+  .bp-pocket.empty.bp-paste{border-color:#3987e5;color:#7fb4f5;background:rgba(57,135,229,.06);font-size:20px}
+  .bp-pocket.empty.bp-paste:hover{border-color:#9cc6f5;color:#cfe2fa;background:rgba(57,135,229,.14)}
+  .bp-pocket.bp-pasted{outline:2px solid #3987e5;outline-offset:2px;transition:outline-color .8s}
   .bp-pocket.miss img{filter:grayscale(1) brightness(.5)}
   .bp-pocket.sold img{filter:grayscale(1) brightness(.45)}
   .bp-q{position:absolute;top:5px;right:5px;z-index:1;background:rgba(14,18,22,.88);border:1px solid var(--line);color:var(--paper);font-family:var(--mono);font-weight:800;font-size:11px;padding:1px 6px;border-radius:6px}
@@ -3212,7 +3218,7 @@
 <script src="events.js?v=7.02"></script>
 <script src="events-ui.js?v=7.05"></script>
 <script src="binders.js?v=7.10"></script>
-<script src="binders-ui.js?v=7.12"></script>
+<script src="binders-ui.js?v=7.22"></script>
 <!-- v7.13 — Performance Analytics (Tahap 1): servis match_logs/match_archetypes (perf.js) + tab Performance (perf-ui.js).
      v7.14 (Tahap 2): tournament runs, import dari Events, share gambar run, grafik tren, detail matchup.
      v7.15 (Tahap 3): data matchup komunitas (opt-in, anonim), detail deck + statistik per versi deck. -->
@@ -3246,7 +3252,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.21</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.22</div>
 </footer>
 
 <div class="dview" id="simView" hidden>

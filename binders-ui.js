@@ -36,6 +36,11 @@
    kantong lama tetap sah). Rp tanpa desimal & titik ribuan (150.000); mata uang lain koma
    ribuan & titik desimal maks 2 angka (1,250.50). Mata uang terakhir dipakai jadi default
    kantong baru (localStorage "mhr_bd_cur"). "Listed value" dijumlah per mata uang.
+   v7.22: DUPLIKAT kantong — tombol "⧉ Duplicate" di form kantong (mode edit) → mode salin: ketuk
+   kantong kosong mana pun (halaman mana pun, boleh berkali-kali) untuk menaruh salinan dengan SEMUA
+   isian kantong asal (kartu, versi, jumlah, harga + mata uang, nego, kondisi, catatan; kartu foto ikut
+   memakai foto yang sama). Salinan mendapat sid baru dan selalu mulai "belum terjual". Foto yang
+   dipakai bersama tidak ikut terhapus selama masih ada kantong lain (di binder mana pun) yang memakainya.
    Keputusan pemilik (23 Okt 2026): link-only, kontak = WA/IG isian pemilik,
    harga boleh tampil + opsi nego, disclaimer wajib di binder jual-beli,
    report hanya akun login, sembunyi otomatis setelah 3 laporan.
@@ -75,6 +80,7 @@
   const S = {
     list:null, err:null, cur:null, edit:false, page:0, saveTmr:null, status:'', reports:null,
     pub:null, pubCode:null, pubPage:0, pubView:'binder', hideSold:false,
+    copy:null,   // v7.22 — { src: isi kantong asal (salinan dalam), name } saat mode salin aktif
   };
   let cardMap = null;
   const card = no => { if(!cardMap){ cardMap = new Map(); DB.forEach(c=>cardMap.set(c.no, c)); } return cardMap.get(no) || null; };
@@ -304,19 +310,20 @@
   /* =================== EDITOR =================== */
   function openBinder(id, edit){
     const b = (S.list || []).find(x=>x.id === id); if(!b) return;
-    S.cur = norm(b); S.edit = !!edit; S.page = 0; S.status = '';
+    S.cur = norm(b); S.edit = !!edit; S.page = 0; S.status = ''; S.copy = null;
     renderEditor();
     const w = q1('#bindWrap'); if(w && w.scrollIntoView) w.scrollIntoView({block:'start'});
   }
   async function closeBinder(){
     if(S.saveTmr) await saveNow();
-    S.cur = null; S.edit = false;
+    S.cur = null; S.edit = false; S.copy = null;
     renderShelf();
   }
 
   function pocketHTML(s, i, mode, b){
     const own = mode === 'own';
-    if(!s) return `<div class="bp-pocket empty${own && S.edit ? ' add' : ''}" data-bslot="${i}">${own && S.edit ? '＋' : ''}</div>`;
+    if(!s) return own && S.edit && S.copy ? `<div class="bp-pocket empty add bp-paste" data-bslot="${i}" title="Place the copy here">⧉</div>`
+      : `<div class="bp-pocket empty${own && S.edit ? ' add' : ''}" data-bslot="${i}">${own && S.edit ? '＋' : ''}</div>`;
     const drag = own && S.edit ? ' draggable="true"' : '';
     const qty = (s.q||1) > 1 ? `<span class="bp-q">×${s.q}</span>` : '';
     const soldTag = s.sold ? '<span class="bp-sold">SOLD</span>' : '';
@@ -386,7 +393,10 @@
         <button type="button" class="btn2" data-bact="settings">⚙ Settings</button>
         <button type="button" class="btn2 bd-ghost" data-bact="share">🔗 Share</button></div>
       ${b.hidden ? `<div class="bd-warn">⚠ ${E(b.hidden_reason || 'This binder is hidden.')} Other people can't open the link until our team reviews it. You can still edit it.</div>` : ''}
-      ${S.edit ? `<div class="bd-editbar"><b>Edit mode</b><span>Tap an empty pocket to add a card, tap a card to change it${per > 1 ? ', drag to move it' : ''}.</span><span class="bd-sp"></span>
+      ${S.edit && S.copy ? `<div class="bd-editbar bd-copybar"><b>⧉ Copying ${E(S.copy.name)}</b><span>Tap an empty pocket to place a copy. You can place as many copies as you like, on any page.</span><span class="bd-sp"></span>
+        ${b.pages < MAX_PAGES ? '<button type="button" class="btn2" data-bact="addpage">＋ Add page</button>' : ''}
+        <button type="button" class="btn2 main" data-bact="copydone">✓ Done copying</button></div>` : ''}
+      ${S.edit && !S.copy ? `<div class="bd-editbar"><b>Edit mode</b><span>Tap an empty pocket to add a card, tap a card to change it${per > 1 ? ', drag to move it' : ''}.</span><span class="bd-sp"></span>
         ${b.pages < MAX_PAGES ? '<button type="button" class="btn2" data-bact="addpage">＋ Add page</button>' : ''}
         ${b.pages > 1 && lastEmpty ? '<button type="button" class="btn2" data-bact="delpage">− Remove last page</button>' : ''}</div>` : ''}
       <div class="bd-layout"><div class="bd-main">${spreadHTML(b, S.page, 'own')}
@@ -483,8 +493,14 @@
     S.photoCount = data.filter(f=>!/_t\.(webp|jpg)$/.test(f.name)).length;
     return S.photoCount;
   }
+  /* v7.22 — foto yang masih dipakai kantong lain (hasil Duplicate) tidak boleh ikut terhapus */
+  function photoInUse(path){
+    const binders = (S.list || []).map(b=>S.cur && S.cur.id === b.id ? S.cur : b);
+    if(S.cur && !binders.some(b=>b.id === S.cur.id)) binders.push(S.cur);
+    return binders.some(b=>(Array.isArray(b.slots) ? b.slots : []).some(s=>xPaths(s).includes(path)));
+  }
   async function removePhotos(paths){
-    const list = (paths || []).filter(Boolean); if(!list.length || !API() || !API().photoRemove) return;
+    const list = (paths || []).filter(p=>p && !photoInUse(p)); if(!list.length || !API() || !API().photoRemove) return;
     await API().photoRemove(list);
     S.photoCount = null;                 // dihitung ulang dari Storage saat dibutuhkan
   }
@@ -564,7 +580,7 @@
             ${P.err ? `<p class="bd-err">${E(P.err)}</p>` : ''}
             <div class="bd-btns"><button type="button" class="btn2 main" data-bs="save">${s ? 'Save' : 'Put in pocket'}</button>
               <button type="button" class="btn2" data-bs="change">Pick from database instead</button>
-              ${s ? `<button type="button" class="btn2" data-bs="left" ${i<=0?'disabled':''}>◀ Move</button><button type="button" class="btn2" data-bs="right" ${i>=b.pages*PER-1?'disabled':''}>Move ▶</button><button type="button" class="btn2 bd-red" data-bs="remove">Remove</button>` : ''}</div>
+              ${s ? `<button type="button" class="btn2" data-bs="left" ${i<=0?'disabled':''}>◀ Move</button><button type="button" class="btn2" data-bs="right" ${i>=b.pages*PER-1?'disabled':''}>Move ▶</button><button type="button" class="btn2" data-bs="dup" title="Copy this card with all its details into another empty pocket">⧉ Duplicate</button><button type="button" class="btn2 bd-red" data-bs="remove">Remove</button>` : ''}</div>
           </div></div>`;
     };
     const formHTML = () => {
@@ -588,7 +604,7 @@
             <p class="bd-mut" id="bsOwn">Card Collection: you own ${own} of this version.${trade ? ' Leave the price empty and tick “Open to offers” to show “Make offer”.' : ''}</p>
             <div class="bd-btns"><button type="button" class="btn2 main" data-bs="save">${s ? 'Save' : 'Put in pocket'}</button>
               <button type="button" class="btn2" data-bs="change">Change card</button>
-              ${s ? `<button type="button" class="btn2" data-bs="left" ${i<=0?'disabled':''}>◀ Move</button><button type="button" class="btn2" data-bs="right" ${i>=b.pages*PER-1?'disabled':''}>Move ▶</button><button type="button" class="btn2 bd-red" data-bs="remove">Remove</button>` : ''}</div>
+              ${s ? `<button type="button" class="btn2" data-bs="left" ${i<=0?'disabled':''}>◀ Move</button><button type="button" class="btn2" data-bs="right" ${i>=b.pages*PER-1?'disabled':''}>Move ▶</button><button type="button" class="btn2" data-bs="dup" title="Copy this card with all its details into another empty pocket">⧉ Duplicate</button><button type="button" class="btn2 bd-red" data-bs="remove">Remove</button>` : ''}</div>
           </div></div>`;
     };
     /* simpan isian form foto sebelum pindah langkah (ganti foto) supaya tidak hilang */
@@ -715,9 +731,15 @@
         }).catch(()=>{ P.err = 'Couldn\'t prepare this photo in this browser. Please try another photo or browser.'; P.step = 'crop'; draw(); });
         return;
       }
+      if(act === 'dup'){
+        if(!s) return;
+        dropPend(); if(P.img && P.img.close) try{ P.img.close(); }catch(er){}
+        mxClose(); startCopy(i); return;
+      }
       if(act === 'remove'){
         const old = xPaths(s);
-        if(old.length && !confirm('Remove this card? Its photo is deleted for good.')) return;
+        const shared = old.length && b.slots.some((x, k)=>k !== i && xPaths(x).some(p=>old.includes(p)));
+        if(old.length && !shared && !confirm('Remove this card? Its photo is deleted for good.')) return;
         b.slots[i] = null; dropPend(); mxClose(); renderEditor();
         if(old.length){ saveNow().then(()=>removePhotos(old)); } else queueSave();
         return;
@@ -806,6 +828,26 @@
       renderEditor();
     }
   }
+
+  /* ---------- v7.22: duplikat kantong ---------- */
+  function startCopy(i){
+    const b = S.cur, s = b && b.slots[i]; if(!s) return;
+    const src = JSON.parse(JSON.stringify(s));
+    S.copy = { src, name: isX(s) ? xName(s) : cardName(card(s.no)) };
+    if(!b.slots.some(x=>!x)) setStatus('No empty pocket left — add a page to place the copy.');
+    renderEditor();
+  }
+  function pasteCopy(i){
+    const b = S.cur; if(!b || !S.copy) return;
+    if(b.slots[i]){ setStatus('That pocket is taken — tap an empty pocket.'); return; }
+    const out = JSON.parse(JSON.stringify(S.copy.src));
+    out.sid = rid();                    // id kantong baru (riwayat penjualan per kantong)
+    if(out.sold) out.sold = false;      // salinan selalu mulai belum terjual
+    b.slots[i] = out;
+    queueSave(); renderEditor();
+    const el = q1(`#bindWrap [data-bslot="${i}"]`); if(el){ el.classList.add('bp-pasted'); setTimeout(()=>el.classList.remove('bp-pasted'), 900); }
+  }
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && S.copy && S.cur && !document.querySelector('#mxModal .mx-box') && (!document.getElementById('lightbox') || document.getElementById('lightbox').hidden)){ S.copy = null; renderEditor(); } });
 
   /* ---------- pengaturan ---------- */
   function cleanWa(v){
@@ -941,6 +983,7 @@
     const slot = e.target.closest('[data-bslot]');
     if(slot && S.cur){
       const i = +slot.dataset.bslot;
+      if(S.edit && S.copy){ pasteCopy(i); return; }
       if(S.edit) openSlot(i);
       else if(isX(S.cur.slots[i])) openPhoto(S.cur.slots[i], S.cur);
       else if(S.cur.slots[i]) openLightbox(S.cur.slots[i].no);
@@ -950,7 +993,8 @@
     const act = a.dataset.bact;
     if(act === 'new') openCreate();
     else if(act === 'back') closeBinder();
-    else if(act === 'edit'){ S.edit = !S.edit; if(!S.edit && S.saveTmr) saveNow(); renderEditor(); }
+    else if(act === 'edit'){ S.edit = !S.edit; S.copy = null; if(!S.edit && S.saveTmr) saveNow(); renderEditor(); }
+    else if(act === 'copydone'){ S.copy = null; renderEditor(); }
     else if(act === 'settings') openSettings();
     else if(act === 'share') openShare();
     else if(act === 'copylist') salinTeks(listText(S.cur), a);
