@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.22** · 2 November 2026
+**Versi saat ini: v7.23** · 2 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -591,6 +591,28 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.23 — Binders: pilih warna sampul tiap binder (default hitam) — 2 November 2026 *(`index.html`, `binders.js`, `binders-ui.js`, migrasi SQL baru `mhr_decklab_v723_binder_color.sql` di folder internal)*
+
+Permintaan pemilik: pengguna bisa memilih warna tiap binder; kalau tidak memilih, warnanya **hitam**.
+- **10 warna**: Black (default), Red, Orange, Yellow, Green, Teal, Blue, Purple, Pink, Grey — pilihan kotak warna di
+  **＋ New binder** dan **⚙ Settings** binder. Warna dipakai di sampul rak binder, tag tipe di editor, ikon halaman
+  publik `#binder/<kode>`, dan cahaya bawah gambar "Save pages as image" (binder hitam tetap memakai cahaya tipe
+  binder seperti sebelumnya). **Tipe binder (My collection / For sale / Wishlist) tidak lagi menentukan warna**; label
+  tipe tetap tampil di sampul. Binder hitam diberi garis tepi tipis supaya tetap terlihat di latar gelap.
+- **Binder lama ikut jadi hitam** (default kolom) sampai pemiliknya memilih warna lain di Settings.
+- **Supabase** (`mhr_decklab_v723_binder_color.sql`): kolom `binders.color text not null default 'black'` + check
+  10 nilai; `mhr_binder_get` ikut mengembalikan `color` (isi lain sama dengan versi yang sedang dipakai). Tabel sudah
+  punya GRANT & RLS pemilik dari v7.06, jadi tidak ada GRANT baru.
+- **Sebelum migrasi dijalankan** `binders.js` otomatis jatuh ke kolom lama (`colorMissing`, error 42703 / PGRST204):
+  binder tetap bisa dibuka, dibuat dan disimpan, semua tampil hitam, dan pilihan warna disembunyikan.
+- Sekalian diperbaiki: tombol radio di form binder (Type, Start with) ikut `width:100%` dari `.bd-f input` sehingga
+  tampil di tengah/melebar — sekarang lebar normal dan rata kiri.
+- `binders.js?v=7.23`, `binders-ui.js?v=7.23`; versi 7.23 (komentar, meta, footer).
+- Dicek: Playwright (18 tes) — binder tanpa warna tampil hitam, binder ungu tetap ungu, form New binder 10 warna dengan
+  Black terpilih, buat binder merah → tersimpan `red` dan tag editor merah, Settings ganti ke teal → tersimpan & rak ikut
+  teal, ikon halaman publik ikut warna; mode sebelum migrasi (rak tampil, tanpa pilihan warna, buat & simpan tetap jalan);
+  HP 390 px tanpa scroll horizontal; tanpa error JS.
 
 ### v7.22 — Binders: Duplicate (salin kartu beserta semua isiannya ke kantong kosong lain) — 2 November 2026 *(`index.html`, `binders-ui.js`)*
 

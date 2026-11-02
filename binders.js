@@ -17,6 +17,11 @@
    per berkas & maks 20 foto per akun ditegakkan oleh kebijakan Storage di
    mhr_decklab_v710_binder_photos.sql. Foto dikecilkan di browser sebelum
    diunggah (binders-ui.js), jadi pengguna tidak perlu mengonversi apa pun.
+
+   v7.23 — WARNA BINDER: kolom binders.color (black | red | orange | yellow | green | teal |
+   blue | purple | pink | grey; default 'black'), lihat mhr_decklab_v723_binder_color.sql.
+   Kalau migrasinya belum dijalankan, kolom color otomatis tidak dipakai (colorMissing = true):
+   binder tetap bisa dibuka & disimpan, semua tampil hitam, dan pilihan warna disembunyikan.
    =================================================================== */
 (function(){
   'use strict';
@@ -26,24 +31,36 @@
     const s = await window.MHRAuth.getSession();
     return (s && s.user) ? s.user.id : null;
   }
-  const COLS = 'id,share_code,name,kind,is_public,pages,slots,show_prices,contact_wa,contact_ig,location,note,hidden,hidden_reason,created_at,updated_at';
+  const COLS0 = 'id,share_code,name,kind,is_public,pages,slots,show_prices,contact_wa,contact_ig,location,note,hidden,hidden_reason,created_at,updated_at';
+  const COLS1 = COLS0 + ',color';
+  let colorOff = false;                                  // v7.23 — kolom color belum ada di database
+  const cols = () => colorOff ? COLS0 : COLS1;
+  /* kolom tidak dikenal (migrasi v7.23 belum jalan): 42703 dari Postgres atau PGRST204 dari PostgREST */
+  const colErr = e => !!e && (/42703|PGRST204/.test(String(e.code || '')) || /color/i.test(String(e.message || '')) && /column/i.test(String(e.message || '')));
+  /* jalankan query; kalau gagal karena kolom color, ulangi sekali tanpa kolom itu */
+  async function withColor(run){
+    let r = await run();
+    if(!colorOff && r && colErr(r.error)){ colorOff = true; window.MHRBinders.colorMissing = true; r = await run(); }
+    return r;
+  }
   const off = { message:'offline' };
   /* tabel/fungsi belum ada = migrasi v7.06 belum dijalankan */
   const miss = e => e ? (/PGRST205|42P01|PGRST202|42883/.test(`${e.code||''} ${e.message||''}`) ? {...e, missing:true} : e) : null;
   /* kode dari RAISE EXCEPTION (mis. OWN_BINDER) */
   const rpcErr = e => { if(!e) return null; const m = /([A-Z_]{5,})/.exec(e.message||''); return {...miss(e), code: m ? m[1] : (e.code||'ERROR')}; };
   const EDITABLE = ['name','kind','is_public','pages','slots','show_prices','contact_wa','contact_ig','location','note'];
-  const pick = row => { const o = {}; EDITABLE.forEach(k=>{ if(row[k] !== undefined) o[k] = row[k]; }); return o; };
+  const pick = row => { const o = {}; EDITABLE.forEach(k=>{ if(row[k] !== undefined) o[k] = row[k]; }); if(!colorOff && row.color) o.color = row.color; return o; };
   const BUCKET = 'binder-photos';
   const store = () => { const c = client(); return c && c.storage ? c.storage.from(BUCKET) : null; };
 
   window.MHRBinders = {
     get ready(){ return !!client(); },
+    colorMissing: false,
     async listMine(){
       const c = client(); if(!c) return { data:[], error:off };
       const u = await uid(); if(!u) return { data:[], error:null };
       try{
-        const { data, error } = await c.from('binders').select(COLS).eq('owner_id', u).order('updated_at', { ascending:false });
+        const { data, error } = await withColor(()=>c.from('binders').select(cols()).eq('owner_id', u).order('updated_at', { ascending:false }));
         return { data:data||[], error:miss(error) };
       }catch(e){ return { data:[], error:off }; }
     },
@@ -51,14 +68,14 @@
       const c = client(); if(!c) return { data:null, error:off };
       const u = await uid(); if(!u) return { data:null, error:{ code:'NOT_LOGGED_IN' } };
       try{
-        const { data, error } = await c.from('binders').insert({ ...pick(row), owner_id:u }).select(COLS).single();
+        const { data, error } = await withColor(()=>c.from('binders').insert({ ...pick(row), owner_id:u }).select(cols()).single());
         return { data, error:miss(error) };
       }catch(e){ return { data:null, error:off }; }
     },
     async save(id, row){
       const c = client(); if(!c) return { data:null, error:off };
       try{
-        const { data, error } = await c.from('binders').update(pick(row)).eq('id', id).select(COLS).single();
+        const { data, error } = await withColor(()=>c.from('binders').update(pick(row)).eq('id', id).select(cols()).single());
         return { data, error:miss(error) };
       }catch(e){ return { data:null, error:off }; }
     },

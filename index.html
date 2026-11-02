@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.22  ·  2 November 2026
+     MHR DECK LAB  ·  versi 7.23  ·  2 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.22">
+<meta name="version" content="7.23">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2009,6 +2009,17 @@
   .bp-pocket.empty.add:hover{border-color:var(--accent);color:var(--accent)}
   .bp-pocket[draggable="true"]{cursor:grab}
   .bp-pocket.drop{outline:2px solid var(--accent);outline-offset:2px}
+  /* v7.23 — pilihan warna binder */
+  .bd-colors{display:flex;flex-wrap:wrap;gap:8px}
+  .bd-col{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;width:52px;position:relative}
+  .bd-f input[type=radio],.bd-f input[type=checkbox]{width:auto;padding:0;flex:none}   /* sebelumnya ikut width:100% → radio Type/Start with melebar */
+  .bd-col input{position:absolute;opacity:0;pointer-events:none}
+  .bd-col i{display:block;width:40px;height:40px;border-radius:5px 10px 10px 5px;border:2px solid var(--line);box-shadow:inset 3px 0 0 rgba(255,255,255,.18)}
+  .bd-col small{font-size:10.5px;color:var(--muted)}
+  .bd-col input:checked + i{border-color:var(--accent);box-shadow:0 0 0 2px rgba(242,176,30,.35),inset 3px 0 0 rgba(255,255,255,.18)}
+  .bd-col input:checked ~ small{color:var(--paper);font-weight:700}
+  .bd-col input:focus-visible + i{outline:2px solid var(--accent);outline-offset:2px}
+  .bd-book.bd-c-black{box-shadow:inset 8px 0 0 rgba(0,0,0,.28),inset 0 0 0 1px #3a414c,0 6px 18px rgba(0,0,0,.35)}
   /* v7.22 — mode Duplicate */
   .bd-copybar{background:rgba(57,135,229,.10);border-color:#3987e5}
   .bd-copybar b{color:#9cc6f5}
@@ -2051,7 +2062,7 @@
   .bd-f input:focus,.bd-f select:focus,.bd-f textarea:focus,.bs-tool input:focus{border-color:var(--accent)}
   .bd-kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .bd-kopt{border:1px solid var(--line);border-radius:10px;padding:9px 10px;cursor:pointer;display:flex;flex-direction:column;gap:3px;font-size:12.5px}
-  .bd-kopt input{margin:0 0 3px}
+  .bd-kopt input{margin:0 0 3px;align-self:flex-start}
   .bd-kopt small{color:var(--muted);font-size:11px}
   .bd-kopt:has(input:checked){border-color:var(--accent);background:rgba(242,176,30,.07)}
   .bd-ropt{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;padding:6px 0}
@@ -3217,8 +3228,8 @@
 <script src="tournaments.js?v=7.02"></script>
 <script src="events.js?v=7.02"></script>
 <script src="events-ui.js?v=7.05"></script>
-<script src="binders.js?v=7.10"></script>
-<script src="binders-ui.js?v=7.22"></script>
+<script src="binders.js?v=7.23"></script>
+<script src="binders-ui.js?v=7.23"></script>
 <!-- v7.13 — Performance Analytics (Tahap 1): servis match_logs/match_archetypes (perf.js) + tab Performance (perf-ui.js).
      v7.14 (Tahap 2): tournament runs, import dari Events, share gambar run, grafik tren, detail matchup.
      v7.15 (Tahap 3): data matchup komunitas (opt-in, anonim), detail deck + statistik per versi deck. -->
@@ -3252,7 +3263,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.22</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.23</div>
 </footer>
 
 <div class="dview" id="simView" hidden>

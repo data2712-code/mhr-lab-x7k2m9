@@ -36,6 +36,11 @@
    kantong lama tetap sah). Rp tanpa desimal & titik ribuan (150.000); mata uang lain koma
    ribuan & titik desimal maks 2 angka (1,250.50). Mata uang terakhir dipakai jadi default
    kantong baru (localStorage "mhr_bd_cur"). "Listed value" dijumlah per mata uang.
+   v7.23: WARNA BINDER — pemilik memilih warna sampul tiap binder (10 pilihan, default Black) di
+   "New binder" dan ⚙ Settings. Warna dipakai di rak, tag di editor, ikon halaman publik dan cahaya
+   gambar Story/Post. Tipe binder (collection/trade/wishlist) tidak lagi menentukan warna.
+   Disimpan di kolom binders.color (mhr_decklab_v723_binder_color.sql); sebelum migrasi pilihan
+   warna disembunyikan dan semua binder tampil hitam.
    v7.22: DUPLIKAT kantong — tombol "⧉ Duplicate" di form kantong (mode edit) → mode salin: ketuk
    kantong kosong mana pun (halaman mana pun, boleh berkali-kali) untuk menaruh salinan dengan SEMUA
    isian kantong asal (kartu, versi, jumlah, harga + mata uang, nego, kondisi, catatan; kartu foto ikut
@@ -58,6 +63,23 @@
     trade:      { label:'For sale / trade', icon:'🏷', bg:'linear-gradient(135deg,#1f6f43,#0f3d25)' },
     wishlist:   { label:'Wishlist', icon:'⭐', bg:'linear-gradient(135deg,#5b3fb0,#2a1c5a)' },
   };
+  /* v7.23 — warna sampul binder (key disimpan di binders.color; daftar sama dengan constraint database) */
+  const COLORS = {
+    black:  { label:'Black',  bg:'linear-gradient(135deg,#353a43,#101216)', glow:'#8A94A3' },
+    red:    { label:'Red',    bg:'linear-gradient(135deg,#8a2a2a,#431414)', glow:'#E4442E' },
+    orange: { label:'Orange', bg:'linear-gradient(135deg,#a8561b,#52280b)', glow:'#E8821E' },
+    yellow: { label:'Yellow', bg:'linear-gradient(135deg,#a07b12,#4d3a06)', glow:'#F2B01E' },
+    green:  { label:'Green',  bg:'linear-gradient(135deg,#1f6f43,#0f3d25)', glow:'#33A45C' },
+    teal:   { label:'Teal',   bg:'linear-gradient(135deg,#14707a,#083a40)', glow:'#22B3C2' },
+    blue:   { label:'Blue',   bg:'linear-gradient(135deg,#1f4f9a,#0e2652)', glow:'#3B87E8' },
+    purple: { label:'Purple', bg:'linear-gradient(135deg,#5b3fb0,#2a1c5a)', glow:'#9B6BFF' },
+    pink:   { label:'Pink',   bg:'linear-gradient(135deg,#a3346f,#4d1634)', glow:'#E2559B' },
+    grey:   { label:'Grey',   bg:'linear-gradient(135deg,#5d6573,#2a2f37)', glow:'#AAB3C0' },
+  };
+  const colorOf = b => (b && b.color && COLORS[b.color]) ? b.color : 'black';
+  const colorOn = () => !(window.MHRBinders && window.MHRBinders.colorMissing);
+  const colorPickHTML = (cur, name) => `<div class="bd-f"><span>Colour</span><div class="bd-colors" role="radiogroup" aria-label="Binder colour">${Object.entries(COLORS).map(([k, c])=>
+    `<label class="bd-col" title="${E(c.label)}"><input type="radio" name="${name}" value="${k}"${k === cur ? ' checked' : ''}><i style="background:${c.bg}"></i><small>${E(c.label)}</small></label>`).join('')}</div></div>`;
   const COND = { NM:'Near mint', LP:'Lightly played', MP:'Played', DMG:'Damaged' };
   const REASONS = [
     ['scam', 'Scam or suspicious payment request'],
@@ -243,7 +265,7 @@
     const k = KIND[b.kind] || KIND.collection; const nb = norm(b);
     const peek = filled(nb).slice(0, 3).map(s=>{ if(isX(s)) return (s.th || s.ph) ? `<img alt="" loading="lazy" src="${E(purl(s.th || s.ph))}">` : ''; const c = card(s.no); return c ? imgTag(c, s.v) : ''; }).join('');
     const st = b.hidden ? '⚠ hidden' : b.is_public ? '🔗 shared' : '🔒 private';
-    return `<button type="button" class="bd-book" data-bopen="${E(b.id)}" style="background:${k.bg}">
+    return `<button type="button" class="bd-book bd-c-${colorOf(b)}" data-bopen="${E(b.id)}" style="background:${COLORS[colorOf(b)].bg}">
       <span class="bd-kind">${k.icon} ${E(k.label)} · ${st}</span><span class="bd-ttl">${E(b.name)}</span>
       <span class="bd-peek">${peek}</span>
       <span class="bd-inf">${filled(nb).length} cards · ${nb.pages} page${nb.pages>1?'s':''}</span></button>`;
@@ -271,6 +293,7 @@
         <label class="bd-f"><span>Name</span><input id="bnName" maxlength="60" placeholder="e.g. Spider-Verse master set, Cards for sale"></label>
         <div class="bd-f"><span>Type</span><div class="bd-kinds">${Object.entries(KIND).map(([k, v], i)=>`<label class="bd-kopt"><input type="radio" name="bnKind" value="${k}"${i===0?' checked':''}><b>${v.icon} ${E(v.label)}</b><small>${
           k === 'collection' ? 'Show off cards you own' : k === 'trade' ? 'Cards you want to sell or swap, with prices' : 'Cards you are looking for'}</small></label>`).join('')}</div></div>
+        ${colorOn() ? colorPickHTML('black', 'bnColor') : ''}
         <div class="bd-f"><span>Start with</span>
           <label class="bd-ropt"><input type="radio" name="bnStart" value="blank" checked> Empty pages <select id="bnPages">${[1,2,3,4,6,8,10].map(n=>`<option value="${n}"${n===2?' selected':''}>${n} page${n>1?'s':''} (${n*PER} pockets)</option>`).join('')}</select></label>
           <label class="bd-ropt"><input type="radio" name="bnStart" value="set"> Every card of a set <select id="bnSet">${sets.map(s=>`<option value="${s.kode}">${E(s.kode)}${collSetName(s) ? ' · ' + E(collSetName(s)) : ''}</option>`).join('')}</select></label>
@@ -298,7 +321,9 @@
       if(slots.length) pages = Math.max(1, Math.ceil(slots.length / PER));
       if(!name) name = kind === 'trade' ? 'For sale / trade' : kind === 'wishlist' ? 'Wishlist' : 'My binder';
       ev.target.disabled = true;
-      const { data, error } = await API().create({ name, kind, pages, slots, is_public:false, show_prices:true });
+      const colEl = box.querySelector('input[name="bnColor"]:checked');
+      const color = colEl && COLORS[colEl.value] ? colEl.value : 'black';
+      const { data, error } = await API().create({ name, kind, pages, slots, is_public:false, show_prices:true, color });
       if(error){ ev.target.disabled = false; box.querySelector('#bnErr').textContent = errMsg(error); return; }
       mxClose();
       S.list = [data, ...(S.list || [])]; updateTile();
@@ -387,7 +412,7 @@
     if(S.page >= b.pages) S.page = Math.max(0, Math.floor((b.pages - 1) / per) * per);
     const lastEmpty = b.slots.slice((b.pages-1)*PER).every(s=>!s);
     w.innerHTML = `<div class="bd-top"><button type="button" class="bd-back" data-bact="back">‹ All binders</button>
-        <h3>${E(b.name)}</h3><span class="bd-tag" style="background:${k.bg};border-color:transparent;color:#fff">${k.icon} ${E(k.label)}</span>${statusTag(b)}
+        <h3>${E(b.name)}</h3><span class="bd-tag" style="background:${COLORS[colorOf(b)].bg};border-color:${colorOf(b) === 'black' ? 'var(--line)' : 'transparent'};color:#fff">${k.icon} ${E(k.label)}</span>${statusTag(b)}
         <span class="bd-sp"></span>
         <button type="button" class="btn2 ${S.edit ? 'main' : ''}" data-bact="edit">${S.edit ? '✓ Done' : '✏️ Edit'}</button>
         <button type="button" class="btn2" data-bact="settings">⚙ Settings</button>
@@ -865,6 +890,7 @@
     const m = mxOpen(`<h3>⚙ Binder settings</h3><div class="bd-form">
       <label class="bd-f"><span>Name</span><input id="bgName" maxlength="60" value="${E(b.name)}"></label>
       <label class="bd-f"><span>Type</span><select id="bgKind">${Object.entries(KIND).map(([k, v])=>`<option value="${k}"${b.kind===k?' selected':''}>${v.icon} ${E(v.label)}</option>`).join('')}</select></label>
+      ${colorOn() ? colorPickHTML(colorOf(b), 'bgColor') : ''}
       <label class="bd-chk"><input type="checkbox" id="bgPub"${b.is_public ? ' checked' : ''}> Shared link on — anyone with the link can view this binder</label>
       <div id="bgTrade"${b.kind === 'trade' ? '' : ' hidden'}>
         <label class="bd-chk"><input type="checkbox" id="bgPrices"${b.show_prices !== false ? ' checked' : ''}> Show prices on the shared page</label>
@@ -886,6 +912,7 @@
       const wa = cleanWa(box.querySelector('#bgWa').value), ig = cleanIg(box.querySelector('#bgIg').value);
       if(wa && (wa.length < 10 || wa.length > 15)){ box.querySelector('#bgErr').textContent = 'That WhatsApp number doesn\'t look right. Use the full number, e.g. 0812 3456 7890.'; return; }
       b.name = box.querySelector('#bgName').value.trim().slice(0, 60) || b.name;
+      const colEl = box.querySelector('input[name="bgColor"]:checked'); if(colEl && COLORS[colEl.value]) b.color = colEl.value;
       b.kind = box.querySelector('#bgKind').value;
       b.is_public = box.querySelector('#bgPub').checked;
       b.show_prices = box.querySelector('#bgPrices').checked;
@@ -1070,7 +1097,7 @@
         <span class="bd-mut">Page${a===z?'':'s'} ${a}${a===z?'':'–'+z} of ${b.pages}</span></div>`;
     };
     w.innerHTML = `${b.is_owner ? `<div class="bdp-own">This is your binder${b.is_public ? '' : ' (private: only you can see it)'}${b.hidden ? '. It is hidden from other people while our team reviews reports' : ''}. <a href="#dashboard" data-bpub="edit">Edit it in My Dashboard → Binders</a></div>` : ''}
-      <div class="bdp-top"><div class="bdp-ico" style="background:${k.bg}">${k.icon}</div>
+      <div class="bdp-top"><div class="bdp-ico" style="background:${COLORS[colorOf(b)].bg}">${k.icon}</div>
         <div class="bdp-h"><span class="bd-mut">Shared binder · ${E(k.label)}</span><h2>${E(b.name)}</h2>
           <span class="bd-mut">by <b>@${E(b.owner)}</b>${b.location ? ` · 📍 ${E(b.location)}` : ''} · updated ${E(tglPendek(b.updated_at))} · ${f.length} card${f.length===1?'':'s'}</span></div>
         <div class="bdp-acts">${acts}</div></div>
@@ -1208,7 +1235,7 @@
     /* latar + cahaya */
     ctx.fillStyle = '#0B0E12'; ctx.fillRect(0, 0, W, H);
     const glow = (x, y, col) => { const g = ctx.createRadialGradient(x, y, 0, x, y, 900); g.addColorStop(0, col + '30'); g.addColorStop(1, col + '00'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); };
-    glow(W, 0, '#F2B01E'); glow(0, H, KIND_GLOW[b.kind] || '#E4442E');
+    glow(W, 0, '#F2B01E'); glow(0, H, colorOf(b) === 'black' ? (KIND_GLOW[b.kind] || '#E4442E') : COLORS[colorOf(b)].glow);
     /* header: logo + chip + nomor halaman */
     let y = F.top;
     const logo = await loadImg('icons/logo-header.png?v=7.03');
