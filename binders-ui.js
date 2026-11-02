@@ -207,6 +207,7 @@
   function setStatus(t){ S.status = t; const el = q1('#bdStatus'); if(el) el.textContent = t; }
   function queueSave(){
     if(!S.cur) return;
+    window.MHRUsage && window.MHRUsage.mark('binder_edit');   // v7.25
     setStatus('Saving…');
     clearTimeout(S.saveTmr);
     S.saveTmr = setTimeout(saveNow, 700);
@@ -214,6 +215,7 @@
   async function saveNow(){
     clearTimeout(S.saveTmr); S.saveTmr = null;
     const b = S.cur; if(!b) return;
+    window.MHRUsage && window.MHRUsage.mark('binder_edit');   // v7.25
     const row = { ...b, slots: trimSlots(b.slots) };
     const { data, error } = await API().save(b.id, row);
     if(error){ setStatus('⚠ Couldn\'t save. ' + errMsg(error)); return; }

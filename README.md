@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.24** · 2 November 2026
+**Versi saat ini: v7.25** · 2 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -37,6 +37,7 @@ mhr-lab-x7k2m9/
 ├── og-image.jpg      ← gambar preview saat link dibagikan
 ├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.89; TIDAK dimuat sejak v7.05, disimpan untuk kampanye berikutnya)
 ├── home-ui.js         ← halaman Beranda (#beranda): perkenalan fitur untuk pengunjung baru, "Welcome back" untuk akun login (v6.63, dirombak v7.16)
+├── usage.js           ← statistik pemakaian fitur anonim (guest vs login) + laporan admin "📊 Usage" di My Lab (v7.25)
 ├── binders.js         ← servis Supabase binder kartu 3×3 (v7.06, tanpa DOM)
 ├── binders-ui.js      ← tab Binders di My Dashboard + halaman publik #binder/<kode> (v7.06)
 ├── perf.js            ← servis Supabase Performance Analytics: catatan match, archetype, tournament runs, data komunitas (v7.13–v7.15, tanpa DOM)
@@ -610,6 +611,42 @@ disetujui pemilik.
 - `api/v1/` dibuat ulang (`node tools/generate_api.js`): hanya kolom `effect` BP01-043-SR yang berubah; `updated`
   2026-11-02, hash `76a1eabfd3853347`.
 - Dicek: `node --check cards.js`; diff piksel gambar hanya di area teks; teks API sama dengan `cards.js`.
+
+### v7.25 — Statistik pemakaian fitur anonim: guest vs login per fitur + kartu 📊 Usage (admin) — 2 November 2026 *(`index.html`, berkas BARU `usage.js`, `perf-ui.js`, `binders-ui.js`, migrasi SQL baru `mhr_decklab_v725_usage.sql` di folder internal)*
+
+> Catatan nomor versi: fitur ini awalnya disiapkan sebagai v7.24 di sesi lain, bersamaan dengan Rules FAQ
+> (v7.24). Saat digabung (stash bentrok di `index.html` & `README.md`) dinomori ulang jadi **v7.25**; konflik
+> diselesaikan dengan memakai keduanya (`rules-faq.js?v=7.24` + `perf-ui.js?v=7.25`).
+
+Permintaan pemilik: tahu berapa guest dan berapa user login yang memakai Deck Builder, My Decks, Binders, Collection dan
+Performance. Keputusan pemilik: hitung **perangkat unik**, laporan di **kartu 📊 Usage My Lab (admin)**, simpan **180 hari**.
+- **Cara kerja (`usage.js`)**: ID perangkat **anonim** (UUID acak di localStorage `mhr_dev`, tanpa cookie, tidak terhubung
+  ke akun/email/IP). Tiap fitur dicatat **paling banyak sekali per hari per perangkat per status** (catatan "sudah dikirim
+  hari ini" di `mhr_usage_sent`), dikirim satu paket ±3 detik kemudian / saat tab disembunyikan lewat RPC `mhr_track`.
+  Status guest/login **ditentukan server** (`auth.uid()`). Browser dengan **Global Privacy Control / Do Not Track tidak
+  dicatat**. Kalau migrasi belum jalan, pencatatan berhenti diam-diam (situs tidak terganggu).
+- **Yang dicatat** (daftar sama di `usage.js` & `mhr_usage_features()`): buka halaman `page_<halaman>` (13 halaman, dari
+  `setPage`), buka tab My Lab `tab_decks/coll/bind/perf` (`setDashTab`), Deck Builder `bld_add` (tambah kartu, `addCard`),
+  `bld_full` (deck tepat 50 kartu), `bld_share` (Salin link / Salin tabel), `bld_export` (Decklist PDF teks/gambar, Unduh
+  HD / PNG), `mydecks_sync` (deck tersimpan ke akun), `coll_edit` (`collSetQty`), `binder_edit` (simpan binder),
+  `perf_log` (match/ronde tersimpan), `perf_run` (run tersimpan). Isi deck/kartu **tidak** dikirim.
+- **Supabase** (`mhr_decklab_v725_usage.sql`): tabel `usage_daily (day, feature, role guest|user, device)` dengan PK
+  gabungan (kirim ulang tidak dobel), RLS aktif **tanpa policy** + semua hak dicabut (tidak bisa dibaca/ditulis langsung);
+  `mhr_track` (anon & authenticated; fitur di luar daftar diabaikan, maks 40 per panggilan, rem 300.000 baris/hari,
+  bersih otomatis > 180 hari ±2% panggilan); `mhr_usage_report(hari)` **khusus admin** (`mhr_is_admin()`): perangkat unik
+  per fitur guest/login (hari ini, 7 hari, 30 hari), total seluruh situs, dan perangkat per hari.
+- **Kartu 📊 Usage** di bawah tab My Lab (hanya akun admin, `<details>` dimuat saat dibuka): tabel per kelompok (Deck
+  Builder, My Decks, Card Collection, Binders, Performance, halaman lain) + grafik perangkat per hari (guest kuning, login biru).
+- **Batasan**: dihitung per browser/perangkat, bukan per orang (HP + laptop = 2; incognito / data browser dihapus =
+  perangkat baru). Data baru terkumpul sejak migrasi dijalankan; hari = tanggal UTC server.
+- `usage.js?v=7.25` (sesudah `auth.js`), `binders-ui.js?v=7.25`, `perf-ui.js?v=7.25`; versi 7.25 (komentar, meta, footer).
+- Dicek: tes SQL di PostgreSQL 16 lokal (guest/user dari `auth.uid()`, fitur asing diabaikan, duplikat tidak dobel, anon
+  tidak bisa membaca tabel/laporan, non-admin `NOT_ALLOWED`, > 40 fitur ditolak, jendela 1/7/30 hari & baris 200 hari lalu
+  tidak dihitung, migrasi bisa dijalankan dua kali) + Playwright 17 tes (guest: page_build/bld_add sekali, UUID tersimpan,
+  bld_full saat 50 kartu, bld_share, tidak dikirim ulang setelah reload, page_lgs; GPC = tidak ada pengiriman & tidak ada
+  ID; tanpa migrasi = satu panggilan gagal lalu berhenti tanpa error; admin: tab_* tercatat, kartu Usage tampil & angka
+  sesuai, non-admin kartu tersembunyi). Satu error `clipboard.writeText` di tes berasal dari tombol Salin tabel yang memang
+  butuh HTTPS (bukan perubahan ini).
 
 ### v7.24 — Guide jadi sub-menu + halaman baru Rules FAQ & Errata & Text Differences — 2 November 2026 *(`index.html`, `rules-faq.js` baru)*
 

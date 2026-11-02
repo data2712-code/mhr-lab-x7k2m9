@@ -528,6 +528,7 @@
     updateTile();
     if(q1('#dashPanelPerf') && !q1('#dashPanelPerf').hidden) render();
     toast(`${L.id ? (L.run ? 'Round updated' : 'Match updated') : (L.run ? 'Round saved' : 'Match saved')} ✓ ${data.result} vs ${oppDeck(data).name}`);
+    window.MHRUsage && window.MHRUsage.mark('perf_log');   // v7.25
   }
   function toast(msg){
     let t = q1('#pfToast');
@@ -758,6 +759,7 @@
       a.disabled = true; a.textContent = 'Saving…';
       const { data, error } = await API().saveRun(row);
       if(error || !data){ a.disabled = false; a.textContent = run ? 'Save changes' : 'Create run'; err.textContent = errMsg(error) || 'Could not save. Please try again.'; return; }
+      window.MHRUsage && window.MHRUsage.mark('perf_run');   // v7.25
       const i = (S.runs || []).findIndex(r=>r.id === data.id);
       S.runs = S.runs || []; if(i >= 0) S.runs[i] = data; else S.runs.unshift(data);
       /* trigger match_runs_sync sudah memperbarui ronde di server — samakan salinan lokal */

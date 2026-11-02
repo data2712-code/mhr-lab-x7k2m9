@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.24  ·  2 November 2026
+     MHR DECK LAB  ·  versi 7.25  ·  2 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.24">
+<meta name="version" content="7.25">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2009,6 +2009,26 @@
   .bp-pocket.empty.add:hover{border-color:var(--accent);color:var(--accent)}
   .bp-pocket[draggable="true"]{cursor:grab}
   .bp-pocket.drop{outline:2px solid var(--accent);outline-offset:2px}
+  /* v7.25 — kartu 📊 Usage (admin) */
+  .us-box{margin-top:22px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:12px 16px}
+  .us-box summary{cursor:pointer;font-family:var(--disp);font-size:15px;letter-spacing:.03em;list-style:none}
+  .us-box summary::-webkit-details-marker{display:none}
+  .us-box summary .bd-mut{font-family:var(--body);font-size:12px;letter-spacing:0}
+  .us-box[open] summary{margin-bottom:10px}
+  .us-scroll{overflow-x:auto;margin-top:8px}
+  .us-tbl{border-collapse:collapse;width:100%;font-size:12.5px;min-width:520px}
+  .us-tbl th,.us-tbl td{padding:6px 8px;border-bottom:1px solid #232b36;text-align:right;font-variant-numeric:tabular-nums}
+  .us-tbl th:first-child,.us-tbl td:first-child{text-align:left}
+  .us-tbl th{font-size:11px;color:var(--muted);font-weight:700}
+  .us-tbl th.g{color:#f3d48a}.us-tbl th.u{color:#9cc6f5}
+  .us-tbl th[colspan]{text-align:center;border-bottom:1px solid #2C3644}
+  .us-tbl td.z{color:#56606d}
+  .us-tbl tr.grp td{color:var(--paper);font-weight:800;background:var(--panel2);text-align:left}
+  .us-tbl tr.tot td{font-weight:800;color:var(--paper)}
+  .us-h{font-family:var(--disp);font-size:13px;letter-spacing:.04em;text-transform:uppercase;margin:14px 0 4px;color:var(--muted)}
+  .us-leg{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+  .us-leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .us-chart{width:100%;height:auto;display:block;margin-top:4px}
   /* v7.23 — pilihan warna binder */
   .bd-colors{display:flex;flex-wrap:wrap;gap:8px}
   .bd-col{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;width:52px;position:relative}
@@ -2927,6 +2947,8 @@
       <div class="dt-panel" id="dashPanelBind" hidden><div id="bindWrap"></div></div>
       <!-- v7.13 — Performance Analytics (perf-ui.js) -->
       <div class="dt-panel" id="dashPanelPerf" hidden><div id="perfWrap"></div></div>
+      <!-- v7.25 — statistik pemakaian fitur (guest vs login), HANYA admin; isi digambar usage.js (renderAdmin) -->
+      <details class="us-box" id="usageBox" hidden><summary>📊 Usage <span class="bd-mut">· admin only · guests vs logged-in devices per feature</span></summary><div id="usageWrap"></div></details>
     </div>
   </div>
 </section>
@@ -3290,6 +3312,8 @@
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
 <script src="auth.js?v=7.19"></script>
+<!-- v7.25 — statistik pemakaian fitur anonim (guest vs login), laporan admin di My Lab -->
+<script src="usage.js?v=7.25"></script>
 <script src="decks.js?v=7.02"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
 <script src="social.js?v=7.02"></script>
@@ -3307,12 +3331,12 @@
 <script src="events.js?v=7.02"></script>
 <script src="events-ui.js?v=7.05"></script>
 <script src="binders.js?v=7.23"></script>
-<script src="binders-ui.js?v=7.23"></script>
+<script src="binders-ui.js?v=7.25"></script>
 <!-- v7.13 — Performance Analytics (Tahap 1): servis match_logs/match_archetypes (perf.js) + tab Performance (perf-ui.js).
      v7.14 (Tahap 2): tournament runs, import dari Events, share gambar run, grafik tren, detail matchup.
      v7.15 (Tahap 3): data matchup komunitas (opt-in, anonim), detail deck + statistik per versi deck. -->
 <script src="perf.js?v=7.15"></script>
-<script src="perf-ui.js?v=7.21"></script>
+<script src="perf-ui.js?v=7.25"></script>
 <script src="rules-faq.js?v=7.24"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules) -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
@@ -3342,7 +3366,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.24</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.25</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -4071,6 +4095,7 @@ function addCard(no){
   if(c0 && salinanNama(c0.nm, no) + cur >= max) return;
   if(cur >= max) return;
   state.deck[no] = cur+1;
+  if(window.MHRUsage){ window.MHRUsage.mark('bld_add'); if(Object.values(state.deck).reduce((a,b)=>a+b, 0) === 50) window.MHRUsage.mark('bld_full'); }   // v7.25
   renderAll();
 }
 function decCard(no){
@@ -5504,6 +5529,7 @@ function tabelDeck(){
 $('#btnTabel').addEventListener('click', ()=>{
   const teks = tabelDeck();
   if(!teks){ alert(t('mDeckEmpty')); return; }
+  window.MHRUsage && window.MHRUsage.mark('bld_share');   // v7.25
   const box = $('#exportBox');
   box.value = teks; box.classList.add('show'); box.select();
   const b = $('#btnTabel');
@@ -5657,6 +5683,7 @@ function pdfMuatLogo(){
 }
 
 async function buatDecklistPDF(){
+  window.MHRUsage && window.MHRUsage.mark('bld_export');   // v7.25
   const btn = $('#btnDlPdf');
   const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no), q}))
     .filter(x=>x.c);
@@ -5939,6 +5966,7 @@ function pdfLinkDeck(){
 }
 
 async function buatDecklistGambarPDF(){
+  window.MHRUsage && window.MHRUsage.mark('bld_export');   // v7.25
   const btn = $('#btnDlPdf');
   const entries = Object.entries(state.deck).map(([no,q])=>({c:DB.find(d=>d.no===no), q}))
     .filter(x=>x.c);
@@ -6541,6 +6569,7 @@ function roundRect(ctx,x,y,w,h,r){
 // (HEXC didefinisikan sekali dekat COLORS di atas, lihat HEXC_ALL.)
 
 $('#btnDvHd').addEventListener('click', async ()=>{
+  window.MHRUsage && window.MHRUsage.mark('bld_export');   // v7.25
   const btn = $('#btnDvHd');
   const sumber = dvDeck || state.deck;
   const entries = Object.entries(sumber).map(([no,q])=>({c:DB.find(d=>d.no===no),q}))
@@ -6699,6 +6728,7 @@ $('#btnDvHd').addEventListener('click', async ()=>{
 });
 
 $('#btnDvPng').addEventListener('click', async ()=>{
+  window.MHRUsage && window.MHRUsage.mark('bld_export');   // v7.25
   if(typeof html2canvas === 'undefined'){
     alert(t('mNoImgLib')); return;
   }
@@ -6954,6 +6984,7 @@ function deckShareURL(){
 
 $('#btnLink').addEventListener('click', async ()=>{
   if(!deckCount()){ alert(t('mDeckEmpty')); return; }
+  window.MHRUsage && window.MHRUsage.mark('bld_share');   // v7.25
   const url = deckShareURL();
   const btn = $('#btnLink');
   try{
@@ -8310,6 +8341,7 @@ function setPage(p, dariHash){
      Inggris (lihat GUIDE di atas), konsisten dengan seluruh UI situs yang kini
      satu bahasa saja. */
   state.page = p;
+  window.MHRUsage && window.MHRUsage.mark('page_' + p);   /* v7.25 — statistik pemakaian anonim */
   document.body.className = 'page-' + p;
   [...$('#navTabs').children].forEach(b=>
     b.setAttribute('aria-current', String(b.dataset.page === p)));
@@ -8779,6 +8811,10 @@ async function renderDashboardPage(){
   if(window.MHRUI && window.MHRUI.renderCloudList) window.MHRUI.renderCloudList();
   renderCollectionGrid();
 }
+/* v7.25 — kartu 📊 Usage (admin): dimuat saat dibuka, dimuat ulang tiap kali dibuka lagi */
+if($('#usageBox')) $('#usageBox').addEventListener('toggle', e=>{
+  if(e.target.open && isAccountAdmin && window.MHRUsage) window.MHRUsage.renderAdmin($('#usageWrap'));
+});
 if($('#dashLoginBtn')) $('#dashLoginBtn').addEventListener('click', ()=>{
   if(window.MHRUI && window.MHRUI.openAuthModal) window.MHRUI.openAuthModal();
 });
@@ -8987,6 +9023,7 @@ function collQueueSave(){
 function collSetQty(key, v){
   v = Math.max(0, Math.min(COLL_MAX, Math.round(v)||0));
   if(v <= 0) delete collMap[key]; else collMap[key] = v;
+  window.MHRUsage && window.MHRUsage.mark('coll_edit');   // v7.25
   setDeckCollection(collMap);   // v6.96/v6.97 — badge koleksi di Deck Builder ikut segar
   const no = collNoOfKey(key);
   const card = $(`.coll-card[data-no="${no}"]`);
@@ -9010,6 +9047,7 @@ function collCopyList(kind, btn){
 function setDashTab(tab){
   dashTab = (tab === 'coll' || tab === 'bind' || tab === 'perf') ? tab : 'decks';
   try{ localStorage.setItem(DASH_TAB_KEY, dashTab); }catch(e){}
+  if(state.page === 'dashboard') window.MHRUsage && window.MHRUsage.mark('tab_' + dashTab);   // v7.25
   document.querySelectorAll('[data-dtab]').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.dtab === dashTab)));
   const pd = $('#dashPanelDecks'), pc = $('#dashPanelColl');
   if(pd) pd.hidden = dashTab !== 'decks';
@@ -10184,6 +10222,7 @@ window.addEventListener('hashchange', ()=>{
        proxy supaya muncul/hilang langsung tanpa reload halaman. */
     isAccountAdmin = loggedIn && await window.MHRAuth.isAdmin(session);
     isLoggedIn = loggedIn;
+    { const ub = $('#usageBox'); if(ub){ ub.hidden = !isAccountAdmin; if(!isAccountAdmin) ub.open = false; } }   // v7.25
     if(typeof renderProxyBox === 'function') renderProxyBox();
     /* v6.62 — admin melihat draft + tombol tulis/edit di halaman Berita */
     if(typeof refreshBerita === 'function') refreshBerita();
@@ -10542,6 +10581,7 @@ window.addEventListener('hashchange', ()=>{
       const name = resolveName(name0);
       if(!store.decks[name]) continue;
       store.cloudLink[name] = data.id;
+      window.MHRUsage && window.MHRUsage.mark('mydecks_sync');   // v7.25
       store.cloudCode[name] = (name === name0) ? code : (store.cloudCode[name] || code);
       delete store.cloudPending[name];
       store.cloudAt[data.id] = data.updated_at;
