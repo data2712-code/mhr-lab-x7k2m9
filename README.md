@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.23** · 2 November 2026
+**Versi saat ini: v7.24** · 2 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -591,6 +591,60 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### Data — Errata V.1 BP01-043 「Reinstall」 Vision dilengkapi (teks Indonesia + gambar ID) — 2 November 2026 *(`cards.js`, `index.html`, `sw.js`, `images/BP01-043.jpg`, `api/v1/`)*
+
+Temuan saat menyusun draf halaman **Errata & Text Differences**: teks Indonesia BP01-043 di situs baru memuat sebagian
+errata V.1. Dicocokkan ke dokumen resmi **MHR ERRATA V.1** (kolom "Post Errata"), bagian akhirnya belum ada. Perbaikan
+disetujui pemilik.
+- **Sebelum** — ID: `...ambil 1 kartu dari atas deck lalu tempatkan 1 karakter Lv3 atau lebih rendah Anda.`
+- **Sesudah** — ID: `...lalu tempatkan 1 karakter Lv3 atau lebih rendah Anda dengan Trait [Machine] dari HAND ke FIELD Anda.`
+  (dokumen resmi menulis `Trait (Machine)`; situs memakai kurung siku seperti trait lain di `cards.js`). Teks Inggris
+  sudah benar sejak awal, tidak diubah. `er` tetap `"V.1"`.
+- **Gambar `images/BP01-043.jpg` ikut diperbaiki** (gambar hasil edit v6.13 juga berhenti di "…atau lebih rendah Anda."):
+  teks efek lama dihapus (inpainting), lalu paragraf ditulis ulang dalam **5 baris** dengan font yang sama (Liberation
+  Sans Bold, sedikit lebih kecil, jarak baris 18,6 px) supaya baris ke-5 tidak menabrak bar R/Power. Lencana TRIG/FIELD
+  tidak disentuh. Hanya blok JPEG area teks (x 16–416, y 448–560) yang diganti (`jpegtran -drop`, tabel kuantisasi asli);
+  piksel di luar area itu identik. Gambar Inggris tidak diubah.
+- Cache-buster `index.html` → `cards.js?v=7.02-er1102`; `sw.js` `CACHE_VERSION` **v11 → v12** (gambar cache-first).
+- `api/v1/` dibuat ulang (`node tools/generate_api.js`): hanya kolom `effect` BP01-043-SR yang berubah; `updated`
+  2026-11-02, hash `76a1eabfd3853347`.
+- Dicek: `node --check cards.js`; diff piksel gambar hanya di area teks; teks API sama dengan `cards.js`.
+
+### v7.24 — Guide jadi sub-menu + halaman baru Rules FAQ & Errata & Text Differences — 2 November 2026 *(`index.html`, `rules-faq.js` baru)*
+
+Permintaan pemilik: FAQ ruling untuk pemain baru (pertanyaan yang berulang di grup komunitas) dan halaman khusus errata &
+perbedaan teks. Isi disusun sebagai draf dulu dan disetujui pemilik **per poin** (2 Nov 2026); draf ada di folder
+internal `mhr-deck-lab-internal/Rules FAQ & Errata/`. Tanpa perubahan database / Supabase.
+- **Tab Guide → sub-menu** seperti My Lab (blok JS "GUIDE MENU", memakai kelas `.lab-menu` yang sama): **Site Guide ·
+  Rules FAQ · Errata & Text Differences · Official Rules 1.03**. Hover di desktop, klik/keyboard (panah, Esc), HP 2×2
+  di atas bar navigasi bawah. Membuka sub-menu Guide menutup sub-menu My Lab dan sebaliknya. Sub-tab di halaman Guide
+  (`#pdTabs`) ikut jadi 4.
+- **Hash baru:** `#faq`, `#faq/F-23`, `#errata`, `#errata/E-04` / `#errata/TD-02`, `#rules` (Official Rules). `#panduan`
+  tetap = Site Guide (link lama tetap jalan). Pindah sub-tab memperbarui hash (`replaceState`). Nomor poin yang tidak
+  dikenal (mis. `#faq/F-99`) cukup membuka halaman FAQ.
+- **Rules FAQ** (44 poin, F-01…F-44, 8 bagian): sumber hanya **CR 1.03** dan pernyataan **Head Judge of Marvel Hero Rush
+  Indonesia** yang disetujui pemilik; keputusan pemilik khusus simulator tidak dimasukkan. Setiap jawaban berupa
+  akordeon dengan baris **Source** dan tombol **🔗 Copy link** (menyalin `…/#faq/F-xx`, ada cadangan `prompt` kalau
+  clipboard ditolak). Ada kotak pencarian (semua kata harus cocok; jawaban yang cocok otomatis terbuka), tombol Expand
+  all / Collapse all, dan tombol lompat ke tiap bagian.
+- **Errata & Text Differences** (24 poin): Errata V.1 (E-01…E-11, dokumen resmi MHR ERRATA V.1, teks Indonesia sebelum
+  → sesudah), Errata V.2 (E-12…E-14, October 2026 — "V.2" label MHR Deck Lab; nomor versi naik setiap set baru), dan
+  perbedaan teks tanpa errata resmi (TD-01…TD-10, termasuk SP01-005 Buster/Armor, SP01-043 Archenemy/Nemesis,
+  SP01-018 Kraven, SP01-038 Boomerang). Tiap poin: gambar kecil kartu (klik = popup kartu; errata teks Indonesia
+  memakai printing Indonesia, E-13 printing Inggris), tombol Copy link (`#errata/<no>`).
+- Kode kartu di kedua halaman jadi chip `.nw-chip` (sama dengan artikel News): klik membuka popup kartu tanpa
+  meninggalkan halaman, hover menampilkan pratinjau gambar (desktop).
+- **`rules-faq.js`** (baru, `window.MHRRules`): data halaman (HTML siap tampil, dibuat dari draf yang disetujui) +
+  renderer. Nomor poin dipakai sebagai link yang dibagikan — jangan diganti/diurutkan ulang; poin baru selalu nomor
+  baru. Kalau berkas ini gagal dimuat, sub-tab FAQ/Errata jatuh ke Site Guide. `sw.js` tidak diubah (pola sama
+  dengan `promo-popup.js`/`binders-ui.js`: berkas JS lokal network-first).
+- CSS blok "v7.24 — GUIDE MENU … RULES FAQ & ERRATA". Versi 7.24 (komentar, meta, footer); `rules-faq.js?v=7.24`.
+- Dicek: Playwright desktop 1280 & HP 390 (29 tes) — `#faq/F-23` membuka & menyorot F-23, 44 jawaban, pencarian &
+  pesan kosong, Copy link menyalin URL yang benar, chip kartu membuka popup tanpa pindah halaman, `#errata/E-04`
+  (24 poin, E-04 tersorot), link intro → `#faq/F-41`, sub-tab → `#rules`/`#panduan`, sub-menu Guide (klik, hover,
+  digantikan sub-menu My Lab), `#faq/F-99` aman, halaman lain tetap jalan, HP tanpa scroll horizontal & sub-menu di
+  dalam layar, tanpa error JS.
 
 ### v7.23 — Binders: pilih warna sampul tiap binder (default hitam) — 2 November 2026 *(`index.html`, `binders.js`, `binders-ui.js`, migrasi SQL baru `mhr_decklab_v723_binder_color.sql` di folder internal)*
 

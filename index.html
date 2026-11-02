@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.23  ·  2 November 2026
+     MHR DECK LAB  ·  versi 7.24  ·  2 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.23">
+<meta name="version" content="7.24">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2679,6 +2679,71 @@
     .lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
     .lab-grid button{flex-direction:column;align-items:flex-start;gap:4px;background:var(--ink);border-color:var(--line);padding:10px}
   }
+
+  /* ================= v7.24 — GUIDE MENU (sub-menu seperti My Lab) + RULES FAQ & ERRATA ================= */
+  @media (max-width:920px){ nav.tabs button[data-guidemenu] .ts::after{content:" ▴";font-size:9px} }
+  .rf-wrap{color:#D5DBE3}
+  .rf-wrap a{color:var(--accent)}
+  .rf-h{font-family:var(--disp);font-size:26px;letter-spacing:.04em;text-transform:uppercase;margin:6px 0 10px;color:var(--paper)}
+  .rf-intro p,.rf-intro li{line-height:1.65;font-size:14px}
+  .rf-intro p{margin:0 0 10px}
+  .rf-intro ul{margin:0 0 10px;padding-left:20px}
+  .rf-wrap .rf-note{color:var(--muted);font-size:12.5px}
+  .rf-tools{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 10px}
+  .rf-search{flex:1 1 240px;min-width:0;background:var(--ink);border:1px solid var(--line);border-radius:8px;
+    color:var(--paper);padding:9px 12px;font:inherit;font-size:14px}
+  .rf-search:focus{outline:none;border-color:var(--accent)}
+  .rf-tbtn{background:var(--panel);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:8px 12px;
+    cursor:pointer;font:inherit;font-size:13px}
+  .rf-tbtn:hover{border-color:var(--accent)}
+  .rf-jump{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+  .rf-wrap .rf-jump a{font-size:12.5px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--paper);
+    text-decoration:none;background:var(--panel)}
+  .rf-wrap .rf-jump a:hover{border-color:var(--accent)}
+  .rf-empty{color:var(--muted);font-size:13px}
+  .rf-sec{margin:22px 0 6px}
+  .rf-sec>h3{font-size:16.5px;margin:0 0 10px;color:var(--accent)}
+  .rf-item{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:0 0 8px;scroll-margin-top:90px;
+    transition:border-color .3s,box-shadow .3s}
+  .rf-item summary{cursor:pointer;list-style:none;display:flex;gap:10px;align-items:baseline;padding:11px 14px;
+    font-weight:600;line-height:1.45;color:var(--paper)}
+  .rf-item summary::-webkit-details-marker{display:none}
+  .rf-item summary::after{content:"＋";margin-left:auto;color:var(--muted);flex:none;padding-left:8px}
+  .rf-item[open] summary::after{content:"－"}
+  .rf-item summary:hover .rf-q{color:var(--accent)}
+  .rf-id{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted);flex:none;border:1px solid var(--line);
+    border-radius:5px;padding:1px 5px;line-height:1.5}
+  .rf-a{padding:0 14px 12px;line-height:1.65;font-size:14px}
+  .rf-a p,.rf-er-body p{margin:0 0 8px}
+  .rf-a ul,.rf-a ol,.rf-er-body ul{margin:0 0 8px;padding-left:20px}
+  .rf-a li,.rf-er-body li{margin:3px 0}
+  .rf-a strong,.rf-er-body strong{color:var(--paper)}
+  .rf-wrap p.rf-src{color:var(--muted);font-size:12px;border-top:1px dashed var(--line);padding-top:8px;margin-top:8px}
+  .rf-acts{display:flex;justify-content:flex-end;margin-top:4px}
+  .rf-copy{background:none;border:1px solid var(--line);color:var(--accent);border-radius:7px;padding:4px 10px;font:inherit;
+    font-size:12px;cursor:pointer}
+  .rf-copy:hover{border-color:var(--accent)}
+  .rf-hit{border-color:var(--accent)!important;box-shadow:0 0 0 2px rgba(242,176,30,.35)}
+  .rf-gh{margin:18px 0 4px;font-size:15px;color:var(--paper)}
+  .rf-gi p{color:var(--muted);font-size:13px;line-height:1.6}
+  .rf-er{display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;
+    margin:0 0 10px;scroll-margin-top:90px;transition:border-color .3s,box-shadow .3s}
+  .rf-thumbs{display:flex;flex-direction:column;gap:6px;flex:none}
+  .rf-thumb{padding:0;border:none;background:none;cursor:zoom-in;width:92px}
+  .rf-thumb img{width:92px;aspect-ratio:568/793;object-fit:cover;border-radius:6px;border:1px solid var(--line);display:block;
+    background:var(--panel2)}
+  .rf-thumb:hover img{border-color:var(--accent)}
+  .rf-er-body{min-width:0;flex:1;line-height:1.6;font-size:14px}
+  .rf-er-h{font-weight:700;color:var(--paper);margin-bottom:6px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .rf-er-body code{font-family:var(--mono);font-size:.9em}
+  .rf-foot{color:var(--muted);font-size:13px;margin-top:22px}
+  @media (max-width:560px){
+    .rf-er{flex-direction:column;gap:10px}
+    .rf-thumbs{flex-direction:row}
+    .rf-thumb,.rf-thumb img{width:74px}
+    .rf-item summary{padding:10px 12px}
+    .rf-a{padding:0 12px 12px}
+  }
 </style>
 <!-- v6.21 — SEO: structured data JSON-LD (WebApplication), 3 September 2026 -->
 <script type="application/ld+json">
@@ -2743,7 +2808,8 @@
   <button data-page="tourney" aria-current="false">🥇 <span class="tl" data-i18n="navTourney">Tournament Decks</span><span class="ts" data-i18n="navTourneyS">Tournament Decks</span> <span class="cnt" id="navTourney">0</span></button>
   <button data-page="event" aria-current="false">🏟 <span class="tl">Events</span><span class="ts">Events</span></button>
   <button data-page="lgs" aria-current="false">📅 <span class="tl" data-i18n="navLgs">Weekly Rush LGS</span><span class="ts" data-i18n="navLgsS">Weekly Rush LGS</span> <span class="cnt" id="navLgs">0</span></button>
-  <button data-page="panduan" aria-current="false">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span></button>
+  <!-- v7.24 — Guide membuka sub-menu (Site Guide · Rules FAQ · Errata & Text Differences · Official Rules), pola sama dengan My Lab -->
+  <button data-page="panduan" data-guidemenu aria-current="false" aria-haspopup="menu" aria-expanded="false" aria-controls="guideMenu">📘 <span class="tl" data-i18n="navPanduan">Panduan</span><span class="ts" data-i18n="navPanduanS">Panduan</span><span class="lab-caret" aria-hidden="true">▾</span></button>
 </nav>
 <!-- v7.17 — sub-menu My Lab. Di luar <nav> karena nav.tabs overflow-x:auto (menu di dalamnya akan terpotong). -->
 <div class="lab-menu" id="labMenu" role="menu" aria-label="My Lab" hidden>
@@ -2755,6 +2821,16 @@
     <button type="button" role="menuitem" data-labtab="perf"><span class="lab-ic">📈</span><span class="lab-tx"><b>Performance</b><small>Log matches, win rate &amp; matchups</small></span></button>
   </div>
   <div class="lab-foot" id="labFoot" hidden>Needs a free account · <button type="button" data-labact="login">Log in / Sign up</button></div>
+</div>
+<!-- v7.24 — sub-menu Guide (lihat GUIDE MENU di JS). Memakai kelas .lab-menu yang sama. -->
+<div class="lab-menu" id="guideMenu" role="menu" aria-label="Guide" hidden>
+  <div class="lab-mh">📘 Guide <span>How to play, rulings &amp; card errata</span></div>
+  <div class="lab-grid">
+    <button type="button" role="menuitem" data-guidetab="guide"><span class="lab-ic">📘</span><span class="lab-tx"><b>Site Guide</b><small>Game basics &amp; how to use the site</small></span></button>
+    <button type="button" role="menuitem" data-guidetab="faq"><span class="lab-ic">❓</span><span class="lab-tx"><b>Rules FAQ</b><small>Answers to common rules questions</small></span></button>
+    <button type="button" role="menuitem" data-guidetab="errata"><span class="lab-ic">⚠️</span><span class="lab-tx"><b>Errata &amp; Text Differences</b><small>Card corrections, ID vs EN text</small></span></button>
+    <button type="button" role="menuitem" data-guidetab="official"><span class="lab-ic">📜</span><span class="lab-tx"><b>Official Rules 1.03</b><small>Full Comprehensive Rules</small></span></button>
+  </div>
 </div>
 
 <!-- v6.64 — halaman Set & Spoiler (isi digambar set-ui.js: renderSet) -->
@@ -2774,6 +2850,8 @@
   <div class="pd-wrap">
     <div class="pd-tabs" id="pdTabs">
       <button class="pd-tab" data-pdtab="guide" aria-pressed="true">📘 Site Guide</button>
+      <button class="pd-tab" data-pdtab="faq" aria-pressed="false">❓ Rules FAQ</button>
+      <button class="pd-tab" data-pdtab="errata" aria-pressed="false">⚠️ Errata &amp; Text Differences</button>
       <button class="pd-tab" data-pdtab="official" aria-pressed="false">📜 Official Rules 1.03</button>
     </div>
     <div id="panduanWrap"></div>
@@ -3206,7 +3284,7 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=7.02-er1029b"></script>
+<script src="cards.js?v=7.02-er1102"></script>
 <script src="data.js?v=7.02-lgs1029b"></script>
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
@@ -3235,6 +3313,7 @@
      v7.15 (Tahap 3): data matchup komunitas (opt-in, anonim), detail deck + statistik per versi deck. -->
 <script src="perf.js?v=7.15"></script>
 <script src="perf-ui.js?v=7.21"></script>
+<script src="rules-faq.js?v=7.24"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules) -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
@@ -3263,7 +3342,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.23</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.24</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -6181,7 +6260,12 @@ $('#pdTabs').addEventListener('click', e=>{
   if(state.pdTab === b.dataset.pdtab) return;
   state.pdTab = b.dataset.pdtab;
   renderPanduan();
+  history.replaceState(null,'',pdHash());   /* v7.24 — #panduan / #faq / #errata / #rules */
   $('#panduanWrap').scrollIntoView({block:'start'});
+});
+/* v7.24 — klik di Rules FAQ / Errata (Copy link, chip & gambar kartu, lompat seksi) */
+$('#panduanWrap').addEventListener('click', e=>{
+  if(window.MHRRules && (state.pdTab === 'faq' || state.pdTab === 'errata')) window.MHRRules.onClick(e, $('#panduanWrap'));
 });
 
 /* --- popup gambar kartu --- */
@@ -8176,15 +8260,22 @@ const OFFICIAL_RULES = `
    GUIDE) dan "Official Rules" (teks penuh Comprehensive Rules 1.03 resmi dari Jason,
    OFFICIAL_RULES). state.pdTab tidak disimpan ke store — selalu kembali ke 'guide'
    tiap buka halaman, konsisten dengan tab lain yang bersifat sesi (mis. auth-tabs). */
-function renderPanduan(){
+/* v7.24 — sub-tab ke-3 & ke-4: 'faq' (Rules FAQ) dan 'errata' (Errata & Text Differences),
+   isinya di rules-faq.js (window.MHRRules). Hash: #panduan · #faq[/F-xx] · #errata[/E-xx|TD-xx] · #rules */
+const PD_HASH = {guide:'panduan', faq:'faq', errata:'errata', official:'rules'};
+function pdHash(focus){ return '#' + (PD_HASH[state.pdTab] || 'panduan') + (focus ? '/' + focus : ''); }
+function renderPanduan(focus){
   const w = $('#panduanWrap');
   if(!w) return;
+  if((state.pdTab === 'faq' || state.pdTab === 'errata') && !window.MHRRules) state.pdTab = 'guide';   // rules-faq.js gagal dimuat
   const tabs = $('#pdTabs');
   if(tabs){
     [...tabs.children].forEach(b=>{
       b.setAttribute('aria-pressed', b.dataset.pdtab === state.pdTab ? 'true' : 'false');
     });
   }
+  if(state.pdTab === 'faq'){ window.MHRRules.renderFaq(w, focus); return; }
+  if(state.pdTab === 'errata'){ window.MHRRules.renderErrata(w, focus); return; }
   w.innerHTML = (state.pdTab === 'official') ? OFFICIAL_RULES : GUIDE;
 }
 
@@ -8199,6 +8290,17 @@ function setPage(p, dariHash){
   if(typeof p === 'string' && p.startsWith('event/')){ sub = p.slice(6).toLowerCase(); p = 'event'; }  /* v6.98 */
   if(typeof p === 'string' && p.startsWith('binder/')){ sub = p.slice(7); p = 'binder'; }  /* v7.06 — kode link binder (huruf besar/kecil dipertahankan) */
   if(p === 'binder' && !sub) p = 'dashboard';
+  /* v7.24 — sub-halaman Guide: 'faq', 'faq/F-23', 'errata', 'errata/E-04', 'rules'; '#panduan' dari hash = Site Guide */
+  let pdFocus = null;
+  if(typeof p === 'string'){
+    const m = p.match(/^(panduan|faq|errata|rules)(?:\/(.*))?$/);
+    if(m){
+      if(m[1] !== 'panduan') state.pdTab = (m[1] === 'rules') ? 'official' : m[1];
+      else if(dariHash) state.pdTab = 'guide';
+      if(m[2] && window.MHRRules && window.MHRRules.hasId(m[1], m[2].toUpperCase())) pdFocus = m[2].toUpperCase();
+      p = 'panduan';
+    }
+  }
   if(!PAGES.includes(p)) p = 'cards';
   if(p !== 'berita') document.title = TITLE_AWAL;
   /* v6.46 — semua tab (termasuk LGS/Tournament Decks/User Decks) SELALU
@@ -8219,12 +8321,12 @@ function setPage(p, dariHash){
   if(p === 'tourney') renderTourney();
   if(p === 'event' && typeof renderEvents === 'function') renderEvents(sub);   /* v6.98 */
   if(p === 'lgs') renderLgs();
-  if(p === 'panduan') renderPanduan();
+  if(p === 'panduan') renderPanduan(pdFocus);
   if(p === 'dukung') renderDukungPage();
   if(p === 'dashboard') renderDashboardPage();
   if(p === 'binder' && window.MHRBindersUI) window.MHRBindersUI.renderPage(sub);   /* v7.06 */
   if(p === 'cards' || p === 'build') renderCards();
-  if(!dariHash) history.replaceState(null,'','#'+p+(sub?'/'+sub:''));
+  if(!dariHash) history.replaceState(null,'', p === 'panduan' ? pdHash(pdFocus) : '#'+p+(sub?'/'+sub:''));
   window.scrollTo({top:0});
   if(store){ store.page = p; persist(); }
 }
@@ -8243,6 +8345,7 @@ function setPage(p, dariHash){
 $('#navTabs').addEventListener('click', e=>{
   const b = e.target.closest('[data-page]'); if(!b) return;
   if(b.hasAttribute('data-labmenu')){ labMenuClick(b); return; }   /* v7.17 — My Lab membuka sub-menu */
+  if(b.hasAttribute('data-guidemenu')){ guideMenuClick(b); return; }   /* v7.24 — Guide membuka sub-menu */
   [...b.parentElement.children].forEach(x=>
     x.setAttribute('aria-current', String(x===b)));
   setTimeout(()=>setPage(b.dataset.page), 0);
@@ -8272,6 +8375,7 @@ $('#navTabs').addEventListener('click', e=>{
     const cur = state.page === 'dashboard' ? dashTab : null;
     menu.querySelectorAll('[data-labtab]').forEach(x=>x.setAttribute('aria-current', String(x.dataset.labtab === cur)));
     const f = $('#labFoot'); if(f) f.hidden = !!isLoggedIn;
+    if(window.closeGuideMenu) window.closeGuideMenu();   /* v7.24 — satu sub-menu terbuka sekaligus */
     menu.hidden = false; btn.setAttribute('aria-expanded','true'); byHover = !!hover; place();
   }
   function close(){ clearTimeout(tOpen); menu.hidden = true; btn.setAttribute('aria-expanded','false'); byHover = false; }
@@ -8301,6 +8405,66 @@ $('#navTabs').addEventListener('click', e=>{
   });
   menu.addEventListener('keydown', e=>{
     const its = [...menu.querySelectorAll('[data-labtab]')], i = its.indexOf(document.activeElement);
+    if(e.key === 'Escape'){ e.preventDefault(); close(); btn.focus(); }
+    else if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){ e.preventDefault();
+      its[(i + (e.key === 'ArrowDown' ? 1 : -1) + its.length) % its.length].focus(); }
+  });
+  document.addEventListener('click', e=>{ if(!menu.hidden && !menu.contains(e.target) && !btn.contains(e.target)) close(); });
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && !menu.hidden) close(); });
+  addEventListener('resize', ()=>{ if(!menu.hidden) place(); });
+  addEventListener('scroll', ()=>{ if(!menu.hidden && innerWidth > 920) place(); }, {passive:true});
+  $('#navTabs').addEventListener('scroll', ()=>{ if(!menu.hidden) close(); }, {passive:true});
+})();
+
+/* ==================== v7.24 — GUIDE MENU ====================
+   Permintaan pemilik 2 Nov 2026: tab Guide jadi dropdown seperti My Lab, berisi Site Guide ·
+   Rules FAQ · Errata & Text Differences · Official Rules 1.03. Perilaku sama dengan LAB MENU
+   (hover di desktop, klik/keyboard, HP 2×2 di atas bar navigasi bawah). Memilih item =
+   state.pdTab lalu setPage → hash #panduan / #faq / #errata / #rules. */
+(function(){
+  const menu = $('#guideMenu'), btn = $('#navTabs [data-guidemenu]');
+  if(!menu || !btn) return;
+  const canHover = window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches;
+  let byHover = false, tOpen = 0, tClose = 0;
+  const items = ()=>[...menu.querySelectorAll('[data-guidetab]')];
+  function place(){
+    if(innerWidth <= 920) return;            // posisi HP diatur CSS
+    const r = btn.getBoundingClientRect(), w = menu.offsetWidth || 340;
+    menu.style.top = Math.round(r.bottom + 6) + 'px';
+    menu.style.left = Math.round(Math.max(8, Math.min(r.left, innerWidth - w - 8))) + 'px';
+  }
+  function open(hover){
+    clearTimeout(tClose); clearTimeout(tOpen);
+    if(window.closeLabMenu) window.closeLabMenu();
+    const cur = state.page === 'panduan' ? state.pdTab : null;
+    items().forEach(x=>x.setAttribute('aria-current', String(x.dataset.guidetab === cur)));
+    menu.hidden = false; btn.setAttribute('aria-expanded','true'); byHover = !!hover; place();
+  }
+  function close(){ clearTimeout(tOpen); menu.hidden = true; btn.setAttribute('aria-expanded','false'); byHover = false; }
+  window.closeGuideMenu = close;
+  window.guideMenuClick = function(){
+    if(menu.hidden) open(false);
+    else if(byHover) byHover = false;        // dibuka lewat hover: klik "mengunci" menu tetap terbuka
+    else close();
+  };
+  if(canHover){
+    const enter = ()=>{ clearTimeout(tClose); if(menu.hidden) tOpen = setTimeout(()=>{ if(menu.hidden) open(true); }, 120); };
+    const leave = ()=>{ clearTimeout(tOpen); if(byHover) tClose = setTimeout(close, 220); };
+    btn.addEventListener('mouseenter', enter); btn.addEventListener('mouseleave', leave);
+    menu.addEventListener('mouseenter', ()=>clearTimeout(tClose)); menu.addEventListener('mouseleave', leave);
+  }
+  menu.addEventListener('click', e=>{
+    const it = e.target.closest('[data-guidetab]'); if(!it) return;
+    close();
+    state.pdTab = it.dataset.guidetab;
+    setPage('panduan');
+  });
+  btn.addEventListener('keydown', e=>{
+    if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){ e.preventDefault(); if(menu.hidden) open(false);
+      const its = items(); (e.key === 'ArrowDown' ? its[0] : its[its.length-1]).focus(); }
+  });
+  menu.addEventListener('keydown', e=>{
+    const its = items(), i = its.indexOf(document.activeElement);
     if(e.key === 'Escape'){ e.preventDefault(); close(); btn.focus(); }
     else if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){ e.preventDefault();
       its[(i + (e.key === 'ArrowDown' ? 1 : -1) + its.length) % its.length].focus(); }
@@ -9929,6 +10093,8 @@ if(hashAwal.startsWith('#d=')){
   setPage('set/' + window.setKodeFromHash(hashAwal), true);
 } else if(hashAwal.startsWith('#berita/') && window.beritaSlugFromHash && window.beritaSlugFromHash(hashAwal)){
   setPage('berita/' + window.beritaSlugFromHash(hashAwal), true);
+} else if(/^#(faq|errata|rules)(\/|$)/.test(hashAwal)){   /* v7.24 */
+  setPage(decodeURIComponent(hashAwal.slice(1)), true);
 } else {
   /* v6.63 — tanpa #hash (buka mhrdecklab.com biasa) = halaman Beranda */
   const p = hashAwal.replace('#','');
@@ -9956,6 +10122,7 @@ window.addEventListener('hashchange', ()=>{
     const slug = window.beritaSlugFromHash ? window.beritaSlugFromHash(h) : null;
     setPage(slug ? 'berita/'+slug : 'berita', true); return;
   }
+  if(/^#(faq|errata|rules|panduan)(\/|$)/.test(h)){ setPage(decodeURIComponent(h.slice(1)), true); return; }   /* v7.24 */
   const p = h.replace('#','');
   if(PAGES.includes(p) && p !== state.page) setPage(p, true);
 });
