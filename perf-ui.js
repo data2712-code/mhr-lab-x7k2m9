@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR DECK LAB — perf-ui.js (v7.13, Performance Analytics Tahap 1; v7.14 Tahap 2; v7.18 Log match = casual)
+   MHR DECK LAB — perf-ui.js (v7.13, Performance Analytics Tahap 1; v7.14 Tahap 2; v7.18 Log match = casual; v7.21 4 cara menang)
    ===================================================================
    Tampilan tab "📈 Performance" di My Dashboard (#perfWrap):
      • Catat match (Bo1/Bo3): deck sendiri, deck lawan (daftar kurasi admin
@@ -52,8 +52,12 @@
   const runCtx = r => r && r.context === 'casual' ? 'community' : (r && CTX[r.context] ? r.context : 'store');
   const logCtx = l => l.context === 'casual' && l.run_id ? 'community' : (CTX[l.context] ? l.context : 'casual');
   const dbCtx = k => k === 'community' ? 'casual' : k;
-  const END = { rp:'9 Rush Points', eff:'Card effect', deck:'Deck out', con:'Concede', time:'Time', unk:'Not recorded' };
-  const END_COL = { rp:'#3987e5', eff:'#d95926', deck:'#199e70', con:'#c98500', time:'#6b7684', unk:'#3a4350' };
+  /* v7.21 — hanya 4 cara game berakhir sesuai official ruling MHR Indonesia (permintaan pemilik). 'Card effect' (eff)
+     dan 'Not recorded' (unk) tidak bisa dipilih lagi. Data lama TIDAK diubah di database: game ber-e 'eff'/'unk'
+     (termasuk ronde hasil import Events) dianggap "belum dicatat" — tidak ditampilkan di riwayat/CSV dan tidak
+     dihitung di "How games end"; saat diedit, pilihannya kosong ("Choose…") sampai dipilih salah satu dari 4. */
+  const END = { rp:'9 Rush Points', deck:'Deck out', con:'Concede', time:'Time' };
+  const END_COL = { rp:'#3987e5', deck:'#199e70', con:'#c98500', time:'#6b7684' };
   const PLACES = ['1st','2nd','3rd','4th','Top 4','Top 8','Top 16','Top 32','Swiss only','Dropped'];
   const LAST_KEY = 'mhr_perf_last', FILT_KEY = 'mhr_perf_filter';
   const MIN_N = 5;          // matchup dengan < 5 match dianggap belum bisa dipercaya
@@ -255,12 +259,14 @@
   }
   function endsHTML(list){
     const w = {}, l = {}; let nw = 0, nl = 0;
-    list.forEach(m=>(m.games || []).forEach(g=>{ if(g.r === 'W'){ w[g.e] = (w[g.e] || 0) + 1; nw++; } else if(g.r === 'L'){ l[g.e] = (l[g.e] || 0) + 1; nl++; } }));
+    let skip = 0;
+    list.forEach(m=>(m.games || []).forEach(g=>{ if((g.r === 'W' || g.r === 'L') && !END[g.e]){ skip++; return; } if(g.r === 'W'){ w[g.e] = (w[g.e] || 0) + 1; nw++; } else if(g.r === 'L'){ l[g.e] = (l[g.e] || 0) + 1; nl++; } }));
     const keys = Object.keys(END);
     const bar = (lab, o, n) => `<div class="pf-end"><span>${lab}</span><div>${n ? keys.filter(k=>o[k]).map(k=>`<i style="flex:${o[k]};background:${END_COL[k]}" title="${END[k]}: ${o[k]} of ${n} (${pct(o[k], n)}%)">${pct(o[k], n) >= 9 ? pct(o[k], n) + '%' : ''}</i>`).join('') : '<em>no games</em>'}</div></div>`;
     const used = keys.filter(k=>w[k] || l[k]);
     return bar('My wins', w, nw) + bar('My losses', l, nl) +
-      `<div class="pf-legend">${used.map(k=>`<span><i style="background:${END_COL[k]}"></i>${END[k]}</span>`).join('')}</div>`;
+      `<div class="pf-legend">${used.map(k=>`<span><i style="background:${END_COL[k]}"></i>${END[k]}</span>`).join('')}</div>` +
+      (skip ? `<p class="bd-mut pf-hint">${skip} game${skip === 1 ? '' : 's'} without a recorded ending ${skip === 1 ? 'is' : 'are'} not counted.</p>` : '');
   }
   const cellBg = wr => wr == null ? 'transparent' : wr >= 60 ? `rgba(57,135,229,${(0.25 + Math.min(1, (wr - 60) / 30) * 0.45).toFixed(2)})` : wr <= 40 ? `rgba(230,103,103,${(0.25 + Math.min(1, (40 - wr) / 30) * 0.45).toFixed(2)})` : 'var(--pf-mid)';
   function matchupsHTML(list){
@@ -282,7 +288,7 @@
     const sup = f => f === true ? '¹' : f === false ? '²' : '';
     const pips = l.best_of === 3 ? `<span class="pf-pips">${g.map(x=>`<i class="${x.r}">${x.r}${sup(x.f)}</i>`).join('')}</span>` : '';
     const turn = f => f === true ? 'went 1st' : f === false ? 'went 2nd' : 'turn order not set';
-    const how = l.best_of === 3 ? 'Bo3' : (g[0] ? [turn(g[0].f), g[0].e === 'unk' ? '' : END[g[0].e]].filter(Boolean).join(' · ') : '');
+    const how = l.best_of === 3 ? 'Bo3' : (g[0] ? [turn(g[0].f), END[g[0].e] || ''].filter(Boolean).join(' · ') : '');
     const run = l.run_id && (S.runs || []).find(r=>r.id === l.run_id);
     const ctxTag = run ? `<button type="button" class="pf-tag pf-rtag" data-pfrun="${E(run.id)}" title="Open run">🏆 ${E(roundLabel(l))} · ${E(run.name)}</button>` : `<span class="pf-tag">${c.icon} ${E(c.short)}</span>`;
     return `<div class="pf-mrow" data-pfid="${E(l.id)}"><span class="pf-res ${l.result}">${l.result}</span>${thumb(o.cover)}
@@ -410,7 +416,7 @@
     return shown.map((g, i)=>`<div class="pf-game"><span class="pf-gl">${L.bo === 3 ? 'Game ' + (i + 1) : 'Game'}</span>
       <div class="pf-seg res" data-g="${i}" data-gf="r">${[['W','Win'],['L','Loss'],['D','Draw']].map(([v,t])=>`<button type="button" data-v="${v}" aria-pressed="${g.r === v}">${t}</button>`).join('')}</div>
       <div class="pf-seg" data-g="${i}" data-gf="f" title="Who took the first turn?"><button type="button" data-v="1" aria-pressed="${g.f === true}">1st</button><button type="button" data-v="0" aria-pressed="${g.f === false}">2nd</button>${g.f === null ? '<button type="button" data-v="" aria-pressed="true" title="Not recorded">?</button>' : ''}</div>
-      <select data-g="${i}" data-gf="e" aria-label="How game ${i + 1} ended">${Object.entries(END).map(([k,t])=>`<option value="${k}" ${g.e === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`).join('') +
+      <select data-g="${i}" data-gf="e" aria-label="How game ${i + 1} ended">${END[g.e] ? '' : '<option value="" selected disabled>Choose…</option>'}${Object.entries(END).map(([k,t])=>`<option value="${k}" ${g.e === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`).join('') +
       (L.bo === 3 && !g3needed() ? '<p class="bd-mut pf-hint">Game 3 is hidden because the match ended 2-0.</p>' : '');
   }
   function drawLog(){
@@ -649,7 +655,7 @@
     const rows = st.rounds.map(l=>{ const o = oppDeck(l); const g = l.games || [];
       return `<div class="pf-rd${l.is_top ? ' top' : ''}"><span class="pf-rn">${E(roundLabel(l))}</span>${thumb(o.cover)}
         <div class="pf-mm"><b>${needsDeck(l) ? '<span class="pf-need">Opponent deck not set</span>' : E(o.name)}</b> ${dots(o.cols)}
-          <small>${g.map((x, i)=>`G${i + 1} ${x.r} (${sup(x.f)}${x.e && x.e !== 'unk' ? ', ' + E(END[x.e]) : ''})`).join(' · ')}${l.opp_name ? ' · vs ' + E(l.opp_name) : ''}</small>
+          <small>${g.map((x, i)=>`G${i + 1} ${x.r} (${sup(x.f)}${END[x.e] ? ', ' + E(END[x.e]) : ''})`).join(' · ')}${l.opp_name ? ' · vs ' + E(l.opp_name) : ''}</small>
           ${l.notes ? `<small class="pf-note">📝 ${E(l.notes)}</small>` : ''}</div>
         <span class="pf-res ${l.result}">${l.result}</span>
         <span class="pf-ma"><button type="button" class="btn2" data-rdedit="${E(l.id)}" aria-label="Edit round">✏️</button><button type="button" class="btn2 danger" data-rddel="${E(l.id)}" aria-label="Delete round">🗑</button></span></div>`; }).join('');

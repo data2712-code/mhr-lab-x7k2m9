@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.20** · 1 November 2026
+**Versi saat ini: v7.21** · 2 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -591,6 +591,25 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.21 — Performance: cara game berakhir tinggal 4 sesuai official ruling (Card effect & Not recorded dihapus) — 2 November 2026 *(`index.html`, `perf-ui.js`)*
+
+Permintaan pemilik: official ruling Marvel Hero Rush Indonesia hanya mencatat **4 kondisi menang**, jadi pilihan "How it
+ended" di form match tinggal **9 Rush Points · Deck out · Concede · Time**. Tanpa perubahan database / Supabase.
+- `END` / `END_COL` di `perf-ui.js` tanpa `eff` ("Card effect") dan `unk` ("Not recorded"). Pilihan 1st / 2nd / "?" untuk
+  urutan giliran tidak berubah.
+- **Data lama tidak diubah** di database (guard `match_logs` tetap menerima nilai lama). Game lama ber-`e` `eff`/`unk`
+  (termasuk ronde hasil import Events, yang memang tidak tahu cara game berakhir) dianggap **belum dicatat**:
+  tidak ditampilkan di riwayat match, rincian ronde run, dan CSV, serta **tidak dihitung** di kartu "How games end"
+  (persentase dihitung dari game yang punya salah satu dari 4 cara; di bawah legenda muncul catatan "N games without a
+  recorded ending are not counted."). Saat match lama seperti itu diedit, pilihannya kosong (**Choose…**, tidak bisa
+  dipilih ulang) sampai pemain memilih salah satu dari 4 cara; kalau dibiarkan, nilai lamanya tetap tersimpan apa adanya.
+- `perf-ui.js?v=7.21`; versi 7.21 (komentar, meta, footer).
+- Catatan: Rulebook 1.03 di halaman Guide (103.1.c) masih menyebut "card effect declares the winner" sebagai kondisi
+  menang; daftar di Performance mengikuti official ruling MHR Indonesia sesuai permintaan pemilik.
+- Dicek: Playwright desktop 1360 & HP 390 dengan data campuran (rp, eff, deck, unk, con): form baru hanya 4 pilihan, kartu
+  "How games end" hanya 4 warna + catatan 2 game tidak dihitung, tidak ada label "Card effect"/"Not recorded" di halaman,
+  edit match lama menampilkan "Choose…" dan tersimpan sebagai "Time" setelah dipilih, tanpa error JS.
 
 ### v7.20 — Kotak catatan "unofficial translation" SD05/SD06/PB02 dihapus; info cukup di tiap kartu — 1 November 2026 *(`index.html`)*
 
