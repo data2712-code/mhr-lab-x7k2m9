@@ -598,7 +598,7 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 - Poin **E-14** ditambah bagian ruling: teks Inggris "you flip all your cards in BASE" = **semua** kartu di BASE dibalik (karakter dibuat
   tertutup lebih dulu, lalu kartu tertutup dibuat terbuka, CR 301.2.a.2), bukan hanya "menjadi terbuka" seperti terbaca di teks Indonesia.
   Dikonfirmasi Head Judge (keterangan pemilik). Contoh 2 karakter + 2 kartu tertutup, dampak ke kartu terpasang (CR 301.25.l), tautan ke F-11.
-- Teks kartu di `cards.js` tidak diubah. Cache-buster `index.html` → `rules-faq.js?v=7.26-faq1103c`.
+- Teks kartu di `cards.js` tidak diubah. Cache-buster `index.html` → `rules-faq.js?v=7.26-faq1103c` (lalu `…faq1103d` saat contoh kasus F-13 dihapus).
 
 ### Data — Rules FAQ: daftar istilah (ID) diperjelas + contoh kasus F-11, F-13, F-23 — 3 November 2026 *(`rules-faq.js`, `index.html`)*
 
@@ -612,8 +612,8 @@ Permintaan pemilik (revisi isi FAQ, EN & ID; nomor poin tidak berubah):
   SP01-061 「Spider-Archenemy」 Mr. Negative: "flip all your cards in BASE" = karakter di BASE dibuat tertutup lebih dulu, lalu kartu tertutup dibuat
   terbuka (CR 301.2.a.2; ruling mengikuti teks Inggris, dikonfirmasi Head Judge). Kartu yang dibalik tidak "masuk ke FIELD", tetap boleh
   BATTLE-BASE MOVE; TRIG Mr. Negative sendiri tetap terpicu.
-- **F-13**: ditambah poin "kartu terpasang juga dihitung" untuk UNIQUE (CR 305.6.a + 301.25.k) dengan contoh SP01-021 「The Web of Destiny」 Spider-Man
-  dan SP01-033 「Spider-Mentor」 Spider-Man (tidak bisa dipasang / dipanggil bila sudah ada kartu bernama sama).
+- **F-13**: ditambah poin "kartu terpasang juga dihitung" untuk UNIQUE (CR 305.6.a + 301.25.k): kartu yang akan melanggar UNIQUE tidak bisa
+  dipasang, dipanggil, atau ditempatkan. (Contoh kasus SP01-021 / SP01-033 sempat ditambahkan lalu dihapus atas permintaan pemilik.)
 - **F-23**: ditambah contoh urutan Counter Step 8 langkah (A menyerang → B pass → A counter → B counter → A counter → B pass → A pass → hasil
   pertarungan), plus catatan COUNTER CALL hanya sekali per Battle Phase (tautan ke F-24).
 - Cache-buster `index.html` → `rules-faq.js?v=7.26-faq1103b` (huruf `b`: contoh Mr. Negative dilengkapi di hari yang sama). Versi Inggris tetap acuan; versi ID diterjemahkan dengan istilah yang sama.
