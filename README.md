@@ -593,6 +593,13 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Jadwal Weekly Rush LGS: Meja Main Boardgame (Tangerang Selatan) ditambahkan — 3 November 2026 *(`data.js`, `index.html`)*
+
+- Toko baru **Meja Main Boardgame** (Tangerang Selatan, WIB — Jl. Merpati No.54B, Sawah Lama, Ciputat, Bintaro): **Jumat 19:00 - Close**
+  (`jd:[ {h:5, w:'19:00 - Close'} ]`), Instagram `mejamain`, peta https://maps.app.goo.gl/fKxucStFi9jiacvc6?g_st=ic — permintaan pemilik.
+  Kota dibaca dari alamat Google Maps tautan tersebut; ditaruh di grup Tangerang Selatan sesudah Draagoons Hobby Shop.
+- `LGS_UPDATE` → 3 November 2026; cache-buster `index.html` → `data.js?v=7.02-lgs1103`.
+
 ### Data — Errata & Text Differences: TD-04 (BP01-035 Hulk Buster) dihapus permanen — 3 November 2026 *(`rules-faq.js`, `index.html`)*
 
 Hasil konfirmasi ulang pemilik: **BATTLE Move** adalah perpindahan antar area BATTLE (FRONT, WING, BACK — CR 301.23),
