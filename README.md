@@ -593,6 +593,22 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Rules FAQ: daftar istilah (ID) diperjelas + contoh kasus F-11, F-13, F-23 — 3 November 2026 *(`rules-faq.js`, `index.html`)*
+
+Permintaan pemilik (revisi isi FAQ, EN & ID; nomor poin tidak berubah):
+- **"📖 Istilah yang dipakai" (versi ID) ditulis ulang**: satu istilah per poin dengan penjelasan lengkap. Poin lama "tukar (swap), Weakness — area
+  BATTLE yang kosong" (dua istilah tergabung dan terbaca seolah sama) dipisah: **Tukar (swap)** = menukar posisi 2 kartu beserta keadaan &
+  kartu terpasangnya (CR 301.18); **Weakness** = area BATTLE yang kosong, menyerangnya memberi 1 Rush Point ke Timeline (CR 301.20, 303.2.a.4.3.3.2).
+  Istilah baru: Membalik (flip), Area permainan (termasuk BASE maks. 6 & Timeline); CALL/menempatkan/kartu tertutup/kartu terpasang/retreat/buang/Prune
+  diperjelas dengan contoh dan rujukan ke F-11, F-36, F-37, F-39.
+- **F-11**: ditambah aturan bahwa kartu tertutup **hanya** bisa dibalik oleh efek (membalik tanpa efek tidak legal, CR 301.22.a–c) dan contoh
+  SP01-061 「Spider-Archenemy」 Mr. Negative (kartu yang dibalik tidak "masuk ke FIELD", tetap boleh BATTLE-BASE MOVE; TRIG Mr. Negative sendiri tetap terpicu).
+- **F-13**: ditambah poin "kartu terpasang juga dihitung" untuk UNIQUE (CR 305.6.a + 301.25.k) dengan contoh SP01-021 「The Web of Destiny」 Spider-Man
+  dan SP01-033 「Spider-Mentor」 Spider-Man (tidak bisa dipasang / dipanggil bila sudah ada kartu bernama sama).
+- **F-23**: ditambah contoh urutan Counter Step 8 langkah (A menyerang → B pass → A counter → B counter → A counter → B pass → A pass → hasil
+  pertarungan), plus catatan COUNTER CALL hanya sekali per Battle Phase (tautan ke F-24).
+- Cache-buster `index.html` → `rules-faq.js?v=7.26-faq1103`. Versi Inggris tetap acuan; versi ID diterjemahkan dengan istilah yang sama.
+
 ### Data — Jadwal Weekly Rush LGS: Meja Main Boardgame (Tangerang Selatan) ditambahkan — 3 November 2026 *(`data.js`, `index.html`)*
 
 - Toko baru **Meja Main Boardgame** (Tangerang Selatan, WIB — Jl. Merpati No.54B, Sawah Lama, Ciputat, Bintaro): **Jumat 19:00 - Close**
