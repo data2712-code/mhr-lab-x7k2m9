@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.25** · 2 November 2026
+**Versi saat ini: v7.26** · 3 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -609,6 +609,31 @@ Move once") sudah benar, jadi poin TD-04 bukan perbedaan teks dan dihapus.
   (dicatat di komentar), TD-05 dst. tidak berubah. Link lama `#errata/TD-04` tetap aman (membuka halaman Errata).
 - Cache-buster `index.html` → `rules-faq.js?v=7.24-td04b`.
 - Teks kartu di `cards.js` (EN & ID) tidak diubah.
+
+### v7.26 — Rules FAQ versi Bahasa Indonesia (pilihan English / Bahasa Indonesia) — 3 November 2026 *(`index.html`, `rules-faq.js`)*
+
+Permintaan pemilik: versi Bahasa Indonesia untuk Rules FAQ (permintaan terbanyak pengguna Indonesia), dicek teliti supaya
+tidak ada beda arti. Tanpa perubahan database / Supabase.
+- **Terjemahan 44 poin** (F-01…F-44, nomor & urutan sama dengan versi Inggris) di draf internal
+  `mhr-deck-lab-internal/Rules FAQ & Errata/03 - Rules FAQ (ID).md`; hasil pengecekan EN↔ID per poin di
+  `04 - Review terjemahan Rules FAQ (EN-ID).md`. Istilah mengikuti teks kartu Indonesia resmi (dipanggil, ditempatkan,
+  kartu tertutup, terpasang, buang, tarik, Prune, RETREAT…); nama area/fase/kemampuan tetap bahasa Inggris seperti di
+  kartu. Halaman menyebut bahwa **versi bahasa Inggris tetap menjadi acuan** bila ada beda arti. Versi ID punya daftar
+  "📖 Istilah yang dipakai" (bisa dibuka-tutup).
+- **Tombol bahasa** English / Bahasa Indonesia di atas FAQ; pilihan disimpan per pengunjung (`localStorage`
+  `mhr-faq-lang`, aman bila storage diblokir). Ganti bahasa mempertahankan jawaban yang sedang terbuka.
+- **Link:** `#faq/id`, `#faq/id/F-23`, `#faq/en/F-23`; **Copy link selalu menyertakan bahasa** (penerima melihat bahasa
+  yang sama dengan pengirim). Link lama `#faq/F-23` tetap jalan (memakai bahasa pilihan terakhir, default English).
+  Label tombol, pencarian, "Sumber", "Salin link" ikut bahasa yang dipilih; pencarian punya indeks per bahasa.
+- Pengaman: kalau nomor/urutan poin versi ID tidak sama dengan versi Inggris, versi ID otomatis dimatikan (peringatan
+  di console) supaya tidak ada jawaban yang tertukar.
+- Halaman Errata & Text Differences dan Official Rules tetap bahasa Inggris. Sub-menu Guide: keterangan Rules FAQ jadi
+  "Common rules questions · English & Indonesian". CSS `.rf-lang`, `.rf-gloss`.
+- `rules-faq.js?v=7.26`; versi 7.26 (komentar, meta, footer).
+- Dicek: Playwright (21 tes) — default English, ganti ke ID (hash `#faq/id`, 44 poin, istilah, label "Sumber"/"Salin link"),
+  jawaban terbuka tetap terbuka, Copy link `#faq/id/F-23` & `#faq/en/F-31`, pencarian "kartu tertutup", pilihan bahasa
+  diingat setelah pindah halaman, `#faq/id/F-44` & link lama `#faq/F-02`, Errata tetap 23 poin, chip kartu membuka popup,
+  HP 390 px tanpa scroll horizontal, tanpa error JS.
 
 ### Data — Errata & Text Differences: TD-04 (BP01-035 Hulk Buster) disembunyikan sementara — 2 November 2026 *(`rules-faq.js`, `index.html`)*
 

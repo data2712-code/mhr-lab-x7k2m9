@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.25  ·  2 November 2026
+     MHR DECK LAB  ·  versi 7.26  ·  3 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.25">
+<meta name="version" content="7.26">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2757,6 +2757,17 @@
   .rf-er-h{font-weight:700;color:var(--paper);margin-bottom:6px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
   .rf-er-body code{font-family:var(--mono);font-size:.9em}
   .rf-foot{color:var(--muted);font-size:13px;margin-top:22px}
+  /* v7.26 — pilihan bahasa Rules FAQ (English / Bahasa Indonesia) + daftar istilah versi ID */
+  .rf-lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;gap:3px;margin:2px 0 8px;
+    background:var(--panel)}
+  .rf-lang button{background:none;border:none;color:var(--muted);font:inherit;font-size:13px;font-weight:600;
+    padding:6px 14px;border-radius:999px;cursor:pointer}
+  .rf-lang button[aria-pressed="true"]{background:var(--accent);color:#14181D}
+  .rf-lang button:not([aria-pressed="true"]):hover{color:var(--paper)}
+  .rf-gloss{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:4px 0 6px;padding:0 14px}
+  .rf-gloss summary{cursor:pointer;padding:10px 0;font-weight:600;color:var(--paper)}
+  .rf-gloss ul{margin:0 0 12px;padding-left:20px;font-size:13.5px;line-height:1.6}
+  .rf-gloss li{margin:3px 0}
   @media (max-width:560px){
     .rf-er{flex-direction:column;gap:10px}
     .rf-thumbs{flex-direction:row}
@@ -2847,7 +2858,7 @@
   <div class="lab-mh">📘 Guide <span>How to play, rulings &amp; card errata</span></div>
   <div class="lab-grid">
     <button type="button" role="menuitem" data-guidetab="guide"><span class="lab-ic">📘</span><span class="lab-tx"><b>Site Guide</b><small>Game basics &amp; how to use the site</small></span></button>
-    <button type="button" role="menuitem" data-guidetab="faq"><span class="lab-ic">❓</span><span class="lab-tx"><b>Rules FAQ</b><small>Answers to common rules questions</small></span></button>
+    <button type="button" role="menuitem" data-guidetab="faq"><span class="lab-ic">❓</span><span class="lab-tx"><b>Rules FAQ</b><small>Common rules questions · English &amp; Indonesian</small></span></button>
     <button type="button" role="menuitem" data-guidetab="errata"><span class="lab-ic">⚠️</span><span class="lab-tx"><b>Errata &amp; Text Differences</b><small>Card corrections, ID vs EN text</small></span></button>
     <button type="button" role="menuitem" data-guidetab="official"><span class="lab-ic">📜</span><span class="lab-tx"><b>Official Rules 1.03</b><small>Full Comprehensive Rules</small></span></button>
   </div>
@@ -3337,7 +3348,7 @@
      v7.15 (Tahap 3): data matchup komunitas (opt-in, anonim), detail deck + statistik per versi deck. -->
 <script src="perf.js?v=7.15"></script>
 <script src="perf-ui.js?v=7.25"></script>
-<script src="rules-faq.js?v=7.24-td04b"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules) -->
+<script src="rules-faq.js?v=7.26"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules); v7.26 — FAQ versi Bahasa Indonesia -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
@@ -3366,7 +3377,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.25</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.26</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -8294,7 +8305,10 @@ const OFFICIAL_RULES = `
 /* v7.24 — sub-tab ke-3 & ke-4: 'faq' (Rules FAQ) dan 'errata' (Errata & Text Differences),
    isinya di rules-faq.js (window.MHRRules). Hash: #panduan · #faq[/F-xx] · #errata[/E-xx|TD-xx] · #rules */
 const PD_HASH = {guide:'panduan', faq:'faq', errata:'errata', official:'rules'};
-function pdHash(focus){ return '#' + (PD_HASH[state.pdTab] || 'panduan') + (focus ? '/' + focus : ''); }
+function pdHash(focus){
+  if(state.pdTab === 'faq' && window.MHRRules && window.MHRRules.faqHash) return window.MHRRules.faqHash(focus);   /* v7.26 — #faq[/id][/F-xx] */
+  return '#' + (PD_HASH[state.pdTab] || 'panduan') + (focus ? '/' + focus : '');
+}
 function renderPanduan(focus){
   const w = $('#panduanWrap');
   if(!w) return;
@@ -8328,7 +8342,11 @@ function setPage(p, dariHash){
     if(m){
       if(m[1] !== 'panduan') state.pdTab = (m[1] === 'rules') ? 'official' : m[1];
       else if(dariHash) state.pdTab = 'guide';
-      if(m[2] && window.MHRRules && window.MHRRules.hasId(m[1], m[2].toUpperCase())) pdFocus = m[2].toUpperCase();
+      if(m[1] === 'faq' && window.MHRRules && window.MHRRules.parseFaqSub){   /* v7.26 — #faq/id/F-23, #faq/en/F-23, #faq/F-23 */
+        const r = window.MHRRules.parseFaqSub(m[2] || '');
+        if(r.lang) window.MHRRules.setLang(r.lang);
+        pdFocus = r.focus;
+      } else if(m[2] && window.MHRRules && window.MHRRules.hasId(m[1], m[2].toUpperCase())) pdFocus = m[2].toUpperCase();
       p = 'panduan';
     }
   }
