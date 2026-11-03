@@ -593,6 +593,16 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Errata & Text Differences: TD-04 (BP01-035 Hulk Buster) dihapus permanen — 3 November 2026 *(`rules-faq.js`, `index.html`)*
+
+Hasil konfirmasi ulang pemilik: **BATTLE Move** adalah perpindahan antar area BATTLE (FRONT, WING, BACK — CR 301.23),
+bukan BATTLE-BASE MOVE (CR 301.24). Teks BP01-035 「MK44-The Commander」 Hulk Buster ("that character may take BATTLE
+Move once") sudah benar, jadi poin TD-04 bukan perbedaan teks dan dihapus.
+- `rules-faq.js`: entri TD-04 dihapus dari `RF_DATA`; `HIDDEN` kembali kosong. Nomor **TD-04 tidak dipakai ulang**
+  (dicatat di komentar), TD-05 dst. tidak berubah. Link lama `#errata/TD-04` tetap aman (membuka halaman Errata).
+- Cache-buster `index.html` → `rules-faq.js?v=7.24-td04b`.
+- Teks kartu di `cards.js` (EN & ID) tidak diubah.
+
 ### Data — Errata & Text Differences: TD-04 (BP01-035 Hulk Buster) disembunyikan sementara — 2 November 2026 *(`rules-faq.js`, `index.html`)*
 
 Permintaan pemilik: poin **TD-04** (BP01-035 「MK44-The Commander」 Hulk Buster — tercetak "BATTLE Move", menurut Head
