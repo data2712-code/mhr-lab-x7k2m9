@@ -593,6 +593,13 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Errata E-14 (SP01-061 Mr. Negative): ruling "flip" mengikuti teks Inggris — 3 November 2026 *(`rules-faq.js`, `index.html`)*
+
+- Poin **E-14** ditambah bagian ruling: teks Inggris "you flip all your cards in BASE" = **semua** kartu di BASE dibalik (karakter dibuat
+  tertutup lebih dulu, lalu kartu tertutup dibuat terbuka, CR 301.2.a.2), bukan hanya "menjadi terbuka" seperti terbaca di teks Indonesia.
+  Dikonfirmasi Head Judge (keterangan pemilik). Contoh 2 karakter + 2 kartu tertutup, dampak ke kartu terpasang (CR 301.25.l), tautan ke F-11.
+- Teks kartu di `cards.js` tidak diubah. Cache-buster `index.html` → `rules-faq.js?v=7.26-faq1103c`.
+
 ### Data — Rules FAQ: daftar istilah (ID) diperjelas + contoh kasus F-11, F-13, F-23 — 3 November 2026 *(`rules-faq.js`, `index.html`)*
 
 Permintaan pemilik (revisi isi FAQ, EN & ID; nomor poin tidak berubah):
@@ -602,12 +609,14 @@ Permintaan pemilik (revisi isi FAQ, EN & ID; nomor poin tidak berubah):
   Istilah baru: Membalik (flip), Area permainan (termasuk BASE maks. 6 & Timeline); CALL/menempatkan/kartu tertutup/kartu terpasang/retreat/buang/Prune
   diperjelas dengan contoh dan rujukan ke F-11, F-36, F-37, F-39.
 - **F-11**: ditambah aturan bahwa kartu tertutup **hanya** bisa dibalik oleh efek (membalik tanpa efek tidak legal, CR 301.22.a–c) dan contoh
-  SP01-061 「Spider-Archenemy」 Mr. Negative (kartu yang dibalik tidak "masuk ke FIELD", tetap boleh BATTLE-BASE MOVE; TRIG Mr. Negative sendiri tetap terpicu).
+  SP01-061 「Spider-Archenemy」 Mr. Negative: "flip all your cards in BASE" = karakter di BASE dibuat tertutup lebih dulu, lalu kartu tertutup dibuat
+  terbuka (CR 301.2.a.2; ruling mengikuti teks Inggris, dikonfirmasi Head Judge). Kartu yang dibalik tidak "masuk ke FIELD", tetap boleh
+  BATTLE-BASE MOVE; TRIG Mr. Negative sendiri tetap terpicu.
 - **F-13**: ditambah poin "kartu terpasang juga dihitung" untuk UNIQUE (CR 305.6.a + 301.25.k) dengan contoh SP01-021 「The Web of Destiny」 Spider-Man
   dan SP01-033 「Spider-Mentor」 Spider-Man (tidak bisa dipasang / dipanggil bila sudah ada kartu bernama sama).
 - **F-23**: ditambah contoh urutan Counter Step 8 langkah (A menyerang → B pass → A counter → B counter → A counter → B pass → A pass → hasil
   pertarungan), plus catatan COUNTER CALL hanya sekali per Battle Phase (tautan ke F-24).
-- Cache-buster `index.html` → `rules-faq.js?v=7.26-faq1103`. Versi Inggris tetap acuan; versi ID diterjemahkan dengan istilah yang sama.
+- Cache-buster `index.html` → `rules-faq.js?v=7.26-faq1103b` (huruf `b`: contoh Mr. Negative dilengkapi di hari yang sama). Versi Inggris tetap acuan; versi ID diterjemahkan dengan istilah yang sama.
 
 ### Data — Jadwal Weekly Rush LGS: Meja Main Boardgame (Tangerang Selatan) ditambahkan — 3 November 2026 *(`data.js`, `index.html`)*
 
