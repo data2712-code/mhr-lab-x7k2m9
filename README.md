@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.26** · 3 November 2026
+**Versi saat ini: v7.27** · 5 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -35,6 +35,8 @@ mhr-lab-x7k2m9/
 ├── sw.js                 ← PWA: service worker, cache offline (sejak v6.6)
 ├── icons/               ← ikon PWA berbagai ukuran (sejak v6.6)
 ├── og-image.jpg      ← gambar preview saat link dibagikan
+├── og-faq.jpg · og-errata.jpg ← banner preview link Rules FAQ / Errata (v7.27)
+├── faq/ · errata/     ← halaman statis per poin Rules FAQ (EN & -id) & Errata untuk preview WhatsApp — DIBUAT tools/generate_faq_pages.js, jangan diedit tangan (v7.27)
 ├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.89; TIDAK dimuat sejak v7.05, disimpan untuk kampanye berikutnya)
 ├── home-ui.js         ← halaman Beranda (#beranda): perkenalan fitur untuk pengunjung baru, "Welcome back" untuk akun login (v6.63, dirombak v7.16)
 ├── usage.js           ← statistik pemakaian fitur anonim (guest vs login) + laporan admin "📊 Usage" di My Lab (v7.25)
@@ -592,6 +594,34 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.27 — Preview WhatsApp per poin Rules FAQ & Errata — 5 November 2026 *(`rules-faq.js`, `index.html`, `faq/`, `errata/`, `og-faq.jpg`, `og-errata.jpg`, `tools/generate_faq_pages.js`)*
+
+Masukan komunitas lewat pemilik: link "Copy link" di Rules FAQ (mis. `https://mhrdecklab.com/#faq/F-01`) saat dibagikan di
+WhatsApp hanya menampilkan preview umum situs (logo). Penyebab: crawler preview tidak menjalankan JavaScript dan tidak mengirim
+bagian `#...` ke server, jadi selalu membaca `index.html`. Tanpa perubahan database / Supabase.
+
+- **Halaman statis per poin** (pola yang sama dengan `cards/<NO>.html` dan `news/`), folder rata:
+  - `faq/F-01.html` … `faq/F-44.html` — Rules FAQ bahasa Inggris → redirect ke `#faq/en/F-xx`;
+  - `faq/F-01-id.html` … — Rules FAQ Bahasa Indonesia → `#faq/id/F-xx`;
+  - `errata/E-01.html` … `errata/TD-10.html` — Errata & Text Differences → `#errata/<ID>`.
+  Isinya: `og:title` = nomor + pertanyaan (mis. "F-01 · What are the deck building rules?"), `og:description` = cuplikan
+  jawaban (±200 karakter), `og:image` = banner baru **`og-faq.jpg`** / **`og-errata.jpg`** (1200×630). Badan halaman memuat
+  pertanyaan + jawaban lengkap (untuk Google / tanpa JavaScript), lalu langsung redirect ke poin itu di aplikasi.
+  Total 111 halaman (44 EN + 44 ID + 23 errata). Poin di `HIDDEN` tidak dibuatkan halaman.
+- **Copy link** (`rules-faq.js` → `linkFor`) di `mhrdecklab.com` kini menyalin alamat halaman statis itu (bahasa FAQ ikut:
+  `-id` untuk Bahasa Indonesia). Di luar domain itu (uji lokal) tetap memakai link `#faq/...`. Link lama `#faq/...` tetap jalan.
+- **`tools/generate_faq_pages.js`** membaca `RF_DATA`, `RF_FAQ_ID`, `HIDDEN` langsung dari `rules-faq.js`, menulis halaman
+  (CRLF, hanya kalau isinya berubah) dan menghapus halaman poin yang sudah tidak ada. **Wajib dijalankan ulang setiap
+  `rules-faq.js` berubah:** `node tools/generate_faq_pages.js` (sesi Claude yang mengubah FAQ/Errata menjalankannya dan ikut
+  mengirim `faq/` & `errata/`). Kalau poin baru belum dibuatkan halamannya, Copy link poin itu akan 404.
+- **Opsional — otomatis lewat GitHub Actions:** berkas workflow `faq-pages.yml` (disimpan di folder internal
+  `mhr-deck-lab-internal\Rules FAQ & Errata\`, tidak bisa ditulis Claude ke folder `.github`) bisa disalin pemilik ke
+  `.github/workflows/`. Workflow itu menjalankan generator setiap push yang mengubah `rules-faq.js` lalu commit `faq/` &
+  `errata/`; seperti workflow Berita, setelah ia membuat commit lakukan "Pull origin" dulu di GitHub Desktop.
+- Catatan: WhatsApp menyimpan preview per alamat. Link `#faq/...` yang sudah pernah dibagikan tetap menampilkan logo; link baru
+  dari Copy link (setelah versi ini online) yang menampilkan pertanyaan.
+- Cache-buster `index.html` → `rules-faq.js?v=7.27`.
 
 ### Data — Errata E-14 (SP01-061 Mr. Negative): ruling "flip" mengikuti teks Inggris — 3 November 2026 *(`rules-faq.js`, `index.html`)*
 

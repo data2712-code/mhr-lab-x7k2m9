@@ -18,6 +18,11 @@
    FAQ, disimpan per pengunjung (localStorage 'mhr-faq-lang'). Link: #faq/en/F-23 atau
    #faq/id/F-23 (Copy link selalu menyertakan bahasa); #faq/F-23 = bahasa pilihan terakhir.
    Nomor poin & urutan WAJIB sama dengan versi Inggris (dicek saat dimuat).
+   v7.27 — Copy link (di mhrdecklab.com) menyalin halaman statis faq/<ID>.html, faq/<ID>-id.html,
+   errata/<ID>.html supaya preview WhatsApp/Telegram menampilkan nomor + pertanyaan + cuplikan
+   jawaban (bukan logo saja). Halaman itu dibuat tools/generate_faq_pages.js dari data di berkas
+   ini — WAJIB dijalankan ulang tiap kali isi FAQ/Errata berubah:  node tools/generate_faq_pages.js
+   (atau otomatis lewat workflow GitHub Actions faq-pages.yml bila sudah dipasang, lihat README v7.27).
 
    Butuh fungsi global dari index.html: openLightbox(no), artFile(no), DB.
    ===================================================================== */
@@ -77,6 +82,10 @@ function parseFaqSub(sub){
 function faqHash(focus){ return '#faq' + (faqLang === 'id' ? '/id' : '') + (focus ? '/' + focus : ''); }
 
 function linkFor(kind, id){
+  /* v7.27 — di mhrdecklab.com: halaman statis per poin (preview WhatsApp spesifik, lalu redirect ke #faq/<lang>/<ID>).
+     Poin tersembunyi (HIDDEN) tidak punya halaman statis, jadi tetap memakai link #. */
+  if(/(^|\.)mhrdecklab\.com$/i.test(location.hostname) && !HIDDEN.includes(id))
+    return location.origin + '/' + kind + '/' + id + (kind === 'faq' && faqLang === 'id' ? '-id' : '') + '.html';
   /* Rules FAQ: bahasa selalu ikut di link supaya penerima melihat bahasa yang sama */
   return location.origin + location.pathname + '#' + kind + '/' + (kind === 'faq' ? faqLang + '/' : '') + id;
 }
