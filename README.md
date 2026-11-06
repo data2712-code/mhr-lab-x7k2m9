@@ -595,6 +595,20 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.28 — Text Differences TD-11: BP01-054 Ultron-Spawn Rebuild — 6 November 2026 *(`rules-faq.js`, `index.html`, `errata/TD-11.html`)*
+
+Keputusan pemilik (6 Nov 2026, dari pengerjaan simulator BP01): teks Inggris BP01-054 「Ultron-Spawn Rebuild」Ultron menulis
+"…characters with Lv4 or above and 【Ultron】 in their **features**", padahal tidak ada kartu dengan fitur 【Ultron】 (kartu
+Ultron berfitur 【Machine】). Yang dimaksud adalah **nama** Ultron, sama dengan teks Indonesia ("bernama [Ultron]") dan kartu
+Ultron BP01 lain (BP01-014, -037, -043). Tanpa perubahan database / Supabase; teks kartu di `cards.js` tetap sesuai sumber resmi.
+
+- **Errata & Text Differences**: poin baru **TD-11** di Part 2. Karena teks Inggris tidak bisa diterapkan apa adanya, poin
+  ini menyebut terang-terangan bahwa ini pengecualian dari aturan umum "ikuti teks Inggris" (F-41), dan ditandai sebagai
+  bacaan MHR Deck Lab, bukan erratum resmi.
+- **Halaman statis** `errata/TD-11.html` dibuat dengan `node tools/generate_faq_pages.js` (112 halaman, 1 baru); preview
+  WhatsApp untuk link Copy link TD-11 langsung berfungsi setelah push.
+- Versi situs 7.28 (`index.html`: header, `meta version`, footer, `rules-faq.js?v=7.28`).
+
 ### v7.27 — Preview WhatsApp per poin Rules FAQ & Errata — 5 November 2026 *(`rules-faq.js`, `index.html`, `faq/`, `errata/`, `og-faq.jpg`, `og-errata.jpg`, `tools/generate_faq_pages.js`)*
 
 Masukan komunitas lewat pemilik: link "Copy link" di Rules FAQ (mis. `https://mhrdecklab.com/#faq/F-01`) saat dibagikan di
