@@ -595,6 +595,19 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Teks Inggris SP01-065 「Echo of Fate」Spider-Man diperbaiki — 7 November 2026 *(`cards.js`, `index.html`)*
+
+Temuan saat pengerjaan simulator Tahap 4 (pertanyaan K-36): `e_en` SP01-065 berisi salinan teks Inggris SP01-064
+「Dual Destiny」Scarlet Spider (ACTI swap + AIR STRIKE, TRIG awal giliran lawan swap + BLOCK). Pemilik mengecek kartu fisik:
+teks cetak SP01-065 sama persis dengan EB01-014 (cetak ulang bernama sama); gambar `images/en/SP01-065.jpg` dan
+`images/en/EB01-014.jpg` juga menunjukkan teks yang sama. Perbaikan disetujui pemilik.
+- **Sesudah** — EN: `e_en` SP01-065 = `e_en` EB01-014 (UNIQUE; TRIG【FIELD】 saat dipasang → 1 karakter 【Web】 dari RETREAT/VOID
+  ke HAND; ACTI【HAND】 bila punya Weakness → prune 5 karakter 【Web】 di RETREAT, tempatkan kartu ini ke BATTLE, retreat 1
+  karakter lawan). Teks Indonesia SP01-065 sudah benar sejak awal, tidak diubah.
+- Cache-buster `index.html` → `cards.js?v=7.28-sp065`. Tanpa gambar baru (`sw.js` tetap), tanpa perubahan `api/v1/`
+  (API hanya memuat teks Indonesia).
+- Dicek: `node --check cards.js`; selain `e_en` SP01-065 tidak ada bagian lain yang berubah.
+
 ### v7.28 — Text Differences TD-11: BP01-054 Ultron-Spawn Rebuild — 6 November 2026 *(`rules-faq.js`, `index.html`, `errata/TD-11.html`)*
 
 Keputusan pemilik (6 Nov 2026, dari pengerjaan simulator BP01): teks Inggris BP01-054 「Ultron-Spawn Rebuild」Ultron menulis
