@@ -595,6 +595,13 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Deploy — Terbitkan ulang perbaikan SP01-065 — 10 November 2026 *(`README.md`)*
+
+Commit `fe369b4` (7 Nov, perbaikan teks Inggris SP01-065 di bawah) sudah ter-push, tetapi langkah *Deploy to GitHub Pages*
+pada workflow "pages build and deployment" gagal ("Timeout reached, aborting!"; build Jekyll sendiri sukses), sehingga
+mhrdecklab.com masih menayangkan versi 6 November (`bce92a0`). Entri ini hanya catatan; push-nya memicu deploy baru.
+Tidak ada perubahan kode atau data lain.
+
 ### Data — Teks Inggris SP01-065 「Echo of Fate」Spider-Man diperbaiki — 7 November 2026 *(`cards.js`, `index.html`)*
 
 Temuan saat pengerjaan simulator Tahap 4 (pertanyaan K-36): `e_en` SP01-065 berisi salinan teks Inggris SP01-064
