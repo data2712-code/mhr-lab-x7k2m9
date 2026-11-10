@@ -597,6 +597,14 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Jadwal Weekly Rush LGS: Littleroot Town (Jakarta) ditambahkan — 10 November 2026 *(`data.js`, `index.html`, `sim/index.html`)*
+
+- Toko baru **Littleroot Town** (Jakarta, WIB — Jl. Kemuning No.33A, Jatipulo, Jakarta Barat): **Selasa 19:00 - Close**
+  (`jd:[ {h:2, w:'19:00 - Close'} ]`), Instagram `littleroottown.id`, peta https://share.google/C5ByTWR35QvLQHcBM — permintaan pemilik.
+  Kota dibaca dari alamat pada tautan tersebut; ditaruh di grup Jakarta sesudah Ogre Kelapa Gading.
+- `LGS_UPDATE` → 10 November 2026; cache-buster `index.html` → `data.js?v=7.02-lgs1110` (`sim/index.html` dibuat ulang
+  supaya memakai `?v=` yang sama; isi simulator tidak berubah).
+
 ### v7.29 — Battle Sim O2 (uji tertutup, khusus admin): main online, offline, hasil & replay, lapor bug — 10 November 2026 *(`index.html`, berkas BARU `sim-host.js`, folder BARU `sim/`, migrasi SQL `o2-battle-sim.sql` di folder `mhr-simulator\online\sql`)*
 
 Tahap O2 simulator (riwayat simulator #63). Keputusan pemilik 10 Nov 2026: kode simulator ditaruh di repo ini (folder
