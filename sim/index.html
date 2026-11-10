@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MHR Battle Sim — local (Stage 5 · UI v5)</title>
+<style>
+/* =====================================================================
+   UI v5 · alternatif C "Broadcast" (keputusan pemilik 6 Nov 2026, riwayat #40–#41).
+   Warna & huruf mengikuti mhrdecklab.com (ink · paper · kuning, huruf condensed).
+   Warna pemain mengikuti sudut pandang: pemain di sisi bawah (yang melihat) = biru, lawan = merah.
+   ===================================================================== */
+:root{
+  --bg:#0E1216; --ink2:#12171d; --panel:#171D24; --panel2:#1F2731; --line:#2C3644; --line2:#3a4656;
+  --text:#E8E4DA; --paper:#EDE7DA; --muted:#8B96A5; --dim:#5d6876;
+  --gold:#F2B01E; --gold2:#FFD36A; --red:#E4442E; --green:#33A45C; --blue:#3B87E8; --tg:#E4442E;
+  --you:#3B87E8; --foe:#E4442E;
+  --disp:'Arial Narrow','Helvetica Neue Condensed','Roboto Condensed',Impact,sans-serif;
+  --mono:'Consolas','SF Mono','Roboto Mono',monospace;
+  /* Ukuran kartu mengikuti TINGGI layar supaya seluruh papan muat tanpa scroll. */
+  --cw: clamp(40px, calc((100vh - 300px) / 7.1), 98px);
+  --ch: calc(var(--cw) * 1.4);
+  --mini: calc(var(--cw) * .5);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;cursor:pointer;border:1px solid var(--line2);background:var(--panel2);color:var(--text);border-radius:9px;padding:6px 11px;white-space:nowrap}
+button:hover:not(:disabled){border-color:var(--gold)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.pri{background:var(--gold);color:#1a1405;border-color:#ffd56b;font-weight:700}
+button.warn{border-color:var(--red);color:#ffb4a8}
+button.sm{padding:3px 8px;font-size:12px}
+input,select,textarea{font:inherit;background:var(--ink2);color:var(--text);border:1px solid var(--line2);border-radius:8px;padding:7px 9px}
+textarea{width:100%;min-height:70px;resize:vertical}
+h1,h2,h3{margin:0 0 8px}
+h1,h2{font-family:var(--disp);letter-spacing:.03em}
+.muted{color:var(--muted)} .small{font-size:12px}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font-size:12px;white-space:nowrap}
+.badge.gold{border-color:var(--gold);color:var(--gold)}
+.wrap{max-width:1080px;margin:0 auto;padding:22px 16px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.box h3{font-size:12px;letter-spacing:.14em;color:#c9d2de}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.row label{min-width:100px;color:var(--muted)}
+.err{color:#ffb4a8;white-space:pre-line}
+.q{color:var(--gold)}
+.kbd{font-family:var(--mono);font-size:10px;padding:0 5px;border-radius:4px;border:1px solid var(--line2);color:#aeb6c2;background:var(--ink2);margin-left:6px}
+
+/* ================= SETUP (satu mode) ================= */
+#setup .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#setup .mode{grid-column:1/3;display:grid;grid-template-columns:1.3fr 1fr;gap:18px;border-color:#5a4a1e;background:linear-gradient(135deg,rgba(60,46,10,.35),var(--panel))}
+#setup .mode .t{font-family:var(--disp);font-size:24px;font-weight:900;color:var(--gold2);letter-spacing:.03em}
+#setup .mode ul{margin:8px 0 0 18px;padding:0;color:#c9d2de;font-size:13px}#setup .mode li{margin:3px 0}
+.clk2{display:flex;gap:10px;margin:6px 0 10px}.clk2 div{flex:1;text-align:center;padding:10px;border-radius:12px;background:var(--ink2);border:1px solid #5a4a1e}
+.clk2 b{display:block;font-family:var(--disp);font-size:30px;font-weight:900}.clk2 span{font-size:11px;color:var(--muted)}
+#setup .tools{grid-column:1/3;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){#setup .grid,#setup .mode,#setup .tools{grid-template-columns:1fr}#setup .mode,#setup .tools{grid-column:auto}}
+
+/* ================= MENU MODE (riwayat #50) — mobile-first ================= */
+.topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.topbar h1{flex:1;min-width:200px;margin:0}
+.lang{display:inline-flex;border:1px solid var(--line2);border-radius:99px;overflow:hidden}
+.lang button{border:0;border-radius:0;padding:6px 12px;background:transparent;color:var(--muted);font-weight:700}
+.lang button.on{background:var(--gold);color:#1a1405}
+#home{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.tile{display:flex;gap:12px;align-items:flex-start;text-align:left;white-space:normal;padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);min-height:84px;width:100%}
+.tile .ic{font-size:26px;line-height:1;flex:none;width:34px;text-align:center}
+.tile b{display:block;font-family:var(--disp);font-size:19px;letter-spacing:.03em;color:var(--paper)}
+.tile span{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
+.tile.main{border-color:#5a4a1e;background:linear-gradient(135deg,rgba(60,46,10,.35),var(--panel))}
+.tile.soon{opacity:.6}
+.tile .tag{display:inline-block;margin-top:6px;font-size:11px;padding:1px 7px;border-radius:99px;border:1px solid var(--line2);color:var(--muted)}
+#resumeBox .resume{margin:12px 0}
+.resume{grid-column:1/-1;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px;border-radius:14px;border:1px solid var(--you);background:linear-gradient(135deg,rgba(59,135,232,.18),var(--panel))}
+.resume .tx{flex:1;min-width:200px}.resume b{font-family:var(--disp);font-size:19px}
+.panelx{display:none;margin:12px 0}.panelx.on{display:block}
+.panelx .hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}.panelx .hd h2{flex:1;margin:0;font-size:24px}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}
+.form .f{display:flex;flex-direction:column;gap:4px}.form .f label{color:var(--muted);font-size:12px}
+.form .f.full{grid-column:1/-1}
+.form select,.form input{width:100%;min-height:42px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}.seg button{min-height:40px;flex:1;min-width:90px}.seg button.on{background:var(--gold);color:#1a1405;border-color:#ffd56b;font-weight:700}
+.startbar{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.startbar button{min-height:46px;font-size:16px;padding:10px 22px}
+.hrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin:6px 0}
+.hrow .res{font-family:var(--disp);font-weight:900;font-size:18px;min-width:56px;text-align:center;border-radius:8px;padding:4px 6px}
+.hrow .res.w{background:rgba(51,164,92,.2);color:#7fd79d}.hrow .res.l{background:rgba(228,68,46,.18);color:#ff9d8f}.hrow .res.d{background:var(--panel2);color:var(--muted)}
+.hrow .tx{flex:1;min-width:180px}.hrow .tx b{color:var(--paper)}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}.stats .badge{font-size:13px;padding:4px 10px}
+@media (max-width:760px){
+  #home{grid-template-columns:1fr}
+  .form{grid-template-columns:1fr}
+  .wrap{padding:14px 12px}
+  .startbar button{flex:1}
+}
+
+/* ================= GAME: kerangka ================= */
+#game{display:none;height:100vh;flex-direction:column;
+  background:radial-gradient(ellipse 70% 60% at 45% 50%,#1b222b 0%,#13181e 55%,#0b0e12 100%)}
+#game.on{display:flex}
+#game.both{--cw: clamp(36px, calc((100vh - 360px) / 8.2), 88px); --ch: calc(var(--cw) * 1.4); --mini: calc(var(--cw) * .5)}
+
+/* pelat pemain (riwayat #54, Alternatif A · Tabletop): lawan di atas papan, Anda di bawah di samping HAND */
+.plate{flex:none;display:flex;align-items:center;gap:12px;padding:6px 16px;min-width:0;position:relative}
+.plate.op{border-bottom:1px solid #1f2731;background:linear-gradient(90deg,rgba(228,68,46,.10),transparent 40%)}
+.plate .avw{--pct:100;flex:none;width:48px;height:48px;border-radius:50%;padding:3px;background:conic-gradient(#3a4452 calc(var(--pct) * 1%),#1a2028 0)}
+.plate .avw.run{background:conic-gradient(var(--gold) calc(var(--pct) * 1%),#2a313b 0)}
+.plate .avw.run.resp{background:conic-gradient(var(--red) calc(var(--pct) * 1%),#2a313b 0)}
+.plate .av{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:900;font-size:20px;color:#fff;border:2px solid #0e1216}
+.plate.me .av{background:var(--you)}.plate.op .av{background:var(--foe)}
+.plate .info{min-width:0}
+.plate .nm{font-family:var(--disp);font-size:18px;font-weight:900;letter-spacing:.04em;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plate .nm .ord{display:inline-block;font-family:system-ui,sans-serif;font-size:10.5px;font-weight:800;letter-spacing:.05em;padding:1px 6px;border-radius:6px;margin:0 0 0 6px;vertical-align:middle;background:#2a3340;color:#c9d2de;border:1px solid var(--line2)}
+.plate .nm .ord.f{background:var(--gold);color:#1a1405;border-color:#ffd56b}
+.plate .nm .act{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);margin:0 0 0 8px;vertical-align:middle}
+.plate .sub{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted);margin-top:3px;flex-wrap:wrap}
+.plate .score{font-family:var(--disp);font-weight:900;font-size:24px;line-height:1;color:#fff;margin-right:2px}
+.plate.me .score{color:#8fbaf3}.plate.op .score{color:#ff9b8c}
+.plate .score small{font-size:12px;opacity:.7;margin-left:1px}
+.orderbig{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 10px;padding:12px 14px;border-radius:14px;background:var(--ink2);border:1px solid var(--line2)}
+.orderbig b{font-family:var(--disp);font-size:44px;line-height:1;font-weight:900;color:var(--paper)}
+.orderbig span{font-family:var(--disp);font-size:22px;font-weight:900;letter-spacing:.04em}
+.orderbig small{flex-basis:100%;color:var(--muted);font-size:12.5px}
+.orderbig.f{border-color:#ffd56b;background:linear-gradient(135deg,rgba(242,176,30,.22),var(--ink2))}.orderbig.f b,.orderbig.f span{color:var(--gold2)}
+.you{font-family:system-ui,sans-serif;font-size:9.5px;font-weight:800;letter-spacing:.1em;padding:1px 6px;border-radius:4px;background:var(--paper);color:#111;vertical-align:middle;margin-left:6px}
+.chipc{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#c9d2de;padding:1px 8px;border-radius:999px;background:#1a2028;border:1px solid var(--line)}
+.chipc b{color:var(--text)}
+.chipc.click{cursor:pointer}.chipc.click:hover{border-color:var(--gold)}
+.rt{display:inline-flex;gap:3px;align-items:center}
+.rt i{width:13px;height:8px;border-radius:2px;background:#2a313b;display:block;transform:skewX(-14deg)}
+.plate.me .rt i.on{background:var(--you)}.plate.op .rt i.on{background:var(--foe)}
+.rt i:nth-child(9){outline:1px solid #6b7686}
+/* kapsul giliran · fase · jam (di tengah papan, di atas baki) */
+.pill{display:flex;align-items:center;gap:12px;padding:3px 14px;border-radius:999px;background:#0e1216;border:1px solid #2c3542;white-space:nowrap;max-width:100%;overflow:hidden;position:relative}
+.pill .t{font-size:10px;letter-spacing:.16em;color:var(--muted);font-weight:700}
+.pill .ph{font-family:var(--disp);font-size:15px;font-weight:900;letter-spacing:.05em;color:var(--gold)}
+.pill .ph i{font-style:normal;color:var(--dim)} .pill .ph .cs{color:#ff9b8c}
+.pill .ck{display:inline-flex;flex-direction:column;align-items:center}
+#clock{font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;white-space:nowrap}
+#clock.resp{color:#ff9b8c}#clock.paused{color:var(--muted)}
+#clock.warn{animation:clkp 1s infinite}
+@keyframes clkp{50%{color:#ff5a45}}
+.cbarw{width:120px;height:3px;border-radius:2px;background:#2a313b;overflow:hidden;margin-top:2px}
+#clockBar{display:block;height:100%;background:var(--gold);transition:width .25s linear}
+#clockBar.resp{background:var(--red)}#clockBar.paused{background:var(--dim)}
+#sbBadge{border-color:var(--gold);color:var(--gold);font-size:9px;padding:0 5px}
+.handbar{flex:none;display:flex;align-items:center;min-width:0;border-top:1px solid #1f2731;background:linear-gradient(90deg,rgba(59,135,232,.10),transparent 35%)}
+.handbar .plate{width:290px}
+.handbar .hand{flex:1;min-width:0}
+/* kilasan Rush Point / waktu habis: tanpa tombol, hilang sendiri */
+.flash{position:absolute;left:50%;top:24%;transform:translate(-50%,-50%) scale(.9);z-index:40;pointer-events:none;opacity:0;padding:12px 28px;border-radius:14px;background:rgba(14,18,22,.92);border:2px solid var(--gold);text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.flash b{display:block;font-family:var(--disp);font-size:30px;font-weight:900;letter-spacing:.06em;color:var(--gold2)}
+.flash small{display:block;font-size:13px;color:#d8d4ca;margin-top:2px}
+.flash.me{border-color:var(--you)}.flash.op{border-color:var(--foe)}.flash.to{border-color:var(--red)}
+.flash.on{animation:flashA 2.4s ease-out forwards}
+/* riwayat #57 (studi RushDee): toast langkah lawan, kilasan kartu vs kartu, petunjuk area lawan, tombol lihat papan */
+.otoast{position:absolute;left:50%;top:70px;transform:translate(-50%,-8px);z-index:41;pointer-events:none;opacity:0;display:flex;align-items:center;gap:10px;padding:8px 16px 8px 8px;border-radius:12px;background:rgba(14,18,22,.95);border:1px solid var(--foe);box-shadow:0 8px 26px rgba(0,0,0,.55);transition:opacity .25s,transform .25s;max-width:92%}
+.otoast.on{opacity:1;transform:translate(-50%,0)}
+.otoast .tc .card{--cw:44px;cursor:default}
+.otoast .tt{min-width:0}
+.otoast .tt small{display:block;font-size:10px;color:#ff9b8c;letter-spacing:.08em;font-weight:700;text-transform:uppercase}
+.otoast .tt b{display:block;font-family:var(--disp);font-size:16px;color:#fff;letter-spacing:.04em;white-space:nowrap}
+.otoast .tt span{display:block;font-size:11.5px;color:var(--gold2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+.flash.fight{padding:12px 18px}
+.flash.fight > b{font-size:18px;margin-top:4px}
+.flash .vs{display:flex;align-items:center;justify-content:center;gap:14px}
+.flash .vs > i{font-style:normal;font-family:var(--disp);font-size:26px;color:var(--gold)}
+.flash .fc{display:flex;flex-direction:column;align-items:center;gap:2px}
+.flash .fc .card{--cw:64px;cursor:default}
+.flash .fc.lost .card{filter:grayscale(.85) brightness(.55)}
+.flash .fc small{max-width:110px;font-size:10px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flash .fc b{font-size:16px;letter-spacing:.02em}
+.flash .fc.me b{color:#8fbaf3}.flash .fc.op b{color:#ff9b8c}
+.ohint{display:none}
+.abar .peek{display:none}
+/* riwayat #59: lapor bug & feedback */
+.rep{display:flex;flex-direction:column;gap:8px;max-width:540px}
+.rep h2{margin:0}
+.rep textarea,.rep input:not([type=checkbox]){width:100%;box-sizing:border-box}
+.rep .seg button{min-width:0}
+.logbar{flex:none;display:flex;gap:6px;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--line)}
+.repline{grid-column:1/-1;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.repline button{font-size:12.5px}
+@keyframes flashA{0%{opacity:0;transform:translate(-50%,-50%) scale(.8)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}20%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
+
+
+
+.replaybar{display:none;gap:8px;align-items:center;padding:4px 12px;border-bottom:1px solid var(--line);flex:none;background:#12171d}
+.replaybar.on{display:flex}
+.replaybar input[type=range]{flex:1}
+
+/* isi: kolom kiri (papan, baki, tangan) + kolom kanan (panel & tombol) */
+.main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 300px}
+.lcol{display:flex;flex-direction:column;min-height:0;min-width:0;position:relative}
+#board{flex:1;min-height:0;display:flex;flex-direction:column;padding:4px 14px 0;position:relative;overflow:hidden}
+.ohand{display:flex;align-items:center;gap:6px;padding:4px 0;--cw:var(--mini)}
+.ohand .zl{margin-right:4px}
+.half{flex:1;min-height:0;display:grid;grid-template-columns:118px minmax(0,1fr) auto;align-items:center;gap:10px;position:relative}
+#acts button i{font-style:normal}
+.mtitle,.fab{display:none}
+/* riwayat #52: zona tengah papan = baki keputusan (tengah) + Timeline (kanan), di antara FIELD kedua pemain */
+.midzone{flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 290px 6px 128px;position:relative;z-index:8}
+.midzone .abar{width:100%;max-width:980px;border:1px solid #2c3542;border-radius:12px;box-shadow:0 8px 26px rgba(0,0,0,.45)}
+.tl{position:absolute;right:0;top:50%;transform:translateY(-50%);width:276px;display:flex;flex-direction:column;gap:5px;z-index:9}
+.tlh{display:flex;align-items:center;gap:8px;font-size:10.5px;letter-spacing:.14em;color:var(--muted)}
+.tlh b{color:var(--gold);font-family:var(--disp);font-size:12px}
+.tlh .nw{background:var(--gold);color:#1a1405;font-weight:800;letter-spacing:.04em;border-radius:8px;padding:0 6px;font-size:10px}
+.tlh button{margin-left:auto;padding:2px 8px;font-size:11px}
+.tli{background:#161c23;border:1px solid #29313c;border-left:3px solid #3a4452;border-radius:0 9px 9px 0;padding:5px 9px;font-size:11.5px;line-height:1.3;color:#d8d4ca}
+.tli.me{border-left-color:var(--you)}.tli.op{border-left-color:var(--foe)}
+.tli.new{background:#1d2229;border-top-color:#4a3f1e;border-right-color:#4a3f1e;border-bottom-color:#4a3f1e}
+.tli.k-rp{background:rgba(242,176,30,.12);color:var(--gold2)}
+.tli .lbl{display:block;font-size:9.5px;font-weight:800;letter-spacing:.14em;color:var(--muted)}
+.tli .nwt{font-style:normal;color:var(--gold);margin-left:6px}
+.tli .tx{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tlm{font-size:10.5px;color:var(--gold);cursor:pointer;padding-left:2px}
+.tlf{font-size:10.5px;color:var(--muted);line-height:1.35}
+#limits{font-size:10.5px;color:var(--muted)}
+#waitFor{font-size:10.5px;color:#c9d2de}
+.rail{display:flex;flex-direction:column;gap:6px}
+.pile{display:flex;align-items:center;gap:8px;font-size:10.5px;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.pile .stk{width:30px;height:40px;border-radius:4px;background:#20262e;border:1px solid #3a4452;box-shadow:2px 2px 0 #171b21,4px 4px 0 #13171c;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:900;color:var(--text);font-size:15px;flex:none}
+.pile .stk.v{border-style:dashed;box-shadow:none;background:transparent}
+.pile.click{cursor:pointer}.pile.click:hover .stk{border-color:var(--gold)}
+.zl{font-size:10px;color:var(--muted);letter-spacing:.12em;font-weight:700}
+.basecol{display:flex;flex-direction:column;gap:5px}
+.basebox{display:grid;grid-template-columns:repeat(3,calc(var(--mini) + 6px));gap:4px}
+.basebox .slot{width:calc(var(--mini) + 6px);height:calc(var(--mini) * 1.4 + 6px);padding:2px}
+.basebox .card{--cw:var(--mini)}
+.basebox .card .st{font-size:7px}
+/* BATTLE belah ketupat (keputusan 4 Nov 2026); FRONT lawan berhadapan dengan FRONT kita */
+.battle{justify-self:center;display:grid;grid-template-columns:repeat(3,calc(var(--cw) + 10px));grid-template-rows:repeat(4,calc((var(--ch) + 10px) / 2));gap:2px 14px;align-items:center}
+.side-opp .battle{grid-template-areas:". b ." "w1 b w2" "w1 f w2" ". f ."}
+.side-me .battle{grid-template-areas:". f ." "w1 f w2" "w1 b w2" ". b ."}
+.battle .slot[data-slot=F]{grid-area:f} .battle .slot[data-slot=W1]{grid-area:w1}
+.battle .slot[data-slot=W2]{grid-area:w2} .battle .slot[data-slot=B]{grid-area:b}
+.slot{width:calc(var(--cw) + 10px);height:calc(var(--ch) + 10px);border:1px solid #323b48;background:rgba(30,36,44,.5);border-radius:8px;padding:4px;display:flex;align-items:center;justify-content:center;position:relative}
+.slot:has(.card) .sl{display:none}
+.slot .sl{position:absolute;inset:auto 0 3px 0;text-align:center;font-family:var(--disp);font-size:10px;color:#5d6876;letter-spacing:.08em;pointer-events:none}
+.slot.hl{border:2px solid var(--gold);background:rgba(242,176,30,.08);cursor:pointer}
+.slot.tg{border:2px dashed var(--tg);background:rgba(228,68,46,.10);cursor:pointer}
+.slot.tg.pick{box-shadow:0 0 0 3px rgba(242,176,30,.6);border-color:var(--gold)}
+.slot .weak{color:#ff9b8c;font-family:var(--disp);font-size:11px;letter-spacing:.05em;text-align:center;line-height:1.2}
+.slot.under{box-shadow:inset 0 0 0 2px var(--red)}
+.slot.outr{opacity:.5}
+
+/* kartu */
+.card{width:var(--cw);height:calc(var(--cw) * 1.4);border-radius:6px;position:relative;overflow:hidden;background:#20262e;border:2px solid transparent;cursor:pointer;flex:none}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:1}
+.card .ph{position:absolute;inset:0;padding:3px;font-size:9px;line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center}
+.card .st{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;padding:0 3px;background:rgba(14,18,22,.88);font-size:clamp(8px,calc(var(--cw) * .13),11.5px);font-weight:700;z-index:2}
+.card .st b{color:var(--gold)} .card .st i{font-style:normal;color:#cfd7e2}
+.card .cbar{position:absolute;left:0;top:0;bottom:0;width:3px;z-index:2}
+.card.fd{background:repeating-linear-gradient(135deg,#2a2f37,#2a2f37 4px,#23272e 4px,#23272e 8px);border-color:#4a5260}
+.card.fd .fdl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:10px;letter-spacing:.06em;color:#aeb6c2;z-index:2}
+.card.sel{border-color:var(--paper);box-shadow:0 0 0 2px rgba(237,231,218,.5)}
+.card.cost{border-color:var(--red);box-shadow:0 0 0 2px rgba(228,68,46,.5)}
+.card.can{box-shadow:0 0 0 2px var(--gold),0 0 14px rgba(242,176,30,.45)}
+.card.atk{border-color:var(--gold);box-shadow:0 0 0 3px rgba(242,176,30,.45),0 0 22px rgba(242,176,30,.45)}
+.card .tag{position:absolute;top:1px;right:1px;font-size:8px;padding:0 3px;border-radius:3px;background:rgba(0,0,0,.85);z-index:2}
+.card .tag.new{color:#e8e4da} .card .tag.done{color:var(--muted)}
+.card .st .up{color:#9fe0b2} .card .st .down{color:#ffb4a8}
+.card .tag.att{right:auto;left:5px;color:#cdbcf5}
+.card.nores::after{content:"no resolver";position:absolute;top:1px;left:5px;font-size:8px;background:rgba(0,0,0,.8);color:#ffb4a8;padding:0 3px;border-radius:3px;z-index:3}
+
+/* chip hasil serangan di area lawan */
+.oc{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;font-family:var(--disp);font-size:11px;letter-spacing:.03em;font-weight:800;padding:2px 6px;border-radius:7px;line-height:1.2;text-align:center;width:max-content;max-width:calc(var(--cw) + 24px);pointer-events:none;background:#0e1216;border:1px solid;box-shadow:0 3px 10px rgba(0,0,0,.5)}
+.oc small{display:block;font-family:system-ui,sans-serif;letter-spacing:0;font-weight:600;font-size:9px;opacity:.9}
+.oc.win{border-color:var(--green);color:#8fdcab}
+.oc.lose{border-color:var(--red);color:#ff9b8c}
+.oc.both{border-color:#8a6a1e;color:#ffe3a1}
+.oc.rush{border-color:var(--gold);color:var(--gold2);box-shadow:0 0 14px rgba(242,176,30,.45)}
+.oc.out{border-color:#4d5a6d;color:#9aa5b5}
+.oc.under{border-color:var(--red);color:#ff9b8c}
+svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:7;overflow:visible}
+
+/* baki keputusan (= bar aksi). Kelas .abar dipertahankan untuk uji otomatis. */
+.abar{flex:none;display:flex;align-items:stretch;gap:10px;height:100px;padding:8px 14px;background:#12171d;border-top:1px solid var(--line)}
+.abar.err{background:#24100c;border-top-color:#7a2a20}
+.abar .hint{width:250px;flex:none;display:flex;flex-direction:column;justify-content:flex-start;font-size:11.5px;color:#c9d2de;line-height:1.3;overflow:auto}
+.abar .hint .ttl{font-family:var(--disp);font-size:16px;font-weight:900;letter-spacing:.06em;color:var(--gold);line-height:1.1;margin-bottom:2px}
+.abar.err .hint{color:#ffb4a8}
+.abar .acts{flex:1;min-width:0;display:flex;gap:8px;align-items:stretch;overflow-x:auto;padding-bottom:2px}
+.abar .acts > *{flex:0 1 auto}
+.abar .acts button{min-width:120px;max-width:260px;text-align:left;border-radius:10px;padding:8px 10px;font-weight:700;font-size:12.5px;white-space:normal}
+.abar .acts button small{display:block;font-size:11px;font-weight:500;color:#aeb6c2;margin-top:3px}
+.abar .acts button.pri{background:var(--gold);color:#1a1405}.abar .acts button.pri small{color:#4a3a10}
+.abar .acts button.rush{background:#2a2008;border-color:var(--gold);color:var(--gold2)}
+.abar .acts button.go{background:#2a2008;border-color:var(--gold);color:var(--gold2)}
+.abar .acts button.bad{border-color:#7a3328}
+.abar .acts button.warn{border-color:#7a3328;color:#ffb4a8}
+.abar .acts button:disabled small{color:#ff9b8c}
+.abar .acts .badge{align-self:center}
+.abar .acts button.rpsb{flex:1 1 0;min-width:0;text-align:center;font-size:15px}
+.abar .ord{font-size:11px;color:var(--muted);display:block;margin-top:3px}
+.abar .ord b{color:#ff9b8c}
+.abar .pv{font-size:12px}
+.pv b.w{color:#9fe0b2} .pv b.l{color:#ffb4a8} .pv b.d{color:var(--gold)}
+.abar a{color:var(--gold)}
+#game.blocked #board .half,#game.blocked .hand{filter:brightness(.55)}
+
+/* tangan */
+.hand{flex:none;display:flex;align-items:flex-start;gap:8px;min-height:calc(var(--ch) + 18px);padding:8px 14px 6px;position:relative}
+.hand .zl{display:none}
+.handcards{display:flex;flex-wrap:nowrap;justify-content:center;flex:1;min-width:0;padding-left:0}
+.handcards .card{margin-right:6px;transition:transform .12s}
+.handcards .card:hover,.handcards .card.sel{transform:translateY(-6px);z-index:5}
+
+/* kolom kanan */
+.rcol{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--line);background:#12171d}
+.tabs{display:flex;border-bottom:1px solid var(--line);flex:none}
+.tabs b{flex:1;text-align:center;padding:9px 0;font-size:12px;color:var(--muted);cursor:pointer;font-weight:600}
+.tabs b.on{color:var(--text);box-shadow:inset 0 -2px 0 var(--gold)}
+#sideBody{flex:1;min-height:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+#sideBody .cardinfo{display:flex;gap:10px}
+#sideBody .cardinfo .big{--cw:96px;flex:none}
+#sideBody .nm{font-family:var(--disp);font-size:17px;font-weight:900;letter-spacing:.02em;line-height:1.15}
+#sideBody .eff{font-size:11.5px;color:#c9d2de;background:#0e1216;border:1px solid var(--line);border-radius:8px;padding:8px;white-space:pre-line}
+#sideBody .acts{display:flex;flex-direction:column;gap:6px}
+#sideBody .reason{font-size:11.5px;color:#ffb4a8}
+#sideBody .empty{color:var(--muted);font-size:12px}
+.lfil{display:flex;gap:4px;flex-wrap:wrap;flex:none}
+.lfil span{font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid var(--line2);color:var(--muted);cursor:pointer}
+.lfil span.on{background:#26303c;color:var(--text)}
+.log{font-size:12px}
+.log div{padding:3px 7px;margin:2px 0;border-left:3px solid transparent;border-radius:0 5px 5px 0}
+.log div.me{border-left-color:var(--you);background:rgba(59,135,232,.06)}
+.log div.op{border-left-color:var(--foe);background:rgba(228,68,46,.06)}
+.log div.k-turn{color:var(--gold);font-weight:700;margin-top:8px;border-bottom:1px solid var(--line);border-left:0}
+.log div.k-phase,.log div.k-step{color:var(--muted);font-size:11px}
+.log div.k-over{color:#9fe0b2;font-weight:700}
+.log div.k-rp{background:rgba(242,176,30,.12);color:#ffe3a1}
+.log div.k-judge{font-weight:600}
+.log div.k-timeout{color:#ffb4a8}
+.log div.fresh{animation:fresh 2s ease-out 1}
+@keyframes fresh{0%{background:rgba(242,176,30,.35)}100%{background:transparent}}
+.pilesum{display:flex;flex-direction:column;gap:8px}
+.pilesum .pp{border:1px solid var(--line);border-radius:10px;padding:8px}
+.pilesum .pp b{font-family:var(--disp);letter-spacing:.04em}
+#acts{flex:none;border-top:1px solid var(--line);padding:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+#acts button{padding:7px 4px;font-size:12px}
+#acts button.wide{grid-column:1/4}
+/* rincian stat */
+.bd{width:100%;border-collapse:collapse;font-size:11.5px;margin:4px 0}
+.bd td{padding:2px 0;border-bottom:1px dashed #2a3340}
+.bd td:last-child{text-align:right;font-weight:700}
+.bd tr.off td{opacity:.45;text-decoration:line-through}
+.bd tr.tot td{border-bottom:none;border-top:1px solid #4a5462}
+.bd .neg{color:#ffb4a8}.bd .pos{color:#9fe0b2}
+
+/* popover kartu (layar sempit; di desktop isinya tampil di tab Card) */
+#pop{position:fixed;z-index:30;display:none;width:300px;max-width:calc(100vw - 16px);background:var(--panel);border:1px solid var(--gold);border-radius:12px;padding:10px;box-shadow:0 8px 30px rgba(0,0,0,.6);max-height:80vh;overflow:auto}
+#pop.on{display:block}
+#pop .nm{font-family:var(--disp);font-size:17px;font-weight:900;letter-spacing:.02em;line-height:1.15}
+#pop .cardinfo{display:flex;gap:10px}
+#pop .cardinfo .big{--cw:96px;flex:none}
+#pop{width:340px}
+#pop .eff{font-size:11.5px;color:#c9d2de;background:#0e1216;border:1px solid var(--line);border-radius:8px;padding:8px;max-height:160px;overflow:auto;margin:6px 0;white-space:pre-line}
+#pop .acts{display:flex;flex-direction:column;gap:5px}
+#pop .reason{font-size:11.5px;color:#ffb4a8}
+
+.overlay{position:fixed;inset:0;background:rgba(5,7,10,.9);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.overlay.on{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:20px;max-width:820px;width:100%;max-height:92vh;overflow:auto}
+.modal .handcards{flex-wrap:wrap;gap:8px;margin:12px 0;padding-left:0;justify-content:center}
+.modal .handcards .card{margin-right:0;--cw:96px}
+.modal.mull{background:none;border:0;text-align:center;max-width:1000px}
+.modal.mull h2{font-size:40px;letter-spacing:.12em;margin-bottom:10px}
+.modal.mull .hintb{max-width:600px;margin:0 auto;padding:10px 16px;border-radius:12px;border:1px solid var(--line2);background:var(--ink2);color:#c9d2de;font-size:13px}
+.modal.mull .handcards .card{--cw:132px}
+.modal.mull .row{justify-content:center}
+.handover{text-align:center}
+.handover h2{font-size:30px}
+
+/* drag & drop */
+.card{touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.card img{-webkit-user-drag:none;user-select:none}
+.card.drag-src{opacity:.35}
+#dragGhost{position:fixed;z-index:60;pointer-events:none;transform:translate(-50%,-60%) rotate(-4deg);opacity:.92;filter:drop-shadow(0 10px 18px rgba(0,0,0,.6))}
+.slot.drop{border:2px dashed var(--gold);background:rgba(242,176,30,.10)}
+.slot.drop.over{background:rgba(242,176,30,.28);box-shadow:0 0 0 3px rgba(242,176,30,.5)}
+.basebox.drop{outline:2px dashed var(--gold);outline-offset:3px;border-radius:8px}
+.basebox.drop.over{background:rgba(242,176,30,.18)}
+
+/* ================= SANDBOX (editor posisi, Tahap 1c) ================= */
+#sandbox{display:none}
+.sbgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:12px;margin-top:12px}
+.sbp h3{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.sbz{margin-top:8px}
+.sbz .zl{text-align:left;margin-bottom:3px}
+.sbl{display:flex;flex-wrap:wrap;gap:4px}
+.sbl.col{flex-direction:column}
+.sbl.deck{max-height:230px;overflow:auto;padding:4px;border:1px solid var(--line);border-radius:8px}
+.sbc{display:inline-flex;align-items:center;gap:4px;padding:2px 6px 2px 0;border:1px solid var(--line);border-radius:6px;background:var(--panel2);font-size:12px;cursor:pointer;overflow:hidden}
+.sbc i{width:4px;align-self:stretch}
+.sbc b{color:var(--gold);font-weight:700}
+.sbc small{color:var(--muted)}
+.sbc em{font-style:normal;font-size:10px;color:#cdbcf5}
+.sbc em.nw{color:#9fe0b2}
+.sbc.fd{background:#23272e;border-color:#4a5260}
+.sbc.on{border-color:var(--gold);box-shadow:0 0 0 2px rgba(242,176,30,.45)}
+.sbc:hover{border-color:var(--gold)}
+.sbc button.x{padding:0 5px;margin-left:2px}
+.sbe{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.sbt{display:inline-flex;gap:3px}
+.sbatt{width:100%;display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding-left:14px}
+.sbbat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(24px,auto);gap:6px;grid-template-areas:". f ." "w1 f w2" "w1 b w2" ". b ."}
+.sbbat .sbslot[data-s=F]{grid-area:f} .sbbat .sbslot[data-s=W1]{grid-area:w1}
+.sbbat .sbslot[data-s=W2]{grid-area:w2} .sbbat .sbslot[data-s=B]{grid-area:b}
+.sbbat .sbslot{align-self:center}
+.sbslot{border:1px dashed #303a48;border-radius:8px;padding:5px;min-height:44px}
+.sbdest{margin:8px 0;padding:8px;border:1px solid #5c4610;background:#20190a;border-radius:10px}
+.sbdest.muted{border-color:var(--line);background:transparent}
+.mrow{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+
+/* ================= layar sempit (HP) ================= */
+@media (max-width:820px){
+  /* ===== HP · M1 Arena Portrait (riwayat #55): satu layar tanpa gulir, tombol utama di zona ibu jari, HAND dikipas ===== */
+  :root{--cw: clamp(34px, min(calc((100vw - 134px) / 3), calc((100dvh - 340px) / 5.6)), 84px); --mini: calc(var(--cw) * .5); --hcw: clamp(44px, min(calc((100vw - 40px) / 7), calc((100dvh - 290px) / 7 + 6px)), 66px); --bw: clamp(16px, calc((100vw - 190px) / 6 - 7px), 26px)}
+  .handbar{flex:none}
+  .handbar .hand{flex:none}
+  #game{height:100dvh;min-height:0;overflow:hidden}
+  .main{flex:1;min-height:0;grid-template-columns:1fr}
+  .lcol{height:100%;padding-bottom:0;overflow:hidden}
+  #board{flex:1;min-height:0;overflow:hidden;padding:2px 6px 0}
+  .half{flex:1 1 0;min-height:0;grid-template-columns:1fr;justify-items:center;gap:8px}
+  #game.both{--cw: clamp(28px, min(calc((100vw - 190px) / 3.9), calc((100dvh - 390px) / 7.6)), 50px); --ch: calc(var(--cw) * 1.4); --mini: calc(var(--cw) * .5)}
+  .rail{position:absolute;left:0;top:2px;flex-direction:row;gap:4px;z-index:3}
+  .pile{font-size:0;gap:0}
+  .pile .stk{width:22px;height:28px;font-size:11px;box-shadow:none}
+  .battle{gap:2px 8px}
+  .battle .card .st b,.basebox .card .st b{display:none}
+  .card .st{font-size:8px;padding:0 2px}
+  .basecol .zl{font-size:8.5px;letter-spacing:.06em}
+  /* garis tengah: kapsul + judul momen + kejadian terakhir (kiri), tombol utama bulat (kanan) */
+  .midzone{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"pill fab" "tl fab";align-items:center;gap:2px 10px;padding:4px 4px 4px 6px;position:relative;z-index:auto;background:transparent}
+  #pill{grid-area:pill;justify-self:start;z-index:8}
+  .mtitle{display:none;grid-area:mt;font-family:var(--disp);font-weight:900;font-size:12px;letter-spacing:.08em;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tl{grid-area:tl;position:relative;z-index:8;transform:none;width:auto;min-width:0;gap:0;cursor:pointer}
+  .tl .tlh,.tl .tlm,.tlf{display:none}
+  .tl .tli:not(.last){display:none}
+  .tli{padding:2px 8px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:0 7px 7px 0}
+  .tli .lbl{display:inline;margin-right:6px}
+  .tli .tx{display:inline;-webkit-line-clamp:unset}
+  .fab{display:flex;grid-area:fab;align-items:center;justify-content:center;width:74px;height:74px;border-radius:50%;padding:6px;background:var(--gold);color:#1a1405;border:3px solid #ffd56b;font-family:var(--disp);font-weight:900;font-size:13px;line-height:1.05;letter-spacing:.04em;text-align:center;white-space:normal;box-shadow:0 6px 20px rgba(242,176,30,.35),0 4px 14px rgba(0,0,0,.5)}
+  .fab.warn{background:#2a1a17;color:#ffb4a8;border-color:#7a3328;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+  .fab:active{transform:scale(.95)}
+  .pill{gap:8px;padding:2px 10px}
+  .pill .t{display:none}
+  .pill .ph{font-size:12px}
+  #clock{font-size:11px}
+  .cbarw{width:70px}
+  /* baki keputusan = lembar pendek dari bawah, hanya bila ada pilihan selain tombol utama */
+  .abar{display:none}
+  .midzone .abar.sheet,.abar.sheet{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;width:auto;max-width:none;height:auto;max-height:46dvh;flex-direction:column;gap:6px;padding:10px 10px calc(12px + env(safe-area-inset-bottom));border-radius:16px 16px 0 0;border:1px solid #2c3542;border-bottom:0;background:#141a21;box-shadow:0 -10px 30px rgba(0,0,0,.6);overflow:auto}
+  .abar .hint{width:auto;font-size:11px;overflow:visible}
+  .abar .hint > span:last-child{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .abar .hint .ttl{font-size:13px}
+  .abar.sheet .acts{flex-wrap:wrap;overflow:visible}
+  .abar.sheet .acts button{flex:1 1 140px;min-width:0;max-width:none;min-height:48px;font-size:12.5px;padding:8px 10px}
+  .abar .acts .infab{display:none}
+  /* pelat */
+  .plate{gap:8px;padding:4px 8px;height:52px;box-sizing:border-box}
+  .plate .info{flex:1 1 auto;min-width:0}
+  .plate .chipc.dk{display:none}
+  /* BASE = satu baris kecil di pelat (riwayat #57) */
+  .plate .basecol{margin-left:auto;flex:none;gap:0}
+  .plate .basecol .zl{display:none}
+  .plate .basebox{grid-template-columns:repeat(6,calc(var(--bw) + 4px));gap:3px;border-radius:7px;padding:2px}
+  .plate .basebox .slot{width:calc(var(--bw) + 4px);height:calc(var(--bw) * 1.4 + 4px);padding:1px;border-radius:5px}
+  .plate .basebox .card{--cw:var(--bw)}
+  .plate .basebox .card .st,.plate .basebox .card .tag{display:none}
+  .plate .basebox .card.fd .fdl{font-size:0}
+  .plate .basebox.drop,.plate .basebox:has(.slot.hl){box-shadow:0 0 0 2px var(--gold)}
+  /* petunjuk satu kalimat di area FIELD lawan */
+  .ohint{display:block;position:absolute;left:50%;transform:translateX(-50%);top:32px;z-index:9;pointer-events:none;width:max-content;max-width:94%;text-align:center;padding:5px 12px;border-radius:10px;background:rgba(14,18,22,.82);border:1px solid #2c3542;font-size:11px;color:#c9d2de;line-height:1.3}
+  .ohint b{display:block;color:var(--gold);font-size:12.5px;font-family:var(--disp);letter-spacing:.03em}
+  .ohint span{display:block}
+  /* lembar pilihan: tombol Lihat papan */
+  .abar.sheet .peek{display:block;align-self:flex-end;font-size:12px;padding:4px 12px;min-height:0;border-radius:999px}
+  .abar.sheet.peeked{padding:6px 10px calc(6px + env(safe-area-inset-bottom));max-height:none}
+  .abar.sheet.peeked > :not(.peek){display:none}
+  .abar.sheet.peeked .peek{align-self:stretch;min-height:44px;font-size:13px;font-weight:700}
+  .otoast{position:fixed;top:56px}
+  .flash .fc .card{--cw:52px}
+  .plate .avw{width:34px;height:34px;padding:2px}
+  .plate .av{font-size:15px}
+  .plate .nm{font-size:13px}
+  .plate .nm .ord{font-size:9px;padding:0 4px}
+  .plate .you{display:none}
+  .plate .sub{margin-top:1px;flex-wrap:nowrap;overflow:hidden}
+  .plate .score{font-size:18px}
+  .plate .chipc{font-size:10px;padding:0 6px}
+  .plate .rt{display:none}
+  .handbar{flex-direction:column;align-items:stretch}
+  .handbar .plate{width:auto}
+  /* HAND dikipas di bawah */
+  .hand{--cw:var(--hcw);--ch:calc(var(--hcw) * 1.4);min-height:0;height:calc(var(--hcw) * 1.4 + 26px);padding:8px 6px 0;overflow:visible;align-items:flex-start}
+  .hand .card .st{font-size:clamp(8.5px, calc(var(--cw) * .19), 12px);padding:1px 3px}
+  .hand .zl{display:none}
+  .handcards{padding-left:0;justify-content:center;overflow:visible}
+  .handcards .card{transition:transform .15s}
+  .handcards .card.sel,.handcards .card.can.sel{transform:translateY(-16px) !important;z-index:50 !important}
+  .flash b{font-size:20px}
+  .flash{position:fixed;top:40%;padding:8px 18px;white-space:nowrap}
+  /* tombol kecil (Undo, Log, suara, Menu) di baris pelat Anda; Play-by-play = lembar dari bawah */
+  .rcol{position:fixed;left:auto;right:4px;top:auto;bottom:calc(var(--hcw) * 1.4 + 26px + 52px + 10px);z-index:20;border:0;background:transparent}
+  .rcol .tabs,.rcol #sideBody{display:none}
+  #acts{display:flex;flex-direction:column;gap:6px;padding:0}
+  #acts button{width:34px;height:34px;padding:0;border-radius:50%;font-size:0;display:flex;align-items:center;justify-content:center}
+  #acts button i{font-size:15px}
+  #acts #btnSound{font-size:14px}
+  #acts .dsk{display:none}
+  #game.sideOn .rcol{left:0;right:0;top:30%;bottom:0;border-radius:18px 18px 0 0;background:#12171d;border-top:1px solid var(--line);z-index:32}
+  #game.sideOn .rcol .tabs{display:flex}#game.sideOn .rcol #sideBody{display:flex}
+  #game.sideOn #acts{padding:8px;justify-content:flex-end;flex-direction:row}
+  .modal.mull .handcards .card{--cw:84px}
+  #pop{left:0 !important;right:0;top:auto !important;bottom:0;width:100%;max-width:none;border-radius:16px 16px 0 0;max-height:70vh;z-index:60}
+  .modal.mull h2{font-size:28px}
+  .sbgrid{grid-template-columns:1fr}
+  .sbbat{grid-template-columns:1fr;grid-template-areas:none}
+  .sbbat .sbslot{grid-area:auto !important}
+}
+@media (max-width:820px) and (max-height:600px){ #acts button{width:30px;height:30px} #acts{gap:4px} .fab{width:64px;height:64px;font-size:12px} }
+@media (min-width:821px){ #acts .mob{display:none} }
+
+/* ---- O2 (riwayat #63): main online ---- */
+#netStatus{position:fixed;left:50%;top:8px;transform:translate(-50%,-150%);z-index:80;background:#3a1f12;border:1px solid #ff8a5b;color:#ffd7c4;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:99px;transition:transform .2s;pointer-events:none;max-width:92vw;text-align:center}
+#netStatus.on{transform:translate(-50%,0)}
+.netbar{flex:1 1 100%;font-size:12.5px;line-height:1.45;background:rgba(242,176,30,.10);border:1px solid rgba(242,176,30,.45);border-radius:10px;padding:7px 10px;margin:0 0 6px;color:#ffe3a3}
+.netbar button{margin-left:6px}
+.chipc.off{border-color:#ff8a5b;color:#ffb08f}
+.roomcode{font-family:var(--disp);font-size:42px;font-weight:900;letter-spacing:.22em;color:var(--gold2);margin:4px 0 6px}
+.spin{width:26px;height:26px;margin:10px auto 2px;border:3px solid rgba(242,176,30,.25);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="loaderr" class="box err" style="display:none"></div>
+
+  <!-- ================= SETUP: satu mode (riwayat #39) ================= -->
+  <div id="setup">
+    <div class="topbar">
+      <h1 style="font-size:30px">MHR Battle Sim <span class="badge gold" style="font-family:system-ui,sans-serif;letter-spacing:0">LOCAL · Stage 5 · UI v5</span></h1>
+      <div class="lang" id="langSw"><button data-lang="en">EN</button><button data-lang="id">ID</button></div>
+    </div>
+    <!-- Menu mode (riwayat #50), diisi sim-modes.js -->
+    <div id="resumeBox"></div>
+    <div id="home"></div>
+    <div class="panelx" id="panelPractice"></div>
+    <div class="panelx" id="panelHistory"></div>
+    <div class="panelx" id="panelOnline"></div>
+    <div class="panelx" id="panelCustom">
+    <div class="hd"><button data-mode="home">← Menu</button><h2 id="customTitle">Play with a friend · same device</h2></div>
+    <p class="muted small">Two decks of your choice, each side played by a human or the test bot. With two humans this is pass-and-play on one device, with a handover screen between players. All cards of SD01–SD04, BP01, PB01, EB01, TB01 and SP01 have automatic effects; SD05, SD06 and PB02 are hidden until their official Indonesian release.</p>
+    <div class="grid">
+      <div class="box">
+        <h3>PLAYER 1</h3>
+        <div class="row"><label>Name</label><input id="n0" value="Player 1"></div>
+        <div class="row"><label>Deck</label><select id="dk0"><option value="sd01">SD01 test deck (Red)</option><option value="sd02">SD02 test deck (Yellow)</option><option value="sd03">SD03 test deck (Blue)</option><option value="sd04">SD04 test deck (Green)</option><option value="bp01r">BP01 test deck (Red)</option><option value="bp01y">BP01 test deck (Yellow)</option><option value="bp01b">BP01 test deck (Blue)</option><option value="bp01g">BP01 test deck (Green)</option><option value="s4r">Stage 4 test deck (Red) · BP01 + PB01/EB01</option><option value="s4y">Stage 4 test deck (Yellow) · BP01 + PB01/EB01</option><option value="s4b">Stage 4 test deck (Blue) · BP01 + PB01/EB01</option><option value="s4g">Stage 4 test deck (Green) · BP01 + PB01/EB01/TB01</option><option value="spr">SP01 test deck (Red)</option><option value="spy">SP01 test deck (Yellow)</option><option value="spb">SP01 test deck (Blue)</option><option value="spg">SP01 test deck (Green)</option><option value="code">Paste deck code…</option></select></div>
+        <textarea id="dc0" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder (e.g. https://mhrdecklab.com/#d=1.xxx.xxx)" style="display:none"></textarea>
+        <div class="row"><label>Played by</label><select id="ct0"><option value="human">Human</option><option value="bot">Test bot</option></select></div>
+      </div>
+      <div class="box">
+        <h3>PLAYER 2</h3>
+        <div class="row"><label>Name</label><input id="n1" value="Player 2"></div>
+        <div class="row"><label>Deck</label><select id="dk1"><option value="sd01">SD01 test deck (Red)</option><option value="sd02">SD02 test deck (Yellow)</option><option value="sd03">SD03 test deck (Blue)</option><option value="sd04">SD04 test deck (Green)</option><option value="bp01r">BP01 test deck (Red)</option><option value="bp01y">BP01 test deck (Yellow)</option><option value="bp01b">BP01 test deck (Blue)</option><option value="bp01g">BP01 test deck (Green)</option><option value="s4r">Stage 4 test deck (Red) · BP01 + PB01/EB01</option><option value="s4y">Stage 4 test deck (Yellow) · BP01 + PB01/EB01</option><option value="s4b">Stage 4 test deck (Blue) · BP01 + PB01/EB01</option><option value="s4g">Stage 4 test deck (Green) · BP01 + PB01/EB01/TB01</option><option value="spr">SP01 test deck (Red)</option><option value="spy">SP01 test deck (Yellow)</option><option value="spb">SP01 test deck (Blue)</option><option value="spg">SP01 test deck (Green)</option><option value="code">Paste deck code…</option></select></div>
+        <textarea id="dc1" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder" style="display:none"></textarea>
+        <div class="row"><label>Played by</label><select id="ct1"><option value="human">Human</option><option value="bot">Test bot</option></select></div>
+      </div>
+      <div class="box mode">
+        <div>
+          <h3>GAME MODE · ONE MODE ONLY</h3>
+          <div class="t">Full automatic</div>
+          <ul>
+            <li>Every rule and every card effect is handled by the simulator.</li>
+            <li>Only legal choices light up; a choice with a single option still asks you to confirm.</li>
+            <li>Counter Step and Counter Phase always open for both players (no automatic pass, so a HAND is never revealed).</li>
+            <li>When time runs out the simulator acts for that player (End Action Phase, no attack, Pass, decline an optional effect). Nobody loses on time.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>TURN CLOCK</h3>
+          <div class="row"><label>Clock</label><select id="clk"><option value="standard">Standard · 2:00 turn / 0:30 response</option><option value="relaxed">Relaxed · 5:00 / 1:00</option><option value="long">Long · 10:00 / 2:00</option><option value="off">No clock</option><option value="match30">Match 30:00 · no per-turn limit (official match)</option></select></div>
+          <div class="row"><label>First player</label><select id="first"><option value="random">Random</option><option value="0">Player 1</option><option value="1">Player 2</option></select></div>
+          <div class="row"><label>Seed (testing)</label><input id="seed" placeholder="empty = random" style="width:150px"></div>
+          <div class="row" style="justify-content:flex-end"><button class="pri" id="btnStart" style="font-size:16px;padding:10px 22px">▶ Start game</button></div>
+          <div id="setupErr" class="err"></div>
+        </div>
+      </div>
+      <div class="tools">
+        <div class="box">
+          <h3>SANDBOX · TEST TOOL</h3>
+          <p class="small muted">Build any position for both players (HAND, BATTLE, BASE, attached cards, RETREAT, VOID, Rush Points, turn), then play it with every card visible and unlimited undo. Useful for testing a ruling or a card effect in one exact situation.</p>
+          <div class="row"><button id="btnSandbox">Open Sandbox editor</button></div>
+        </div>
+        <div class="box">
+          <h3>LOAD LOG CODE · TEST TOOL</h3>
+          <p class="small muted">Paste a <b>MHRSIM1.…</b> code from an earlier game (or from the Claude chat) to resume it or watch a replay.</p>
+          <textarea id="logIn" placeholder="MHRSIM1.…"></textarea>
+          <div class="row"><button id="btnContinue">Resume from log</button><button id="btnReplay">Watch replay</button></div>
+          <div id="logErr" class="err"></div>
+        </div>
+      </div>
+    </div>
+    </div><!-- /panelCustom -->
+    <p class="small muted" id="dbinfo"></p>
+  </div>
+
+  <!-- ================= SANDBOX: editor posisi (sim-sandbox.js) ================= -->
+  <div id="sandbox"></div>
+
+  </div>
+
+<!-- ================= GAME (UI v5 · Broadcast) ================= -->
+<div id="game">
+  <div id="replayBar" class="replaybar">
+    <b>Replay</b>
+    <button class="sm" id="rpStart">⏮</button><button class="sm" id="rpPrev">◀</button>
+    <input type="range" id="rpRange" min="0" value="0">
+    <button class="sm" id="rpNext">▶</button><button class="sm" id="rpEnd">⏭</button>
+    <span class="badge" id="rpInfo"></span>
+    <button class="sm" id="rpPlay">Play from here</button>
+  </div>
+  <div class="main">
+    <div class="lcol">
+      <div class="plate team r op" id="teamR"></div>
+      <div id="board"></div>
+      <div class="pill mid" id="pill"><span class="t" id="turnInfo"></span><span class="ph" id="stages"></span><span class="ck"><span id="clock"></span><span class="cbarw"><i id="clockBar"></i></span></span><span class="badge" id="sbBadge" style="display:none">SANDBOX</span></div>
+      <div id="tray" class="abar"></div>
+      <div class="handbar"><div class="plate team l me" id="teamL"></div><div id="handRow" class="hand"></div></div>
+      <div class="flash" id="flash"></div>
+      <div class="otoast" id="otoast"></div>
+      <div id="parking" hidden></div>
+    </div>
+    <aside class="rcol" id="drawer">
+      <div class="tabs" id="tabs"><b class="on" data-act="tab" data-tab="log">Play-by-play</b></div>
+      <div id="sideBody"><div class="lfil" id="logFil"></div><div class="log" id="log"></div></div>
+      <div id="acts">
+        <button class="mob" data-act="tab" data-tab="log" title="Play-by-play"><i>▤</i> Log</button>
+        <button id="btnUndo" title="Undo your last move (local test). In online games the opponent must agree."><i>↶</i> Undo</button>
+        <button id="btnSound" title="Sound effects on/off">🔊</button>
+        <button id="btnMenu" title="Back to the menu"><i>☰</i> Menu</button>
+        <button class="dsk" id="btnCopy" title="Copy the log code to report a bug or resume later">⧉ Log code</button>
+        <button class="dsk" data-rep="open" data-v="bug" title="Report a bug or send feedback">🐞 Report</button>
+        <button class="dsk" id="btnSiaga" title="Trigger Hand: choose which [TRIG](HAND) cards in your HAND are ready (two-player games)" style="display:none">Siaga</button>
+        <button class="dsk" id="btnEditPos" title="Open this position in the Sandbox editor (Action Phase only)">✎ Position</button>
+        <button class="dsk" id="btnCopyPos" title="Copy a MHRPOS1. position code of the current position (Action Phase only)" style="display:none">⧉ Position</button>
+      </div>
+    </aside>
+  </div>
+</div>
+<div id="netStatus" role="status"></div>
+<div id="pop"></div>
+
+<div class="overlay" id="ov"><div class="modal" id="ovBody"></div></div>
+
+<script>
+/* Battle Sim di mhrdecklab.com (sim/ di repo situs, disalin oleh mhr-simulator\online\site-sim.js): data kartu & gambar dari situs. */
+window.MHRSIM_BASE = '../';
+</script>
+<script src="../cards.js?v=7.28-sp065" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
+<script src="../data.js?v=7.02-lgs1103" onerror="window.MHRSIM_DATA_FAIL=true"></script>
+<script src="sim.js?v=o2.1"></script>
+<script src="sim-cards.js?v=o2.1"></script>
+<script src="sim-cards-bp01.js?v=o2.1"></script>
+<script src="sim-cards-s4.js?v=o2.1"></script>
+<script src="sim-cards-sp01.js?v=o2.1"></script>
+<script src="sim-bot.js?v=o2.1"></script>
+<script src="sim-sound.js?v=o2.1"></script>
+<script src="sim-shadow.js?v=o2.1"></script>
+<script src="sim-ui.js?v=o2.1"></script>
+<script src="sim-sandbox.js?v=o2.1"></script>
+<script src="sim-report.js?v=o2.1"></script>
+<script src="sim-modes.js?v=o2.1"></script>
+<script src="sim-i18n.js?v=o2.1"></script>
+<script src="sim-online.js?v=o2.1"></script>
+</body>
+</html>

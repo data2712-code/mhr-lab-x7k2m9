@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.29  ·  10 November 2026
+     MHR DECK LAB  ·  versi 7.30  ·  10 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.29">
+<meta name="version" content="7.30">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -1235,6 +1235,23 @@
   body:not(.page-set) #setPage{display:none}
   body.page-set .filters, body.page-set .cards, body.page-set .deck{display:none}
   body.page-set .layout{grid-template-columns:minmax(0,1fr)}
+
+/* ================= v7.29 — HALAMAN BATTLE SIM (iframe sim/index.html, sim-host.js) ================= */
+  body:not(.page-sim) #simPage{display:none}
+  body.page-sim .filters, body.page-sim .cards, body.page-sim .deck{display:none}
+  body.page-sim .layout{grid-template-columns:minmax(0,1fr)}
+  body.page-sim footer{display:none}
+  .sim-wrap{margin:0 auto;max-width:1600px}
+  #simFrame{display:block;width:100%;height:calc(100vh - 140px);border:0;background:#0E1216}
+  body.sim-full #simFrame{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:1000}
+  body.sim-full{overflow:hidden}
+  .sim-gate{padding:40px 20px 70px;max-width:640px;margin:0 auto;text-align:center}
+  .sim-gate h2{margin:0 0 10px}
+  .simrep-head{margin:6px 0 10px}
+  .simrep{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 8px;background:var(--panel)}
+  .simrep-top{font-size:12.5px;margin-bottom:6px}
+  .simrep-top select{margin-left:6px}
+  .simrep-msg{white-space:pre-wrap;margin:0 0 6px}
 
 /* ================= v6.98 — HALAMAN EVENTS (turnamen LGS) ================= */
   body:not(.page-event) #eventPage{display:none}
@@ -2700,8 +2717,9 @@
     .lab-grid button{flex-direction:column;align-items:flex-start;gap:4px;background:var(--ink);border-color:var(--line);padding:10px}
   }
 
-  /* ================= v7.29 — NAV GROUPS: 11 tab → 6 (Cards / Decks / Community jadi sub-menu) ================= */
+  /* ================= v7.30 — NAV GROUPS: 11 tab → 6 (Cards / Decks / Community jadi sub-menu) ================= */
   nav.tabs button[data-grouped]{display:none}
+  .grp-menu .lab-grid button[hidden]{display:none}   /* item ikut tersembunyi kalau tab aslinya hidden (Battle Sim: admin saja) */
   nav.tabs button[data-group][data-on="true"]{color:var(--accent);border-bottom-color:var(--accent)}
   @media (max-width:920px){
     nav.tabs button[data-group][data-on="true"]{border-top-color:var(--accent);border-bottom-color:transparent}
@@ -2842,11 +2860,13 @@
   <!-- v7.17 — "My Dashboard" berganti nama jadi "My Lab" + sub-menu (lihat LAB MENU di JS); sengaja tab PERTAMA (sebelum Home) atas permintaan pemilik -->
   <button data-page="dashboard" data-labmenu aria-current="false" aria-haspopup="menu" aria-expanded="false" aria-controls="labMenu">🧪 <span class="tl" data-i18n="navDashboard">My Lab</span><span class="ts" data-i18n="navDashboardS">My Lab</span><span class="lab-caret" aria-hidden="true">▾</span></button>
   <button data-page="beranda" aria-current="false">🏠 <span class="tl">Home</span><span class="ts">Home</span></button>
-  <!-- v7.29 — navigasi dikelompokkan: 11 tab → 6 (My Lab ▾ · Home · Cards ▾ · Decks ▾ · Community ▾ · Guide ▾).
+  <!-- v7.30 — navigasi dikelompokkan: 11 tab → 6 (My Lab ▾ · Home · Cards ▾ · Decks ▾ · Community ▾ · Guide ▾).
        Tombol lama (data-grouped) TETAP ada di DOM tapi disembunyikan CSS: setPage(), penghitung (#navCard dst.) dan
        hash lama tetap bekerja. Tombol grup (data-group) membuka sub-menu .lab-menu — lihat NAV GROUPS di JS. -->
   <button type="button" data-group="cards" aria-haspopup="menu" aria-expanded="false" aria-controls="grpMenu-cards">🃏 <span class="tl">Cards</span><span class="ts">Cards</span><span class="lab-caret" aria-hidden="true">▾</span></button>
   <button type="button" data-group="decks" aria-haspopup="menu" aria-expanded="false" aria-controls="grpMenu-decks">🛠 <span class="tl">Decks</span><span class="ts">Decks</span><span class="lab-caret" aria-hidden="true">▾</span></button>
+  <!-- v7.29 — Battle Sim (O2); selama uji hanya admin, lihat sim-host.js. v7.30: tetap tab sendiri (keputusan pemilik), di antara Decks dan Community -->
+  <button data-page="sim" aria-current="false" hidden>⚔️ <span class="tl">Battle Sim</span><span class="ts">Battle Sim</span></button>
   <button type="button" data-group="comm" aria-haspopup="menu" aria-expanded="false" aria-controls="grpMenu-comm">🏟 <span class="tl">Community</span><span class="ts">Community</span><span class="lab-caret" aria-hidden="true">▾</span></button>
   <button data-page="berita" data-grouped aria-current="false">📰 <span class="tl">News</span><span class="ts">News</span></button>
   <button data-page="cards" data-grouped aria-current="true">🃏 <span class="tl" data-i18n="navCards">Kartu</span><span class="ts" data-i18n="navCardsS">Kartu</span> <span class="cnt" id="navCard">208</span></button>
@@ -2870,7 +2890,7 @@
   </div>
   <div class="lab-foot" id="labFoot" hidden>Needs a free account · <button type="button" data-labact="login">Log in / Sign up</button></div>
 </div>
-<!-- v7.29 — sub-menu grup navigasi (Cards / Decks / Community). Memakai kelas .lab-menu yang sama. -->
+<!-- v7.30 — sub-menu grup navigasi (Cards / Decks / Community). Memakai kelas .lab-menu yang sama. -->
 <div class="lab-menu grp-menu" id="grpMenu-cards" data-groupmenu="cards" role="menu" aria-label="Cards" hidden>
   <div class="lab-mh">🃏 Cards <span>Browse every card and set</span></div>
   <div class="lab-grid">
@@ -2907,6 +2927,8 @@
 
 <!-- v6.64 — halaman Set & Spoiler (isi digambar set-ui.js: renderSet) -->
 <section id="setPage"><div class="st-wrap" id="setWrap"></div></section>
+<!-- v7.29 — Battle Sim (simulator permainan, iframe sim/index.html; sim-host.js) -->
+<section id="simPage"><div class="sim-wrap" id="simWrap"></div></section>
 <!-- v6.98 — halaman Events (turnamen LGS: Swiss + Top cut), lihat events.js & events-ui.js -->
 <section id="eventPage"><div class="ev-wrap" id="eventWrap"></div></section>
 <!-- v7.06 — binder yang dibagikan lewat link (#binder/<kode>), binders-ui.js -->
@@ -3001,6 +3023,8 @@
       <div class="dt-panel" id="dashPanelPerf" hidden><div id="perfWrap"></div></div>
       <!-- v7.25 — statistik pemakaian fitur (guest vs login), HANYA admin; isi digambar usage.js (renderAdmin) -->
       <details class="us-box" id="usageBox" hidden><summary>📊 Usage <span class="bd-mut">· admin only · guests vs logged-in devices per feature</span></summary><div id="usageWrap"></div></details>
+      <!-- v7.29 — laporan bug & feedback Battle Sim (tabel sim_feedback), HANYA admin; isi digambar sim-host.js -->
+      <details class="us-box" id="simRepBox" hidden><summary>🐞 Battle Sim reports <span class="bd-mut">· admin only · bug reports & feedback from the simulator</span></summary><div id="simRepWrap"></div></details>
     </div>
   </div>
 </section>
@@ -3390,6 +3414,7 @@
 <script src="perf.js?v=7.15"></script>
 <script src="perf-ui.js?v=7.25"></script>
 <script src="rules-faq.js?v=7.28"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules); v7.26 — FAQ versi Bahasa Indonesia; v7.27 — Copy link ke halaman statis faq/ & errata/; v7.28 — TD-11 -->
+<script src="sim-host.js?v=7.29"></script>   <!-- v7.29 — Battle Sim (menu admin, iframe sim/, jembatan login/deck, laporan) -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
@@ -3418,7 +3443,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.29</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.30</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -8366,7 +8391,7 @@ function renderPanduan(focus){
 }
 
 /* ==================== NAVIGASI HALAMAN ==================== */
-const PAGES = ['beranda','berita','cards','set','build','meta','tourney','event','lgs','panduan','dukung','dashboard','binder'];
+const PAGES = ['beranda','berita','cards','set','build','meta','tourney','sim','event','lgs','panduan','dukung','dashboard','binder'];
 const TITLE_AWAL = document.title;
 function setPage(p, dariHash){
   /* v6.62 — 'berita/<slug>' = satu artikel (lihat news-ui.js) */
@@ -8375,6 +8400,8 @@ function setPage(p, dariHash){
   if(typeof p === 'string' && p.startsWith('set/')){ sub = p.slice(4).toUpperCase(); p = 'set'; }  /* v6.64 */
   if(typeof p === 'string' && p.startsWith('event/')){ sub = p.slice(6).toLowerCase(); p = 'event'; }  /* v6.98 */
   if(typeof p === 'string' && p.startsWith('binder/')){ sub = p.slice(7); p = 'binder'; }  /* v7.06 — kode link binder (huruf besar/kecil dipertahankan) */
+  if(typeof p === 'string' && p.startsWith('sim/')){ sub = p.slice(4); p = 'sim'; }  /* v7.29 — link undangan Battle Sim #sim/room/KODE */
+  if(p !== 'sim') document.body.classList.remove('sim-full');
   if(p === 'binder' && !sub) p = 'dashboard';
   /* v7.24 — sub-halaman Guide: 'faq', 'faq/F-23', 'errata', 'errata/E-04', 'rules'; '#panduan' dari hash = Site Guide */
   let pdFocus = null;
@@ -8411,6 +8438,7 @@ function setPage(p, dariHash){
   if(p === 'meta') renderMeta();
   if(p === 'tourney') renderTourney();
   if(p === 'event' && typeof renderEvents === 'function') renderEvents(sub);   /* v6.98 */
+  if(p === 'sim' && window.renderSimPage) window.renderSimPage(sub);           /* v7.29 */
   if(p === 'lgs') renderLgs();
   if(p === 'panduan') renderPanduan(pdFocus);
   if(p === 'dukung') renderDukungPage();
@@ -8567,7 +8595,7 @@ $('#navTabs').addEventListener('click', e=>{
   $('#navTabs').addEventListener('scroll', ()=>{ if(!menu.hidden) close(); }, {passive:true});
 })();
 
-/* ==================== v7.29 — NAV GROUPS ====================
+/* ==================== v7.30 — NAV GROUPS ====================
    Permintaan pemilik (Nov 2026): terlalu banyak tab di atas; pengguna baru bingung dan di HP
    sebagian tab baru terlihat setelah digeser. 11 tab → 6: My Lab ▾ · Home · Cards ▾ (All Cards,
    Sets) · Decks ▾ (Deck Builder, User Decks, Tournament Decks) · Community ▾ (News, Events,
@@ -8583,8 +8611,9 @@ $('#navTabs').addEventListener('click', e=>{
   window.closeNavGroups = ()=>closeAll(null);
   document.querySelectorAll('.grp-menu').forEach(menu=>{
     const btn = nav.querySelector(`[data-group="${menu.dataset.groupmenu}"]`); if(!btn) return;
-    const items = ()=>[...menu.querySelectorAll('[data-go]')];
-    const pages = items().map(x=>x.dataset.go);
+    const all = ()=>[...menu.querySelectorAll('[data-go]')];
+    const items = ()=>all().filter(x=>!x.hidden);
+    const pages = all().map(x=>x.dataset.go);
     let byHover = false, tOpen = 0, tClose = 0;
     function place(){
       if(innerWidth <= 920) return;            // posisi HP diatur CSS (.lab-menu)
@@ -8595,7 +8624,8 @@ $('#navTabs').addEventListener('click', e=>{
     function open(hover){
       clearTimeout(tClose); clearTimeout(tOpen);
       closeAll(g); if(window.closeLabMenu) window.closeLabMenu(); if(window.closeGuideMenu) window.closeGuideMenu();
-      items().forEach(x=>x.setAttribute('aria-current', String(x.dataset.go === state.page)));
+      all().forEach(x=>{ x.setAttribute('aria-current', String(x.dataset.go === state.page));
+        const o = nav.querySelector(`[data-page="${x.dataset.go}"]`); x.hidden = !!(o && o.hidden); });   // tab asli hidden → item hidden
       menu.hidden = false; btn.setAttribute('aria-expanded','true'); byHover = !!hover; place();
     }
     function close(){ clearTimeout(tOpen); menu.hidden = true; btn.setAttribute('aria-expanded','false'); byHover = false; }
@@ -10266,6 +10296,8 @@ if(hashAwal.startsWith('#d=')){
   setPage('set/' + window.setKodeFromHash(hashAwal), true);
 } else if(hashAwal.startsWith('#berita/') && window.beritaSlugFromHash && window.beritaSlugFromHash(hashAwal)){
   setPage('berita/' + window.beritaSlugFromHash(hashAwal), true);
+} else if(/^#sim(\/|$)/.test(hashAwal)){   /* v7.29 — Battle Sim & link undangan room */
+  setPage(decodeURIComponent(hashAwal.slice(1)), true);
 } else if(/^#(faq|errata|rules)(\/|$)/.test(hashAwal)){   /* v7.24 */
   setPage(decodeURIComponent(hashAwal.slice(1)), true);
 } else {
@@ -10283,6 +10315,7 @@ window.addEventListener('hashchange', ()=>{
     const id = window.eventIdFromHash ? window.eventIdFromHash(h) : null;
     setPage(id ? 'event/'+id : 'event', true); return;
   }
+  if(/^#sim(\/|$)/.test(h)){ setPage(decodeURIComponent(h.slice(1)), true); return; }   /* v7.29 */
   if(h.startsWith('#binder/')){                                       /* v7.06 */
     const code = window.binderCodeFromHash ? window.binderCodeFromHash(h) : null;
     setPage(code ? 'binder/'+code : 'dashboard', true); return;
@@ -10358,6 +10391,7 @@ window.addEventListener('hashchange', ()=>{
     isAccountAdmin = loggedIn && await window.MHRAuth.isAdmin(session);
     isLoggedIn = loggedIn;
     { const ub = $('#usageBox'); if(ub){ ub.hidden = !isAccountAdmin; if(!isAccountAdmin) ub.open = false; } }   // v7.25
+    if(window.refreshSimNav) window.refreshSimNav();   // v7.29 — menu Battle Sim & kartu laporan (admin)
     if(typeof renderProxyBox === 'function') renderProxyBox();
     /* v6.62 — admin melihat draft + tombol tulis/edit di halaman Berita */
     if(typeof refreshBerita === 'function') refreshBerita();
