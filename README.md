@@ -44,6 +44,8 @@ mhr-lab-x7k2m9/
 ├── binders-ui.js      ← tab Binders di My Dashboard + halaman publik #binder/<kode> (v7.06)
 ├── perf.js            ← servis Supabase Performance Analytics: catatan match, archetype, tournament runs, data komunitas (v7.13–v7.15, tanpa DOM)
 ├── perf-ui.js         ← tab Performance di My Dashboard: catat match, statistik, tren, runs, import Events, share gambar, komunitas, versi deck (v7.13–v7.15)
+├── sim-host.js        ← Battle Sim: penghubung situs ↔ simulator (menu khusus admin, iframe, link undangan, kartu laporan di My Lab) (v7.29)
+├── sim/               ← simulator Battle Sim (index.html + 14 skrip) — DIBUAT mhr-simulator\online\site-sim.js, jangan diedit tangan (v7.29)
 ├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
 ├── sitemap.xml           ← SEO: sitemap untuk Google Search Console (sejak v6.21)
 ├── robots.txt            ← SEO: izinkan semua crawler + rujuk ke sitemap.xml (sejak v6.21)
@@ -594,6 +596,33 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.29 — Battle Sim O2 (uji tertutup, khusus admin): main online, offline, hasil & replay, lapor bug — 10 November 2026 *(`index.html`, berkas BARU `sim-host.js`, folder BARU `sim/`, migrasi SQL `o2-battle-sim.sql` di folder `mhr-simulator\online\sql`)*
+
+Tahap O2 simulator (riwayat simulator #63). Keputusan pemilik 10 Nov 2026: kode simulator ditaruh di repo ini (folder
+`sim/`), dan selama masa uji **hanya akun admin** (`admin_users`) yang melihat menu dan bisa bermain. Pengunjung lain
+tidak melihat perubahan apa pun.
+
+- **Menu Battle Sim** (`#sim`) di antara Tournament Decks dan Events, tersembunyi kecuali untuk admin. Non-admin yang
+  membuka `#sim` hanya melihat keterangan "closed testing"; simulator tidak dimuat.
+- **`sim/`** — salinan simulator (`index.html` + 14 skrip, versi `o2.1`) yang dimuat lewat iframe. Data kartu dan gambar
+  dibaca dari situs (`../cards.js`, `../data.js`, `../images/`), jadi tidak ada data kartu ganda. Halaman `sim/` diberi
+  `noindex`. **Jangan diedit tangan**: dibuat ulang dengan `node online/site-sim.js <folder repo ini> <versi>` dari folder
+  `mhr-simulator`.
+- **`sim-host.js`** — penghubung situs ↔ simulator: sesi login, Deck Saya dari akun, deck turnamen, link undangan
+  `#sim/room/KODE`, layar penuh saat bermain di HP, dan kartu admin **Battle Sim reports** di My Lab (daftar laporan,
+  ubah status, salin log).
+- **Main online**: room pribadi dengan kode/link undangan, lewat server uji Cloudflare Worker
+  `mhr-battle-sim-test` (wasit di server; kartu tersembunyi lawan tidak pernah dikirim ke browser). Mode offline
+  (lawan bot, latihan, sandbox) tetap ada di halaman yang sama. "Find a match" belum aktif.
+- **Supabase** — dua tabel baru, dibuat dengan `o2-battle-sim.sql` (dijalankan pemilik di SQL Editor): `sim_matches`
+  (hasil + log pertandingan online; hanya server yang menulis, pemain membaca pertandingannya sendiri) dan `sim_feedback`
+  (laporan bug & feedback; akun login mengirim, maks. 5 per menit; hanya admin membaca). RLS aktif di keduanya.
+- Versi situs 7.29 (`index.html`: header, `meta version`, footer, `sim-host.js?v=7.29`). `cards.js`, `data.js`, `sw.js`,
+  dan `api/v1/` tidak berubah.
+- Dicek di salinan lokal (Supabase tiruan + server lokal): uji situs 19/19 lulus (menu khusus admin, link undangan,
+  Deck Saya, layar penuh HP, kartu laporan), uji layar online 26/26, 100 pertandingan penuh lewat server tanpa kebocoran
+  kartu tersembunyi, dan seluruh uji layar simulator lama tetap lulus.
 
 ### Deploy — Terbitkan ulang perbaikan SP01-065 — 10 November 2026 *(`README.md`)*
 
