@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.27** · 5 November 2026
+**Versi saat ini: v7.30** · 10 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -604,6 +604,31 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
   Kota dibaca dari alamat pada tautan tersebut; ditaruh di grup Jakarta sesudah Ogre Kelapa Gading.
 - `LGS_UPDATE` → 10 November 2026; cache-buster `index.html` → `data.js?v=7.02-lgs1110` (`sim/index.html` dibuat ulang
   supaya memakai `?v=` yang sama; isi simulator tidak berubah).
+
+### v7.30 — Navigasi dikelompokkan: 11 tab → 6 (Cards / Decks / Community jadi sub-menu) — 10 November 2026 *(`index.html`)*
+
+Permintaan pemilik: tab di atas terlalu banyak; pengguna baru bingung harus mulai dari mana, dan di HP sebagian tab
+(Events, Weekly Rush LGS, Guide) baru terlihat setelah bar bawah digeser. Struktur disetujui pemilik lewat draf simulasi.
+- **Tab sekarang:** My Lab ▾ · Home · **Cards ▾** (All Cards, Sets) · **Decks ▾** (Deck Builder, User Decks, Tournament
+  Decks) · **Community ▾** (News, Events, Weekly Rush LGS) · Guide ▾. My Lab tetap paling kiri (keputusan pemilik v7.17).
+- Sub-menu baru memakai tampilan `.lab-menu` yang sama dengan My Lab / Guide: judul + keterangan satu baris per item,
+  hover di desktop, klik/Enter, panah atas/bawah, Esc; di HP tampil sebagai panel di atas bar bawah (satu kolom).
+  Hanya satu sub-menu terbuka sekaligus (membuka My Lab / Guide menutup menu grup dan sebaliknya).
+- **Tab grup menyala** (`data-on="true"`) saat halaman aktif ada di dalam grupnya, mis. di Deck Builder → tab Decks.
+- **Tidak ada hash / halaman yang berubah:** tombol tab lama tetap ada di DOM dengan atribut `data-grouped`
+  (disembunyikan CSS), jadi `setPage()`, penghitung (`#navCard`, `#navDeck`, …), statistik `usage.js` dan semua link
+  lama (`#cards`, `#build`, `#lgs`, `#berita`, …) bekerja seperti sebelumnya. Angka penghitung di tab tidak lagi tampil.
+- Kode: markup tombol `data-group` + tiga `<div class="lab-menu grp-menu">`; CSS blok "v7.30 — NAV GROUPS"; JS blok
+  "v7.30 — NAV GROUPS" (membungkus `setPage` untuk menandai tab grup; `window.closeNavGroups()`).
+- **Battle Sim (v7.29) tetap tab sendiri** (keputusan pemilik), dipindah ke antara Decks dan Community; tetap hanya terlihat
+  oleh admin selama masa uji (`refreshSimNav()` di `sim-host.js` tidak berubah). Admin melihat 7 tab, pengunjung lain 6.
+- Catatan nomor versi: dikerjakan sebagai v7.29 bersamaan dengan Battle Sim (v7.29) di sesi lain; saat digabung dinomori
+  ulang jadi **v7.30**.
+- **Untuk menambah halaman ke grup:** beri tombol tab lamanya `data-grouped` dan tambah satu `<button data-go="<halaman>">`
+  di menu grupnya. Tidak ada perubahan database / Supabase / `sw.js`. Versi 7.30 (komentar, meta, footer).
+- Dicek: Playwright desktop 1366 px & HP 390 / 360 / 320 px — 6 tab terlihat, ketiga menu terbuka dan membuka halaman yang
+  benar (hash tetap), tab grup menyala, keyboard (panah, Esc), My Lab & Guide tetap jalan dan saling menutup, link
+  langsung `#lgs` / `#build` / `#faq/F-23`, tanpa error JS, tanpa scroll horizontal halaman.
 
 ### v7.29 — Battle Sim O2 (uji tertutup, khusus admin): main online, offline, hasil & replay, lapor bug — 10 November 2026 *(`index.html`, berkas BARU `sim-host.js`, folder BARU `sim/`, migrasi SQL `o2-battle-sim.sql` di folder `mhr-simulator\online\sql`)*
 
