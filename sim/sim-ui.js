@@ -115,7 +115,7 @@
   function readDeck(k) { return deckFrom($('dk' + k).value, $('dc' + k).value, 'Player ' + (+k + 1) + "'s"); }
   // Deck dari nilai pilihan menu (deck uji, deck komunitas, atau kode deck yang ditempel).
   function deckFrom(v, codeText, who) {
-    if (/^sd0[1-4]$/.test(v)) return { list: S.testDeck(v.toUpperCase()), name: v.toUpperCase() + ' test deck' };
+    if (/^sd0[1-6]$/.test(v)) return { list: S.testDeck(v.toUpperCase()), name: v.toUpperCase() + ' test deck' };
     if (/^bp01[rybg]$/.test(v)) return { list: S.testDeck(v.toUpperCase()), name: 'BP01 ' + ({ r: 'Red', y: 'Yellow', b: 'Blue', g: 'Green' })[v[4]] + ' test deck' };
     if (/^s4[rybg]$/.test(v)) return { list: S.testDeck(v.toUpperCase()), name: 'Stage 4 ' + ({ r: 'Red', y: 'Yellow', b: 'Blue', g: 'Green' })[v[2]] + ' test deck' };
     if (/^sp[rybg]$/.test(v)) return { list: S.testDeck(v.toUpperCase()), name: 'SP01 ' + ({ r: 'Red', y: 'Yellow', b: 'Blue', g: 'Green' })[v[2]] + ' test deck' };
@@ -170,7 +170,7 @@
     ui.mleft = MATCH[ui.timer] || null;
     ui.lastLaunch = Object.assign({}, o, { seed: undefined });
     G = S.createGame({ decks: o.decks, seed: o.seed, first: o.first == null ? 'random' : o.first, names: o.names, vanilla: false,
-      siaga: ui.ctrl[0] === 'human' && ui.ctrl[1] === 'human', confirm: true });   // pilihan tunggal tetap ditanyakan
+      siaga: false, confirm: true });   // #82: Siaga dihapus dari mode satu perangkat (keputusan pemilik 12 Nov 2026)   // pilihan tunggal tetap ditanyakan
     ui.hist = []; ui.replay = null;
     begin();
     return G;

@@ -148,7 +148,7 @@
     'Attach this game\'s log code (lets the team replay the game exactly)': 'Lampirkan kode log permainan ini (tim bisa memutar ulang permainan persis sama)',
     'Save & copy report': 'Simpan & salin laporan', 'Download (.txt)': 'Unduh (.txt)', 'Please write a short description first.': 'Tulis penjelasan singkat dulu.',
     '✓ Saved on this device and copied. Paste it in WhatsApp or email to the admin.': '✓ Tersimpan di perangkat ini dan tersalin. Tempel di WhatsApp atau email ke admin.',
-    '⧉ Copy log code': '⧉ Salin kode log', '🐞 Report a bug / feedback': '🐞 Lapor bug / feedback', '🐞 Report a bug': '🐞 Lapor bug', '💬 Send feedback': '💬 Kirim feedback', '🐞 Report': '🐞 Lapor',
+    '⧉ Copy log code': '⧉ Salin kode log', '🐞 Report a bug / feedback': '🐞 Lapor bug / feedback', '🐞 Report a bug': '🐞 Lapor bug', '💬 Send feedback': '💬 Kirim feedback', 'Help us improve': 'Bantu kami memperbaiki', 'SD05 test deck (Orange)': 'Deck uji SD05 (Oranye)', 'SD06 test deck (Purple)': 'Deck uji SD06 (Ungu)', '🐞 Report': '🐞 Lapor',
     '✊ Rock': '✊ Batu', '✋ Paper': '✋ Kertas', '✌ Scissors': '✌ Gunting', '⏱ Time up': '⏱ Waktu habis', '⏱ Time up · rock-paper-scissors': '⏱ Waktu habis · jankenpon',
     'Match time is up: moves can no longer be undone.': 'Waktu pertandingan habis: langkah tidak bisa dibatalkan lagi.',
     '9 Rush Points in the Timeline (103.1.a)': '9 Rush Point di Timeline (103.1.a)', "the opposing player's Deck has 0 cards (103.1.b)": 'Deck lawan tersisa 0 kartu (103.1.b)'

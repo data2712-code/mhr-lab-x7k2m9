@@ -29,7 +29,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = '0.13.0';
+  const VERSION = '0.14.0';
   const SLOTS = ['F', 'W1', 'W2', 'B'];
   const SLOT_NAME = { F: 'FRONT', W1: 'WING 1', W2: 'WING 2', B: 'BACK', BASE: 'BASE' };
   // Posisi pada garis serangan (303.2.a.4.3.1.1): BACK sendiri = 0, WING = 1,
@@ -48,7 +48,7 @@
   let DEFS = {};
   /* Set yang DISEMBUNYIKAN (keputusan pemilik 7 Nov 2026, riwayat #48): belum rilis resmi di Indonesia dan teks efeknya
      belum terjemahan resmi. Kartunya tidak dimuat sama sekali: tidak bisa dipakai di deck, kode deck, maupun Sandbox. */
-  const HIDDEN_SETS = ['SD05', 'SD06', 'PB02'];
+  const HIDDEN_SETS = [];   // riwayat #82 (keputusan pemilik 12 Nov 2026): SD05, SD06, PB02 dibuka dengan terjemahan pra-rilis (Tahap 6). Dulu ['SD05','SD06','PB02'] (#48).
   const isHiddenNo = no => HIDDEN_SETS.includes(String(no || '').slice(0, 4).toUpperCase());
   let hiddenN = 0;
   function init(cards) {
@@ -189,7 +189,9 @@
        diberi awalan 'b:'. */
   function lostEffects(st, iid) {
     const x = st.inst[iid];
-    if (st.vanilla || !x || !x.att.length) return false;
+    if (st.vanilla || !x) return false;
+    if (x.gr && x.gr.lose === st.turn) return true;                // Tahap 6 (SD05-007): "this card loses its effects in this turn"
+    if (!x.att.length) return false;
     return x.att.some(a => { const d = DEFS[st.inst[a].no]; return !!(d && d.strip) && !st.inst[a].fd; });
   }
   const MERGED = new Map();
@@ -735,7 +737,7 @@
   // BATTLE-BASE MOVE oleh efek (301.24.b): tidak terikat batas aksi 303.2.a.3.1.3.
   function bbmDests(st, iid) {
     const L = locate(st, iid); if (!L || st.inst[iid].fd) return [];
-    if (st.inst[iid].gr && st.inst[iid].gr.nomove === st.turn) return [];      // BP01-050 "can not move in this turn"
+    if (restricted(st, iid, 'move')) return [];      // BP01-050 "can not move in this turn"; Tahap 6: larangan tetap
     const P = st.P[L.p];
     if (L.zone === 'bat') return P.base.length < BASE_MAX ? ['BASE'] : [];
     if (L.zone === 'base') return SLOTS.filter(s => !P.bat[s]);
@@ -859,7 +861,7 @@
   function battleMove(st, iid, to, why) {
     const L = locate(st, iid); if (!L || L.zone !== 'bat' || !SLOTS.includes(to) || to === L.slot) return false;
     const P = st.P[L.p]; if (P.bat[to]) return false;
-    if (st.inst[iid].gr && st.inst[iid].gr.nomove === st.turn) return false;
+    if (restricted(st, iid, 'move')) return false;
     P.bat[L.slot] = null; P.bat[to] = iid;
     log(st, 'move', plabel(st, L.p) + ': ' + nameOf(st, iid) + ' takes BATTLE MOVE from ' + SLOT_NAME[L.slot] + ' to ' + SLOT_NAME[to] + (why ? ' (' + why + ')' : '') + '.');
     emit(st, { k: 'BMOVE', c: iid, from: L.slot, to });
@@ -968,6 +970,12 @@
     for (const a of x.att) {
       const da = defOf(st, a);
       if (da && da.hostAbil && !st.inst[a].fd) { try { if ((da.hostAbil(readApi(st, a), a, iid) || []).includes(ab)) return true; } catch (e) { /* abaikan */ } }
+    }
+    // Tahap 6: kemampuan dari aura kartu lain (PB02-005 Nebula: [AIR STRIKE] untuk Karakter [GOTG] di FRONT).
+    for (let p = 0; p < 2; p++) for (const src of charsOnField(st, p)) {
+      if (src === iid) continue;
+      const ds = defOf(st, src); if (!ds || !ds.auraAbil) continue;
+      try { if ((ds.auraAbil(readApi(st, src), src, iid) || []).includes(ab)) return true; } catch (e) { /* abaikan */ }
     }
     return false;
   }
@@ -1385,7 +1393,7 @@
   }
   function canAttack(st, iid) {
     const L = locate(st, iid);
-    if (st.inst[iid].gr && st.inst[iid].gr.noatk === st.turn) return false;   // BP01-093 "can not attack in this turn"
+    if (restricted(st, iid, 'atk')) return false;   // BP01-093 "can not attack in this turn"; Tahap 6: larangan tetap
     return !!L && L.zone === 'bat' && L.p === st.tp && !st.inst[iid].fd && hasOpportunity(st, iid) && targetsFor(st, iid).length > 0;  // 303.2.a.4.6
   }
   function stageSlots(stage) { return stage === 'F' ? ['F'] : stage === 'W' ? ['W1', 'W2'] : stage === 'B' ? ['B'] : []; }
@@ -1427,13 +1435,33 @@
     const tp = st.tp;
     st.P[tp].rp += 1; st.P[tp].rpDeck = Math.max(0, st.P[tp].rpDeck - 1);     // 303.2.a.4.3.3.2.1
     log(st, 'rp', plabel(st, tp) + ': ' + nameOf(st, a) + ' successfully attacked a Weakness' + (how || " (opponent's " + SLOT_NAME[slot] + ')') + '. Rush Point → Timeline: ' + st.P[tp].rp + '/9.');
+    // Tahap 6: [RAMPAGE] (305.8, CR 1.05 — belum resmi di Indonesia): jumlah kartu yang masuk Timeline +1.
+    if (locate(st, a) && hasAbility(st, a, 'rampage') && st.P[tp].rp < RP_WIN) {
+      st.P[tp].rp += 1; st.P[tp].rpDeck = Math.max(0, st.P[tp].rpDeck - 1);
+      log(st, 'rp', plabel(st, tp) + ': RAMPAGE — 1 more card into the Timeline: ' + st.P[tp].rp + '/9.');
+    }
     emit(st, { k: 'WEAK_HIT', a, p: tp });                          // BP01-041 "attacks the weakness successfully"
     checkWin(st);
   }
   // "Not retreated by BOTH LOSE" (SD02-003 di FRONT).
   function bothLoseImmune(st, iid) {
     const d = defOf(st, iid);
+    if (d && typeof d.bothLoseImmune === 'function') { try { return !!d.bothLoseImmune(readApi(st, iid), iid); } catch (e) { return false; } }   // Tahap 6: QUICK STRIKE (305.7, CR 1.05)
     return !!(d && d.bothLoseImmune && inZone(st, iid, d.bothLoseImmune));
+  }
+  /* Tahap 6: larangan tetap "can not attack" / "can not move" (PB02-007 Star-Lord, SD05-007 Doctor Strange). Sumber = kartu
+     terbuka di FIELD dengan def.restrict(A, src, tgt) → { atk, move } (termasuk dirinya sendiri), ditambah larangan
+     "in this turn" lama (gr.noatk / gr.nomove). */
+  function restricted(st, iid, kind) {
+    const x = st.inst[iid]; if (!x) return false;
+    if (kind === 'atk' && x.gr && x.gr.noatk === st.turn) return true;
+    if (kind === 'move' && x.gr && x.gr.nomove === st.turn) return true;
+    if (st.vanilla || x.fd) return false;
+    for (let p = 0; p < 2; p++) for (const src of charsOnField(st, p)) {
+      const d = defOf(st, src); if (!d || !d.restrict) continue;
+      try { const r = d.restrict(readApi(st, src), src, iid); if (r && r[kind]) return true; } catch (e) { /* abaikan */ }
+    }
+    return false;
   }
   function confirmBattle(st) {
     const b = st.bt.cur, tp = st.tp, op = opp(tp);
@@ -1657,6 +1685,11 @@
   }
   // 305.1. Tahap 4: counter boleh berupa fungsi (PB01-008: [COUNTER] hanya bila syaratnya terpenuhi).
   function hasCounterAbility(st, iid) {
+    // Tahap 6 (SD06-013 War Envoy): [COUNTER] untuk kartu lain di HAND dari aura di FIELD.
+    if (!st.vanilla && !st.inst[iid].fd) for (let p = 0; p < 2; p++) for (const src of charsOnField(st, p)) {
+      const ds = defOf(st, src); if (!ds || !ds.auraCounter) continue;
+      try { if (ds.auraCounter(readApi(st, src), src, iid)) return true; } catch (e) { /* abaikan */ }
+    }
     const d = defOf(st, iid); if (!d || !d.counter) return false;
     if (typeof d.counter !== 'function') return true;
     try { return !!d.counter(readApi(st, iid), iid); } catch (e) { return false; }
@@ -1691,6 +1724,7 @@
         const cur = SLOTS.map(s => P.bat[s] || '').sort().join(',');
         const nw = SLOTS.map(s => (a.map[s] || '')).sort().join(',');
         if (cur !== nw) return 'Rearranging may only change the positions of Characters already in your BATTLE.';
+        if (SLOTS.some(sl => P.bat[sl] && a.map[sl] !== P.bat[sl] && restricted(st, P.bat[sl], 'move'))) return 'A Character that cannot move must stay where it is (card effect).';
         return null;
       }
       case 'attack': {
@@ -1776,7 +1810,7 @@
         if (x.fd) return 'A Face-Down Card is not a Character and cannot perform BATTLE-BASE MOVE.';
         if (x.enT === st.turn) return 'A Character placed onto the FIELD this turn cannot perform BATTLE-BASE MOVE (303.2.a.3.1.3.3).';
         if (x.bbm === st.turn) return 'This Character has already used its BATTLE-BASE MOVE this turn (303.2.a.3.1.3.2).';
-        if (x.gr && x.gr.nomove === st.turn) return 'This Character cannot move this turn (card effect).';
+        if (restricted(st, a.c, 'move')) return 'This Character cannot move (card effect).';
         if (L.zone === 'bat') {
           if (a.to !== 'BASE') return 'A Character in BATTLE can only move to the BASE.';
           if (P.base.length >= BASE_MAX) return 'BASE is full (limit 6 cards).';
@@ -1908,6 +1942,7 @@
   }
   function checkCallCore(st, a, p, P) {                  // 301.19
     if (!P.hand.includes(a.c)) return 'Choose a Character from your HAND.';
+    { const d = defOf(st, a.c); if (d && d.noCall) return 'This card can not be called (its own effect).'; }   // Tahap 6: SD05-012, PB02-004
     const lv = getLv(st, a.c), cost = a.cost || [];
     if (new Set(cost).size !== cost.length) return 'A card was chosen twice for the CALL cost.';
     if (lv <= 3) {
@@ -1987,6 +2022,7 @@
         permute(cur).forEach(perm => {
           const k = perm.join(','); if (seen.has(k)) return; seen.add(k);
           const map = {}; SLOTS.forEach((s, i) => { map[s] = perm[i]; });
+          if (SLOTS.some((sl, i) => cur[i] && perm[i] !== cur[i] && restricted(st, cur[i], 'move'))) return;   // Tahap 6: PB02-007
           out.push({ t: 'arrange', map });
         });
         return out;

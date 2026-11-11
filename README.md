@@ -603,6 +603,21 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.9: kartu SD05, SD06, PB02 tampil + efeknya; Siaga dihapus; tag BETA hilang sesudah 18 Nov — 12 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #82; rincian di `mhr-simulator\`. Permintaan pemilik 12 Nov 2026:
+- **57 kartu SD05 (Orange), SD06 (Purple), PB02 kini bisa dipakai di Battle Sim** (sebelumnya disembunyikan sejak #48), dengan
+  efek otomatis dari **terjemahan pra-rilis yang ada di `cards.js`** (`fan:2`). Mesin v0.14.0, berkas baru
+  `sim/sim-cards-t6.js`. Ruling: "damaged" = Power di bawah Power cetak karena efek minus (dari siapa pun), Gamora aktif saat total
+  Power tepat 6500, Yondu hanya 1 aktivasi tambahan per giliran (keputusan pemilik); QUICK STRIKE / RAMPAGE dari CR 1.05
+  masih sementara (`mhr-simulator\ruling-simulator.md`). Bila teks resmi berbeda, `cards.js` dan resolver diganti.
+- Deck uji **SD05 (Orange)** dan **SD06 (Purple)** ditambahkan ke pilihan deck bot / satu perangkat.
+- **Siaga dihapus** dari room privat (Play a friend online) dan mode satu perangkat (Find a match sudah sejak o2.8). Perubahan
+  server sudah di-deploy (versi `27f59029`, riwayat simulator #82–#83).
+- **Beta berakhir 18 Nov 2026**: mulai 19 Nov tag BETA (tab menu, judul, spanduk) dan kotak beta hilang sendiri; tombol
+  lapor bug / feedback tetap ada. Tidak perlu push lagi untuk itu.
+`sim/` disalin ulang (o2.9), `SIM_URL` → `?v=o2.9`, `sim-host.js?v=7.33-sim9`.
+
 ### Data — Battle Sim o2.8: "Your deck" hanya deck akun + tempel kode; Find a match tanpa Siaga — 12 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #80; rincian di `mhr-simulator\`. Permintaan pemilik: menu **Your deck** (Practice vs Bot, Play a friend

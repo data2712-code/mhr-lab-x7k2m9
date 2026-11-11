@@ -24,7 +24,7 @@
     del(k) { try { localStorage.removeItem(k); } catch (e) { /* abaikan */ } }
   };
   const CLOCK_LABEL = { standard: 'Standard 2:00 / 0:30', relaxed: 'Relaxed 5:00 / 1:00', long: 'Long 10:00 / 2:00', off: 'No clock', match30: 'Match 30:00' };
-  const TEST_LABEL = { sd01: 'SD01', sd02: 'SD02', sd03: 'SD03', sd04: 'SD04', bp01r: 'BP01R', bp01y: 'BP01Y', bp01b: 'BP01B', bp01g: 'BP01G', s4r: 'S4R', s4y: 'S4Y', s4b: 'S4B', s4g: 'S4G', spr: 'SPR', spy: 'SPY', spb: 'SPB', spg: 'SPG' };
+  const TEST_LABEL = { sd01: 'SD01', sd02: 'SD02', sd03: 'SD03', sd04: 'SD04', sd05: 'SD05', sd06: 'SD06', bp01r: 'BP01R', bp01y: 'BP01Y', bp01b: 'BP01B', bp01g: 'BP01G', s4r: 'S4R', s4y: 'S4Y', s4b: 'S4B', s4g: 'S4G', spr: 'SPR', spy: 'SPY', spb: 'SPB', spg: 'SPG' };
 
   /* ---------- situs induk (iframe Battle Sim di mhrdecklab.com) ---------- */
   function host() {

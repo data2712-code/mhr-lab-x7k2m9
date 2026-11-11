@@ -202,7 +202,7 @@
   /* ---------------- input ---------------- */
   function parseSel(t) { try { return JSON.parse(t.dataset.sel); } catch (e) { return null; } }
   function deckList(p) {
-    if (/^(sd0[1-4]|bp01[rybg]|s4[rybg]|sp[rybg])$/.test(E.src[p])) return { list: S.testDeck(E.src[p].toUpperCase()) };
+    if (/^(sd0[1-6]|bp01[rybg]|s4[rybg]|sp[rybg])$/.test(E.src[p])) return { list: S.testDeck(E.src[p].toUpperCase()) };
     const d = S.decodeDeckCode(E.code[p]);
     if (!d) return { err: E.pos.names[p] + ': the deck code could not be read.' };
     return d;

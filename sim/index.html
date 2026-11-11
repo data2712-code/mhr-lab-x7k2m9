@@ -125,6 +125,7 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .hero p{margin:0;max-width:520px;color:#c9d2de;font-size:13.5px}
 .hstats{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--muted)}
 .hstats b{color:var(--paper);font-size:15px}.hstats i{font-style:normal}.hstats .w b{color:#7fd79d}.hstats .l b{color:#ff9d8f}.hstats .e{margin-left:auto}
+.beta-over .betatag{display:none!important}
 .betatag{display:inline-block;padding:1px 8px;border-radius:6px;background:var(--red);color:#fff;font-size:11px;font-weight:900;letter-spacing:.12em;transform:rotate(-3deg);box-shadow:2px 2px 0 rgba(0,0,0,.45)}
 .modes{display:flex;flex-direction:column;gap:8px;padding:12px}
 .mrow{border:1px solid var(--line);border-radius:12px;background:#12171d;overflow:hidden}
@@ -672,14 +673,14 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
       <div class="box">
         <h3>PLAYER 1</h3>
         <div class="row"><label>Name</label><input id="n0" value="Player 1"></div>
-        <div class="row"><label>Deck</label><select id="dk0"><option value="sd01">SD01 test deck (Red)</option><option value="sd02">SD02 test deck (Yellow)</option><option value="sd03">SD03 test deck (Blue)</option><option value="sd04">SD04 test deck (Green)</option><option value="bp01r">BP01 test deck (Red)</option><option value="bp01y">BP01 test deck (Yellow)</option><option value="bp01b">BP01 test deck (Blue)</option><option value="bp01g">BP01 test deck (Green)</option><option value="s4r">Stage 4 test deck (Red) · BP01 + PB01/EB01</option><option value="s4y">Stage 4 test deck (Yellow) · BP01 + PB01/EB01</option><option value="s4b">Stage 4 test deck (Blue) · BP01 + PB01/EB01</option><option value="s4g">Stage 4 test deck (Green) · BP01 + PB01/EB01/TB01</option><option value="spr">SP01 test deck (Red)</option><option value="spy">SP01 test deck (Yellow)</option><option value="spb">SP01 test deck (Blue)</option><option value="spg">SP01 test deck (Green)</option><option value="code">Paste deck code…</option></select></div>
+        <div class="row"><label>Deck</label><select id="dk0"><option value="sd01">SD01 test deck (Red)</option><option value="sd02">SD02 test deck (Yellow)</option><option value="sd03">SD03 test deck (Blue)</option><option value="sd04">SD04 test deck (Green)</option><option value="sd05">SD05 test deck (Orange)</option><option value="sd06">SD06 test deck (Purple)</option><option value="bp01r">BP01 test deck (Red)</option><option value="bp01y">BP01 test deck (Yellow)</option><option value="bp01b">BP01 test deck (Blue)</option><option value="bp01g">BP01 test deck (Green)</option><option value="s4r">Stage 4 test deck (Red) · BP01 + PB01/EB01</option><option value="s4y">Stage 4 test deck (Yellow) · BP01 + PB01/EB01</option><option value="s4b">Stage 4 test deck (Blue) · BP01 + PB01/EB01</option><option value="s4g">Stage 4 test deck (Green) · BP01 + PB01/EB01/TB01</option><option value="spr">SP01 test deck (Red)</option><option value="spy">SP01 test deck (Yellow)</option><option value="spb">SP01 test deck (Blue)</option><option value="spg">SP01 test deck (Green)</option><option value="code">Paste deck code…</option></select></div>
         <textarea id="dc0" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder (e.g. https://mhrdecklab.com/#d=1.xxx.xxx)" style="display:none"></textarea>
         <div class="row"><label>Played by</label><select id="ct0"><option value="human">Human</option><option value="bot">Test bot</option></select></div>
       </div>
       <div class="box">
         <h3>PLAYER 2</h3>
         <div class="row"><label>Name</label><input id="n1" value="Player 2"></div>
-        <div class="row"><label>Deck</label><select id="dk1"><option value="sd01">SD01 test deck (Red)</option><option value="sd02">SD02 test deck (Yellow)</option><option value="sd03">SD03 test deck (Blue)</option><option value="sd04">SD04 test deck (Green)</option><option value="bp01r">BP01 test deck (Red)</option><option value="bp01y">BP01 test deck (Yellow)</option><option value="bp01b">BP01 test deck (Blue)</option><option value="bp01g">BP01 test deck (Green)</option><option value="s4r">Stage 4 test deck (Red) · BP01 + PB01/EB01</option><option value="s4y">Stage 4 test deck (Yellow) · BP01 + PB01/EB01</option><option value="s4b">Stage 4 test deck (Blue) · BP01 + PB01/EB01</option><option value="s4g">Stage 4 test deck (Green) · BP01 + PB01/EB01/TB01</option><option value="spr">SP01 test deck (Red)</option><option value="spy">SP01 test deck (Yellow)</option><option value="spb">SP01 test deck (Blue)</option><option value="spg">SP01 test deck (Green)</option><option value="code">Paste deck code…</option></select></div>
+        <div class="row"><label>Deck</label><select id="dk1"><option value="sd01">SD01 test deck (Red)</option><option value="sd02">SD02 test deck (Yellow)</option><option value="sd03">SD03 test deck (Blue)</option><option value="sd04">SD04 test deck (Green)</option><option value="sd05">SD05 test deck (Orange)</option><option value="sd06">SD06 test deck (Purple)</option><option value="bp01r">BP01 test deck (Red)</option><option value="bp01y">BP01 test deck (Yellow)</option><option value="bp01b">BP01 test deck (Blue)</option><option value="bp01g">BP01 test deck (Green)</option><option value="s4r">Stage 4 test deck (Red) · BP01 + PB01/EB01</option><option value="s4y">Stage 4 test deck (Yellow) · BP01 + PB01/EB01</option><option value="s4b">Stage 4 test deck (Blue) · BP01 + PB01/EB01</option><option value="s4g">Stage 4 test deck (Green) · BP01 + PB01/EB01/TB01</option><option value="spr">SP01 test deck (Red)</option><option value="spy">SP01 test deck (Yellow)</option><option value="spb">SP01 test deck (Blue)</option><option value="spg">SP01 test deck (Green)</option><option value="code">Paste deck code…</option></select></div>
         <textarea id="dc1" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder" style="display:none"></textarea>
         <div class="row"><label>Played by</label><select id="ct1"><option value="human">Human</option><option value="bot">Test bot</option></select></div>
       </div>
@@ -780,19 +781,20 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.28-sp065" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.02-lgs1110" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.8"></script>
-<script src="sim-cards.js?v=o2.8"></script>
-<script src="sim-cards-bp01.js?v=o2.8"></script>
-<script src="sim-cards-s4.js?v=o2.8"></script>
-<script src="sim-cards-sp01.js?v=o2.8"></script>
-<script src="sim-bot.js?v=o2.8"></script>
-<script src="sim-sound.js?v=o2.8"></script>
-<script src="sim-shadow.js?v=o2.8"></script>
-<script src="sim-ui.js?v=o2.8"></script>
-<script src="sim-sandbox.js?v=o2.8"></script>
-<script src="sim-report.js?v=o2.8"></script>
-<script src="sim-modes.js?v=o2.8"></script>
-<script src="sim-i18n.js?v=o2.8"></script>
-<script src="sim-online.js?v=o2.8"></script>
+<script src="sim.js?v=o2.9"></script>
+<script src="sim-cards.js?v=o2.9"></script>
+<script src="sim-cards-bp01.js?v=o2.9"></script>
+<script src="sim-cards-s4.js?v=o2.9"></script>
+<script src="sim-cards-sp01.js?v=o2.9"></script>
+<script src="sim-cards-t6.js?v=o2.9"></script>
+<script src="sim-bot.js?v=o2.9"></script>
+<script src="sim-sound.js?v=o2.9"></script>
+<script src="sim-shadow.js?v=o2.9"></script>
+<script src="sim-ui.js?v=o2.9"></script>
+<script src="sim-sandbox.js?v=o2.9"></script>
+<script src="sim-report.js?v=o2.9"></script>
+<script src="sim-modes.js?v=o2.9"></script>
+<script src="sim-i18n.js?v=o2.9"></script>
+<script src="sim-online.js?v=o2.9"></script>
 </body>
 </html>

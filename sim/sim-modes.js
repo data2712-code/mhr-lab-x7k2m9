@@ -107,8 +107,13 @@
      mode yang membuka di tempat (mulai cepat tanpa pindah layar), ubin pintasan, kotak beta (lapor bug / feedback) dan
      permainan terakhir. Rujukan susunan: beranda rushdee.app dan lobi game kartu lain; teks, warna dan isi milik sendiri. */
   const BETA = { from: '2026-11-11', to: '2026-11-18', label: '11–18 Nov 2026' };      // keputusan pemilik: beta 1 minggu
+  const BETA_END = new Date(BETA.to + 'T23:59:59+07:00').getTime();
+  // #82 (pemilik 12 Nov 2026: beta berakhir 18 Nov): sesudah tanggal itu tag BETA dan kotak beta hilang sendiri,
+  // tombol lapor bug / feedback tetap ada. Kelas html.beta-over juga menyembunyikan tag BETA di judul (index.html).
+  const betaOn = () => Date.now() <= BETA_END;
+  try { if (!betaOn()) document.documentElement.classList.add('beta-over'); } catch (e) { /* bukan peramban */ }
   function betaLeft() {
-    const end = new Date(BETA.to + 'T23:59:59+07:00').getTime(), d = Math.ceil((end - Date.now()) / 86400000);
+    const end = BETA_END, d = Math.ceil((end - Date.now()) / 86400000);
     return d > 1 ? d + ' days left' : d === 1 ? 'last day' : '';
   }
   /* ---------------- Menu v7 · A "Play Blade" (riwayat #81, pilihan pemilik 12 Nov 2026) ----------------
@@ -185,7 +190,7 @@
     const left = betaLeft();
     let h = '<nav class="pbnav"><button class="on" data-mode="home">Play</button><button data-mode="history">History</button><button data-hub="sandbox">Sandbox</button>' +
       '<button data-mode="tools">Tools</button><button data-rep="open" data-v="feedback">Feedback</button></nav>';
-    h += '<section class="pbhero"><div class="kick"><span>MARVEL HERO RUSH · MATCH SIMULATOR</span><span class="betatag">BETA</span></div>' +
+    h += '<section class="pbhero"><div class="kick"><span>MARVEL HERO RUSH · MATCH SIMULATOR</span>' + (betaOn() ? '<span class="betatag">BETA</span>' : '') + '</div>' +
       '<h2>CALL. ATTACK.<br><em>RUSH.</em></h2><p>Every rule and card effect is handled for you. Pick a mode, pick your deck, press PLAY.</p>' +
       '<div class="hstats">' + (mine.length ? '<span><b>' + mine.length + '</b> <i>games</i></span><span class="w"><b>' + W + '</b> <i>wins</i></span><span class="l"><b>' + L + '</b> <i>losses</i></span>' : '<span><i>No games yet: start with the bot</i></span>') +
       '<span class="e"><i>Engine</i> <b>v' + esc(S.VERSION) + '</b></span></div><div class="fan"><i></i><i></i><i></i></div></section>';
@@ -201,8 +206,8 @@
         '<div class="small muted">' + esc(MODE_LABEL[r.mode] || 'Game') + ' · ' + r.turns + ' turns · ' + esc(ago(new Date(r.at).getTime() || Date.now())) + '</div></div>' +
         '<button class="sm" data-h="replay" data-id="' + r.id + '">Replay</button></div>';
     });
-    h += '</div><div class="betabox"><div class="bh"><span class="betatag">BETA</span><b>' + esc(BETA.label) + '</b>' + (left ? '<i>' + esc(left) + '</i>' : '') + '</div>' +
-      '<p>Battle Sim is in a one-week beta. It may end earlier if no bugs are reported and player feedback is positive.</p>' +
+    h += '</div><div class="betabox">' + (betaOn() ? '<div class="bh"><span class="betatag">BETA</span><b>' + esc(BETA.label) + '</b>' + (left ? '<i>' + esc(left) + '</i>' : '') + '</div>' +
+      '<p>Battle Sim is in a one-week beta. It may end earlier if no bugs are reported and player feedback is positive.</p>' : '<div class="bh"><b>Help us improve</b></div>') +
       '<p class="small">Something wrong with a rule or a card effect? Is anything confusing on your phone? Your report goes straight to the developer.</p>' +
       '<div class="mgo"><button class="pri" data-rep="open" data-v="bug">🐞 Report a bug</button><button data-rep="open" data-v="feedback">💬 Send feedback</button></div></div></section>';
     $('home').innerHTML = h;
