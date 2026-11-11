@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!-- MHR DECK LAB — 404.html (v7.32)
+     GitHub Pages menampilkan berkas ini untuk alamat yang tidak ada.
+     v7.32: link berbagi baru /b/<kode binder> dan /d/<kode deck> normalnya dilayani
+     Cloudflare Worker (tools/share-worker.js). Kalau Worker belum/tidak terpasang,
+     halaman ini mengalihkan ke link hash lama supaya link tetap terbuka. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>MHR Deck Lab</title>
+<script>
+(function(){
+  var p = location.pathname, m;
+  if((m = p.match(/^\/b\/([A-Za-z0-9]{6,32})\/?$/))){ location.replace('/#binder/' + m[1]); return; }
+  if((m = p.match(/^\/d\/(1\.[A-Za-z0-9_-]*\.[A-Za-z0-9]*)\/?$/))){ location.replace('/#d=' + m[1]); return; }
+})();
+</script>
+<style>
+  body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0B0E12;color:#C0C8D2;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;text-align:center;padding:16px;box-sizing:border-box}
+  h1{color:#fff;font-size:24px;margin:0 0 8px}
+  a{color:#F2B01E;font-weight:700}
+</style>
+</head>
+<body>
+<main>
+  <h1>Page not found</h1>
+  <p>This page doesn't exist on MHR Deck Lab.</p>
+  <p><a href="/">Go to mhrdecklab.com →</a></p>
+</main>
+</body>
+</html>

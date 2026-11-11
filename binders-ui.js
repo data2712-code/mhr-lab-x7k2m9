@@ -57,7 +57,9 @@
   const E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const PER = 9, MAX_PAGES = 50, MAX_BINDERS = 20;
   const SITE = 'https://mhrdecklab.com/';
-  const linkOf = code => `${SITE}#binder/${code}`;
+  /* v7.32 — link /b/<kode> (thumbnail WhatsApp lewat Cloudflare Worker, lihat share-preview.js);
+     kalau Worker belum terpasang tetap #binder/<kode> seperti dulu */
+  const linkOf = code => window.MHRSharePreview ? window.MHRSharePreview.binderUrl(code) : `${SITE}#binder/${code}`;
   const KIND = {
     collection: { label:'My collection', icon:'🗂', bg:'linear-gradient(135deg,#8a2a2a,#431414)' },
     trade:      { label:'For sale / trade', icon:'🏷', bg:'linear-gradient(135deg,#1f6f43,#0f3d25)' },
@@ -222,6 +224,7 @@
     if(S.cur && S.cur.id === data.id){ S.cur.updated_at = data.updated_at; S.cur.hidden = data.hidden; S.cur.hidden_reason = data.hidden_reason; }
     if(S.list){ const i = S.list.findIndex(x=>x.id === data.id); if(i >= 0) S.list[i] = data; }
     setStatus('Saved ✓'); updateTile();
+    if(b.is_public && window.MHRSharePreview && window.MHRSharePreview.hasBinder(b.share_code)) queueOg(b);   // v7.32
   }
   /* buang null di ekor supaya json tetap kecil (panjang array boleh < pages × 9) */
   function trimSlots(slots){ let n = slots.length; while(n && !slots[n-1]) n--; return slots.slice(0, n); }
@@ -970,6 +973,7 @@
         <div class="bd-btns"><button type="button" class="btn2 main" data-bh="on">Turn on shared link</button><button type="button" class="btn2" data-bh="list">📋 Copy list for WhatsApp</button><button type="button" class="btn2" data-bh="image">🖼 Save as image</button></div>`;
     const m = mxOpen(`<div id="bhBody">${draw()}</div>`, 'bd-mx');
     const box = m.querySelector('.mx-box');
+    if(b.is_public) refreshOg(b);   // v7.32 — pastikan gambar thumbnail WhatsApp sudah ada & terbaru
     box.addEventListener('click', async e=>{
       const a = e.target.closest('[data-bh]'); if(!a) return;
       const act = a.dataset.bh;
@@ -979,6 +983,7 @@
       else if(act === 'native'){ try{ await navigator.share({ title:b.name, text:`${b.name} — MHR Deck Lab binder`, url:linkOf(b.share_code) }); }catch(err){} }
       else if(act === 'on' || act === 'off'){
         b.is_public = act === 'on'; box.querySelector('#bhBody').innerHTML = draw(); renderEditor(); await saveNow(); renderEditor();
+        if(window.MHRSharePreview){ if(b.is_public) refreshOg(b, true); else window.MHRSharePreview.removeBinder(b.share_code); }   // v7.32
       }
     });
   }
@@ -1367,7 +1372,7 @@
     ctx.textBaseline = 'alphabetic';
     let fy = footTop + 34;
     ctx.fillStyle = '#FFFFFF'; ctx.font = `800 ${fmtKey === 'story' ? 30 : 27}px ${bodyFont}`;
-    ctx.fillText(fitText(ctx, b.is_public ? `mhrdecklab.com/#binder/${b.share_code}` : 'mhrdecklab.com', maxTxt), left, fy);
+    ctx.fillText(fitText(ctx, b.is_public ? linkOf(b.share_code).replace(/^https?:\/\//, '') : 'mhrdecklab.com', maxTxt), left, fy);
     const contact = trade ? [b.contact_wa ? `WA ${prettyWa(b.contact_wa)}` : '', b.contact_ig ? `IG @${b.contact_ig}` : ''].filter(Boolean).join('  ·  ') : '';
     if(contact){ fy += 38; ctx.fillStyle = '#F2B01E'; ctx.font = `700 ${fmtKey === 'story' ? 26 : 24}px ${bodyFont}`; ctx.fillText(fitText(ctx, contact, maxTxt), left, fy); }
     fy += contact ? 34 : 38;
@@ -1377,6 +1382,65 @@
     ctx.fillText(fitText(ctx, 'Card art © MARVEL © JASON · fan-made content, unofficial', maxTxt), left, fy);
     return cv;
   }
+  /* =================== v7.32 — GAMBAR THUMBNAIL LINK BINDER (1200×630) ===================
+     Dipakai share-preview.js: diunggah ke Storage "share-previews/binder/<kode>.jpg" oleh pemilik
+     saat binder dibagikan; Cloudflare Worker memasangnya sebagai og:image link /b/<kode>.
+     Kiri: logo, jenis binder, nama, pemilik, jumlah kartu. Kanan: halaman binder pertama yang
+     berisi kartu (3×3), gaya sama dengan "Save as image". Kartu terjual tampil abu-abu + SOLD. */
+  async function ownerName(){
+    if(S.username) return S.username;
+    try{ if(window.MHRAuth && window.MHRAuth.getUsername){ const ss = await window.MHRAuth.getSession(); S.username = (await window.MHRAuth.getUsername(ss)) || ''; } }catch(e){}
+    return S.username || '';
+  }
+  async function ogCanvas(b, owner){
+    const K = window.MHRSharePreview._kit; const { W, H, rr } = K;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d');
+    const k = KIND[b.kind] || KIND.collection, trade = b.kind === 'trade';
+    const glowB = colorOf(b) === 'black' ? (KIND_GLOW[b.kind] || '#E4442E') : COLORS[colorOf(b)].glow;
+    const F = await K.frame(ctx, k.label, '#F2B01E', glowB);
+    let y = K.title(ctx, F, b.name || 'Binder', 160, 560);
+    const copies = filled(b).filter(s=>!s.sold).reduce((a, s)=>a + (s.q || 1), 0);
+    ctx.font = `600 24px ${F.body}`; ctx.fillStyle = '#C0C8D2';
+    y += 42; ctx.fillText(K.fit(ctx, owner ? `by @${owner}` : 'MHR Deck Lab binder', 560), 56, y);
+    y += 36; ctx.fillText(`${copies} card${copies === 1 ? '' : 's'} · ${b.pages} page${b.pages == 1 ? '' : 's'}`, 56, y);
+    if(b.location){ y += 36; ctx.fillText(K.fit(ctx, `📍 ${b.location}`, 560), 56, y); }
+    K.footer(ctx, F, trade ? 'Prices & contact on the binder page' : 'View the full binder');
+    /* halaman pertama yang berisi kartu */
+    let pg = 0; for(let i = 0; i < b.pages; i++){ if(b.slots.slice(i * PER, i * PER + PER).some(Boolean)){ pg = i; break; } }
+    const slots = b.slots.slice(pg * PER, pg * PER + PER);
+    const gap = 10, padP = 18, ch = Math.floor((H - 2 * 44 - 2 * padP - 2 * gap) / 3), cw = Math.round(ch * 63 / 88);
+    const pw = 3 * cw + 2 * gap + 2 * padP, ph = 3 * ch + 2 * gap + 2 * padP, px = W - 56 - pw, py = Math.round((H - ph) / 2);
+    ctx.fillStyle = '#12161C'; rr(ctx, px, py, pw, ph, 18); ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = glowB; ctx.stroke();
+    const imgs = await Promise.all(Array.from({ length:PER }, (_, i)=>{ const s = slots[i]; if(!s) return null; if(isX(s)) return s.ph ? loadImgCors(purl(s.ph)) : null; const c = card(s.no); return c ? cardImage(c, s.v) : null; }));
+    const showPrice = trade && b.show_prices !== false;
+    for(let i = 0; i < PER; i++){
+      const s = slots[i], x = px + padP + (i % 3) * (cw + gap), yy = py + padP + Math.floor(i / 3) * (ch + gap);
+      if(!s){ ctx.save(); ctx.setLineDash([8, 7]); ctx.lineWidth = 2; ctx.strokeStyle = '#2C3644'; rr(ctx, x + 2, yy + 2, cw - 4, ch - 4, 8); ctx.stroke(); ctx.restore(); continue; }
+      if(s.sold){ ctx.save(); ctx.filter = 'grayscale(1) brightness(.5)'; }
+      K.drawCard(ctx, F, imgs[i], x, yy, cw, ch, s.q || 1, isX(s) ? xName(s) : s.no);
+      if(s.sold){ ctx.restore();
+        ctx.save(); ctx.translate(x + cw / 2, yy + ch * 0.45); ctx.rotate(-14 * Math.PI / 180);
+        const bh = ch * 0.14; ctx.fillStyle = 'rgba(228,68,46,.92)'; ctx.fillRect(-cw * 0.62, -bh / 2, cw * 1.24, bh);
+        ctx.fillStyle = '#fff'; ctx.font = `800 ${Math.round(bh * 0.62)}px ${F.disp}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('SOLD', 0, 2); ctx.restore();
+      } else if(showPrice && s.price != null && s.price !== ''){
+        const t = shortMoney(+s.price, curOf(s)), fs = Math.round(cw * 0.13);
+        ctx.font = `800 ${fs}px ${F.body}`; const tw = ctx.measureText(t).width + fs * 0.8, th = fs * 1.5;
+        ctx.fillStyle = 'rgba(11,14,18,.92)'; rr(ctx, x + 8, yy + 8, tw, th, 6); ctx.fill();
+        ctx.fillStyle = '#F2B01E'; ctx.textBaseline = 'middle'; ctx.fillText(t, x + 8 + fs * 0.4, yy + 8 + th / 2 + 1); ctx.textBaseline = 'alphabetic';
+      }
+    }
+    return cv;
+  }
+  window.MHRBinderOg = ogCanvas;
+  /* unggah / perbarui thumbnail (hanya pemilik, hanya binder yang link-nya aktif) */
+  function refreshOg(b, force){
+    const SP = window.MHRSharePreview; if(!SP || !b || !b.is_public || !b.share_code) return;
+    SP.binderPreview(b, async ()=>ogCanvas(b, await ownerName()), force);
+  }
+  let ogTmr = 0;
+  function queueOg(b){ clearTimeout(ogTmr); ogTmr = setTimeout(()=>{ if(S.cur && S.cur.id === b.id) refreshOg(S.cur); }, 8000); }
   const slug = s => String(s || 'binder').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'binder';
   const toBlob = cv => new Promise(res => cv.toBlob(b => res(b), 'image/png'));
 

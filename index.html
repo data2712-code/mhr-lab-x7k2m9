@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.31  ·  10 November 2026
+     MHR DECK LAB  ·  versi 7.32  ·  11 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.31">
+<meta name="version" content="7.32">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -3408,7 +3408,8 @@
 <script src="events.js?v=7.02"></script>
 <script src="events-ui.js?v=7.05"></script>
 <script src="binders.js?v=7.23"></script>
-<script src="binders-ui.js?v=7.25"></script>
+<script src="binders-ui.js?v=7.32"></script>
+<script src="share-preview.js?v=7.32"></script>   <!-- v7.32 — thumbnail WhatsApp untuk link binder (/b/) & deck (/d/) lewat Cloudflare Worker (tools/share-worker.js) -->
 <!-- v7.13 — Performance Analytics (Tahap 1): servis match_logs/match_archetypes (perf.js) + tab Performance (perf-ui.js).
      v7.14 (Tahap 2): tournament runs, import dari Events, share gambar run, grafik tren, detail matchup.
      v7.15 (Tahap 3): data matchup komunitas (opt-in, anonim), detail deck + statistik per versi deck. -->
@@ -3444,7 +3445,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.31</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.32</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -7060,20 +7061,37 @@ function deckShareURL(){
   return base + '#d=' + encodeDeck(state.deck, store.active);
 }
 
+/* v7.32 — link deck baru https://mhrdecklab.com/d/<kode>[?i=<id>] supaya WhatsApp menampilkan
+   nama deck + gambar pratinjau deck (share-preview.js + Cloudflare Worker). Akun login: gambar
+   pratinjau diunggah dulu (maks. ±7 detik). Guest: judul & deskripsi deck, gambar umum.
+   Kalau Worker belum terpasang, isinya tetap #d=<kode> seperti dulu. Clipboard memakai
+   ClipboardItem berisi Promise supaya Safari tetap mengizinkan salin setelah proses async. */
 $('#btnLink').addEventListener('click', async ()=>{
   if(!deckCount()){ alert(t('mDeckEmpty')); return; }
   window.MHRUsage && window.MHRUsage.mark('bld_share');   // v7.25
-  const url = deckShareURL();
   const btn = $('#btnLink');
+  if(btn.dataset.busy) return;
+  const SP = window.MHRSharePreview;
+  const urlP = SP ? SP.deckUrl({...state.deck}, store.active).catch(()=>deckShareURL()) : Promise.resolve(deckShareURL());
+  btn.dataset.busy = '1';
+  if(SP && SP.enabled) btn.textContent = '⏳ Preparing link…';
+  let url = '';
   try{
-    await navigator.clipboard.writeText(url);
+    if(SP && SP.enabled && window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+      await navigator.clipboard.write([new ClipboardItem({ 'text/plain': urlP.then(u=>{ url = u; return new Blob([u], {type:'text/plain'}); }) })]);
+    } else {
+      url = await urlP;
+      await navigator.clipboard.writeText(url);
+    }
     btn.textContent = t('linkCopied');
   }catch(e){
+    url = url || await urlP;
     const box = $('#exportBox');
     box.value = url; box.classList.add('show'); box.select();
     try{ document.execCommand('copy'); btn.textContent = t('linkCopied'); }
     catch(e2){ btn.textContent = t('copyManual'); }
   }
+  delete btn.dataset.busy;
   setTimeout(()=>btn.textContent = t('copyLink'), 2200);
 });
 

@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.30** · 10 November 2026
+**Versi saat ini: v7.32** · 11 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -602,6 +602,50 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.32 — Thumbnail WhatsApp untuk link binder & link deck (gambar pratinjau binder / deck) — 11 November 2026 *(`index.html`, `binders-ui.js`, berkas BARU `share-preview.js`, `404.html`, `tools/share-worker.js`; migrasi SQL baru `mhr_decklab_v732_share_previews.sql` dan panduan Worker di folder internal)*
+
+Permintaan pemilik: saat link binder / link deck dibagikan di WhatsApp, thumbnail-nya harus pratinjau binder / deck itu,
+bukan gambar umum situs. Keputusan pemilik: pakai **Cloudflare Worker** (dipasang pemilik sendiri), dan gambar pratinjau
+deck **hanya untuk akun login** (guest tetap dapat judul & deskripsi deck yang benar, dengan gambar umum).
+
+- **Kenapa perlu Worker:** crawler WhatsApp tidak menjalankan JavaScript dan tidak melihat bagian `#…` dari URL, jadi
+  link lama `/#binder/<kode>` dan `/#d=<kode>` selalu dibaca sebagai halaman depan (`og-image.jpg`).
+- **Link baru:** `https://mhrdecklab.com/b/<kode binder>` dan `https://mhrdecklab.com/d/<kode deck>` (akun login:
+  `…/d/<kode deck>?i=<id>`). Worker `tools/share-worker.js` (rute `mhrdecklab.com/b/*` dan `mhrdecklab.com/d/*`)
+  membalas HTML kecil berisi `og:title`, `og:description`, `og:image` yang sesuai, lalu langsung mengalihkan pengunjung
+  ke link hash lama, jadi situs membukanya persis seperti dulu. Binder privat / disembunyikan / tidak ada → judul umum
+  + `og-image.jpg`. Jalur lain tidak lewat Worker.
+- **Aman sebelum Worker dipasang:** situs memeriksa `GET /b/__ping` (Worker membalas `{"mhr":"share"}`); selama belum
+  ada jawaban itu, semua tombol tetap membagikan link hash lama. `404.html` baru juga mengalihkan `/b/<kode>` →
+  `/#binder/<kode>` dan `/d/<kode>` → `/#d=<kode>` kalau Worker suatu saat dimatikan. Link lama tetap berfungsi selamanya.
+- **Gambar pratinjau (1200×630 JPEG, ≤ 380 KB)** digambar di browser (canvas, gaya template konten sosmed) lalu diunggah
+  ke bucket Storage publik **`share-previews`**:
+  - **binder** `binder/<share_code>.jpg` — oleh pemilik saat membuka 🔗 Share (link aktif) atau menyalakan link; diperbarui
+    otomatis ±8 detik sesudah binder yang sudah punya gambar disimpan lagi; dihapus saat link dimatikan. Isi: logo, jenis
+    binder, nama, pemilik, jumlah kartu (tanpa yang terjual), halaman, lokasi, dan halaman binder pertama yang berisi kartu
+    (3×3, harga untuk For sale / trade bila harga ditampilkan, kartu terjual abu-abu + SOLD).
+  - **deck** `deck/<id>.jpg` — oleh akun login saat "Copy deck link" (id dari tabel baru `deck_shares` lewat RPC
+    `mhr_deck_share_make`, satu id per akun per kode deck; deck yang sama tidak diunggah ulang). Isi: nama deck, jumlah
+    kartu, pemilik, jumlah per warna, kurva Level, dan 8 kartu kunci (jumlah terbanyak lalu Level tertinggi) dengan ×N.
+  - Tombol "Copy deck link" menampilkan "⏳ Preparing link…" selama pembuatan id + unggah (maks. ±7 detik, sisanya lanjut
+    di latar belakang). Salin memakai `ClipboardItem` berisi Promise supaya tetap jalan di Safari/iPhone.
+- **Kode deck tetap utuh di dalam link baru**, jadi Import from text, Events (decklist), Tournament admin, dan pembaca
+  link lain tetap menemukan `1.xxx.yyy` di dalamnya (dicek dengan `cariKodeDeckDibagikan`).
+- **Supabase** (`mhr_decklab_v732_share_previews.sql`): tabel `deck_shares` (RLS: pemilik membaca miliknya; tulis hanya
+  lewat RPC, maks. 200 link baru per akun per hari), RPC `mhr_deck_share_make` (authenticated) dan `mhr_deck_share_get`
+  (anon, dibaca Worker), bucket `share-previews` (publik, JPEG, maks. 400 KB), fungsi `mhr_share_preview_owner` +
+  4 kebijakan Storage: hanya pemilik binder / pemilik baris `deck_shares` yang boleh menulis berkasnya. GRANT eksplisit.
+  Worker memakai anon key yang sama dengan `auth.js`. Sebelum migrasi dijalankan, akun login mendapat link `/d/<kode>`
+  seperti guest.
+- Versi situs 7.32 (`index.html`: header, `meta version`, footer, `binders-ui.js?v=7.32`, `share-preview.js?v=7.32`).
+  Battle Sim (`sim/`) tidak diubah; perubahan pilihan "Your deck" diserahkan ke sesi simulator lewat brief terpisah.
+- Dicek: situs di salinan lokal dengan Supabase tiruan (Playwright) 23/23 lulus — tanpa Worker link tetap format lama;
+  guest `/d/<kode>` tanpa unggah; login `/d/<kode>?i=<id>` + satu unggahan JPEG; migrasi belum jalan → `/d/<kode>`;
+  binder `/b/<kode>`, unggah sekali, tidak unggah ulang bila tidak berubah, dihapus saat link dimatikan; `404.html`
+  mengalihkan; tanpa error JS. Worker di Node dengan Supabase tiruan 14/14 (judul di-escape, gambar ber-`?v=`, id milik kode
+  lain tidak dipakai, kode rusak → beranda, jalur lain diteruskan). SQL dijalankan dua kali di PostgreSQL lokal dengan
+  skema auth/storage tiruan: akun lain tidak bisa menulis gambar binder/deck orang lain, anon hanya bisa `mhr_deck_share_get`.
 
 ### v7.31 — Weekly Rush LGS: jadwal disimpan di Supabase + admin bisa menambah / mengubah / menghapus dari situs — 10 November 2026 *(`index.html`, berkas BARU `lgs-admin.js`, migrasi SQL baru `mhr_decklab_v731_lgs_stores.sql` di folder internal)*
 
