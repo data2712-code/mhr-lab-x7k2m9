@@ -7,8 +7,8 @@
    - window.MHRSimHost: jembatan yang dipakai simulator di dalam iframe (asal sama) — sesi login (token Supabase untuk
      server Battle Sim), Deck Saya, deck Tournament Decks, klien Supabase (riwayat online & laporan), buka modal login,
      dan mode layar penuh selama permainan.
-   - renderSimPage(sub): isi halaman #sim. Selama uji O2 hanya akun admin (tabel admin_users) yang melihat menu & halaman;
-     pengunjung lain mendapat pesan singkat, iframe tidak dimuat.
+   - renderSimPage(sub): isi halaman #sim. Beta O3 (11 Nov 2026, riwayat simulator #70): SEMUA akun yang login melihat
+     menu & halaman (uji O2 dulu hanya admin); pengunjung tanpa login mendapat ajakan login, iframe tidak dimuat.
    - Link undangan room privat: #sim/room/KODE (dibagikan lewat WhatsApp) → iframe dibuka langsung di formulir gabung.
    - Kartu admin "🐞 Battle Sim reports" di My Lab: laporan bug & feedback dari tabel sim_feedback (hanya admin, RLS).
    Bergantung pada variabel global di blok <script> utama index.html (isAccountAdmin, isLoggedIn, state, TOURNAMENTS,
@@ -21,6 +21,7 @@
   const q = s => document.querySelector(s);
   const admin = () => (typeof isAccountAdmin !== 'undefined' && isAccountAdmin);
   const loggedIn = () => (typeof isLoggedIn !== 'undefined' && isLoggedIn);
+  const canPlay = () => loggedIn();        // beta O3: semua akun login (server: AUTH = "user"). Uji O2 dulu: admin()
 
   /* ---------- jembatan untuk simulator di dalam iframe ---------- */
   window.MHRSimHost = {
@@ -64,13 +65,12 @@
     const wrap = q('#simWrap'); if (!wrap) return;
     const room = sub && /^room\/([A-Z0-9]{6})$/i.test(sub) ? sub.slice(5).toUpperCase() : null;
     if (room) lastRoom = room;
-    if (!admin()) {
+    if (!canPlay()) {
       if (frame()) wrap.innerHTML = '';
       const authReady = window.MHRAuth && window.MHRAuth.ready;
       wrap.innerHTML = '<div class="sim-gate"><h2>⚔️ Battle Sim</h2>' +
-        (!loggedIn() ? '<p>Battle Sim is in closed testing. Log in with a tester account to open it.</p>' + (authReady ? '<p><button class="nw-btn ev-main" id="simLogin">Log in</button></p>' : '') :
-          '<p>Battle Sim is in closed testing and not open to everyone yet. Thank you for your patience!</p>') +
-        (lastRoom ? '<p class="ev-muted">Room invite: <b>' + esc(lastRoom) + '</b>. Keep this link; it will open the room once you have access.</p>' : '') + '</div>';
+        '<p>Battle Sim is in beta. Log in with your MHR Deck Lab account to play.</p>' + (authReady ? '<p><button class="nw-btn ev-main" id="simLogin">Log in</button></p>' : '') +
+        (lastRoom ? '<p class="ev-muted">Room invite: <b>' + esc(lastRoom) + '</b>. The room opens right after you log in.</p>' : '') + '</div>';
       const b = q('#simLogin'); if (b) b.onclick = () => window.MHRSimHost.openLogin();
       return;
     }
@@ -86,10 +86,10 @@
   };
   // Dipanggil setelah status login/admin berubah (refreshAccountUI di index.html).
   window.refreshSimNav = function () {
-    const b = q('#navTabs [data-page="sim"]'); if (b) b.hidden = !admin();
+    const b = q('#navTabs [data-page="sim"]'); if (b) b.hidden = !canPlay();
     const rb = q('#simRepBox'); if (rb) { rb.hidden = !admin(); if (!admin()) rb.open = false; }
     if (typeof state !== 'undefined' && state.page === 'sim') window.renderSimPage();
-    if (!admin()) document.body.classList.remove('sim-full');
+    if (!canPlay()) document.body.classList.remove('sim-full');
   };
 
   /* ---------- My Lab: laporan Battle Sim (admin) ---------- */

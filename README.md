@@ -45,7 +45,7 @@ mhr-lab-x7k2m9/
 ├── perf.js            ← servis Supabase Performance Analytics: catatan match, archetype, tournament runs, data komunitas (v7.13–v7.15, tanpa DOM)
 ├── perf-ui.js         ← tab Performance di My Dashboard: catat match, statistik, tren, runs, import Events, share gambar, komunitas, versi deck (v7.13–v7.15)
 ├── lgs-admin.js       ← jadwal Weekly Rush LGS dari Supabase (tabel lgs_stores) + editor admin di halaman #lgs; data.js = cadangan (v7.31)
-├── sim-host.js        ← Battle Sim: penghubung situs ↔ simulator (menu khusus admin, iframe, link undangan, kartu laporan di My Lab) (v7.29)
+├── sim-host.js        ← Battle Sim: penghubung situs ↔ simulator (menu untuk akun login sejak beta O3, iframe, link undangan, kartu laporan admin di My Lab) (v7.29)
 ├── sim/               ← simulator Battle Sim (index.html + 14 skrip) — DIBUAT mhr-simulator\online\site-sim.js, jangan diedit tangan (v7.29)
 ├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
 ├── sitemap.xml           ← SEO: sitemap untuk Google Search Console (sejak v6.21)
@@ -602,6 +602,16 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### Data — Battle Sim beta O3: menu terbuka untuk semua akun login — 11 November 2026 *(`sim-host.js`, `index.html`)*
+
+Keputusan pemilik setelah uji O2 lulus (riwayat simulator #69–#70; rincian di `mhr-simulator\`).
+
+- Menu dan halaman **Battle Sim** kini tampil untuk **semua akun yang login** (dulu hanya admin). Tanpa login: menu
+  tersembunyi; link undangan `#sim/room/KODE` menampilkan ajakan login. Kartu **Battle Sim reports** di My Lab tetap admin.
+- **Harus berbarengan dengan server**: variabel `AUTH` di Worker `mhr-battle-sim-test` diubah dari `admin` ke `user`.
+  Bila situs di-push lebih dulu, akun non-admin melihat menu tetapi ditolak saat membuat/bergabung room (mode offline tetap jalan).
+- Isi `sim/` tidak berubah (tetap o2.3). Cache-buster `index.html` → `sim-host.js?v=7.32-sim4`. Versi situs tetap 7.32.
 
 ### Perbaikan v7.32 — link berbagi masih format lama di tab yang sudah terbuka — 11 November 2026 *(`share-preview.js`, `index.html`)*
 
