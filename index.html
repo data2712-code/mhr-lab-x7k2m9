@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.32  ·  11 November 2026
+     MHR DECK LAB  ·  versi 7.33  ·  11 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.32">
+<meta name="version" content="7.33">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2698,6 +2698,26 @@
   .lab-mh{font-weight:700;font-size:13px;color:var(--paper);padding:2px 6px 8px;display:flex;flex-direction:column;gap:1px}
   .lab-mh span{font-weight:400;font-size:11.5px;color:var(--muted)}
   .lab-grid{display:flex;flex-direction:column;gap:2px}
+  /* v7.33 — My Lab: item super-admin (admin-roles.js) + layar Admin roles */
+  .lab-grid.lab-super{margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}
+  .lab-grid.lab-super[hidden]{display:none}
+  .mx-box.ar-mx{max-width:560px}
+  .ar-mx h4{font-family:var(--disp);font-size:15px;margin:16px 0 6px}
+  .ar-mut{color:var(--muted);font-size:13px;margin:4px 0}
+  .ar-err{color:var(--merah);font-size:13.5px}
+  .ar-msg{font-size:13.5px;margin:10px 0 0;color:var(--paper)}
+  .ar-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .ar-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .ar-u{display:flex;flex-direction:column;min-width:0;overflow-wrap:anywhere}
+  .ar-u small{color:var(--muted);font-size:11.5px}
+  .ar-tag{font-size:11.5px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:3px 9px;color:var(--muted);white-space:nowrap}
+  .ar-tag.sup{color:#1A1200;background:#F2B01E;border-color:#F2B01E}
+  .ar-btn{flex:none;white-space:nowrap}
+  .ar-btn.main{border-color:var(--accent);color:var(--accent);font-weight:700}
+  .ar-btn.warn{background:var(--merah);border-color:var(--merah);color:#fff;font-weight:800}
+  .ar-q{width:100%;box-sizing:border-box;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--paper);font:inherit;margin-bottom:8px}
+  .ar-log{margin-top:14px;font-size:12.5px;color:var(--muted)}
+  .ar-log ul{margin:6px 0 0;padding-left:18px}
   .lab-grid button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;
     border:1px solid transparent;border-radius:9px;padding:8px;color:var(--paper);cursor:pointer;font:inherit}
   .lab-grid button:hover,.lab-grid button:focus-visible{background:var(--ink);border-color:var(--line);outline:none}
@@ -3409,7 +3429,8 @@
 <script src="events-ui.js?v=7.05"></script>
 <script src="binders.js?v=7.23"></script>
 <script src="binders-ui.js?v=7.32"></script>
-<script src="share-preview.js?v=7.32b"></script>   <!-- v7.32 — thumbnail WhatsApp untuk link binder (/b/) & deck (/d/) lewat Cloudflare Worker (tools/share-worker.js) -->
+<script src="share-preview.js?v=7.32b"></script>
+<script src="admin-roles.js?v=7.33"></script>   <!-- v7.33 — super-admin: My Lab → 👑 Admin roles (beri / cabut admin), tabel super_admins -->   <!-- v7.32 — thumbnail WhatsApp untuk link binder (/b/) & deck (/d/) lewat Cloudflare Worker (tools/share-worker.js) -->
 <!-- v7.13 — Performance Analytics (Tahap 1): servis match_logs/match_archetypes (perf.js) + tab Performance (perf-ui.js).
      v7.14 (Tahap 2): tournament runs, import dari Events, share gambar run, grafik tren, detail matchup.
      v7.15 (Tahap 3): data matchup komunitas (opt-in, anonim), detail deck + statistik per versi deck. -->
@@ -3445,7 +3466,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.32</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.33</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -10412,6 +10433,7 @@ window.addEventListener('hashchange', ()=>{
     { const ub = $('#usageBox'); if(ub){ ub.hidden = !isAccountAdmin; if(!isAccountAdmin) ub.open = false; } }   // v7.25
     if(window.refreshSimNav) window.refreshSimNav();   // v7.29 — menu Battle Sim & kartu laporan (admin)
     if(window.refreshLgsAdmin) window.refreshLgsAdmin();   // v7.31 — bilah admin & tombol Edit di Weekly Rush LGS
+    if(window.refreshAdminRoles) window.refreshAdminRoles();   // v7.33 — menu 👑 Admin roles (super-admin saja)
     if(typeof renderProxyBox === 'function') renderProxyBox();
     /* v6.62 — admin melihat draft + tombol tulis/edit di halaman Berita */
     if(typeof refreshBerita === 'function') refreshBerita();

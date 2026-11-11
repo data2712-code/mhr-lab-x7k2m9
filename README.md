@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.32** · 11 November 2026
+**Versi saat ini: v7.33** · 11 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -612,6 +612,30 @@ Keputusan pemilik setelah uji O2 lulus (riwayat simulator #69–#70; rincian di 
 - **Harus berbarengan dengan server**: variabel `AUTH` di Worker `mhr-battle-sim-test` diubah dari `admin` ke `user`.
   Bila situs di-push lebih dulu, akun non-admin melihat menu tetapi ditolak saat membuat/bergabung room (mode offline tetap jalan).
 - Isi `sim/` tidak berubah (tetap o2.3). Cache-buster `index.html` → `sim-host.js?v=7.32-sim4`. Versi situs tetap 7.32.
+
+### v7.33 — Peran super-admin + kelola admin dari My Lab (👑 Admin roles) — 11 November 2026 *(`index.html`, berkas BARU `admin-roles.js`; migrasi SQL baru `mhr_decklab_v733_super_admin.sql` di folder internal)*
+
+Permintaan pemilik: akun **data2712** menjadi **super-admin** (peran tertinggi), dan super-admin bisa memberi akun lain peran
+admin dari situs, lewat menu My Lab. Sebelumnya admin hanya bisa ditambah lewat SQL Editor Supabase.
+
+- **Tabel baru `super_admins`** (RLS: akun hanya membaca barisnya sendiri; tanpa kebijakan tulis — super-admin hanya bisa
+  ditambah/dihapus lewat SQL Editor). Migrasi memasukkan `data2712` ke tabel ini dan memastikan akun itu tetap ada di
+  `admin_users`. Fungsi `mhr_is_super_admin()`.
+- **RPC khusus super-admin** (security definer, menolak akun lain dengan `NOT_ALLOWED`): `mhr_admin_roles_list` (daftar admin +
+  20 perubahan terakhir), `mhr_admin_roles_search` (cari username, min. 2 huruf, maks. 10 hasil), `mhr_admin_roles_set`
+  (jadikan / cabut admin berdasarkan username). Super-admin tidak bisa dicabut adminnya lewat situs (`IS_SUPER_ADMIN`).
+  Tabel `admin_users` tidak diubah dan tetap tanpa kebijakan tulis, jadi RPC ini satu-satunya jalan menulis dari situs.
+- **Tabel baru `admin_role_log`**: siapa memberi / mencabut admin siapa dan kapan (hanya super-admin yang bisa membaca).
+- **My Lab → 👑 Admin roles** (hanya tampil untuk super-admin, di bawah empat menu My Lab): daftar admin (tanggal sejak kapan,
+  label Super-admin, tombol **Remove admin**), kolom cari username dengan tombol **Make admin**, dan riwayat perubahan.
+  Setiap tombol perlu diklik dua kali (konfirmasi). Perubahan berlaku saat akun itu membuka / memuat ulang situs.
+- Sebelum migrasi dijalankan, menu tidak muncul (tabel `super_admins` belum ada). Versi situs 7.33 (`index.html`: header,
+  `meta version`, footer, `admin-roles.js?v=7.33`).
+- Sebelumnya hari ini, atas permintaan pemilik, peran admin akun `donsingkong` dicabut langsung di Supabase
+  (`delete from admin_users`), sehingga admin tersisa hanya `data2712`.
+- Dicek: SQL dijalankan dua kali di PostgreSQL lokal dengan skema tiruan — akun biasa ditolak di semua RPC dan tidak bisa
+  menulis `admin_users` / `super_admins`; super-admin bisa mencari, memberi, dan mencabut admin; super-admin tidak bisa dicabut;
+  riwayat tercatat. Situs di salinan lokal dengan Supabase tiruan (Playwright, desktop & HP).
 
 ### Perbaikan v7.32 — link berbagi masih format lama di tab yang sudah terbuka — 11 November 2026 *(`share-preview.js`, `index.html`)*
 
