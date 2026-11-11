@@ -603,6 +603,17 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.8: "Your deck" hanya deck akun + tempel kode; Find a match tanpa Siaga — 12 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #80; rincian di `mhr-simulator\`. Permintaan pemilik: menu **Your deck** (Practice vs Bot, Play a friend
+online, Find a match) kini hanya berisi deck yang pemain simpan ke akunnya + "Paste a deck link / code…" — Tournament Decks,
+User/Community decks dan Test decks dihapus dari menu itu (deck bot tetap deck uji). Find a match: mode Siaga dihapus
+(perubahan **server**, perlu `wrangler deploy`; room privat dan satu perangkat tetap memakai Siaga). `sim/` disalin ulang
+(o2.8), `SIM_URL` → `?v=o2.8`, `sim-host.js?v=7.33-sim8`. `tourneyDecks()` di `sim-host.js` tidak dipakai lagi oleh simulator.
+Juga di o2.8 (riwayat simulator #81): **menu Battle Sim baru, opsi A "Play Blade"** pilihan pemilik — panel Play di kanan
+(MODE → ubin deck akun + tempel kode → PLAY / FIND A MATCH), pintasan Play · History · Sandbox · Tools · Feedback di kiri;
+menggantikan menu hub #76 yang terlalu mirip rushdee.app.
+
 ### Data — Battle Sim o2.7: pengaturan "Counter prompts" On / Auto / Off — 12 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #79; rincian di `mhr-simulator\`. `sim/` disalin ulang (o2.7): tombol Counter prompts di papan (pass

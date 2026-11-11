@@ -36,6 +36,28 @@
     if (!withCode) { const o = tmp.querySelector('option[value="code"]'); if (o) o.remove(); }
     return tmp.innerHTML;
   }
+  /* #80 (keputusan pemilik 12 Nov 2026): "Your deck" di Battle Sim situs = deck yang disimpan pemain ke akunnya + tempel
+     link/kode (sim-online.js). Deck uji tetap untuk deck bot. Dibuka lokal tanpa situs (app\ untuk uji) = daftar lama. */
+  const OL = () => window.MHRSimOnline;
+  function yourDeckOptions() {
+    if (!onlineReady()) return deckOptions(true);
+    return OL().deckOptionsHTML();
+  }
+  function yourDeckNote() { return onlineReady() && !OL().myDecks().length ? '<div class="small muted" style="margin-top:4px" data-yournote>' + esc(OL().noDecksText) + '</div>' : ''; }
+  // Muat deck akun lalu perbarui menu "Your deck" yang sedang tampil (tanpa menggambar ulang layar).
+  function refreshYourDecks() {
+    if (!onlineReady()) return;
+    OL().loadDecks().then(() => ['hubDeck', 'prDeck'].forEach(id => {
+      const x = $(id); if (!x) return;
+      const pp = prefs.practice || {}, want = pp.deck === 'code' && pp.code ? 'code' : pp.deck;
+      x.innerHTML = OL().deckOptionsHTML();
+      x.value = want || ''; if (!x.value) x.selectedIndex = 0;   // deck akun pertama, atau "Paste…" bila belum ada
+      const note = x.parentNode.querySelector('[data-yournote]'); if (note) note.remove();
+      if (!OL().myDecks().length) x.insertAdjacentHTML('afterend', yourDeckNote());
+      if (id === 'prDeck' && $('prCodeWrap')) $('prCodeWrap').style.display = x.value === 'code' ? '' : 'none';
+      if (window.MHRSimI18N) window.MHRSimI18N.apply();
+    }));
+  }
   function testDeckValues() {
     const src = $('dk0'); if (!src) return ['sd01'];
     return Array.from(src.querySelectorAll('option')).map(o => o.value).filter(v => v !== 'code');
@@ -89,52 +111,88 @@
     const end = new Date(BETA.to + 'T23:59:59+07:00').getTime(), d = Math.ceil((end - Date.now()) / 86400000);
     return d > 1 ? d + ' days left' : d === 1 ? 'last day' : '';
   }
-  let hubOpen = prefs.hubOpen || 'practice';
-  function row(id, ic, title, sub, body, tag) {
-    const open = hubOpen === id;
-    return '<div class="mrow m-' + id + (open ? ' open' : '') + (tag && tag !== 'New' ? ' soon' : '') + '"><button class="mhead" data-acc="' + id + '" aria-expanded="' + open + '"><span class="ic">' + ic + '</span>' +
-      '<span class="mt"><b>' + esc(title) + '</b><span>' + esc(sub) + '</span></span>' + (tag ? '<span class="tag">' + esc(tag) + '</span>' : '') + '<span class="chev">▾</span></button>' +
-      '<div class="mbody">' + body + '</div></div>';
+  /* ---------------- Menu v7 · A "Play Blade" (riwayat #81, pilihan pemilik 12 Nov 2026) ----------------
+     Menggantikan menu "hub" #76 yang susunannya terlalu mirip rushdee.app. Pola panel Play di sisi kanan (MTG Arena /
+     Legends of Runeterra): MODE (4 ubin) → YOUR DECK (ubin deck akun + tempel kode) → pilihan mode → tombol PLAY.
+     Kiri: spanduk, pintasan (History, Sandbox, Tools, Feedback), permainan terakhir, kotak beta. Di HP panel Play tampil
+     tepat di bawah spanduk. Layar lama (More options, room online, Find a match, satu perangkat) tetap menjadi langkah kedua. */
+  const PB_MODES = [['practice', '🤖', 'Practice', 'vs Bot'], ['find', '⚔️', 'Find a match', 'Standard clock'], ['online', '🔗', 'Friend online', 'Room link'], ['custom', '👥', 'Same device', 'Pass-and-play']];
+  let pbMode = PB_MODES.some(m => m[0] === prefs.pbMode) ? prefs.pbMode : 'practice';
+  let pbDeck = null, pbCode = null, pbPicked = false;   // pilihan deck di panel (my:i atau code); pbPicked = dipilih pemain
+  const COLOR_DOT = { Merah: 'r', Kuning: 'y', Biru: 'b', Hijau: 'g', Orange: 'o', Purple: 'p' };
+  function deckLook(code) {
+    const d = S.decodeDeckCode(code || ''); if (!d || !d.list.length) return { n: 0, cols: [], key: null };
+    const cnt = {}; d.list.forEach(no => { cnt[no] = (cnt[no] || 0) + 1; });
+    const cols = {}; d.list.forEach(no => { const c = S.card(no); if (c) cols[c.c] = (cols[c.c] || 0) + 1; });
+    const key = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || ((S.card(b) || {}).l || 0) - ((S.card(a) || {}).l || 0))[0];
+    return { n: d.list.length, cols: Object.keys(cols).sort((a, b) => cols[b] - cols[a]), key };
   }
-  function qtile(attr, ic, title, sub) {
-    return '<button class="qtile" ' + attr + '><span class="ic">' + ic + '</span><b>' + esc(title) + '</b><span>' + esc(sub) + '</span></button>';
+  function pbImg(no) {
+    const base = window.MHRSIM_BASE || '../../mhr-lab-x7k2m9/';
+    return '<img alt="" draggable="false" src="' + base + 'images/en/' + no + '.jpg" data-no="' + no + '" data-i="0" onerror="window.__simImgErr && window.__simImgErr(this)">';
+  }
+  function pbDecksHTML() {
+    if (!onlineReady()) {     // dibuka lokal (app\ untuk uji): daftar lama
+      return '<div class="f"><select id="hubDeck">' + deckOptions(false) + '<option value="code">Deck link or code…</option></select></div>';
+    }
+    const list = OL().myDecks(), p = practicePrefs();
+    if (!pbPicked || pbDeck == null || (/^my:/.test(pbDeck) && !list[+pbDeck.slice(3)])) pbDeck = list.length ? (/^my:\d+$/.test(p.deck) && list[+p.deck.slice(3)] ? p.deck : 'my:0') : 'code';
+    let h = '<div class="pbdecks">';
+    list.slice(0, 11).forEach((d, i) => {
+      const lk = deckLook(d.code), v = 'my:' + i;
+      h += '<button class="pbdk' + (pbDeck === v ? ' on' : '') + '" data-pbdeck="' + v + '" title="' + esc(d.name) + '"><span class="art">' + (lk.key ? pbImg(lk.key) : '') + '</span>' +
+        '<span class="t"><b>' + esc(d.name) + '</b><span class="dots">' + lk.cols.map(c => '<i class="' + (COLOR_DOT[c] || '') + '"></i>').join('') + '</span> <small>' + lk.n + '</small></span></button>';
+    });
+    h += '<button class="pbdk paste' + (pbDeck === 'code' ? ' on' : '') + '" data-pbdeck="code"><span>＋ Paste a deck link / code</span></button></div>';
+    if (pbDeck === 'code') h += '<textarea id="pbCode" class="pbcode" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder">' + esc(pbCode != null ? pbCode : (p.code || '')) + '</textarea>';
+    if (!list.length) h += '<p class="small muted">' + esc(OL().noDecksText) + '</p>';
+    return h;
+  }
+  function pbBody() {
+    const on = onlineReady(), p = practicePrefs();
+    const offline = '<p class="small muted">Online play runs inside Battle Sim on mhrdecklab.com. Open mhrdecklab.com, log in, and choose Battle Sim in the menu.</p>';
+    let h = '';
+    if (pbMode === 'practice') {
+      h += '<div class="pblbl">YOUR DECK' + (on ? ' · SAVED TO YOUR ACCOUNT' : '') + '</div>' + pbDecksHTML() +
+        '<div class="pblbl">BOT LEVEL</div>' + seg('hublevel', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']], p.level) +
+        '<div id="hubErr" class="err"></div><button class="pbplay" data-hub="play">PLAY</button><button class="pbmore" data-mode="practice">More options (name, bot deck, clock, first player)</button>';
+    } else if (pbMode === 'find') {
+      h += on ? '<div class="pblbl">YOUR DECK · SAVED TO YOUR ACCOUNT</div>' + pbDecksHTML() +
+        '<p class="small muted">You are matched with the next player who is searching: Standard clock 2:00 / 0:30, random first player. After 45 seconds you can play the bot while you keep searching; a bot is always shown as a bot.</p>' +
+        '<div id="hubErr" class="err"></div><button class="pbplay" data-hub="play">FIND A MATCH</button>'
+        : offline + '<button class="pbmore" data-mode="find">Details</button>';
+    } else if (pbMode === 'online') {
+      h += on ? '<p class="small">Create a private room and send the link (WhatsApp works well), or enter a room code from a friend. You choose your deck and the turn clock on the next screen.</p>' +
+        '<button class="pbplay" data-mode="online">CREATE OR JOIN A ROOM</button>'
+        : offline + '<button class="pbmore" data-mode="online">Details</button>';
+    } else {
+      h += '<p class="small">Two players take turns on one device, with a handover screen between them. Flexible turn clock or a 30-minute match clock.</p>' +
+        '<button class="pbplay" data-mode="custom">SET UP THE GAME</button>';
+    }
+    return h;
+  }
+  function drawBlade() {
+    const el = $('pbBody'); if (!el) return;
+    document.querySelectorAll('#home [data-pbmode]').forEach(b => b.classList.toggle('on', b.dataset.pbmode === pbMode));
+    el.innerHTML = pbBody();
+    const hd = $('hubDeck'); if (hd) { const p = practicePrefs(); hd.value = p.deck === 'code' ? 'code' : p.deck; if (!hd.value) hd.selectedIndex = 0; }
+    if (window.MHRSimI18N) window.MHRSimI18N.apply();
   }
   function renderHome() {
-    const ui = U(), hist = ui ? ui.history() : [], on = onlineReady();
-    const p = practicePrefs();
+    const ui = U(), hist = ui ? ui.history() : [];
     const mine = hist.filter(r => r.me != null && r.winner != null);
     const W = mine.filter(r => r.winner === r.me).length, L = mine.filter(r => r.winner >= 0 && r.winner !== r.me).length;
     const left = betaLeft();
-    let h = '<div class="hubmain"><div class="hero"><div class="kick"><span>MARVEL HERO RUSH · MATCH SIMULATOR</span><span class="betatag">BETA</span></div>' +
-      '<h2><span>CALL. ATTACK.</span> <em>RUSH.</em></h2>' +
-      '<p>Practice against the bot, play a friend with a link, or share one device. Every rule and card effect is handled for you.</p>' +
+    let h = '<nav class="pbnav"><button class="on" data-mode="home">Play</button><button data-mode="history">History</button><button data-hub="sandbox">Sandbox</button>' +
+      '<button data-mode="tools">Tools</button><button data-rep="open" data-v="feedback">Feedback</button></nav>';
+    h += '<section class="pbhero"><div class="kick"><span>MARVEL HERO RUSH · MATCH SIMULATOR</span><span class="betatag">BETA</span></div>' +
+      '<h2>CALL. ATTACK.<br><em>RUSH.</em></h2><p>Every rule and card effect is handled for you. Pick a mode, pick your deck, press PLAY.</p>' +
       '<div class="hstats">' + (mine.length ? '<span><b>' + mine.length + '</b> <i>games</i></span><span class="w"><b>' + W + '</b> <i>wins</i></span><span class="l"><b>' + L + '</b> <i>losses</i></span>' : '<span><i>No games yet: start with the bot</i></span>') +
-      '<span class="e"><i>Engine</i> <b>v' + esc(S.VERSION) + '</b></span></div></div>';
-    h += '<div class="modes">';
-    h += row('practice', '🤖', 'Practice vs Bot', 'Easy · Normal · Hard: starts right away',
-      '<div class="f"><label>Your deck</label><select id="hubDeck">' + deckOptions(false) + '<option value="code">Deck link or code…</option></select></div>' +
-      '<div class="f"><label>Bot level</label>' + seg('hublevel', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']], p.level) + '</div>' +
-      '<div id="hubErr" class="err"></div><div class="mgo"><button class="pri big" data-hub="startPractice">▶ Start practice</button><button data-mode="practice">More options</button></div>');
-    h += row('online', '🔗', 'Play a friend online', on ? 'Create a room, send the link, pick the clock' : 'Private room with a link',
-      on ? '<p class="small">Create a private room and send the link (WhatsApp works well), or enter a room code from a friend. Turn clock: Standard, Relaxed, Long, none, or Match 30:00.</p>' +
-        '<div class="mgo"><button class="pri big" data-mode="online">🔗 Create or join a room</button></div>'
-        : '<p class="small">Online play runs inside Battle Sim on mhrdecklab.com. Open mhrdecklab.com, log in, and choose Battle Sim in the menu.</p><div class="mgo"><button data-mode="online">Details</button></div>', on ? '' : 'Online version');
-    h += row('find', '⚔️', 'Find a match', on ? 'Get matched with the next player searching' : 'Queue for an opponent',
-      on ? '<p class="small">You are matched with the next player who is searching (Standard clock, random first player). After 45 seconds you can play the bot while you keep searching; a bot is always shown as a bot.</p>' +
-        '<div class="mgo"><button class="pri big" data-mode="find">⚔️ Find a match</button></div>'
-        : '<p class="small">Online play runs inside Battle Sim on mhrdecklab.com. Open mhrdecklab.com, log in, and choose Battle Sim in the menu.</p><div class="mgo"><button data-mode="find">Details</button></div>', on ? 'New' : 'Online version');
-    h += row('custom', '👥', 'Same device', 'Pass-and-play on one phone or tablet',
-      '<p class="small">Two players take turns on one device, with a handover screen between them. Flexible turn clock or a 30-minute match clock.</p><div class="mgo"><button class="pri big" data-mode="custom">👥 Set up the game</button></div>');
-    h += '</div><div class="quick">' +
-      qtile('data-hub="sandbox"', '🧪', 'Sandbox', 'Build any position') +
-      qtile('data-mode="history"', '📜', 'History', hist.length ? hist.length + ' saved' : 'Your games') +
-      qtile('data-mode="tools"', '🛠', 'Tools', 'Custom game, log code') +
-      qtile('data-rep="open" data-v="feedback"', '💬', 'Feedback', 'Tell us') + '</div></div>';
-    h += '<aside class="hubside"><div class="betabox"><div class="bh"><span class="betatag">BETA</span><b>' + esc(BETA.label) + '</b>' + (left ? '<i>' + esc(left) + '</i>' : '') + '</div>' +
-      '<p>Battle Sim is in a one-week beta. It may end earlier if no bugs are reported and player feedback is positive.</p>' +
-      '<p class="small">Something wrong with a rule or a card effect? Is anything confusing on your phone? Your report goes straight to the developer.</p>' +
-      '<div class="mgo"><button class="pri" data-rep="open" data-v="bug">🐞 Report a bug</button><button data-rep="open" data-v="feedback">💬 Send feedback</button></div></div>';
-    h += '<div class="recent"><div class="rh"><b>RECENT GAMES</b><button class="sm" data-mode="history">All →</button></div>';
+      '<span class="e"><i>Engine</i> <b>v' + esc(S.VERSION) + '</b></span></div><div class="fan"><i></i><i></i><i></i></div></section>';
+    h += '<aside class="pblade"><div class="pblbl">MODE</div><div class="pbmodes">' +
+      PB_MODES.map(([k, ic, t, s]) => '<button data-pbmode="' + k + '"' + (k === pbMode ? ' class="on"' : '') + '><b><i class="pbic">' + ic + '</i>' + esc(t) + '</b><span>' + esc(s) + '</span></button>').join('') +
+      '</div><div id="pbBody"></div></aside>';
+    h += '<section class="pbmore2"><div class="recent"><div class="rh"><b>RECENT GAMES</b><button class="sm" data-mode="history">All →</button></div>';
     if (!hist.length) h += '<p class="small muted">Games you finish on this device appear here, with a replay.</p>';
     hist.slice(0, 4).forEach(r => {
       const me = r.me, res = r.winner < 0 ? 'd' : me == null ? null : r.winner === me ? 'w' : 'l';
@@ -143,18 +201,32 @@
         '<div class="small muted">' + esc(MODE_LABEL[r.mode] || 'Game') + ' · ' + r.turns + ' turns · ' + esc(ago(new Date(r.at).getTime() || Date.now())) + '</div></div>' +
         '<button class="sm" data-h="replay" data-id="' + r.id + '">Replay</button></div>';
     });
-    h += '</div></aside>';
+    h += '</div><div class="betabox"><div class="bh"><span class="betatag">BETA</span><b>' + esc(BETA.label) + '</b>' + (left ? '<i>' + esc(left) + '</i>' : '') + '</div>' +
+      '<p>Battle Sim is in a one-week beta. It may end earlier if no bugs are reported and player feedback is positive.</p>' +
+      '<p class="small">Something wrong with a rule or a card effect? Is anything confusing on your phone? Your report goes straight to the developer.</p>' +
+      '<div class="mgo"><button class="pri" data-rep="open" data-v="bug">🐞 Report a bug</button><button data-rep="open" data-v="feedback">💬 Send feedback</button></div></div></section>';
     $('home').innerHTML = h;
-    const hd = $('hubDeck'); if (hd) { hd.value = p.deck === 'code' ? 'code' : p.deck; if (!hd.value) hd.selectedIndex = 0; }
+    drawBlade();
+    if (onlineReady()) OL().loadDecks().then(() => { if (view === 'home') drawBlade(); });
+  }
+  function pbDeckChoice() {
+    const hd = $('hubDeck');
+    if (hd) return { deck: hd.value, code: hd.value === 'code' ? (practicePrefs().code || '') : '' };
+    const c = $('pbCode');
+    return { deck: pbDeck || 'code', code: c ? c.value : '' };
+  }
+  function pbPlay() {
+    const ch = pbDeckChoice(), err = $('hubErr');
+    if (pbMode === 'find') {
+      if (ch.deck === 'code' && !ch.code.trim()) { if (err) err.textContent = 'Paste a deck link / code first.'; if (window.MHRSimI18N) window.MHRSimI18N.apply(); return; }
+      OL().findWith(ch.deck, ch.code); return;
+    }
+    const p = practicePrefs();
+    if (ch.deck === 'code' && !ch.code.trim() && !$('hubDeck')) { if (err) err.textContent = 'Paste a deck link / code first.'; if (window.MHRSimI18N) window.MHRSimI18N.apply(); return; }
+    if ($('hubDeck') && ch.deck === 'code' && !p.code) { show('practice'); $('prDeck').value = 'code'; $('prCodeWrap').style.display = ''; return; }
+    launchPractice(Object.assign(p, { deck: ch.deck, code: ch.code || p.code || '', level: segVal('hublevel') || p.level }), err);
   }
   function practicePrefs() { return Object.assign({ name: 'Player', deck: 'spr', bot: 'random', level: 'normal', first: 'random', clock: 'off' }, prefs.practice || {}); }
-  // Mulai cepat dari menu: deck & level dari baris Practice, sisanya dari pilihan terakhir di layar "More options".
-  function hubStartPractice() {
-    const p = practicePrefs(), deck = $('hubDeck').value;
-    if (deck === 'code' && !(p.deck === 'code' && p.code)) { show('practice'); $('prDeck').value = 'code'; $('prCodeWrap').style.display = ''; return; }
-    launchPractice(Object.assign(p, { deck, level: segVal('hublevel') || p.level }), $('hubErr'));
-  }
-
   function seg(id, opts, cur) {
     return '<div class="seg" data-seg="' + id + '">' + opts.map(([v, l]) => '<button data-v="' + v + '"' + (v === cur ? ' class="on"' : '') + '>' + esc(l) + '</button>').join('') + '</div>';
   }
@@ -163,7 +235,7 @@
     $('panelPractice').innerHTML = '<div class="hd"><button data-mode="home">← Menu</button><h2>Practice vs Bot</h2></div>' +
       '<div class="box"><div class="form">' +
       '<div class="f"><label>Your name</label><input id="prName" maxlength="20" value="' + esc(p.name) + '"></div>' +
-      '<div class="f"><label>Your deck</label><select id="prDeck">' + deckOptions(true) + '</select></div>' +
+      '<div class="f"><label>Your deck</label><select id="prDeck">' + yourDeckOptions() + '</select>' + yourDeckNote() + '</div>' +
       '<div class="f full" id="prCodeWrap" style="display:none"><label>Deck link or code</label><textarea id="prCode" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder">' + esc(p.code || '') + '</textarea></div>' +
       '<div class="f"><label>Bot deck</label><select id="prBot"><option value="random">Random test deck</option>' + deckOptions(false) + '</select></div>' +
       '<div class="f"><label>Bot level</label>' + seg('level', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']], p.level) + '</div>' +
@@ -176,6 +248,7 @@
     $('prCodeWrap').style.display = $('prDeck').value === 'code' ? '' : 'none';
     $('prDeck').onchange = () => { $('prCodeWrap').style.display = $('prDeck').value === 'code' ? '' : 'none'; };
     $('prStart').onclick = startPractice;
+    refreshYourDecks();
   }
   function segVal(id) { const b = document.querySelector('[data-seg="' + id + '"] button.on'); return b ? b.dataset.v : null; }
   function startPractice() {
@@ -185,7 +258,9 @@
   function launchPractice(o, errEl) {
     const ui = U();
     const name = o.name || 'Player', level = o.level, first = o.first, clock = o.clock;
-    const mine = ui.deckFrom(o.deck, o.code || '', 'Your');
+    const my = /^my:(\d+)$/.exec(o.deck || ''), saved = my && onlineReady() ? OL().myDecks()[+my[1]] : null;   // #80: deck akun
+    if (my && !saved) { errEl.textContent = 'Choose one of your saved decks, or paste a deck link / code.'; if (window.MHRSimI18N) window.MHRSimI18N.apply(); return; }
+    const mine = saved ? Object.assign(ui.deckFrom('code', saved.code, 'Your'), { name: saved.name }) : ui.deckFrom(o.deck, o.code || '', 'Your');
     let botV = o.bot || 'random';
     if (botV === 'random') { const vals = testDeckValues().filter(v => !/^cd:/.test(v)); botV = vals[Math.floor(Math.random() * vals.length)]; }
     const bot = ui.deckFrom(botV, '', "The bot's");
@@ -249,15 +324,12 @@
     } catch (e) { /* abaikan */ }
   }
   function onClick(ev) {
-    const t = ev.target.closest('[data-mode],[data-m],[data-h],[data-ht],[data-seg] button,[data-lang],[data-acc],[data-hub]');
+    const t = ev.target.closest('[data-mode],[data-m],[data-h],[data-ht],[data-seg] button,[data-lang],[data-hub],[data-pbmode],[data-pbdeck]');
     if (!t || !$('setup').contains(t)) return;
     const ui = U();
-    if (t.dataset.acc) {
-      hubOpen = hubOpen === t.dataset.acc ? '' : t.dataset.acc; prefs.hubOpen = hubOpen; savePrefs();
-      document.querySelectorAll('#home .mrow').forEach(r => { const o = r.classList.contains('m-' + hubOpen); r.classList.toggle('open', o); r.querySelector('.mhead').setAttribute('aria-expanded', o); });
-      return;
-    }
-    if (t.dataset.hub === 'startPractice') { hubStartPractice(); return; }
+    if (t.dataset.hub === 'play') { pbPlay(); return; }
+    if (t.dataset.pbmode) { pbMode = t.dataset.pbmode; prefs.pbMode = pbMode; savePrefs(); drawBlade(); return; }
+    if (t.dataset.pbdeck) { const c = $('pbCode'); if (c) pbCode = c.value; pbDeck = t.dataset.pbdeck; pbPicked = true; drawBlade(); if (pbDeck === 'code' && $('pbCode')) $('pbCode').focus(); return; }
     if (t.dataset.hub === 'sandbox') { const b = $('btnSandbox'); if (b) b.click(); return; }
     if (t.dataset.ht) { histTab = t.dataset.ht; renderHistory(); if (window.MHRSimI18N) window.MHRSimI18N.apply(); return; }
     if (t.dataset.lang) { if (window.MHRSimI18N) window.MHRSimI18N.set(t.dataset.lang); return; }

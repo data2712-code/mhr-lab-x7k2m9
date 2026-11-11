@@ -64,7 +64,56 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .lang button{border:0;border-radius:0;padding:6px 12px;background:transparent;color:var(--muted);font-weight:700}
 .lang button.on{background:var(--gold);color:#1a1405}
 /* Menu hub (riwayat #76): spanduk + baris mode yang membuka di tempat + pintasan; kolom kanan = beta & permainan terakhir */
-#home{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:16px;margin:12px 0;align-items:start}
+/* Menu v7 · A "Play Blade" (riwayat #81): kiri = pintasan, spanduk, permainan terakhir, beta; kanan = panel Play (mode → deck → PLAY) */
+#home{display:grid;grid-template-columns:minmax(0,1fr) 400px;grid-template-areas:"nav blade" "hero blade" "more blade";grid-template-rows:auto auto 1fr;gap:14px 18px;margin:12px 0;align-items:start}
+.pbnav{grid-area:nav;display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.pbnav button{background:transparent;border:0;border-radius:0;color:var(--muted);font-weight:700;padding:8px 12px;border-bottom:2px solid transparent;margin-bottom:-1px;min-height:40px}
+.pbnav button.on{color:var(--paper);border-bottom-color:var(--gold)}.pbnav button:hover{color:var(--paper)}
+.pbhero{grid-area:hero;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:18px;padding:22px 22px 18px;min-height:250px;
+  background:radial-gradient(circle 520px at 15% 0%,rgba(59,135,232,.22),transparent 70%),radial-gradient(circle 480px at 100% 100%,rgba(228,68,46,.2),transparent 70%),linear-gradient(120deg,#18202c,#0e1218)}
+.pbhero > *{position:relative;z-index:1}
+.pbhero .kick{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--gold)}
+.pbhero h2{margin:12px 0 8px;font-family:var(--disp);font-size:52px;line-height:.95;font-weight:900;letter-spacing:.01em;color:var(--paper)}
+.pbhero h2 em{font-style:normal;color:var(--gold)}
+.pbhero p{margin:0;max-width:380px;color:#c9d2de;font-size:13.5px}
+.pbhero .fan{position:absolute;right:26px;bottom:-34px;display:flex;z-index:0}
+.pbhero .fan i{display:block;width:112px;height:156px;border-radius:12px;border:5px solid #050608;margin-left:-38px;box-shadow:0 14px 30px rgba(0,0,0,.6)}
+.pbhero .fan i:nth-child(1){transform:rotate(-10deg);background:linear-gradient(160deg,#7a2a22,#2a0f0c)}
+.pbhero .fan i:nth-child(2){transform:rotate(-2deg) translateY(-14px);background:linear-gradient(160deg,#2b5aa0,#0f2142)}
+.pbhero .fan i:nth-child(3){transform:rotate(8deg);background:linear-gradient(160deg,#a07b12,#3d2e06)}
+.pbmore2{grid-area:more;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.pblade{grid-area:blade;position:sticky;top:10px;display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+.pblbl{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:800;margin-top:2px}
+.pbmodes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pbmodes button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;white-space:normal;border:1px solid var(--line);background:#12171d;border-radius:12px;padding:10px 12px;min-height:58px}
+.pbmodes button b{font-size:14.5px;color:var(--paper)}.pbmodes .pbic{font-style:normal;margin-right:6px}.pbmodes button span{font-size:12px;color:var(--muted)}
+.pbmodes button.on{border-color:var(--gold);background:rgba(242,176,30,.1);box-shadow:inset 0 0 0 1px var(--gold)}
+#pbBody{display:flex;flex-direction:column;gap:10px}
+#pbBody .f select{width:100%;min-height:42px}#pbBody p{margin:0}
+.pbdecks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pbdk{display:flex;flex-direction:column;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#12171d;text-align:left;white-space:normal;min-height:118px}
+.pbdk .art{display:block;height:70px;background:linear-gradient(160deg,#2b3446,#141a22);overflow:hidden}
+.pbdk .art img{width:100%;height:auto;display:block;margin-top:-14%}
+.pbdk .t{display:block;padding:6px 8px 7px;font-size:11px;color:var(--muted)}
+.pbdk .t b{display:block;font-size:12.5px;color:var(--paper);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbdk .dots{display:inline-flex;gap:3px;vertical-align:middle}.pbdk .dots i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.pbdk .dots .r{background:var(--red)}.pbdk .dots .y{background:var(--gold)}.pbdk .dots .b{background:var(--blue)}.pbdk .dots .g{background:var(--green)}.pbdk .dots .o{background:#E8821E}.pbdk .dots .p{background:#9B6BFF}
+.pbdk.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.pbdk.paste{align-items:center;justify-content:center;border-style:dashed;color:var(--muted);font-size:12px;text-align:center;padding:8px}
+.pbdk.paste.on{color:var(--paper)}
+.pbcode{width:100%;min-height:64px;box-sizing:border-box}
+.pbplay{margin-top:4px;min-height:62px;border-radius:14px;border:0;background:linear-gradient(180deg,#ffc53d,#e09a0c);color:#1a1200;font-family:var(--disp);font-size:26px;font-weight:900;letter-spacing:.08em;box-shadow:0 10px 26px rgba(242,176,30,.28)}
+.pbplay:hover{filter:brightness(1.06)}
+.pbmore{background:transparent;border:0;color:var(--muted);font-size:12.5px;text-decoration:underline;padding:2px;min-height:0}
+@media (max-width:900px){
+  #home{grid-template-columns:1fr;grid-template-areas:"nav" "hero" "blade" "more";grid-template-rows:none}
+  .pblade{position:static}
+  .pbmore2{grid-template-columns:1fr}
+  .pbhero{min-height:0;padding:16px 16px 14px}.pbhero h2{font-size:38px}.pbhero .fan{transform:scale(.62);transform-origin:right bottom;right:8px;bottom:-26px}
+  .pbnav{overflow-x:auto;flex-wrap:nowrap}.pbnav button{flex:none}
+}
+/* menu hub lama (#76) — tidak dipakai lagi oleh sim-modes.js sejak #81 */
+#home.hub76{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:16px;margin:12px 0;align-items:start}
 .hubmain{border:1px solid #4a3d18;border-radius:18px;overflow:hidden;background:var(--panel);box-shadow:5px 5px 0 rgba(242,176,30,.55)}
 .hero{position:relative;padding:20px 18px 16px;background:
   repeating-linear-gradient(115deg,rgba(228,68,46,.34) 0 46px,rgba(59,135,232,.30) 46px 92px,rgba(242,176,30,.26) 92px 138px,rgba(51,164,92,.26) 138px 184px),#141a21;overflow:hidden}
@@ -135,7 +184,6 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .hrow .tx{flex:1;min-width:180px}.hrow .tx b{color:var(--paper)}
 .stats{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}.stats .badge{font-size:13px;padding:4px 10px}
 @media (max-width:760px){
-  #home{grid-template-columns:1fr}
   .hero h2{font-size:34px}.hero{padding:16px 14px 14px}.hubmain{box-shadow:3px 3px 0 rgba(242,176,30,.55)}.hstats .e{margin-left:0}
   .form{grid-template-columns:1fr}
   .wrap{padding:14px 12px}
@@ -732,19 +780,19 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.28-sp065" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.02-lgs1110" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.7"></script>
-<script src="sim-cards.js?v=o2.7"></script>
-<script src="sim-cards-bp01.js?v=o2.7"></script>
-<script src="sim-cards-s4.js?v=o2.7"></script>
-<script src="sim-cards-sp01.js?v=o2.7"></script>
-<script src="sim-bot.js?v=o2.7"></script>
-<script src="sim-sound.js?v=o2.7"></script>
-<script src="sim-shadow.js?v=o2.7"></script>
-<script src="sim-ui.js?v=o2.7"></script>
-<script src="sim-sandbox.js?v=o2.7"></script>
-<script src="sim-report.js?v=o2.7"></script>
-<script src="sim-modes.js?v=o2.7"></script>
-<script src="sim-i18n.js?v=o2.7"></script>
-<script src="sim-online.js?v=o2.7"></script>
+<script src="sim.js?v=o2.8"></script>
+<script src="sim-cards.js?v=o2.8"></script>
+<script src="sim-cards-bp01.js?v=o2.8"></script>
+<script src="sim-cards-s4.js?v=o2.8"></script>
+<script src="sim-cards-sp01.js?v=o2.8"></script>
+<script src="sim-bot.js?v=o2.8"></script>
+<script src="sim-sound.js?v=o2.8"></script>
+<script src="sim-shadow.js?v=o2.8"></script>
+<script src="sim-ui.js?v=o2.8"></script>
+<script src="sim-sandbox.js?v=o2.8"></script>
+<script src="sim-report.js?v=o2.8"></script>
+<script src="sim-modes.js?v=o2.8"></script>
+<script src="sim-i18n.js?v=o2.8"></script>
+<script src="sim-online.js?v=o2.8"></script>
 </body>
 </html>

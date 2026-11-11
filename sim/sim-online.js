@@ -105,24 +105,26 @@
     if (!noMenu) { U().toMenu(); if (window.MHRSimModes) window.MHRSimModes.show('online'); }
   }
 
-  /* ---------- pilihan deck ---------- */
-  let decks = { mine: [], tn: [] };
-  async function loadDecks() {
-    const h = host(); decks = { mine: [], tn: [] };
-    if (!h) return;
-    try { decks.mine = (await h.myDecks()) || []; } catch (e) { decks.mine = []; }
-    try { decks.tn = (await h.tourneyDecks()) || []; } catch (e) { decks.tn = []; }
+  /* ---------- pilihan deck ----------
+     #80 (keputusan pemilik 12 Nov 2026): menu "Your deck" hanya berisi deck yang pemain simpan ke akunnya (Deck Builder →
+     ☁️ Save to account) + "Paste a deck link / code…". Tournament Decks, User/Community decks dan Test decks tidak
+     ditawarkan lagi (readDeck masih bisa membaca nilai lama tn:/cd:/uji yang tersimpan di pilihan terakhir). */
+  let decks = { mine: [], tn: [] }, decksAt = 0, decksP = null;
+  async function loadDecks(force) {
+    const h = host();
+    if (!h) { decks = { mine: [], tn: [] }; return decks.mine; }
+    if (!force && decksP && Date.now() - decksAt < 30000) return decksP;
+    decksAt = Date.now();
+    decksP = (async () => { let mine = []; try { mine = (await h.myDecks()) || []; } catch (e) { mine = []; } decks = { mine, tn: [] }; return mine; })();
+    return decksP;
   }
-  function deckSelect(id, cur) {
-    const cds = Array.isArray(window.DECK_KOMUNITAS) ? window.DECK_KOMUNITAS : [];
-    let h = '<select id="' + id + '">';
-    if (decks.mine.length) h += '<optgroup label="My Decks">' + decks.mine.map((d, i) => '<option value="my:' + i + '">' + esc(d.name) + '</option>').join('') + '</optgroup>';
-    if (decks.tn.length) h += '<optgroup label="Tournament Decks">' + decks.tn.map((d, i) => '<option value="tn:' + i + '">' + esc(d.name) + '</option>').join('') + '</optgroup>';
-    const cv = cds.map((d, i) => ({ d, i })).filter(o => o.d && o.d.cd && !/</.test(o.d.cd));
-    if (cv.length) h += '<optgroup label="Community decks">' + cv.map(o => '<option value="cd:' + o.i + '">' + esc(o.d.nm) + '</option>').join('') + '</optgroup>';
-    h += '<optgroup label="Test decks">' + Object.keys(TEST_LABEL).map(k => '<option value="' + k + '">' + TEST_LABEL[k] + ' test deck</option>').join('') + '</optgroup>';
-    h += '<option value="code">Paste a deck link / code…</option></select>';
-    return h;
+  const NO_DECKS = 'No saved decks yet. Save a deck to your account in the Deck Builder (☁️ Save active deck to account), or paste a deck link / code.';
+  function deckOptionsHTML() {
+    return (decks.mine.length ? '<optgroup label="My Decks">' + decks.mine.map((d, i) => '<option value="my:' + i + '">' + esc(d.name) + '</option>').join('') + '</optgroup>' : '') +
+      '<option value="code">Paste a deck link / code…</option>';
+  }
+  function deckSelect(id) {
+    return '<select id="' + id + '">' + deckOptionsHTML() + '</select>' + (decks.mine.length ? '' : '<div class="small muted" style="margin-top:4px">' + esc(NO_DECKS) + '</div>');
   }
   // Nilai pilihan → { body: {test}|{code,name}, err }
   function readDeck(v, codeText) {
@@ -160,7 +162,7 @@
       tr(); return;
     }
     await loadDecks();
-    const pref = Object.assign({ deck: decks.mine.length ? 'my:0' : 'spr', clock: 'standard', first: 'random' }, ls.get(KEY_PREF) || {});
+    const pref = Object.assign({ deck: decks.mine.length ? 'my:0' : 'code', clock: 'standard', first: 'random' }, ls.get(KEY_PREF) || {});
     const sv = seatGet();
     let h = head;
     if (sv && !sv.over) {
@@ -308,7 +310,7 @@
     }
     await loadDecks();
     if (fq.on) { drawFind(true); return; }
-    const pref = Object.assign({ deck: decks.mine.length ? 'my:0' : 'spr' }, ls.get(KEY_PREF) || {});
+    const pref = Object.assign({ deck: decks.mine.length ? 'my:0' : 'code' }, ls.get(KEY_PREF) || {});
     const st = await apiFetch('/api/queue');
     if (fq.on || !findVisible()) return;
     el.innerHTML = fhead + '<p class="small muted" style="margin:0 2px 10px">Playing as <b>' + esc(s.username || 'Player') + '</b></p>' +
@@ -369,6 +371,19 @@
     b.style.borderColor = st.state === 'found' ? '#F2B01E' : '#2a313b';
   }
   function fqDraw() { drawFind(); banner(); }
+  /* #81 (menu v7 · Play Blade): tombol FIND A MATCH di panel menu — deck dipilih di panel, lalu layar Find a match dibuka
+     dan pencarian langsung dimulai dengan deck itu. */
+  async function findWith(v, code) {
+    const old = ls.get(KEY_PREF) || {};
+    ls.set(KEY_PREF, Object.assign(old, { findDeck: v, code: v === 'code' ? code : old.code }));
+    if (fq.on) { if (window.MHRSimModes) window.MHRSimModes.show('find'); return; }
+    if (window.MHRSimModes) window.MHRSimModes.show('find');
+    for (let k = 0; k < 50 && !$('fqDeck'); k++) await new Promise(r => setTimeout(r, 100));
+    const x = $('fqDeck'); if (!x || fq.on) return;
+    x.value = v; if (!x.value) x.selectedIndex = 0; x.dispatchEvent(new Event('change'));
+    if (v === 'code' && $('fqDeckCode')) $('fqDeckCode').value = code;
+    fqStart();
+  }
   async function fqStart() {
     if (fq.on || fq.busy) return;
     const v = $('fqDeck').value, code = $('fqDeckCode').value, d = readDeck(v, code);
@@ -535,6 +550,6 @@
     if (sv && !sv.over && Date.now() - (sv.at || 0) < 24 * 3600 * 1000 && host()) back();
   }
   function openReplay(code) { try { if (S.parseLog(code)) window.MHRSimUI.replayCode(code); } catch (e) { /* kode rusak: tetap di menu */ } }
-  window.MHRSimOnline = { renderFind, finding: () => fq.on, shareReplay, openReplay, renderPanel, renderHistory, leaveGame, sendReport, reportContext, host, api: API, joinRoom: code => { pendingJoin = code; if (window.MHRSimModes) window.MHRSimModes.show('online'); } };
+  window.MHRSimOnline = { findWith, loadDecks, myDecks: () => decks.mine.slice(), deckOptionsHTML, noDecksText: NO_DECKS, renderFind, finding: () => fq.on, shareReplay, openReplay, renderPanel, renderHistory, leaveGame, sendReport, reportContext, host, api: API, joinRoom: code => { pendingJoin = code; if (window.MHRSimModes) window.MHRSimModes.show('online'); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else setTimeout(init, 0);
 })();
