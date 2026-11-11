@@ -603,6 +603,14 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.4: log ikut turun, penjelasan Battle Phase tanpa serangan, tombol Concede — 11 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+
+Masukan pemilik dari pertandingan online pertama di beta (riwayat simulator #74; rincian di `mhr-simulator\`).
+
+- `sim/` disalin ulang (o2.4). Cache-buster: `SIM_URL` → `?v=o2.4`, `index.html` → `sim-host.js?v=7.32-sim5`. Versi situs tetap 7.32.
+- **Server lebih dulu**: tombol Concede butuh Worker `mhr-battle-sim-test` versi baru; bila situs di-push lebih dulu, Concede
+  di permainan online ditolak server ("Unknown message type") — fitur lain tetap jalan.
+
 ### Data — Battle Sim beta O3: menu terbuka untuk semua akun login — 11 November 2026 *(`sim-host.js`, `index.html`)*
 
 Keputusan pemilik setelah uji O2 lulus (riwayat simulator #69–#70; rincian di `mhr-simulator\`).

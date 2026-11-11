@@ -82,6 +82,7 @@
     $('btnReplay').onclick = () => loadLog(true);
     $('btnCopy').onclick = copyLog;
     $('btnUndo').onclick = undo;
+    $('btnConcede').onclick = concede;
     $('btnMenu').onclick = () => {
       if (net.on) { if (G && G.result || confirm('Leave this online game? Your seat is kept for 2 minutes; open Battle Sim again to return.')) window.MHRSimOnline.leaveGame(); return; }
       const keep = G && !G.result && !ui.replay;
@@ -361,6 +362,23 @@
     ui.msg = ui.sandbox || ui.gmode === 'practice' ? 'Move undone.' : 'Move undone (test mode). Undo can reveal hidden information; use it for testing only.';
     resetSel(); step();
   }
+  /* Menyerah (riwayat #74, permintaan pemilik): pemain yang menyerah kalah dan permainan berhenti. Selalu ditanya dulu.
+     Online: server yang mencatat ({type:'concede'}); offline: aksi bebas {t:'concede', p} di mesin. */
+  function concede() {
+    if (!G || G.result || ui.replay || ui.sandbox) return;
+    const h = humans(); if (!h.length) return;
+    const p = net.on ? net.seat : h.length === 1 ? h[0] : (ui.viewer != null ? ui.viewer : G.prompt ? G.prompt.p : G.tp);
+    const two = !net.on && h.length === 2;
+    if (!confirm(two ? 'Concede this game as ' + G.names[p] + '? ' + G.names[p] + ' loses and the game ends now. This cannot be undone.'
+      : 'Concede this game? You will lose and the game ends now. This cannot be undone.')) return;
+    if (net.on) { net.send({ type: 'concede' }); return; }
+    clearTimeout(ui.botTimer);
+    const r = S.apply(G, { t: 'concede', p });
+    if (!r.ok) { ui.msg = r.err; render(); return; }
+    ui.hist.push({ p, auto: true });
+    ui.msg = ''; resetSel(); closeOv();
+    step();
+  }
   function copyLog() {
     if (!G) return;
     if (net.on && !net.replay) { ui.msg = 'The full log code of an online game is available when the game is over.'; render(); return; }
@@ -522,6 +540,15 @@
     const v = viewer();
     return G && G.prompt && !ui.replay && (v === G.prompt.p || (v === 'all' && ui.sandbox)) && (!type || G.prompt.type === type) && ui.ctrl[G.prompt.p] === 'human';
   }
+  // Riwayat #74: dengan susunan Reposition yang sedang tampil, adakah Karakter yang bisa menyerang? (peringatan sebelum Skip/Confirm)
+  const ARR_WARN = '⚠ No Character can attack from these positions (no target within Attack Range): the Battle Phase will end without an attack.';
+  function arrNoAtk() {
+    if (!G || !G.prompt || G.prompt.type !== 'arrange' || !S.noAttackWhy || !myTurnPrompt('arrange')) return false;
+    const P = G.P[G.prompt.p], keep = Object.assign({}, P.bat);
+    try { if (ui.arr) S.SLOTS.forEach(s => { P.bat[s] = ui.arr[s] || null; }); return !!S.noAttackWhy(G); }
+    catch (e) { return false; }
+    finally { S.SLOTS.forEach(s => { P.bat[s] = keep[s] || null; }); }
+  }
   // Pemain yang sedang bertindak di sisi bawah papan (Sandbox: siapa pun yang sedang diberi prompt).
   function actor() {
     if (ui.sandbox) return G && G.prompt ? G.prompt.p : (G ? G.tp : 0);
@@ -579,6 +606,7 @@
     ui.bottomP = bottom;
     renderScore(v, bottom, top);
     $('btnUndo').style.display = ui.replay ? 'none' : '';
+    $('btnConcede').style.display = ui.replay || ui.sandbox || G.result || !humans().length ? 'none' : '';
     $('btnEditPos').style.display = ui.replay || G.result || net.on ? 'none' : '';
     $('btnSiaga').style.display = G.siaga && !ui.replay && !G.result ? '' : 'none';
     playEvents(v);
@@ -710,7 +738,7 @@
     if (ui.mode === 'drop-base') return T('CALL face-up or set face-down?', 'Choose in the sheet below');
     switch (pr.type) {
       case 'main': return T('Your turn · CALL ' + G.cnt.call + '/' + S.callLimit(G), 'Tap a HAND card to play it · END ACTION when done');
-      case 'arrange': return T('Reposition (optional)', 'Tap two areas to swap, then CONFIRM');
+      case 'arrange': return T('Reposition (optional)', arrNoAtk() ? '⚠ No Character can attack from these positions' : 'Tap two areas to swap, then CONFIRM');
       case 'attack': {
         if (!ui.atk) return T('Choose an attacker', 'Tap a glowing Character');
         if (!ui.tg) return T(esc(S.nameOf(G, ui.atk)) + ' attacks', 'Tap a glowing target · an empty area (Weakness) = +1 Rush Point');
@@ -806,7 +834,7 @@
   const TL_LABEL = { call: 'CALL', callcost: 'CALL COST', attack: 'ATTACK', judge: 'FIGHT', rp: '★ RUSH POINT', retreat: 'RETREAT', prune: 'RETREAT',
     trig: 'EFFECT', acti: 'EFFECT', eff: 'EFFECT', mod: 'EFFECT', move: 'MOVE', swap: 'SWAP', place: 'PLACE', deploy: 'BASE DEPLOYMENT', timeout: 'TIME',
     timeup: 'TIME UP', rps: 'JANKENPON', reveal: 'REVEAL', flip: 'FLIP', discard: 'DISCARD', battle: 'BATTLE', attach: 'ATTACH', turn: 'TURN', draw: 'DRAW',
-    pass: 'PASS', mulligan: 'STARTING HAND', arrange: 'REPOSITION', noattack: 'NO ATTACK', over: 'GAME OVER', manual: 'MANUAL' };
+    pass: 'PASS', mulligan: 'STARTING HAND', arrange: 'REPOSITION', noattack: 'NO ATTACK', concede: 'CONCEDE', over: 'GAME OVER', manual: 'MANUAL' };
   function timelineHTML(v) {
     const k = annKey(v);
     if (ui.seenN[k] == null) ui.seenN[k] = G.log.length;
@@ -1141,7 +1169,7 @@
       case 'main':
         if (ui.mode) return '';
         return sp('Tap a card in your HAND to play it.') + ' ' + sp('Press END ACTION when you are done.');
-      case 'arrange': return sp('Optional: tap two of your areas to swap them, then CONFIRM.');
+      case 'arrange': return sp('Optional: tap two of your areas to swap them, then CONFIRM.') + (arrNoAtk() ? '<span class="arrwarn">' + esc(ARR_WARN) + '</span>' : '');
       case 'attack':
         if (!ui.atk) return sp('Tap one of your glowing Characters to attack with it.');
         if (!ui.tg) return sp('Tap a glowing target, or pick one from the list.');
@@ -1180,7 +1208,7 @@
         if (ui.mode === 'move-dest') return esc('Choose a highlighted empty BATTLE area.');
         if (ui.mode === 'drop-base') return esc('Dropped on the BASE: CALL it face-up into the BASE, or use Base Deployment (face-down, draw 1)?');
         return esc(who + ' · Action Phase: hold a card and drag it onto an area (or click it) to CALL, use Base Deployment, or BATTLE-BASE MOVE; then end the Action Phase.');
-      case 'arrange': return esc(who + ' · Battle Phase, Reposition: hold a Character and drag it onto another BATTLE area (FRONT, WING or BACK) to swap or move it — or click two areas. Repeat as needed, then Confirm positions (or Skip).');
+      case 'arrange': return esc(who + ' · Battle Phase, Reposition: hold a Character and drag it onto another BATTLE area (FRONT, WING or BACK) to swap or move it — or click two areas. Repeat as needed, then Confirm positions (or Skip).') + (arrNoAtk() ? ' <b class="arrwarn">' + esc(ARR_WARN) + '</b>' : '');
       case 'attack': return attackHint(who, pr);
       case 'counter': {
         const b = G.bt && G.bt.cur;
@@ -1542,7 +1570,10 @@
     const lg = S.logFor(G, v === null ? -1 : v), f = ui.logF, fresh = ui.logPrevN;
     ui.logPrevN = G.log.length;
     const fil = [['all', 'All'], ['p0', G.names[0]], ['p1', G.names[1]], ['battle', 'Battle'], ['rush', '★ Rush']];
-    if (!$('log')) return;
+    const lg0 = $('log'); if (!lg0) return;
+    // Riwayat #74: daftar ikut turun ke kejadian terbaru, kecuali pemain sedang menggulir ke atas untuk membaca.
+    const top0 = lg0.scrollTop, stick = !lg0.childElementCount || lg0.scrollHeight - top0 - lg0.clientHeight < 48 || ui.logStickF !== f || ui.logHid !== false;
+    ui.logStickF = f;
     $('logFil').innerHTML = fil.map(([k, l]) => '<span data-logf="' + k + '" class="' + (f === k ? 'on' : '') + '">' + esc(l) + '</span>').join('');
     const BAT = ['attack', 'judge', 'rp', 'battle', 'step', 'retreat', 'timeout'];
     const keep = e => f === 'all' || e.k === 'turn' || (f === 'p0' && e.txt.startsWith(G.names[0])) || (f === 'p1' && e.txt.startsWith(G.names[1])) ||
@@ -1551,7 +1582,8 @@
       const pcls = povCls(e.txt);
       return '<div class="k-' + e.k + ' ' + pcls + (e.n >= fresh && fresh > 0 ? ' fresh' : '') + '">' + esc(e.txt).replace(NAME_RE, m => '<span class="q">' + m + '</span>') + '</div>';
     }).join('');
-    $('log').scrollTop = 1e9;
+    lg0.scrollTop = stick ? lg0.scrollHeight : top0;
+    ui.logHid = !lg0.clientHeight;                     // lembar Log di HP tertutup: saat dibuka lagi mulai dari kejadian terbaru
   }
 
   /* ---------- efek suara (permintaan pemilik 6 Nov 2026) ---------- */

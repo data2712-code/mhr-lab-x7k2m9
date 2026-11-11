@@ -334,7 +334,8 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
 .lfil{display:flex;gap:4px;flex-wrap:wrap;flex:none}
 .lfil span{font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid var(--line2);color:var(--muted);cursor:pointer}
 .lfil span.on{background:#26303c;color:var(--text)}
-.log{font-size:12px}
+.log{font-size:12px;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.arrwarn{color:#ffb4a8;font-weight:600;display:block}
 .log div{padding:3px 7px;margin:2px 0;border-left:3px solid transparent;border-radius:0 5px 5px 0}
 .log div.me{border-left-color:var(--you);background:rgba(59,135,232,.06)}
 .log div.op{border-left-color:var(--foe);background:rgba(228,68,46,.06)}
@@ -658,6 +659,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
         <button class="mob" data-act="tab" data-tab="log" title="Play-by-play"><i>▤</i> Log</button>
         <button id="btnUndo" title="Undo your last move (local test). In online games the opponent must agree."><i>↶</i> Undo</button>
         <button id="btnSound" title="Sound effects on/off">🔊</button>
+        <button id="btnConcede" title="Concede: you lose and the game ends now"><i>🏳</i> Concede</button>
         <button id="btnMenu" title="Back to the menu"><i>☰</i> Menu</button>
         <button class="dsk" id="btnCopy" title="Copy the log code to report a bug or resume later">⧉ Log code</button>
         <button class="dsk" data-rep="open" data-v="bug" title="Report a bug or send feedback">🐞 Report</button>
@@ -679,19 +681,19 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.28-sp065" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.02-lgs1110" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.3"></script>
-<script src="sim-cards.js?v=o2.3"></script>
-<script src="sim-cards-bp01.js?v=o2.3"></script>
-<script src="sim-cards-s4.js?v=o2.3"></script>
-<script src="sim-cards-sp01.js?v=o2.3"></script>
-<script src="sim-bot.js?v=o2.3"></script>
-<script src="sim-sound.js?v=o2.3"></script>
-<script src="sim-shadow.js?v=o2.3"></script>
-<script src="sim-ui.js?v=o2.3"></script>
-<script src="sim-sandbox.js?v=o2.3"></script>
-<script src="sim-report.js?v=o2.3"></script>
-<script src="sim-modes.js?v=o2.3"></script>
-<script src="sim-i18n.js?v=o2.3"></script>
-<script src="sim-online.js?v=o2.3"></script>
+<script src="sim.js?v=o2.4"></script>
+<script src="sim-cards.js?v=o2.4"></script>
+<script src="sim-cards-bp01.js?v=o2.4"></script>
+<script src="sim-cards-s4.js?v=o2.4"></script>
+<script src="sim-cards-sp01.js?v=o2.4"></script>
+<script src="sim-bot.js?v=o2.4"></script>
+<script src="sim-sound.js?v=o2.4"></script>
+<script src="sim-shadow.js?v=o2.4"></script>
+<script src="sim-ui.js?v=o2.4"></script>
+<script src="sim-sandbox.js?v=o2.4"></script>
+<script src="sim-report.js?v=o2.4"></script>
+<script src="sim-modes.js?v=o2.4"></script>
+<script src="sim-i18n.js?v=o2.4"></script>
+<script src="sim-online.js?v=o2.4"></script>
 </body>
 </html>

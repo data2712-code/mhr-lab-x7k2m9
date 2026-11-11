@@ -1398,6 +1398,20 @@
       st.bt.stage = st.bt.stage === 'F' ? 'W' : st.bt.stage === 'W' ? 'B' : 'done';
     }
   }
+  // Riwayat #74: alasan tidak ada Karakter pemain giliran yang bisa menyerang (dipakai log dan petunjuk Reposition).
+  // '' bila BATTLE kosong atau masih ada yang bisa menyerang.
+  function noAttackWhy(st) {
+    const p = st.tp, cs = battleCards(st, p).filter(i => !st.inst[i].fd);
+    if (!cs.length || cs.some(i => canAttack(st, i))) return '';
+    const parts = cs.map(i => {
+      const L = locate(st, i), x = st.inst[i], R = getR(st, i), at = nameOf(st, i) + ' (' + SLOT_NAME[L.slot] + ', R' + R + ')';
+      if (x.gr && x.gr.noatk === st.turn) return at + ' cannot attack this turn (card effect)';
+      if (R <= 0) return at + ' cannot attack with R 0 (303.2.a.4.6)';
+      if (!hasOpportunity(st, i)) return at + ' has no attack opportunity left';
+      return at + ' has no target within Attack Range';
+    });
+    return plabel(st, p) + ' has no Character that can attack: ' + parts.join('; ') + '. Range counts along BACK–WING–FRONT: from FRONT the opponent\'s FRONT is 1 away, from WING 2, from BACK 3.';
+  }
   // Target serangan masih sah? (303.2.a.4.3.1.6, 303.2.a.4.3.2.2)
   function targetValid(st) {
     const b = st.bt.cur, O = st.P[opp(st.tp)];
@@ -1586,7 +1600,12 @@
           }
           if (!st.cnt.arranged) { st.prompt = { p: st.tp, type: 'arrange' }; return; }
           advanceStage(st);
-          if (st.bt.stage === 'done') { log(st, 'phase', 'Battle Phase ends.'); enterCounterPhase(st); settle(st); continue; }
+          if (st.bt.stage === 'done') {
+            // Riwayat #74: bila tidak ada satu pun kesempatan menyerang, jelaskan sebabnya (dulu terlewati tanpa keterangan).
+            if (!st.bt.had) { const why = noAttackWhy(st); if (why) log(st, 'battle', why); }
+            log(st, 'phase', 'Battle Phase ends.'); enterCounterPhase(st); settle(st); continue;
+          }
+          st.bt.had = true;
           st.prompt = { p: st.tp, type: 'attack', stage: st.bt.stage };
           return;
         }
@@ -2059,6 +2078,18 @@
     log(st, 'timeout', plabel(st, a.p) + ' ran out of ' + (a.kind === 'resp' ? 'response' : 'turn') + ' time (timeout ' + st.to[a.p] + (st.toLimit ? '/' + st.toLimit : '') + '); the simulator acts for them.');
     return { ok: true };
   }
+  /* Menyerah (riwayat #74, permintaan pemilik 11 Nov 2026): aksi bebas {t:'concede', p}; boleh kapan saja selama
+     permainan belum selesai, juga di luar giliran. Pemain itu kalah dan permainan berhenti saat itu juga. */
+  function applyConcede(st, a) {
+    if (st.result) return { ok: false, err: 'The game is over.' };
+    if (a.p !== 0 && a.p !== 1) return { ok: false, err: 'Choose a player.' };
+    st.actions.push({ t: 'concede', p: a.p });
+    log(st, 'concede', plabel(st, a.p) + ' concedes the game.');
+    st.result = { winner: opp(a.p), cause: plabel(st, a.p) + ' conceded', concede: true };
+    st.phase = 'over'; st.prompt = null;
+    log(st, 'over', plabel(st, opp(a.p)) + ' WINS — ' + st.result.cause + '.');
+    return { ok: true };
+  }
   /* Waktu pertandingan habis (O-14, keputusan pemilik 7 Nov 2026: pilihan 30 menit tanpa batas waktu per pemain,
      simulasi pertandingan resmi). Dicatat sebagai aksi bebas {t:'timeup'}; permainan berhenti saat itu juga.
      Penentu: (1) Rush Point terbanyak di Timeline, (2) sisa kartu Deck terbanyak, (3) jankenpon (diulang bila seri).
@@ -2108,6 +2139,7 @@
     if (a && a.t === 'arm') return applyArm(st, a);
     if (a && a.t === 'timeout') return applyTimeout(st, a);
     if (a && a.t === 'timeup') return applyTimeup(st, a);
+    if (a && a.t === 'concede') return applyConcede(st, a);
     if (a && a.t === 'rps') return applyRps(st, a);
     if (st.prompt && st.prompt.type === 'rps') return { ok: false, err: 'Choose Rock, Paper or Scissors.' };
     const err = check(st, a);
@@ -2398,7 +2430,7 @@
   const API = {
     VERSION, SLOTS, SLOT_NAME, BASE_MAX, HAND_MAX, RP_WIN, COLOR_EN,
     init, registerCards, hasResolver, card, nameEn, textEn, nameKey, createGame, check, apply, legalActions, advance,
-    locate, fieldCards, battleCards, charsOnField, targetsFor, canAttack, attackersNow, distance, actiOptions, hasCounterAbility, counterCallUsed,
+    locate, fieldCards, battleCards, charsOnField, targetsFor, canAttack, attackersNow, noAttackWhy, distance, actiOptions, hasCounterAbility, counterCallUsed,
     getLv, getR, getPower, statBreakdown, nameOf, costLv, costOptions, callLimit, opportunities, countCards, settle,
     validateDeck, decodeDeckCode, testDeckSD01, seedFromString,
     exportLog, parseLog, replay, clone, hash, logFor, opp,

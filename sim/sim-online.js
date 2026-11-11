@@ -305,7 +305,7 @@
       let when = r.ended_at; try { const d = new Date(r.ended_at); when = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { /* abaikan */ }
       out += '<div class="hrow"><span class="res ' + (res || 'd') + '">' + resTxt + '</span><div class="tx"><b>Online · private room</b> · ' + esc(who) +
         '<div class="small muted">' + esc(names.map((n, i) => n + ': ' + (dn[i] || 'Deck')).join(' · ')) + '</div>' +
-        '<div class="small muted">' + esc(when) + ' · ' + (r.turns || 0) + ' turns · ' + esc(END[r.end_cause] || '') + ' · ' + esc(CLOCK_LABEL[r.clock] || '') + '</div></div>' +
+        '<div class="small muted">' + esc(when) + ' · ' + (r.turns || 0) + ' turns · ' + esc(/ conceded$/.test(r.cause || '') ? 'Conceded' : END[r.end_cause] || '') + ' · ' + esc(CLOCK_LABEL[r.clock] || '') + '</div></div>' +
         (r.log_code ? '<button class="sm" data-on="hrep" data-code="' + esc(r.log_code) + '">Replay</button><button class="sm" data-on="hcopy" data-code="' + esc(r.log_code) + '">Log code</button>' : '') + '</div>';
     });
     el.innerHTML = out; tr();

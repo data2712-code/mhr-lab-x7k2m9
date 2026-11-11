@@ -269,7 +269,12 @@
       (m, r, n) => ': waktu pertandingan habis dan Rush Point serta Deck sama. Pilih Batu, Kertas, atau Gunting' + (n ? ' (ronde ' + n + ')' : '') + '. Pilihan Anda baru ditampilkan setelah kedua pemain memilih.'],
     [/^(\d+) turns · (\d+) actions · seed (\d+)$/, '$1 giliran · $2 aksi · seed $3'],
     [/^Data: (\d+) Characters from (.+?) \(English card text\) · engine v([\d.]+)\.(.*)$/, (m, n, f, v, rest) => 'Data: ' + n + ' Karakter dari ' + f + ' (teks kartu Inggris) · mesin v' + v + '.' + rest.replace(/ SD05, SD06 and PB02 \((\d+) cards\) are hidden until their official Indonesian release\./, ' SD05, SD06, dan PB02 ($1 kartu) disembunyikan sampai rilis resmi Indonesia.')],
-    [/^Back to the menu\?.*$/, 'Kembali ke menu? Permainan ini tersimpan di perangkat: pilih "Lanjutkan" di menu untuk meneruskannya.']
+    [/^Concede this game\? You will lose.*$/, 'Menyerah di permainan ini? Anda kalah dan permainan langsung berakhir. Tidak bisa dibatalkan.'],
+    [/^Concede this game as (.+?)\? .*$/, 'Menyerah sebagai $1? $1 kalah dan permainan langsung berakhir. Tidak bisa dibatalkan.'],
+    [/^(.+) conceded$/, '$1 menyerah'], [/^Concede$/, 'Menyerah'], [/^Conceded$/, 'Menyerah'],
+    [/^⚠ No Character can attack from these positions$/, '⚠ Dari posisi ini tidak ada Karakter yang bisa menyerang'],
+    [/^⚠ No Character can attack from these positions \(no target.*$/, '⚠ Dari posisi ini tidak ada Karakter yang bisa menyerang (tidak ada target dalam Attack Range): Battle Phase berakhir tanpa serangan.'],
+    [/^Back to the menu\?.*$/,'Kembali ke menu? Permainan ini tersimpan di perangkat: pilih "Lanjutkan" di menu untuk meneruskannya.']
   ];
   // Teks atribut (placeholder / title)
   const ATTR = new Map(Object.entries({
@@ -279,7 +284,7 @@
     'e.g. The hand cards are too small on my phone': 'mis. Kartu HAND terlalu kecil di HP saya',
     'Paste a deck link/code from the mhrdecklab Deck Builder': 'Tempel link/kode deck dari Deck Builder mhrdecklab',
     'Paste a deck link/code from the mhrdecklab Deck Builder (e.g. https://mhrdecklab.com/#d=1.xxx.xxx)': 'Tempel link/kode deck dari Deck Builder mhrdecklab (mis. https://mhrdecklab.com/#d=1.xxx.xxx)',
-    'empty = random': 'kosong = acak', 'Back to the menu': 'Kembali ke menu', 'Sound effects on/off': 'Efek suara nyala/mati',
+    'empty = random': 'kosong = acak', 'Back to the menu': 'Kembali ke menu', 'Concede: you lose and the game ends now': 'Menyerah: Anda kalah dan permainan langsung berakhir', 'Sound effects on/off': 'Efek suara nyala/mati',
     'Undo your last move (local test). In online games the opponent must agree.': 'Batalkan langkah terakhir Anda. Di permainan online lawan harus setuju.',
     'Copy the log code to report a bug or resume later': 'Salin kode log untuk melapor bug atau melanjutkan nanti',
     'Rush Points: the first to 9 wins': 'Rush Point: yang pertama mencapai 9 menang', 'Open RETREAT': 'Buka RETREAT', 'Open VOID': 'Buka VOID'
