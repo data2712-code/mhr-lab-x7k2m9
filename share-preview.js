@@ -46,7 +46,9 @@
 
   /* ---------- apakah Worker sudah terpasang? ---------- */
   let ok = null;
-  try{ const v = sessionStorage.getItem('mhr_sp_ok'); if(v === '1' || v === '0') ok = v === '1'; }catch(e){}
+  /* v7.32b — hanya hasil POSITIF yang diingat per tab. Dulu hasil negatif juga disimpan, jadi tab yang dibuka
+     sebelum Worker dipasang tetap membagikan link hash lama walau halaman sudah dimuat ulang. */
+  try{ if(sessionStorage.getItem('mhr_sp_ok') === '1') ok = true; }catch(e){}
   const probe = (async ()=>{
     if(ok !== null) return ok;
     if(!onSite){ ok = false; return ok; }
@@ -55,7 +57,7 @@
       const j = r.ok && /json/.test(r.headers.get('content-type') || '') ? await r.json() : null;
       ok = !!(j && j.mhr === 'share');
     }catch(e){ ok = false; }
-    try{ sessionStorage.setItem('mhr_sp_ok', ok ? '1' : '0'); }catch(e){}
+    try{ if(ok) sessionStorage.setItem('mhr_sp_ok', '1'); else sessionStorage.removeItem('mhr_sp_ok'); }catch(e){}
     return ok;
   })();
 

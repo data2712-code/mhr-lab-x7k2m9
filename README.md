@@ -603,6 +603,15 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Perbaikan v7.32 — link berbagi masih format lama di tab yang sudah terbuka — 11 November 2026 *(`share-preview.js`, `index.html`)*
+
+- Laporan pemilik: sesudah Worker dipasang, Copy link binder / deck masih menghasilkan `/#binder/…` dan `/#d=…`, jadi
+  thumbnail WhatsApp tidak berubah. Penyebab: hasil cek Worker (`/b/__ping`) disimpan di `sessionStorage` per tab,
+  **termasuk hasil negatif** — tab yang dibuka sebelum Worker aktif terus memakai link lama walau dimuat ulang.
+- Sekarang hanya hasil positif yang disimpan; hasil negatif dicek ulang setiap halaman dimuat. Cache-buster
+  `share-preview.js?v=7.32b`. Worker dan Supabase tidak berubah (sudah dicek: `/b/76813836b244` dan `/d/1.UkIgVG9vbHM…`
+  membalas judul & deskripsi yang benar).
+
 ### Data — Battle Sim o2.3: kartu tertutup digelapkan + alur di HP lebih ringkas — 11 November 2026 *(`sim/index.html`, `sim/sim-ui.js`, `sim/sim-i18n.js`, `sim-host.js`, `index.html`)*
 
 Masukan pemilik dari uji di HP (riwayat simulator #65–#66). Tetap hanya admin yang melihat Battle Sim.
