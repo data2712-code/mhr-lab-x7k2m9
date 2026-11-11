@@ -603,6 +603,11 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.7: pengaturan "Counter prompts" On / Auto / Off — 12 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #79; rincian di `mhr-simulator\`. `sim/` disalin ulang (o2.7): tombol Counter prompts di papan (pass
+otomatis di window Counter). Hanya sisi layar; server tidak berubah. `SIM_URL` → `?v=o2.7`, `sim-host.js?v=7.32-sim7`.
+
 ### Data — Battle Sim o2.6: Find a match (antrean + tawaran bot) — 11 November 2026 *(`sim/`, `sim-host.js`)*
 
 Riwayat simulator #77; rincian di `mhr-simulator\`. `sim/` disalin ulang (o2.6), `SIM_URL` → `?v=o2.6` (o2.5 belum sempat

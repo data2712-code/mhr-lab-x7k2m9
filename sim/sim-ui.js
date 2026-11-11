@@ -83,6 +83,7 @@
     $('btnCopy').onclick = copyLog;
     $('btnUndo').onclick = undo;
     $('btnConcede').onclick = concede;
+    $('btnConf').onclick = confCycle;
     $('btnMenu').onclick = () => {
       if (net.on) { if (G && G.result || confirm('Leave this online game? Your seat is kept for 2 minutes; open Battle Sim again to return.')) window.MHRSimOnline.leaveGame(); return; }
       const keep = G && !G.result && !ui.replay;
@@ -325,7 +326,7 @@
       // Lawan bot: kalau pemain manusia tidak punya aksi selain pass, pass otomatis (tidak ada
       // informasi yang bocor ke bot). Melawan manusia, window tetap selalu dibuka.
       if (pr.type === 'counter' && !G.vanilla && ui.ctrl[pr.p] === 'human' && ui.ctrl[1 - pr.p] === 'bot' && ui.autoPassBot !== false &&
-          S.legalActions(G, { limit: 5 }).every(x => x.t === 'pass')) {
+          (confMode() === 'off' || (confMode() === 'auto' && S.legalActions(G, { limit: 5 }).every(x => x.t === 'pass')))) {
         const p = pr.p; S.apply(G, { t: 'pass' }); ui.hist.push({ p, auto: true }); continue;
       }
       // Jam giliran habis: sisa keputusan pemain giliran pada giliran ini dijalankan dengan aksi bawaan.
@@ -361,6 +362,28 @@
     ui.hist.length = i; ui.clk = null; ui.sndN = G.log.length; ui.seenN = {}; ui.flashN = G.log.length; ui.toastN = G.log.length;
     ui.msg = ui.sandbox || ui.gmode === 'practice' ? 'Move undone.' : 'Move undone (test mode). Undo can reveal hidden information; use it for testing only.';
     resetSel(); step();
+  }
+  /* Pengaturan konfirmasi window Counter (riwayat #79, pilihan pemilik; rujukan: Activation Confirmation di Master Duel).
+     on   = selalu ditanya di Counter Step / Counter Phase;
+     auto = Pass otomatis bila tidak ada COUNTER CALL / ACTI yang bisa dipakai (lawan bisa menebak dari Pass yang cepat);
+     off  = selalu Pass otomatis (tidak pernah ditanya).
+     Bawaan: lawan bot = auto (perilaku lama), online = on (perilaku lama). Dua pemain satu perangkat selalu on. */
+  const KEY_CONF = 'mhrsim.confirm.v1';
+  const CONF_NEXT = { on: 'auto', auto: 'off', off: 'on' };
+  const CONF_TIP = { on: 'Counter prompts ON: you are always asked in the Counter Step and Counter Phase.',
+    auto: 'Counter prompts AUTO: you pass automatically when you have no COUNTER CALL or ACTI to use.',
+    off: 'Counter prompts OFF: you always pass automatically. Switch back to ON or AUTO to answer attacks.' };
+  function confMode() {
+    if (!net.on && humans().length !== 1) return 'on';
+    let v = null; try { v = localStorage.getItem(KEY_CONF + (net.on ? '.online' : '.bot')); } catch (e) { v = null; }
+    return CONF_NEXT[v] ? v : net.on ? 'on' : 'auto';
+  }
+  function confCycle() {
+    if (!G || ui.replay || (!net.on && humans().length !== 1)) return;
+    const v = CONF_NEXT[confMode()];
+    try { localStorage.setItem(KEY_CONF + (net.on ? '.online' : '.bot'), v); } catch (e) { /* abaikan */ }
+    tip(CONF_TIP[v]);
+    if (net.on) { render(); if (net.last) netAutoPass(net.last); } else step();
   }
   /* Menyerah (riwayat #74, permintaan pemilik): pemain yang menyerah kalah dan permainan berhenti. Selalu ditanya dulu.
      Online: server yang mencatat ({type:'concede'}); offline: aksi bebas {t:'concede', p} di mesin. */
@@ -425,6 +448,18 @@
     }
     if (promptKey() !== key) { resetSel(); ui.pickClosed = false; ui.msg = ''; }
     render();
+    netAutoPass(msg);
+  }
+  // Riwayat #79: pengaturan konfirmasi di window Counter (Auto / Off) — klien mengirim Pass sendiri setelah jeda singkat.
+  function netAutoPass(msg) {
+    clearTimeout(net.autoT);
+    const pr = G && G.prompt;
+    if (!pr || pr.type !== 'counter' || pr.p !== net.seat || G.result || msg.undoPending) return;
+    const cm = confMode(), L = Array.isArray(msg.legal) ? msg.legal : [];
+    const only = L.length > 0 && L.every(x => x && x.a && x.a.t === 'pass');
+    if (!(cm === 'off' || (cm === 'auto' && only))) return;
+    const k = promptKey();
+    net.autoT = setTimeout(() => { if (net.on && G && !G.result && promptKey() === k && !net.pending && confMode() !== 'on') netAct({ t: 'pass' }); }, 350);
   }
   function netError(m) { net.pending = false; ui.msg = String(m || 'Not allowed.'); if (window.MHRSound) MHRSound.play('error'); if (G) render(); }
   function netAct(a) {
@@ -609,6 +644,9 @@
     renderScore(v, bottom, top);
     $('btnUndo').style.display = ui.replay ? 'none' : '';
     $('btnConcede').style.display = ui.replay || ui.sandbox || G.result || !humans().length ? 'none' : '';
+    { const cb = $('btnConf'), showC = !ui.replay && !ui.sandbox && !G.result && !G.vanilla && (net.on || humans().length === 1), cm = confMode();
+      cb.style.display = showC ? '' : 'none';
+      if (showC && cb.dataset.m !== cm) { cb.dataset.m = cm; cb.innerHTML = '<i>' + cm.toUpperCase() + '</i> <span>Counter prompts</span>'; } }
     $('btnEditPos').style.display = ui.replay || G.result || net.on ? 'none' : '';
     $('btnSiaga').style.display = G.siaga && !ui.replay && !G.result ? '' : 'none';
     playEvents(v);

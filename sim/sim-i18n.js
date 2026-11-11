@@ -239,6 +239,13 @@
     ['The search stopped (the server restarted). Please search again.', 'Pencarian berhenti (server dimulai ulang). Silakan cari lagi.'],
     ['The search stopped.', 'Pencarian berhenti.'], ['Could not join the queue.', 'Tidak bisa masuk antrean.'], ['The room could not be created. Searching again.', 'Room tidak bisa dibuat. Mencari lagi.']
   ].forEach(([en, id]) => EXACT.set(en, id));
+  // Pengaturan konfirmasi window Counter (riwayat #79)
+  [
+    ['Counter prompts', 'Tanya Counter'],
+    ['Counter prompts ON: you are always asked in the Counter Step and Counter Phase.', 'Tanya Counter ON: Anda selalu ditanya di Counter Step dan Counter Phase.'],
+    ['Counter prompts AUTO: you pass automatically when you have no COUNTER CALL or ACTI to use.', 'Tanya Counter AUTO: Pass otomatis bila Anda tidak punya COUNTER CALL atau ACTI yang bisa dipakai.'],
+    ['Counter prompts OFF: you always pass automatically. Switch back to ON or AUTO to answer attacks.', 'Tanya Counter OFF: Anda selalu Pass otomatis. Kembalikan ke ON atau AUTO untuk menanggapi serangan.']
+  ].forEach(([en, id]) => EXACT.set(en, id));
   const RULES = [
     [/^Unfinished game$/, 'Permainan belum selesai'],
     [/^(.+?) · turn (\d+) · saved just now$/, '$1 · giliran $2 · disimpan baru saja'],
@@ -324,7 +331,7 @@
     'e.g. The hand cards are too small on my phone': 'mis. Kartu HAND terlalu kecil di HP saya',
     'Paste a deck link/code from the mhrdecklab Deck Builder': 'Tempel link/kode deck dari Deck Builder mhrdecklab',
     'Paste a deck link/code from the mhrdecklab Deck Builder (e.g. https://mhrdecklab.com/#d=1.xxx.xxx)': 'Tempel link/kode deck dari Deck Builder mhrdecklab (mis. https://mhrdecklab.com/#d=1.xxx.xxx)',
-    'empty = random': 'kosong = acak', 'Back to the menu': 'Kembali ke menu', 'Concede: you lose and the game ends now': 'Menyerah: Anda kalah dan permainan langsung berakhir', 'Sound effects on/off': 'Efek suara nyala/mati',
+    'empty = random': 'kosong = acak', 'Back to the menu': 'Kembali ke menu', 'Counter prompts: ON = always ask, AUTO = pass when you have nothing to use, OFF = always pass': 'Tanya Counter: ON = selalu ditanya, AUTO = Pass bila tidak ada yang bisa dipakai, OFF = selalu Pass', 'Concede: you lose and the game ends now': 'Menyerah: Anda kalah dan permainan langsung berakhir', 'Sound effects on/off': 'Efek suara nyala/mati',
     'Undo your last move (local test). In online games the opponent must agree.': 'Batalkan langkah terakhir Anda. Di permainan online lawan harus setuju.',
     'Copy the log code to report a bug or resume later': 'Salin kode log untuk melapor bug atau melanjutkan nanti',
     'Rush Points: the first to 9 wins': 'Rush Point: yang pertama mencapai 9 menang', 'Open RETREAT': 'Buka RETREAT', 'Open VOID': 'Buka VOID'
