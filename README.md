@@ -44,6 +44,7 @@ mhr-lab-x7k2m9/
 ├── binders-ui.js      ← tab Binders di My Dashboard + halaman publik #binder/<kode> (v7.06)
 ├── perf.js            ← servis Supabase Performance Analytics: catatan match, archetype, tournament runs, data komunitas (v7.13–v7.15, tanpa DOM)
 ├── perf-ui.js         ← tab Performance di My Dashboard: catat match, statistik, tren, runs, import Events, share gambar, komunitas, versi deck (v7.13–v7.15)
+├── lgs-admin.js       ← jadwal Weekly Rush LGS dari Supabase (tabel lgs_stores) + editor admin di halaman #lgs; data.js = cadangan (v7.31)
 ├── sim-host.js        ← Battle Sim: penghubung situs ↔ simulator (menu khusus admin, iframe, link undangan, kartu laporan di My Lab) (v7.29)
 ├── sim/               ← simulator Battle Sim (index.html + 14 skrip) — DIBUAT mhr-simulator\online\site-sim.js, jangan diedit tangan (v7.29)
 ├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
@@ -427,6 +428,11 @@ hapus satu objek event-nya. Commit changes seperti biasa.
 
 ### Cara mengubah jadwal Weekly Rush LGS
 
+> **Sejak v7.31 jadwal diubah dari situs, bukan dari `data.js`.** Login dengan akun admin → Weekly Rush LGS →
+> **＋ Add store** atau **✎ Edit** di toko yang bersangkutan. Jadwal tersimpan di tabel Supabase `lgs_stores` dan
+> langsung tampil tanpa push. Bagian di bawah ini (format `data.js`) hanya berlaku untuk **cadangan** yang dipakai
+> bila Supabase tidak bisa dihubungi; tabel jadwal di bawah juga tidak lagi diperbarui.
+
 Semua jadwal ada di **`data.js`** (bukan `index.html`), jadi aman saat aplikasi
 diperbarui. **Setelah mengubah jadwal, ganti juga `?v=` pada `<script src="data.js?v=...">` di
 `index.html`** (lihat aturan cache-buster di § Cara update) — kalau tidak, jadwal baru baru
@@ -596,6 +602,33 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.31 — Weekly Rush LGS: jadwal disimpan di Supabase + admin bisa menambah / mengubah / menghapus dari situs — 10 November 2026 *(`index.html`, berkas BARU `lgs-admin.js`, migrasi SQL baru `mhr_decklab_v731_lgs_stores.sql` di folder internal)*
+
+Permintaan pemilik: jadwal baru bisa dimasukkan sendiri dari menu Weekly Rush LGS, hanya oleh admin. Keputusan pemilik:
+admin bisa **menambah, mengubah, dan menghapus**; **semua toko dipindahkan ke Supabase**, `data.js` jadi cadangan.
+
+- **Tabel baru `lgs_stores`** (satu baris = satu toko; kolom sama dengan field `data.js`: `nm`, `kota`, `tz`, `map`, `ig`,
+  `hp`, `wa`, `jd`, plus `sort` untuk urutan tampil). RLS: semua orang membaca, hanya akun di `admin_users` menulis.
+  SQL sekaligus mengimpor 34 toko dari `data.js` (hanya bila tabel masih kosong). **Dijalankan pemilik di Supabase.**
+- **`lgs-admin.js`** (dimuat sesudah `data.js`): mengambil jadwal dari Supabase dan mengganti isi `window.LGS` di tempat,
+  jadi halaman Weekly Rush LGS, panel "Weekly Rush today" di Home, dan angka jumlah toko ikut memakai data terbaru.
+  Salinan terakhir disimpan di browser supaya halaman tidak berkedip dari data lama ke data baru.
+  **Kalau Supabase tidak bisa dihubungi atau tabel belum dibuat/kosong, situs tetap memakai `data.js`** seperti sebelumnya.
+- **Untuk admin** di halaman `#lgs`: bilah "ADMIN" dengan tombol **＋ Add store**, dan tombol **✎ Edit** di tiap toko.
+  Formulir: nama toko, kota (saran dari kota yang sudah ada; zona waktu ikut terisi), zona waktu, link Google Maps,
+  Instagram, nomor WhatsApp toko, link grup WhatsApp, dan daftar jadwal (hari, jam, catatan opsional; bisa lebih dari
+  satu). **Delete store** harus diklik dua kali. Perubahan langsung tampil untuk semua pengunjung, tanpa push.
+  Pengunjung dan akun bukan admin tidak melihat bilah maupun tombol itu.
+- Toko baru di kota yang sudah ada ditaruh sesudah toko terakhir kota itu; kota baru ditaruh paling akhir.
+- Tanggal "last updated" di bawah jadwal sekarang diambil dari perubahan terakhir di database.
+- Keamanan isian: teks dibersihkan dari `< > " \``, link wajib `https://`, Instagram hanya username, nomor hanya angka;
+  batas yang sama dipasang sebagai CHECK di tabel dan diperiksa lagi saat data ditampilkan.
+- `data.js` tidak diubah. Jadwal di `data.js` sekarang hanya **cadangan** (keadaan 10 November 2026) — lihat
+  § Cara mengubah jadwal Weekly Rush LGS. Versi situs 7.31 (`index.html`: header, `meta version`, footer, `lgs-admin.js?v=7.31`).
+- Dicek di salinan lokal dengan Supabase tiruan (Playwright, desktop 1366 px & HP): 50/50 lulus — tabel belum ada →
+  cadangan `data.js` + keterangan untuk admin; tamu & akun biasa melihat data Supabase tanpa kontrol admin; admin
+  menambah / mengubah / menghapus (validasi, urutan kota, tombol Edit tetap cocok saat difilter per kota), tanpa error JS.
 
 ### Data — Jadwal Weekly Rush LGS: Littleroot Town (Jakarta) ditambahkan — 10 November 2026 *(`data.js`, `index.html`, `sim/index.html`)*
 
