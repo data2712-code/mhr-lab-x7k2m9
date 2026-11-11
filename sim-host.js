@@ -16,7 +16,7 @@
    =================================================================== */
 (function () {
   'use strict';
-  const SIM_URL = 'sim/index.html?v=o2.4';
+  const SIM_URL = 'sim/index.html?v=o2.6';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const q = s => document.querySelector(s);
   const admin = () => (typeof isAccountAdmin !== 'undefined' && isAccountAdmin);
@@ -47,7 +47,8 @@
     client() { return window.MHRAuth && window.MHRAuth.client; },
     openLogin() { if (window.MHRUI && window.MHRUI.openAuthModal) window.MHRUI.openAuthModal(); },
     gameMode(on) { document.body.classList.toggle('sim-full', !!on); sizeFrame(); },
-    shareUrl(code) { return location.origin + '/#sim/room/' + code; }
+    shareUrl(code) { return location.origin + '/#sim/room/' + code; },
+    replayUrl(code) { return location.origin + '/#sim/replay/' + code; }      // o2.5: link replay = kode log di alamat
   };
 
   /* ---------- halaman #sim ---------- */
@@ -60,24 +61,30 @@
     f.style.height = Math.max(420, innerHeight - top - (fixedNav ? nav.offsetHeight : 0)) + 'px';
   }
   addEventListener('resize', sizeFrame);
-  let lastRoom = null;
+  let lastRoom = null, lastReplay = null;
   window.renderSimPage = function (sub) {
     const wrap = q('#simWrap'); if (!wrap) return;
     const room = sub && /^room\/([A-Z0-9]{6})$/i.test(sub) ? sub.slice(5).toUpperCase() : null;
     if (room) lastRoom = room;
+    const rpm = sub && /^replay\/(MHRSIM1\.[A-Za-z0-9_-]+)$/.exec(sub), replay = rpm ? rpm[1] : null;
+    if (replay) lastReplay = replay;
     if (!canPlay()) {
       if (frame()) wrap.innerHTML = '';
       const authReady = window.MHRAuth && window.MHRAuth.ready;
-      wrap.innerHTML = '<div class="sim-gate"><h2>⚔️ Battle Sim</h2>' +
-        '<p>Battle Sim is in beta. Log in with your MHR Deck Lab account to play.</p>' + (authReady ? '<p><button class="nw-btn ev-main" id="simLogin">Log in</button></p>' : '') +
-        (lastRoom ? '<p class="ev-muted">Room invite: <b>' + esc(lastRoom) + '</b>. The room opens right after you log in.</p>' : '') + '</div>';
+      wrap.innerHTML = '<div class="sim-gate"><h2>⚔️ Battle Sim <span class="sim-beta">BETA</span></h2>' +
+        '<p>Battle Sim is in beta (11–18 Nov 2026). Log in with your MHR Deck Lab account to play, and tell us about any bug you find.</p>' + (authReady ? '<p><button class="nw-btn ev-main" id="simLogin">Log in</button></p>' : '') +
+        (lastRoom ? '<p class="ev-muted">Room invite: <b>' + esc(lastRoom) + '</b>. The room opens right after you log in.</p>' : '') +
+        (lastReplay ? '<p class="ev-muted">Replay link: the replay opens right after you log in.</p>' : '') + '</div>';
       const b = q('#simLogin'); if (b) b.onclick = () => window.MHRSimHost.openLogin();
       return;
     }
     let f = frame();
     if (!f) {
-      wrap.innerHTML = '<iframe id="simFrame" title="MHR Battle Sim" src="' + SIM_URL + (lastRoom ? '#room=' + lastRoom : '') + '" allow="clipboard-write; web-share; fullscreen"></iframe>';
-      f = frame(); lastRoom = null;
+      wrap.innerHTML = '<iframe id="simFrame" title="MHR Battle Sim" src="' + SIM_URL + (lastReplay ? '#replay=' + lastReplay : lastRoom ? '#room=' + lastRoom : '') + '" allow="clipboard-write; web-share; fullscreen"></iframe>';
+      f = frame(); lastRoom = null; lastReplay = null;
+    } else if (replay) {
+      try { f.contentWindow.MHRSimOnline.openReplay(replay); } catch (e) { f.src = SIM_URL + '#replay=' + replay; }
+      lastReplay = null;
     } else if (room) {
       try { f.contentWindow.MHRSimOnline.joinRoom(room); } catch (e) { f.src = SIM_URL + '#room=' + room; }
       lastRoom = null;

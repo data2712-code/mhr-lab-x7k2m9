@@ -167,7 +167,7 @@
       h += '<div class="resume"><div class="tx"><b>▶ Online game in progress</b><div class="small muted">Room ' + esc(sv.room) + ' · ' + esc(CLOCK_LABEL[sv.clock] || '') + ' · your seat is kept for 2 minutes after you leave</div></div>' +
         '<button class="pri" data-on="back" style="min-height:44px">Back to the game</button><button data-on="forget" style="min-height:44px">Forget</button></div>';
     }
-    h += '<p class="small muted" style="margin:0 2px 10px">Playing as <b>' + esc(s.username || 'Player') + '</b>' + (s.admin ? ' · admin (closed testing)' : '') + '</p>';
+    h += '<p class="small muted" style="margin:0 2px 10px">Playing as <b>' + esc(s.username || 'Player') + '</b>' + (s.admin ? ' · admin' : '') + '</p>';
     // Gabung (dari link / kode)
     h += '<div class="box"><h3 style="margin:0 0 8px">Join a room</h3><div class="form">' +
       '<div class="f"><label>Room code</label><input id="onJoinCode" maxlength="6" autocomplete="off" style="text-transform:uppercase;letter-spacing:.2em;font-weight:700" value="' + esc(pendingJoin || '') + '" placeholder="e.g. 7KQ2MX"></div>' +
@@ -201,6 +201,13 @@
     el.innerHTML = r.started ? 'Room ' + esc(code) + ' has already started.' : r.expired ? 'Room ' + esc(code) + ' has expired.' :
       'Room <b>' + esc(code) + '</b> · host <b>' + esc(r.names[0]) + '</b> (' + esc(r.decks[0] || 'Deck') + ') · clock ' + esc(CLOCK_LABEL[r.clock] || r.clock) + ' · first: ' + esc(r.first === 0 ? r.names[0] : r.first === 1 ? 'you' : 'random');
     tr();
+  }
+  // Riwayat #76: link replay = kode log di dalam alamat (#sim/replay/KODE). Tidak butuh tabel/izin baru; penerima harus login.
+  function replayUrl(code) { const h = host(); try { if (h && h.replayUrl) return h.replayUrl(code); } catch (e) { /* abaikan */ } return 'https://mhrdecklab.com/#sim/replay/' + code; }
+  function shareReplay(code, btn) {
+    const url = replayUrl(code), done = () => { if (btn) { btn.textContent = 'Replay link copied.'; tr(); } };
+    if (navigator.share) { navigator.share({ title: 'MHR Battle Sim replay', text: 'Watch this MHR Battle Sim game', url }).catch(() => copyText(url, btn)); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, () => prompt('Replay link', url)); else prompt('Replay link', url);
   }
   function shareUrl(code) { const h = host(); try { if (h && h.shareUrl) return h.shareUrl(code); } catch (e) { /* abaikan */ } return 'https://mhrdecklab.com/#sim/room/' + code; }
   function renderWaiting() {
@@ -271,10 +278,190 @@
         if (navigator.share) navigator.share({ title: 'MHR Battle Sim', text, url }).catch(() => { /* dibatalkan */ }); else copyText(url, t);
         return;
       }
+      case 'fqStart': fqStart(); return;
+      case 'fqCancel': fqStop(); return;
+      case 'fqBot': fqBot(); return;
       case 'hrep': { const code = t.dataset.code; if (code) U().replayCode(code); return; }
       case 'hcopy': copyText(t.dataset.code || '', t); return;
+      case 'hshare': shareReplay(t.dataset.code || '', t); return;
     }
   });
+
+  /* ---------- Cari lawan (riwayat #77) ----------
+     Antrean di server (POST /api/queue/…): masuk dengan deck, lalu bertanya berkala. Lawan ditemukan → kedua pemain
+     menekan Accept dalam 10 detik → room dimulai (jam Standard, giliran pertama acak). Setelah 45 detik menunggu (O-13)
+     ditawarkan main lawan bot (permainan offline biasa, bot selalu bernama "Bot · level") sambil pencarian tetap jalan;
+     pemberitahuan "lawan ditemukan" tampil di atas papan. Pencarian berhenti sendiri setelah 10 menit. */
+  const BOT_OFFER_MS = window.MHRSIM_BOT_OFFER_MS || 45000;
+  const fq = { on: false, ticket: null, token: null, since: 0, st: null, timer: null, tick: null, deck: null, deckVal: null, err: '', note: '', busy: false, botGame: false, foundBy: 0 };
+  const fhead = '<div class="hd"><button data-mode="home">← Menu</button><h2>Find a match</h2></div>';
+  const mmss = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  const findVisible = () => !!(window.MHRSimModes && window.MHRSimModes.view() === 'find' && !document.getElementById('game').classList.contains('on'));
+  async function renderFind() {
+    const el = $('panelOnline'); if (!el) return;
+    if (fq.on) { drawFind(true); return; }
+    el.innerHTML = fhead + '<div class="box small muted">Loading…</div>'; tr();
+    const s = await session();
+    if (!s) {
+      el.innerHTML = fhead + '<div class="box"><p><b>Log in to play online.</b></p><p class="small muted">Online games need a mhrdecklab.com account so your games and replays are saved to it. Practice vs Bot and same-device games work without logging in.</p><div class="startbar"><button class="pri" data-on="login">Log in</button></div></div>';
+      tr(); return;
+    }
+    await loadDecks();
+    if (fq.on) { drawFind(true); return; }
+    const pref = Object.assign({ deck: decks.mine.length ? 'my:0' : 'spr' }, ls.get(KEY_PREF) || {});
+    const st = await apiFetch('/api/queue');
+    if (fq.on || !findVisible()) return;
+    el.innerHTML = fhead + '<p class="small muted" style="margin:0 2px 10px">Playing as <b>' + esc(s.username || 'Player') + '</b></p>' +
+      '<div class="box"><div class="form"><div class="f"><label>Your deck</label>' + deckSelect('fqDeck') + '</div>' +
+      '<div class="f full" id="fqCodeWrap" style="display:none"><label>Deck link or code</label><textarea id="fqDeckCode" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder">' + esc(pref.code || '') + '</textarea></div></div>' +
+      '<p class="small muted">You are matched with the next player who is searching. Clock: Standard 2:00 per turn / 0:30 per response; the 3rd timeout loses the game. Who goes first is random. The game is saved to your account. During the beta there may be few players online: after 45 seconds you can play the bot while you keep searching.</p>' +
+      '<p class="small" id="fqStat">' + (st && st.waiting != null ? '<b>' + st.waiting + '</b> <span>player(s) searching now</span>' : '') + '</p>' +
+      '<div id="onErr" class="err">' + esc(fq.note || '') + '</div><div class="startbar"><button class="pri" data-on="fqStart">⚔️ Find a match</button></div></div>';
+    fq.note = '';
+    const x = $('fqDeck'); x.value = pref.findDeck || pref.deck; if (!x.value) x.selectedIndex = 0;
+    const f = () => { $('fqCodeWrap').style.display = x.value === 'code' ? '' : 'none'; }; x.onchange = f; f();
+    tr();
+  }
+  function drawFind(force) {
+    const el = $('panelOnline'); if (!el || !findVisible()) return;
+    const waited = Date.now() - fq.since, st = fq.st || {};
+    const mode = st.state === 'found' ? 'found' : waited >= BOT_OFFER_MS ? 'offer' : 'search';
+    // layar yang sama: cukup perbarui angka (pilihan level bot tidak hilang)
+    if (!force && el.dataset.fq === mode && $('fqTime')) { $('fqTime').textContent = mmss(waited); const n = $('fqN'); if (n) n.textContent = st.waiting || 1; const e = $('onErr'); if (e) e.textContent = fq.err || ''; return; }
+    el.dataset.fq = mode;
+    let h = '<div class="hd"><button data-on="fqCancel">← Cancel</button><h2>Find a match</h2></div><div class="box" style="text-align:center">';
+    if (mode === 'found') h += '<p><b>Opponent found</b></p><p class="small muted" id="fqTime">Answer in the box at the top of the screen.</p>';
+    else {
+      h += '<p style="margin:0"><b>Searching for an opponent…</b></p><div class="roomcode" id="fqTime">' + mmss(waited) + '</div>' +
+        '<p class="small muted"><b id="fqN">' + (st.waiting || 1) + '</b> <span>player(s) searching now</span> · <span>your deck:</span> <span data-noi18n>' + esc(fq.deck ? fq.deck.name : 'Deck') + '</span></p><div class="spin"></div>';
+      if (mode === 'offer') h += '<div class="box" style="margin-top:12px;text-align:left"><p style="margin:0 0 8px"><b>No opponent yet.</b> <span>Play the bot while you keep searching?</span></p>' +
+        '<p class="small muted">The bot is always shown as a bot and the game is not saved to your online history. When a player is found you are asked whether to switch.</p>' +
+        seg('fqLevel', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']], 'normal') + '<div class="startbar"><button class="pri" data-on="fqBot">🤖 Play the bot while waiting</button></div></div>';
+    }
+    h += '</div><div id="onErr" class="err">' + esc(fq.err || '') + '</div>';
+    el.innerHTML = h; tr();
+  }
+  function banner() {
+    let b = document.getElementById('fqBanner');
+    const st = fq.st || {}, inGame = document.getElementById('game').classList.contains('on');
+    const show = fq.on && (st.state === 'found' || (inGame && st.state === 'waiting'));
+    if (!show) { if (b) b.remove(); return; }
+    if (!b) {
+      b = document.createElement('div'); b.id = 'fqBanner';
+      b.style.cssText = 'position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:200;width:max-content;max-width:94vw;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 12px;border-radius:12px;background:#12171d;border:2px solid #F2B01E;box-shadow:0 8px 24px rgba(0,0,0,.6);font-size:13px;color:#e8edf3';
+      b.addEventListener('click', e => { const t = e.target.closest('[data-fq]'); if (!t) return; if (t.dataset.fq === 'accept') fqAccept(); else fqStop(); });
+      document.body.appendChild(b);
+    }
+    const key = st.state + ':' + (st.accepted ? 1 : 0) + ':' + (st.opp || '');
+    if (st.state === 'found') {
+      const left = Math.ceil(Math.max(0, fq.foundBy - Date.now()) / 1000);
+      if (b.dataset.key !== key) {
+        b.dataset.key = key;
+        b.innerHTML = '<span><b>Opponent found:</b> <b data-noi18n>' + esc(st.opp || 'Player') + '</b></span>' + (st.accepted ? '<span>Waiting for your opponent to accept…</span>' :
+          '<button class="pri" data-fq="accept" style="min-height:40px"><span>Accept</span> (<i id="fqLeft" style="font-style:normal">' + left + '</i>)</button><button data-fq="decline" style="min-height:40px">Decline</button>') +
+          (inGame && !st.accepted ? '<span class="small" style="flex-basis:100%;text-align:center;color:#8f9bab">Accepting leaves the bot game.</span>' : '');
+        tr();
+      } else { const l = document.getElementById('fqLeft'); if (l) l.textContent = left; }
+    } else if (b.dataset.key !== key) {
+      b.dataset.key = key;
+      b.innerHTML = '<span>Still searching for a player…</span><button data-fq="stop" class="sm">Stop searching</button>'; tr();
+    }
+    b.style.borderColor = st.state === 'found' ? '#F2B01E' : '#2a313b';
+  }
+  function fqDraw() { drawFind(); banner(); }
+  async function fqStart() {
+    if (fq.on || fq.busy) return;
+    const v = $('fqDeck').value, code = $('fqDeckCode').value, d = readDeck(v, code);
+    if (d.err) { $('onErr').textContent = d.err; tr(); return; }
+    const old = ls.get(KEY_PREF) || {};
+    ls.set(KEY_PREF, Object.assign(old, { findDeck: v, code: v === 'code' ? code : old.code }));
+    fq.busy = true;
+    const r = await apiFetch('/api/queue/enter', { method: 'POST', auth: true, body: JSON.stringify({ deck: d.body }) });
+    fq.busy = false;
+    if (r.error || !r.ticket) { const e = $('onErr'); if (e) { e.textContent = r.error || 'Could not join the queue.'; tr(); } return; }
+    Object.assign(fq, { on: true, ticket: r.ticket, token: r.token, since: Date.now(), st: null, deck: d, deckVal: v, err: '', botGame: false, foundBy: 0 });
+    fqApply(r);
+    if (!fq.on) return;
+    drawFind(true); banner();
+    clearInterval(fq.tick); fq.tick = setInterval(() => { if (fq.on) fqDraw(); }, 1000);
+    fqPoll();
+  }
+  function fqPoll() {
+    clearTimeout(fq.timer); if (!fq.on) return;
+    const st = (fq.st || {}).state, d = st === 'found' ? 1500 : Date.now() - fq.since < 60000 ? 2500 : fq.botGame ? 5000 : 4000;
+    fq.timer = setTimeout(async () => {
+      if (!fq.on) return;
+      if (!fq.ticket) { fqPoll(); return; }                 // sedang masuk antrean lagi
+      const r = await apiFetch('/api/queue/poll', { method: 'POST', body: JSON.stringify({ ticket: fq.ticket, token: fq.token }) });
+      if (!fq.on) return;
+      if (r.error) fq.err = r.error; else { fq.err = ''; fqApply(r); }
+      if (fq.on) { fqDraw(); fqPoll(); }
+    }, d);
+  }
+  const GONE = {
+    declined: 'You did not accept in time, so the search stopped.',
+    timeout: 'No opponent was found within 10 minutes. Try again later, or share a private room link with a friend.',
+    replaced: 'A new search was started with this account on another device or tab.',
+    left: 'The search stopped because the connection was lost.',
+    expired: 'The search stopped (the server restarted). Please search again.'
+  };
+  function fqApply(r) {
+    const prev = (fq.st || {}).state;
+    fq.st = r;
+    if (r.state === 'found' && prev !== 'found') { fq.foundBy = Date.now() + (r.left || 0); if (window.MHRSound) { try { window.MHRSound.play('turn'); } catch (e) { /* abaikan */ } } }
+    if (r.state !== 'found') fq.foundBy = 0;
+    if (r.state === 'ready') { fqEnterRoom(r); return; }
+    if (r.state === 'gone') { if (r.reason === 'expired' && !fq.rejoin) fqRejoin(); else fqEnd(GONE[r.reason] || 'The search stopped.'); }
+    else fq.rejoin = false;
+  }
+  // Antrean di server hidup di memori; bila server memulai ulang, tiket hilang. Masuk lagi diam-diam (sekali), waktu tunggu tetap.
+  async function fqRejoin() {
+    fq.rejoin = true; fq.ticket = null; fq.st = { state: 'waiting', waiting: 1 };
+    const r = await apiFetch('/api/queue/enter', { method: 'POST', auth: true, body: JSON.stringify({ deck: fq.deck.body }) });
+    if (!fq.on) return;
+    if (r.error || !r.ticket) { fqEnd(GONE.expired); return; }
+    fq.ticket = r.ticket; fq.token = r.token; fq.st = r;
+    if (r.state === 'found') fq.foundBy = Date.now() + (r.left || 0);
+  }
+  function fqEnd(note) {
+    const bot = fq.botGame;
+    fq.on = false; clearTimeout(fq.timer); clearInterval(fq.tick); fq.st = null; fq.note = note || ''; fq.botGame = false;
+    banner();
+    if (findVisible()) renderFind();
+    else if (note && bot) { const ui = U(); if (ui && ui.state()) { ui.ui.msg = note; ui.render(); } }
+  }
+  function fqStop() {
+    if (!fq.on) return;
+    apiFetch('/api/queue/leave', { method: 'POST', body: JSON.stringify({ ticket: fq.ticket, token: fq.token }) });
+    fqEnd('');
+  }
+  async function fqAccept() {
+    if (!fq.on) return;
+    const r = await apiFetch('/api/queue/accept', { method: 'POST', body: JSON.stringify({ ticket: fq.ticket, token: fq.token }) });
+    if (!fq.on) return;
+    if (r.error) { fq.err = r.error; fqDraw(); return; }
+    fqApply(r); if (fq.on) fqDraw();
+  }
+  function fqEnterRoom(r) {
+    const name = fq.deck ? fq.deck.name : 'Deck';
+    fq.on = false; clearTimeout(fq.timer); clearInterval(fq.tick); fq.st = null; fq.botGame = false; banner();
+    seatSet({ room: r.room, seat: r.seat, token: r.token, clock: r.clock, deckName: name, started: true, queue: true });
+    status('Connecting…');
+    connect({ room: r.room, seat: r.seat, token: r.token, clock: r.clock });
+  }
+  // Tawaran bot (O-13): permainan offline biasa melawan bot bertanda; pencarian tetap berjalan di belakang.
+  async function fqBot() {
+    const ui = U(), level = segVal('fqLevel') || 'normal';
+    const mine = TEST_LABEL[fq.deckVal] ? ui.deckFrom(fq.deckVal, '', 'Your') : ui.deckFrom('code', fq.deck.body.code, 'Your');
+    const keys = Object.keys(TEST_LABEL), bot = ui.deckFrom(keys[Math.floor(Math.random() * keys.length)], '', "The bot's");
+    if (mine.err || bot.err) { fq.err = mine.err || bot.err; drawFind(true); return; }
+    const s = await session();
+    if (!fq.on) return;
+    fq.botGame = true;
+    ui.launch({ decks: [mine.list, bot.list], names: [(s && s.username) || 'Player', 'Bot · ' + ({ easy: 'Easy', normal: 'Normal', hard: 'Hard' })[level]], ctrl: ['human', 'bot'], first: 'random', timer: 'off', botLevel: level, gmode: 'practice',
+      deckNames: [fq.deck.name || 'Deck', bot.name || 'Deck'], youIdx: 0 });
+    banner();
+  }
 
   /* ---------- riwayat online (Supabase sim_matches, RLS: hanya milik sendiri) ---------- */
   const END = { rp: '9 Rush Points', deck: 'Deck out', time: 'Time up', timeouts: '3 timeouts', claim: 'Opponent left', draw: 'Draw', other: 'Other' };
@@ -306,7 +493,7 @@
       out += '<div class="hrow"><span class="res ' + (res || 'd') + '">' + resTxt + '</span><div class="tx"><b>Online · private room</b> · ' + esc(who) +
         '<div class="small muted">' + esc(names.map((n, i) => n + ': ' + (dn[i] || 'Deck')).join(' · ')) + '</div>' +
         '<div class="small muted">' + esc(when) + ' · ' + (r.turns || 0) + ' turns · ' + esc(/ conceded$/.test(r.cause || '') ? 'Conceded' : END[r.end_cause] || '') + ' · ' + esc(CLOCK_LABEL[r.clock] || '') + '</div></div>' +
-        (r.log_code ? '<button class="sm" data-on="hrep" data-code="' + esc(r.log_code) + '">Replay</button><button class="sm" data-on="hcopy" data-code="' + esc(r.log_code) + '">Log code</button>' : '') + '</div>';
+        (r.log_code ? '<button class="sm" data-on="hrep" data-code="' + esc(r.log_code) + '">Replay</button><button class="sm" data-on="hshare" data-code="' + esc(r.log_code) + '">Share</button><button class="sm" data-on="hcopy" data-code="' + esc(r.log_code) + '">Log code</button>' : '') + '</div>';
     });
     el.innerHTML = out; tr();
   }
@@ -333,6 +520,8 @@
   // Link undangan: situs membuka iframe dengan #room=KODE (dibaca sekarang, sebelum menu mengganti hash).
   const HASH0 = location.hash || '';
   function init() {
+    const rp = /^#replay=(MHRSIM1[.][A-Za-z0-9_-]+)$/.exec(HASH0);
+    if (rp) { openReplay(rp[1]); return; }
     const m = /^#room=([A-Z0-9]{6})$/i.exec(HASH0);
     const sv = seatGet();
     if (m) {
@@ -345,6 +534,7 @@
     // Permainan online yang belum selesai: langsung tersambung lagi (rencana 10e).
     if (sv && !sv.over && Date.now() - (sv.at || 0) < 24 * 3600 * 1000 && host()) back();
   }
-  window.MHRSimOnline = { renderPanel, renderHistory, leaveGame, sendReport, reportContext, host, api: API, joinRoom: code => { pendingJoin = code; if (window.MHRSimModes) window.MHRSimModes.show('online'); } };
+  function openReplay(code) { try { if (S.parseLog(code)) window.MHRSimUI.replayCode(code); } catch (e) { /* kode rusak: tetap di menu */ } }
+  window.MHRSimOnline = { renderFind, finding: () => fq.on, shareReplay, openReplay, renderPanel, renderHistory, leaveGame, sendReport, reportContext, host, api: API, joinRoom: code => { pendingJoin = code; if (window.MHRSimModes) window.MHRSimModes.show('online'); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else setTimeout(init, 0);
 })();

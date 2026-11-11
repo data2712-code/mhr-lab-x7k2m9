@@ -1247,6 +1247,7 @@
   body.sim-full{overflow:hidden}
   .sim-gate{padding:40px 20px 70px;max-width:640px;margin:0 auto;text-align:center}
   .sim-gate h2{margin:0 0 10px}
+  .sim-beta{display:inline-block;margin-left:4px;padding:1px 6px;border-radius:5px;background:#E4442E;color:#fff;font-size:9px;font-weight:800;letter-spacing:.1em;vertical-align:middle;line-height:1.5}
   .simrep-head{margin:6px 0 10px}
   .simrep{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 8px;background:var(--panel)}
   .simrep-top{font-size:12.5px;margin-bottom:6px}
@@ -2886,7 +2887,7 @@
   <button type="button" data-group="cards" aria-haspopup="menu" aria-expanded="false" aria-controls="grpMenu-cards">🃏 <span class="tl">Cards</span><span class="ts">Cards</span><span class="lab-caret" aria-hidden="true">▾</span></button>
   <button type="button" data-group="decks" aria-haspopup="menu" aria-expanded="false" aria-controls="grpMenu-decks">🛠 <span class="tl">Decks</span><span class="ts">Decks</span><span class="lab-caret" aria-hidden="true">▾</span></button>
   <!-- v7.29 — Battle Sim; beta O3: semua akun login (uji O2 dulu hanya admin), lihat sim-host.js. v7.30: tetap tab sendiri (keputusan pemilik), di antara Decks dan Community -->
-  <button data-page="sim" aria-current="false" hidden>⚔️ <span class="tl">Battle Sim</span><span class="ts">Battle Sim</span></button>
+  <button data-page="sim" aria-current="false" hidden>⚔️ <span class="tl">Battle Sim</span><span class="ts">Battle Sim</span><span class="sim-beta">BETA</span></button>
   <button type="button" data-group="comm" aria-haspopup="menu" aria-expanded="false" aria-controls="grpMenu-comm">🏟 <span class="tl">Community</span><span class="ts">Community</span><span class="lab-caret" aria-hidden="true">▾</span></button>
   <button data-page="berita" data-grouped aria-current="false">📰 <span class="tl">News</span><span class="ts">News</span></button>
   <button data-page="cards" data-grouped aria-current="true">🃏 <span class="tl" data-i18n="navCards">Kartu</span><span class="ts" data-i18n="navCardsS">Kartu</span> <span class="cnt" id="navCard">208</span></button>
@@ -3437,7 +3438,7 @@
 <script src="perf.js?v=7.15"></script>
 <script src="perf-ui.js?v=7.25"></script>
 <script src="rules-faq.js?v=7.28"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules); v7.26 — FAQ versi Bahasa Indonesia; v7.27 — Copy link ke halaman statis faq/ & errata/; v7.28 — TD-11 -->
-<script src="sim-host.js?v=7.32-sim5"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
+<script src="sim-host.js?v=7.32-sim6"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->

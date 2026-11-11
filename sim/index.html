@@ -63,7 +63,54 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .lang{display:inline-flex;border:1px solid var(--line2);border-radius:99px;overflow:hidden}
 .lang button{border:0;border-radius:0;padding:6px 12px;background:transparent;color:var(--muted);font-weight:700}
 .lang button.on{background:var(--gold);color:#1a1405}
-#home{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+/* Menu hub (riwayat #76): spanduk + baris mode yang membuka di tempat + pintasan; kolom kanan = beta & permainan terakhir */
+#home{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:16px;margin:12px 0;align-items:start}
+.hubmain{border:1px solid #4a3d18;border-radius:18px;overflow:hidden;background:var(--panel);box-shadow:5px 5px 0 rgba(242,176,30,.55)}
+.hero{position:relative;padding:20px 18px 16px;background:
+  repeating-linear-gradient(115deg,rgba(228,68,46,.34) 0 46px,rgba(59,135,232,.30) 46px 92px,rgba(242,176,30,.26) 92px 138px,rgba(51,164,92,.26) 138px 184px),#141a21;overflow:hidden}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,18,22,.94) 0,rgba(14,18,22,.78) 55%,rgba(14,18,22,.35) 100%);pointer-events:none}
+.hero > *{position:relative;z-index:1}
+.hero .kick{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--gold)}
+.hero h2{margin:8px 0 6px;font-family:var(--disp);font-size:44px;line-height:.98;font-weight:900;letter-spacing:.02em;color:var(--paper);font-style:italic}
+.hero h2 em{font-style:italic;color:transparent;-webkit-text-stroke:1.5px var(--gold2)}
+.hero p{margin:0;max-width:520px;color:#c9d2de;font-size:13.5px}
+.hstats{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--muted)}
+.hstats b{color:var(--paper);font-size:15px}.hstats i{font-style:normal}.hstats .w b{color:#7fd79d}.hstats .l b{color:#ff9d8f}.hstats .e{margin-left:auto}
+.betatag{display:inline-block;padding:1px 8px;border-radius:6px;background:var(--red);color:#fff;font-size:11px;font-weight:900;letter-spacing:.12em;transform:rotate(-3deg);box-shadow:2px 2px 0 rgba(0,0,0,.45)}
+.modes{display:flex;flex-direction:column;gap:8px;padding:12px}
+.mrow{border:1px solid var(--line);border-radius:12px;background:#12171d;overflow:hidden}
+.mhead{display:flex;align-items:center;gap:12px;width:100%;text-align:left;white-space:normal;border:0;border-radius:0;background:transparent;padding:12px 14px;min-height:60px}
+.mhead .ic{font-size:22px;width:30px;text-align:center;flex:none}
+.mhead .mt{flex:1;min-width:0}.mhead .mt b{display:block;font-family:var(--disp);font-size:18px;letter-spacing:.03em;color:var(--paper)}
+.mhead .mt span{display:block;font-size:12px;color:var(--muted)}
+.mhead .chev{flex:none;transition:transform .15s;color:var(--muted)}
+.mhead .tag{flex:none;font-size:10.5px;padding:1px 7px;border-radius:99px;border:1px solid var(--line2);color:var(--muted)}
+.mrow.open .mhead .chev{transform:rotate(180deg)}
+.mrow .mbody{display:none;padding:12px 14px 14px;border-top:1px solid var(--line)}
+.mrow.open .mbody{display:block}
+.mrow .mbody p{margin:0 0 10px;color:#c9d2de}
+.mrow .mbody .f{margin:0 0 10px}.mrow .mbody .f label{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.mrow .mbody select{width:100%;min-height:42px}
+.mgo{display:flex;gap:8px;flex-wrap:wrap}.mgo button{min-height:44px}.mgo .big{flex:1;min-width:180px;font-size:16px;font-family:var(--disp);letter-spacing:.04em}
+.m-practice.open{border-color:#6b5514}.m-practice.open .mhead{background:var(--gold)}.m-practice.open .mhead b,.m-practice.open .mhead .mt span,.m-practice.open .mhead .chev{color:#1a1405}
+.m-online.open{border-color:#2c5f9f}.m-online.open .mhead{background:var(--blue)}.m-online.open .mhead b,.m-online.open .mhead .mt span,.m-online.open .mhead .chev{color:#fff}
+.m-online.open .pri{background:var(--blue);border-color:#7fb3f5;color:#fff}
+.m-find.open{border-color:#8a2a1d}.m-find.open .mhead{background:#7a271c}.m-find.open .mhead b{color:#fff}.m-find.open .mhead .mt span,.m-find.open .mhead .chev,.m-find.open .mhead .tag{color:#ffd1ca;border-color:#c96a5d}
+.m-custom.open{border-color:#2a7a48}.m-custom.open .mhead{background:var(--green)}.m-custom.open .mhead b,.m-custom.open .mhead .mt span,.m-custom.open .mhead .chev{color:#fff}
+.m-custom.open .pri{background:var(--green);border-color:#7fd79d;color:#fff}
+.mrow.soon:not(.open) .mhead{opacity:.7}
+.quick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0 12px 12px}
+.qtile{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:12px;background:#12171d;white-space:normal;min-height:76px}
+.qtile .ic{font-size:20px}.qtile b{font-family:var(--disp);font-size:14px;letter-spacing:.03em}.qtile span:last-child{font-size:10.5px;color:var(--muted);text-align:center}
+.hubside{display:flex;flex-direction:column;gap:12px;min-width:0}
+.betabox{border:1px solid #8a2a1d;border-radius:14px;padding:14px;background:linear-gradient(160deg,rgba(228,68,46,.16),var(--panel) 60%)}
+.betabox .bh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}.betabox .bh b{font-family:var(--disp);font-size:18px;letter-spacing:.03em}.betabox .bh i{font-style:normal;font-size:12px;color:#ffb4a8;margin-left:auto}
+.betabox p{margin:0 0 8px;color:#dfe5ec;font-size:13px}.betabox p.small{color:var(--muted);font-size:12px}.betabox .mgo button{flex:1}
+.recent{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--panel)}
+.recent .rh{display:flex;align-items:center;margin-bottom:6px}.recent .rh b{flex:1;font-family:var(--disp);letter-spacing:.08em;font-size:14px;color:var(--gold)}
+.rrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.rrow .tx{flex:1;min-width:0}.rrow .tx b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rrow .res{flex:none;width:46px;text-align:center;font-size:11px;font-weight:800;padding:3px 0;border-radius:6px;background:#26303c}
+.rrow .res.w{background:rgba(51,164,92,.25);color:#7fd79d}.rrow .res.l{background:rgba(228,68,46,.22);color:#ff9d8f}
 .tile{display:flex;gap:12px;align-items:flex-start;text-align:left;white-space:normal;padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);min-height:84px;width:100%}
 .tile .ic{font-size:26px;line-height:1;flex:none;width:34px;text-align:center}
 .tile b{display:block;font-family:var(--disp);font-size:19px;letter-spacing:.03em;color:var(--paper)}
@@ -89,6 +136,7 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .stats{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}.stats .badge{font-size:13px;padding:4px 10px}
 @media (max-width:760px){
   #home{grid-template-columns:1fr}
+  .hero h2{font-size:34px}.hero{padding:16px 14px 14px}.hubmain{box-shadow:3px 3px 0 rgba(242,176,30,.55)}.hstats .e{margin-left:0}
   .form{grid-template-columns:1fr}
   .wrap{padding:14px 12px}
   .startbar button{flex:1}
@@ -558,7 +606,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   <!-- ================= SETUP: satu mode (riwayat #39) ================= -->
   <div id="setup">
     <div class="topbar">
-      <h1 style="font-size:30px">MHR Battle Sim <span class="badge gold" style="font-family:system-ui,sans-serif;letter-spacing:0">LOCAL · Stage 5 · UI v5</span></h1>
+      <h1 style="font-size:30px">MHR Battle Sim <span class="betatag" title="Beta 11–18 Nov 2026">BETA</span></h1>
       <div class="lang" id="langSw"><button data-lang="en">EN</button><button data-lang="id">ID</button></div>
     </div>
     <!-- Menu mode (riwayat #50), diisi sim-modes.js -->
@@ -681,19 +729,19 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.28-sp065" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.02-lgs1110" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.4"></script>
-<script src="sim-cards.js?v=o2.4"></script>
-<script src="sim-cards-bp01.js?v=o2.4"></script>
-<script src="sim-cards-s4.js?v=o2.4"></script>
-<script src="sim-cards-sp01.js?v=o2.4"></script>
-<script src="sim-bot.js?v=o2.4"></script>
-<script src="sim-sound.js?v=o2.4"></script>
-<script src="sim-shadow.js?v=o2.4"></script>
-<script src="sim-ui.js?v=o2.4"></script>
-<script src="sim-sandbox.js?v=o2.4"></script>
-<script src="sim-report.js?v=o2.4"></script>
-<script src="sim-modes.js?v=o2.4"></script>
-<script src="sim-i18n.js?v=o2.4"></script>
-<script src="sim-online.js?v=o2.4"></script>
+<script src="sim.js?v=o2.6"></script>
+<script src="sim-cards.js?v=o2.6"></script>
+<script src="sim-cards-bp01.js?v=o2.6"></script>
+<script src="sim-cards-s4.js?v=o2.6"></script>
+<script src="sim-cards-sp01.js?v=o2.6"></script>
+<script src="sim-bot.js?v=o2.6"></script>
+<script src="sim-sound.js?v=o2.6"></script>
+<script src="sim-shadow.js?v=o2.6"></script>
+<script src="sim-ui.js?v=o2.6"></script>
+<script src="sim-sandbox.js?v=o2.6"></script>
+<script src="sim-report.js?v=o2.6"></script>
+<script src="sim-modes.js?v=o2.6"></script>
+<script src="sim-i18n.js?v=o2.6"></script>
+<script src="sim-online.js?v=o2.6"></script>
 </body>
 </html>

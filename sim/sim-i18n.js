@@ -183,7 +183,7 @@
     ['Enter the 6-character room code from your friend\'s link.', 'Masukkan kode room 6 karakter dari link teman Anda.'],
     ['Cannot reach the Battle Sim server. Check your internet connection.', 'Server Battle Sim tidak terjangkau. Periksa koneksi internet Anda.'],
     ['Please log in to mhrdecklab.com to play online.', 'Silakan masuk ke mhrdecklab.com untuk main online.'], ['Your login has expired. Please log in again.', 'Sesi masuk Anda habis. Silakan masuk lagi.'],
-    ['Battle Sim online is in closed testing (admin accounts only).', 'Battle Sim online masih uji tertutup (hanya akun admin).'],
+    ['beta', 'beta'], ['Battle Sim online is in closed testing (admin accounts only).', 'Battle Sim online masih uji tertutup (hanya akun admin).'],
     ['Room not found. Check the code or ask your friend for a new link.', 'Room tidak ditemukan. Periksa kodenya atau minta link baru ke teman Anda.'], ['This room is full.', 'Room ini sudah penuh.'],
     ['This room has expired (not started within 30 minutes).', 'Room ini sudah kedaluwarsa (tidak dimulai dalam 30 menit).'],
     ['Offline (this device)', 'Offline (perangkat ini)'], ['Online (account)', 'Online (akun)'], ['SIMULATOR · ONLINE', 'SIMULATOR · ONLINE'], ['No online games yet.', 'Belum ada permainan online.'],
@@ -199,6 +199,45 @@
     ['The server attaches the full log of this online game, so the team can replay it exactly (your opponent\'s hidden cards are only visible to the admins).', 'Server melampirkan log lengkap permainan online ini supaya tim bisa memutarnya ulang persis (kartu tersembunyi lawan hanya terlihat oleh admin).'],
     ['⚠ Connection lost · reconnecting…', '⚠ Koneksi putus · menyambung ulang…'], ['Connecting…', 'Menyambung…'], ['⚠ Reconnecting… your move was not sent', '⚠ Menyambung ulang… langkah Anda belum terkirim'],
     ['Too many messages, slow down.', 'Terlalu banyak pesan, pelan-pelan.']
+  ].forEach(([en, id]) => EXACT.set(en, id));
+  // Menu hub + beta (riwayat #76)
+  [
+    ['MARVEL HERO RUSH · MATCH SIMULATOR', 'MARVEL HERO RUSH · SIMULATOR PERTANDINGAN'],
+    ['Practice against the bot, play a friend with a link, or share one device. Every rule and card effect is handled for you.', 'Latihan lawan bot, main dengan teman lewat link, atau bergantian di satu perangkat. Semua aturan dan efek kartu dijalankan simulator.'],
+    ['games', 'permainan'], ['wins', 'menang'], ['losses', 'kalah'], ['Engine', 'Mesin'], ['No games yet: start with the bot', 'Belum ada permainan: mulai dari lawan bot'],
+    ['Easy · Normal · Hard: starts right away', 'Mudah · Normal · Sulit: langsung mulai'], ['More options', 'Pilihan lain'], ['Deck link or code…', 'Link atau kode deck…'],
+    ['Play a friend online', 'Main online dengan teman'], ['Create a room, send the link, pick the clock', 'Buat room, kirim link, pilih jam'],
+    ['Create a private room and send the link (WhatsApp works well), or enter a room code from a friend. Turn clock: Standard, Relaxed, Long, none, or Match 30:00.', 'Buat room privat lalu kirim link-nya (lewat WhatsApp misalnya), atau masukkan kode room dari teman. Jam giliran: Standar, Santai, Panjang, tanpa jam, atau Pertandingan 30:00.'],
+    ['🔗 Create or join a room', '🔗 Buat atau gabung room'], ['Details', 'Rincian'], ['Queue for an opponent', 'Antre mencari lawan'],
+    ['Not open yet. You will queue for an opponent; after 45 seconds you are offered a bot (always shown as a bot) while you keep waiting.', 'Belum dibuka. Anda akan mengantre mencari lawan; setelah 45 detik Anda ditawari main lawan bot (selalu ditandai bot) sambil tetap menunggu.'],
+    ['Same device', 'Satu perangkat'], ['Pass-and-play on one phone or tablet', 'Bergantian di satu HP atau tablet'],
+    ['Two players take turns on one device, with a handover screen between them. Flexible turn clock or a 30-minute match clock.', 'Dua pemain bergantian di satu perangkat, dengan layar serah perangkat di antaranya. Jam giliran fleksibel atau jam pertandingan 30 menit.'],
+    ['👥 Set up the game', '👥 Atur permainan'], ['Build any position', 'Susun posisi apa pun'], ['History', 'Riwayat'], ['Your games', 'Permainan Anda'], ['Tools', 'Alat'],
+    ['Custom game, log code', 'Permainan kustom, kode log'], ['Feedback', 'Feedback'], ['Tell us', 'Sampaikan ke kami'],
+    ['Battle Sim is in a one-week beta. It may end earlier if no bugs are reported and player feedback is positive.', 'Battle Sim sedang dalam masa beta satu minggu. Beta bisa selesai lebih cepat bila tidak ada laporan bug dan feedback pemain sudah positif.'],
+    ['Something wrong with a rule or a card effect? Is anything confusing on your phone? Your report goes straight to the developer.', 'Ada aturan atau efek kartu yang salah? Ada yang membingungkan di HP Anda? Laporan Anda langsung sampai ke pengembang.'],
+    ['RECENT GAMES', 'PERMAINAN TERAKHIR'], ['All →', 'Semua →'], ['Games you finish on this device appear here, with a replay.', 'Permainan yang Anda selesaikan di perangkat ini tampil di sini, lengkap dengan replay.'],
+    ['last day', 'hari terakhir'], ['🔗 Share replay', '🔗 Bagikan replay'], ['Replay link copied.', 'Link replay disalin.'], ['saving…', 'menyimpan…'],
+    ['not saved yet: the server keeps trying, check Match history later', 'belum tersimpan: server terus mencoba, cek Match history nanti']
+  ].forEach(([en, id]) => EXACT.set(en, id));
+  // Cari lawan (riwayat #77)
+  [
+    ['Get matched with the next player searching', 'Dipasangkan dengan pemain berikutnya yang mencari'], ['New', 'Baru'],
+    ['You are matched with the next player who is searching (Standard clock, random first player). After 45 seconds you can play the bot while you keep searching; a bot is always shown as a bot.', 'Anda dipasangkan dengan pemain berikutnya yang sedang mencari (jam Standar, giliran pertama acak). Setelah 45 detik Anda bisa main lawan bot sambil tetap mencari; bot selalu ditandai bot.'],
+    ['⚔️ Find a match', '⚔️ Cari lawan'],
+    ['You are matched with the next player who is searching. Clock: Standard 2:00 per turn / 0:30 per response; the 3rd timeout loses the game. Who goes first is random. The game is saved to your account. During the beta there may be few players online: after 45 seconds you can play the bot while you keep searching.', 'Anda dipasangkan dengan pemain berikutnya yang sedang mencari. Jam: Standar 2:00 per giliran / 0:30 per respons; timeout ke-3 kalah. Giliran pertama acak. Permainan tersimpan di akun Anda. Selama beta pemain online mungkin sedikit: setelah 45 detik Anda bisa main lawan bot sambil tetap mencari.'],
+    ['player(s) searching now', 'pemain sedang mencari'], ['your deck:', 'deck Anda:'], ['Searching for an opponent…', 'Mencari lawan…'], ['← Cancel', '← Batal'],
+    ['No opponent yet.', 'Belum ada lawan.'], ['Play the bot while you keep searching?', 'Main lawan bot sambil tetap mencari?'],
+    ['The bot is always shown as a bot and the game is not saved to your online history. When a player is found you are asked whether to switch.', 'Bot selalu ditandai bot dan permainannya tidak masuk riwayat online Anda. Bila pemain ditemukan, Anda ditanya mau pindah atau tidak.'],
+    ['🤖 Play the bot while waiting', '🤖 Main lawan bot sambil menunggu'], ['Opponent found', 'Lawan ditemukan'], ['Opponent found:', 'Lawan ditemukan:'],
+    ['Answer in the box at the top of the screen.', 'Jawab di kotak di bagian atas layar.'], ['Accept', 'Terima'], ['Waiting for your opponent to accept…', 'Menunggu lawan menerima…'],
+    ['Accepting leaves the bot game.', 'Menerima berarti meninggalkan permainan lawan bot.'], ['Still searching for a player…', 'Masih mencari pemain…'], ['Stop searching', 'Berhenti mencari'],
+    ['You did not accept in time, so the search stopped.', 'Anda tidak menerima tepat waktu, jadi pencarian berhenti.'],
+    ['No opponent was found within 10 minutes. Try again later, or share a private room link with a friend.', 'Tidak ada lawan dalam 10 menit. Coba lagi nanti, atau kirim link room privat ke teman.'],
+    ['A new search was started with this account on another device or tab.', 'Pencarian baru dimulai dengan akun ini di perangkat atau tab lain.'],
+    ['The search stopped because the connection was lost.', 'Pencarian berhenti karena koneksi terputus.'],
+    ['The search stopped (the server restarted). Please search again.', 'Pencarian berhenti (server dimulai ulang). Silakan cari lagi.'],
+    ['The search stopped.', 'Pencarian berhenti.'], ['Could not join the queue.', 'Tidak bisa masuk antrean.'], ['The room could not be created. Searching again.', 'Room tidak bisa dibuat. Mencari lagi.']
   ].forEach(([en, id]) => EXACT.set(en, id));
   const RULES = [
     [/^Unfinished game$/, 'Permainan belum selesai'],
@@ -271,6 +310,7 @@
     [/^Data: (\d+) Characters from (.+?) \(English card text\) · engine v([\d.]+)\.(.*)$/, (m, n, f, v, rest) => 'Data: ' + n + ' Karakter dari ' + f + ' (teks kartu Inggris) · mesin v' + v + '.' + rest.replace(/ SD05, SD06 and PB02 \((\d+) cards\) are hidden until their official Indonesian release\./, ' SD05, SD06, dan PB02 ($1 kartu) disembunyikan sampai rilis resmi Indonesia.')],
     [/^Concede this game\? You will lose.*$/, 'Menyerah di permainan ini? Anda kalah dan permainan langsung berakhir. Tidak bisa dibatalkan.'],
     [/^Concede this game as (.+?)\? .*$/, 'Menyerah sebagai $1? $1 kalah dan permainan langsung berakhir. Tidak bisa dibatalkan.'],
+    [/^([0-9]+) days left$/, '$1 hari lagi'], [/^([0-9]+) saved$/, '$1 tersimpan'],
     [/^(.+) conceded$/, '$1 menyerah'], [/^Concede$/, 'Menyerah'], [/^Conceded$/, 'Menyerah'],
     [/^⚠ No Character can attack from these positions$/, '⚠ Dari posisi ini tidak ada Karakter yang bisa menyerang'],
     [/^⚠ No Character can attack from these positions \(no target.*$/, '⚠ Dari posisi ini tidak ada Karakter yang bisa menyerang (tidak ada target dalam Attack Range): Battle Phase berakhir tanpa serangan.'],

@@ -50,7 +50,8 @@
     if (view === 'home') renderHome();
     if (view === 'practice') renderPractice();
     if (view === 'history') renderHistory();
-    if (view === 'online' && onlineReady()) window.MHRSimOnline.renderPanel();
+    if (view === 'find' && onlineReady()) window.MHRSimOnline.renderFind();
+    else if (view === 'online' && onlineReady()) window.MHRSimOnline.renderPanel();
     else if (view === 'online' || view === 'find') renderOnline();
     if (view === 'custom' || view === 'tools') {
       const friend = view === 'custom';
@@ -80,29 +81,85 @@
   }
   // O2: main online tersedia bila simulator dibuka di dalam Battle Sim situs (ada MHRSimHost di halaman induk).
   function onlineReady() { return !!(window.MHRSimOnline && window.MHRSimOnline.host()); }
-  function renderHome() {
-    const ui = U(), hist = ui ? ui.history() : [];
-    let h = '';
-    h += tile('practice', '🤖', 'Practice vs Bot', 'Train against the bot with your deck. Choose the bot level; clock is optional and undo is free.', true);
-    h += tile('custom', '👥', 'Play with a friend · same device', 'Pass-and-play on one phone or tablet. Choose a flexible turn clock or a 30-minute match clock.', true);
-    if (onlineReady()) h += tile('online', '🔗', 'Private room with a link', 'Create a room and send the link to a friend. Flexible turn clock or 30-minute match clock.', true);
-    h += tile('find', '🌐', 'Find a match', 'Play someone online.', false, onlineReady() ? 'Coming later' : 'Online version');
-    if (!onlineReady()) h += tile('online', '🔗', 'Private room with a link', 'Create a room and send the link to a friend. Flexible turn clock or 30-minute match clock.', false, 'Online version');
-    h += tile('history', '📜', 'Match history', hist.length ? hist.length + ' offline game(s) saved on this device.' : 'Offline games you finish are saved here.', false);
-    h += tile('tools', '🛠', 'Custom game & test tools', 'Any two decks, human or bot on each side, Sandbox editor, log codes.', false);
-    h += '<div class="repline"><button data-rep="open" data-v="bug">🐞 Report a bug</button><button data-rep="open" data-v="feedback">💬 Send feedback</button></div>';
-    $('home').innerHTML = h;
+  /* Menu "hub" (riwayat #76, permintaan pemilik 11 Nov 2026): satu layar seperti lobi game — spanduk + tag BETA, baris
+     mode yang membuka di tempat (mulai cepat tanpa pindah layar), ubin pintasan, kotak beta (lapor bug / feedback) dan
+     permainan terakhir. Rujukan susunan: beranda rushdee.app dan lobi game kartu lain; teks, warna dan isi milik sendiri. */
+  const BETA = { from: '2026-11-11', to: '2026-11-18', label: '11–18 Nov 2026' };      // keputusan pemilik: beta 1 minggu
+  function betaLeft() {
+    const end = new Date(BETA.to + 'T23:59:59+07:00').getTime(), d = Math.ceil((end - Date.now()) / 86400000);
+    return d > 1 ? d + ' days left' : d === 1 ? 'last day' : '';
   }
-  function tile(v, ic, title, sub, main, tag) {
-    return '<button class="tile' + (main ? ' main' : '') + (tag ? ' soon' : '') + '" data-mode="' + v + '"><span class="ic">' + ic + '</span><span><b>' + esc(title) + '</b><span>' + esc(sub) + '</span>' +
-      (tag ? '<span class="tag">' + esc(tag) + '</span>' : '') + '</span></button>';
+  let hubOpen = prefs.hubOpen || 'practice';
+  function row(id, ic, title, sub, body, tag) {
+    const open = hubOpen === id;
+    return '<div class="mrow m-' + id + (open ? ' open' : '') + (tag && tag !== 'New' ? ' soon' : '') + '"><button class="mhead" data-acc="' + id + '" aria-expanded="' + open + '"><span class="ic">' + ic + '</span>' +
+      '<span class="mt"><b>' + esc(title) + '</b><span>' + esc(sub) + '</span></span>' + (tag ? '<span class="tag">' + esc(tag) + '</span>' : '') + '<span class="chev">▾</span></button>' +
+      '<div class="mbody">' + body + '</div></div>';
+  }
+  function qtile(attr, ic, title, sub) {
+    return '<button class="qtile" ' + attr + '><span class="ic">' + ic + '</span><b>' + esc(title) + '</b><span>' + esc(sub) + '</span></button>';
+  }
+  function renderHome() {
+    const ui = U(), hist = ui ? ui.history() : [], on = onlineReady();
+    const p = practicePrefs();
+    const mine = hist.filter(r => r.me != null && r.winner != null);
+    const W = mine.filter(r => r.winner === r.me).length, L = mine.filter(r => r.winner >= 0 && r.winner !== r.me).length;
+    const left = betaLeft();
+    let h = '<div class="hubmain"><div class="hero"><div class="kick"><span>MARVEL HERO RUSH · MATCH SIMULATOR</span><span class="betatag">BETA</span></div>' +
+      '<h2><span>CALL. ATTACK.</span> <em>RUSH.</em></h2>' +
+      '<p>Practice against the bot, play a friend with a link, or share one device. Every rule and card effect is handled for you.</p>' +
+      '<div class="hstats">' + (mine.length ? '<span><b>' + mine.length + '</b> <i>games</i></span><span class="w"><b>' + W + '</b> <i>wins</i></span><span class="l"><b>' + L + '</b> <i>losses</i></span>' : '<span><i>No games yet: start with the bot</i></span>') +
+      '<span class="e"><i>Engine</i> <b>v' + esc(S.VERSION) + '</b></span></div></div>';
+    h += '<div class="modes">';
+    h += row('practice', '🤖', 'Practice vs Bot', 'Easy · Normal · Hard: starts right away',
+      '<div class="f"><label>Your deck</label><select id="hubDeck">' + deckOptions(false) + '<option value="code">Deck link or code…</option></select></div>' +
+      '<div class="f"><label>Bot level</label>' + seg('hublevel', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']], p.level) + '</div>' +
+      '<div id="hubErr" class="err"></div><div class="mgo"><button class="pri big" data-hub="startPractice">▶ Start practice</button><button data-mode="practice">More options</button></div>');
+    h += row('online', '🔗', 'Play a friend online', on ? 'Create a room, send the link, pick the clock' : 'Private room with a link',
+      on ? '<p class="small">Create a private room and send the link (WhatsApp works well), or enter a room code from a friend. Turn clock: Standard, Relaxed, Long, none, or Match 30:00.</p>' +
+        '<div class="mgo"><button class="pri big" data-mode="online">🔗 Create or join a room</button></div>'
+        : '<p class="small">Online play runs inside Battle Sim on mhrdecklab.com. Open mhrdecklab.com, log in, and choose Battle Sim in the menu.</p><div class="mgo"><button data-mode="online">Details</button></div>', on ? '' : 'Online version');
+    h += row('find', '⚔️', 'Find a match', on ? 'Get matched with the next player searching' : 'Queue for an opponent',
+      on ? '<p class="small">You are matched with the next player who is searching (Standard clock, random first player). After 45 seconds you can play the bot while you keep searching; a bot is always shown as a bot.</p>' +
+        '<div class="mgo"><button class="pri big" data-mode="find">⚔️ Find a match</button></div>'
+        : '<p class="small">Online play runs inside Battle Sim on mhrdecklab.com. Open mhrdecklab.com, log in, and choose Battle Sim in the menu.</p><div class="mgo"><button data-mode="find">Details</button></div>', on ? 'New' : 'Online version');
+    h += row('custom', '👥', 'Same device', 'Pass-and-play on one phone or tablet',
+      '<p class="small">Two players take turns on one device, with a handover screen between them. Flexible turn clock or a 30-minute match clock.</p><div class="mgo"><button class="pri big" data-mode="custom">👥 Set up the game</button></div>');
+    h += '</div><div class="quick">' +
+      qtile('data-hub="sandbox"', '🧪', 'Sandbox', 'Build any position') +
+      qtile('data-mode="history"', '📜', 'History', hist.length ? hist.length + ' saved' : 'Your games') +
+      qtile('data-mode="tools"', '🛠', 'Tools', 'Custom game, log code') +
+      qtile('data-rep="open" data-v="feedback"', '💬', 'Feedback', 'Tell us') + '</div></div>';
+    h += '<aside class="hubside"><div class="betabox"><div class="bh"><span class="betatag">BETA</span><b>' + esc(BETA.label) + '</b>' + (left ? '<i>' + esc(left) + '</i>' : '') + '</div>' +
+      '<p>Battle Sim is in a one-week beta. It may end earlier if no bugs are reported and player feedback is positive.</p>' +
+      '<p class="small">Something wrong with a rule or a card effect? Is anything confusing on your phone? Your report goes straight to the developer.</p>' +
+      '<div class="mgo"><button class="pri" data-rep="open" data-v="bug">🐞 Report a bug</button><button data-rep="open" data-v="feedback">💬 Send feedback</button></div></div>';
+    h += '<div class="recent"><div class="rh"><b>RECENT GAMES</b><button class="sm" data-mode="history">All →</button></div>';
+    if (!hist.length) h += '<p class="small muted">Games you finish on this device appear here, with a replay.</p>';
+    hist.slice(0, 4).forEach(r => {
+      const me = r.me, res = r.winner < 0 ? 'd' : me == null ? null : r.winner === me ? 'w' : 'l';
+      const who = me == null ? (r.names || []).join(' vs ') : 'vs ' + (r.names[1 - me] || '');
+      h += '<div class="rrow"><span class="res ' + (res || 'd') + '">' + (res === 'w' ? 'WIN' : res === 'l' ? 'LOSS' : res === 'd' ? 'DRAW' : '—') + '</span><div class="tx"><b>' + esc(who) + '</b>' +
+        '<div class="small muted">' + esc(MODE_LABEL[r.mode] || 'Game') + ' · ' + r.turns + ' turns · ' + esc(ago(new Date(r.at).getTime() || Date.now())) + '</div></div>' +
+        '<button class="sm" data-h="replay" data-id="' + r.id + '">Replay</button></div>';
+    });
+    h += '</div></aside>';
+    $('home').innerHTML = h;
+    const hd = $('hubDeck'); if (hd) { hd.value = p.deck === 'code' ? 'code' : p.deck; if (!hd.value) hd.selectedIndex = 0; }
+  }
+  function practicePrefs() { return Object.assign({ name: 'Player', deck: 'spr', bot: 'random', level: 'normal', first: 'random', clock: 'off' }, prefs.practice || {}); }
+  // Mulai cepat dari menu: deck & level dari baris Practice, sisanya dari pilihan terakhir di layar "More options".
+  function hubStartPractice() {
+    const p = practicePrefs(), deck = $('hubDeck').value;
+    if (deck === 'code' && !(p.deck === 'code' && p.code)) { show('practice'); $('prDeck').value = 'code'; $('prCodeWrap').style.display = ''; return; }
+    launchPractice(Object.assign(p, { deck, level: segVal('hublevel') || p.level }), $('hubErr'));
   }
 
   function seg(id, opts, cur) {
     return '<div class="seg" data-seg="' + id + '">' + opts.map(([v, l]) => '<button data-v="' + v + '"' + (v === cur ? ' class="on"' : '') + '>' + esc(l) + '</button>').join('') + '</div>';
   }
   function renderPractice() {
-    const p = Object.assign({ name: 'Player', deck: 'spr', bot: 'random', level: 'normal', first: 'random', clock: 'off' }, prefs.practice || {});
+    const p = practicePrefs();
     $('panelPractice').innerHTML = '<div class="hd"><button data-mode="home">← Menu</button><h2>Practice vs Bot</h2></div>' +
       '<div class="box"><div class="form">' +
       '<div class="f"><label>Your name</label><input id="prName" maxlength="20" value="' + esc(p.name) + '"></div>' +
@@ -122,11 +179,14 @@
   }
   function segVal(id) { const b = document.querySelector('[data-seg="' + id + '"] button.on'); return b ? b.dataset.v : null; }
   function startPractice() {
+    launchPractice({ name: ($('prName').value || 'Player').trim().slice(0, 20) || 'Player', deck: $('prDeck').value, code: $('prCode').value, bot: $('prBot').value,
+      level: segVal('level') || 'normal', first: segVal('first') || 'random', clock: segVal('clock') || 'off' }, $('prErr'));
+  }
+  function launchPractice(o, errEl) {
     const ui = U();
-    const name = ($('prName').value || 'Player').trim().slice(0, 20) || 'Player';
-    const level = segVal('level') || 'normal', first = segVal('first') || 'random', clock = segVal('clock') || 'off';
-    const mine = ui.deckFrom($('prDeck').value, $('prCode').value, 'Your');
-    let botV = $('prBot').value;
+    const name = o.name || 'Player', level = o.level, first = o.first, clock = o.clock;
+    const mine = ui.deckFrom(o.deck, o.code || '', 'Your');
+    let botV = o.bot || 'random';
     if (botV === 'random') { const vals = testDeckValues().filter(v => !/^cd:/.test(v)); botV = vals[Math.floor(Math.random() * vals.length)]; }
     const bot = ui.deckFrom(botV, '', "The bot's");
     const errs = [];
@@ -135,8 +195,8 @@
       if (d.hidden) errs.push(who + ': ' + d.hidden + ' card(s) from SD05, SD06 or PB02. ' + S.HIDDEN_MSG + '.');
       const v = S.validateDeck(d.list); if (v.length) errs.push(who + ' (' + d.name + '):\n- ' + v.join('\n- '));
     });
-    if (errs.length) { $('prErr').textContent = errs.join('\n\n'); if (window.MHRSimI18N) window.MHRSimI18N.apply(); return; }
-    prefs.practice = { name, deck: $('prDeck').value, code: $('prCode').value, bot: $('prBot').value, level, first, clock }; savePrefs();
+    if (errs.length) { errEl.textContent = errs.join('\n\n'); if (window.MHRSimI18N) window.MHRSimI18N.apply(); return; }
+    prefs.practice = { name, deck: o.deck, code: o.code || '', bot: o.bot || 'random', level, first, clock }; savePrefs();
     ui.launch({ decks: [mine.list, bot.list], names: [name, 'Bot · ' + LEVEL_LABEL[level]], ctrl: ['human', 'bot'],
       first: first === 'you' ? 0 : first === 'bot' ? 1 : 'random', timer: clock, botLevel: level, gmode: 'practice',
       deckNames: [mine.name || 'Deck', bot.name || 'Deck'], youIdx: 0 });
@@ -189,9 +249,16 @@
     } catch (e) { /* abaikan */ }
   }
   function onClick(ev) {
-    const t = ev.target.closest('[data-mode],[data-m],[data-h],[data-ht],[data-seg] button,[data-lang]');
+    const t = ev.target.closest('[data-mode],[data-m],[data-h],[data-ht],[data-seg] button,[data-lang],[data-acc],[data-hub]');
     if (!t || !$('setup').contains(t)) return;
     const ui = U();
+    if (t.dataset.acc) {
+      hubOpen = hubOpen === t.dataset.acc ? '' : t.dataset.acc; prefs.hubOpen = hubOpen; savePrefs();
+      document.querySelectorAll('#home .mrow').forEach(r => { const o = r.classList.contains('m-' + hubOpen); r.classList.toggle('open', o); r.querySelector('.mhead').setAttribute('aria-expanded', o); });
+      return;
+    }
+    if (t.dataset.hub === 'startPractice') { hubStartPractice(); return; }
+    if (t.dataset.hub === 'sandbox') { const b = $('btnSandbox'); if (b) b.click(); return; }
     if (t.dataset.ht) { histTab = t.dataset.ht; renderHistory(); if (window.MHRSimI18N) window.MHRSimI18N.apply(); return; }
     if (t.dataset.lang) { if (window.MHRSimI18N) window.MHRSimI18N.set(t.dataset.lang); return; }
     if (t.closest('[data-seg]') && t.dataset.v) { t.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === t)); return; }

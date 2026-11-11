@@ -398,7 +398,7 @@
   const net = { on: false, seat: null, send: null, last: null, recvAt: 0, pending: false, replay: null, matchId: null, ask: null, waitUndo: false, clock: 'standard' };
   function netEnter(o) {
     clearTimeout(ui.botTimer);
-    Object.assign(net, { on: true, seat: o.seat, send: o.send, last: null, recvAt: 0, pending: false, replay: null, matchId: null, ask: null, waitUndo: false, clock: o.clock || 'standard' });
+    Object.assign(net, { on: true, seat: o.seat, send: o.send, last: null, recvAt: 0, pending: false, replay: null, matchId: null, ask: null, waitUndo: false, clock: o.clock || 'standard', overAt: 0 });
     ui.ctrl = o.seat === 0 ? ['human', 'remote'] : ['remote', 'human'];
     ui.sandbox = false; ui.replay = null; ui.gmode = 'online'; ui.timer = net.clock; ui.mleft = null; ui.hist = []; ui.recorded = true; ui.lastLaunch = null;
     ui.youIdx = o.seat; ui.deckNames = (o.deckNames || []).slice(); ui.msg = ''; ui.overClosed = false;
@@ -414,6 +414,8 @@
     G = Shadow.shadow(msg.view);
     if (G.prompt && G.prompt.type === 'rps') G.prompt.p = msg.rps && msg.rps.mine == null ? net.seat : 1 - net.seat;   // jankenpon serentak
     if (msg.ended && !G.result) G.result = msg.ended;                     // klaim kursi kosong: hasil di luar mesin
+    // Riwayat #76: bila hasil belum tersimpan beberapa detik setelah selesai, layar hasil mengatakannya (server mencoba ulang, #71).
+    if (G.result && !net.overAt) { net.overAt = Date.now(); setTimeout(() => { if (net.on && G && G.result && !net.matchId) render(); }, 7500); }
     if (first) {
       $('setup').style.display = 'none'; document.querySelector('.wrap').style.display = 'none'; $('game').classList.add('on');
       ui.viewer = null; resetSel();
@@ -1250,14 +1252,14 @@
     if (net.on && G.result && !ui.overClosed) {
       const w = G.result.winner, me = net.seat;
       openOv('<h2>' + (w < 0 ? 'Draw' : w === me ? 'You win!' : esc(G.names[w]) + ' wins') + '</h2><p>' + esc(G.result.cause) + '</p>' +
-        '<p class="small muted">' + G.turn + ' turns · online game' + (net.matchId ? ' · saved to your account' : '') + '</p>' +
-        '<div class="row">' + (net.replay ? '<button data-act="netReplay">Replay</button><button data-act="copy">Copy log code</button>' : '') + '<button data-act="closeOverModal">View board</button><button class="pri" data-act="netMenu">Menu</button><button data-rep="open" data-v="bug">🐞 Report a bug</button></div>');
+        '<p class="small muted"><span>' + G.turn + ' turns · online game</span> · <span' + (net.matchId || !net.overAt || Date.now() - net.overAt < 7000 ? '' : ' style="color:#ffb4a8"') + '>' + (net.matchId ? 'saved to your account' : !net.overAt || Date.now() - net.overAt < 7000 ? 'saving…' : 'not saved yet: the server keeps trying, check Match history later') + '</span></p>' +
+        '<div class="row">' + (net.replay ? '<button data-act="netReplay">Replay</button><button data-act="shareReplay">🔗 Share replay</button><button data-act="copy">Copy log code</button>' : '') + '<button data-act="closeOverModal">View board</button><button class="pri" data-act="netMenu">Menu</button><button data-rep="open" data-v="bug">🐞 Report a bug</button></div>');
       return;
     }
     if (G.result && !ui.replay && !ui.overClosed) {
       openOv('<h2>' + (G.result.winner < 0 ? 'Draw' : esc(G.names[G.result.winner]) + ' wins') + '</h2><p>' + esc(G.result.cause) + '</p>' +
         '<p class="small muted">' + G.turn + ' turns · ' + G.actions.length + ' actions · seed ' + G.seed + '</p>' +
-        '<div class="row"><button class="pri" data-act="copy">Copy log code</button><button data-act="toReplay">Replay</button><button data-act="closeOverModal">View board</button>' + (ui.lastLaunch && !ui.sandbox ? '<button class="pri" data-act="rematch">Rematch</button>' : '') + '<button data-act="menu">Menu</button><button data-rep="open" data-v="bug">🐞 Report a bug</button></div>');
+        '<div class="row"><button class="pri" data-act="copy">Copy log code</button><button data-act="toReplay">Replay</button>' + (window.MHRSimOnline && window.MHRSimOnline.host() ? '<button data-act="shareReplay">🔗 Share replay</button>' : '') + '<button data-act="closeOverModal">View board</button>' + (ui.lastLaunch && !ui.sandbox ? '<button class="pri" data-act="rematch">Rematch</button>' : '') + '<button data-act="menu">Menu</button><button data-rep="open" data-v="bug">🐞 Report a bug</button></div>');
       return;
     }
     if (pr && myTurnPrompt('mulligan')) {
@@ -1334,6 +1336,7 @@
       case 'undoYes': case 'undoNo': net.ask = null; closeOv(); net.send({ type: 'undo_answer', accept: a === 'undoYes' }); render(); return;
       case 'claimWin': if (confirm('Claim the win? Your opponent has been disconnected for more than 2 minutes.')) net.send({ type: 'claim_win' }); return;
       case 'netMenu': window.MHRSimOnline.leaveGame(true); return;
+      case 'shareReplay': { const code = net.on ? net.replay : G && S.exportLog(G); if (code && window.MHRSimOnline) window.MHRSimOnline.shareReplay(code, t); return; }
       case 'netReplay': { const code = net.replay; window.MHRSimOnline.leaveGame(true, true); if (code) window.MHRSimUI.replayCode(code); return; }
       case 'copy': copyLog(); return;
       case 'copyLog': copyLog(); return;

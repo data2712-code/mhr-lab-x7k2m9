@@ -603,6 +603,22 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.6: Find a match (antrean + tawaran bot) — 11 November 2026 *(`sim/`, `sim-host.js`)*
+
+Riwayat simulator #77; rincian di `mhr-simulator\`. `sim/` disalin ulang (o2.6), `SIM_URL` → `?v=o2.6` (o2.5 belum sempat
+tayang, jadi `sim-host.js?v=7.32-sim6` tetap). **Server lebih dulu**: Find a match butuh Worker `mhr-battle-sim-test`
+versi baru (rute `/api/queue/…`); dengan server lama tombolnya menampilkan pesan gagal, fitur lain tetap jalan.
+
+### Data — Battle Sim o2.5: menu baru, tag BETA (11–18 Nov 2026), link replay — 11 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+
+Permintaan pemilik (riwayat simulator #76; rincian di `mhr-simulator\`).
+
+- `sim/` disalin ulang (o2.5): menu "hub" baru, kotak beta + lapor bug/feedback, status simpan di layar hasil online,
+  tombol Share replay. Server tidak berubah.
+- `sim-host.js`: tag **BETA** di layar ajakan login, link replay `#sim/replay/KODE` (kode log di alamat; penerima harus
+  login), `replayUrl()` di jembatan. `index.html`: tag BETA di tombol menu Battle Sim + gaya `.sim-beta`.
+- Cache-buster: `SIM_URL` → `?v=o2.5`, `sim-host.js?v=7.32-sim6`. Versi situs tetap 7.32.
+
 ### Data — Battle Sim o2.4: log ikut turun, penjelasan Battle Phase tanpa serangan, tombol Concede — 11 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 
 Masukan pemilik dari pertandingan online pertama di beta (riwayat simulator #74; rincian di `mhr-simulator\`).
