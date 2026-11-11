@@ -240,7 +240,7 @@
   }
   function begin() {
     $('setup').style.display = 'none'; document.querySelector('.wrap').style.display = 'none'; $('game').classList.add('on');
-    ui.viewer = null; ui.overClosed = false; resetSel();
+    ui.viewer = null; ui.overClosed = false; resetSel(); ui.tbKey = null;
     ui.sndN = G.log.length; ui.logPrevN = G.log.length; ui.seenN = {}; ui.flashN = G.log.length; ui.toastN = G.log.length; ui.peek = false; ui.clk = null; ui.mlast = Date.now();
     ui.botRng = Bot.makeRng((G.seed ^ 0x9e3779b9) >>> 0);
     $('replayBar').classList.toggle('on', !!ui.replay);
@@ -556,7 +556,7 @@
       return '<div class="' + cls.concat('fd').join(' ') + '" data-iid="' + iid + '"><div class="fdl">Face-down</div></div>';
     }
     let tag = '';
-    if (x.fd) tag = '<span class="tag">face-down</span>';
+    if (x.fd) tag = '<div class="fdv" aria-label="Face-down"><span>FACE-DOWN</span></div>';   // #65: kartu sendiri yang tertutup digelapkan + label (juga di pelat HP)
     else if (opts.onField && x.enT === G.turn) tag = '<span class="tag new">just placed</span>';
     else if (opts.onField && x.dclT === G.turn) tag = '<span class="tag done">attacked</span>';
     if (!G.vanilla && !S.hasResolver(x.no) && !/no effect text/i.test(S.textEn(c))) cls.push('nores');
@@ -615,8 +615,30 @@
     placePop();                                      // riwayat #54: info + aksi kartu = popover di semua layar
     flashCheck(v);
     oppToast(v);
+    turnBanner(v);
     modals();
     updateClockView();
+  }
+  /* Riwayat #66 (paket B, masukan pemilik dari HP): spanduk singkat tiap pergantian giliran, supaya jelas kapan giliran kita
+     mulai. Tidak menghalangi ketukan (pointer-events:none), hilang sendiri. Tidak tampil di replay / mode dua pemain satu layar. */
+  function turnBanner(v) {
+    const el = $('turnban'); if (!el) return;
+    if (ui.replay || G.result || !G.prompt || G.prompt.type === 'mulligan' || G.prompt.type === 'rps' || v === 'all' || v == null || !(G.turn >= 1)) { el.classList.remove('on'); return; }
+    const key = G.turn + ':' + G.tp + ':' + v;
+    const busy = ['flash', 'otoast'].some(id => { const x = $(id); return x && x.classList.contains('on'); });   // jangan menumpuk dengan kilasan pertarungan / toast lawan
+    if (ui.tbKey === key) { if (busy) el.classList.remove('on'); return; }
+    ui.tbKey = key;
+    const mine = G.tp === v;
+    if (busy) return;
+    el.className = 'turnban on ' + (mine ? 'me' : 'opp');
+    el.innerHTML = '<b>' + (mine ? 'YOUR TURN' : esc(G.names[G.tp]) + "'s turn") + '</b><span>' + (mine ? (G.turn === 1 ? 'First turn: 1 CALL, no Battle Phase' : 'Play your cards, then END ACTION') : 'You can respond when they attack') + '</span>';
+    clearTimeout(ui.tbT); ui.tbT = setTimeout(() => el.classList.remove('on'), 1500);
+  }
+  /* Riwayat #66: alasan singkat saat mengetuk sesuatu yang tidak bisa dipakai (tanpa menggambar ulang papan). */
+  function tip(text) {
+    const el = $('tip'); if (!el) return;
+    el.textContent = text; el.classList.add('on');
+    clearTimeout(ui.tipT); ui.tipT = setTimeout(() => el.classList.remove('on'), 2400);
   }
   // Kalau tangan tidak muat satu baris, kartu ditumpuk sedikit (bukan dibungkus ke baris baru).
   // HP (riwayat #57, studi RushDee): HAND satu baris lurus; kartu dilebarkan semaksimal mungkin tanpa tumpuk (min 44 px),
@@ -687,7 +709,7 @@
     if (ui.mode === 'call-dest' || ui.mode === 'move-dest') return T('Choose a zone', 'Tap a glowing area');
     if (ui.mode === 'drop-base') return T('CALL face-up or set face-down?', 'Choose in the sheet below');
     switch (pr.type) {
-      case 'main': return T('Your turn · CALL ' + G.cnt.call + '/' + S.callLimit(G), 'Tap a HAND card to view/use · drag it onto a glowing area');
+      case 'main': return T('Your turn · CALL ' + G.cnt.call + '/' + S.callLimit(G), 'Tap a HAND card to play it · END ACTION when done');
       case 'arrange': return T('Reposition (optional)', 'Tap two areas to swap, then CONFIRM');
       case 'attack': {
         if (!ui.atk) return T('Choose an attacker', 'Tap a glowing Character');
@@ -699,7 +721,8 @@
         const b = G.bt && G.bt.cur;
         if (b && pr.kind === 'step') {
           const pl = attackPlan(b.a, true)[b.slot];
-          return T(esc(S.nameOf(G, b.a)) + ' (' + S.getPower(G, b.a) + ') attacks your ' + S.SLOT_NAME[b.slot], pl ? 'If both pass: ' + esc(pl.a) : '');
+          const mineAtk = pr.p === G.tp;
+          return T(esc(S.nameOf(G, b.a)) + ' (' + S.getPower(G, b.a) + ') attacks ' + (mineAtk ? 'their ' : 'your ') + S.SLOT_NAME[b.slot], esc(passOutcome(pl, mineAtk)));
         }
         return T('Counter Phase', 'Last chance for COUNTER cards this turn');
       }
@@ -918,7 +941,7 @@
   }
   function abarHTML() {
     const acts = abarActs();
-    return '<div class="hint" id="hint"><span class="ttl">' + esc(trayTitle()) + '</span><span>' + (ui.msg ? esc(ui.msg) : hintText()) + '</span></div>' +
+    return '<div class="hint" id="hint"><span class="ttl">' + esc(trayTitle()) + '</span><span>' + (ui.msg ? esc(ui.msg) : ((narrow() && hintShort()) || hintText())) + '</span></div>' +
       '<div class="acts">' + acts + '</div>';
   }
   function abarActs() {
@@ -1104,6 +1127,44 @@
     if (ui.mode === 'call-cost') return esc('Choose cards on your FIELD to Retreat for this ' + (ui.callType === 'ccall' ? 'COUNTER CALL' : 'CALL') + ' until the combined Lv is exactly ' + S.getLv(G, ui.sel) + '. Each Face-Down Card counts as Lv1.');
     return esc('Choose a highlighted destination (a BATTLE area or the BASE).');
   }
+  /* Riwayat #66 (paket B): di HP petunjuk hanya muat dua baris, jadi kalimat panjang terpotong. Untuk Action Phase dan
+     jendela Counter (dua momen yang paling membingungkan menurut pemilik) dipakai satu-dua kalimat tindakan.
+     Mengembalikan '' bila tidak ada versi pendek → hintText() biasa. Tiap kalimat = satu simpul teks (untuk terjemahan ID). */
+  function hintShort() {
+    if (ui.replay || G.result || !G.prompt) return '';
+    const pr = G.prompt;
+    if (ui.ctrl[pr.p] === 'bot' || !myTurnPrompt() || (net.on && (pr.p !== net.seat || net.pending))) return '';
+    const sp = s => '<span>' + esc(s) + '</span>';
+    if (ui.mode === 'call-cost') return sp('Tap your own cards on the FIELD to pay the cost: total Lv ' + ui.cost.reduce((n, i) => n + S.costLv(G, i), 0) + '/' + S.getLv(G, ui.sel) + '.');
+    if (ui.mode === 'call-dest' || ui.mode === 'move-dest') return sp('Tap a glowing area to place the card.');
+    switch (pr.type) {
+      case 'main':
+        if (ui.mode) return '';
+        return sp('Tap a card in your HAND to play it.') + ' ' + sp('Press END ACTION when you are done.');
+      case 'arrange': return sp('Optional: tap two of your areas to swap them, then CONFIRM.');
+      case 'attack':
+        if (!ui.atk) return sp('Tap one of your glowing Characters to attack with it.');
+        if (!ui.tg) return sp('Tap a glowing target, or pick one from the list.');
+        return '';
+      case 'counter': {
+        const b = G.bt && G.bt.cur;
+        if (!b || pr.kind !== 'step') return sp('Last chance to play COUNTER cards this turn.') + ' ' + sp('Play one, or PASS.');
+        const out = passOutcome(attackPlan(b.a, true)[b.slot], pr.p === G.tp);   // siapa menyerang apa sudah tampil di petunjuk atas & penanda UNDER ATTACK
+        return (out ? '<b>' + esc(out) + '</b> ' : '') + sp('Play a COUNTER card, or PASS.');
+      }
+      case 'order': return sp('Several effects triggered together.') + ' ' + sp('Tap the one to resolve first.');
+    }
+    return '';
+  }
+  /* Akibat bila tidak ada yang merespons, dari sudut pandang pemain yang melihat (bukan "WIN/LOSE" milik penyerang). */
+  function passOutcome(pl, viewerAttacks) {
+    if (!pl) return '';
+    const x = ({ rush: viewerAttacks ? 'you score 1 Rush Point' : 'your opponent scores 1 Rush Point',
+      win: (viewerAttacks ? 'you win the Fight and their Character Retreats' : 'your Character loses the Fight and Retreats') + (/ASSAULT/.test(pl.b || '') ? ' (ASSAULT: +1 Rush Point)' : ''),
+      lose: viewerAttacks ? 'your attacker loses the Fight and Retreats' : 'the attacker loses the Fight and Retreats',
+      both: 'both Characters Retreat' })[pl.cls];
+    return x ? 'If nobody responds: ' + x + '.' : '';
+  }
   function hintText() {
     if (ui.replay) return esc('Replay mode: all cards are visible. Use the slider to step through the game.');
     if (G.result) return esc(G.result.winner < 0 ? 'The game is a draw.' : G.names[G.result.winner] + ' wins — ' + G.result.cause + '.');
@@ -1184,7 +1245,7 @@
       const lab = i => { const L = S.locate(G, i); return L ? ({ hand: 'HAND', bat: S.SLOT_NAME[L.slot], base: 'BASE', att: 'attached', ret: 'RETREAT', void: 'VOID', deck: 'Deck' })[L.zone] + (L.p !== pr.p ? ' · opponent' : '') : ''; };
       if (pr.forced && !ui.pick.length && !ui.pickTouched) ui.pick = pr.from.slice();   // satu-satunya pilihan: sudah terisi, tinggal Confirm
       const okN = ui.pick.length >= pr.min && ui.pick.length <= pr.max;
-      openOv('<h3>' + esc(pr.label) + '</h3><p class="small">' + esc(pr.text) + '</p><p class="small muted">' + (pr.forced ? 'This is the only possible choice. Check it, then press Confirm.' : 'Choose ' + (pr.min === pr.max ? pr.min : pr.min + '–' + pr.max) + ' card(s).') + '</p><div class="handcards">' +
+      openOv('<h3>' + esc(pr.label) + '</h3><p class="small">' + esc(pr.text) + '</p><p class="small muted">' + (pr.forced ? 'This is the only possible choice. It is already selected: press Confirm.' : 'Choose ' + (pr.min === pr.max ? pr.min : pr.min + '–' + pr.max) + ' card(s).') + '</p><div class="handcards">' +
         pr.from.map(i => '<div style="text-align:center">' + cardHTML(i, { cls: ui.pick.includes(i) ? 'cost' : '', reveal: true }).replace('data-iid', 'data-pick') + '<div class="small muted">' + esc(lab(i)) + '</div></div>').join('') + '</div>' +
         '<div class="row"><button class="pri" data-act="pickDone" ' + (okN ? '' : 'disabled') + '>Confirm ' + ui.pick.length + '</button><button data-act="pickHide">View board</button></div>');
       return;
@@ -1334,6 +1395,7 @@
       return onSlot(slotEl.dataset.slot, slotEl.dataset.side);
     }
     if (myTurnPrompt('attack') && S.attackersNow(G).includes(iid)) { ui.atk = iid; ui.tg = null; ui.sel = null; render(); return; }
+    if (myTurnPrompt('attack') && !ui.atk && L && L.zone === 'bat' && L.p === G.prompt.p) tip('This Character cannot attack right now. Tap a glowing one.');
     if (!canSee(iid) && (G.inst[iid].fd || (L && L.zone === 'hand'))) return;
     ui.sel = ui.sel === iid ? null : iid; ui.mode = null; ui.cost = [];
     render();
@@ -1341,8 +1403,10 @@
   function onSlot(slot, side) {
     if (ui.mode === 'call-dest' && side === 'bottom') {
       if (destOk(slot)) act({ t: ui.callType, c: ui.sel, to: slot, cost: ui.cost.slice() });
+      else tip('This card cannot go there. Tap a glowing area.');
       return;
     }
+    if ((ui.mode === 'call-dest' || ui.mode === 'move-dest') && side === 'top') { tip("That is your opponent's side. Tap a glowing area on your side."); return; }
     if (myTurnPrompt('retarget') && side === 'top') {
       if (!S.targetsFor(G, G.prompt.a).some(x => x.slot === slot)) return;
       if (S.hasAbility(G, G.prompt.a, 'air') && G.P[1 - G.prompt.p].bat[slot]) { ui.tg = slot; render(); return; }
@@ -1351,12 +1415,16 @@
     }
     if (ui.mode === 'move-dest' && side === 'bottom') {
       if (destOk(slot)) act({ t: 'bbmove', c: ui.sel, to: slot });
+      else tip('This card cannot move there. Tap a glowing area.');
       return;
     }
     if (myTurnPrompt('attack') && ui.atk && side === 'top') {
       if (S.targetsFor(G, ui.atk).some(t => t.slot === slot)) { ui.tg = slot; render(); }
+      else tip('This attacker cannot reach that area. Tap a glowing target.');
       return;
     }
+    if (myTurnPrompt('attack') && !ui.atk && side === 'top') { tip('First tap one of your glowing Characters to choose the attacker.'); return; }
+    if (myTurnPrompt('main') && !ui.mode && !ui.sel && side === 'bottom' && slot !== 'BASE' && !G.P[G.prompt.p].bat[slot]) { tip('Tap a card in your HAND first, then choose where it goes.'); return; }
     if (myTurnPrompt('arrange') && side === 'bottom' && slot !== 'BASE') {
       if (!ui.arr) ui.arr = Object.assign({}, G.P[G.prompt.p].bat);
       if (!ui.arrPick) { ui.arrPick = slot; }

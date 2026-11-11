@@ -603,6 +603,18 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.3: kartu tertutup digelapkan + alur di HP lebih ringkas — 11 November 2026 *(`sim/index.html`, `sim/sim-ui.js`, `sim/sim-i18n.js`, `sim-host.js`, `index.html`)*
+
+Masukan pemilik dari uji di HP (riwayat simulator #65–#66). Tetap hanya admin yang melihat Battle Sim.
+- **Kartu tertutup milik sendiri** (Base Deployment) kini digelapkan, diberi garis miring dan label **FACE-DOWN**
+  (di pelat BASE HP: gelap + bingkai putus-putus). Sebelumnya terlihat sama dengan kartu terbuka.
+- **Spanduk pergantian giliran** ("YOUR TURN" / giliran lawan), hilang sendiri dan tidak menghalangi ketukan.
+- **Petunjuk pendek di HP** untuk Action Phase, Reposition, memilih penyerang, dan jendela Counter. Di Counter Step akibatnya
+  ditulis dari sudut pandang pemain ("If nobody responds: your Character loses the Fight and Retreats").
+- **Alasan singkat** saat mengetuk sesuatu yang tidak bisa dipakai (area yang salah, penyerang yang belum bisa menyerang).
+- Teks baru tersedia dalam EN dan ID. `sim/` dibuat ulang dengan `site-sim.js` versi **o2.3**; `sim-host.js` →
+  `sim/index.html?v=o2.3`; cache-buster `index.html` → `sim-host.js?v=7.32-sim3`. Versi situs tetap 7.32.
+
 ### v7.32 — Thumbnail WhatsApp untuk link binder & link deck (gambar pratinjau binder / deck) — 11 November 2026 *(`index.html`, `binders-ui.js`, berkas BARU `share-preview.js`, `404.html`, `tools/share-worker.js`; migrasi SQL baru `mhr_decklab_v732_share_previews.sql` dan panduan Worker di folder internal)*
 
 Permintaan pemilik: saat link binder / link deck dibagikan di WhatsApp, thumbnail-nya harus pratinjau binder / deck itu,
