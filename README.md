@@ -603,6 +603,17 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.36 — Tab menu Battle Sim selalu tampil, juga tanpa login — 12 November 2026 *(`index.html`, `sim-host.js`)*
+
+Permintaan pemilik (lanjutan v7.35, untuk menaikkan traffic): tab **⚔️ Battle Sim** kini tampil untuk semua pengunjung.
+Dulu tab ini disembunyikan bila belum login.
+- Halaman Battle Sim tetap meminta login sebelum bermain: tanpa login, iframe tidak dimuat dan yang tampil ajakan login.
+  Server tetap memeriksa token (`AUTH = "user"`).
+- `index.html`: atribut `hidden` di tombol tab dihapus. `sim-host.js`: `refreshSimNav` tidak lagi menyembunyikan tab.
+- HP: tab utama jadi 7. Tombol dirapatkan di layar ≤ 920 px (padding 1 px, huruf 10,5 px, lencana BETA lebih kecil)
+  supaya tetap muat tanpa digeser di HP 360 px. Dicek di 390 px, 360 px dan desktop 1280 px.
+- Versi 7.36, `sim-host.js?v=7.36-sim11`.
+
 ### v7.35 — Home: Battle Sim jadi hero utama — 12 November 2026 *(`home-ui.js`, `sim-host.js`, `index.html`)*
 
 Permintaan pemilik: Battle Sim dijadikan highlight di Home karena menjadi daya tarik utama untuk menaikkan traffic.

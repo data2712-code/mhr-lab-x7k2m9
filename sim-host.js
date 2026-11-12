@@ -109,7 +109,7 @@
   };
   // Dipanggil setelah status login/admin berubah (refreshAccountUI di index.html).
   window.refreshSimNav = function () {
-    const b = q('#navTabs [data-page="sim"]'); if (b) b.hidden = !canPlay();
+    const b = q('#navTabs [data-page="sim"]'); if (b) b.hidden = false;      // v7.36: tab selalu tampil (tanpa login → ajakan login)
     const rb = q('#simRepBox'); if (rb) { rb.hidden = !admin(); if (!admin()) rb.open = false; }
     if (typeof state !== 'undefined' && state.page === 'sim') window.renderSimPage();
     if (!canPlay()) document.body.classList.remove('sim-full');
