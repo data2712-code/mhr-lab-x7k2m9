@@ -16,7 +16,7 @@
   const prefs = (() => { try { return JSON.parse(localStorage.getItem(KEY_PREF) || '{}') || {}; } catch (e) { return {}; } })();
   const savePrefs = () => { try { localStorage.setItem(KEY_PREF, JSON.stringify(prefs)); } catch (e) { /* abaikan */ } };
   const VIEWS = { home: 'home', practice: 'panelPractice', history: 'panelHistory', online: 'panelOnline', find: 'panelOnline', custom: 'panelCustom', tools: 'panelCustom' };
-  let histTab = 'offline';
+  let histTab = null;                    // #85: default Online (akun) bila tersedia, kalau tidak Offline
   const MODE_LABEL = { practice: 'Practice vs Bot', friend: 'Friend · same device', custom: 'Custom game', sandbox: 'Sandbox' };
   const LEVEL_LABEL = { easy: 'Easy', normal: 'Normal', hard: 'Hard' };
   const CLOCK_LABEL = { off: 'No clock', standard: 'Standard 2:00 / 0:30', relaxed: 'Relaxed 5:00 / 1:00', long: 'Long 10:00 / 2:00', match30: 'Match 30:00' };
@@ -164,7 +164,7 @@
     } else if (pbMode === 'find') {
       h += on ? '<div class="pblbl">YOUR DECK · SAVED TO YOUR ACCOUNT</div>' + pbDecksHTML() +
         '<p class="small muted">You are matched with the next player who is searching: Standard clock 2:00 / 0:30, random first player. After 45 seconds you can play the bot while you keep searching; a bot is always shown as a bot.</p>' +
-        '<div id="hubErr" class="err"></div><button class="pbplay" data-hub="play">FIND A MATCH</button>'
+        '<div id="pbLive"></div><div id="hubErr" class="err"></div><button class="pbplay" data-hub="play">FIND A MATCH</button>'
         : offline + '<button class="pbmore" data-mode="find">Details</button>';
     } else if (pbMode === 'online') {
       h += on ? '<p class="small">Create a private room and send the link (WhatsApp works well), or enter a room code from a friend. You choose your deck and the turn clock on the next screen.</p>' +
@@ -180,6 +180,7 @@
     const el = $('pbBody'); if (!el) return;
     document.querySelectorAll('#home [data-pbmode]').forEach(b => b.classList.toggle('on', b.dataset.pbmode === pbMode));
     el.innerHTML = pbBody();
+    if ($('pbLive') && OL().liveInto) OL().liveInto($('pbLive'), false);
     const hd = $('hubDeck'); if (hd) { const p = practicePrefs(); hd.value = p.deck === 'code' ? 'code' : p.deck; if (!hd.value) hd.selectedIndex = 0; }
     if (window.MHRSimI18N) window.MHRSimI18N.apply();
   }
@@ -287,8 +288,9 @@
     const prac = list.filter(r => r.me != null && r.winner != null);
     const W = prac.filter(r => r.winner === r.me).length, L = prac.filter(r => r.winner >= 0 && r.winner !== r.me).length, D = prac.filter(r => r.winner < 0).length;
     let h = '<div class="hd"><button data-mode="home">← Menu</button><h2>Match history</h2></div>';
+    if (!histTab) histTab = onlineReady() ? 'online' : 'offline';
     if (onlineReady()) {
-      h += '<div class="seg" style="margin:0 0 10px" data-histtab>' + [['offline', 'Offline (this device)'], ['online', 'Online (account)']].map(([v, l]) => '<button data-ht="' + v + '"' + (v === histTab ? ' class="on"' : '') + '>' + l + '</button>').join('') + '</div>';
+      h += '<div class="seg" style="margin:0 0 10px" data-histtab>' + [['online', 'Online (account)'], ['offline', 'Offline (this device)']].map(([v, l]) => '<button data-ht="' + v + '"' + (v === histTab ? ' class="on"' : '') + '>' + l + '</button>').join('') + '</div>';
       if (histTab === 'online') { $('panelHistory').innerHTML = h + '<div id="histOnline"></div>'; window.MHRSimOnline.renderHistory($('histOnline')); return; }
     }
     h += '<p class="small muted"><span class="badge">SIMULATOR · OFFLINE</span> Games played on this device (practice, same-device, custom). In Performance, simulator games form their own group; offline and online games are never combined in one statistic, and never mixed with tournament records. Up to 100 games are kept.</p>';

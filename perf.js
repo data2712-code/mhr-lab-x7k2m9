@@ -20,6 +20,9 @@
    share_community), match_logs.my_archetype (jenis deck sendiri, diisi browser), RPC
    mhr_set_my_archetypes (isi catatan lama) & mhr_community_meta (angka gabungan komunitas).
    Kolom yang belum ada (migrasi belum jalan) → otomatis memakai kolom versi sebelumnya.
+   v7.34 — simMatches(): pertandingan ONLINE Battle Sim milik akun ini (tabel sim_matches, ditulis server
+   simulator; RLS: pemain membaca miliknya). Hanya dibaca; ditampilkan perf-ui.js sebagai kelompok
+   "Battle Sim" yang terpisah dari catatan match meja (match_logs). Kolom mode (v7.34) opsional.
    =================================================================== */
 (function(){
   'use strict';
@@ -118,6 +121,19 @@
       try{
         const { data, error } = await c.from('match_logs').insert(rows.map(r=>({ ...logBody(r), owner_id:u }))).select(logCols());
         return { data:data||[], error:rpcErr(error) };
+      }catch(e){ return { data:[], error:off }; }
+    },
+
+    /* ---------- v7.34 pertandingan online Battle Sim (hanya baca) ---------- */
+    async simMatches(){
+      const c = client(); if(!c) return { data:[], error:off };
+      const u = await uid(); if(!u) return { data:[], error:null };
+      const COLS = 'id,p1,p2,names,deck_names,deck_codes,clock,first,winner,end_cause,cause,turns,ended_at';
+      try{
+        const q = cols => c.from('sim_matches').select(cols).or(`p1.eq.${u},p2.eq.${u}`).order('ended_at', { ascending:false }).limit(2000);
+        let { data, error } = await q(COLS + ',mode');
+        if(colErr(error)) ({ data, error } = await q(COLS));          // migrasi v7.34 belum dijalankan: tanpa kolom mode
+        return { data:data||[], error:miss(error), uid:u };
       }catch(e){ return { data:[], error:off }; }
     },
 

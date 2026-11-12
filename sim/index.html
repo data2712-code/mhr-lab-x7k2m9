@@ -179,6 +179,12 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .form select,.form input{width:100%;min-height:42px}
 .seg{display:flex;flex-wrap:wrap;gap:6px}.seg button{min-height:40px;flex:1;min-width:90px}.seg button.on{background:var(--gold);color:#1a1405;border-color:#ffd56b;font-weight:700}
 .startbar{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.startbar button{min-height:46px;font-size:16px;padding:10px 22px}
+/* #85: pemain yang sedang main + grafik jam ramai */
+.livedot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);margin-right:6px;vertical-align:middle}.livedot.on{background:#33a45c;box-shadow:0 0 0 3px rgba(51,164,92,.22)}
+.busy{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px 14px;margin:10px 0}
+.busy .bars{display:flex;align-items:flex-end;gap:2px;height:72px;margin-top:10px;border-bottom:1px solid var(--line)}
+.busy .bars i{flex:1;min-width:0;background:#3b87e8;border-radius:3px 3px 0 0;opacity:.75}.busy .bars i.top{background:var(--gold);opacity:1}.busy .bars i.now{outline:2px solid var(--paper);outline-offset:1px;opacity:1}
+.busy .bx{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px}
 .hrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin:6px 0}
 .hrow .res{font-family:var(--disp);font-weight:900;font-size:18px;min-width:56px;text-align:center;border-radius:8px;padding:4px 6px}
 .hrow .res.w{background:rgba(51,164,92,.2);color:#7fd79d}.hrow .res.l{background:rgba(228,68,46,.18);color:#ff9d8f}.hrow .res.d{background:var(--panel2);color:var(--muted)}
@@ -781,20 +787,20 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.28-sp065" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.02-lgs1110" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.9"></script>
-<script src="sim-cards.js?v=o2.9"></script>
-<script src="sim-cards-bp01.js?v=o2.9"></script>
-<script src="sim-cards-s4.js?v=o2.9"></script>
-<script src="sim-cards-sp01.js?v=o2.9"></script>
-<script src="sim-cards-t6.js?v=o2.9"></script>
-<script src="sim-bot.js?v=o2.9"></script>
-<script src="sim-sound.js?v=o2.9"></script>
-<script src="sim-shadow.js?v=o2.9"></script>
-<script src="sim-ui.js?v=o2.9"></script>
-<script src="sim-sandbox.js?v=o2.9"></script>
-<script src="sim-report.js?v=o2.9"></script>
-<script src="sim-modes.js?v=o2.9"></script>
-<script src="sim-i18n.js?v=o2.9"></script>
-<script src="sim-online.js?v=o2.9"></script>
+<script src="sim.js?v=o2.10"></script>
+<script src="sim-cards.js?v=o2.10"></script>
+<script src="sim-cards-bp01.js?v=o2.10"></script>
+<script src="sim-cards-s4.js?v=o2.10"></script>
+<script src="sim-cards-sp01.js?v=o2.10"></script>
+<script src="sim-cards-t6.js?v=o2.10"></script>
+<script src="sim-bot.js?v=o2.10"></script>
+<script src="sim-sound.js?v=o2.10"></script>
+<script src="sim-shadow.js?v=o2.10"></script>
+<script src="sim-ui.js?v=o2.10"></script>
+<script src="sim-sandbox.js?v=o2.10"></script>
+<script src="sim-report.js?v=o2.10"></script>
+<script src="sim-modes.js?v=o2.10"></script>
+<script src="sim-i18n.js?v=o2.10"></script>
+<script src="sim-online.js?v=o2.10"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.33** · 11 November 2026
+**Versi saat ini: v7.34** · 12 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -602,6 +602,40 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### Data — Battle Sim o2.10: riwayat online default Find a match, jumlah pemain yang sedang main, grafik jam ramai — 12 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #85; rincian di `mhr-simulator\`. Permintaan pemilik 12 Nov 2026:
+- **Match history** kini membuka tab **Online (account)** lebih dulu, dengan pilihan **Find a match** (default) / Private room /
+  All online. Pembedanya kolom baru `sim_matches.mode` (migrasi v7.34 di bawah); pertandingan lama tanpa mode tampil sebagai
+  room privat.
+- **Pemain yang sedang main**: layar Find a match dan panel Play menampilkan "N player(s) in a game now · M searching now"
+  (angka gabungan dari server Battle Sim, `GET /api/queue`).
+- **Grafik jam ramai** ("Busiest hours") di layar Find a match: pertandingan online yang dimulai per jam, 14 hari terakhir,
+  waktu setempat pemain (RPC `mhr_sim_busy_hours`, hanya angka gabungan).
+Semua bagian aman bila migrasi / server baru belum terpasang (bagian itu tidak ditampilkan). `sim/` disalin ulang (o2.10),
+`SIM_URL` → `?v=o2.10`, `sim-host.js?v=7.34-sim10`. Server Battle Sim perlu deploy (riwayat simulator #85).
+
+### v7.34 — Performance: hasil online Battle Sim sebagai kelompok tersendiri; rapikan hak akses `admin_users` — 12 November 2026 *(`perf.js`, `perf-ui.js`, `index.html`; migrasi SQL baru `mhr_decklab_v734_sim_stats.sql` di folder internal)*
+
+Permintaan pemilik: "hasil pertandingan online masuk ke Performance, tetapi dibedakan antara yang simulator dan yang bukan
+simulator".
+- **Sakelar sumber** di atas tab Performance: **🃏 Tabletop** (catatan `match_logs`, persis seperti semula) dan
+  **⚔️ Battle Sim** (pertandingan online dari tabel `sim_matches`, tersimpan otomatis oleh server simulator). Sakelar hanya
+  tampil kalau akun itu punya pertandingan online. Pilihan terakhir diingat.
+- Kelompok Battle Sim memakai statistik yang sama (win rate, giliran 1st/2nd, My decks, How games end, Matchups, tren,
+  detail deck / matchup, CSV) dengan pilihan **All online / Find a match / Private room**. Deck lawan dikenali otomatis
+  dari isi deck lawan (`classifyDeck`); cara berakhir: 9 RP, Deck out, Time (waktu habis / 3 timeout), Concede (menyerah /
+  lawan pergi). Hanya baca: tidak ada tombol catat, edit atau hapus.
+- **Tidak pernah digabung**: kotak ringkasan dashboard, data komunitas dan statistik Tabletop tetap hanya dari match meja
+  (keputusan O-15 simulator). Baris Battle Sim tidak pernah ditulis ke `match_logs`.
+- `perf.js`: `MHRPerf.simMatches()` (baca `sim_matches` milik akun; kolom `mode` opsional).
+- **Migrasi `mhr_decklab_v734_sim_stats.sql`** (jalankan sekali di Supabase SQL Editor): kolom `sim_matches.mode`
+  (`queue` / `room`), RPC `mhr_sim_busy_hours` (untuk grafik jam ramai), dan **hak akses `admin_users` dirapikan**: peran
+  `anon` tidak punya hak apa pun, akun login hanya `SELECT` (RLS: barisnya sendiri); menulis tetap hanya lewat RPC
+  super-admin (v7.33) atau SQL Editor. Sebelum migrasi dijalankan situs tetap jalan (tanpa pilihan Find a match / room dan
+  tanpa grafik).
+- `?v=` naik: `perf.js?v=7.34`, `perf-ui.js?v=7.34`. Diuji lokal: 27 cek Performance (desktop + HP), SQL di Postgres lokal.
 
 ### Data — Battle Sim o2.9: kartu SD05, SD06, PB02 tampil + efeknya; Siaga dihapus; tag BETA hilang sesudah 18 Nov — 12 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 

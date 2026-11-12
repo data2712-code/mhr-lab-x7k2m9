@@ -16,7 +16,7 @@
    =================================================================== */
 (function () {
   'use strict';
-  const SIM_URL = 'sim/index.html?v=o2.9';
+  const SIM_URL = 'sim/index.html?v=o2.10';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const q = s => document.querySelector(s);
   const admin = () => (typeof isAccountAdmin !== 'undefined' && isAccountAdmin);

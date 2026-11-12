@@ -29,6 +29,11 @@
    RPC mhr_community_meta, sel baru tampil kalau >= 20 game dari >= 3 akun); jenis deck sendiri
    (my_archetype) ditentukan otomatis dari isi deck (classifyDeck); detail deck + statistik per
    VERSI deck (isi deck yang dicatat per match, label dari riwayat versi deck v6.97).
+   v7.34: hasil pertandingan ONLINE Battle Sim (sim_matches) tampil di Performance sebagai kelompok
+   tersendiri. Sakelar sumber di atas: "🃏 Tabletop" (match_logs, seperti semula) / "⚔️ Battle Sim"
+   (hanya baca, otomatis dari server simulator; pilihan Find a match / Private room). Dua kelompok itu
+   TIDAK pernah digabung dalam satu statistik (keputusan O-15 simulator), kotak ringkasan dashboard dan
+   data komunitas tetap hanya dari match meja.
    =================================================================== */
 (function(){
   'use strict';
@@ -50,7 +55,13 @@
      yang punya run_id dibaca sebagai 'community'; match 'casual' tanpa run = Casual biasa.
      Match lama tanpa run dengan tipe store/tournament tetap disimpan apa adanya. */
   const runCtx = r => r && r.context === 'casual' ? 'community' : (r && CTX[r.context] ? r.context : 'store');
-  const logCtx = l => l.context === 'casual' && l.run_id ? 'community' : (CTX[l.context] ? l.context : 'casual');
+  const logCtx = l => l.sim ? 'sim' : l.context === 'casual' && l.run_id ? 'community' : (CTX[l.context] ? l.context : 'casual');
+  /* v7.34 — Battle Sim online: bukan salah satu CTX (tidak bisa dipilih di form), hanya label tampilan */
+  const SIM_CTX = { icon:'⚔️', label:'Battle Sim', short:'Sim' };
+  const SIM_MODE = { queue:'Find a match', room:'Private room' };
+  const ctxInfo = k => k === 'sim' ? SIM_CTX : (CTX[k] || CTX.casual);
+  const isSim = () => S.f.src === 'sim';
+  const filtNote = () => E(S.f.per === 'all' ? 'all time' : 'last ' + S.f.per + ' days') + (isSim() ? ', Battle Sim online' + (S.f.sim ? ' · ' + SIM_MODE[S.f.sim] : '') : (S.f.ctx ? ', ' + E(CTX[S.f.ctx].label) : ''));
   const dbCtx = k => k === 'community' ? 'casual' : k;
   /* v7.21 — hanya 4 cara game berakhir sesuai official ruling MHR Indonesia (permintaan pemilik). 'Card effect' (eff)
      dan 'Not recorded' (unk) tidak bisa dipilih lagi. Data lama TIDAK diubah di database: game ber-e 'eff'/'unk'
@@ -71,10 +82,11 @@
 
   const S = { uid:null, logs:null, arch:null, decks:null, err:null, sort:'n', all:false, runs:null, runsOff:false, entries:null, runsAll:false,
     share:null, comm:null, commOff:false, backfilled:false, commF:{ days:'90', scope:'all' },
-    f:{ deck:'', per:'90', ctx:'' } };
-  try{ const f = JSON.parse(localStorage.getItem(FILT_KEY) || 'null'); if(f && typeof f === 'object') S.f = { ...S.f, per:f.per || '90', ctx:f.ctx || '' }; }catch(e){}
+    sim:null, simOff:false,
+    f:{ deck:'', per:'90', ctx:'', src:'real', sim:'' } };
+  try{ const f = JSON.parse(localStorage.getItem(FILT_KEY) || 'null'); if(f && typeof f === 'object') S.f = { ...S.f, per:f.per || '90', ctx:CTX[f.ctx] ? f.ctx : '', src:f.src === 'sim' ? 'sim' : 'real', sim:SIM_MODE[f.sim] ? f.sim : '' }; }catch(e){}
   try{ const c = JSON.parse(localStorage.getItem('mhr_perf_comm') || 'null'); if(c && typeof c === 'object') S.commF = { days: ['30','90','0'].includes(c.days) ? c.days : '90', scope: c.scope === 'competitive' ? 'competitive' : 'all' }; }catch(e){}
-  const saveFilt = () => { try{ localStorage.setItem(FILT_KEY, JSON.stringify({ per:S.f.per, ctx:S.f.ctx })); }catch(e){} };
+  const saveFilt = () => { try{ localStorage.setItem(FILT_KEY, JSON.stringify({ per:S.f.per, ctx:S.f.ctx, src:S.f.src, sim:S.f.sim })); }catch(e){} };
   const lastPrefs = () => { try{ return JSON.parse(localStorage.getItem(LAST_KEY) || '{}') || {}; }catch(e){ return {}; } };
   const saveLast = o => { try{ localStorage.setItem(LAST_KEY, JSON.stringify(o)); }catch(e){} };
 
@@ -126,12 +138,28 @@
   }
   function filtered(){
     const lim = S.f.per === 'all' ? null : (()=>{ const d = new Date(); d.setDate(d.getDate() - (+S.f.per)); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); })();
-    return (S.logs || []).filter(l=>{
+    return (isSim() ? (S.sim || []) : (S.logs || [])).filter(l=>{
       if(S.f.deck && myKey(l) !== S.f.deck) return false;
-      if(S.f.ctx && logCtx(l) !== S.f.ctx) return false;
+      if(isSim()){ if(S.f.sim && l.mode !== S.f.sim) return false; }
+      else if(S.f.ctx && logCtx(l) !== S.f.ctx) return false;
       if(lim && l.played_on < lim) return false;
       return true;
     });
+  }
+  /* v7.34 — baris sim_matches → bentuk match_logs (hanya di memori; id 'sim:…' tidak pernah dikirim ke database).
+     Cara berakhir: rp/deck apa adanya; time & 3 timeouts → Time; lawan pergi (claim) & menyerah → Concede. */
+  function simToLog(r, u){
+    const seat = r.p1 === u && r.p2 !== u ? 0 : r.p2 === u && r.p1 !== u ? 1 : null;
+    if(seat == null || r.winner == null) return null;
+    const res = r.winner < 0 ? 'D' : r.winner === seat ? 'W' : 'L';
+    const e = r.end_cause === 'rp' ? 'rp' : r.end_cause === 'deck' ? 'deck' : (r.end_cause === 'time' || r.end_cause === 'timeouts') ? 'time'
+      : (r.end_cause === 'claim' || / conceded$/.test(r.cause || '')) ? 'con' : 'unk';
+    const d = new Date(r.ended_at); const loc = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    const oc = (r.deck_codes || [])[1 - seat] || '';
+    return { id:'sim:' + r.id, sim:true, mode: r.mode === 'queue' ? 'queue' : 'room', played_on: isNaN(d) ? todayISO() : loc.toISOString().slice(0, 10), context:'sim', best_of:1,
+      deck_id:null, deck_name:(r.deck_names || [])[seat] || 'Deck', deck_code:(r.deck_codes || [])[seat] || '',
+      opp_archetype: classifyDeck(oc) || null, opp_label:null, opp_colors: oc ? deckInfo(oc).cols : [], opp_name:(r.names || [])[1 - seat] || '',
+      games:[{ r:res, f: r.first == null ? null : r.first === seat, e }], result:res, notes:null, run_id:null, turns:r.turns, created_at:r.ended_at, updated_at:r.ended_at };
   }
   function groupBy(list, keyFn){ const m = new Map(); list.forEach(l=>{ const k = keyFn(l); if(!m.has(k)) m.set(k, []); m.get(k).push(l); }); return m; }
 
@@ -139,7 +167,7 @@
   async function ensureUser(){
     const ss = (window.MHRAuth && window.MHRAuth.ready) ? await window.MHRAuth.getSession() : null;
     const u = (ss && ss.user) ? ss.user.id : null;
-    if(u !== S.uid){ S.uid = u; S.logs = null; S.decks = null; S.err = null; S.f.deck = ''; S.all = false; S.runs = null; S.entries = null; S.share = null; S.comm = null; S.backfilled = false; }
+    if(u !== S.uid){ S.uid = u; S.logs = null; S.sim = null; S.decks = null; S.err = null; S.f.deck = ''; S.all = false; S.runs = null; S.entries = null; S.share = null; S.comm = null; S.backfilled = false; }
     return u;
   }
   async function loadDecks(){
@@ -150,10 +178,13 @@
   async function refresh(){
     await ensureUser();
     if(!API() || !API().ready) return;
-    const [l, a, r, en, st] = await Promise.all([API().listMine(), API().archetypes(), API().listRuns ? API().listRuns() : { data:[], error:{ missing:true } }, API().myEventEntries ? API().myEventEntries() : { data:[] },
-      API().settings ? API().settings() : { data:null, error:{ missing:true } }, loadDecks()]);
+    const [l, a, r, en, st, , sm] = await Promise.all([API().listMine(), API().archetypes(), API().listRuns ? API().listRuns() : { data:[], error:{ missing:true } }, API().myEventEntries ? API().myEventEntries() : { data:[] },
+      API().settings ? API().settings() : { data:null, error:{ missing:true } }, loadDecks(), API().simMatches ? API().simMatches() : { data:[], error:{ missing:true } }]);
     S.logs = l.error ? (S.logs || []) : l.data; S.err = l.error || a.error || null;
     if(!a.error) S.arch = a.data;
+    /* v7.34 — pertandingan online Battle Sim (tabel belum ada / gagal dibaca → kelompoknya kosong, tab lain tetap jalan) */
+    S.simOff = !!(sm.error && sm.error.missing);
+    if(!sm.error) S.sim = (sm.data || []).map(x=>simToLog(x, sm.uid || S.uid)).filter(Boolean); else S.sim = S.sim || [];
     /* migrasi v7.14 belum dijalankan → fitur run disembunyikan, Tahap 1 tetap jalan */
     S.runsOff = !!(API().runsMissing || (r.error && r.error.missing));
     S.runs = r.error ? (S.runs || []) : r.data;
@@ -182,7 +213,22 @@
   function render(){
     const w = q1('#perfWrap'); if(!w) return;
     if(S.err && S.err.missing){ w.innerHTML = `<p class="auth-note">${E(errMsg(S.err))}</p>`; return; }
+    const nSim = (S.sim || []).length, nReal = (S.logs || []).length;
+    /* v7.34 — sakelar sumber: tampil kalau akun ini punya pertandingan online Battle Sim */
+    const srcBar = nSim ? `<div class="pf-srcbar"><div class="pf-seg pf-src" role="group" aria-label="Source">
+        <button type="button" data-pfsrc="real" aria-pressed="${!isSim()}">🃏 Tabletop <small>${nReal}</small></button>
+        <button type="button" data-pfsrc="sim" aria-pressed="${isSim()}">⚔️ Battle Sim <small>${nSim}</small></button></div>
+      <span class="bd-mut">${isSim() ? 'Online games from Battle Sim, saved automatically. Kept apart from your tabletop matches and not part of community data.' : 'Matches you logged yourself: casual games, store events and tournaments.'}</span></div>` : '';
+    if(!nSim && isSim()) S.f.src = 'real';
+    if(isSim()){ renderSim(w, srcBar); return; }
     const logs = S.logs || [];
+    if(!logs.length && nSim){
+      w.innerHTML = `${srcBar}<div class="pf-empty"><h3>📈 No tabletop matches logged yet</h3>
+        <p>Your Battle Sim online games are under <b>⚔️ Battle Sim</b>. Log the matches you play at the table with <b>＋ Log a casual match</b> or <b>🏆 New run</b>.</p>
+        <div class="bd-btns" style="justify-content:center"><button type="button" class="btn2 main" data-pfact="log">＋ Log a casual match</button>
+          ${S.runsOff ? '' : '<button type="button" class="btn2" data-pfact="newrun">🏆 New run</button>'}</div></div>${importBanner()}${communityShell()}${adminHTML()}`;
+      wireAdmin(); loadCommunity(); return;
+    }
     if(!logs.length){
       w.innerHTML = `<div class="pf-empty"><h3>📈 Track how your decks really perform</h3>
         <p>Log each match you play: casual games with <b>＋ Log a casual match</b>, and store, Weekly Rush, tournament or community tournament rounds with <b>🏆 New run</b>. Your deck, your opponent's deck, who went first and how each game ended.
@@ -196,7 +242,7 @@
     /* pilihan deck untuk filter: deck yang pernah dicatat */
     const dk = [...groupBy(logs, myKey).entries()].map(([k, l])=>({ k, d:myDeck(l[0]), n:l.length })).sort((a,b)=>b.n - a.n);
     if(S.f.deck && !dk.some(x=>x.k === S.f.deck)) S.f.deck = '';
-    w.innerHTML = `
+    w.innerHTML = `${srcBar}
       <div class="pf-tool">
         <select id="pfDeck" aria-label="Deck"><option value="">All my decks</option>${dk.map(x=>`<option value="${E(x.k)}" ${S.f.deck === x.k ? 'selected' : ''}>${E(x.d.name)}</option>`).join('')}</select>
         <select id="pfPer" aria-label="Period">${[['30','Last 30 days'],['90','Last 90 days'],['all','All time']].map(([v,t])=>`<option value="${v}" ${S.f.per === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
@@ -213,6 +259,25 @@
       ${recentHTML(list)}
       ${adminHTML()}`;
     wireAdmin(); wireTrend(list); loadCommunity();
+  }
+  /* v7.34 — tampilan kelompok Battle Sim (hanya baca): statistik yang sama, tanpa tombol catat / run / komunitas */
+  function renderSim(w, srcBar){
+    const logs = S.sim || []; const list = filtered(); const s = stats(list);
+    const dk = [...groupBy(logs, myKey).entries()].map(([k, l])=>({ k, d:myDeck(l[0]), n:l.length })).sort((a,b)=>b.n - a.n);
+    if(S.f.deck && !dk.some(x=>x.k === S.f.deck)){ S.f.deck = ''; return renderSim(w, srcBar); }
+    const nMode = k => logs.filter(l=>l.mode === k).length;
+    w.innerHTML = `${srcBar}
+      <div class="pf-tool">
+        <select id="pfDeck" aria-label="Deck"><option value="">All my decks</option>${dk.map(x=>`<option value="${E(x.k)}" ${S.f.deck === x.k ? 'selected' : ''}>${E(x.d.name)}</option>`).join('')}</select>
+        <select id="pfPer" aria-label="Period">${[['30','Last 30 days'],['90','Last 90 days'],['all','All time']].map(([v,t])=>`<option value="${v}" ${S.f.per === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
+        <div class="pf-chips">${[['', 'All online', logs.length], ['queue', '⚔️ Find a match', nMode('queue')], ['room', '🔗 Private room', nMode('room')]].map(([k,t,n])=>`<button type="button" class="dk-chip" data-pfsim="${k}" aria-pressed="${S.f.sim === k}">${E(t)} (${n})</button>`).join('')}</div>
+        <span class="bd-sp"></span>
+        <button type="button" class="btn2" data-pfact="csv" title="Download the games in this filter as a CSV file">⬇ CSV</button>
+        <a class="btn2 main" href="#sim" title="Open Battle Sim">⚔️ Play Battle Sim</a>
+      </div>
+      ${list.length ? statsHTML(list, s) : '<div class="pf-card"><p class="bd-mut">No Battle Sim games in this filter yet.</p></div>'}
+      ${recentHTML(list)}`;
+    wireTrend(list);
   }
   function statsHTML(list, s){
     return `<div class="pf-kpis">
@@ -283,20 +348,21 @@
           <td class="r hm">${pv(r.s.fwr)}</td><td class="r hm">${pv(r.s.swr)}</td><td class="r hm">${r.s.gW}/${r.s.gN}</td></tr>`; }).join('');
   }
   function matchRow(l){
-    const o = oppDeck(l), d = myDeck(l), c = CTX[logCtx(l)] || CTX.casual;
+    const o = oppDeck(l), d = myDeck(l), c = ctxInfo(logCtx(l));
     const g = l.games || [];
     const sup = f => f === true ? '¹' : f === false ? '²' : '';
     const pips = l.best_of === 3 ? `<span class="pf-pips">${g.map(x=>`<i class="${x.r}">${x.r}${sup(x.f)}</i>`).join('')}</span>` : '';
     const turn = f => f === true ? 'went 1st' : f === false ? 'went 2nd' : 'turn order not set';
     const how = l.best_of === 3 ? 'Bo3' : (g[0] ? [turn(g[0].f), END[g[0].e] || ''].filter(Boolean).join(' · ') : '');
     const run = l.run_id && (S.runs || []).find(r=>r.id === l.run_id);
-    const ctxTag = run ? `<button type="button" class="pf-tag pf-rtag" data-pfrun="${E(run.id)}" title="Open run">🏆 ${E(roundLabel(l))} · ${E(run.name)}</button>` : `<span class="pf-tag">${c.icon} ${E(c.short)}</span>`;
+    const ctxTag = l.sim ? `<span class="pf-tag pf-simtag">⚔️ ${E(SIM_MODE[l.mode] || 'Battle Sim')}</span>`
+      : run ? `<button type="button" class="pf-tag pf-rtag" data-pfrun="${E(run.id)}" title="Open run">🏆 ${E(roundLabel(l))} · ${E(run.name)}</button>` : `<span class="pf-tag">${c.icon} ${E(c.short)}</span>`;
     return `<div class="pf-mrow" data-pfid="${E(l.id)}"><span class="pf-res ${l.result}">${l.result}</span>${thumb(o.cover)}
-      <div class="pf-mm"><div><b>${E(o.name)}</b>${pips}${ctxTag}${needsDeck(l) ? '<em class="pf-few">set deck</em>' : ''}</div>
-        <small>${E(d.name)} · ${E(how)}${l.opp_name ? ' · vs ' + E(l.opp_name) : ''}</small>
+      <div class="pf-mm"><div><b>${E(o.name)}</b>${pips}${ctxTag}${!l.sim && needsDeck(l) ? '<em class="pf-few">set deck</em>' : ''}</div>
+        <small>${E(d.name)} · ${E(how)}${l.sim && l.turns ? ' · ' + l.turns + ' turns' : ''}${l.opp_name ? ' · vs ' + E(l.opp_name) : ''}</small>
         ${l.notes ? `<small class="pf-note">📝 ${E(l.notes)}</small>` : ''}</div>
       <span class="pf-date">${E(fmtDate(l.played_on))}</span>
-      <span class="pf-ma"><button type="button" class="btn2" data-pfedit="${E(l.id)}" title="Edit match" aria-label="Edit match">✏️</button><button type="button" class="btn2 danger" data-pfdel="${E(l.id)}" title="Delete match" aria-label="Delete match">🗑</button></span></div>`;
+      ${l.sim ? '<span class="pf-ma"></span>' : `<span class="pf-ma"><button type="button" class="btn2" data-pfedit="${E(l.id)}" title="Edit match" aria-label="Edit match">✏️</button><button type="button" class="btn2 danger" data-pfdel="${E(l.id)}" title="Delete match" aria-label="Delete match">🗑</button></span>`}</div>`;
   }
   function recentHTML(list){
     if(!list.length) return '';
@@ -324,6 +390,8 @@
     const dk = e.target.closest('[data-pfdeck]'); if(dk){ openDeck(dk.dataset.pfdeck); return; }
     const mu = e.target.closest('[data-pfmu]'); if(mu && !e.target.closest('[data-pfsort]')){ openMu(mu.dataset.pfmu); return; }
     const cx = e.target.closest('[data-pfctx]'); if(cx){ S.f.ctx = cx.dataset.pfctx; saveFilt(); render(); return; }
+    const sr = e.target.closest('[data-pfsrc]'); if(sr){ S.f.src = sr.dataset.pfsrc === 'sim' ? 'sim' : 'real'; S.f.deck = ''; S.all = false; saveFilt(); render(); return; }
+    const sm = e.target.closest('[data-pfsim]'); if(sm){ S.f.sim = SIM_MODE[sm.dataset.pfsim] ? sm.dataset.pfsim : ''; saveFilt(); render(); return; }
     const so = e.target.closest('[data-pfsort]'); if(so){ S.sort = so.dataset.pfsort; render(); return; }
     const ed = e.target.closest('[data-pfedit]'); if(ed){ const l = (S.logs || []).find(x=>x.id === ed.dataset.pfedit); if(l) openLog({ edit:l }); return; }
     const del = e.target.closest('[data-pfdel]');
@@ -542,14 +610,14 @@
     const esc = v => { const s = String(v == null ? '' : v); return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
     const head = ['date','where','best_of','my_deck','opponent_deck','opponent_colours','opponent_name','result','games','went_first_game1','tournament_run','round','notes'];
     const ft = f => f === true ? '1st' : f === false ? '2nd' : '?';
-    const rows = list.map(l=>[l.played_on, (CTX[logCtx(l)] || {}).label, 'Bo' + l.best_of, myDeck(l).name, oppDeck(l).name,
+    const rows = list.map(l=>[l.played_on, l.sim ? 'Battle Sim · ' + (SIM_MODE[l.mode] || 'online') : (CTX[logCtx(l)] || {}).label, 'Bo' + l.best_of, myDeck(l).name, oppDeck(l).name,
       (l.opp_colors || []).map(c=>WARNA_EN_SAFE(c)).join(' / '), l.opp_name, l.result,
       (l.games || []).map(g=>`${g.r} ${ft(g.f)} ${END[g.e] || ''}`).join(' | '), l.games && l.games[0] ? (l.games[0].f === true ? 'yes' : l.games[0].f === false ? 'no' : '') : '',
       ((S.runs || []).find(r=>r.id === l.run_id) || {}).name || '', l.run_id ? roundLabel(l) : '', l.notes]);
     const csv = '﻿' + [head].concat(rows).map(r=>r.map(esc).join(',')).join('\r\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
-    a.download = `mhr-matches-${todayISO()}.csv`;
+    a.download = `mhr-${isSim() ? 'battle-sim' : 'matches'}-${todayISO()}.csv`;
     document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
   const WARNA_EN_SAFE = c => (typeof WARNA_EN !== 'undefined' && WARNA_EN[c]) || c;
@@ -920,7 +988,7 @@
     const arch = key.startsWith('x:') ? null : archById(key);
     const c = chrono(list).reverse();
     const m = mxOpen(`<h3 class="pf-muh">${thumb(d.cover)} vs ${E(d.name)} ${dots(d.cols)}</h3>
-      <p class="bd-mut">In the current filter (${E(S.f.per === 'all' ? 'all time' : 'last ' + S.f.per + ' days')}${S.f.ctx ? ', ' + E(CTX[S.f.ctx].label) : ''}).</p>
+      <p class="bd-mut">In the current filter (${filtNote()}).</p>
       <div class="pf-kpis pf-kpis4">
         <div class="pf-kpi"><span class="k">Record</span><b>${rec(s)}</b><small>${s.n} match${s.n === 1 ? '' : 'es'}</small></div>
         <div class="pf-kpi"><span class="k">Match win rate</span><b>${pv(s.wr)}</b><small>games ${s.gW}/${s.gN}</small></div>
@@ -928,7 +996,7 @@
         <div class="pf-kpi"><span class="k">Going 2nd</span><b>${pv(s.swr)}</b><small>${s.sN} games</small></div></div>
       <div class="pf-grid2"><div class="pf-card"><h4>By my deck</h4>${decksHTML(list)}</div><div class="pf-card"><h4>How games end</h4>${endsHTML(list)}</div></div>
       <div class="pf-card"><h4>Matches <span class="bd-sp"></span><small>${list.length}</small></h4>${c.slice(0, 30).map(l=>matchRow(l)).join('')}${c.length > 30 ? `<p class="bd-mut">+ ${c.length - 30} older matches (see Recent matches → Show all).</p>` : ''}</div>
-      ${arch && arch.active !== false ? `<div class="bd-btns"><span class="bd-sp"></span><button type="button" class="btn2 main" data-muact="log">＋ Log a casual match vs ${E(d.name)}</button></div>` : ''}`, 'pf-mx pf-mxw');
+      ${!isSim() && arch && arch.active !== false ? `<div class="bd-btns"><span class="bd-sp"></span><button type="button" class="btn2 main" data-muact="log">＋ Log a casual match vs ${E(d.name)}</button></div>` : ''}`, 'pf-mx pf-mxw');
     m.querySelector('.mx-box').addEventListener('click', async e=>{
       if(e.target.closest('[data-muact="log"]')){ openLog({ opp:key }); return; }
       const rn = e.target.closest('[data-pfrun]'); if(rn){ openRun(rn.dataset.pfrun); return; }
@@ -1232,7 +1300,7 @@
     const mu = [...groupBy(list, oppKey).entries()].map(([k, l])=>({ k, d:oppDeck(l[0]), s:stats(l) })).sort((a,b)=>b.s.n - a.s.n);
     const myType = (()=>{ const code = (cur && cur.code) || list[list.length - 1].deck_code; const id = classifyDeck(code); const a = id && archById(id); return a ? a.name : ''; })();
     const m = mxOpen(`<h3 class="pf-muh">${thumb(d.cover)} ${E(d.name)} ${dots(d.cols)}</h3>
-      <p class="bd-mut">In the current filter (${E(S.f.per === 'all' ? 'all time' : 'last ' + S.f.per + ' days')}${S.f.ctx ? ', ' + E(CTX[S.f.ctx].label) : ''})${myType ? ` · counts as <b>${E(myType)}</b> in community data` : ''}.</p>
+      <p class="bd-mut">In the current filter (${filtNote()})${!isSim() && myType ? ` · counts as <b>${E(myType)}</b> in community data` : ''}.</p>
       <div class="pf-kpis pf-kpis4">
         <div class="pf-kpi"><span class="k">Record</span><b>${rec(s)}</b><small>${s.n} match${s.n === 1 ? '' : 'es'}</small></div>
         <div class="pf-kpi"><span class="k">Match win rate</span><b>${pv(s.wr)}</b><small>games ${s.gW}/${s.gN}</small></div>
@@ -1254,11 +1322,11 @@
     }
   }
   if(window.MHRAuth && window.MHRAuth.ready && window.MHRAuth.onAuthChange){
-    window.MHRAuth.onAuthChange(()=>{ S.logs = null; S.decks = null; S.runs = null; S.entries = null; S.share = null; S.comm = null; S.backfilled = false; });
+    window.MHRAuth.onAuthChange(()=>{ S.logs = null; S.sim = null; S.decks = null; S.runs = null; S.entries = null; S.share = null; S.comm = null; S.backfilled = false; });
   }
   window.MHRPerfUI = {
     renderTab, refresh, openLog, openRun, openRunForm, openDeck, classifyDeck,
-    reset(){ S.logs = null; S.decks = null; S.err = null; S.runs = null; S.entries = null; },
+    reset(){ S.logs = null; S.sim = null; S.decks = null; S.err = null; S.runs = null; S.entries = null; },
     _state: S, _stats: stats, _renderRunImage: renderRunImage,
   };
 })();

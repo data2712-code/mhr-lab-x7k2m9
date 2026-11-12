@@ -286,6 +286,7 @@
       case 'hrep': { const code = t.dataset.code; if (code) U().replayCode(code); return; }
       case 'hcopy': copyText(t.dataset.code || '', t); return;
       case 'hshare': shareReplay(t.dataset.code || '', t); return;
+      case 'hmode': { histMode = t.dataset.v || 'queue'; const el = $('histOnline'); if (el) renderHistory(el); return; }
     }
   });
 
@@ -297,6 +298,49 @@
   const BOT_OFFER_MS = window.MHRSIM_BOT_OFFER_MS || 45000;
   const fq = { on: false, ticket: null, token: null, since: 0, st: null, timer: null, tick: null, deck: null, deckVal: null, err: '', note: '', busy: false, botGame: false, foundBy: 0 };
   const fhead = '<div class="hd"><button data-mode="home">← Menu</button><h2>Find a match</h2></div>';
+  /* ---------- #85: pemain yang sedang main + grafik jam ramai ----------
+     GET /api/queue → { waiting, playing, games } (angka gabungan dari server). Jam ramai: RPC Supabase
+     mhr_sim_busy_hours (jumlah pertandingan online yang dimulai per jam, 14 hari terakhir, zona waktu perangkat ini).
+     Bila RPC belum ada (migrasi v7.34 belum dijalankan) grafiknya tidak ditampilkan. */
+  function liveHTML(st) {
+    if (!st || st.waiting == null) return '';
+    const a = st.playing != null ? '<b>' + st.playing + '</b> <span>player(s) in a game now</span> · ' : '';
+    return '<span class="livedot' + ((st.playing || st.waiting) ? ' on' : '') + '"></span>' + a + '<b>' + st.waiting + '</b> <span>player(s) searching now</span>';
+  }
+  let busyC = null;
+  async function busyHours() {
+    if (busyC && Date.now() - busyC.at < 10 * 60000) return busyC.d;
+    const h = host(); let d = null;
+    try {
+      const c = h && h.client && h.client();
+      if (c) {
+        let tz = 'Asia/Jakarta'; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || tz; } catch (e) { /* bawaan */ }
+        const r = await c.rpc('mhr_sim_busy_hours', { p_days: 14, p_tz: tz });
+        if (!r.error && r.data && Array.isArray(r.data.hours)) d = r.data;
+      }
+    } catch (e) { d = null; }
+    busyC = { at: Date.now(), d };
+    return d;
+  }
+  function busyHTML(d) {
+    if (!d) return '';
+    const hrs = d.hours.map(n => +n || 0), max = Math.max.apply(null, hrs), now = new Date().getHours();
+    let h = '<div class="busy"><div class="bt"><b>Busiest hours</b> <span class="small muted"><span>Online games started per hour, last 14 days, your local time</span> · <b>' + (d.total || 0) + '</b> <span>games</span></span></div>';
+    if (!max) return h + '<p class="small muted" style="margin:6px 0 0">No online games in the last 14 days yet. Be the first: press Find a match.</p></div>';
+    const top = hrs.indexOf(max), hh = n => String(n).padStart(2, '0') + ':00';
+    h += '<div class="bars" role="img" aria-label="Online games started per hour">' + hrs.map((n, i) => '<i class="' + (i === now ? 'now ' : '') + (n === max ? 'top' : '') + '" style="height:' + Math.max(n ? 8 : 2, Math.round(n / max * 100)) + '%" title="' + hh(i) + ' · ' + n + '"></i>').join('') + '</div>' +
+      '<div class="bx"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>' +
+      '<p class="small muted" style="margin:6px 0 0"><span>Busiest:</span> <b data-noi18n>' + hh(top) + '–' + hh((top + 1) % 24) + '</b> · <span>the outlined bar is the current hour</span></p></div>';
+    return h;
+  }
+  // Dipakai layar Find a match dan panel Play (sim-modes): isi elemen dengan angka pemain + grafik (bila ada).
+  async function liveInto(el, withChart) {
+    if (!el) return;
+    const [st, d] = await Promise.all([apiFetch('/api/queue'), withChart ? busyHours() : Promise.resolve(null)]);
+    if (!el.isConnected) return;
+    el.innerHTML = (st && !st.error ? '<p class="small livep" style="margin:0 0 8px">' + liveHTML(st) + '</p>' : '') + (withChart ? busyHTML(d) : '');
+    tr();
+  }
   const mmss = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
   const findVisible = () => !!(window.MHRSimModes && window.MHRSimModes.view() === 'find' && !document.getElementById('game').classList.contains('on'));
   async function renderFind() {
@@ -317,12 +361,13 @@
       '<div class="box"><div class="form"><div class="f"><label>Your deck</label>' + deckSelect('fqDeck') + '</div>' +
       '<div class="f full" id="fqCodeWrap" style="display:none"><label>Deck link or code</label><textarea id="fqDeckCode" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder">' + esc(pref.code || '') + '</textarea></div></div>' +
       '<p class="small muted">You are matched with the next player who is searching. Clock: Standard 2:00 per turn / 0:30 per response; the 3rd timeout loses the game. Who goes first is random. The game is saved to your account. During the beta there may be few players online: after 45 seconds you can play the bot while you keep searching.</p>' +
-      '<p class="small" id="fqStat">' + (st && st.waiting != null ? '<b>' + st.waiting + '</b> <span>player(s) searching now</span>' : '') + '</p>' +
-      '<div id="onErr" class="err">' + esc(fq.note || '') + '</div><div class="startbar"><button class="pri" data-on="fqStart">⚔️ Find a match</button></div></div>';
+      '<p class="small livep" id="fqStat">' + liveHTML(st) + '</p>' +
+      '<div id="onErr" class="err">' + esc(fq.note || '') + '</div><div class="startbar"><button class="pri" data-on="fqStart">⚔️ Find a match</button></div></div><div id="fqBusy"></div>';
     fq.note = '';
     const x = $('fqDeck'); x.value = pref.findDeck || pref.deck; if (!x.value) x.selectedIndex = 0;
     const f = () => { $('fqCodeWrap').style.display = x.value === 'code' ? '' : 'none'; }; x.onchange = f; f();
     tr();
+    busyHours().then(d => { const b = $('fqBusy'); if (b && d) { b.innerHTML = busyHTML(d); tr(); } });
   }
   function drawFind(force) {
     const el = $('panelOnline'); if (!el || !findVisible()) return;
@@ -480,32 +525,41 @@
 
   /* ---------- riwayat online (Supabase sim_matches, RLS: hanya milik sendiri) ---------- */
   const END = { rp: '9 Rush Points', deck: 'Deck out', time: 'Time up', timeouts: '3 timeouts', claim: 'Opponent left', draw: 'Draw', other: 'Other' };
+  // #85: default = pertandingan dari Find a match (kolom sim_matches.mode); baris lama tanpa mode dianggap room privat.
+  let histMode = 'queue';
+  const HCOLS = 'id,room,p1,p2,names,deck_names,clock,first,winner,end_cause,cause,turns,rp,timeouts,log_code,engine,ended_at';
   async function renderHistory(el) {
     const h = host();
     if (!h) { el.innerHTML = '<div class="box small muted">Online games are saved to your mhrdecklab.com account. Open Battle Sim on the site to see them.</div>'; tr(); return; }
     const s = await session();
     if (!s) { el.innerHTML = '<div class="box small muted">Log in on mhrdecklab.com to see your online games.</div>'; tr(); return; }
     el.innerHTML = '<div class="box small muted">Loading…</div>';
-    let rows = [], err = null;
+    let rows = [], err = null, noMode = false;
     try {
       const c = h.client();
-      const q = await c.from('sim_matches').select('id,room,p1,p2,names,deck_names,clock,first,winner,end_cause,cause,turns,rp,timeouts,log_code,engine,ended_at').order('ended_at', { ascending: false }).limit(100);
+      let q = await c.from('sim_matches').select(HCOLS + ',mode').order('ended_at', { ascending: false }).limit(200);
+      // kolom mode belum ada (migrasi v7.34 belum dijalankan): tampilkan semua tanpa pilihan Find a match / room
+      if (q.error && /42703|PGRST204|column/.test((q.error.code || '') + ' ' + (q.error.message || ''))) { noMode = true; q = await c.from('sim_matches').select(HCOLS).order('ended_at', { ascending: false }).limit(200); }
       rows = q.data || []; err = q.error;
     } catch (e) { err = e; }
     if (err) { el.innerHTML = '<div class="box small err">Online history could not be loaded: ' + esc(err.message || err) + '</div>'; tr(); return; }
     const me = r => (r.p1 === s.userId && r.p2 === s.userId) ? null : r.p1 === s.userId ? 0 : r.p2 === s.userId ? 1 : null;
+    const modeOf = r => r.mode === 'queue' ? 'queue' : 'room';
+    const all = rows;
+    if (!noMode && histMode !== 'all') rows = rows.filter(r => modeOf(r) === histMode);
     const mine = rows.filter(r => me(r) != null && r.winner != null);
     const W = mine.filter(r => r.winner === me(r)).length, D = mine.filter(r => r.winner < 0).length, L = mine.length - W - D;
-    let out = '<p class="small muted"><span class="badge">SIMULATOR · ONLINE</span> Games played online with your account. Online and offline statistics are kept separate (O-15).</p>';
+    let out = '<p class="small muted"><span class="badge">SIMULATOR · ONLINE</span> Games played online with your account. Online and offline statistics are kept separate (O-15). Your online results also appear in Performance on mhrdecklab.com, in their own Battle Sim group.</p>';
+    if (!noMode) out += '<div class="seg" style="margin:0 0 10px">' + [['queue', 'Find a match'], ['room', 'Private room'], ['all', 'All online']].map(([v, l]) => '<button data-on="hmode" data-v="' + v + '"' + (v === histMode ? ' class="on"' : '') + '><span>' + l + '</span> <span data-noi18n>(' + (v === 'all' ? all.length : all.filter(r => modeOf(r) === v).length) + ')</span></button>').join('') + '</div>';
     if (mine.length) out += '<div class="stats"><span class="badge">Online games: ' + mine.length + '</span><span class="badge" style="color:#7fd79d">W ' + W + '</span><span class="badge" style="color:#ff9d8f">L ' + L + '</span>' + (D ? '<span class="badge">D ' + D + '</span>' : '') + '<span class="badge">Win rate ' + Math.round(W / Math.max(1, mine.length) * 100) + '%</span></div>';
-    if (!rows.length) out += '<div class="box small muted">No online games yet.</div>';
+    if (!rows.length) out += '<div class="box small muted">' + (all.length && histMode === 'queue' ? 'No Find a match games yet. Your private-room games are under Private room.' : all.length ? 'No games in this group yet.' : 'No online games yet.') + '</div>';
     rows.forEach(r => {
       const m = me(r), res = r.winner == null ? null : r.winner < 0 ? 'd' : m == null ? null : r.winner === m ? 'w' : 'l';
       const resTxt = res === 'w' ? 'WIN' : res === 'l' ? 'LOSS' : res === 'd' ? 'DRAW' : '—';
       const names = r.names || [], dn = r.deck_names || [];
       const who = m == null ? (r.winner >= 0 ? (names[r.winner] || '') + ' won' : 'Draw') : 'vs ' + (names[1 - m] || '');
       let when = r.ended_at; try { const d = new Date(r.ended_at); when = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { /* abaikan */ }
-      out += '<div class="hrow"><span class="res ' + (res || 'd') + '">' + resTxt + '</span><div class="tx"><b>Online · private room</b> · ' + esc(who) +
+      out += '<div class="hrow"><span class="res ' + (res || 'd') + '">' + resTxt + '</span><div class="tx"><b>' + (noMode ? 'Online' : modeOf(r) === 'queue' ? 'Online · Find a match' : 'Online · private room') + '</b> · ' + esc(who) +
         '<div class="small muted">' + esc(names.map((n, i) => n + ': ' + (dn[i] || 'Deck')).join(' · ')) + '</div>' +
         '<div class="small muted">' + esc(when) + ' · ' + (r.turns || 0) + ' turns · ' + esc(/ conceded$/.test(r.cause || '') ? 'Conceded' : END[r.end_cause] || '') + ' · ' + esc(CLOCK_LABEL[r.clock] || '') + '</div></div>' +
         (r.log_code ? '<button class="sm" data-on="hrep" data-code="' + esc(r.log_code) + '">Replay</button><button class="sm" data-on="hshare" data-code="' + esc(r.log_code) + '">Share</button><button class="sm" data-on="hcopy" data-code="' + esc(r.log_code) + '">Log code</button>' : '') + '</div>';
@@ -550,6 +604,6 @@
     if (sv && !sv.over && Date.now() - (sv.at || 0) < 24 * 3600 * 1000 && host()) back();
   }
   function openReplay(code) { try { if (S.parseLog(code)) window.MHRSimUI.replayCode(code); } catch (e) { /* kode rusak: tetap di menu */ } }
-  window.MHRSimOnline = { findWith, loadDecks, myDecks: () => decks.mine.slice(), deckOptionsHTML, noDecksText: NO_DECKS, renderFind, finding: () => fq.on, shareReplay, openReplay, renderPanel, renderHistory, leaveGame, sendReport, reportContext, host, api: API, joinRoom: code => { pendingJoin = code; if (window.MHRSimModes) window.MHRSimModes.show('online'); } };
+  window.MHRSimOnline = { findWith, loadDecks, myDecks: () => decks.mine.slice(), deckOptionsHTML, noDecksText: NO_DECKS, renderFind, liveInto, finding: () => fq.on, shareReplay, openReplay, renderPanel, renderHistory, leaveGame, sendReport, reportContext, host, api: API, joinRoom: code => { pendingJoin = code; if (window.MHRSimModes) window.MHRSimModes.show('online'); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else setTimeout(init, 0);
 })();

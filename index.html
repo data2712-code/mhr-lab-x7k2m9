@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.33  ·  11 November 2026
+     MHR DECK LAB  ·  versi 7.34  ·  12 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.33">
+<meta name="version" content="7.34">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2233,6 +2233,13 @@
   .pf-tool .btn2{flex:none;padding:8px 14px}
   .pf-tool .btn2.main,.pf-empty .btn2.main{background:var(--accent);color:#1A1206;border-color:var(--accent);font-weight:800}
   .pf-chips{display:flex;gap:6px;flex-wrap:wrap}
+  /* v7.34 — Performance: sakelar sumber Tabletop / Battle Sim (hasil online simulator, kelompok terpisah) */
+  .pf-srcbar{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .pf-srcbar .bd-mut{flex:1;min-width:220px;margin:0;font-size:12.5px}
+  .pf-src button{padding:9px 14px;font-size:13.5px}
+  .pf-src button small{font-weight:600;opacity:.75;margin-left:4px}
+  .pf-simtag{border-color:#3B87E8;color:#8DBBF5}
+  .pf-tool a.btn2{text-decoration:none;display:inline-flex;align-items:center}
   .pf-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
   .pf-kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 13px;display:flex;flex-direction:column;gap:3px;min-width:0}
   .pf-kpi .k{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
@@ -3435,10 +3442,10 @@
 <!-- v7.13 — Performance Analytics (Tahap 1): servis match_logs/match_archetypes (perf.js) + tab Performance (perf-ui.js).
      v7.14 (Tahap 2): tournament runs, import dari Events, share gambar run, grafik tren, detail matchup.
      v7.15 (Tahap 3): data matchup komunitas (opt-in, anonim), detail deck + statistik per versi deck. -->
-<script src="perf.js?v=7.15"></script>
-<script src="perf-ui.js?v=7.25"></script>
+<script src="perf.js?v=7.34"></script>
+<script src="perf-ui.js?v=7.34"></script>
 <script src="rules-faq.js?v=7.28"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules); v7.26 — FAQ versi Bahasa Indonesia; v7.27 — Copy link ke halaman statis faq/ & errata/; v7.28 — TD-11 -->
-<script src="sim-host.js?v=7.33-sim9"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
+<script src="sim-host.js?v=7.34-sim10"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
@@ -3467,7 +3474,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.33</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.34</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
