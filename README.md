@@ -603,6 +603,41 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — SD05 & SD06: nama, teks & gambar versi Inggris resmi — 12 November 2026 *(`cards.js`, `index.html`, `sitemap.xml`, 32 halaman `cards/`, 40 gambar baru di `images/en/`)*
+
+Permintaan pemilik: teks Inggris SD05 dan SD06 sudah terbit di https://www.marvelherorush.com/en/cards. Pemilik menyimpan
+data resmi (respons daftar kartu + halaman lengkap dengan gambarnya) ke `mhr-deck-lab-internal\Database Image Kartu\English\
+SD05_English` dan `SD06_English`; isinya dipindahkan ke database. PB02 belum ada versi Inggrisnya, jadi tidak diubah.
+
+- **36 kartu (40 cetakan)** SD05-001..018 dan SD06-001..018: `nm_en` dan `e_en` = teks resmi Inggris; `fan:2` → `fan:1`
+  (lencana kartu sekarang "ID*+EN": teks Inggris resmi, teks Indonesia masih terjemahan belum resmi sampai versi Indonesia
+  terbit). Lv, R, Power, warna, dan rarity semuanya sudah sama dengan data resmi (tidak ada yang berubah).
+- **Nama kartu berubah** untuk 32 dari 36 kartu (judul terjemahan lama diganti judul resmi), mis. SD06-001 「Curse of
+  Wisdom」→「Genius Burden」 Thanos, SD06-011 「Swarm Assault」Chitauri Soldier →「Swarming Assault」Chitauri Infantry,
+  SD06-013 War Envoy → Warbringer, SD06-014 Chitauri Chariot → Chitauri Flying Chariots. `nm` (Indonesia) ikut memakai judul
+  Inggris resmi, karena kartu resmi Indonesia selalu memakai judul Inggris.
+- **Kata kunci baru resmi**: 猛袭 = **ONSLAUGHT** (SD06-001; dulu RAMPAGE*), 速攻 = **QUICK ATTACK** (SD05-003; dulu QUICK
+  STRIKE*). Teks Indonesia dan filter "Key ability" di halaman Kartu ikut memakai nama resmi (tanpa tanda *).
+- **Trait**: 【Cabal】 → **【The Cabal】**, sesuai teks resmi: trait SD06-011..018, dan teks efek kedua bahasa yang
+  menyebutnya (SD06-007..010, SD06-016, SD06-017).
+- **Salah ketik di situs resmi yang dibetulkan** (preseden pemilik SP01-005 / SD04-005: database memakai bentuk yang benar):
+  SD05-001 "charactes" → "characters"; SD06-003 "If you doand" → "If you do and"; SD05-018 judul 「Anitmate the Dead」 →
+  「Animate the Dead」; trait SD05-016..018 tetap **Niffleheim** mengikuti database resmi (sebelumnya Niflheim). Tata letak: baris baru → spasi, "：" → ":",
+  【UNIQUE】/【COUNTER】/【BLOCK】 di awal baris ditulis polos seperti kartu resmi lain.
+- **Perbedaan isi yang perlu diketahui**: SD06-004 versi resmi Inggris tidak menulis "this turn" untuk Power-1000 (terjemahan
+  lama menulis "in this turn"); teks Indonesia belum diubah karena masih menunggu teks resmi Indonesia.
+- **Gambar**: 40 gambar resmi Inggris (PNG 744×1039 dari situs resmi, ber-watermark SAMPLE) → `images/en/<no>.jpg`,
+  `_MR`, `_SEC` (JPEG 500×698). `images/` (cetakan China) tetap dipakai untuk tampilan Indonesia. Berkas baru, jadi
+  `sw.js` tidak perlu diubah.
+- Kartu Rush Point SD05-019/SD06-019 tidak diubah (masih `cn:1`). SD05/SD06 tetap belum legal di Events sampai
+  14 November 2026.
+- Cache-buster `index.html` → `cards.js?v=7.32-sd56en`. `api/v1/` tidak berubah (SD05/SD06 belum masuk API).
+  `tools/generate_card_pages.py` dijalankan: 32 halaman `cards/` diperbarui (judul berubah) dan `<lastmod>`-nya di
+  `sitemap.xml`; halaman lain tidak disentuh.
+- Dicek: `node --check cards.js`; halaman Kartu (salinan lokal) mode Inggris menampilkan nama resmi dan gambar
+  `images/en/`, mode Indonesia memakai gambar China, filter Key ability menampilkan ONSLAUGHT (1) dan QUICK ATTACK (1),
+  tanpa error JS.
+
 ### Data — Battle Sim o2.10: riwayat online default Find a match, jumlah pemain yang sedang main, grafik jam ramai — 12 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #85; rincian di `mhr-simulator\`. Permintaan pemilik 12 Nov 2026:

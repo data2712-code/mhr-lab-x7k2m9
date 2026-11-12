@@ -3410,7 +3410,7 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=7.28-sp065"></script>
+<script src="cards.js?v=7.32-sd56en2"></script>
 <script src="data.js?v=7.02-lgs1110"></script>
 <script src="lgs-admin.js?v=7.31"></script>   <!-- v7.31 — jadwal Weekly Rush LGS dari Supabase (lgs_stores) + editor admin; HARUS sesudah data.js (cadangan) -->
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
@@ -3660,9 +3660,10 @@ const MECH = {
   assault:      /\[ASSAULT\]/,
   airstrike:    /\[AIR STRIKE\]/,
   unique:       /\[UNIQUE\]|\[UNIQUE COUNTER\]/,
-  /* v7.02 — kata kunci baru SD05/SD06 (nama sementara, belum ada nama resmi) */
-  rampage:      /\[RAMPAGE\]/,
-  quickstrike:  /\[QUICK STRIKE\]/,
+  /* v7.02 — kata kunci baru SD05/SD06; nama resmi Inggris sejak 12 Nov 2026: ONSLAUGHT (dulu RAMPAGE*),
+     QUICK ATTACK (dulu QUICK STRIKE*). Kunci 'rampage'/'quickstrike' dipertahankan supaya filter tersimpan tidak rusak. */
+  rampage:      /\[ONSLAUGHT\]|\bONSLAUGHT\(/,
+  quickstrike:  /\[QUICK ATTACK\]|\bQUICK ATTACK\(/,
 };
 const KEY_ABIL = ['block','doubleattack','assault','airstrike','unique','rampage','quickstrike'];
 
@@ -3706,7 +3707,7 @@ const FX_EFFECTS = [
 /* buang "[KATA KUNCI](...pengingat...)" / "KATA KUNCI(...pengingat...)" dengan
    kurung seimbang — pengingat BLOCK memuat kurung bersarang "(BATTLE/ONCE PER TURN)". */
 function fxStripReminders(s){
-  const re = /\[(?:UNIQUE COUNTER|UNIQUE|COUNTER|BLOCK|DOUBLE ATTACK|ASSAULT|AIR STRIKE|RAMPAGE|QUICK STRIKE)\]\(|\b(?:UNIQUE COUNTER|UNIQUE|COUNTER|BLOCK|DOUBLE ATTACK|ASSAULT|AIR STRIKE|RAMPAGE|QUICK STRIKE)\(/g;
+  const re = /\[(?:UNIQUE COUNTER|UNIQUE|COUNTER|BLOCK|DOUBLE ATTACK|ASSAULT|AIR STRIKE|ONSLAUGHT|QUICK ATTACK)\]\(|\b(?:UNIQUE COUNTER|UNIQUE|COUNTER|BLOCK|DOUBLE ATTACK|ASSAULT|AIR STRIKE|ONSLAUGHT|QUICK ATTACK)\(/g;
   let out = '', last = 0, m;
   while((m = re.exec(s))){
     let depth = 1, i = re.lastIndex;
@@ -4630,7 +4631,7 @@ const T = {
   allTrait: 'All traits',
   allRarity: 'All rarities',
   allKeyAbil: 'Key ability',
-  fKeyAbilT: 'Key ability filter (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE (in the rulebook: AIR-ATTACK)/UNIQUE, plus RAMPAGE*/QUICK STRIKE* from SD05/SD06 (* = unofficial name until the official English text is out) — combined into one dropdown since each only has a few cards',
+  fKeyAbilT: 'Key ability filter (305): BLOCK/DOUBLE ATTACK/ASSAULT/AIR STRIKE (in the rulebook: AIR-ATTACK)/UNIQUE, plus ONSLAUGHT/QUICK ATTACK from SD05/SD06 — combined into one dropdown since each only has a few cards',
   mk_block: 'BLOCK',
   mk_doubleattack: 'DOUBLE ATTACK',
   mk_assault: 'ASSAULT',
@@ -4651,8 +4652,8 @@ const T = {
   langFan2Note: '⚠ Unofficial translation: the Indonesian and English text of this card are fan-made translations of the official Chinese card text (the image is the Chinese print). They will be updated regularly once the official Indonesian and English text is published on the official website.',
   preRelNote: 'Indonesian release: {d}. Not tournament-legal in Events until then.',
   rpLangCn: 'Only in the official Chinese card list so far (Indonesian release: 14 November 2026).',
-  mk_rampage: 'RAMPAGE*',
-  mk_quickstrike: 'QUICK STRIKE*',
+  mk_rampage: 'ONSLAUGHT',
+  mk_quickstrike: 'QUICK ATTACK',
   langEnOnlyTip: 'This card is currently only available in English',
   langIdOnlyTip: 'This card is currently only available in Indonesian',
   metaAll: 'All',
