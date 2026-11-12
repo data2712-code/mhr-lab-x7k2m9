@@ -22,6 +22,14 @@
              30 hari, koleksi, binder) + saran fitur yang belum dicoba.
    Pratinjau mini di kartu fitur hanya ILUSTRASI (nama pemain/angka contoh).
 
+   v7.35 (12 Nov 2026) — BATTLE SIM jadi hero utama di ketiga tampilan (keputusan pemilik: Battle Sim = daya tarik
+   utama untuk menaikkan traffic). Hero Battle Sim: mockup HP (screenshot asli), 4 ubin mode yang langsung membuka
+   mode itu (#sim/practice, #sim/find, #sim/online, #sim/custom — lihat sim-host.js), jumlah pemain yang sedang main
+   (GET /api/queue server Battle Sim; hanya tampil bila > 0), dan untuk yang login rekor online akun itu
+   (MHRPerf.simMatches, tabel sim_matches). Hero deck builder pindah ke bagian kedua dan dibuat lebih ringkas.
+   Battle Sim juga jadi kartu fitur pertama, pintasan pertama di Welcome back, alasan #1 membuat akun, dan ada di
+   jalur per peran, FAQ dan CTA penutup.
+
    Dimuat SEBELUM blok <script> inline di index.html; fungsinya baru
    dipanggil dari setPage('beranda'), jadi global dari blok inline ($, DB,
    LGS, TOURNAMENTS, DECK_KOMUNITAS, decodeDeck, deckStats, previewCards,
@@ -198,6 +206,74 @@
     </section>`;
   }
 
+  /* =================== v7.35 — Battle Sim (hero utama) =================== */
+  const SIM_API = (window.MHRSIM_ONLINE_API || 'https://mhr-battle-sim-test.dataanggi2712.workers.dev').replace(/\/$/, '');
+  const SIM_IMG = 'images/news/battle-sim-open-beta/';
+  const SIM_MODES = [['practice','🤖','Practice vs Bot','Easy · Normal · Hard'],['find','⚔️','Find a match','Play a real opponent'],
+    ['online','🔗','Friend online','Private room link'],['custom','👥','Same device','Pass-and-play']];
+  let simLive = null;     /* {playing, waiting} dari server; null = belum/gagal dimuat */
+  async function loadLive(){
+    try{
+      const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const t = ctl ? setTimeout(()=>ctl.abort(), 5000) : 0;
+      const r = await fetch(SIM_API + '/api/queue', { cache:'no-store', signal: ctl ? ctl.signal : undefined });
+      clearTimeout(t);
+      if(!r.ok) return null;
+      const j = await r.json();
+      return (simLive = { playing: Math.max(0, +j.playing || 0), waiting: Math.max(0, +j.waiting || 0) });
+    }catch(e){ return null; }
+  }
+  /* angka 0 tidak ditampilkan (keputusan pemilik: jangan terlihat sepi) */
+  function liveHTML(l){
+    if(!l || !(l.playing > 0 || l.waiting > 0)) return '';
+    const p = l.playing > 0 ? `<b>${l.playing}</b> player${l.playing===1?'':'s'} in a game now` : '';
+    const w = l.waiting > 0 ? `<b>${l.waiting}</b> searching for a match` : '';
+    return `<span class="bs-live"><i aria-hidden="true"></i>${[p,w].filter(Boolean).join(' · ')}</span>`;
+  }
+  /* rekor online akun (sim_matches): winner = kursi pemenang (0/1), < 0 = seri */
+  let simMe = { uid:null, data:null };
+  async function loadSimMe(session){
+    const uid = session && session.user && session.user.id; if(!uid) return null;
+    if(simMe.uid === uid && simMe.data) return simMe.data;
+    if(!window.MHRPerf || !window.MHRPerf.simMatches) return null;
+    const r = await window.MHRPerf.simMatches();
+    if(!r || r.error) return null;
+    let w = 0, l = 0, d = 0;
+    (r.data || []).forEach(m=>{
+      if(m.winner == null || (m.p1 === uid && m.p2 === uid)) return;
+      const seat = m.p1 === uid ? 0 : m.p2 === uid ? 1 : null; if(seat == null) return;
+      if(m.winner < 0) d++; else if(m.winner === seat) w++; else l++;
+    });
+    return (simMe = { uid, data: { n: w + l + d, w, l, d } }).data;
+  }
+  const simRec = s => s.n ? `${s.w}W–${s.l}L${s.d?`–${s.d}D`:''} · ${Math.round(s.w / s.n * 100)}% win rate` : '';
+  function simMeHTML(s){
+    if(!s) return '';
+    return s.n
+      ? `<a class="bs-me" href="#dashboard" data-hm-tab="perf"><span>Your online record</span><b>${s.n} game${s.n>1?'s':''} · ${simRec(s)}</b><i>See it in Performance →</i></a>`
+      : `<div class="bs-me"><span>Your online record</span><b>No online games yet</b><i>Try Find a match or invite a friend.</i></div>`;
+  }
+  function simHeroHTML(mode){
+    const user = mode === 'user';
+    const tiles = SIM_MODES.map(([k, ic, t, sub])=>`<a class="bs-mode" href="#sim/${k}"><span class="ic" aria-hidden="true">${ic}</span><span><b>${t}</b><i>${sub}</i></span></a>`).join('');
+    return `<section class="bs-hero${user?' bs-user':''}">
+      <div class="bs-txt">
+        <span class="nh-kick">⚔️ New on MHR Deck Lab · Battle Sim</span>
+        <h2 class="nh-h1">Play Marvel Hero Rush <em>online</em></h2>
+        <p class="lead">Play full games right in your browser, on your phone or computer. Every rule and card effect is handled for you — practice against a bot or challenge real players with your own decks.</p>
+        <div id="bsLive">${liveHTML(simLive)}</div>
+        <div class="bs-modes">${tiles}</div>
+        <div class="nh-ctas"><a class="nh-btn main bs-play" href="#sim">⚔️ Play now</a>
+          ${user ? `<a class="nh-btn" href="#sim/history">Match history</a>` : `<span class="bs-note">Free · just log in with a free account · <button type="button" data-hm="login">Log in / sign up</button></span>`}</div>
+        ${user ? `<div id="bsMe">${simMeHTML(simMe.data)}</div>` : ''}
+      </div>
+      <a class="bs-phones" href="#sim" aria-label="Open Battle Sim">
+        <span class="bs-ph bs-ph2"><img src="${SIM_IMG}menu.jpg" alt="" loading="lazy"></span>
+        <span class="bs-ph"><img src="${SIM_IMG}battle.jpg" alt="Battle Sim on a phone: an attack in progress" fetchpriority="high"></span>
+      </a>
+    </section>`;
+  }
+
   /* =================== v7.16 — bagian perkenalan (pengunjung baru) =================== */
   const COL = {R:'#E4442E',Y:'#F2B01E',B:'#3B87E8',G:'#33A45C',O:'#E8821E',P:'#8B5CF6'};
   const nCards = () => (typeof DB !== 'undefined' && DB.length) || 0;
@@ -215,7 +291,7 @@
   const heroFan = () => `<div class="nh-fan" aria-hidden="true">${HERO_CARDS.map(([n,r])=>cardImg(n,r)).join('')}</div>`;
 
   function heroHTML(){
-    return `<section class="nh-hero">
+    return `<section class="nh-hero nh-hero2">
       <div>
         <span class="nh-kick">Free · fan-made · Marvel Hero Rush TCG</span>
         <h2 class="nh-h1">Build, play &amp; track your <em>Marvel Hero Rush</em> decks</h2>
@@ -262,6 +338,9 @@
     return `<section id="hmFeats">
       <div class="nh-sec-h"><div><h2>${title}</h2><p>${sub}</p></div></div>
       <div class="nh-feats nh-scroll">
+        ${F('#sim','','Play','Battle Sim',`Play full games online with every rule and card effect automated: practice vs a bot, find a match or invite a friend with a link.`,
+          `<div class="pv-bs"><img src="${SIM_IMG}battle.jpg" alt="" loading="lazy"><img src="${SIM_IMG}effect.jpg" alt="" loading="lazy"></div>
+           <span class="pv-live">● ONLINE</span>`, NEW + ACC)}
         ${F('#cards','','Explore','Card database',`Search and filter every card by colour, level, power and keyword. Official English and Indonesian text, alt arts and set spoilers.`,
           `<div class="pv-search">🔍 &nbsp;Search ${nCards()||''} cards…</div><div class="pv-dots">${'RYBGOP'.split('').map(k=>`<i style="background:${COL[k]}"></i>`).join('')}</div>
            <div class="pv-thumbs">${['BP01-011','BP01-015','SP01-027','BP01-066'].map(n=>cardImg(n)).join('')}</div>`)}
@@ -289,7 +368,7 @@
              <div>vs Yellow-Green<b>48%</b><i><u style="width:48%;background:#F2B01E"></u></i></div>
              <div>vs Purple<b>33%</b><i><u style="width:33%;background:#E4442E"></u></i></div></div>`, NEW + ACC)}
       </div>
-      <span class="nh-swipe">Swipe to see all 6 →</span>
+      <span class="nh-swipe">Swipe to see all 7 →</span>
       <div class="nh-more"><a href="#build">⚖ Compare two decks</a><a href="#build">🕘 Deck version history</a><a href="#build">🖼 Export deck image &amp; PDF</a><a href="#set">📰 Set spoilers</a><a href="#panduan">📘 Rules guide</a><a href="#meta">🏆 User decks</a></div>
     </section>`;
   }
@@ -300,8 +379,8 @@
     return `<section>
       <div class="nh-sec-h"><div><h2>Where do you want to start?</h2><p>Pick what fits you best.</p></div></div>
       <div class="nh-paths nh-scroll">
-        ${P('🌱','New to the game','Learn the rules and start with a deck that already works.',[L('#panduan','Read the rules guide'),L('#meta','Copy a ready-to-use deck'),L('#lgs','Find a store near you')])}
-        ${P('🏆','Competitive player','Study the meta, test your list and track your results.',[L('#tourney','Tournament decklists'),L('#build','Build &amp; compare decks'),L('#dashboard','Track your matchups','perf')])}
+        ${P('🌱','New to the game','Learn the rules and start with a deck that already works.',[L('#panduan','Read the rules guide'),L('#sim/practice','Practice against a bot'),L('#meta','Copy a ready-to-use deck'),L('#lgs','Find a store near you')])}
+        ${P('🏆','Competitive player','Study the meta, test your list and track your results.',[L('#tourney','Tournament decklists'),L('#sim/find','Test your deck in Battle Sim'),L('#build','Build &amp; compare decks'),L('#dashboard','Track your matchups','perf')])}
         ${P('📦','Collector &amp; trader','Know what you own and what you still need.',[L('#set','Browse sets &amp; spoilers'),L('#dashboard','Track your collection','coll'),L('#dashboard','Share a sale/trade binder','bind')])}
         ${P('🏪','Store / organizer','Run your LGS tournament and get your store listed.',[L('#event','Run an event with live pairings'),L('#lgs','See the Weekly Rush list'),L('https://www.instagram.com/deteprtm','Get your store listed or verified')])}
       </div>
@@ -314,22 +393,24 @@
     return `<section class="nh-acct">
       <div class="hm-box"><div class="hm-box-h"><h3>Why make a free account?</h3></div>
         <div class="nh-steps">
-          ${st(1,'Save your decks to the cloud','With version history, on every device — and publish them to User Decks.')}
-          ${st(2,'Track your collection &amp; binders','Per set and per version; share a binder for sale or trade.')}
-          ${st(3,'Log matches &amp; see your stats','Win rate, matchups and tournament runs in My Lab.')}
+          ${st(1,'Play Battle Sim online','Practice vs a bot, find a match or play a friend — your online results go straight to Performance.')}
+          ${st(2,'Save your decks to the cloud','With version history, on every device — and publish them to User Decks.')}
+          ${st(3,'Track your collection &amp; binders','Per set and per version; share a binder for sale or trade.')}
+          ${st(4,'Log matches &amp; see your stats','Win rate, matchups and tournament runs in My Lab.')}
         </div>
         <button type="button" class="nh-btn main" data-hm="login">Create a free account</button>
       </div>
       <div class="hm-box nh-faq"><div class="hm-box-h"><h3>Quick answers</h3></div>
         ${qa('Is MHR Deck Lab free?','Yes. Browsing cards and building or sharing decks need no account. A free account only adds saving and tracking.', true)}
+        ${qa('What is Battle Sim?','A free online simulator of Marvel Hero Rush. The rules and card effects run automatically, so you can test decks against a bot or play other players from your phone or computer. You only need a free account.')}
         ${qa('Is the card text official?','Card text comes from the official marvelherorush.com database. Pre-release cards that only have a fan translation are clearly marked.')}
         ${qa('Is this the official Marvel Hero Rush site?','No. MHR Deck Lab is a fan-made tool for the community and is not affiliated with Marvel or the publisher.')}
         ${qa('Can I use it on my phone?','Yes. Open mhrdecklab.com in your browser and add it to your home screen to use it like an app.')}
       </div>
     </section>`;
   }
-  const finalHTML = () => `<section class="nh-final"><div><h2>Ready to build your next deck?</h2><p>Free for everyone — no sign-up needed to start.</p></div>
-    <div class="nh-ctas"><a class="nh-btn main" href="#build">🛠 Start building</a><a class="nh-btn" href="https://www.instagram.com/deteprtm" target="_blank" rel="noopener">Follow @deteprtm</a></div></section>`;
+  const finalHTML = () => `<section class="nh-final"><div><h2>Ready for your next game?</h2><p>Build a deck, then play it in Battle Sim — free for everyone.</p></div>
+    <div class="nh-ctas"><a class="nh-btn main" href="#sim">⚔️ Play Battle Sim</a><a class="nh-btn" href="#build">🛠 Build a deck</a><a class="nh-btn" href="https://www.instagram.com/deteprtm" target="_blank" rel="noopener">Follow @deteprtm</a></div></section>`;
 
   /* =================== v7.16 — sudah login: "Welcome back" =================== */
   /* hint sinkron dari token Supabase di localStorage (supaya tidak berkedip), dipastikan lagi lewat getSession() */
@@ -397,6 +478,7 @@
       if(d.bindOk && !nB) tips.push(['#dashboard','bind','🗂 Binders']);
       if(d.collOk && !d.owned) tips.push(['#dashboard','coll','📦 Card collection']);
     }
+    if(!seen.includes('sim')) tips.unshift(['#sim','','⚔️ Battle Sim']);
     if(!seen.includes('event')) tips.push(['#event','','📅 Events &amp; live pairings']);
     if(!seen.includes('tourney')) tips.push(['#tourney','','🥇 Tournament decks']);
     if(!seen.includes('meta')) tips.push(['#meta','','🏆 User decks']);
@@ -405,6 +487,7 @@
         <a class="nh-btn" href="#dashboard">Open My Lab →</a>
       </section>
       <section class="nc-sc">
+        ${sc('#sim','', ic('⚔️'), 'Battle Sim', !simMe.data ? 'Play online' : simMe.data.n ? `${simMe.data.n} online game${simMe.data.n>1?'s':''}` : 'Play your first game', simMe.data && simMe.data.n ? simRec(simMe.data) : 'Bot · Find a match · Friend')}
         ${sc('#build','', top ? cardImg(top.no) : ic('🛠'), tot ? 'Continue deck' : 'Deck builder', tot ? E(deckName) : 'Start a new deck', tot ? `${tot}/50 cards` : 'Curve, share, image &amp; PDF')}
         ${sc('#dashboard','perf', ic('📈'), 'Performance', perfB, perfS)}
         ${sc('#dashboard','coll', ic('📦'), 'Collection', !d ? '…' : d.owned ? `${d.owned} / ${nCards()} cards` : 'Start your collection', 'Per set &amp; per version')}
@@ -435,12 +518,12 @@
     const cd = rel ? countdownHTML(rel) : '';
     const news = `<div id="hmNews">${cache.news ? newsHTML(cache.news) : '<div class="hm-news hm-skel"><div class="hm-lead"></div><div class="hm-side"></div></div>'}</div>`;
     const pop = `<section class="hm-sec" id="hmPopular">${cache.popular ? popularHTML(cache.popular) : ''}</section>`;
-    if(mode === 'user') return [`<div id="hmMe">${welcomeHTML(me.data)}</div>`, cd, news, pop,
+    if(mode === 'user') return [simHeroHTML(mode), `<div id="hmMe">${welcomeHTML(me.data)}</div>`, cd, news, pop,
       featsHTML('Everything on MHR Deck Lab', 'Tools you might not have tried yet.'), seriesHTML()];
-    if(mode === 'short') return [introShortHTML(), cd, news, pop,
+    if(mode === 'short') return [simHeroHTML(mode), introShortHTML(), cd, news, pop,
       featsHTML('What you can do here', 'Everything for Marvel Hero Rush players — from your first deck to your next tournament.'),
       pathsHTML(), seriesHTML(), accountHTML(), finalHTML()];
-    return [heroHTML(), statsHTML(),
+    return [simHeroHTML(mode), heroHTML(), statsHTML(),
       featsHTML('What you can do here', 'Everything for Marvel Hero Rush players — from your first deck to your next tournament.'),
       cd, pathsHTML(), news, pop, seriesHTML(), accountHTML(), finalHTML()];
   }
@@ -463,6 +546,13 @@
     const real = session && session.user ? 'user' : (mode === 'user' ? (forceFull ? 'full' : introMode()) : mode);
     if(real !== mode){ curMode = real; w.innerHTML = layout(real).filter(Boolean).join('\n'); w.dataset.mode = real; }
 
+    /* v7.35: angka pemain & rekor online dimuat terpisah — tidak menahan berita/deck */
+    loadLive().then(l=>{ const el = $q('#bsLive'); if(el && state.page === 'beranda') el.innerHTML = liveHTML(l); });
+    if(real === 'user') loadSimMe(session).catch(()=>null).then(s=>{
+      if(state.page !== 'beranda' || curMode !== 'user' || !s) return;
+      const el = $q('#bsMe'); if(el) el.innerHTML = simMeHTML(s);
+      const m2 = $q('#hmMe'); if(m2 && me.data) m2.innerHTML = welcomeHTML(me.data);
+    });
     const jobs = [loadNews().catch(()=>[]), loadPopular().catch(()=>[])];
     if(real === 'user') jobs.push(loadMe(session).catch(()=>null));
     const [news, pop, d] = await Promise.all(jobs);
@@ -488,14 +578,14 @@
   });
 
   window.renderBeranda = renderBeranda;
-  window.refreshBeranda = ()=>{ cache = {news:null, popular:null}; me = { uid:null, data:null, loading:null }; if(typeof state!=='undefined' && state.page==='beranda') renderBeranda(); };
+  window.refreshBeranda = ()=>{ cache = {news:null, popular:null}; me = { uid:null, data:null, loading:null }; simMe = { uid:null, data:null }; if(typeof state!=='undefined' && state.page==='beranda') renderBeranda(); };
   /* login/logout → home ikut berubah (Welcome back ↔ perkenalan) */
   let lastUid;   /* hanya render ulang kalau akun berganti (bukan tiap token refresh) */
   if(window.MHRAuth && window.MHRAuth.onAuthChange) window.MHRAuth.onAuthChange(session=>{
     const uid = (session && session.user && session.user.id) || null;
     if(lastUid === undefined){ lastUid = uid; return; }
     if(uid === lastUid) return;
-    lastUid = uid; me = { uid:null, data:null, loading:null };
+    lastUid = uid; me = { uid:null, data:null, loading:null }; simMe = { uid:null, data:null };
     if(typeof state!=='undefined' && state.page==='beranda') renderBeranda();
   });
 

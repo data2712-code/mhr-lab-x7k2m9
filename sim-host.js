@@ -10,6 +10,8 @@
    - renderSimPage(sub): isi halaman #sim. Beta O3 (11 Nov 2026, riwayat simulator #70): SEMUA akun yang login melihat
      menu & halaman (uji O2 dulu hanya admin); pengunjung tanpa login mendapat ajakan login, iframe tidak dimuat.
    - Link undangan room privat: #sim/room/KODE (dibagikan lewat WhatsApp) → iframe dibuka langsung di formulir gabung.
+   - v7.35: link langsung ke layar mode dari Home — #sim/practice, #sim/find, #sim/online, #sim/custom, #sim/history →
+     iframe dibuka dengan #<layar> (rute VIEWS yang sudah ada di sim-modes.js). Tanpa login: dibuka setelah login.
    - Kartu admin "🐞 Battle Sim reports" di My Lab: laporan bug & feedback dari tabel sim_feedback (hanya admin, RLS).
    Bergantung pada variabel global di blok <script> utama index.html (isAccountAdmin, isLoggedIn, state, TOURNAMENTS,
    loadTournaments) — semuanya dibaca saat fungsi dipanggil, bukan saat berkas ini dimuat.
@@ -66,13 +68,16 @@
     f.style.height = Math.max(420, innerHeight - top - (fixedNav ? nav.offsetHeight : 0)) + 'px';
   }
   addEventListener('resize', sizeFrame);
-  let lastRoom = null, lastReplay = null;
+  let lastRoom = null, lastReplay = null, lastView = null;
+  const VIEW_RE = /^(practice|find|online|custom|history)$/;        // v7.35 — layar menu di dalam iframe
   window.renderSimPage = function (sub) {
     const wrap = q('#simWrap'); if (!wrap) return;
     const room = sub && /^room\/([A-Z0-9]{6})$/i.test(sub) ? sub.slice(5).toUpperCase() : null;
     if (room) lastRoom = room;
     const rpm = sub && /^replay\/(MHRSIM1\.[A-Za-z0-9_-]+)$/.exec(sub), replay = rpm ? rpm[1] : null;
     if (replay) lastReplay = replay;
+    const view = sub && VIEW_RE.test(sub) ? sub : null;
+    if (view) lastView = view;
     if (!canPlay()) {
       if (frame()) wrap.innerHTML = '';
       const authReady = window.MHRAuth && window.MHRAuth.ready;
@@ -80,20 +85,25 @@
       wrap.innerHTML = '<div class="sim-gate"><h2>⚔️ Battle Sim' + (beta ? ' <span class="sim-beta">BETA</span>' : '') + '</h2>' +
         (beta ? '<p>Battle Sim is in beta (11–18 Nov 2026). Log in with your MHR Deck Lab account to play, and tell us about any bug you find.</p>' : '<p>Log in with your MHR Deck Lab account to play, and tell us about any bug you find.</p>') + (authReady ? '<p><button class="nw-btn ev-main" id="simLogin">Log in</button></p>' : '') +
         (lastRoom ? '<p class="ev-muted">Room invite: <b>' + esc(lastRoom) + '</b>. The room opens right after you log in.</p>' : '') +
-        (lastReplay ? '<p class="ev-muted">Replay link: the replay opens right after you log in.</p>' : '') + '</div>';
+        (lastReplay ? '<p class="ev-muted">Replay link: the replay opens right after you log in.</p>' : '') +
+        '<p class="ev-muted">Free: practice against a bot, find a match or play a friend online. Every rule and card effect is handled for you.</p>' + '</div>';
       const b = q('#simLogin'); if (b) b.onclick = () => window.MHRSimHost.openLogin();
       return;
     }
     let f = frame();
     if (!f) {
-      wrap.innerHTML = '<iframe id="simFrame" title="MHR Battle Sim" src="' + SIM_URL + (lastReplay ? '#replay=' + lastReplay : lastRoom ? '#room=' + lastRoom : '') + '" allow="clipboard-write; web-share; fullscreen"></iframe>';
-      f = frame(); lastRoom = null; lastReplay = null;
+      wrap.innerHTML = '<iframe id="simFrame" title="MHR Battle Sim" src="' + SIM_URL + (lastReplay ? '#replay=' + lastReplay : lastRoom ? '#room=' + lastRoom : lastView ? '#' + lastView : '') + '" allow="clipboard-write; web-share; fullscreen"></iframe>';
+      f = frame(); lastRoom = null; lastReplay = null; lastView = null;
     } else if (replay) {
       try { f.contentWindow.MHRSimOnline.openReplay(replay); } catch (e) { f.src = SIM_URL + '#replay=' + replay; }
       lastReplay = null;
     } else if (room) {
       try { f.contentWindow.MHRSimOnline.joinRoom(room); } catch (e) { f.src = SIM_URL + '#room=' + room; }
       lastRoom = null;
+    } else if (view) {
+      // hashchange di sim-modes.js membuka layar itu (diabaikan bila permainan sedang berjalan)
+      try { f.contentWindow.location.hash = view; } catch (e) { f.src = SIM_URL + '#' + view; }
+      lastView = null;
     }
     requestAnimationFrame(sizeFrame);
   };

@@ -603,6 +603,39 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.35 — Home: Battle Sim jadi hero utama — 12 November 2026 *(`home-ui.js`, `sim-host.js`, `index.html`)*
+
+Permintaan pemilik: Battle Sim dijadikan highlight di Home karena menjadi daya tarik utama untuk menaikkan traffic.
+Pilihan pemilik: Battle Sim jadi hero utama di ketiga tampilan Home, ditambah jumlah pemain live, 4 mode permainan, dan
+rekor online akun.
+- **Hero Battle Sim** paling atas di tampilan pengunjung baru, pengunjung lama dan yang sudah login:
+  - judul "Play Marvel Hero Rush online" dan dua mockup HP berisi screenshot asli (gambar artikel
+    `images/news/battle-sim-open-beta/`);
+  - tombol **Play now** (`#sim`);
+  - 4 ubin mode yang langsung membuka layar mode itu: Practice vs Bot, Find a match, Friend online, Same device.
+  - Tanpa login muncul catatan "Free · just log in with a free account" dan tombol Log in / sign up.
+- **Jumlah pemain live**: `GET /api/queue` server Battle Sim (batas 5 detik), "N players in a game now · M searching for
+  a match". **Hanya tampil bila angkanya > 0** (keputusan pemilik), tidak menahan bagian lain bila server lambat.
+- **Rekor online akun** (yang login): dari `MHRPerf.simMatches()` (tabel `sim_matches`). Tampil di hero ("Your online
+  record: N games · W–L · win rate", menuju Performance) dan di pintasan pertama Welcome back (pintasan jadi 5 kolom).
+- Hero deck builder lama pindah ke bagian kedua dan dibuat lebih ringkas (`.nh-hero2`).
+- Battle Sim juga ditambahkan di tempat lain di Home:
+  - kartu fitur pertama, lebar 2 kolom; grid fitur desktop jadi 4 kolom dan teks "Swipe to see all 7";
+  - alasan #1 di "Why make a free account?";
+  - FAQ "What is Battle Sim?";
+  - jalur per peran: "Practice against a bot" dan "Test your deck in Battle Sim";
+  - CTA penutup "Ready for your next game?";
+  - saran "You haven't tried yet" untuk yang belum pernah membuka #sim.
+- **`sim-host.js`: link langsung ke layar mode** `#sim/practice`, `#sim/find`, `#sim/online`, `#sim/custom`,
+  `#sim/history`. Iframe dibuka dengan `#<layar>` (rute yang sudah ada di `sim/sim-modes.js`, simulator tidak diubah).
+  Tanpa login, layar itu dibuka sesudah login. Ajakan login di halaman Battle Sim diberi satu baris penjelasan.
+- Versi 7.35 (komentar, meta, footer), `home-ui.js?v=7.35`, `sim-host.js?v=7.35-sim11`.
+- Dicek di salinan lokal (desktop 1280 dan HP 390):
+  - tampilan pengunjung baru dan pengunjung lama; jumlah pemain disimulasikan;
+  - klik ubin mode membuka layar yang benar di iframe (Practice, History);
+  - tidak ada error JS dari berkas yang diubah.
+  - Tampilan login (rekor online) belum diuji dengan akun sungguhan.
+
 ### Data — Battle Sim o2.11: SD05 & SD06 memakai teks Inggris resmi — 12 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #86. Permintaan pemilik: kartu SD05 dan SD06 di Battle Sim memakai teks Inggris resmi yang masuk
