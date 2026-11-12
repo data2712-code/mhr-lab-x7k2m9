@@ -390,6 +390,7 @@
     finally { busy = false; }
   });
   function start() { mo.observe(document.body, { childList: true, subtree: true, characterData: true }); apply(); }
-  window.MHRSimI18N = { get lang() { return lang; }, set, apply, t: s => (lang === 'id' ? (trText(s) || s) : s) };
+  // o2.12: add() dipakai modul lain (sim-ranked.js) untuk menambah kamus kalimat utuh
+  window.MHRSimI18N = { get lang() { return lang; }, set, apply, t: s => (lang === 'id' ? (trText(s) || s) : s), add: o => { Object.entries(o || {}).forEach(([k, v]) => EXACT.set(k, v)); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

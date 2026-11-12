@@ -30,6 +30,10 @@
    Battle Sim juga jadi kartu fitur pertama, pintasan pertama di Welcome back, alasan #1 membuat akun, dan ada di
    jalur per peran, FAQ dan CTA penutup.
 
+   v7.37 (12 Nov 2026) — RANKED: papan "Ranked leaderboard" (5 teratas season bulan ini, tabel sim_ratings — publik) tepat
+   di bawah hero Battle Sim, plus rank & poin akun di kartu "Your online record". Aturan tier sama dengan
+   sim/sim-ranked.js dan fungsi SQL mhr_sim_tier (mhr_decklab_v737_sim_ranked.sql).
+
    Dimuat SEBELUM blok <script> inline di index.html; fungsinya baru
    dipanggil dari setPage('beranda'), jadi global dari blok inline ($, DB,
    LGS, TOURNAMENTS, DECK_KOMUNITAS, decodeDeck, deckStats, previewCards,
@@ -246,6 +250,60 @@
     });
     return (simMe = { uid, data: { n: w + l + d, w, l, d } }).data;
   }
+  /* ---------- v7.37 — ranked (aturan sama dengan sim/sim-ranked.js & SQL mhr_sim_tier) ---------- */
+  /* v7.38: 8 tier (Myth, Cosmic, puncak Genius Burden 2700+) + ikon SVG orisinal di images/rank/; Season 1 = 19 Nov – 31 Des 2026 */
+  const RK_T = ['Recruit','Agent','Hero','Avenger','Legend','Myth','Cosmic'];
+  const RK_ALL = ['Recruit','Agent','Hero','Avenger','Legend','Myth','Cosmic','Genius Burden'];
+  const RK_C = {Recruit:'#9aa5b1',Agent:'#3B87E8',Hero:'#33A45C',Avenger:'#E4442E',Legend:'#F2B01E',Myth:'#E05BD0',Cosmic:'#4FD1E8','Genius Burden':'#A47BFF',Unranked:'#6b7785'};
+  const rkIcon = (k, cls) => `<img class="${cls||'rk-i'}" src="images/rank/${k.toLowerCase().replace(/\s+/g,'-')}.svg?v=1" alt="" loading="lazy">`;
+  const RK_MONTH = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function rkTier(points, games){
+    if((games||0) < 5) return {key:'Unranked', name:'Unranked'};
+    if(points >= 2700) return {key:'Genius Burden', name:'Genius Burden'};
+    const p = Math.max(points, 600) - 600, t = RK_T[Math.min(6, Math.floor(p/300))];
+    return {key:t, name:t + ' ' + ['III','II','I'][Math.floor((p%300)/100)]};
+  }
+  const rkSeason = () => { const k = new Date(Date.now() + 7*3600e3).toISOString().slice(0,7); return k < '2027-01' ? '2026-12' : k; };
+  const RK_START = Date.parse('2026-11-19T00:00:00+07:00');      /* ranked aktif setelah beta (= mhr_sim_ranked_start() di SQL) */
+  const rkLive = () => Date.now() >= RK_START;
+  const rkLabel = s => { if(s === '2026-12') return 'Season 1'; const [y,m] = s.split('-'); return `${RK_MONTH[+m-1]} ${y}`; };
+  const rkBadge = t => `<span class="rk-b" style="--rk:${RK_C[t.key]}">${rkIcon(t.key)}${E(t.name)}</span>`;
+  let rank = null;      /* {season, rows} */
+  async function loadRank(){
+    if(!rkLive()) return (rank = { soon:true });
+    const c = window.MHRAuth && window.MHRAuth.ready && window.MHRAuth.client; if(!c) return null;
+    try{
+      const season = rkSeason();
+      const { data, error } = await c.from('sim_ratings').select('user_id,username,points,games,wins,losses,draws')
+        .eq('season', season).order('points', {ascending:false}).order('wins', {ascending:false}).order('last_match_at', {ascending:true}).limit(200);
+      if(error) return null;          /* tabel belum ada (migrasi v7.37 belum dijalankan) → bagian disembunyikan */
+      return (rank = { season, rows: data || [] });
+    }catch(e){ return null; }
+  }
+  const rkTierRow = () => `<div class="rk-tiers">${RK_ALL.map(k=>`<span style="--rk:${RK_C[k]}" title="${k}">${rkIcon(k,'rk-ti')}<i>${k}</i></span>`).join('')}</div>`;
+  function rankHTML(d){
+    if(!d) return '';
+    if(d.soon) return `<section class="rk-sec">
+      <div class="nh-sec-h"><div><h2>🏆 Ranked is coming</h2><p>Starts 19 November 2026, right after the beta · Season 1 runs until 31 December</p></div><a class="hm-link" href="#sim/ranked">How it works →</a></div>
+      <div class="rk-wrap"><div class="rk-empty"><b>Earn points in every Find a match game.</b><span>Beat stronger players to climb faster, from Recruit all the way to Genius Burden, and race for the top of the leaderboard. Games during the beta are not counted.</span></div>
+        <div class="rk-side">${rkTierRow()}<a class="nh-btn main" href="#sim/find">⚔️ Practice in Find a match</a></div></div>
+    </section>`;
+    const placed = d.rows.filter(r=>r.games >= 5);
+    const uid = simMe.uid;
+    const mine = uid ? d.rows.find(r=>r.user_id === uid) : null;
+    const top = placed.slice(0,5).map((r,i)=>`<li${r.user_id===uid?' class="you"':''}><span class="n">${['🥇','🥈','🥉'][i]||i+1}</span><b>${E(r.username||'Player')}</b>${rkBadge(rkTier(r.points, r.games))}<span class="p">${r.points.toLocaleString('en-US')}</span></li>`).join('');
+    const me = mine ? `<a class="rk-me" href="#sim/ranked"><span>Your rank</span>${rkBadge(rkTier(mine.points, mine.games))}<b>${mine.points.toLocaleString('en-US')} pts</b>${mine.games<5?`<i>placement ${mine.games}/5</i>`:`<i>#${placed.indexOf(mine)+1} of ${placed.length}</i>`}</a>` : '';
+    return `<section class="rk-sec">
+      <div class="nh-sec-h"><div><h2>🏆 Ranked leaderboard</h2><p>${d.season === '2026-12' ? 'Season 1 · 19 Nov – 31 Dec 2026' : rkLabel(d.season) + ' season'} · Find a match games only</p></div><a class="hm-link" href="#sim/ranked">Full leaderboard →</a></div>
+      <div class="rk-wrap">
+        ${top ? `<ol class="rk-top">${top}</ol>` : `<div class="rk-empty"><b>${rkLabel(d.season)} has just started.</b><span>Play 5 games in Find a match to get your rank and be the first on the board.</span></div>`}
+        <div class="rk-side">${me || `<div class="rk-me"><span>Ranked</span><b>Start at 1,000 points</b><i>Climb from Recruit to Genius Burden</i></div>`}
+          ${rkTierRow()}
+          <a class="nh-btn main" href="#sim/find">⚔️ Play ranked</a></div>
+      </div>
+    </section>`;
+  }
+
   const simRec = s => s.n ? `${s.w}W–${s.l}L${s.d?`–${s.d}D`:''} · ${Math.round(s.w / s.n * 100)}% win rate` : '';
   function simMeHTML(s){
     if(!s) return '';
@@ -518,12 +576,13 @@
     const cd = rel ? countdownHTML(rel) : '';
     const news = `<div id="hmNews">${cache.news ? newsHTML(cache.news) : '<div class="hm-news hm-skel"><div class="hm-lead"></div><div class="hm-side"></div></div>'}</div>`;
     const pop = `<section class="hm-sec" id="hmPopular">${cache.popular ? popularHTML(cache.popular) : ''}</section>`;
-    if(mode === 'user') return [simHeroHTML(mode), `<div id="hmMe">${welcomeHTML(me.data)}</div>`, cd, news, pop,
+    const rk = `<div id="hmRank">${rankHTML(rank)}</div>`;
+    if(mode === 'user') return [simHeroHTML(mode), rk, `<div id="hmMe">${welcomeHTML(me.data)}</div>`, cd, news, pop,
       featsHTML('Everything on MHR Deck Lab', 'Tools you might not have tried yet.'), seriesHTML()];
-    if(mode === 'short') return [simHeroHTML(mode), introShortHTML(), cd, news, pop,
+    if(mode === 'short') return [simHeroHTML(mode), rk, introShortHTML(), cd, news, pop,
       featsHTML('What you can do here', 'Everything for Marvel Hero Rush players — from your first deck to your next tournament.'),
       pathsHTML(), seriesHTML(), accountHTML(), finalHTML()];
-    return [simHeroHTML(mode), heroHTML(), statsHTML(),
+    return [simHeroHTML(mode), rk, heroHTML(), statsHTML(),
       featsHTML('What you can do here', 'Everything for Marvel Hero Rush players — from your first deck to your next tournament.'),
       cd, pathsHTML(), news, pop, seriesHTML(), accountHTML(), finalHTML()];
   }
@@ -548,6 +607,9 @@
 
     /* v7.35: angka pemain & rekor online dimuat terpisah — tidak menahan berita/deck */
     loadLive().then(l=>{ const el = $q('#bsLive'); if(el && state.page === 'beranda') el.innerHTML = liveHTML(l); });
+    /* v7.37: leaderboard ranked (uid dipasang dulu supaya baris "Your rank" ikut tampil) */
+    if(session && session.user && simMe.uid !== session.user.id) simMe = { uid: session.user.id, data: null };
+    loadRank().then(d=>{ const el = $q('#hmRank'); if(el && state.page === 'beranda' && d) el.innerHTML = rankHTML(d); });
     if(real === 'user') loadSimMe(session).catch(()=>null).then(s=>{
       if(state.page !== 'beranda' || curMode !== 'user' || !s) return;
       const el = $q('#bsMe'); if(el) el.innerHTML = simMeHTML(s);

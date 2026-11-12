@@ -18,7 +18,7 @@
    =================================================================== */
 (function () {
   'use strict';
-  const SIM_URL = 'sim/index.html?v=o2.11';
+  const SIM_URL = 'sim/index.html?v=o2.13';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const q = s => document.querySelector(s);
   const admin = () => (typeof isAccountAdmin !== 'undefined' && isAccountAdmin);
@@ -69,7 +69,7 @@
   }
   addEventListener('resize', sizeFrame);
   let lastRoom = null, lastReplay = null, lastView = null;
-  const VIEW_RE = /^(practice|find|online|custom|history)$/;        // v7.35 — layar menu di dalam iframe
+  const VIEW_RE = /^(practice|find|online|custom|history|ranked)$/;        // v7.35 — layar menu di dalam iframe (ranked: v7.37)
   window.renderSimPage = function (sub) {
     const wrap = q('#simWrap'); if (!wrap) return;
     const room = sub && /^room\/([A-Z0-9]{6})$/i.test(sub) ? sub.slice(5).toUpperCase() : null;

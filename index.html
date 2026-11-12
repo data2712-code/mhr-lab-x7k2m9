@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.36  ·  12 November 2026
+     MHR DECK LAB  ·  versi 7.38  ·  12 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.36">
+<meta name="version" content="7.38">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2773,6 +2773,33 @@
     .nc-sc{grid-template-columns:repeat(2,minmax(0,1fr))}
     .nc-sc>.nc-s:first-child{grid-column:span 2;flex-direction:row;align-items:center}
   }
+  /* ================= v7.37 — HOME: Ranked leaderboard Battle Sim (lihat home-ui.js) ================= */
+  .rk-b .rk-i{width:16px;height:16px;flex:none}
+  .rk-tiers .rk-ti{width:30px;height:30px}
+  .rk-b{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--rk);color:var(--rk);background:color-mix(in srgb,var(--rk) 14%,transparent);border-radius:999px;padding:1px 8px;font-weight:800;font-size:11.5px;white-space:nowrap}
+  .rk-wrap{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;align-items:stretch}
+  .rk-top{list-style:none;display:flex;flex-direction:column;gap:6px;margin:0;padding:0}
+  .rk-top li{display:grid;grid-template-columns:34px minmax(0,auto) auto 1fr;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+  .rk-top li .n{font-size:18px;text-align:center;font-weight:900;color:var(--muted)}
+  .rk-top li b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rk-top li .p{text-align:right;font-family:var(--disp);font-size:18px;font-weight:800}
+  .rk-top li.you{border-color:var(--accent);background:linear-gradient(90deg,rgba(242,176,30,.10),transparent 60%),var(--panel)}
+  .rk-empty{display:flex;flex-direction:column;gap:6px;justify-content:center;background:var(--panel);border:1px dashed #46546a;border-radius:14px;padding:22px}
+  .rk-empty b{font-size:15px}.rk-empty span{font-size:13px;color:var(--muted)}
+  .rk-side{display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .rk-me{display:flex;flex-direction:column;gap:5px;align-items:flex-start;text-decoration:none;color:inherit}
+  .rk-me>span{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--muted)}
+  .rk-me b{font-family:var(--disp);font-size:24px}.rk-me i{font-style:normal;font-size:12px;color:var(--muted)}
+  .rk-tiers{display:flex;gap:6px;flex-wrap:wrap}
+  .rk-tiers span{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:16px;border:1px solid var(--rk);border-radius:10px;padding:5px 4px;min-width:0;flex:1 1 22%;background:color-mix(in srgb,var(--rk) 10%,transparent)}
+  .rk-tiers i{font-style:normal;font-size:8.5px;white-space:nowrap;font-weight:800;color:var(--rk);letter-spacing:.04em;text-transform:uppercase}
+  .rk-side .nh-btn{justify-content:center;margin-top:auto}
+  @media (max-width:920px){
+    .rk-wrap{grid-template-columns:minmax(0,1fr)}
+    .rk-top li{grid-template-columns:28px minmax(0,1fr) auto;padding:9px 11px;gap:8px}
+    .rk-top li .rk-b{display:none}
+    .rk-tiers span{min-width:0;flex:1}
+  }
   /* ================= v7.17 — MY LAB: sub-menu tab nav (dulu "My Dashboard") ================= */
   nav.tabs .lab-caret{font-size:10px;margin-left:-3px;opacity:.75;transition:transform .15s}
   nav.tabs button[aria-expanded="true"]{color:var(--paper)}
@@ -3507,7 +3534,7 @@
 <script src="news.js?v=7.08"></script>
 <script src="news-ui.js?v=7.02"></script>
 <!-- v6.63 — halaman Beranda (#beranda). v7.17: teks My Lab. v7.16: home baru (perkenalan fitur, Welcome back untuk akun login) -->
-<script src="home-ui.js?v=7.35"></script>
+<script src="home-ui.js?v=7.38"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
 <script src="spoilers.js?v=7.02"></script>
 <script src="set-ui.js?v=7.02"></script>
@@ -3525,7 +3552,7 @@
 <script src="perf.js?v=7.34"></script>
 <script src="perf-ui.js?v=7.34"></script>
 <script src="rules-faq.js?v=7.28"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules); v7.26 — FAQ versi Bahasa Indonesia; v7.27 — Copy link ke halaman statis faq/ & errata/; v7.28 — TD-11 -->
-<script src="sim-host.js?v=7.36-sim11"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
+<script src="sim-host.js?v=7.38-sim13"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
@@ -3554,7 +3581,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.36</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.38</div>
 </footer>
 
 <div class="dview" id="simView" hidden>

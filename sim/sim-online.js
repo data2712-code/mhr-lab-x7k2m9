@@ -360,14 +360,15 @@
     el.innerHTML = fhead + '<p class="small muted" style="margin:0 2px 10px">Playing as <b>' + esc(s.username || 'Player') + '</b></p>' +
       '<div class="box"><div class="form"><div class="f"><label>Your deck</label>' + deckSelect('fqDeck') + '</div>' +
       '<div class="f full" id="fqCodeWrap" style="display:none"><label>Deck link or code</label><textarea id="fqDeckCode" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder">' + esc(pref.code || '') + '</textarea></div></div>' +
-      '<p class="small muted">You are matched with the next player who is searching. Clock: Standard 2:00 per turn / 0:30 per response; the 3rd timeout loses the game. Who goes first is random. The game is saved to your account. During the beta there may be few players online: after 45 seconds you can play the bot while you keep searching.</p>' +
-      '<p class="small livep" id="fqStat">' + liveHTML(st) + '</p>' +
+      '<p class="small muted">You are matched with the next player who is searching. ' + (window.MHRSimRanked && window.MHRSimRanked.live() ? 'Find a match is <b>ranked</b>: you win or lose points (see 🏆 Ranked). ' : 'Ranked points start on 19 November 2026, after the beta. ') + 'Clock: Standard 2:00 per turn / 0:30 per response; the 3rd timeout loses the game. Who goes first is random. The game is saved to your account. During the beta there may be few players online: after 45 seconds you can play the bot while you keep searching.</p>' +
+      '<div id="fqRank"></div><p class="small livep" id="fqStat">' + liveHTML(st) + '</p>' +
       '<div id="onErr" class="err">' + esc(fq.note || '') + '</div><div class="startbar"><button class="pri" data-on="fqStart">⚔️ Find a match</button></div></div><div id="fqBusy"></div>';
     fq.note = '';
     const x = $('fqDeck'); x.value = pref.findDeck || pref.deck; if (!x.value) x.selectedIndex = 0;
     const f = () => { $('fqCodeWrap').style.display = x.value === 'code' ? '' : 'none'; }; x.onchange = f; f();
     tr();
     busyHours().then(d => { const b = $('fqBusy'); if (b && d) { b.innerHTML = busyHTML(d); tr(); } });
+    if (window.MHRSimRanked) window.MHRSimRanked.fillLine($('fqRank'));     // o2.12: rank & poin saya (riwayat #87)
   }
   function drawFind(force) {
     const el = $('panelOnline'); if (!el || !findVisible()) return;

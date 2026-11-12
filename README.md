@@ -603,6 +603,91 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.38 — Ranked: tier Myth, Cosmic, Genius Burden + ikon rank; Season 1 sampai 31 Desember — 12 November 2026 *(`home-ui.js`, `sim-host.js`, `index.html`, `sim/sim-ranked.js`, `sim/index.html`, 9 berkas baru `images/rank/*.svg`; fungsi SQL di `mhr_decklab_v737_sim_ranked.sql` diperbarui + migrasi kecil `mhr_decklab_v738_sim_ranked_tiers.sql`)*
+
+Permintaan pemilik (lanjutan v7.37):
+- **Tier baru setelah Legend:** Myth → Cosmic → Genius Burden. Urutan lengkap:
+  - Recruit (< 900), Agent (900), Hero (1.200), Avenger (1.500), Legend (1.800), Myth (2.100), Cosmic (2.400) — masing-masing
+    divisi III/II/I, 100 poin per divisi;
+  - **Genius Burden** (2.700+) = tier puncak, tanpa divisi;
+  - Unranked selama placement.
+- **Season 1 diperpanjang:** 19 Nov – 31 Des 2026 (kode season `2026-12`, label "Season 1 · 19 Nov – 31 Dec 2026"). Mulai
+  Januari 2027 season bulanan (`2027-01`, …).
+- **Ikon rank:** 9 SVG orisinal (Unranked + 8 tier) di `images/rank/`, dibuat dari nol (tidak menyalin ikon game lain dan tidak
+  memakai logo/karakter Marvel). Prinsipnya mengikuti sistem rank game online: bentuk dan warna makin megah di tier lebih tinggi.
+  - Recruit: perisai baja, 1 chevron.
+  - Agent: heksagon biru, 2 chevron + bintang.
+  - Hero: perisai hijau, bintang, sayap kecil.
+  - Avenger: perisai merah, dua bilah bersilang, sayap.
+  - Legend: perisai emas, mahkota, daun laurel.
+  - Myth: cincin rune magenta dengan nyala api.
+  - Cosmic: bola galaksi cyan dengan cincin orbit.
+  - Genius Burden: bola ungu dengan mahkota emas berat dan lingkaran cahaya.
+  - Ikon dipakai di lencana tier (Home & Battle Sim), baris 8 tier, dan kartu rank. URL memakai `?v=1`.
+- SQL: `mhr_sim_season()` (Season 1 → `2026-12`) dan `mhr_sim_tier()` (8 tier) — sudah dijalankan di Supabase lewat `mhr_decklab_v738_sim_ranked_tiers.sql` (12 Nov 2026). Belum ada data ranked,
+  karena ranked baru dihitung mulai 19 Nov, jadi tidak perlu hitung ulang.
+- Versi 7.38, `home-ui.js?v=7.38`, `sim-host.js?v=7.38-sim13`, `sim/` `SIM_URL ?v=o2.13`, `sim-ranked.js?v=o2.13`.
+- Dicek:
+  - fungsi SQL di PostgreSQL lokal: batas 899…4000, dan season 19 Nov / 31 Des → `2026-12`, 1 Jan 2027 → `2027-01`;
+  - UI dengan data tiruan setelah 19 Nov (desktop & HP): lencana Genius Burden / Cosmic / Myth, kartu rank, baris 8 tier;
+    tanpa error JS.
+
+### v7.37 — Battle Sim RANKED: poin, tier & leaderboard (season bulanan) — 12 November 2026 *(`home-ui.js`, `sim-host.js`, `index.html`, `sim/` o2.12 + berkas baru `sim/sim-ranked.js`; migrasi SQL baru `mhr_decklab_v737_sim_ranked.sql` di folder internal)*
+
+Permintaan pemilik: sistem poin dan leaderboard ala ranked match di game online, dengan tier rank. Karena pemain masih sedikit,
+antrean tidak memakai poin: semua pemain bisa bertemu pemain berpoin lebih tinggi atau lebih rendah. Riwayat simulator #87.
+
+**Ranked aktif setelah beta** (keputusan pemilik): hanya pertandingan yang selesai mulai **19 Nov 2026 00:00 WIB** yang dihitung
+(`mhr_sim_ranked_start()` di SQL, `START` di `sim-ranked.js`, `RK_START` di `home-ui.js`). Sebelum itu:
+- Home menampilkan "🏆 Ranked is coming" (tanpa leaderboard);
+- menu 🏆 Ranked menampilkan "Ranked starts on 19 November 2026" + aturan;
+- Find a match berlabel "Standard clock" + "Ranked points start on 19 November 2026";
+- layar hasil tidak menampilkan poin.
+
+Semuanya berganti otomatis tanpa push. Season pertama (November 2026) hanya 19–30 Nov.
+
+**Keputusan pemilik (12 Nov 2026):**
+- Yang ranked **hanya Find a match**. Room privat = casual; lawan bot tidak dihitung.
+- **Poin dinamis ala Elo:**
+  - mulai 1000 poin; K = 48 (menang lawan setara ±+24);
+  - 5 pertandingan pertama tiap season = placement (K = 96);
+  - menang minimal +4, kalah minimal −4, poin tidak bisa di bawah 0.
+  - Menyerah, keluar, atau timeout ke-3 = kalah (sama dengan hasil yang dicatat server).
+- **Tier bertema hero**, divisi III/II/I masing-masing 100 poin:
+  - Recruit (< 900), Agent (900), Hero (1200), Avenger (1500), Legend (1800);
+  - Cosmic (2100+, tanpa divisi);
+  - selama placement: Unranked.
+- **Season bulanan** (WIB, kode `YYYY-MM`). Soft reset: poin awal = 1000 + ½ × (poin akhir season lalu − 1000).
+
+**Perubahan teknis:**
+- **Supabase** (`mhr_decklab_v737_sim_ranked.sql`):
+  - tabel `sim_ratings` (publik, hanya baca) dan `sim_rating_log` (perubahan poin per pertandingan; akun hanya membaca miliknya);
+  - fungsi `mhr_sim_tier`, `mhr_sim_season`, `mhr_sim_rank_apply`, `mhr_sim_rank_rebuild` (hanya SQL Editor), `mhr_sim_seasons`;
+  - **trigger AFTER INSERT di `sim_matches`**: poin dihitung saat server Battle Sim menyimpan hasil (`mode = 'queue'`, dua akun
+    berbeda, ada pemenang/seri).
+  - Kegagalan hitung poin tidak pernah menggagalkan penyimpanan pertandingan. Idempotent (satu pertandingan dihitung sekali).
+  - Migrasi juga menghitung ulang pertandingan Find a match yang sudah ada di season berjalan.
+  - **Server Battle Sim tidak diubah.**
+- **Battle Sim (`sim/` o2.12):**
+  - menu baru **🏆 Ranked**: kartu rank saya (tier, poin, W/L, peak, beruntun, sisa poin ke divisi berikut, posisi), leaderboard
+    season (pilih season), daftar pemain yang masih placement, dan penjelasan aturan;
+  - Find a match diberi label Ranked dan baris "RANKED · tier · poin";
+  - layar hasil online menampilkan "+24 points → 1,072 · Agent II" (data `sim_rating_log`; room privat tidak menampilkan apa-apa);
+  - `sim-i18n.js` mendapat `add()` untuk kamus modul lain.
+- **Home:**
+  - papan **🏆 Ranked leaderboard** (5 teratas season ini, rank akun, ikon 6 tier, tombol Play ranked) tepat di bawah hero
+    Battle Sim;
+  - bagian ini disembunyikan bila migrasi belum dijalankan.
+  - `#sim/ranked` membuka menu Ranked.
+- Versi 7.37, `home-ui.js?v=7.37`, `sim-host.js?v=7.37-sim12`, `sim/` `?v=o2.12`.
+
+**Dicek:**
+- SQL di PostgreSQL 16 lokal dengan skema tiruan:
+  - backfill hanya menghitung Find a match dua akun berbeda; room, lawan diri sendiri, bot, dan tanpa pemenang dilewati;
+  - Elo/placement, seri, soft reset ke season berikut, batas tier, RLS (anon membaca leaderboard tetapi tidak log; akun tidak
+    bisa menulis atau memanggil rebuild).
+- UI di salinan lokal (desktop 1280 & HP 390) dengan data tiruan: Home, menu Ranked, baris Find a match, teks hasil; tanpa error JS.
+
 ### v7.36 — Tab menu Battle Sim selalu tampil, juga tanpa login — 12 November 2026 *(`index.html`, `sim-host.js`)*
 
 Permintaan pemilik (lanjutan v7.35, untuk menaikkan traffic): tab **⚔️ Battle Sim** kini tampil untuk semua pengunjung.

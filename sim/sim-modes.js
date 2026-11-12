@@ -15,7 +15,7 @@
   const KEY_PREF = 'mhrsim.prefs.v1';
   const prefs = (() => { try { return JSON.parse(localStorage.getItem(KEY_PREF) || '{}') || {}; } catch (e) { return {}; } })();
   const savePrefs = () => { try { localStorage.setItem(KEY_PREF, JSON.stringify(prefs)); } catch (e) { /* abaikan */ } };
-  const VIEWS = { home: 'home', practice: 'panelPractice', history: 'panelHistory', online: 'panelOnline', find: 'panelOnline', custom: 'panelCustom', tools: 'panelCustom' };
+  const VIEWS = { home: 'home', practice: 'panelPractice', history: 'panelHistory', online: 'panelOnline', find: 'panelOnline', custom: 'panelCustom', tools: 'panelCustom', ranked: 'panelRanked' };   // ranked: o2.12 (riwayat #87)
   let histTab = null;                    // #85: default Online (akun) bila tersedia, kalau tidak Offline
   const MODE_LABEL = { practice: 'Practice vs Bot', friend: 'Friend · same device', custom: 'Custom game', sandbox: 'Sandbox' };
   const LEVEL_LABEL = { easy: 'Easy', normal: 'Normal', hard: 'Hard' };
@@ -67,11 +67,12 @@
   function show(v) {
     view = VIEWS[v] ? v : 'home';
     $('home').style.display = view === 'home' ? '' : 'none';
-    ['panelPractice', 'panelHistory', 'panelOnline', 'panelCustom'].forEach(id => $(id).classList.toggle('on', VIEWS[view] === id));
+    ['panelPractice', 'panelHistory', 'panelOnline', 'panelCustom', 'panelRanked'].forEach(id => { const el = $(id); if (el) el.classList.toggle('on', VIEWS[view] === id); });
     renderResume();
     if (view === 'home') renderHome();
     if (view === 'practice') renderPractice();
     if (view === 'history') renderHistory();
+    if (view === 'ranked' && window.MHRSimRanked) window.MHRSimRanked.render($('panelRanked'));
     if (view === 'find' && onlineReady()) window.MHRSimOnline.renderFind();
     else if (view === 'online' && onlineReady()) window.MHRSimOnline.renderPanel();
     else if (view === 'online' || view === 'find') renderOnline();
@@ -121,7 +122,7 @@
      Legends of Runeterra): MODE (4 ubin) → YOUR DECK (ubin deck akun + tempel kode) → pilihan mode → tombol PLAY.
      Kiri: spanduk, pintasan (History, Sandbox, Tools, Feedback), permainan terakhir, kotak beta. Di HP panel Play tampil
      tepat di bawah spanduk. Layar lama (More options, room online, Find a match, satu perangkat) tetap menjadi langkah kedua. */
-  const PB_MODES = [['practice', '🤖', 'Practice', 'vs Bot'], ['find', '⚔️', 'Find a match', 'Standard clock'], ['online', '🔗', 'Friend online', 'Room link'], ['custom', '👥', 'Same device', 'Pass-and-play']];
+  const PB_MODES = [['practice', '🤖', 'Practice', 'vs Bot'], ['find', '⚔️', 'Find a match', Date.now() >= Date.parse('2026-11-19T00:00:00+07:00') ? 'Ranked' : 'Standard clock'] /* Ranked setelah beta (riwayat #87) */, ['online', '🔗', 'Friend online', 'Room link'], ['custom', '👥', 'Same device', 'Pass-and-play']];
   let pbMode = PB_MODES.some(m => m[0] === prefs.pbMode) ? prefs.pbMode : 'practice';
   let pbDeck = null, pbCode = null, pbPicked = false;   // pilihan deck di panel (my:i atau code); pbPicked = dipilih pemain
   const COLOR_DOT = { Merah: 'r', Kuning: 'y', Biru: 'b', Hijau: 'g', Orange: 'o', Purple: 'p' };
@@ -164,7 +165,7 @@
     } else if (pbMode === 'find') {
       h += on ? '<div class="pblbl">YOUR DECK · SAVED TO YOUR ACCOUNT</div>' + pbDecksHTML() +
         '<p class="small muted">You are matched with the next player who is searching: Standard clock 2:00 / 0:30, random first player. After 45 seconds you can play the bot while you keep searching; a bot is always shown as a bot.</p>' +
-        '<div id="pbLive"></div><div id="hubErr" class="err"></div><button class="pbplay" data-hub="play">FIND A MATCH</button>'
+        '<div id="pbRank"></div><div id="pbLive"></div><div id="hubErr" class="err"></div><button class="pbplay" data-hub="play">FIND A MATCH</button>'
         : offline + '<button class="pbmore" data-mode="find">Details</button>';
     } else if (pbMode === 'online') {
       h += on ? '<p class="small">Create a private room and send the link (WhatsApp works well), or enter a room code from a friend. You choose your deck and the turn clock on the next screen.</p>' +
@@ -181,6 +182,7 @@
     document.querySelectorAll('#home [data-pbmode]').forEach(b => b.classList.toggle('on', b.dataset.pbmode === pbMode));
     el.innerHTML = pbBody();
     if ($('pbLive') && OL().liveInto) OL().liveInto($('pbLive'), false);
+    if ($('pbRank') && window.MHRSimRanked) window.MHRSimRanked.fillLine($('pbRank'));
     const hd = $('hubDeck'); if (hd) { const p = practicePrefs(); hd.value = p.deck === 'code' ? 'code' : p.deck; if (!hd.value) hd.selectedIndex = 0; }
     if (window.MHRSimI18N) window.MHRSimI18N.apply();
   }
@@ -189,7 +191,7 @@
     const mine = hist.filter(r => r.me != null && r.winner != null);
     const W = mine.filter(r => r.winner === r.me).length, L = mine.filter(r => r.winner >= 0 && r.winner !== r.me).length;
     const left = betaLeft();
-    let h = '<nav class="pbnav"><button class="on" data-mode="home">Play</button><button data-mode="history">History</button><button data-hub="sandbox">Sandbox</button>' +
+    let h = '<nav class="pbnav"><button class="on" data-mode="home">Play</button><button data-mode="ranked">🏆 Ranked</button><button data-mode="history">History</button><button data-hub="sandbox">Sandbox</button>' +
       '<button data-mode="tools">Tools</button><button data-rep="open" data-v="feedback">Feedback</button></nav>';
     h += '<section class="pbhero"><div class="kick"><span>MARVEL HERO RUSH · MATCH SIMULATOR</span>' + (betaOn() ? '<span class="betatag">BETA</span>' : '') + '</div>' +
       '<h2>CALL. ATTACK.<br><em>RUSH.</em></h2><p>Every rule and card effect is handled for you. Pick a mode, pick your deck, press PLAY.</p>' +

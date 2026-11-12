@@ -418,7 +418,7 @@
   /* ---------------- mode online (O2, riwayat #63) ----------------
      sim-online.js memegang koneksi; berkas ini hanya menggambar status bayangan dari tampilan server dan mengirim aksi.
      Server yang memeriksa dan menjalankan aksi; check() di sini hanya untuk pesan cepat sebelum terkirim. */
-  const net = { on: false, seat: null, send: null, last: null, recvAt: 0, pending: false, replay: null, matchId: null, ask: null, waitUndo: false, clock: 'standard' };
+  const net = { on: false, seat: null, send: null, last: null, recvAt: 0, pending: false, replay: null, matchId: null, rank: null, ask: null, waitUndo: false, clock: 'standard' };
   function netEnter(o) {
     clearTimeout(ui.botTimer);
     Object.assign(net, { on: true, seat: o.seat, send: o.send, last: null, recvAt: 0, pending: false, replay: null, matchId: null, ask: null, waitUndo: false, clock: o.clock || 'standard', overAt: 0 });
@@ -496,7 +496,11 @@
     net.note = t ? { text: t, at: Date.now() } : null;
     closeOv(); if (G) render();
   }
-  function netSaved(id) { net.matchId = id; if (G && G.result) render(); }
+  function netSaved(id) {
+    net.matchId = id; net.rank = null; if (G && G.result) render();
+    // o2.12 (riwayat #87): perubahan poin ranked (Find a match) dari Supabase; room privat → tidak ada baris → tidak tampil
+    if (window.MHRSimRanked) window.MHRSimRanked.result(id).then(x => { if (x && net.matchId === id) { net.rank = x; if (G && G.result && !ui.overClosed) render(); } }).catch(() => {});
+  }
   function netChips(p) {
     const s = net.last.seats && net.last.seats[p]; if (!s) return '';
     let h = '<span class="chipc" title="Undos left (opponent must agree)">↶ <b>' + s.undoLeft + '/3</b></span>';
@@ -1291,6 +1295,7 @@
       const w = G.result.winner, me = net.seat;
       openOv('<h2>' + (w < 0 ? 'Draw' : w === me ? 'You win!' : esc(G.names[w]) + ' wins') + '</h2><p>' + esc(G.result.cause) + '</p>' +
         '<p class="small muted"><span>' + G.turn + ' turns · online game</span> · <span' + (net.matchId || !net.overAt || Date.now() - net.overAt < 7000 ? '' : ' style="color:#ffb4a8"') + '>' + (net.matchId ? 'saved to your account' : !net.overAt || Date.now() - net.overAt < 7000 ? 'saving…' : 'not saved yet: the server keeps trying, check Match history later') + '</span></p>' +
+        (net.rank && window.MHRSimRanked ? window.MHRSimRanked.resultHTML(net.rank) : '') +
         '<div class="row">' + (net.replay ? '<button data-act="netReplay">Replay</button><button data-act="shareReplay">🔗 Share replay</button><button data-act="copy">Copy log code</button>' : '') + '<button data-act="closeOverModal">View board</button><button class="pri" data-act="netMenu">Menu</button><button data-rep="open" data-v="bug">🐞 Report a bug</button></div>');
       return;
     }
