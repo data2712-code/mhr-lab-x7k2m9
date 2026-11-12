@@ -603,6 +603,25 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.11: SD05 & SD06 memakai teks Inggris resmi — 12 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #86. Permintaan pemilik: kartu SD05 dan SD06 di Battle Sim memakai teks Inggris resmi yang masuk
+`cards.js` hari ini (entri di bawah).
+- **Wajib di-push bersama `cards.js` baru**: `sim/sim-cards-t6.js` lama mencari trait `Cabal`, sedangkan `cards.js` baru
+  menulis `The Cabal`. Tanpa perbaikan ini, 6 efek SD06 yang memakai 【The Cabal】 (SD06-007, 008, 009, 010, 016, 017)
+  tidak pernah aktif di mode offline. Dicek: 180 pertandingan bot vs bot (SD05/SD06) dengan kode lama + teks lama dan kode
+  baru + teks baru hasilnya identik; kode lama + teks baru berbeda (efek The Cabal mati).
+- `sim/sim-cards-t6.js`: trait 【The Cabal】; label efek dan teks pilihan memakai nama kartu resmi (mis. Super Hunter,
+  Drain the Cosmos, Black Tongue); SD06-002 "wounded"; QUICK ATTACK / ONSLAUGHT di komentar. Isi efek tidak berubah.
+- **SD06-004** (keputusan pemilik): Power-1000 / -3000 tetap "this turn" sesuai teks China, walaupun teks resmi Inggris
+  tidak menulisnya.
+- `sim/sim.js`: log "ONSLAUGHT — 1 more Rush Point card" (dulu RAMPAGE). Versi mesin tetap 0.14.0 (perilaku sama).
+- Cache-buster: `sim/index.html` → `../cards.js?v=7.32-sd56en2` (sebelumnya masih `7.28-sp065`, jadi simulator bisa
+  memakai salinan `cards.js` lama dari cache) dan semua skrip `?v=o2.11`; `SIM_URL` → `?v=o2.11`, `sim-host.js?v=7.34-sim11`.
+- **Server Battle Sim belum diubah.** Pertandingan online dijalankan server dengan data kartu dan resolver yang tertanam
+  saat deploy terakhir (teks pra-rilis), jadi tetap jalan seperti sebelumnya. Saat server di-deploy ulang, `cards.js` baru
+  dan `sim-cards-t6.js` baru harus ikut bersamaan.
+
 ### Data — SD05 & SD06: nama, teks & gambar versi Inggris resmi — 12 November 2026 *(`cards.js`, `index.html`, `sitemap.xml`, 32 halaman `cards/`, 40 gambar baru di `images/en/`)*
 
 Permintaan pemilik: teks Inggris SD05 dan SD06 sudah terbit di https://www.marvelherorush.com/en/cards. Pemilik menyimpan

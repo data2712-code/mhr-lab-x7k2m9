@@ -1435,10 +1435,10 @@
     const tp = st.tp;
     st.P[tp].rp += 1; st.P[tp].rpDeck = Math.max(0, st.P[tp].rpDeck - 1);     // 303.2.a.4.3.3.2.1
     log(st, 'rp', plabel(st, tp) + ': ' + nameOf(st, a) + ' successfully attacked a Weakness' + (how || " (opponent's " + SLOT_NAME[slot] + ')') + '. Rush Point → Timeline: ' + st.P[tp].rp + '/9.');
-    // Tahap 6: [RAMPAGE] (305.8, CR 1.05 — belum resmi di Indonesia): jumlah kartu yang masuk Timeline +1.
+    // Tahap 6: ONSLAUGHT (dulu RAMPAGE*; 305.8, CR 1.05; nama resmi SD06-001 sejak riwayat #86): 1 kartu Rush Point lagi.
     if (locate(st, a) && hasAbility(st, a, 'rampage') && st.P[tp].rp < RP_WIN) {
       st.P[tp].rp += 1; st.P[tp].rpDeck = Math.max(0, st.P[tp].rpDeck - 1);
-      log(st, 'rp', plabel(st, tp) + ': RAMPAGE — 1 more card into the Timeline: ' + st.P[tp].rp + '/9.');
+      log(st, 'rp', plabel(st, tp) + ': ONSLAUGHT — 1 more Rush Point card: ' + st.P[tp].rp + '/9.');
     }
     emit(st, { k: 'WEAK_HIT', a, p: tp });                          // BP01-041 "attacks the weakness successfully"
     checkWin(st);
@@ -1446,7 +1446,7 @@
   // "Not retreated by BOTH LOSE" (SD02-003 di FRONT).
   function bothLoseImmune(st, iid) {
     const d = defOf(st, iid);
-    if (d && typeof d.bothLoseImmune === 'function') { try { return !!d.bothLoseImmune(readApi(st, iid), iid); } catch (e) { return false; } }   // Tahap 6: QUICK STRIKE (305.7, CR 1.05)
+    if (d && typeof d.bothLoseImmune === 'function') { try { return !!d.bothLoseImmune(readApi(st, iid), iid); } catch (e) { return false; } }   // Tahap 6: QUICK ATTACK (dulu QUICK STRIKE*; 305.7, CR 1.05)
     return !!(d && d.bothLoseImmune && inZone(st, iid, d.bothLoseImmune));
   }
   /* Tahap 6: larangan tetap "can not attack" / "can not move" (PB02-007 Star-Lord, SD05-007 Doctor Strange). Sumber = kartu
@@ -1685,7 +1685,7 @@
   }
   // 305.1. Tahap 4: counter boleh berupa fungsi (PB01-008: [COUNTER] hanya bila syaratnya terpenuhi).
   function hasCounterAbility(st, iid) {
-    // Tahap 6 (SD06-013 War Envoy): [COUNTER] untuk kartu lain di HAND dari aura di FIELD.
+    // Tahap 6 (SD06-013 Warbringer): [COUNTER] untuk kartu lain di HAND dari aura di FIELD.
     if (!st.vanilla && !st.inst[iid].fd) for (let p = 0; p < 2; p++) for (const src of charsOnField(st, p)) {
       const ds = defOf(st, src); if (!ds || !ds.auraCounter) continue;
       try { if (ds.auraCounter(readApi(st, src), src, iid)) return true; } catch (e) { /* abaikan */ }

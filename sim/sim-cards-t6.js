@@ -1,14 +1,15 @@
 /* ===================================================================
-   MHR BATTLE SIM — RESOLVER TAHAP 6: SD05, SD06, PB02 (sim-cards-t6.js)      v0.14 · riwayat #82
+   MHR BATTLE SIM — RESOLVER TAHAP 6: SD05, SD06, PB02 (sim-cards-t6.js)      v0.14 · riwayat #82, #86
    ===================================================================
-   Dibuat dari TEKS INGGRIS (e_en) di cards.js — untuk tiga set ini teks itu masih TERJEMAHAN PRA-RILIS (fan:2), bukan teks
-   resmi. Keputusan pemilik 12 Nov 2026: kerjakan dengan terjemahan yang ada, tampilkan di Battle Sim; ganti bila teks resmi
-   Indonesia/Inggris terbit (rilis SD05 & SD06 di Indonesia 14 Nov 2026).
+   Dibuat dari TEKS INGGRIS (e_en) di cards.js. SD05 & SD06: sejak 12 Nov 2026 (riwayat #86) memakai TEKS INGGRIS RESMI
+   (fan:1) — nama kartu resmi, trait 【The Cabal】 (dulu Cabal), QUICK ATTACK (dulu QUICK STRIKE), ONSLAUGHT (dulu RAMPAGE).
+   Isi efek sama dengan terjemahan pra-rilis, kecuali SD06-004: teks resmi Inggris tidak menulis "this turn"; keputusan
+   pemilik 12 Nov 2026 tetap "this turn" (sesuai teks China). PB02 masih TERJEMAHAN PRA-RILIS (fan:2) sampai teks resmi terbit.
    - 57 kartu: SD05-001…018 (Orange), SD06-001…018 (Purple), PB02-001…021.
-   - Kemampuan baru dari CR 1.05 (belum resmi di Indonesia): QUICK STRIKE (305.7, SD05-003) dan RAMPAGE (305.8, SD06-001).
+   - Kemampuan baru dari CR 1.05 (belum resmi di Indonesia): QUICK ATTACK (305.7, SD05-003) dan ONSLAUGHT (305.8, SD06-001).
    - Ruling (ruling-simulator.md, RS-064…RS-067; K-48/K-49/K-50 dijawab pemilik 12 Nov): "damaged character" (SD06-002) = Power di bawah
      Power cetak karena efek minus (siapa pun); Gamora PB02-004 "total Power ... is 6500" dibaca persis 6500; Lv di HAND/RETREAT/VOID = Lv cetak.
-   Format sama dengan sim-cards-sp01.js. Hook mesin baru (sim.js v0.14.0): restrict (tidak bisa menyerang/bergerak),
+   Format sama dengan sim-cards-sp01.js. Hook mesin baru (sim.js v0.14.0+): restrict (tidak bisa menyerang/bergerak),
    noCall, auraAbil, auraCounter, bothLoseImmune berupa fungsi, rampage, gr.lose ("loses its effects in this turn").
    =================================================================== */
 (function (root) {
@@ -32,7 +33,7 @@
   const calledEnter = (e, self) => e.k === 'ENTER' && e.c === self && (e.how === 'call' || e.how === 'ccall');
   const oppEnters = (e, self, A) => e.k === 'ENTER' && e.p === A.opp(A.ctrl(self));
   const isGotg = (A, i) => hasTrait(A, i, 'GOTG');
-  const isCabal = (A, i) => hasTrait(A, i, 'Cabal');
+  const isCabal = (A, i) => hasTrait(A, i, 'The Cabal');
   const isBlackOrder = (A, i) => hasTrait(A, i, 'Black Order');
   const isAsgard = (A, i) => hasTrait(A, i, 'Asgard');
   const isHuman = (A, i) => hasTrait(A, i, 'Human');
@@ -43,7 +44,7 @@
   const lvIn = (A, i) => (inField(A, i) ? A.lv(i) : A.origLv(i));          // Lv di luar FIELD = Lv cetak
   // Jumlah Power semua Karakter Anda di BATTLE.
   const battlePower = (A, p) => A.battleChars(p).reduce((s, i) => s + A.pw(i), 0);
-  // "damaged" (SD06-002), keputusan pemilik 12 Nov 2026 (K-48, RS-065, dikoreksi #84): Power saat ini di bawah Power cetak
+  // "damaged" / teks resmi "wounded" (SD06-002), keputusan pemilik 12 Nov 2026 (K-48, RS-065, dikoreksi #84): Power saat ini di bawah Power cetak
   // karena efek minus — dari pemain mana pun, termasuk efek pemiliknya sendiri.
   const damaged = (A, i) => {
     if (!(A.pw(i) < A.origP(i))) return false;
@@ -60,24 +61,24 @@
 
   const DEFS = {
     /* ============================ SD05 · ORANGE ============================ */
-    /* 「Guardian of the Nine Realms」Odin */
+    /* 「Guardian of Nine Realms」Odin */
     'SD05-001': {
       unique: true,
       trig: [{
-        id: 'end', zone: 'BACK', label: 'Guardian of the Nine Realms',
+        id: 'end', zone: 'BACK', label: 'Guardian of Nine Realms',
         when: (e, self, A) => e.k === 'TURN_END' && e.p === A.ctrl(self),
         can: A => baseChars(A, A.opp(A.p)).length > 0,
         run: A => {
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in the BASE (Power-X, X = Odin's Power)", from: baseChars(A, A.opp(A.p)), prefer: 'high' });
           const X = A.pw(A.self);
           t.forEach(i => {
-            A.mod(i, 'p', -X, 'Guardian of the Nine Realms');
+            A.mod(i, 'p', -X, 'Guardian of Nine Realms');
             if (A.origP(i) > 0 && A.pw(i) === 0) { A.log('Odin: that Character drops to Power 0 and is retreated, so you draw 1 card extra.'); A.draw(A.p, 1); }
           });
         }
       }]
     },
-    /* 「Interstellar Guardian」Captain Marvel */
+    /* 「Guardian of Cosmos」Captain Marvel */
     'SD05-002': {
       unique: true,
       acti: [{
@@ -86,12 +87,12 @@
         run: A => {
           const X = A.pw(A.self);
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters on the FIELD with Power " + X + ' or lower to Prune', from: A.chars(A.opp(A.p)).filter(i => A.pw(i) <= X), prefer: 'high' });
-          A.prune(A.self, 'Interstellar Guardian');
-          t.forEach(i => A.prune(i, 'Interstellar Guardian'));
+          A.prune(A.self, 'Guardian of Cosmos');
+          t.forEach(i => A.prune(i, 'Guardian of Cosmos'));
         }
       }]
     },
-    /* 「Guardian of Earth」Ancient One — QUICK STRIKE (305.7) */
+    /* 「Guardian of Earth」Ancient One — QUICK ATTACK (305.7) */
     'SD05-003': {
       unique: true,
       bothLoseImmune: (A, self) => inBattle(A, self) && A.tp === A.ctrl(self),
@@ -114,29 +115,29 @@
         }
       }]
     },
-    /* 「Soul Return Spell」Doctor Strange */
+    /* 「Astral Return Spell」Doctor Strange */
     'SD05-004': {
       unique: true,
       trig: [{
-        id: 'enter', zone: 'FIELD', optional: true, label: 'Soul Return Spell',
+        id: 'enter', zone: 'FIELD', optional: true, label: 'Astral Return Spell',
         text: 'Discard the top card of your Deck to place 1 orange Lv3-or-lower [Human] Character from RETREAT into your FIELD (then retreat this card)?',
         when: enterSelf,
         can: A => A.deck(A.p).length > 0,
-        run: A => { const got = A.mill(A.p, 1, 'Soul Return Spell'); if (got.length) A.job.step2 = true; },
+        run: A => { const got = A.mill(A.p, 1, 'Astral Return Spell'); if (got.length) A.job.step2 = true; },
         after: A => {
           const cand = A.ret(A.p).filter(i => A.color(i) === ORANGE && A.origLv(i) <= 3 && isHuman(A, i) && A.canPlace(i, A.p));
           const c = A.ask('c', { text: 'Choose 1 orange Lv3-or-lower [Human] Character in your RETREAT to place into your FIELD', from: cand, prefer: 'high' });
           const to = c.length ? A.pick('to', 'Choose where to place it', slotOpts(A, A.spots(A.p))) : null;
-          if (c.length && to) A.place(c[0], to, 'Soul Return Spell');
-          if (inField(A, A.self)) A.retreat(A.self, 'Soul Return Spell');
+          if (c.length && to) A.place(c[0], to, 'Astral Return Spell');
+          if (inField(A, A.self)) A.retreat(A.self, 'Astral Return Spell');
         }
       }]
     },
-    /* 「Einherjar Revival」New Valkyrie */
+    /* 「Rebirth of Einherjar」New Valkyrie */
     'SD05-005': {
       unique: true,
       trig: [{
-        id: 'enter', zone: 'FIELD', label: 'Einherjar Revival', when: enterSelf,
+        id: 'enter', zone: 'FIELD', label: 'Rebirth of Einherjar', when: enterSelf,
         can: A => A.deck(A.p).length > 0,
         run: A => {
           const top = A.deck(A.p).slice(0, 3);
@@ -144,25 +145,25 @@
           const cand = top.filter(i => A.color(i) === ORANGE && A.origLv(i) === 3 && (isHuman(A, i) || isAsgard(A, i)) && A.canPlace(i, A.p));
           const c = A.ask('c', { text: 'Choose 1 orange Lv3 [Human]/[Asgard] Character among the revealed cards to place into your FIELD', from: cand, prefer: 'high' });
           const to = c.length ? A.pick('to', 'Choose where to place it', slotOpts(A, A.spots(A.p))) : null;
-          if (c.length && to) A.place(c[0], to, 'Einherjar Revival');
+          if (c.length && to) A.place(c[0], to, 'Rebirth of Einherjar');
           const rest = top.filter(i => A.zone(i) === 'DECK').length;
-          if (rest) A.mill(A.p, rest, 'Einherjar Revival');
+          if (rest) A.mill(A.p, rest, 'Rebirth of Einherjar');
           else A.mark();
         }
       }]
     },
-    /* 「Guide of the Einherjar」Valkyrie */
+    /* 「Guide of Einherjar」Valkyrie */
     'SD05-006': {
       acti: [{
         id: 'hand', zone: 'HAND', label: 'Discard this card: return an orange Lv3 [Human]/[Asgard] Character from RETREAT to your HAND',
         can: A => A.ret(A.p).some(i => A.color(i) === ORANGE && A.origLv(i) === 3 && (isHuman(A, i) || isAsgard(A, i))),
         run: A => {
           const c = A.ask('c', { text: 'Choose 1 orange Lv3 [Human]/[Asgard] Character in your RETREAT to return to your HAND', from: A.ret(A.p).filter(i => A.color(i) === ORANGE && A.origLv(i) === 3 && (isHuman(A, i) || isAsgard(A, i))), prefer: 'high' });
-          if (A.discard(A.self, 'Guide of the Einherjar')) c.forEach(i => A.toHand(i, 'Guide of the Einherjar'));
+          if (A.discard(A.self, 'Guide of Einherjar')) c.forEach(i => A.toHand(i, 'Guide of Einherjar'));
         }
       }]
     },
-    /* 「Graceful Choice」Doctor Strange — tidak bisa menyerang, kecuali kehilangan efeknya */
+    /* 「Elegant Choice」Doctor Strange — tidak bisa menyerang, kecuali kehilangan efeknya */
     'SD05-007': {
       restrict: (A, src, tgt) => (tgt === src && inBattle(A, src) ? { atk: true } : null),
       acti: [{
@@ -170,66 +171,66 @@
         can: A => A.hand(A.p).length > 0,
         run: A => {
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
-          if (d.length && A.discard(d[0], 'Graceful Choice')) A.setFlag(A.self, 'lose', 'Graceful Choice', 'loses its effects');
+          if (d.length && A.discard(d[0], 'Elegant Choice')) A.setFlag(A.self, 'lose', 'Elegant Choice', 'loses its effects');
         }
       }]
     },
-    /* 「Secret Realm Guardian」Doctor Strange */
+    /* 「Guardian of Sanctum」Doctor Strange */
     'SD05-008': {
       trig: [{
-        id: 'orange', zone: 'FIELD', once: true, optional: true, label: 'Secret Realm Guardian',
+        id: 'orange', zone: 'FIELD', once: true, optional: true, label: 'Guardian of Sanctum',
         text: 'Put 1 [Human] Character from your RETREAT on the bottom of your Deck?',
         when: (e, self, A) => e.k === 'ENTER' && e.p === A.ctrl(self) && A.color(e.c) === ORANGE,
         can: A => A.ret(A.p).some(i => isHuman(A, i)),
         run: A => {
           const c = A.ask('c', { text: 'Choose 1 [Human] Character in your RETREAT to put on the bottom of your Deck', from: A.ret(A.p).filter(i => isHuman(A, i)) });
-          c.forEach(i => A.toDeckBottom(i, 'Secret Realm Guardian'));
+          c.forEach(i => A.toDeckBottom(i, 'Guardian of Sanctum'));
         }
       }]
     },
-    /* 「Arcane Backflow」Wong */
+    /* 「Reversal of Mystic Arts」Wong */
     'SD05-009': {
       trig: [{
-        id: 'enter', zone: 'FIELD', optional: true, label: 'Arcane Backflow (discard top card)',
+        id: 'enter', zone: 'FIELD', optional: true, label: 'Reversal of Mystic Arts (discard top card)',
         text: 'Discard the top card of your Deck?', when: enterSelf,
         can: A => A.deck(A.p).length > 0,
-        run: A => { A.mill(A.p, 1, 'Arcane Backflow'); }
+        run: A => { A.mill(A.p, 1, 'Reversal of Mystic Arts'); }
       }, {
-        id: 'oppend', zone: 'FIELD', optional: true, label: 'Arcane Backflow (retreat)',
+        id: 'oppend', zone: 'FIELD', optional: true, label: 'Reversal of Mystic Arts (retreat)',
         text: "Retreat this card to retreat 1 of your opponent's Lv3 Characters in BATTLE?",
         when: (e, self, A) => e.k === 'TURN_END' && e.p === A.opp(A.ctrl(self)),
         can: A => oppBattle(A).some(i => A.lv(i) === 3),
         run: A => {
           const t = A.ask('t', { text: "Choose 1 of your opponent's Lv3 Characters in BATTLE to retreat", from: oppBattle(A).filter(i => A.lv(i) === 3), prefer: 'high' });
-          if (A.retreat(A.self, 'Arcane Backflow')) t.forEach(i => A.retreat(i, 'Arcane Backflow'));
+          if (A.retreat(A.self, 'Reversal of Mystic Arts')) t.forEach(i => A.retreat(i, 'Reversal of Mystic Arts'));
         }
       }]
     },
-    /* 「Judgment of Exile」Sif */
+    /* 「Judgment for Banishing」Sif */
     'SD05-010': {
       trig: [{
-        id: 'enter', zone: 'FIELD', optional: true, label: 'Judgment of Exile',
+        id: 'enter', zone: 'FIELD', optional: true, label: 'Judgment for Banishing',
         text: "Discard the top card of your Deck to move 1 of your opponent's Lv3-or-lower Characters from BATTLE to their BASE?",
         when: enterSelf,
         can: A => A.deck(A.p).length > 0 && A.baseRoom(A.opp(A.p)) > 0 && oppBattle(A).some(i => A.lv(i) <= 3),
         run: A => {
           const t = A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters in BATTLE to move to their BASE", from: oppBattle(A).filter(i => A.lv(i) <= 3), prefer: 'high' });
-          if (A.mill(A.p, 1, 'Judgment of Exile').length) t.forEach(i => A.bbm(i, 'BASE', 'Judgment of Exile'));
+          if (A.mill(A.p, 1, 'Judgment for Banishing').length) t.forEach(i => A.bbm(i, 'BASE', 'Judgment for Banishing'));
         }
       }]
     },
-    /* 「Judgment of Broken Wings」Sif */
+    /* 「Judgment for Exile」Sif */
     'SD05-011': {
       counter: true,
       trig: [{
-        id: 'enter', zone: 'FIELD', optional: true, label: 'Judgment of Broken Wings',
+        id: 'enter', zone: 'FIELD', optional: true, label: 'Judgment for Exile',
         text: "Discard 1 card from your HAND to move 1 of your opponent's Characters from WING to their BASE?",
         when: enterSelf,
         can: A => A.hand(A.p).length > 0 && A.baseRoom(A.opp(A.p)) > 0 && A.wings(A.opp(A.p)).some(i => !A.isFd(i)),
         run: A => {
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in WING to move to their BASE", from: A.wings(A.opp(A.p)).filter(i => !A.isFd(i)), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
-          if (d.length && A.discard(d[0], 'Judgment of Broken Wings')) t.forEach(i => A.bbm(i, 'BASE', 'Judgment of Broken Wings'));
+          if (d.length && A.discard(d[0], 'Judgment for Exile')) t.forEach(i => A.bbm(i, 'BASE', 'Judgment for Exile'));
         }
       }]
     },
@@ -242,7 +243,7 @@
         run: A => { A.reveal(A.self); A.toDeckTop(A.self, 'Shield of Asgard'); }
       }]
     },
-    /* 「Blessing of the Einherjar」New Valkyrie */
+    /* 「Blessing of Einherjar」New Valkyrie */
     'SD05-013': {
       acti: [{
         id: 'bless', zone: 'BATTLE', once: true, label: 'Discard 1 card: 1 of your Characters gets R+1 and Power+1000 (+1000 more if [Asgard])',
@@ -250,11 +251,11 @@
         run: A => {
           const t = A.ask('t', { text: 'Choose 1 of your Characters on the FIELD (R+1, Power+1000; +1000 more if [Asgard])', from: A.chars(A.p), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
-          if (d.length && A.discard(d[0], 'Blessing of the Einherjar')) t.forEach(i => { A.mod(i, 'r', 1, 'Blessing of the Einherjar'); A.mod(i, 'p', isAsgard(A, i) ? 2000 : 1000, 'Blessing of the Einherjar'); });
+          if (d.length && A.discard(d[0], 'Blessing of Einherjar')) t.forEach(i => { A.mod(i, 'r', 1, 'Blessing of Einherjar'); A.mod(i, 'p', isAsgard(A, i) ? 2000 : 1000, 'Blessing of Einherjar'); });
         }
       }]
     },
-    /* 「Rainbow Light of Exile」Heimdall */
+    /* 「Banishing Bifrost」Heimdall */
     'SD05-014': {
       acti: [{
         id: 'exile', zone: 'BATTLE', once: true, label: "Discard 1 card: move 1 opponent's Character with Power X or lower from BATTLE to their BASE",
@@ -263,11 +264,11 @@
           const X = A.pw(A.self);
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE with Power " + X + ' or lower to move to their BASE', from: oppBattle(A).filter(i => A.pw(i) <= X), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
-          if (d.length && A.discard(d[0], 'Rainbow Light of Exile')) t.forEach(i => A.bbm(i, 'BASE', 'Rainbow Light of Exile'));
+          if (d.length && A.discard(d[0], 'Banishing Bifrost')) t.forEach(i => A.bbm(i, 'BASE', 'Banishing Bifrost'));
         }
       }]
     },
-    /* 「Rainbow Light of Annihilation」Heimdall */
+    /* 「Annihilating Bifrost」Heimdall */
     'SD05-015': {
       acti: [{
         id: 'ann', zone: 'BATTLE', once: true, label: "Discard 1 card: 1 opponent's Character in BATTLE gets Power-1000",
@@ -275,67 +276,67 @@
         run: A => {
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Power-1000)", from: oppBattle(A), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
-          if (d.length && A.discard(d[0], 'Rainbow Light of Annihilation')) t.forEach(i => A.mod(i, 'p', -1000, 'Rainbow Light of Annihilation'));
+          if (d.length && A.discard(d[0], 'Annihilating Bifrost')) t.forEach(i => A.mod(i, 'p', -1000, 'Annihilating Bifrost'));
         }
       }]
     },
-    /* 「Execution of the Nine Realms」Hela */
+    /* 「Nine Realms Executioner」Hela */
     'SD05-016': {
       auto: [{ stat: 'p', zone: 'BATTLE', value: (A, src, tgt) => tgt === src && A.tp === A.ctrl(src) && A.attached(src).length === 1 ? 2000 : 0 }],
       trig: [{
-        id: 'enter', zone: 'FIELD', optional: true, label: 'Execution of the Nine Realms',
+        id: 'enter', zone: 'FIELD', optional: true, label: 'Nine Realms Executioner',
         text: 'Discard the top card of your Deck to attach 1 [Asgard] Character from your RETREAT to this card?',
         when: enterSelf,
         can: A => A.deck(A.p).length > 0,
-        run: A => { if (A.mill(A.p, 1, 'Execution of the Nine Realms').length) A.job.step2 = true; },
+        run: A => { if (A.mill(A.p, 1, 'Nine Realms Executioner').length) A.job.step2 = true; },
         after: A => {
           const c = A.ask('c', { text: 'Choose 1 [Asgard] Character in your RETREAT to attach to Hela', from: A.ret(A.p).filter(i => isAsgard(A, i)), prefer: 'high' });
           if (c.length && inField(A, A.self)) A.attach(c[0], A.self);
         }
       }]
     },
-    /* 「Jailbreak Rebirth」Hela */
+    /* 「Reborn from Hell」Hela */
     'SD05-017': {
       trig: [{
-        id: 'ret', zone: 'RETREAT', optional: true, label: 'Jailbreak Rebirth',
+        id: 'ret', zone: 'RETREAT', optional: true, label: 'Reborn from Hell',
         text: 'Place 1 Character with [Hela] in its name from your RETREAT into your FIELD?',
         when: discardedSelf,
         can: A => A.spots(A.p).length > 0 && A.ret(A.p).some(i => nameHas(A, i, 'Hela') && A.canPlace(i, A.p)),
         run: A => {
           const c = A.ask('c', { text: 'Choose 1 Character with [Hela] in its name in your RETREAT to place into your FIELD', from: A.ret(A.p).filter(i => nameHas(A, i, 'Hela') && A.canPlace(i, A.p)), prefer: 'high' });
           const to = A.pick('to', 'Choose where to place it', slotOpts(A, A.spots(A.p)));
-          if (c.length && to) A.place(c[0], to, 'Jailbreak Rebirth');
+          if (c.length && to) A.place(c[0], to, 'Reborn from Hell');
         }
       }]
     },
-    /* 「Summoning of the Dead」Hela */
+    /* 「Animate the Dead」Hela */
     'SD05-018': {
       trig: [{
-        id: 'ret', zone: 'RETREAT', optional: true, label: 'Summoning of the Dead',
+        id: 'ret', zone: 'RETREAT', optional: true, label: 'Animate the Dead',
         text: 'Place 1 [Asgard] Character from your RETREAT into your FIELD?',
         when: discardedSelf,
         can: A => A.spots(A.p).length > 0 && A.ret(A.p).some(i => isAsgard(A, i) && A.canPlace(i, A.p)),
         run: A => {
           const c = A.ask('c', { text: 'Choose 1 [Asgard] Character in your RETREAT to place into your FIELD', from: A.ret(A.p).filter(i => isAsgard(A, i) && A.canPlace(i, A.p)), prefer: 'high' });
           const to = A.pick('to', 'Choose where to place it', slotOpts(A, A.spots(A.p)));
-          if (c.length && to) A.place(c[0], to, 'Summoning of the Dead');
+          if (c.length && to) A.place(c[0], to, 'Animate the Dead');
         }
       }]
     },
 
     /* ============================ SD06 · PURPLE ============================ */
-    /* 「Curse of Wisdom」Thanos — RAMPAGE (305.8) */
+    /* 「Genius Burden」Thanos — ONSLAUGHT (305.8) */
     'SD06-001': {
       unique: true, rampage: true,
       trig: [{
-        id: 'called', zone: 'BATTLE', optional: true, label: 'Curse of Wisdom',
+        id: 'called', zone: 'BATTLE', optional: true, label: 'Genius Burden',
         text: "Prune 1 purple Character from your RETREAT to retreat 1 of your opponent's Lv4-or-lower Characters in BATTLE?",
         when: calledEnter,
         can: A => purpleRet(A).length > 0 && oppBattle(A).some(i => A.lv(i) <= 4),
         run: A => {
           const pr = askPrune(A, purpleRet(A), 'purple Character');
           const t = A.ask('t', { text: "Choose 1 of your opponent's Lv4-or-lower Characters in BATTLE to retreat", from: oppBattle(A).filter(i => A.lv(i) <= 4), prefer: 'high' });
-          if (pr.length && A.prune(pr[0], 'Curse of Wisdom')) t.forEach(i => A.retreat(i, 'Curse of Wisdom'));
+          if (pr.length && A.prune(pr[0], 'Genius Burden')) t.forEach(i => A.retreat(i, 'Genius Burden'));
         }
       }]
     },
@@ -343,13 +344,13 @@
     'SD06-002': {
       trig: [{
         id: 'called', zone: 'BATTLE', optional: true, label: 'Peerless Blade',
-        text: "Prune 1 purple Character from your RETREAT (if this card is in FRONT: retreat 1 of your opponent's damaged Lv5-or-lower Characters in BATTLE)?",
+        text: "Prune 1 purple Character from your RETREAT (if this card is in FRONT: retreat 1 of your opponent's wounded Lv5-or-lower Characters in BATTLE)?",
         when: calledEnter,
         can: A => purpleRet(A).length > 0,
         run: A => {
           const front = A.slot(A.self) === 'F';
           const pr = askPrune(A, purpleRet(A), 'purple Character');
-          const t = front ? A.ask('t', { text: "Choose 1 of your opponent's damaged (Power lowered by an effect) Lv5-or-lower Characters in BATTLE to retreat", from: oppBattle(A).filter(i => A.lv(i) <= 5 && damaged(A, i)), prefer: 'high' }) : [];
+          const t = front ? A.ask('t', { text: "Choose 1 of your opponent's wounded (Power lowered by an effect) Lv5-or-lower Characters in BATTLE to retreat", from: oppBattle(A).filter(i => A.lv(i) <= 5 && damaged(A, i)), prefer: 'high' }) : [];
           if (pr.length && A.prune(pr[0], 'Peerless Blade') && A.slot(A.self) === 'F') t.forEach(i => A.retreat(i, 'Peerless Blade'));
         }
       }]
@@ -369,24 +370,24 @@
         }
       }]
     },
-    /* 「Black Tongue Schemer」Ebony Maw */
+    /* 「Black Tongue」Ebony Maw */
     'SD06-004': {
       trig: [{
-        id: 'called', zone: 'BATTLE', optional: true, label: 'Black Tongue Schemer',
+        id: 'called', zone: 'BATTLE', optional: true, label: 'Black Tongue',
         text: "Prune 1 purple Character from your RETREAT: 1 of your opponent's Characters in BATTLE gets Power-1000 (-3000 if this card is in FRONT)?",
         when: calledEnter,
         can: A => purpleRet(A).length > 0 && oppBattle(A).length > 0,
         run: A => {
           const pr = askPrune(A, purpleRet(A), 'purple Character');
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Power-1000, or -3000 if Ebony Maw is in FRONT)", from: oppBattle(A), prefer: 'high' });
-          if (pr.length && A.prune(pr[0], 'Black Tongue Schemer')) t.forEach(i => A.mod(i, 'p', A.slot(A.self) === 'F' ? -3000 : -1000, 'Black Tongue Schemer'));
+          if (pr.length && A.prune(pr[0], 'Black Tongue')) t.forEach(i => A.mod(i, 'p', A.slot(A.self) === 'F' ? -3000 : -1000, 'Black Tongue'));
         }
       }]
     },
-    /* 「Cosmic Convergence」Supergiant */
+    /* 「Amass the Cosmos」Supergiant */
     'SD06-005': {
       trig: [{
-        id: 'called', zone: 'BATTLE', optional: true, label: 'Cosmic Convergence',
+        id: 'called', zone: 'BATTLE', optional: true, label: 'Amass the Cosmos',
         text: 'Prune 1 purple Character from your RETREAT: this card gets Power+X (Power of 1 of your Characters in BATTLE; in FRONT, the total Power of your BATTLE)?',
         when: calledEnter,
         can: A => purpleRet(A).length > 0,
@@ -395,164 +396,164 @@
           const pr = askPrune(A, purpleRet(A), 'purple Character');
           const c = front ? [] : A.ask('c', { text: 'Choose 1 of your Characters in BATTLE (this card gets Power+ its Power)', from: A.battleChars(A.p), prefer: 'high' });
           const X = front ? battlePower(A, A.p) : (c.length ? A.pw(c[0]) : 0);
-          if (pr.length && A.prune(pr[0], 'Cosmic Convergence') && X > 0 && inField(A, A.self)) A.mod(A.self, 'p', X, 'Cosmic Convergence');
+          if (pr.length && A.prune(pr[0], 'Amass the Cosmos') && X > 0 && inField(A, A.self)) A.mod(A.self, 'p', X, 'Amass the Cosmos');
         }
       }]
     },
-    /* 「Shaping Battle Axe」Black Dwarf */
+    /* 「Shaping Axe」Black Dwarf */
     'SD06-006': {
       trig: [{
-        id: 'called', zone: 'BATTLE', optional: true, label: 'Shaping Battle Axe',
+        id: 'called', zone: 'BATTLE', optional: true, label: 'Shaping Axe',
         text: "Prune 1 purple Character from your RETREAT: 1 of your opponent's Characters in BATTLE gets R-1 (R-3 if this card is in FRONT)?",
         when: calledEnter,
         can: A => purpleRet(A).length > 0 && oppBattle(A).length > 0,
         run: A => {
           const pr = askPrune(A, purpleRet(A), 'purple Character');
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (R-1, or R-3 if Black Dwarf is in FRONT)", from: oppBattle(A), prefer: 'high' });
-          if (pr.length && A.prune(pr[0], 'Shaping Battle Axe')) t.forEach(i => A.mod(i, 'r', A.slot(A.self) === 'F' ? -3 : -1, 'Shaping Battle Axe'));
+          if (pr.length && A.prune(pr[0], 'Shaping Axe')) t.forEach(i => A.mod(i, 'r', A.slot(A.self) === 'F' ? -3 : -1, 'Shaping Axe'));
         }
       }]
     },
-    /* 「Hunt of Powerful Foes」Corvus Glaive */
+    /* 「Super Hunter」Corvus Glaive */
     'SD06-007': {
       trig: [{
-        id: 'called', zone: 'BATTLE', optional: true, label: 'Hunt of Powerful Foes',
-        text: "Prune 1 [Cabal] Character from your RETREAT to Prune 1 Character in your opponent's RETREAT?",
+        id: 'called', zone: 'BATTLE', optional: true, label: 'Super Hunter',
+        text: "Prune 1 [The Cabal] Character from your RETREAT to Prune 1 Character in your opponent's RETREAT?",
         when: calledEnter,
         can: A => cabalRet(A).length > 0 && A.ret(A.opp(A.p)).length > 0,
         run: A => {
-          const pr = askPrune(A, cabalRet(A), '[Cabal] Character');
+          const pr = askPrune(A, cabalRet(A), '[The Cabal] Character');
           const t = A.ask('t', { text: "Choose 1 Character in your opponent's RETREAT to Prune", from: A.ret(A.opp(A.p)), prefer: 'high' });
-          if (pr.length && A.prune(pr[0], 'Hunt of Powerful Foes')) t.forEach(i => A.prune(i, 'Hunt of Powerful Foes'));
+          if (pr.length && A.prune(pr[0], 'Super Hunter')) t.forEach(i => A.prune(i, 'Super Hunter'));
         }
       }]
     },
-    /* 「Telekinetic Spike」Ebony Maw */
+    /* 「Spike of Psychokinesis」Ebony Maw */
     'SD06-008': {
       acti: [{
-        id: 'spike', zone: 'BATTLE', once: true, label: "Prune 1 [Cabal] Character from RETREAT: 1 opponent's Character in BATTLE gets Power-500",
+        id: 'spike', zone: 'BATTLE', once: true, label: "Prune 1 [The Cabal] Character from RETREAT: 1 opponent's Character in BATTLE gets Power-500",
         can: A => cabalRet(A).length > 0 && oppBattle(A).length > 0,
         run: A => {
-          const pr = askPrune(A, cabalRet(A), '[Cabal] Character');
+          const pr = askPrune(A, cabalRet(A), '[The Cabal] Character');
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Power-500)", from: oppBattle(A), prefer: 'high' });
-          if (pr.length && A.prune(pr[0], 'Telekinetic Spike')) t.forEach(i => A.mod(i, 'p', -500, 'Telekinetic Spike'));
+          if (pr.length && A.prune(pr[0], 'Spike of Psychokinesis')) t.forEach(i => A.mod(i, 'p', -500, 'Spike of Psychokinesis'));
         }
       }]
     },
-    /* 「Cosmic Siphon」Supergiant */
+    /* 「Drain the Cosmos」Supergiant */
     'SD06-009': {
       trig: [{
-        id: 'called', zone: 'BATTLE', optional: true, label: 'Cosmic Siphon',
-        text: 'Prune 1 [Cabal] Character from your RETREAT to draw 1 card?',
+        id: 'called', zone: 'BATTLE', optional: true, label: 'Drain the Cosmos',
+        text: 'Prune 1 [The Cabal] Character from your RETREAT to draw 1 card?',
         when: calledEnter,
         can: A => cabalRet(A).length > 0,
-        run: A => { const pr = askPrune(A, cabalRet(A), '[Cabal] Character'); if (pr.length && A.prune(pr[0], 'Cosmic Siphon')) A.draw(A.p, 1); }
+        run: A => { const pr = askPrune(A, cabalRet(A), '[The Cabal] Character'); if (pr.length && A.prune(pr[0], 'Drain the Cosmos')) A.draw(A.p, 1); }
       }]
     },
-    /* 「Red-Eyed Witch」Black Swan */
+    /* 「Red Eyes」Black Swan */
     'SD06-010': {
       trig: [{
-        id: 'called', zone: 'BATTLE', optional: true, label: 'Red-Eyed Witch',
-        text: 'Prune 1 [Cabal] Character from your RETREAT to return 1 [Black Order] Character with a different name from your RETREAT to your HAND?',
+        id: 'called', zone: 'BATTLE', optional: true, label: 'Red Eyes',
+        text: 'Prune 1 [The Cabal] Character from your RETREAT to return 1 [Black Order] Character with a different name from your RETREAT to your HAND?',
         when: calledEnter,
         can: A => cabalRet(A).length > 0 && A.ret(A.p).some(i => isBlackOrder(A, i) && charName(A, i) !== charName(A, A.self)),
         run: A => {
-          const pr = askPrune(A, cabalRet(A), '[Cabal] Character');
+          const pr = askPrune(A, cabalRet(A), '[The Cabal] Character');
           const c = A.ask('c', { text: 'Choose 1 [Black Order] Character (not Black Swan) in your RETREAT to return to your HAND', from: A.ret(A.p).filter(i => !pr.includes(i) && isBlackOrder(A, i) && charName(A, i) !== charName(A, A.self)), prefer: 'high' });
-          if (pr.length && A.prune(pr[0], 'Red-Eyed Witch')) c.forEach(i => A.toHand(i, 'Red-Eyed Witch'));
+          if (pr.length && A.prune(pr[0], 'Red Eyes')) c.forEach(i => A.toHand(i, 'Red Eyes'));
         }
       }]
     },
-    /* 「Swarm Assault」Chitauri Soldier */
+    /* 「Swarming Assault」Chitauri Infantry */
     'SD06-011': {
       trig: [{
-        id: 'enter', zone: 'BATTLE', optional: true, label: 'Swarm Assault',
+        id: 'enter', zone: 'BATTLE', optional: true, label: 'Swarming Assault',
         text: "Discard the top card of your Deck: 1 of your opponent's Characters in BATTLE gets Power-1000?",
         when: enterSelf,
         can: A => A.deck(A.p).length > 0 && oppBattle(A).length > 0,
         run: A => {
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Power-1000)", from: oppBattle(A), prefer: 'high' });
-          if (A.mill(A.p, 1, 'Swarm Assault').length) t.forEach(i => A.mod(i, 'p', -1000, 'Swarm Assault'));
+          if (A.mill(A.p, 1, 'Swarming Assault').length) t.forEach(i => A.mod(i, 'p', -1000, 'Swarming Assault'));
         }
       }]
     },
-    /* 「Colossal Ram」Leviathan */
+    /* 「Giant Crash」Leviathan */
     'SD06-012': {
       trig: [{
-        id: 'enter', zone: 'BATTLE', optional: true, label: 'Colossal Ram',
+        id: 'enter', zone: 'BATTLE', optional: true, label: 'Giant Crash',
         text: "Discard the top card of your Deck to move 1 of your opponent's Lv3-or-lower Characters from BATTLE to their BASE?",
         when: enterSelf,
         can: A => A.deck(A.p).length > 0 && A.baseRoom(A.opp(A.p)) > 0 && oppBattle(A).some(i => A.lv(i) <= 3),
         run: A => {
           const t = A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters in BATTLE to move to their BASE", from: oppBattle(A).filter(i => A.lv(i) <= 3), prefer: 'high' });
-          if (A.mill(A.p, 1, 'Colossal Ram').length) t.forEach(i => A.bbm(i, 'BASE', 'Colossal Ram'));
+          if (A.mill(A.p, 1, 'Giant Crash').length) t.forEach(i => A.bbm(i, 'BASE', 'Giant Crash'));
         }
       }]
     },
-    /* 「Interstellar Crossing」War Envoy */
+    /* 「Interstellar Crossing」Warbringer */
     'SD06-013': {
       auraCounter: (A, src, tgt) => inBattle(A, src) && A.tp !== A.ctrl(src) && A.owner(tgt) === A.ctrl(src) && A.zone(tgt) === 'HAND' && A.origLv(tgt) === 4 && isBlackOrder(A, tgt),
       auto: [{ stat: 'r', zone: 'BASE', value: (A, src, tgt) => A.ctrl(tgt) === A.ctrl(src) && A.slot(tgt) === 'F' ? 1 : 0 }]
     },
-    /* 「Costly Reinforcement」Chitauri Chariot */
+    /* 「To The Rescue」Chitauri Flying Chariots */
     'SD06-014': {
       trig: [{
-        id: 'void', zone: 'VOID', label: 'Costly Reinforcement', when: voidByYou,
+        id: 'void', zone: 'VOID', label: 'To The Rescue', when: voidByYou,
         can: A => A.deck(A.p).length > 0,
         run: A => { if (A.draw(A.p, 1).length) A.job.step2 = true; },
-        after: A => { const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) }); d.forEach(i => A.discard(i, 'Costly Reinforcement')); }
+        after: A => { const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) }); d.forEach(i => A.discard(i, 'To The Rescue')); }
       }]
     },
-    /* 「Energy Reversal」Silver Surfer */
+    /* 「Reversal of Energy」Silver Surfer */
     'SD06-015': {
       trig: [{
-        id: 'void', zone: 'VOID', label: 'Energy Reversal', when: voidByYou,
+        id: 'void', zone: 'VOID', label: 'Reversal of Energy', when: voidByYou,
         can: A => oppBattle(A).length > 0,
         run: A => {
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Power-1000)", from: oppBattle(A), prefer: 'high' });
-          t.forEach(i => A.mod(i, 'p', -1000, 'Energy Reversal'));
-          if (t.length && A.zone(A.self) === 'VOID') A.toDeckBottom(A.self, 'Energy Reversal');
+          t.forEach(i => A.mod(i, 'p', -1000, 'Reversal of Energy'));
+          if (t.length && A.zone(A.self) === 'VOID') A.toDeckBottom(A.self, 'Reversal of Energy');
         }
       }]
     },
-    /* 「Starship Command」Ronan */
+    /* 「Interstellar Commander」Ronan */
     'SD06-016': {
       trig: [{
-        id: 'void', zone: 'VOID', optional: true, label: 'Starship Command',
-        text: 'Place 1 Lv2-or-lower [Cabal] Character from your VOID into your BATTLE?',
+        id: 'void', zone: 'VOID', optional: true, label: 'Interstellar Commander',
+        text: 'Place 1 Lv2-or-lower [The Cabal] Character from your VOID into your BATTLE?',
         when: voidByYou,
         can: A => A.emptySlots(A.p).length > 0 && A.voidOf(A.p).some(i => i !== A.self && A.origLv(i) <= 2 && isCabal(A, i) && A.canPlace(i, A.p)),
         run: A => {
-          const c = A.ask('c', { text: 'Choose 1 Lv2-or-lower [Cabal] Character in your VOID to place into your BATTLE', from: A.voidOf(A.p).filter(i => i !== A.self && A.origLv(i) <= 2 && isCabal(A, i) && A.canPlace(i, A.p)), prefer: 'high' });
+          const c = A.ask('c', { text: 'Choose 1 Lv2-or-lower [The Cabal] Character in your VOID to place into your BATTLE', from: A.voidOf(A.p).filter(i => i !== A.self && A.origLv(i) <= 2 && isCabal(A, i) && A.canPlace(i, A.p)), prefer: 'high' });
           const to = A.pick('to', 'Choose a BATTLE area', slotOpts(A, A.emptySlots(A.p)));
-          if (c.length && to) A.place(c[0], to, 'Starship Command');
+          if (c.length && to) A.place(c[0], to, 'Interstellar Commander');
         }
       }]
     },
-    /* 「Quest for Allies」Adam Warlock */
+    /* 「Seek for the Alliances」Adam Warlock */
     'SD06-017': {
       trig: [{
-        id: 'enter', zone: 'FIELD', optional: true, label: 'Quest for Allies',
-        text: 'Discard the top card of your Deck (then you may return 1 [Cabal] Character from RETREAT to your HAND)?',
+        id: 'enter', zone: 'FIELD', optional: true, label: 'Seek for the Alliances',
+        text: 'Discard the top card of your Deck (then you may return 1 [The Cabal] Character from RETREAT to your HAND)?',
         when: enterSelf,
         can: A => A.deck(A.p).length > 0,
-        run: A => { if (A.mill(A.p, 1, 'Quest for Allies').length) A.job.step2 = true; },
+        run: A => { if (A.mill(A.p, 1, 'Seek for the Alliances').length) A.job.step2 = true; },
         after: A => {
-          const c = A.ask('c', { text: 'You may choose 1 [Cabal] Character in your RETREAT to return to your HAND', from: A.ret(A.p).filter(i => isCabal(A, i)), min: 0, max: 1, prefer: 'high' });
-          c.forEach(i => A.toHand(i, 'Quest for Allies'));
+          const c = A.ask('c', { text: 'You may choose 1 [The Cabal] Character in your RETREAT to return to your HAND', from: A.ret(A.p).filter(i => isCabal(A, i)), min: 0, max: 1, prefer: 'high' });
+          c.forEach(i => A.toHand(i, 'Seek for the Alliances'));
         }
       }]
     },
-    /* 「Unsealed Magic Burst」Adam Warlock */
+    /* 「Arcane Explosion」Adam Warlock */
     'SD06-018': {
       trig: [{
-        id: 'enter', zone: 'FIELD', optional: true, label: 'Unsealed Magic Burst',
+        id: 'enter', zone: 'FIELD', optional: true, label: 'Arcane Explosion',
         text: "Discard the top card of your Deck to retreat 1 of your opponent's Lv3-or-lower Characters with [ACTI] in BATTLE?",
         when: enterSelf,
         can: A => A.deck(A.p).length > 0 && oppBattle(A).some(i => A.lv(i) <= 3 && /ACTI/.test(A.text(i))),
         run: A => {
           const t = A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters with [ACTI] in BATTLE to retreat", from: oppBattle(A).filter(i => A.lv(i) <= 3 && /ACTI/.test(A.text(i))), prefer: 'high' });
-          if (A.mill(A.p, 1, 'Unsealed Magic Burst').length) t.forEach(i => A.retreat(i, 'Unsealed Magic Burst'));
+          if (A.mill(A.p, 1, 'Arcane Explosion').length) t.forEach(i => A.retreat(i, 'Arcane Explosion'));
         }
       }]
     },
