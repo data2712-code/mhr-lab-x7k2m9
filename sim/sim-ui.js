@@ -1571,6 +1571,9 @@
     // mode korban CALL
     if (ui.mode === 'call-cost') {
       if (L && (L.zone === 'bat' || L.zone === 'base') && L.p === G.prompt.p) {
+        // Laporan #17 (alur RushDee, 14 Nov 2026): biaya sudah pas dan kartu biaya di BATTLE diketuk → kartu baru langsung
+        // menempati area kartu itu (kartu biaya Retreat dulu). Untuk melepas kartu biaya, pakai chip di panel atau Clear.
+        if (costReady() && ui.cost.includes(iid) && L.zone === 'bat' && destOkWith(L.slot)) { act({ t: ui.callType, c: ui.sel, to: L.slot, cost: ui.cost.slice() }); return; }
         ui.cost = ui.cost.includes(iid) ? ui.cost.filter(x => x !== iid) : ui.cost.concat(iid);
         render();
       }

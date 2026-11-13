@@ -517,7 +517,8 @@
   async function fqBot() {
     const ui = U(), level = segVal('fqLevel') || 'normal';
     const mine = TEST_LABEL[fq.deckVal] ? ui.deckFrom(fq.deckVal, '', 'Your') : ui.deckFrom('code', fq.deck.body.code, 'Your');
-    const keys = Object.keys(TEST_LABEL), bot = ui.deckFrom(keys[Math.floor(Math.random() * keys.length)], '', "The bot's");
+    const keys = Object.keys(TEST_LABEL), WD = level === 'expert' && window.MHRSIM_WINNER_DECKS, wd = WD && WD[Math.floor(Math.random() * WD.length)];   // Expert: deck juara turnamen
+    const bot = wd ? Object.assign(ui.deckFrom('code', wd[1], "The bot's"), { name: wd[0] }) : ui.deckFrom(keys[Math.floor(Math.random() * keys.length)], '', "The bot's");
     if (mine.err || bot.err) { fq.err = mine.err || bot.err; drawFind(true); return; }
     const s = await session();
     if (!fq.on) return;

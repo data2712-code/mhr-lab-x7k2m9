@@ -603,6 +603,37 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Sinkronisasi sumber Battle Sim: `mhr-simulator\app` = `sim/` o2.18 — 14 November 2026 *(`sim/index.html`, `sim/sim-modes.js`; di luar repo: `mhr-simulator\app\`, `mhr-simulator\online\site-sim.js`)*
+
+Riwayat simulator #93. Permintaan pemilik: sinkronkan berkas. Di komputer pemilik `mhr-simulator\app` masih versi lama (sebelum
+#86), padahal `sim/` sudah o2.18.
+- `mhr-simulator\app` ditulis ulang dari `sim/` o2.18 (16 skrip + `index.html` dengan jalur lokal `../../mhr-lab-x7k2m9/`).
+  `tests\`, `sim-server.js`, `BACA-SAYA.md` di `app\` tidak disentuh.
+- `site-sim.js`: daftar berkas ditambah `sim-cards-t6.js` dan `sim-ranked.js`.
+- `sim/` dibuat ulang dengan `site-sim.js … o2.18` dan dicocokkan: 15 skrip identik byte demi byte; `index.html` hanya berbeda
+  di `?v=` (semua skrip kini `o2.18`); `sim-modes.js`: gambar kartu hero memakai `MHRSIM_BASE` (bukan `../` tetap) supaya juga
+  tampil saat dibuka dari `app\`. Tampilan dan perilaku tidak berubah.
+- Mulai sekarang alurnya kembali: ubah di `app\` → `node online/site-sim.js <repo situs> <versi>` → push.
+
+### Data — Battle Sim o2.18: Bot Expert v0.14 + deck juara turnamen; ketuk area kartu biaya untuk CALL — 14 November 2026 *(`sim/sim-bot.js`, `sim/sim-modes.js`, `sim/sim-online.js`, `sim/sim-ui.js`, `sim/sim-i18n.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #92. Dari laporan beta #14–#17 dan rekaman RushDee dari pemilik.
+- **Bot Expert v0.14 (laporan #15):** penilaian memakai dua cakrawala (akhir giliran sendiri + akhir giliran lawan berikutnya),
+  waktu berpikir sampai ±1,2 dtk. Uji dengan 9 deck juara: 53% melawan Expert lama (800 pertandingan), 57% melawan Hard (200).
+  Peningkatan dari pencarian saja kecil; varian lain (sampel/kandidat lebih banyak, penilaian v2) tidak lebih baik.
+- **Deck bot Expert = deck juara turnamen:** 9 deck juara 1 dari menu Tournament Decks (Agu–Okt 2026), dipilih acak, dipakai di
+  Practice (bila deck bot = Random) dan bot saat menunggu di Find a match. Nama pemain tidak ditampilkan (nama deck = warna +
+  turnamen). Uji 100 pertandingan pada level yang sama: deck juara menang 62–38 melawan deck uji. Daftar `WINNER_DECKS` di
+  `sim-modes.js` statis; perlu diperbarui manual bila ada turnamen baru.
+- **CALL berbiaya (laporan #17), pelengkap panel biaya o2.17:** saat biaya sudah pas, mengetuk kartu biaya yang ada di BATTLE
+  langsung menaruh kartu baru di area itu (seperti RushDee). Sebelumnya ketukan itu melepas kartu dari biaya, walau areanya menyala.
+  Melepas kartu biaya: lewat chip di panel atau Clear.
+- Laporan #14 (Spore of Consciousness): bukan bug. Ultron Army menawarkan BACK dan BASE (FRONT/WING penuh); efek Spore bertanda
+  TRIG【BATTLE】 sehingga tidak aktif dari BASE, dan bila ditaruh di BACK semua area BATTLE penuh sehingga tidak ada yang bisa ditempatkan.
+- **Catatan sumber:** perubahan ini dibuat langsung di `sim/`. Di komputer ini `mhr-simulator\app` masih versi lama (belum terlihat
+  hasil sinkronisasi yang disebut entri o2.17), jadi sebelum menjalankan `site-sim.js` lagi, salin dulu 5 berkas di atas ke `app\`.
+- Cache-buster: 5 berkas skrip di atas `?v=o2.18`; `SIM_URL ?v=o2.18`; `sim-host.js?v=7.39-sim18`. Server tidak perlu diubah.
+
 ### Data — Battle Sim o2.17: bayar biaya CALL Lv4+ langsung di panel (lebih ringkas, terutama di HP) — 13 November 2026 *(`sim/sim-ui.js`, `sim/sim-i18n.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #91. Permintaan pemilik: CALL / COUNTER CALL karakter Lv4+ terasa tidak mulus — pemain harus membuka

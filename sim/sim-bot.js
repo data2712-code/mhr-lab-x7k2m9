@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR BATTLE SIM — BOT (sim-bot.js)          v0.13 · Easy/Normal/Hard/Expert
+   MHR BATTLE SIM — BOT (sim-bot.js)          v0.14 · Easy/Normal/Hard/Expert
    ===================================================================
    Dipakai untuk uji otomatis dan sebagai lawan mode Latihan (riwayat #50–#51). Tiga gaya:
    - 'random' : memilih acak di antara aksi sah (level Easy).
@@ -215,9 +215,13 @@
      - ikut menimbang pilihan efek (choose), susunan Reposition (arrange), dan urutan efek (order);
      - penilaian Rush Point bertingkat (makin dekat 9 makin berharga) + selisih kartu HAND.
      Uji 80 pertandingan bot-vs-bot (13 Nov 2026): Expert menang 49–31 (61%) melawan Hard. Simulasi sampai akhir giliran
-     lawan (opt.long) diuji dan justru lebih lemah (14–26), jadi tidak dipakai bawaan. */
+     lawan (opt.long) diuji dan justru lebih lemah (14–26), jadi tidak dipakai bawaan.
+     v0.14 (14 Nov 2026, laporan #15 "Expert is still too easy"): penilaian = rata-rata dua cakrawala (opt.mix 0,5): akhir giliran
+     sendiri DAN akhir giliran lawan berikutnya, jadi serangan balik lawan ikut ditimbang; waktu berpikir sampai ±1,2 dtk.
+     Uji dengan 9 deck juara turnamen: 53% melawan Expert lama (800 pertandingan, 4 varian), 57% melawan Hard (200).
+     Penilaian v2 (opt.ev 'x2'), sampel/kandidat lebih banyak diuji dan tidak lebih baik, jadi tidak dipakai bawaan. */
   const EXP_TYPES = { main: 1, attack: 1, counter: 1, opt: 1, yesno: 1, pick: 1, retarget: 1, choose: 1, arrange: 1, order: 1 };
-  const EXP_MAX_CAND = 22, EXP_BUDGET_MS = 750, EXP_SAMPLES = 3;
+  const EXP_MAX_CAND = 22, EXP_BUDGET_MS = 1200, EXP_SAMPLES = 3, EXP_MIX = 0.5;
   function chooseCands(st, rng) {
     const pr = st.prompt, out = [], seen = new Set();
     const add = cards => { const k = cards.slice().sort().join(','); if (!seen.has(k) && cards.length >= pr.min && cards.length <= pr.max) { seen.add(k); out.push({ t: 'choose', cards }); } };
@@ -249,9 +253,28 @@
     const rpv = r => 1300 * r + (r >= 6 ? 400 * (r - 5) : 0);
     return rpv(rm) - rpv(ro) + boardScore(st, me) - boardScore(st, o) + 25 * (st.P[me].hand.length - st.P[o].hand.length);
   }
+  // Penilaian v2 (uji 14 Nov 2026): Weakness dihitung sebagai ancaman Rush Point nyata — tiap area BATTLE kosong yang bisa
+  // diserang lawan pada giliran berikutnya bernilai mendekati 1 Rush Point, dibatasi jumlah penyerang yang bisa lawan siapkan.
+  function sideV2(st, p, wEmpty) {
+    const P = st.P[p], O = st.P[1 - p];
+    let s = 0, empty = 0;
+    S.SLOTS.forEach(sl => { const i = P.bat[sl]; if (i) s += 220 + S.getPower(st, i) / 8 + 60 * S.getR(st, i); else empty++; });
+    const oppAtk = S.SLOTS.filter(sl => O.bat[sl]).length + Math.min(3, O.hand.length);
+    s -= wEmpty * Math.min(empty, oppAtk);
+    s += 35 * P.base.length + 70 * Math.min(P.hand.length, 7);
+    if (P.deck.length < 6) s -= (6 - P.deck.length) * 450;
+    return s;
+  }
+  function evaluateX2(st, me, wEmpty) {
+    if (st.result) return st.result.winner === me ? 1e6 : st.result.winner < 0 ? 0 : -1e6;
+    const o = 1 - me, rpv = r => 1300 * r + (r >= 6 ? 400 * (r - 5) : 0);
+    // giliran siapa berikutnya: pihak yang akan diserang lebih dulu menanggung ancaman penuh, pihak lain setengahnya
+    const meNext = st.tp === me && st.phase !== 'end' ? 0.5 : 1, opNext = 1.5 - meNext;
+    return rpv(st.P[me].rp) - rpv(st.P[o].rp) + sideV2(st, me, wEmpty * meNext) - sideV2(st, o, wEmpty * opNext) + 25 * (st.P[me].hand.length - st.P[o].hand.length);
+  }
   function chooseExpert(st, rng, opt) {
     const pr = st.prompt;
-    const o = Object.assign({ cand: EXP_MAX_CAND, ms: EXP_BUDGET_MS, n: EXP_SAMPLES }, opt || {});
+    const o = Object.assign({ cand: EXP_MAX_CAND, ms: EXP_BUDGET_MS, n: EXP_SAMPLES, mix: EXP_MIX }, opt || {});
     if (!pr || !(o.types || EXP_TYPES)[pr.type] || st.vanilla && pr.type === 'counter') return chooseGreedy(st, rng);
     let acts = pr.type === 'choose' ? chooseCands(st, rng) : pr.type === 'arrange' ? arrangeCands(st, rng)
       : pr.type === 'order' ? pr.jobs.map(j => ({ t: 'order', job: j.id })) : S.legalActions(st, { limit: 300 });
@@ -268,7 +291,9 @@
         const c = hiddenClone(st, me, rng);
         if (!S.apply(c, cand[ci]).ok) { v = -Infinity; break; }
         if (o.long) rolloutLong(c, rng, st.turn); else rollout(c, rng, st.turn);
-        v += (o.ev === 'h' ? evaluate : evaluateX)(c, me);
+        let e = o.ev === 'h' ? evaluate(c, me) : o.ev === 'x2' ? evaluateX2(c, me, o.we || 700) : evaluateX(c, me);
+        if (o.mix && !c.result) { rolloutLong(c, rng, st.turn); e = (1 - o.mix) * e + o.mix * (o.ev === 'x2' ? evaluateX2(c, me, o.we || 700) : evaluateX(c, me)); }
+        v += e;
       }
       v = v / o.n + (ci === 0 ? 60 : 0) + rng();
       if (v > bestV) { bestV = v; best = cand[ci]; }

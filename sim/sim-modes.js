@@ -20,6 +20,18 @@
   const MODE_LABEL = { practice: 'Practice vs Bot', friend: 'Friend · same device', custom: 'Custom game', sandbox: 'Sandbox' };
   // Kartu di hero menu Battle Sim (permintaan pemilik 13 Nov 2026): kiri, tengah, kanan. Gambar Inggris (images/en/).
   const FAN_CARDS = ['SP01-021_MR', 'SD06-001_SEC', 'SD01-001_SEC'];
+  /* Deck bot level Expert (permintaan pemilik 14 Nov 2026): 9 deck juara 1 dari menu Tournament Decks (tabel tournaments, diambil
+     14 Nov 2026). Nama pemain tidak dipakai; nama deck = warna + turnamen. Bila pemain memilih sendiri deck bot, pilihan itu yang dipakai. */
+  const WINNER_DECKS = [["Yellow-Green · MVB October 2026 winner","1.WWVsbG93LUdyZWVuIMK3IE1WQiBPY3RvYmVyIDIwMjYgd2lubmVy.F0043F0123H0022H0132I0213I0223I0253I0263I0273I0292I0323I0633I0653I0671I0682I0792I0803I0303A1003"],
+    ["Red-Blue · Jakarta Game On winner","1.UmVkLUJsdWUgwrcgSmFrYXJ0YSBHYW1lIE9uIHdpbm5lcg.A0013A0023A0081A0113A0132A0153A0222A0633A0643A0663A0672A0773A0802A0833G0113I0031I0441I0491I0072G0043G0011I0421A0611"],
+    ["Yellow-Green · Asia Peak Invitational winner","1.WWVsbG93LUdyZWVuIMK3IEFzaWEgUGVhayBJbnZpdGF0aW9uYWwgd2lubmVy.H0023I0213I0223I0253I0263I0273I0303I0323I0342I0633I0653I0673I0683I0703I0773I0793I0803"],
+    ["Red-Blue · MAC Jakarta Qualifier winner","1.UmVkLUJsdWUgwrcgTUFDIEpha2FydGEgUXVhbGlmaWVyIHdpbm5lcg.A0023A0222I0061A0112I0072A0131A0013A0152I0492A0672A0773A0902G0042G0113A0833A0802I0502A0632A0643A0663G0062I0441G0012"],
+    ["Red-Green · MAC Batam Qualifier winner","1.UmVkLUdyZWVuIMK3IE1BQyBCYXRhbSBRdWFsaWZpZXIgd2lubmVy.A0222I0062A0023A0113I0073A0132A0013A1003A1063B0062I0633I0713A0953H0053H0103I0671I0803A1042H0013"],
+    ["Red-Blue · MAC Bandung Qualifier winner","1.UmVkLUJsdWUgwrcgTUFDIEJhbmR1bmcgUXVhbGlmaWVyIHdpbm5lcg.I0091I0063A0023A0113A0213A0281I0423I0442I0412I0583I0433I0473I0013I0513I0522I0543I0503I0533I0493"],
+    ["Red-Blue · MAC Surabaya Qualifier winner","1.UmVkLUJsdWUgwrcgTUFDIFN1cmFiYXlhIFF1YWxpZmllciB3aW5uZXI.A0212I0063A0023A0113I0013I0423I0513A0773A0901I0503I0521I0543B0031I0433I0443I0412I0583A0611I0473I0533"],
+    ["Red-Green · MVB September 2026 winner","1.UmVkLUdyZWVuIMK3IE1WQiBTZXB0ZW1iZXIgMjAyNiB3aW5uZXI.A0023A0113A0122A0222A0231A0271A0293A0131A0013A0151A1003A1063A0973A0991A1073H0032H0093H0102H0123A0942H0013H0022"],
+    ["Red-Green · MVB August 2026 winner","1.UmVkLUdyZWVuIMK3IE1WQiBBdWd1c3QgMjAyNiB3aW5uZXI.A0221A0022A0052A0113A0271A0941A0293A0131A0011A0151A1002A1041A1063A0973A0993A1073A1081H0013H0032H0093H0103H0123A0931H0023"]];
+  window.MHRSIM_WINNER_DECKS = WINNER_DECKS;
   const LEVEL_LABEL = { easy: 'Easy', normal: 'Normal', hard: 'Hard', expert: 'Expert' };
   const CLOCK_LABEL = { off: 'No clock', standard: 'Standard 2:00 / 0:30', relaxed: 'Relaxed 5:00 / 1:00', long: 'Long 10:00 / 2:00', match30: 'Match 30:00' };
   let view = 'home';
@@ -215,7 +227,7 @@
     let h = '<section class="pbhero"><div class="kick"><span>MARVEL HERO RUSH · MATCH SIMULATOR</span>' + (betaOn() ? '<span class="betatag">BETA</span>' : '') + '</div>' +
       '<h2>CALL. ATTACK.<br><em>RUSH.</em></h2><p>Every rule and card effect is handled for you. Pick a mode, pick your deck, press PLAY.</p>' +
       '<div class="hstats">' + (mine.length ? '<span><b>' + mine.length + '</b> <i>games</i></span><span class="w"><b>' + W + '</b> <i>wins</i></span><span class="l"><b>' + L + '</b> <i>losses</i></span>' : '<span><i>No games yet: start with the bot</i></span>') +
-      '<span class="e"><i>Engine</i> <b>v' + esc(S.VERSION) + '</b></span></div><div class="fan">' + FAN_CARDS.map(f => '<i><img src="../images/en/' + f + '.jpg" alt="" loading="lazy" onerror="this.remove()"></i>').join('') + '</div></section>';
+      '<span class="e"><i>Engine</i> <b>v' + esc(S.VERSION) + '</b></span></div><div class="fan">' + FAN_CARDS.map(f => '<i><img src="' + (window.MHRSIM_BASE || '../') + 'images/en/' + f + '.jpg" alt="" loading="lazy" onerror="this.remove()"></i>').join('') + '</div></section>';
     h += '<aside class="pblade"><div class="pblbl">MODE</div><div class="pbmodes">' +
       PB_MODES.map(([k, ic, t, s]) => '<button data-pbmode="' + k + '"' + (k === pbMode ? ' class="on"' : '') + '><b><i class="pbic">' + ic + '</i>' + esc(t) + '</b><span>' + esc(s) + '</span></button>').join('') +
       '</div><div id="pbBody"></div></aside>';
@@ -268,7 +280,7 @@
       '<div class="f"><label>Bot level</label>' + seg('level', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard'], ['expert', 'Expert']], p.level) + '</div>' +
       '<div class="f"><label>Who goes first</label>' + seg('first', [['random', 'Random'], ['you', 'You'], ['bot', 'Bot']], p.first) + '</div>' +
       '<div class="f"><label>Turn clock</label>' + seg('clock', [['off', 'No clock'], ['standard', 'Standard'], ['relaxed', 'Relaxed'], ['match30', 'Match 30:00']], p.clock) + '</div>' +
-      '</div><p class="small muted">The bot is a training opponent: Easy picks random legal moves, Normal plays greedy moves, Hard tries its options ahead before choosing, Expert tries more options and also weighs effect choices and positions (neither sees your HAND or the Deck order). Match 30:00 simulates an official match: one shared 30-minute clock and no per-turn limit; when time runs out, most Rush Points wins, then most cards left in the Deck, then rock-paper-scissors. Undo is always allowed in practice. Finished games are saved in Match history (offline).</p>' +
+      '</div><p class="small muted">The bot is a training opponent: Easy picks random legal moves, Normal plays greedy moves, Hard tries its options ahead before choosing, Expert tries more options, also weighs your counterattack, and plays a tournament-winning deck unless you pick its deck (neither sees your HAND or the Deck order). Match 30:00 simulates an official match: one shared 30-minute clock and no per-turn limit; when time runs out, most Rush Points wins, then most cards left in the Deck, then rock-paper-scissors. Undo is always allowed in practice. Finished games are saved in Match history (offline).</p>' +
       '<div id="prErr" class="err"></div><div class="startbar"><button class="pri" id="prStart">▶ Start practice</button></div></div>';
     $('prDeck').value = p.deck; if (!$('prDeck').value) $('prDeck').selectedIndex = 0;
     $('prBot').value = p.bot; if (!$('prBot').value) $('prBot').value = 'random';
@@ -289,8 +301,10 @@
     if (my && !saved) { errEl.textContent = 'Choose one of your saved decks, or paste a deck link / code.'; if (window.MHRSimI18N) window.MHRSimI18N.apply(); return; }
     const mine = saved ? Object.assign(ui.deckFrom('code', saved.code, 'Your'), { name: saved.name }) : ui.deckFrom(o.deck, o.code || '', 'Your');
     let botV = o.bot || 'random';
-    if (botV === 'random') { const vals = testDeckValues().filter(v => !/^cd:/.test(v)); botV = vals[Math.floor(Math.random() * vals.length)]; }
-    const bot = ui.deckFrom(botV, '', "The bot's");
+    let win = null;
+    if (botV === 'random' && level === 'expert') win = WINNER_DECKS[Math.floor(Math.random() * WINNER_DECKS.length)];
+    else if (botV === 'random') { const vals = testDeckValues().filter(v => !/^cd:/.test(v)); botV = vals[Math.floor(Math.random() * vals.length)]; }
+    const bot = win ? Object.assign(ui.deckFrom('code', win[1], "The bot's"), { name: win[0] }) : ui.deckFrom(botV, '', "The bot's");
     const errs = [];
     [[mine, 'Your deck'], [bot, "Bot's deck"]].forEach(([d, who]) => {
       if (d.err) { errs.push(d.err); return; }
