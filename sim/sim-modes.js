@@ -66,10 +66,27 @@
   }
 
   /* ---------------- tampilan ---------------- */
+  // o2.16 (permintaan pemilik 13 Nov 2026): tab menu berpindah di tempat, tanpa rasa "pindah halaman" dan tanpa tombol kembali.
+  // Bilah tab #simNav tetap tampil; Play / Ranked / History / Tools menyala sesuai layar. Practice, Online, Find, Same device
+  // adalah bagian dari tab Play.
+  const TAB_OF = { home: 'home', practice: 'home', online: 'home', find: 'home', custom: 'home', ranked: 'ranked', history: 'history', tools: 'tools' };
+  function navHTML() {
+    return '<button data-mode="home">Play</button><button data-mode="ranked">🏆 Ranked</button><button data-mode="history">History</button><button data-hub="sandbox">Sandbox</button>' +
+      '<button data-mode="tools">Tools</button><button data-rep="open" data-v="feedback">Feedback</button>';
+  }
+  function syncNav() {
+    const nav = $('simNav'); if (!nav) return;
+    if (!nav.firstChild) nav.innerHTML = navHTML();
+    const tab = TAB_OF[view] || 'home';
+    nav.querySelectorAll('button[data-mode]').forEach(b => { const on = b.dataset.mode === tab; b.classList.toggle('on', on); b.setAttribute('aria-current', on ? 'page' : 'false'); });
+  }
   function show(v) {
+    const prev = view;
     view = VIEWS[v] ? v : 'home';
     $('home').style.display = view === 'home' ? '' : 'none';
     ['panelPractice', 'panelHistory', 'panelOnline', 'panelCustom', 'panelRanked'].forEach(id => { const el = $(id); if (el) el.classList.toggle('on', VIEWS[view] === id); });
+    syncNav();
+    { const pc = $('panelCustom'); if (pc) pc.classList.toggle('tools', view === 'tools'); }
     renderResume();
     if (view === 'home') renderHome();
     if (view === 'practice') renderPractice();
@@ -84,7 +101,8 @@
       if (friend) { $('ct0').value = 'human'; $('ct1').value = 'human'; }
     }
     try { if (location.hash.slice(1) !== view) history.replaceState(null, '', view === 'home' ? location.pathname + location.search : '#' + view); } catch (e) { /* file:// tanpa history API */ }
-    window.scrollTo(0, 0);
+    // Tidak melompat ke atas setiap ganti tab; hanya bila bilah tab sudah tergulir keluar layar.
+    { const nav = $('simNav'); if (prev !== view && nav && nav.getBoundingClientRect().top < 0) nav.scrollIntoView({ block: 'start' }); }
     if (window.MHRSimI18N) window.MHRSimI18N.apply();
   }
 
@@ -167,15 +185,15 @@
     } else if (pbMode === 'find') {
       h += on ? '<div class="pblbl">YOUR DECK · SAVED TO YOUR ACCOUNT</div>' + pbDecksHTML() +
         '<p class="small muted">You are matched with the next player who is searching: Standard clock 2:00 / 0:30, random first player. After 45 seconds you can play the bot while you keep searching; a bot is always shown as a bot.</p>' +
-        '<div id="pbRank"></div><div id="pbLive"></div><div id="hubErr" class="err"></div><button class="pbplay" data-hub="play">FIND A MATCH</button>'
+        '<div id="pbRank"></div><div id="pbLive"></div><div id="hubErr" class="err"></div><button class="pbplay long" data-hub="play">FIND A MATCH</button>'
         : offline + '<button class="pbmore" data-mode="find">Details</button>';
     } else if (pbMode === 'online') {
       h += on ? '<p class="small">Create a private room and send the link (WhatsApp works well), or enter a room code from a friend. You choose your deck and the turn clock on the next screen.</p>' +
-        '<button class="pbplay" data-mode="online">CREATE OR JOIN A ROOM</button>'
+        '<button class="pbplay long" data-mode="online">CREATE OR JOIN A ROOM</button>'
         : offline + '<button class="pbmore" data-mode="online">Details</button>';
     } else {
       h += '<p class="small">Two players take turns on one device, with a handover screen between them. Flexible turn clock or a 30-minute match clock.</p>' +
-        '<button class="pbplay" data-mode="custom">SET UP THE GAME</button>';
+        '<button class="pbplay long" data-mode="custom">SET UP THE GAME</button>';
     }
     return h;
   }
@@ -193,9 +211,8 @@
     const mine = hist.filter(r => r.me != null && r.winner != null);
     const W = mine.filter(r => r.winner === r.me).length, L = mine.filter(r => r.winner >= 0 && r.winner !== r.me).length;
     const left = betaLeft();
-    let h = '<nav class="pbnav"><button class="on" data-mode="home">Play</button><button data-mode="ranked">🏆 Ranked</button><button data-mode="history">History</button><button data-hub="sandbox">Sandbox</button>' +
-      '<button data-mode="tools">Tools</button><button data-rep="open" data-v="feedback">Feedback</button></nav>';
-    h += '<section class="pbhero"><div class="kick"><span>MARVEL HERO RUSH · MATCH SIMULATOR</span>' + (betaOn() ? '<span class="betatag">BETA</span>' : '') + '</div>' +
+    // o2.16: bilah tab pindah ke luar #home (#simNav, selalu tampil di semua layar menu) — permintaan pemilik 13 Nov 2026.
+    let h = '<section class="pbhero"><div class="kick"><span>MARVEL HERO RUSH · MATCH SIMULATOR</span>' + (betaOn() ? '<span class="betatag">BETA</span>' : '') + '</div>' +
       '<h2>CALL. ATTACK.<br><em>RUSH.</em></h2><p>Every rule and card effect is handled for you. Pick a mode, pick your deck, press PLAY.</p>' +
       '<div class="hstats">' + (mine.length ? '<span><b>' + mine.length + '</b> <i>games</i></span><span class="w"><b>' + W + '</b> <i>wins</i></span><span class="l"><b>' + L + '</b> <i>losses</i></span>' : '<span><i>No games yet: start with the bot</i></span>') +
       '<span class="e"><i>Engine</i> <b>v' + esc(S.VERSION) + '</b></span></div><div class="fan">' + FAN_CARDS.map(f => '<i><img src="../images/en/' + f + '.jpg" alt="" loading="lazy" onerror="this.remove()"></i>').join('') + '</div></section>';

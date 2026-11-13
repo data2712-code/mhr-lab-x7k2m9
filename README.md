@@ -603,6 +603,21 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.16: tab menu tanpa pindah halaman, tombol PLAY panjang, Ranked berbahasa Indonesia — 13 November 2026 *(`sim/sim-modes.js`, `sim/sim-ranked.js`, `sim/sim-online.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #90. Permintaan pemilik:
+- **Tab menu Battle Sim berpindah di tempat:** bilah tab (Play · 🏆 Ranked · History · Sandbox · Tools · Feedback) dipindah ke luar
+  `#home` (`#simNav`) sehingga selalu tampil di semua layar menu; tab aktif menyala sesuai layar (Practice / Online / Find a match /
+  Same device termasuk tab Play). Tombol "← Menu" di Ranked, History, dan Tools disembunyikan; panel muncul dengan transisi
+  pudar singkat; halaman tidak lagi melompat ke atas setiap ganti tab (hanya bila bilah tab sudah tergulir keluar layar).
+- **Tombol PLAY berlabel panjang** (CREATE OR JOIN A ROOM, SET UP THE GAME, FIND A MATCH) tidak lagi keluar dari tombol: kelas
+  `.pbplay.long` (huruf lebih kecil, boleh dua baris). Dicek di lebar 1128, 1440, 390, dan 320.
+- **Ranked dalam bahasa Indonesia lengkap:** kalimat yang memuat angka atau teks tebal (cara kerja ranked, kartu rank, leaderboard,
+  label season, baris ranked di Cari lawan, perubahan poin di layar hasil) kini dibuat langsung dalam bahasa aktif; ganti EN/ID
+  menggambar ulang panel. Nama tier tetap bahasa Inggris (nama resmi).
+- Cache-buster: `sim-modes.js`, `sim-ranked.js`, `sim-online.js` `?v=o2.16`; `SIM_URL ?v=o2.16`; `sim-host.js?v=7.38-sim16`.
+  Server tidak perlu diubah.
+
 ### Data — Battle Sim o2.15: gambar kartu di hero menu — 13 November 2026 *(`sim/sim-modes.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 
 Permintaan pemilik: tiga kartu polos (merah, biru, kuning) di hero menu Battle Sim ("CALL. ATTACK. RUSH.") diganti gambar kartu

@@ -65,8 +65,11 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .lang button.on{background:var(--gold);color:#1a1405}
 /* Menu hub (riwayat #76): spanduk + baris mode yang membuka di tempat + pintasan; kolom kanan = beta & permainan terakhir */
 /* Menu v7 · A "Play Blade" (riwayat #81): kiri = pintasan, spanduk, permainan terakhir, beta; kanan = panel Play (mode → deck → PLAY) */
-#home{display:grid;grid-template-columns:minmax(0,1fr) 400px;grid-template-areas:"nav blade" "hero blade" "more blade";grid-template-rows:auto auto 1fr;gap:14px 18px;margin:12px 0;align-items:start}
-.pbnav{grid-area:nav;display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+#home{display:grid;grid-template-columns:minmax(0,1fr) 400px;grid-template-areas:"hero blade" "more blade";grid-template-rows:auto 1fr;gap:14px 18px;margin:12px 0;align-items:start}
+.pbnav{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:4px 0 0}
+#simNav:empty{display:none}
+/* o2.16: tab Ranked / History / Tools tidak butuh tombol "← Menu" lagi (bilah tab selalu tampil) */
+#panelRanked .hd>button[data-mode=home],#panelHistory .hd>button[data-mode=home],#panelCustom.tools .hd>button[data-mode=home]{display:none}
 .pbnav button{background:transparent;border:0;border-radius:0;color:var(--muted);font-weight:700;padding:8px 12px;border-bottom:2px solid transparent;margin-bottom:-1px;min-height:40px}
 .pbnav button.on{color:var(--paper);border-bottom-color:var(--gold)}.pbnav button:hover{color:var(--paper)}
 .pbhero{grid-area:hero;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:18px;padding:22px 22px 18px;min-height:250px;
@@ -107,9 +110,11 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .pbcode{width:100%;min-height:64px;box-sizing:border-box}
 .pbplay{margin-top:4px;min-height:62px;border-radius:14px;border:0;background:linear-gradient(180deg,#ffc53d,#e09a0c);color:#1a1200;font-family:var(--disp);font-size:26px;font-weight:900;letter-spacing:.08em;box-shadow:0 10px 26px rgba(242,176,30,.28)}
 .pbplay:hover{filter:brightness(1.06)}
+.pbplay{max-width:100%;white-space:normal;line-height:1.1;padding:10px 16px;overflow-wrap:anywhere}
+.pbplay.long{font-size:clamp(17px,4.6vw,21px);letter-spacing:.05em}   /* o2.16: label panjang tidak keluar dari tombol */
 .pbmore{background:transparent;border:0;color:var(--muted);font-size:12.5px;text-decoration:underline;padding:2px;min-height:0}
 @media (max-width:900px){
-  #home{grid-template-columns:1fr;grid-template-areas:"nav" "hero" "blade" "more";grid-template-rows:none}
+  #home{grid-template-columns:1fr;grid-template-areas:"hero" "blade" "more";grid-template-rows:none}
   .pblade{position:static}
   .pbmore2{grid-template-columns:1fr}
   .pbhero{min-height:0;padding:16px 16px 14px}.pbhero h2{font-size:38px}.pbhero .fan{transform:scale(.62);transform-origin:right bottom;right:8px;bottom:-26px}
@@ -175,6 +180,7 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .resume{grid-column:1/-1;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px;border-radius:14px;border:1px solid var(--you);background:linear-gradient(135deg,rgba(59,135,232,.18),var(--panel))}
 .resume .tx{flex:1;min-width:200px}.resume b{font-family:var(--disp);font-size:19px}
 .panelx{display:none;margin:12px 0}.panelx.on{display:block}
+.panelx.on{animation:simfade .16s ease-out}@keyframes simfade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 /* o2.12 — RANKED (sim-ranked.js, riwayat #87) */
 .rkb{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--rk);color:var(--rk);background:color-mix(in srgb,var(--rk) 14%,transparent);border-radius:999px;padding:3px 10px;font-weight:800;font-size:13px;white-space:nowrap}
 .rkb i{font-style:normal}.rkb.sm{font-size:11px;padding:1px 7px 1px 3px;gap:4px}.rkb .rki{width:20px;height:20px;flex:none}.rkb.sm .rki{width:16px;height:16px}
@@ -712,6 +718,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
       <div class="lang" id="langSw"><button data-lang="en">EN</button><button data-lang="id">ID</button></div>
     </div>
     <!-- Menu mode (riwayat #50), diisi sim-modes.js -->
+    <nav class="pbnav" id="simNav" aria-label="Battle Sim menu"></nav>   <!-- o2.16: tab selalu tampil, diisi sim-modes.js -->
     <div id="resumeBox"></div>
     <div id="home"></div>
     <div class="panelx" id="panelPractice"></div>
@@ -846,9 +853,9 @@ window.MHRSIM_BASE = '../';
 <script src="sim-ui.js?v=o2.14"></script>
 <script src="sim-sandbox.js?v=o2.14"></script>
 <script src="sim-report.js?v=o2.14"></script>
-<script src="sim-modes.js?v=o2.15"></script>
+<script src="sim-modes.js?v=o2.16"></script>
 <script src="sim-i18n.js?v=o2.14"></script>
-<script src="sim-online.js?v=o2.14"></script>
-<script src="sim-ranked.js?v=o2.14"></script>
+<script src="sim-online.js?v=o2.16"></script>
+<script src="sim-ranked.js?v=o2.16"></script>
 </body>
 </html>
