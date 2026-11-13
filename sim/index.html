@@ -454,6 +454,34 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
 .pktxt ul{margin:6px 0 0;padding-left:18px;max-height:30vh;overflow:auto;line-height:1.4}.pktxt li{margin-bottom:6px;white-space:pre-line}
 .abar .acts button:disabled small{color:#ff9b8c}
 .abar .acts .badge{align-self:center}
+/* riwayat #91: bayar biaya CALL Lv4+ di baki */
+.abar:has(.cpay){height:auto;min-height:100px;flex-wrap:wrap}
+.abar:has(.cpay) .hint{width:100%;flex-direction:row;gap:10px;align-items:baseline}
+.abar .acts:has(.cpay){overflow:visible;align-items:flex-start}
+.abar .acts .cpay .cpcancel{flex:none;padding:4px 14px;border-radius:999px;text-align:center}
+.abar .acts .cpay .cplink + .cpcancel{margin-left:6px}
+.abar .acts .cpay .cphead > .cpcancel:nth-child(2),.abar .acts .cpay .cphead > .cpl + .cpcancel{margin-left:auto}
+.abar .acts .cpay{flex:1 1 100%;min-width:0;display:flex;flex-direction:column;gap:6px}
+.cpay .cphead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cpay .badge.ok{border-color:#3f9a5d;color:#9fe0b2}.cpay .badge.bad{border-color:#7a3328;color:#ffb4a8}
+.cpay .cpl{font-size:12px;color:var(--muted)}.cpay .cpl.warn{color:#ffb4a8}
+.abar .acts .cpay button{min-width:0;max-width:none;flex:0 0 auto;min-height:0;text-align:left}
+.abar .acts .cpay .cplink{margin-left:auto;background:none;border:0;color:var(--gold);font-size:12px;padding:2px 4px;text-decoration:underline}
+.cpay .cpcards{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:2px}
+.abar .acts .cpay .cpchip{display:flex;flex-direction:row;align-items:baseline;gap:5px;width:auto;flex:0 0 auto;padding:4px 9px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-weight:600}
+.cpay .cpchip b{font-family:var(--disp);font-size:14px;color:var(--gold)}
+.cpay .cpchip .nm{font-size:12px;line-height:1.15;color:var(--paper)}
+.cpay .cpchip small{font-size:10.5px;color:var(--muted);margin:0;white-space:nowrap}
+.cpay .cpchip.fd{border-style:dashed}
+.abar .acts .cpay .cpchip.on{background:#2a2008;border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.cpay .cpchip.on::after{content:'✓';font-size:12px;color:var(--gold2);font-weight:700}
+.cpay .cpchip.over{opacity:.5}
+.cpay .cpsug,.cpay .cpdest{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.cpay .cpsug .cpl,.cpay .cpdest .cpl{flex:0 0 auto;margin-right:2px}
+.abar .acts .cpay .cpq{font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;border-color:#5a4a1a;flex:0 1 auto}
+.abar .acts .cpay .cpq.on{background:#2a2008;border-color:var(--gold);color:var(--gold2)}
+.abar .acts .cpay .cpdest button.pri{flex:0 0 auto;min-width:84px;text-align:center;min-height:34px;font-size:13px}
+.cpay .cpdest.dim .cpl{font-style:italic}
 .abar .acts button.rpsb{flex:1 1 0;min-width:0;text-align:center;font-size:15px}
 .abar .ord{font-size:11px;color:var(--muted);display:block;margin-top:3px}
 .abar .ord b{color:#ff9b8c}
@@ -625,6 +653,21 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   .abar .hint .ttl{font-size:13px}
   .abar.sheet .acts{flex-wrap:wrap;overflow:visible}
   .abar.sheet .acts button{flex:1 1 140px;min-width:0;max-width:none;min-height:48px;font-size:12.5px;padding:8px 10px}
+  .abar.sheet .acts .cpay button{flex:0 0 auto;min-height:0;padding:6px 8px}
+  .abar.sheet .cpay .cpcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible}
+  .abar.sheet .acts .cpay .cpchip{width:auto;flex:none;padding:5px 6px;flex-direction:column;align-items:flex-start;gap:1px;border-radius:9px}
+  .abar.sheet .cpay .cpchip .nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .abar.sheet .cpay .cpchip small{overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .abar.sheet .cpay .cpchip.on::after{content:'✓ cost';font-size:10px}
+  .abar.sheet .cpay .cpsug .cpl,.abar.sheet .cpay .cpdest .cpl{flex:0 0 100%}
+  .abar.sheet .acts .cpay .cpq{flex:1 1 auto}
+  .abar.sheet .cpay .cpchip .nm{font-size:11.5px}
+  .abar.sheet .acts .cpay .cpq{flex:1 1 auto}
+  .abar.sheet .acts .cpay .cpdest button.pri{flex:1 1 64px;min-width:0;min-height:44px;padding:6px 4px}
+  .abar.sheet .acts .cpay .cpcancel{min-height:34px;padding:4px 16px}
+  .abar.sheet:has(.cpay){max-height:58dvh}
+  .abar.sheet:has(.cpay) .hint{flex-direction:column;gap:0}
+  #game.sheetOn .handcards .card.sel,#game.sheetOn .handcards .card.can.sel{z-index:5 !important}
   .abar .acts .infab{display:none}
   /* pelat */
   .plate{gap:8px;padding:4px 8px;height:52px;box-sizing:border-box}
@@ -840,22 +883,22 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
 window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.32-sd56en2" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
-<script src="../data.js?v=7.02-lgs1110" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.14"></script>
-<script src="sim-cards.js?v=o2.14"></script>
-<script src="sim-cards-bp01.js?v=o2.14"></script>
-<script src="sim-cards-s4.js?v=o2.14"></script>
-<script src="sim-cards-sp01.js?v=o2.14"></script>
-<script src="sim-cards-t6.js?v=o2.14"></script>
-<script src="sim-bot.js?v=o2.14"></script>
-<script src="sim-sound.js?v=o2.14"></script>
-<script src="sim-shadow.js?v=o2.14"></script>
-<script src="sim-ui.js?v=o2.14"></script>
-<script src="sim-sandbox.js?v=o2.14"></script>
-<script src="sim-report.js?v=o2.14"></script>
-<script src="sim-modes.js?v=o2.16"></script>
-<script src="sim-i18n.js?v=o2.14"></script>
-<script src="sim-online.js?v=o2.16"></script>
-<script src="sim-ranked.js?v=o2.16"></script>
+<script src="../data.js?v=7.38-saweria" onerror="window.MHRSIM_DATA_FAIL=true"></script>
+<script src="sim.js?v=o2.17"></script>
+<script src="sim-cards.js?v=o2.17"></script>
+<script src="sim-cards-bp01.js?v=o2.17"></script>
+<script src="sim-cards-s4.js?v=o2.17"></script>
+<script src="sim-cards-sp01.js?v=o2.17"></script>
+<script src="sim-cards-t6.js?v=o2.17"></script>
+<script src="sim-bot.js?v=o2.17"></script>
+<script src="sim-sound.js?v=o2.17"></script>
+<script src="sim-shadow.js?v=o2.17"></script>
+<script src="sim-ui.js?v=o2.17"></script>
+<script src="sim-sandbox.js?v=o2.17"></script>
+<script src="sim-report.js?v=o2.17"></script>
+<script src="sim-modes.js?v=o2.17"></script>
+<script src="sim-i18n.js?v=o2.17"></script>
+<script src="sim-online.js?v=o2.17"></script>
+<script src="sim-ranked.js?v=o2.17"></script>
 </body>
 </html>

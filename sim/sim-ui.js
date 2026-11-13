@@ -792,6 +792,7 @@
     const others = tr.querySelectorAll('.acts > :not(.infab)').length;
     const sheet = others > 0 || !!ui.msg;
     tr.classList.toggle('sheet', sheet);
+    $('game').classList.toggle('sheetOn', sheet && !ui.peek);
     // Riwayat #57 (studi RushDee): "Lihat papan" — lembar disembunyikan sebentar; kembali otomatis saat keputusan berganti.
     const key = G.actions.length + ':' + (G.prompt ? G.prompt.type + G.prompt.p : '');
     if (ui.peekKey !== key) { ui.peekKey = key; ui.peek = false; }
@@ -816,7 +817,7 @@
     const T = (a, b) => '<b>' + a + '</b>' + (b ? '<span>' + b + '</span>' : '');
     if (ui.mode === 'call-cost') {
       const need = S.getLv(G, ui.sel), have = ui.cost.reduce((n, i) => n + S.costLv(G, i), 0);
-      return T('Pick the cost: total Lv ' + have + '/' + need, 'Tap your FIELD cards to Retreat (face-down = Lv1)');
+      return T('Pick the cost: total Lv ' + have + '/' + need, have === need ? 'Tap a glowing area, or a button below' : 'Tap cards in the panel below (face-down = Lv1)');
     }
     if (ui.mode === 'call-dest' || ui.mode === 'move-dest') return T('Choose a zone', 'Tap a glowing area');
     if (ui.mode === 'drop-base') return T('CALL face-up or set face-down?', 'Choose in the sheet below');
@@ -988,7 +989,7 @@
     const atkMode = myTurnPrompt('attack');
     const rtMode = myTurnPrompt('retarget');
     const tgSlots = isTop ? ((atkMode && ui.atk) ? S.targetsFor(G, ui.atk).map(t => t.slot) : rtMode ? S.targetsFor(G, G.prompt.a).map(t => t.slot) : []) : [];
-    const destMode = (ui.mode === 'call-dest' || ui.mode === 'move-dest') && !isTop && p === actor();
+    const destMode = (ui.mode === 'call-dest' || ui.mode === 'move-dest' || costReady()) && !isTop && p === actor();
     const arrMode = myTurnPrompt('arrange') && !isTop && p === actor();
     const bat = arrMode && ui.arr ? ui.arr : P.bat;
     const side = isTop ? 'top' : 'bottom';
@@ -1121,12 +1122,61 @@
   }
   function callModeActs() {
     if (ui.mode === 'drop-base') return '<button class="pri" data-act="dropCallBase">CALL to BASE</button><button data-act="deploy">Base Deployment (face-down, draw 1)</button><button data-act="cancel">Cancel</button>';
-    if (ui.mode === 'call-cost') {
-      const lv = S.getLv(G, ui.sel), sum = ui.cost.reduce((s, i) => s + S.costLv(G, i), 0);
-      return '<span class="badge">Lv ' + sum + '/' + lv + '</span><button class="pri" data-act="costDone" ' + (sum === lv ? '' : 'disabled') + '>' + (ui.dropDest ? 'CALL to ' + esc(S.SLOT_NAME[ui.dropDest]) : 'Next: destination') + '</button><button data-act="cancel">Cancel</button>';
-    }
+    if (ui.mode === 'call-cost') return costPanelHTML();
     if (ui.mode === 'call-dest' || ui.mode === 'move-dest') return '<button data-act="cancel">Cancel</button>';
     return '';
+  }
+
+  /* Riwayat #91 (permintaan pemilik): bayar biaya CALL / COUNTER CALL Lv4+ langsung di baki, tanpa melihat papan dulu.
+     (1) kartu FIELD yang boleh jadi biaya tampil sebagai chip (Lv, BATTLE/BASE, face-down = Lv1), ketuk untuk memilih;
+     (2) "Quick picks": kombinasi sah dari S.costOptions sebagai pilihan opsional — TIDAK PERNAH dipilih otomatis (pemilik:
+         pemain bisa punya strategi lain); (3) begitu total Lv pas, tombol tujuan muncul di baki yang sama (tanpa "Next"),
+         area di papan juga menyala dan bisa diketuk; (4) bila kartu di-drag ke area lebih dulu, tujuan itu sudah terkunci. */
+  function costNeed() { return ui.sel ? S.getLv(G, ui.sel) : 0; }
+  function costSum() { return ui.cost.reduce((n, i) => n + S.costLv(G, i), 0); }
+  function costReady() { return ui.mode === 'call-cost' && !!ui.sel && costSum() === costNeed(); }
+  function costPool() { const p = G.prompt.p; return S.fieldCards(G, p).filter(i => !S.costBanned(G, i, p)); }
+  const shortNm = i => S.nameOf(G, i).replace(/^「[^」]*」\s*/, '');
+  function costWhere(i) { const L = S.locate(G, i); return L && L.zone === 'bat' ? S.SLOT_NAME[L.slot] : 'BASE'; }
+  const DESTS = S.SLOTS.concat('BASE');
+  function costDestName(d) { return d === 'BASE' ? 'BASE' : S.SLOT_NAME[d]; }
+  // Kombinasi sah (ada minimal satu tujuan yang boleh). Urutan netral: kartu BASE & face-down lebih dulu, lalu Power
+  // terendah, lalu jumlah kartu paling sedikit. Hanya saran; pemain memilih sendiri.
+  function costSuggestions() {
+    const p = G.prompt.p, lv = costNeed();
+    const okFor = c => (ui.dropDest ? [ui.dropDest] : DESTS).some(d => !S.check(G, { t: ui.callType, c: ui.sel, to: d, cost: c }));
+    const score = c => {
+      const bat = c.filter(i => S.locate(G, i).zone === 'bat').length, fu = c.filter(i => !G.inst[i].fd).length;
+      const pw = c.reduce((n, i) => n + (S.locate(G, i).zone === 'bat' ? S.getPower(G, i) : 0), 0);
+      return [bat, pw, fu, c.length];
+    };
+    const cmp = (a, b) => { for (let k = 0; k < a.length; k++) if (a[k] !== b[k]) return a[k] - b[k]; return 0; };
+    return S.costOptions(G, p, lv).filter(okFor).map(c => ({ c, k: score(c) })).sort((x, y) => cmp(x.k, y.k)).slice(0, 3).map(x => x.c);
+  }
+  function costChip(i) {
+    const on = ui.cost.includes(i), fd = !!G.inst[i].fd, lv = S.costLv(G, i);
+    const over = !on && costSum() + lv > costNeed();
+    return '<button class="cpchip' + (on ? ' on' : '') + (over ? ' over' : '') + (fd ? ' fd' : '') + '" data-act="costTog" data-c="' + i + '">' +
+      '<b>Lv' + lv + '</b><span class="nm">' + esc(fd ? 'Face-down' : shortNm(i)) + '</span><small>' + esc(costWhere(i)) + (fd ? ' · ' + esc(shortNm(i)) : '') + '</small></button>';
+  }
+  function costPanelHTML() {
+    const need = costNeed(), sum = costSum(), ready = sum === need;
+    const pool = costPool(), sug = costSuggestions();
+    ui.costSug = sug;
+    const same = c => c.length === ui.cost.length && c.every(i => ui.cost.includes(i));
+    let h = '<div class="cpay"><div class="cphead"><span class="badge' + (ready ? ' ok' : sum > need ? ' bad' : '') + '">Lv ' + sum + '/' + need + '</span>' +
+      (ready || sum > need ? '<span class="cpl">' + esc(ready ? 'Cost ready' : 'Too high: remove a card') + '</span>' : '') +
+      (ui.cost.length ? '<button class="cplink" data-act="costClear">Clear</button>' : '') + '<button class="cpcancel" data-act="cancel">Cancel</button></div>';
+    h += '<div class="cpcards">' + pool.map(costChip).join('') + '</div>';
+    if (sug.length) h += '<div class="cpsug"><span class="cpl">Quick picks (optional)</span>' + sug.map((c, k) =>
+      '<button class="cpq' + (same(c) ? ' on' : '') + '" data-act="costSet" data-k="' + k + '">' + esc(c.map(i => (G.inst[i].fd ? 'Face-down' : shortNm(i)) + ' Lv' + S.costLv(G, i)).join(' + ')) + '</button>').join('') + '</div>';
+    if (ready) {
+      const dests = ui.dropDest && destOkWith(ui.dropDest) ? [ui.dropDest] : DESTS.filter(d => destOkWith(d));
+      h += '<div class="cpdest"><span class="cpl">' + esc(ui.callType === 'ccall' ? 'COUNTER CALL to' : 'CALL to') + '</span>' +
+        (dests.length ? dests.map(d => '<button class="pri" data-act="callTo" data-to="' + d + '">' + esc(costDestName(d)) + '</button>').join('')
+          : '<span class="cpl warn">' + esc('No area is free with this cost. Choose other cards.') + '</span>') + '</div>';
+    } else h += '<div class="cpdest dim"><span class="cpl">' + esc('Where to place it appears when the total is exactly Lv' + need + '.') + '</span></div>';
+    return h + '</div>';
   }
 
   /* ---------------- kartu terpilih: aksi (desktop: tab Card; HP: popover bawah) ---------------- */
@@ -1228,6 +1278,7 @@
     return r;
   }
   function destOk(dest) {
+    if (ui.mode === 'call-cost') return costReady() && destOkWith(dest);
     if (ui.mode === 'call-dest') return !S.check(G, { t: ui.callType, c: ui.sel, to: dest, cost: ui.cost });
     if (ui.mode === 'move-dest') return !S.check(G, { t: 'bbmove', c: ui.sel, to: dest });
     return false;
@@ -1245,7 +1296,7 @@
     return h + '<span class="pv">vs ' + esc(S.nameOf(G, d)) + ' (' + pd + '): ' + (pa > pd ? '<b class="w">Win the Fight</b>' : pa < pd ? '<b class="l">Lose the Fight, your attacker Retreats</b>' : '<b class="d">BOTH LOSE</b>') + '</span> · locked in once declared (303.2.a.4.5)';
   }
   function callModeHint() {
-    if (ui.mode === 'call-cost') return esc('Choose cards on your FIELD to Retreat for this ' + (ui.callType === 'ccall' ? 'COUNTER CALL' : 'CALL') + ' until the combined Lv is exactly ' + S.getLv(G, ui.sel) + '. Each Face-Down Card counts as Lv1.');
+    if (ui.mode === 'call-cost') return esc(costReady() ? 'Cost ready. Choose where to place it below, or tap a glowing area.' : 'Choose cards on your FIELD to Retreat for this ' + (ui.callType === 'ccall' ? 'COUNTER CALL' : 'CALL') + ' until the combined Lv is exactly ' + S.getLv(G, ui.sel) + '. Each Face-Down Card counts as Lv1.');
     return esc('Choose a highlighted destination (a BATTLE area or the BASE).');
   }
   /* Riwayat #66 (paket B): di HP petunjuk hanya muat dua baris, jadi kalimat panjang terpotong. Untuk Action Phase dan
@@ -1256,7 +1307,7 @@
     const pr = G.prompt;
     if (ui.ctrl[pr.p] === 'bot' || !myTurnPrompt() || (net.on && (pr.p !== net.seat || net.pending))) return '';
     const sp = s => '<span>' + esc(s) + '</span>';
-    if (ui.mode === 'call-cost') return sp('Tap your own cards on the FIELD to pay the cost: total Lv ' + ui.cost.reduce((n, i) => n + S.costLv(G, i), 0) + '/' + S.getLv(G, ui.sel) + '.');
+    if (ui.mode === 'call-cost') return costReady() ? sp('Choose where to place it, or tap a glowing area.') : sp('Tap cards below to pay the cost: total Lv ' + costSum() + '/' + costNeed() + '.');
     if (ui.mode === 'call-dest' || ui.mode === 'move-dest') return sp('Tap a glowing area to place the card.');
     switch (pr.type) {
       case 'main':
@@ -1477,6 +1528,13 @@
       case 'openPick': ui.pickClosed = false; render(); return;
       case 'pickHide': ui.pickClosed = true; closeOv(); render(); return;
       case 'pickDone': { const cs = ui.pick.slice(); ui.pick = []; ui.pickTouched = false; ui.pickClosed = false; act({ t: 'choose', cards: cs }); return; }
+      case 'costTog': {
+        const i = t.dataset.c;
+        ui.cost = ui.cost.includes(i) ? ui.cost.filter(x => x !== i) : ui.cost.concat(i); render(); return;
+      }
+      case 'costSet': { const c = (ui.costSug || [])[+t.dataset.k]; if (c) { ui.cost = c.slice(); render(); } return; }
+      case 'costClear': ui.cost = []; render(); return;
+      case 'callTo': if (costReady() && destOkWith(t.dataset.to)) act({ t: ui.callType, c: ui.sel, to: t.dataset.to, cost: ui.cost.slice() }); return;
       case 'costDone':
         if (ui.dropDest && destOkWith(ui.dropDest)) { act({ t: ui.callType, c: ui.sel, to: ui.dropDest, cost: ui.cost.slice() }); return; }
         ui.dropDest = null; ui.mode = 'call-dest'; render(); return;
@@ -1530,6 +1588,13 @@
     render();
   }
   function onSlot(slot, side) {
+    if (ui.mode === 'call-cost') {
+      if (side !== 'bottom') { tip("That is your opponent's side. Tap a glowing area on your side."); return; }
+      if (!costReady()) { tip('First choose the cost: total Lv ' + costSum() + '/' + costNeed() + '.'); return; }
+      if (destOk(slot)) act({ t: ui.callType, c: ui.sel, to: slot, cost: ui.cost.slice() });
+      else tip('This card cannot go there. Tap a glowing area.');
+      return;
+    }
     if (ui.mode === 'call-dest' && side === 'bottom') {
       if (destOk(slot)) act({ t: ui.callType, c: ui.sel, to: slot, cost: ui.cost.slice() });
       else tip('This card cannot go there. Tap a glowing area.');

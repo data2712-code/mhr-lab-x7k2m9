@@ -603,6 +603,25 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.17: bayar biaya CALL Lv4+ langsung di panel (lebih ringkas, terutama di HP) — 13 November 2026 *(`sim/sim-ui.js`, `sim/sim-i18n.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #91. Permintaan pemilik: CALL / COUNTER CALL karakter Lv4+ terasa tidak mulus — pemain harus membuka
+"Look at the board" untuk melihat kartu di BASE, memilih biaya, lalu menekan "Next: destination" dan mengetuk area.
+- **Biaya dipilih di panel:** semua kartu FIELD yang boleh jadi biaya tampil sebagai chip (Lv, nama, BATTLE/BASE;
+  kartu tertutup = Lv1 + nama aslinya). Ketuk untuk memilih/melepas, penghitung `Lv x/5`, tombol Clear dan Cancel.
+  Di HP chip berupa kisi 4 kolom di lembar bawah, jadi BASE tidak perlu dilihat di papan.
+- **Quick picks (optional):** sampai 3 kombinasi sah dari mesin (BASE & kartu tertutup lebih dulu, lalu Power terendah).
+  Sesuai keputusan pemilik **tidak pernah dipilih otomatis**, termasuk bila hanya ada satu kombinasi.
+- **Tujuan di panel yang sama:** begitu total Lv pas, tombol `CALL to FRONT / WING 1 / WING 2 / BACK / BASE` muncul
+  (area yang kosong karena kartunya jadi biaya ikut aktif) dan area di papan menyala — langkah "Next: destination" hilang.
+- **Seret dulu tetap bisa:** bila kartu Lv4+ di-drag ke area, panel hanya menampilkan tombol CALL ke area itu.
+- Perbaikan: di HP kartu HAND terpilih tidak lagi menutupi tombol di lembar bawah. Teks baru diterjemahkan (ID).
+- Alur di HP: 7–8 ketukan → 4 (kartu → CALL → Quick pick/chip → tujuan). Mesin tidak berubah (v0.14.0); server tidak perlu
+  di-deploy.
+- Sumber simulator disinkronkan: `mhr-simulator\app` sebelumnya masih versi riwayat #85; kini disamakan dengan `sim/` o2.16
+  (#86–#90) sebelum perubahan ini, lalu `sim/` dibuat ulang dengan `site-sim.js` (daftar berkas kini termasuk `sim-ranked.js`).
+- Cache-buster: semua skrip `sim/` `?v=o2.17`; `SIM_URL ?v=o2.17`; `sim-host.js?v=7.39-sim17`.
+
 ### Data — Battle Sim o2.16: tab menu tanpa pindah halaman, tombol PLAY panjang, Ranked berbahasa Indonesia — 13 November 2026 *(`sim/sim-modes.js`, `sim/sim-ranked.js`, `sim/sim-online.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #90. Permintaan pemilik:
