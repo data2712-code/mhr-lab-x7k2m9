@@ -197,6 +197,7 @@ window.DUKUNG = {
   metode: [
     { jenis: 'gopay', label: 'GoPay', nomor: '081384279992' },
     { jenis: 'kofi',  label: 'Ko-fi', url: 'https://ko-fi.com/data2712' },
+    { jenis: 'saweria', label: 'Saweria', url: 'https://saweria.co/deteprtm' },   // 13 Nov 2026
   ],
   emailSaran: 'dataanggi2712@yahoo.co.id',
   teks: {

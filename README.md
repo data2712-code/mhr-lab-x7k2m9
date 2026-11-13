@@ -603,6 +603,12 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Dukungan: tambah Saweria di halaman Support — 13 November 2026 *(`data.js`, `index.html`)*
+
+Permintaan pemilik: link Saweria sebagai opsi lain untuk memberi dukungan. `data.js` → `window.DUKUNG.metode` mendapat
+`{ jenis:'saweria', label:'Saweria', url:'https://saweria.co/deteprtm' }` (tombol **Open**, tab baru, sama seperti Ko-fi).
+`index.html`: ikon 🧡 untuk jenis `saweria` di `DUKUNG_ICON`; `data.js?v=7.38-saweria`.
+
 ### v7.38 — Ranked: tier Myth, Cosmic, Genius Burden + ikon rank; Season 1 sampai 31 Desember — 12 November 2026 *(`home-ui.js`, `sim-host.js`, `index.html`, `sim/sim-ranked.js`, `sim/index.html`, 9 berkas baru `images/rank/*.svg`; fungsi SQL di `mhr_decklab_v737_sim_ranked.sql` diperbarui + migrasi kecil `mhr_decklab_v738_sim_ranked_tiers.sql`)*
 
 Permintaan pemilik (lanjutan v7.37):
