@@ -81,6 +81,9 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .pbhero .fan i:nth-child(1){transform:rotate(-10deg);background:linear-gradient(160deg,#7a2a22,#2a0f0c)}
 .pbhero .fan i:nth-child(2){transform:rotate(-2deg) translateY(-14px);background:linear-gradient(160deg,#2b5aa0,#0f2142)}
 .pbhero .fan i:nth-child(3){transform:rotate(8deg);background:linear-gradient(160deg,#a07b12,#3d2e06)}
+.pbhero .fan i{overflow:hidden;background-color:#111}.pbhero .fan img{display:block;width:100%;height:100%;object-fit:cover}   /* gambar kartu asli; gradasi = cadangan bila gambar gagal */
+.pbhero .kick,.pbhero h2,.pbhero p,.pbhero .hstats{position:relative;z-index:1}.pbhero p,.pbhero .hstats{text-shadow:0 1px 6px rgba(0,0,0,.9)}
+.pbhero .hstats .e{background:rgba(10,12,16,.82);padding:2px 9px;border-radius:999px;text-shadow:none}   /* terbaca di atas gambar kartu */
 .pbmore2{grid-area:more;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
 .pblade{grid-area:blade;position:sticky;top:10px;display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
 .pblbl{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:800;margin-top:2px}
@@ -843,7 +846,7 @@ window.MHRSIM_BASE = '../';
 <script src="sim-ui.js?v=o2.14"></script>
 <script src="sim-sandbox.js?v=o2.14"></script>
 <script src="sim-report.js?v=o2.14"></script>
-<script src="sim-modes.js?v=o2.14"></script>
+<script src="sim-modes.js?v=o2.15"></script>
 <script src="sim-i18n.js?v=o2.14"></script>
 <script src="sim-online.js?v=o2.14"></script>
 <script src="sim-ranked.js?v=o2.14"></script>

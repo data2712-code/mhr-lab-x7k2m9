@@ -18,6 +18,8 @@
   const VIEWS = { home: 'home', practice: 'panelPractice', history: 'panelHistory', online: 'panelOnline', find: 'panelOnline', custom: 'panelCustom', tools: 'panelCustom', ranked: 'panelRanked' };   // ranked: o2.12 (riwayat #87)
   let histTab = null;                    // #85: default Online (akun) bila tersedia, kalau tidak Offline
   const MODE_LABEL = { practice: 'Practice vs Bot', friend: 'Friend · same device', custom: 'Custom game', sandbox: 'Sandbox' };
+  // Kartu di hero menu Battle Sim (permintaan pemilik 13 Nov 2026): kiri, tengah, kanan. Gambar Inggris (images/en/).
+  const FAN_CARDS = ['SP01-021_MR', 'SD06-001_SEC', 'SD01-001_SEC'];
   const LEVEL_LABEL = { easy: 'Easy', normal: 'Normal', hard: 'Hard', expert: 'Expert' };
   const CLOCK_LABEL = { off: 'No clock', standard: 'Standard 2:00 / 0:30', relaxed: 'Relaxed 5:00 / 1:00', long: 'Long 10:00 / 2:00', match30: 'Match 30:00' };
   let view = 'home';
@@ -196,7 +198,7 @@
     h += '<section class="pbhero"><div class="kick"><span>MARVEL HERO RUSH · MATCH SIMULATOR</span>' + (betaOn() ? '<span class="betatag">BETA</span>' : '') + '</div>' +
       '<h2>CALL. ATTACK.<br><em>RUSH.</em></h2><p>Every rule and card effect is handled for you. Pick a mode, pick your deck, press PLAY.</p>' +
       '<div class="hstats">' + (mine.length ? '<span><b>' + mine.length + '</b> <i>games</i></span><span class="w"><b>' + W + '</b> <i>wins</i></span><span class="l"><b>' + L + '</b> <i>losses</i></span>' : '<span><i>No games yet: start with the bot</i></span>') +
-      '<span class="e"><i>Engine</i> <b>v' + esc(S.VERSION) + '</b></span></div><div class="fan"><i></i><i></i><i></i></div></section>';
+      '<span class="e"><i>Engine</i> <b>v' + esc(S.VERSION) + '</b></span></div><div class="fan">' + FAN_CARDS.map(f => '<i><img src="../images/en/' + f + '.jpg" alt="" loading="lazy" onerror="this.remove()"></i>').join('') + '</div></section>';
     h += '<aside class="pblade"><div class="pblbl">MODE</div><div class="pbmodes">' +
       PB_MODES.map(([k, ic, t, s]) => '<button data-pbmode="' + k + '"' + (k === pbMode ? ' class="on"' : '') + '><b><i class="pbic">' + ic + '</i>' + esc(t) + '</b><span>' + esc(s) + '</span></button>').join('') +
       '</div><div id="pbBody"></div></aside>';

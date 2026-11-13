@@ -603,6 +603,15 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.15: gambar kartu di hero menu — 13 November 2026 *(`sim/sim-modes.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Permintaan pemilik: tiga kartu polos (merah, biru, kuning) di hero menu Battle Sim ("CALL. ATTACK. RUSH.") diganti gambar kartu
+asli, dari kiri ke kanan: **SP01-021_MR**, **SD06-001_SEC**, **SD01-001_SEC** (gambar Inggris `images/en/`, sudah ada di repo).
+- `sim/sim-modes.js`: daftar `FAN_CARDS`; bila gambar gagal dimuat, gradasi warna lama tetap tampil sebagai cadangan.
+- `sim/index.html`: gambar mengisi bingkai kartu (`object-fit: cover`); teks hero diberi bayangan dan label "Engine" diberi latar
+  gelap supaya tetap terbaca di atas gambar. Dicek di desktop 1440 dan HP 390.
+- Cache-buster: `sim-modes.js?v=o2.15`, `SIM_URL ?v=o2.15`, `sim-host.js?v=7.38-sim15`. Server tidak perlu diubah.
+
 ### Data — Battle Sim o2.14: perbaikan dari laporan beta (bug + alur seperti RushDee + Bot Expert) — 13 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #88. Permintaan pemilik: cek semua laporan Battle Sim (tabel `sim_feedback`, 13 laporan), bahas, lalu
