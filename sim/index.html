@@ -362,6 +362,15 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .basebox .slot{width:calc(var(--mini) + 6px);height:calc(var(--mini) * 1.4 + 6px);padding:2px}
 .basebox .card{--cw:var(--mini)}
 .basebox .card .st{font-size:7px}
+/* Laporan #3/#4/#5/#8 (13 Nov 2026): BASE di desktop terlalu kecil → kartu BASE ±80% kartu BATTLE, Power/R terbaca. */
+@media (min-width:821px){
+  .basebox{--bcw:calc(var(--cw) * .8);grid-template-columns:repeat(6,calc(var(--bcw) + 6px))}
+  .side-opp .basecol{align-self:start;padding-top:6px}
+  .side-me .basecol{align-self:end;padding-bottom:6px}
+  .basebox .slot{width:calc(var(--bcw) + 6px);height:calc(var(--bcw) * 1.4 + 6px)}
+  .basebox .card{--cw:var(--bcw)}
+  .basebox .card .st{font-size:clamp(8px,calc(var(--bcw) * .14),11px)}
+}
 /* BATTLE belah ketupat (keputusan 4 Nov 2026); FRONT lawan berhadapan dengan FRONT kita */
 .battle{justify-self:center;display:grid;grid-template-columns:repeat(3,calc(var(--cw) + 10px));grid-template-rows:repeat(4,calc((var(--ch) + 10px) / 2));gap:2px 14px;align-items:center}
 .side-opp .battle{grid-template-areas:". b ." "w1 b w2" "w1 f w2" ". f ."}
@@ -426,6 +435,14 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
 .abar .acts button.go{background:#2a2008;border-color:var(--gold);color:var(--gold2)}
 .abar .acts button.bad{border-color:#7a3328}
 .abar .acts button.warn{border-color:#7a3328;color:#ffb4a8}
+/* Laporan #8/#2/#7 (13 Nov 2026): Pass / End = biru (lanjut), aksi = emas; Hints OFF; teks efek di panel pilihan */
+.abar .acts button.next,.sheet .acts button.next{background:#1c4a8a;border-color:#4d8ff0;color:#fff}.abar .acts button.next small{color:#c7dcff}
+#btnHints[data-m="off"] i{opacity:.35;filter:grayscale(1)}
+#game.nohint .oc:not(.under),#game.nohint .ohint span,#game.nohint .abar:not(.err) #hint>span:not(.ttl){display:none}
+.pksrc{display:flex;gap:10px;align-items:flex-start;background:#161b22;border:1px solid #2c3542;border-radius:10px;padding:8px;margin:6px 0 8px;text-align:left}
+.pksrc .card{--cw:58px;cursor:default}.pksrc p{margin:3px 0 0;font-size:12px;line-height:1.4;color:#c9d2de;white-space:pre-line}
+.pktxt{text-align:left;margin:8px 0 0;font-size:12px;color:#c9d2de}.pktxt summary{cursor:pointer;color:var(--gold2);font-weight:700}
+.pktxt ul{margin:6px 0 0;padding-left:18px;max-height:30vh;overflow:auto;line-height:1.4}.pktxt li{margin-bottom:6px;white-space:pre-line}
 .abar .acts button:disabled small{color:#ff9b8c}
 .abar .acts .badge{align-self:center}
 .abar .acts button.rpsb{flex:1 1 0;min-width:0;text-align:center;font-size:15px}
@@ -479,6 +496,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
 #acts{flex:none;border-top:1px solid var(--line);padding:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
 #acts button{padding:7px 4px;font-size:12px}
 #acts button.wide{grid-column:1/4}
+#acts{grid-template-columns:repeat(3,minmax(0,1fr))}#acts button{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* rincian stat */
 .bd{width:100%;border-collapse:collapse;font-size:11.5px;margin:4px 0}
 .bd td{padding:2px 0;border-bottom:1px dashed #2a3340}
@@ -583,6 +601,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   .tli .tx{display:inline;-webkit-line-clamp:unset}
   .fab{display:flex;grid-area:fab;align-items:center;justify-content:center;width:74px;height:74px;border-radius:50%;padding:6px;background:var(--gold);color:#1a1405;border:3px solid #ffd56b;font-family:var(--disp);font-weight:900;font-size:13px;line-height:1.05;letter-spacing:.04em;text-align:center;white-space:normal;box-shadow:0 6px 20px rgba(242,176,30,.35),0 4px 14px rgba(0,0,0,.5)}
   .fab.warn{background:#2a1a17;color:#ffb4a8;border-color:#7a3328;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+  .fab.next{background:#1c4a8a;color:#fff;border-color:#4d8ff0;box-shadow:0 6px 20px rgba(59,135,232,.35),0 4px 14px rgba(0,0,0,.5)}   /* laporan #8: lanjut = biru */
   .fab:active{transform:scale(.95)}
   .pill{gap:8px;padding:2px 10px}
   .pill .t{display:none}
@@ -614,6 +633,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   .plate .basebox .card.fd{border-style:dashed;border-color:#8a94a3}
   .plate .basebox.drop,.plate .basebox:has(.slot.hl){box-shadow:0 0 0 2px var(--gold)}
   /* petunjuk satu kalimat di area FIELD lawan */
+  #board .card{touch-action:none}   /* laporan #2: seret kartu papan di HP tanpa tahan lama */
   .ohint{display:block;position:absolute;left:50%;transform:translateX(-50%);top:32px;z-index:9;pointer-events:none;width:max-content;max-width:94%;text-align:center;padding:5px 12px;border-radius:10px;background:rgba(14,18,22,.82);border:1px solid #2c3542;font-size:11px;color:#c9d2de;line-height:1.3}
   .ohint b{display:block;color:var(--gold);font-size:12.5px;font-family:var(--disp);letter-spacing:.03em}
   .ohint span{display:block}
@@ -788,6 +808,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
         <button id="btnUndo" title="Undo your last move (local test). In online games the opponent must agree."><i>↶</i> Undo</button>
         <button id="btnSound" title="Sound effects on/off">🔊</button>
         <button id="btnConf" title="Counter prompts: ON = always ask, AUTO = pass when you have nothing to use, OFF = always pass"><i>ON</i> <span>Counter prompts</span></button>
+        <button id="btnHints" title="Hints on/off"><i>💡</i> <span>Hints ON</span></button>
         <button id="btnConcede" title="Concede: you lose and the game ends now"><i>🏳</i> Concede</button>
         <button id="btnMenu" title="Back to the menu"><i>☰</i> Menu</button>
         <button class="dsk" id="btnCopy" title="Copy the log code to report a bug or resume later">⧉ Log code</button>
@@ -810,21 +831,21 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.32-sd56en2" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.02-lgs1110" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.12"></script>
-<script src="sim-cards.js?v=o2.12"></script>
-<script src="sim-cards-bp01.js?v=o2.12"></script>
-<script src="sim-cards-s4.js?v=o2.12"></script>
-<script src="sim-cards-sp01.js?v=o2.12"></script>
-<script src="sim-cards-t6.js?v=o2.12"></script>
-<script src="sim-bot.js?v=o2.12"></script>
-<script src="sim-sound.js?v=o2.12"></script>
-<script src="sim-shadow.js?v=o2.12"></script>
-<script src="sim-ui.js?v=o2.12"></script>
-<script src="sim-sandbox.js?v=o2.12"></script>
-<script src="sim-report.js?v=o2.12"></script>
-<script src="sim-modes.js?v=o2.12"></script>
-<script src="sim-i18n.js?v=o2.12"></script>
-<script src="sim-online.js?v=o2.12"></script>
-<script src="sim-ranked.js?v=o2.13"></script>
+<script src="sim.js?v=o2.14"></script>
+<script src="sim-cards.js?v=o2.14"></script>
+<script src="sim-cards-bp01.js?v=o2.14"></script>
+<script src="sim-cards-s4.js?v=o2.14"></script>
+<script src="sim-cards-sp01.js?v=o2.14"></script>
+<script src="sim-cards-t6.js?v=o2.14"></script>
+<script src="sim-bot.js?v=o2.14"></script>
+<script src="sim-sound.js?v=o2.14"></script>
+<script src="sim-shadow.js?v=o2.14"></script>
+<script src="sim-ui.js?v=o2.14"></script>
+<script src="sim-sandbox.js?v=o2.14"></script>
+<script src="sim-report.js?v=o2.14"></script>
+<script src="sim-modes.js?v=o2.14"></script>
+<script src="sim-i18n.js?v=o2.14"></script>
+<script src="sim-online.js?v=o2.14"></script>
+<script src="sim-ranked.js?v=o2.14"></script>
 </body>
 </html>

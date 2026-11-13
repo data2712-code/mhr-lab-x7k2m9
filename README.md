@@ -603,6 +603,53 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.14: perbaikan dari laporan beta (bug + alur seperti RushDee + Bot Expert) — 13 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #88. Permintaan pemilik: cek semua laporan Battle Sim (tabel `sim_feedback`, 13 laporan), bahas, lalu
+perbaiki. Keputusan pemilik dicatat di riwayat #88 (folder `mhr-simulator`).
+- **Mesin (`sim/sim.js`, `sim/sim-cards-bp01.js`, `sim/sim-cards-sp01.js`):**
+  - **Pym Arrow (BP01-099), laporan #6:** efeknya hanya terselesaikan **satu kali per kartu**. Bila dua karakter Lv4+ lawan
+    masuk bersamaan, trigger kedua dari kartu yang sama dibatalkan setelah yang pertama selesai (log: "… has already
+    resolved — its other trigger is cancelled"). Trigger yang belum terselesaikan tetap berjalan walau Pym Arrow sudah keluar
+    dari field (mis. dipilih sebagai target Retreat/Prune). Dua Pym Arrow di field = masing-masing satu kali. Penanda umum
+    `single: true` pada trigger.
+  - **Mr. Negative (SP01-061), laporan #12:** kartu yang dibalik oleh efeknya **boleh BATTLE-BASE MOVE** pada turn itu walau
+    baru masuk BASE turn itu (penanda `bbmOk`; label "just placed" tidak tampil untuk kartu itu).
+  - **Alasan ACTI lebih jelas, laporan #9:** dulu hanya "cannot be activated now"; sekarang menyebut sebabnya (zona salah,
+    sudah dipakai turn ini, atau syarat/biaya di kartu belum terpenuhi + teks kartunya). Jean Grey di laporan #9 memang
+    tidak memenuhi syarat (karakter BATTLE 2 vs 1).
+  - Laporan #13 (Antimatter vs Thor) dan #9 sudah sesuai aturan; tidak diubah. Versi mesin tetap 0.14.0.
+- **Tampilan (`sim/sim-ui.js`, `sim/index.html`), mengikuti interaksi RushDee:**
+  - **BASE lebih besar di desktop** (laporan #3/#4/#5/#8): satu baris 6 tempat, kartu ±80% ukuran kartu BATTLE, Power/R
+    terbaca. BASE lawan rata atas, BASE sendiri rata bawah. HP tidak berubah (BASE tetap di pelat).
+  - **Alur battle lebih cepat** (laporan #8): penyerang dipilih otomatis FRONT → WING 1 → WING 2 → BACK; mengetuk target
+    yang menyala (atau tombol target) **langsung menyerang** (AIR STRIKE ke area terisi tetap bertanya dulu). "Other
+    attacker" tetap ada; Undo tetap bisa di latihan.
+  - **Warna tombol** (laporan #8): Pass / End Action Phase = biru (lanjut), aksi (COUNTER CALL, Attack, Yes) = emas. Tombol
+    bulat di HP ikut biru untuk Pass/End. Pass tanpa pilihan lain berbunyi "Pass · let it through".
+  - **Hints ON/OFF** (laporan #2): tombol 💡 di bilah alat. OFF menyembunyikan pratinjau hasil serangan (WIN/LOSE di papan
+    dan di tombol target) serta kalimat panduan; tombol, sorotan kartu, dan pesan "tidak boleh" tetap. Disimpan per perangkat.
+  - **Cancel effect** (laporan #5): selama memilih target/pilihan untuk ACTI yang baru diaktifkan, tombol "Cancel effect"
+    mengembalikan permainan ke sebelum aktivasi (aman karena semua pilihan ditanya sebelum perubahan pertama). Hanya
+    permainan lokal; online belum (undo online butuh persetujuan lawan).
+  - **Panel pilihan kartu** (laporan #7 Knull): menampilkan kartu sumber + teks efeknya, daftar "Read the card texts" untuk
+    semua kartu pilihan (terbuka otomatis bila pilihannya tentang efek), dan tombol "👁 Look at the board".
+  - **HAND lawan tidak dihitung dua kali** (laporan #2): angka di rel kiri dihapus, cukup ✋ di pelat pemain.
+  - **Seret di HP** (laporan #2): kartu di papan (Reposition, serangan, pindah) langsung bisa diseret tanpa tahan lama.
+  - Bilah alat desktop: teks tombol tidak lagi terpotong keluar panel.
+- **Bot Expert (`sim/sim-bot.js` v0.13), laporan #10:** level baru setelah Hard (menu Practice, Find a match → bot saat
+  menunggu). Lebih banyak kandidat & sampel, ikut menimbang pilihan efek, susunan Reposition, dan urutan efek; penilaian Rush
+  Point bertingkat. Tetap jujur (tidak melihat HAND lawan / urutan Deck). Uji 80 pertandingan: Expert vs Hard 49–31 (61%).
+- Dicek: 300 pertandingan random vs greedy + 150 greedy vs hard + 40 expert vs hard (14 deck uji, termasuk SD05/SD06) tanpa
+  aksi ilegal atau error; log laporan #6 diputar ulang (trigger kedua Pym Arrow batal); skenario Mr. Negative; uji tampilan
+  desktop 1280/1440/1920 dan HP 390×844 (permainan penuh tanpa error JS); Cancel effect di Sandbox.
+- Cache-buster: semua skrip `sim/` `?v=o2.14`; `SIM_URL` → `?v=o2.14`; `sim-host.js?v=7.38-sim14`.
+- **Server Battle Sim belum diubah.** Pertandingan online tetap memakai aturan lama di server (Pym Arrow & Mr. Negative)
+  sampai server di-deploy ulang dengan `sim.js`, `sim-cards-bp01.js`, `sim-cards-sp01.js` terbaru (bersama `cards.js` dan
+  `sim-cards-t6.js` terbaru, lihat entri o2.11). Perubahan tampilan dan Bot Expert langsung berlaku setelah push.
+- Masih terbuka: laporan #11 (permainan online macet) tanpa log, belum bisa ditelusuri. Saran dukungan anonim (laporan #8)
+  sudah terjawab oleh Saweria (entri di bawah).
+
 ### Data — Dukungan: tambah Saweria di halaman Support — 13 November 2026 *(`data.js`, `index.html`)*
 
 Permintaan pemilik: link Saweria sebagai opsi lain untuk memberi dukungan. `data.js` → `window.DUKUNG.metode` mendapat

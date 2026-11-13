@@ -84,6 +84,7 @@
     $('btnUndo').onclick = undo;
     $('btnConcede').onclick = concede;
     $('btnConf').onclick = confCycle;
+    if ($('btnHints')) $('btnHints').onclick = hintsToggle;
     $('btnMenu').onclick = () => {
       if (net.on) { if (G && G.result || confirm('Leave this online game? Your seat is kept for 2 minutes; open Battle Sim again to return.')) window.MHRSimOnline.leaveGame(); return; }
       const keep = G && !G.result && !ui.replay;
@@ -342,7 +343,7 @@
       ui.botTimer = setTimeout(() => {
         if (!G || !G.prompt || ui.ctrl[G.prompt.p] !== 'bot') return;
         const p = G.prompt.p;
-        const a = Bot.choose(G, ui.botLevel === 'easy' ? 'random' : ui.botLevel === 'hard' ? 'hard' : 'greedy', ui.botRng);
+        const a = Bot.choose(G, ui.botLevel === 'easy' ? 'random' : ui.botLevel === 'hard' ? 'hard' : ui.botLevel === 'expert' ? 'expert' : 'greedy', ui.botRng);
         const r = S.apply(G, a);
         if (!r.ok) { ui.msg = 'The test bot made an illegal action (report it to Claude with the log code): ' + r.err; render(); return; }
         ui.hist.push({ p, auto: true });
@@ -363,6 +364,22 @@
     ui.msg = ui.sandbox || ui.gmode === 'practice' ? 'Move undone.' : 'Move undone (test mode). Undo can reveal hidden information; use it for testing only.';
     resetSel(); step();
   }
+  /* Laporan #5 (13 Nov 2026): batalkan efek ACTI yang baru diaktifkan selama masih memilih target/biaya. Aman karena resolver
+     menanyakan semua pilihan SEBELUM perubahan pertama: permainan diputar ulang ke sebelum aktivasi. Hanya permainan lokal
+     (online: undo butuh persetujuan lawan). */
+  function canCancelEff() {
+    const m = ui.actiMark, pr = G && G.prompt;
+    return !!(m && pr && !net.on && !ui.replay && G.job && G.job.kind === 'acti' && G.job.id === m.jid && G.job.p === pr.p &&
+      ['choose', 'pick', 'yesno'].includes(pr.type) && ui.ctrl[pr.p] === 'human' && ui.hist.length >= m.n);
+  }
+  function cancelEffect() {
+    if (!canCancelEff()) return;
+    const n = ui.actiMark.n, o = S.parseLog(S.exportLog(G));
+    G = S.replay(o, n);
+    ui.hist.length = n; ui.clk = null; ui.sndN = G.log.length; ui.seenN = {}; ui.flashN = G.log.length; ui.toastN = G.log.length;
+    ui.actiMark = null; ui.pick = []; ui.pickTouched = false; ui.pickClosed = false; closeOv();
+    ui.msg = ''; resetSel(); tip('Effect cancelled. Nothing was paid or changed.'); step();
+  }
   /* Pengaturan konfirmasi window Counter (riwayat #79, pilihan pemilik; rujukan: Activation Confirmation di Master Duel).
      on   = selalu ditanya di Counter Step / Counter Phase;
      auto = Pass otomatis bila tidak ada COUNTER CALL / ACTI yang bisa dipakai (lawan bisa menebak dari Pass yang cepat);
@@ -377,6 +394,16 @@
     if (!net.on && humans().length !== 1) return 'on';
     let v = null; try { v = localStorage.getItem(KEY_CONF + (net.on ? '.online' : '.bot')); } catch (e) { v = null; }
     return CONF_NEXT[v] ? v : net.on ? 'on' : 'auto';
+  }
+  /* Laporan #2 (13 Nov 2026): petunjuk bisa dimatikan. OFF = pratinjau hasil serangan, kalimat panduan di baki dan di area
+     lawan disembunyikan; tombol, sorotan kartu yang bisa dipakai, dan pesan "tidak boleh" tetap tampil. Disimpan per perangkat. */
+  const KEY_HINTS = 'mhrsim.hints.v1';
+  function hintsOn() { let v = null; try { v = localStorage.getItem(KEY_HINTS); } catch (e) { v = null; } return v !== 'off'; }
+  function hintsToggle() {
+    const on = !hintsOn();
+    try { localStorage.setItem(KEY_HINTS, on ? 'on' : 'off'); } catch (e) { /* abaikan */ }
+    tip(on ? 'Hints ON: outcome previews and step-by-step guidance are shown.' : 'Hints OFF: previews and guidance are hidden. Buttons and glowing cards stay.');
+    if (G) render();
   }
   function confCycle() {
     if (!G || ui.replay || (!net.on && humans().length !== 1)) return;
@@ -625,7 +652,7 @@
     }
     let tag = '';
     if (x.fd) tag = '<div class="fdv" aria-label="Face-down"><span>FACE-DOWN</span></div>';   // #65: kartu sendiri yang tertutup digelapkan + label (juga di pelat HP)
-    else if (opts.onField && x.enT === G.turn) tag = '<span class="tag new">just placed</span>';
+    else if (opts.onField && x.enT === G.turn && x.bbmOk !== G.turn) tag = '<span class="tag new">just placed</span>';
     else if (opts.onField && x.dclT === G.turn) tag = '<span class="tag done">attacked</span>';
     if (!G.vanilla && !S.hasResolver(x.no) && !/no effect text/i.test(S.textEn(c))) cls.push('nores');
     return '<div class="' + cls.concat(x.fd ? ['fd'] : []).join(' ') + '" data-iid="' + iid + '" title="' + esc(S.nameEn(c)) + '">' +
@@ -652,6 +679,9 @@
       cb.style.display = showC ? '' : 'none';
       if (showC && cb.dataset.m !== cm) { cb.dataset.m = cm; cb.innerHTML = '<i>' + cm.toUpperCase() + '</i> <span>Counter prompts</span>'; } }
     $('btnEditPos').style.display = ui.replay || G.result || net.on ? 'none' : '';
+    { const hb = $('btnHints'), hon = hintsOn(); $('game').classList.toggle('nohint', !hon);
+      if (hb && hb.dataset.m !== (hon ? 'on' : 'off')) { hb.dataset.m = hon ? 'on' : 'off'; hb.innerHTML = '<i>💡</i> <span>Hints ' + (hon ? 'ON' : 'OFF') + '</span>'; hb.title = 'Hints ' + (hon ? 'ON' : 'OFF') + ': outcome previews and step-by-step guidance. Click to turn ' + (hon ? 'off' : 'on') + '.'; } }
+    autoAttacker();
     $('btnSiaga').style.display = G.siaga && !ui.replay && !G.result ? '' : 'none';
     playEvents(v);
     if (needHandover()) {
@@ -690,6 +720,16 @@
     turnBanner(v);
     modals();
     updateClockView();
+  }
+  /* Laporan #8 (13 Nov 2026, alur seperti RushDee): penyerang dipilih otomatis berurutan FRONT → WING 1 → WING 2 → BACK,
+     jadi pemain cukup mengetuk target. "Other attacker" tetap bisa dipakai; pilihan manual tidak ditimpa. */
+  function autoAttacker() {
+    if (!myTurnPrompt('attack') || ui.atk || net.on && net.seat !== G.prompt.p) return;
+    const key = G.turn + ':' + G.prompt.stage + ':' + G.log.length;
+    if (ui.atkManual === key) return;
+    const atk = S.attackersNow(G); if (!atk.length) return;
+    const bat = G.P[G.prompt.p].bat, order = S.SLOTS.map(s => bat[s]).filter(i => i && atk.includes(i));
+    ui.atk = order[0] || atk[0]; ui.tg = null; ui.atkAuto = key;
   }
   /* Riwayat #66 (paket B, masukan pemilik dari HP): spanduk singkat tiap pergantian giliran, supaya jelas kapan giliran kita
      mulai. Tidak menghalangi ketukan (pointer-events:none), hilang sendiri. Tidak tampil di replay / mode dua pemain satu layar. */
@@ -747,7 +787,7 @@
     if (b) {
       b.classList.add('infab');
       const attrs = Array.from(b.attributes).filter(x => x.name.startsWith('data-')).map(x => x.name + '="' + esc(x.value) + '"').join(' ');
-      mz.insertAdjacentHTML('beforeend', '<button class="fab' + (b.dataset.act === 'noAtk' ? ' warn' : '') + '" id="fab" ' + attrs + '>' + FAB_LABEL[b.dataset.act] + '</button>');
+      mz.insertAdjacentHTML('beforeend', '<button class="fab' + (b.dataset.act === 'noAtk' ? ' warn' : b.dataset.act === 'pass' || b.dataset.act === 'endAction' ? ' next' : '') + '" id="fab" ' + attrs + '>' + FAB_LABEL[b.dataset.act] + '</button>');
     }
     const others = tr.querySelectorAll('.acts > :not(.infab)').length;
     const sheet = others > 0 || !!ui.msg;
@@ -936,11 +976,11 @@
     return '<div class="ohand"><span class="zl">HAND · ' + esc(G.names[p]).toUpperCase() + '</span><div class="handcards">' + G.P[p].hand.map(i => cardHTML(i)).join('') + '</div></div>';
   }
   function railHTML(p, isTop) {
-    const P = G.P[p], hideHand = isTop && viewer() !== 'all';
+    const P = G.P[p];
     return '<div class="rail"><div class="pile"><span class="stk">' + P.deck.length + '</span>DECK</div>' +
       '<div class="pile click" data-act="pile" data-p="' + p + '" data-z="ret" title="Open RETREAT"><span class="stk">' + P.ret.length + '</span>RETREAT</div>' +
       '<div class="pile click" data-act="pile" data-p="' + p + '" data-z="void" title="Open VOID"><span class="stk v">' + P.void.length + '</span>VOID</div>' +
-      (hideHand ? '<div class="pile"><span class="stk v">' + P.hand.length + '</span>HAND</div>' : '') + '</div>';
+      '</div>';   // laporan #2: jumlah HAND lawan cukup di pelat pemain (✋), tidak diulang di sini
   }
 
   function halfHTML(p, isTop) {
@@ -1025,7 +1065,7 @@
   function abarCore(pr) {
     switch (pr.type) {
       case 'main':
-        return callModeActs() || (pileActis(false) + '<button class="pri" data-act="endAction">End Action Phase</button>');
+        return callModeActs() || (pileActis(false) + '<button class="next" data-act="endAction">End Action Phase</button>');
       case 'arrange':
         return '<button class="pri" data-act="arrSave">Confirm positions</button><button data-act="arrSkip">Skip</button>' + (ui.arr ? '<button data-act="arrReset">Reset</button>' : '');
       case 'attack': {
@@ -1033,7 +1073,9 @@
         if (!ui.tg) {
           const pl = attackPlan(ui.atk), order = S.SLOTS.filter(s => pl[s] && pl[s].cls !== 'out').sort((a, b) => pl[a].rank - pl[b].rank);
           const atks0 = S.attackersNow(G);
-          return order.map(s => '<button class="' + ({ rush: 'rush', win: 'go', both: '', lose: 'bad' })[pl[s].cls] + '" data-act="pickTg" data-slot="' + s + '">' + (pl[s].rank === 0 ? '★ ' : '') + S.SLOT_NAME[s] + ' · ' + esc(pl[s].a) + '<small>' + esc(pl[s].b) + '</small></button>').join('') +
+          const hon = hintsOn(), opp = G.P[1 - pr.p].bat;   // Hints OFF: tanpa pratinjau hasil (laporan #2)
+          return order.map(s => hon ? '<button class="' + ({ rush: 'rush', win: 'go', both: '', lose: 'bad' })[pl[s].cls] + '" data-act="pickTg" data-slot="' + s + '">' + (pl[s].rank === 0 ? '★ ' : '') + S.SLOT_NAME[s] + ' · ' + esc(pl[s].a) + '<small>' + esc(pl[s].b) + '</small></button>'
+            : '<button data-act="pickTg" data-slot="' + s + '">' + S.SLOT_NAME[s] + '<small>' + (opp[s] ? esc(S.nameOf(G, opp[s])) : 'Weakness') + '</small></button>').join('') +
             '<button class="warn" data-act="noAtk">No attack</button>' + (atks0.length > 1 ? '<button data-act="unpickAtk">Other attacker</button>' : '');
         }
         const atks = S.attackersNow(G);
@@ -1043,13 +1085,13 @@
       }
       case 'counter': return callModeActs() || counterActs(pr);
       case 'opt': case 'yesno':
-        return '<button class="pri" data-act="yes">Yes</button><button data-act="no">No</button>';
+        return '<button class="pri" data-act="yes">Yes</button><button data-act="no">No</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'order':
         return pr.jobs.map(j => '<button data-act="order" data-job="' + j.id + '"' + (j.older ? ' title="Triggered earlier and still waiting (RS-016)"' : '') + '>' + esc(j.label) + (j.older ? ' (earlier)' : '') + '</button>').join('');
       case 'choose':
-        return '<button data-act="openPick">Choose cards…</button>';
+        return '<button class="pri" data-act="openPick">Choose cards…</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'pick':
-        return pr.options.map(o => '<button data-act="pickOpt" data-v="' + esc(o.v) + '">' + esc(o.label) + '</button>').join('');
+        return pr.options.map(o => '<button data-act="pickOpt" data-v="' + esc(o.v) + '">' + esc(o.label) + '</button>').join('') + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'retarget': return airButtons(pr.a);
       case 'rps':
         return [['rock', '✊ Rock'], ['paper', '✋ Paper'], ['scissors', '✌ Scissors']].map(([v, l]) => '<button class="pri rpsb" data-act="rps" data-v="' + v + '">' + l + '</button>').join('');
@@ -1063,6 +1105,13 @@
       .map(o => '<button class="go" data-act="acti" data-c="' + o.c + '" data-eff="' + o.eff + '">' + esc(S.nameOf(G, o.c)) + ' (' + (S.locate(G, o.c).zone === 'ret' ? 'RETREAT' : 'VOID') + ')<small>ACTI: ' + esc(o.label) + '</small></button>').join('');
   }
   // AIR STRIKE (305.5): area lawan yang terisi boleh diserang sebagai Weakness.
+  // Laporan #8 (alur battle lebih cepat, seperti RushDee): mengetuk target yang menyala langsung menyerang. Hanya AIR STRIKE
+  // ke area terisi yang masih bertanya dulu (serang karakternya atau sebagai Weakness).
+  function quickAttack() {
+    if (!myTurnPrompt('attack') || !ui.atk || !ui.tg) { render(); return; }
+    if (airButtons(ui.atk)) { render(); return; }
+    act({ t: 'attack', a: ui.atk, tg: ui.tg });
+  }
   function airButtons(a) {
     if (!ui.tg || !a || !S.hasAbility(G, a, 'air')) return '';
     const d = G.P[1 - G.prompt.p].bat[ui.tg];
@@ -1186,7 +1235,7 @@
 
   function attackHint(who, pr) {
     if (!ui.atk) return esc(who) + ' · Battle Phase, ' + ({ F: 'FRONT', W: 'WING', B: 'BACK' })[pr.stage] + ' stage: click a Character highlighted in yellow (or drag it onto a target).';
-    if (!ui.tg) return '<b>' + esc(S.nameOf(G, ui.atk)) + '</b> (Power ' + S.getPower(G, ui.atk) + ', R' + S.getR(G, ui.atk) + ') — choose a target. Every reachable area shows what would happen; an empty area is a <b>Weakness</b> (+1 Rush Point). Previews use the board as it is now: your opponent can still respond in the Counter Step.' +
+    if (!ui.tg) return '<b>' + esc(S.nameOf(G, ui.atk)) + '</b> (Power ' + S.getPower(G, ui.atk) + ', R' + S.getR(G, ui.atk) + ') — tap a target to attack at once. Every reachable area shows what would happen; an empty area is a <b>Weakness</b> (+1 Rush Point). Previews use the board as it is now: your opponent can still respond in the Counter Step.' +
       (S.hasAbility(G, ui.atk, 'air') ? ' AIR STRIKE: an occupied area can also be attacked as a Weakness (305.5).' : '');
     let h = '<b>' + esc(S.nameOf(G, ui.atk)) + '</b> (Power ' + S.getPower(G, ui.atk) + ', R' + S.getR(G, ui.atk) + ') — ';
     if (!ui.tg) return h + "choose a red target: an opponent's Character or a Weakness." + (S.hasAbility(G, ui.atk, 'air') ? ' AIR STRIKE: an occupied area can also be attacked as a Weakness (305.5).' : '');
@@ -1318,9 +1367,14 @@
       const lab = i => { const L = S.locate(G, i); return L ? ({ hand: 'HAND', bat: S.SLOT_NAME[L.slot], base: 'BASE', att: 'attached', ret: 'RETREAT', void: 'VOID', deck: 'Deck' })[L.zone] + (L.p !== pr.p ? ' · opponent' : '') : ''; };
       if (pr.forced && !ui.pick.length && !ui.pickTouched) ui.pick = pr.from.slice();   // satu-satunya pilihan: sudah terisi, tinggal Confirm
       const okN = ui.pick.length >= pr.min && ui.pick.length <= pr.max;
-      openOv('<h3>' + esc(pr.label) + '</h3><p class="small">' + esc(pr.text) + '</p><p class="small muted">' + (pr.forced ? 'This is the only possible choice. It is already selected: press Confirm.' : 'Choose ' + (pr.min === pr.max ? pr.min : pr.min + '–' + pr.max) + ' card(s).') + '</p><div class="handcards">' +
+      // Laporan #7 (Knull): tampilkan teks efek kartu sumber dan teks setiap kartu pilihan, seperti panel pilihan RushDee.
+      const srcI = G.job && G.job.c, srcC = srcI && G.inst[srcI] && S.card(G.inst[srcI].no);
+      const srcBox = srcC && (canSee(srcI) || !G.inst[srcI].fd) ? '<div class="pksrc">' + cardHTML(srcI, { reveal: true }).replace('data-iid', 'data-x') + '<div><b>' + esc(S.nameOf(G, srcI)) + '</b><p>' + esc(S.textEn(srcC)) + '</p></div></div>' : '';
+      const txt = pr.from.map(i => { const c = S.card(G.inst[i].no); return c && S.textEn(c) ? '<li><b>' + esc(S.nameOf(G, i)) + '</b> — ' + esc(S.textEn(c)) + '</li>' : ''; }).join('');
+      openOv('<h3>' + esc(pr.label) + '</h3>' + srcBox + '<p class="small">' + esc(pr.text) + '</p><p class="small muted">' + (pr.forced ? 'This is the only possible choice. It is already selected: press Confirm.' : 'Choose ' + (pr.min === pr.max ? pr.min : pr.min + '–' + pr.max) + ' card(s).') + '</p><div class="handcards">' +
         pr.from.map(i => '<div style="text-align:center">' + cardHTML(i, { cls: ui.pick.includes(i) ? 'cost' : '', reveal: true }).replace('data-iid', 'data-pick') + '<div class="small muted">' + esc(lab(i)) + '</div></div>').join('') + '</div>' +
-        '<div class="row"><button class="pri" data-act="pickDone" ' + (okN ? '' : 'disabled') + '>Confirm ' + ui.pick.length + '</button><button data-act="pickHide">View board</button></div>');
+        (txt ? '<details class="pktxt"' + (/effect/i.test((pr.text || '') + ' ' + (pr.label || '')) ? ' open' : '') + '><summary>Read the card texts</summary><ul>' + txt + '</ul></details>' : '') +
+        '<div class="row"><button class="pri" data-act="pickDone" ' + (okN ? '' : 'disabled') + '>Confirm ' + ui.pick.length + '</button><button data-act="pickHide">👁 Look at the board</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '') + '</div>');
       return;
     }
     if (pr && myTurnPrompt('discard')) {
@@ -1404,7 +1458,7 @@
         render(); return;
       }
       case 'closeSide': ui.sideOn = false; render(); return;
-      case 'pickTg': ui.tg = t.dataset.slot; render(); return;
+      case 'pickTg': ui.tg = t.dataset.slot; quickAttack(); return;
       case 'ccallCard': {
         ui.sel = t.dataset.c; ui.callType = 'ccall'; ui.cost = [];
         ui.mode = S.getLv(G, ui.sel) >= 4 ? 'call-cost' : 'call-dest'; render(); return;
@@ -1415,7 +1469,8 @@
         const lv = S.getLv(G, ui.sel);
         ui.callType = a; ui.cost = []; ui.mode = lv >= 4 ? 'call-cost' : 'call-dest'; render(); return;
       }
-      case 'acti': ui.pileOpen = false; closeOv(); act({ t: 'acti', c: t.dataset.c || ui.sel, eff: t.dataset.eff }); return;
+      case 'acti': { ui.pileOpen = false; closeOv(); ui.actiMark = net.on ? null : { n: ui.hist.length, jid: G.jid + 1 }; if (!act({ t: 'acti', c: t.dataset.c || ui.sel, eff: t.dataset.eff })) ui.actiMark = null; return; }
+      case 'cancelEff': cancelEffect(); return;
       case 'yes': act({ t: G.prompt.type === 'opt' ? 'opt' : 'yesno', yes: true }); return;
       case 'no': act({ t: G.prompt.type === 'opt' ? 'opt' : 'yesno', yes: false }); return;
       case 'order': act({ t: 'order', job: +t.dataset.job }); return;
@@ -1435,7 +1490,7 @@
       case 'arrSkip': act({ t: 'arrange', map: null }); return;
       case 'arrReset': ui.arr = null; ui.arrPick = null; render(); return;
       case 'pickAtk': ui.atk = t.dataset.iid; ui.tg = null; render(); return;
-      case 'unpickAtk': ui.atk = null; ui.tg = null; render(); return;
+      case 'unpickAtk': ui.atkManual = G.turn + ':' + G.prompt.stage + ':' + G.log.length; ui.atk = null; ui.tg = null; render(); return;
       case 'clearTg': ui.tg = null; render(); return;
       case 'doAtk': act({ t: 'attack', a: ui.atk, tg: ui.tg }); return;
       case 'airAtk': {
@@ -1493,7 +1548,7 @@
       return;
     }
     if (myTurnPrompt('attack') && ui.atk && side === 'top') {
-      if (S.targetsFor(G, ui.atk).some(t => t.slot === slot)) { ui.tg = slot; render(); }
+      if (S.targetsFor(G, ui.atk).some(t => t.slot === slot)) { ui.tg = slot; quickAttack(); }
       else tip('This attacker cannot reach that area. Tap a glowing target.');
       return;
     }
@@ -1580,7 +1635,7 @@
       });
     }
     const passNote = G.win && G.win.passes ? G.names[1 - p] + ' already passed: passing closes the window' : G.names[1 - p] + ' may still respond after you';
-    return h + '<button class="pri" data-act="pass">Pass<small>' + esc(passNote) + '</small></button>';
+    return h + '<button class="next" data-act="pass">' + (h ? 'Pass' : 'Pass · let it through') + '<small>' + esc(passNote) + '</small></button>';
   }
   function destOkWith(dest) { return !S.check(G, { t: ui.callType, c: ui.sel, to: dest, cost: ui.cost }); }
 
@@ -1886,7 +1941,10 @@
       const d = ui.drag; if (!d) return;
       const dist = Math.hypot(e.clientX - d.x, e.clientY - d.y);
       if (!d.started) {
-        if (d.touch && dist > 10) { clearTimeout(d.timer); ui.drag = null; return; }        // gulir layar, bukan seret
+        // Laporan #2 (13 Nov 2026): di HP, kartu di papan (Reposition / serangan / pindah) langsung bisa diseret tanpa tahan lama;
+        // papan HP tidak bisa digulir (satu layar), jadi gerakan jari di atas kartu papan selalu berarti seret.
+        if (d.touch && dist > 10) { if (narrow() && d.el.closest('#board') && d.spec.kind !== 'call') startDrag(d, e.clientX, e.clientY); else { clearTimeout(d.timer); ui.drag = null; return; } }
+        else if (d.touch) return;
         if (!d.touch && dist > 6) startDrag(d, e.clientX, e.clientY); else return;
       }
       e.preventDefault();

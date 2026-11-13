@@ -923,7 +923,7 @@
           const up = A.base(A.p).filter(i => !A.isFd(i)), down = A.set(A.p);
           if (to && A.place(A.self, to, 'Mr. Negative')) {
             up.forEach(i => A.cover(i, 'Mr. Negative'));
-            down.forEach(i => A.flip(i, 'Mr. Negative'));
+            down.forEach(i => { if (A.flip(i, 'Mr. Negative')) A.bbmOk(i); });   // laporan #12: boleh BBM turn ini
           }
         }
       }],

@@ -18,7 +18,7 @@
   const VIEWS = { home: 'home', practice: 'panelPractice', history: 'panelHistory', online: 'panelOnline', find: 'panelOnline', custom: 'panelCustom', tools: 'panelCustom', ranked: 'panelRanked' };   // ranked: o2.12 (riwayat #87)
   let histTab = null;                    // #85: default Online (akun) bila tersedia, kalau tidak Offline
   const MODE_LABEL = { practice: 'Practice vs Bot', friend: 'Friend · same device', custom: 'Custom game', sandbox: 'Sandbox' };
-  const LEVEL_LABEL = { easy: 'Easy', normal: 'Normal', hard: 'Hard' };
+  const LEVEL_LABEL = { easy: 'Easy', normal: 'Normal', hard: 'Hard', expert: 'Expert' };
   const CLOCK_LABEL = { off: 'No clock', standard: 'Standard 2:00 / 0:30', relaxed: 'Relaxed 5:00 / 1:00', long: 'Long 10:00 / 2:00', match30: 'Match 30:00' };
   let view = 'home';
 
@@ -160,7 +160,7 @@
     let h = '';
     if (pbMode === 'practice') {
       h += '<div class="pblbl">YOUR DECK' + (on ? ' · SAVED TO YOUR ACCOUNT' : '') + '</div>' + pbDecksHTML() +
-        '<div class="pblbl">BOT LEVEL</div>' + seg('hublevel', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']], p.level) +
+        '<div class="pblbl">BOT LEVEL</div>' + seg('hublevel', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard'], ['expert', 'Expert']], p.level) +
         '<div id="hubErr" class="err"></div><button class="pbplay" data-hub="play">PLAY</button><button class="pbmore" data-mode="practice">More options (name, bot deck, clock, first player)</button>';
     } else if (pbMode === 'find') {
       h += on ? '<div class="pblbl">YOUR DECK · SAVED TO YOUR ACCOUNT</div>' + pbDecksHTML() +
@@ -246,10 +246,10 @@
       '<div class="f"><label>Your deck</label><select id="prDeck">' + yourDeckOptions() + '</select>' + yourDeckNote() + '</div>' +
       '<div class="f full" id="prCodeWrap" style="display:none"><label>Deck link or code</label><textarea id="prCode" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder">' + esc(p.code || '') + '</textarea></div>' +
       '<div class="f"><label>Bot deck</label><select id="prBot"><option value="random">Random test deck</option>' + deckOptions(false) + '</select></div>' +
-      '<div class="f"><label>Bot level</label>' + seg('level', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']], p.level) + '</div>' +
+      '<div class="f"><label>Bot level</label>' + seg('level', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard'], ['expert', 'Expert']], p.level) + '</div>' +
       '<div class="f"><label>Who goes first</label>' + seg('first', [['random', 'Random'], ['you', 'You'], ['bot', 'Bot']], p.first) + '</div>' +
       '<div class="f"><label>Turn clock</label>' + seg('clock', [['off', 'No clock'], ['standard', 'Standard'], ['relaxed', 'Relaxed'], ['match30', 'Match 30:00']], p.clock) + '</div>' +
-      '</div><p class="small muted">The bot is a training opponent: Easy picks random legal moves, Normal plays greedy moves, Hard tries its options ahead before choosing (it never sees your HAND or the Deck order). Match 30:00 simulates an official match: one shared 30-minute clock and no per-turn limit; when time runs out, most Rush Points wins, then most cards left in the Deck, then rock-paper-scissors. Undo is always allowed in practice. Finished games are saved in Match history (offline).</p>' +
+      '</div><p class="small muted">The bot is a training opponent: Easy picks random legal moves, Normal plays greedy moves, Hard tries its options ahead before choosing, Expert tries more options and also weighs effect choices and positions (neither sees your HAND or the Deck order). Match 30:00 simulates an official match: one shared 30-minute clock and no per-turn limit; when time runs out, most Rush Points wins, then most cards left in the Deck, then rock-paper-scissors. Undo is always allowed in practice. Finished games are saved in Match history (offline).</p>' +
       '<div id="prErr" class="err"></div><div class="startbar"><button class="pri" id="prStart">▶ Start practice</button></div></div>';
     $('prDeck').value = p.deck; if (!$('prDeck').value) $('prDeck').selectedIndex = 0;
     $('prBot').value = p.bot; if (!$('prBot').value) $('prBot').value = 'random';
@@ -317,7 +317,7 @@
     $('panelOnline').innerHTML = '<div class="hd"><button data-mode="home">← Menu</button><h2>Online play</h2></div>' +
       '<div class="box"><p><b>Not available yet.</b> Online play arrives with the online version on mhrdecklab.com, after all testing is finished.</p>' +
       '<ul class="small" style="color:#c9d2de;margin:6px 0 0 18px;padding:0">' +
-      '<li><b>Find a match</b>: play someone online. If nobody is found within 45 seconds, you are offered a game against a bot (Easy, Normal or Hard) while you keep waiting; a bot is always shown as a bot.</li>' +
+      '<li><b>Find a match</b>: play someone online. If nobody is found within 45 seconds, you are offered a game against a bot (Easy, Normal, Hard or Expert) while you keep waiting; a bot is always shown as a bot.</li>' +
       '<li><b>Private room with a link</b>: create a room, send the link to a friend, and pick a clock: Standard, Relaxed, Long, no clock, or Match 30:00 (official-match simulation).</li>' +
       '<li>If your phone switches app or tab, your seat is kept for a short time and the simulator reconnects you to the game when you come back.</li>' +
       '<li>Online games are saved in your account and shown in Performance under the Simulator group, with online and offline statistics kept separate.</li></ul></div>';

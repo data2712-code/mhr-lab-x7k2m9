@@ -384,7 +384,7 @@
         '<p class="small muted"><b id="fqN">' + (st.waiting || 1) + '</b> <span>player(s) searching now</span> · <span>your deck:</span> <span data-noi18n>' + esc(fq.deck ? fq.deck.name : 'Deck') + '</span></p><div class="spin"></div>';
       if (mode === 'offer') h += '<div class="box" style="margin-top:12px;text-align:left"><p style="margin:0 0 8px"><b>No opponent yet.</b> <span>Play the bot while you keep searching?</span></p>' +
         '<p class="small muted">The bot is always shown as a bot and the game is not saved to your online history. When a player is found you are asked whether to switch.</p>' +
-        seg('fqLevel', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard']], 'normal') + '<div class="startbar"><button class="pri" data-on="fqBot">🤖 Play the bot while waiting</button></div></div>';
+        seg('fqLevel', [['easy', 'Easy'], ['normal', 'Normal'], ['hard', 'Hard'], ['expert', 'Expert']], 'normal') + '<div class="startbar"><button class="pri" data-on="fqBot">🤖 Play the bot while waiting</button></div></div>';
     }
     h += '</div><div id="onErr" class="err">' + esc(fq.err || '') + '</div>';
     el.innerHTML = h; tr();
@@ -519,7 +519,7 @@
     const s = await session();
     if (!fq.on) return;
     fq.botGame = true;
-    ui.launch({ decks: [mine.list, bot.list], names: [(s && s.username) || 'Player', 'Bot · ' + ({ easy: 'Easy', normal: 'Normal', hard: 'Hard' })[level]], ctrl: ['human', 'bot'], first: 'random', timer: 'off', botLevel: level, gmode: 'practice',
+    ui.launch({ decks: [mine.list, bot.list], names: [(s && s.username) || 'Player', 'Bot · ' + ({ easy: 'Easy', normal: 'Normal', hard: 'Hard', expert: 'Expert' })[level]], ctrl: ['human', 'bot'], first: 'random', timer: 'off', botLevel: level, gmode: 'practice',
       deckNames: [fq.deck.name || 'Deck', bot.name || 'Deck'], youIdx: 0 });
     banner();
   }

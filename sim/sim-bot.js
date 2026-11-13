@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR BATTLE SIM — BOT (sim-bot.js)          v0.12.1 · Easy/Normal/Hard
+   MHR BATTLE SIM — BOT (sim-bot.js)          v0.13 · Easy/Normal/Hard/Expert
    ===================================================================
    Dipakai untuk uji otomatis dan sebagai lawan mode Latihan (riwayat #50–#51). Tiga gaya:
    - 'random' : memilih acak di antara aksi sah (level Easy).
@@ -209,14 +209,81 @@
     return best;
   }
 
+  /* ---------- 'expert' (laporan #10, keputusan pemilik 13 Nov 2026: Bot Hard terlalu mudah → level Expert) ----------
+     Sama jujurnya dengan Hard (salinan dikaburkan: tidak melihat HAND lawan, urutan Deck, atau hasil acak), tetapi:
+     - lebih banyak kandidat & sampel, waktu berpikir lebih panjang;
+     - ikut menimbang pilihan efek (choose), susunan Reposition (arrange), dan urutan efek (order);
+     - penilaian Rush Point bertingkat (makin dekat 9 makin berharga) + selisih kartu HAND.
+     Uji 80 pertandingan bot-vs-bot (13 Nov 2026): Expert menang 49–31 (61%) melawan Hard. Simulasi sampai akhir giliran
+     lawan (opt.long) diuji dan justru lebih lemah (14–26), jadi tidak dipakai bawaan. */
+  const EXP_TYPES = { main: 1, attack: 1, counter: 1, opt: 1, yesno: 1, pick: 1, retarget: 1, choose: 1, arrange: 1, order: 1 };
+  const EXP_MAX_CAND = 22, EXP_BUDGET_MS = 750, EXP_SAMPLES = 3;
+  function chooseCands(st, rng) {
+    const pr = st.prompt, out = [], seen = new Set();
+    const add = cards => { const k = cards.slice().sort().join(','); if (!seen.has(k) && cards.length >= pr.min && cards.length <= pr.max) { seen.add(k); out.push({ t: 'choose', cards }); } };
+    const hi = pr.from.slice().sort((a, b) => value(st, b) - value(st, a));
+    add(hi.slice(0, pr.max)); add(hi.slice().reverse().slice(0, pr.max)); if (pr.min < pr.max) add(hi.slice(0, pr.min));
+    for (let k = 0; k < 10 && out.length < 8; k++) { const n = pr.min + Math.floor(rng() * (pr.max - pr.min + 1)); add(shuffleArr(rng, pr.from.slice()).slice(0, n)); }
+    return out;
+  }
+  function arrangeCands(st, rng) {
+    const P = st.P[st.prompt.p], chars = S.SLOTS.map(s => P.bat[s]).filter(Boolean), out = [{ t: 'arrange', map: null }];
+    const g = chooseGreedy(st, rng); if (g.map) out.push(g);
+    for (let k = 0; k < 6; k++) {
+      const sl = shuffleArr(rng, S.SLOTS.slice()), map = { F: null, W1: null, W2: null, B: null };
+      chars.forEach((c, i) => { map[sl[i]] = c; });
+      if (!S.check(st, { t: 'arrange', map })) out.push({ t: 'arrange', map });
+    }
+    return out;
+  }
+  function rolloutLong(c, rng, turn0) {
+    for (let k = 0; k < 420 && !c.result && c.prompt && c.turn <= turn0 + 1; k++) {
+      const a = c.prompt.type === 'rps' ? { t: 'rps', v: pick(rng, RPS) } : chooseGreedy(c, rng);
+      if (!S.apply(c, a).ok) break;
+    }
+  }
+  function evaluateX(st, me) {
+    if (st.result) return st.result.winner === me ? 1e6 : st.result.winner < 0 ? 0 : -1e6;
+    const o = 1 - me, rm = st.P[me].rp, ro = st.P[o].rp;
+    // Rush Point makin berharga mendekati 9 (RP_WIN); ancaman lawan di 7–8 dihitung berat.
+    const rpv = r => 1300 * r + (r >= 6 ? 400 * (r - 5) : 0);
+    return rpv(rm) - rpv(ro) + boardScore(st, me) - boardScore(st, o) + 25 * (st.P[me].hand.length - st.P[o].hand.length);
+  }
+  function chooseExpert(st, rng, opt) {
+    const pr = st.prompt;
+    const o = Object.assign({ cand: EXP_MAX_CAND, ms: EXP_BUDGET_MS, n: EXP_SAMPLES }, opt || {});
+    if (!pr || !(o.types || EXP_TYPES)[pr.type] || st.vanilla && pr.type === 'counter') return chooseGreedy(st, rng);
+    let acts = pr.type === 'choose' ? chooseCands(st, rng) : pr.type === 'arrange' ? arrangeCands(st, rng)
+      : pr.type === 'order' ? pr.jobs.map(j => ({ t: 'order', job: j.id })) : S.legalActions(st, { limit: 300 });
+    if (acts.length <= 1) return acts[0] || chooseGreedy(st, rng);
+    const g = chooseGreedy(st, rng), gk = JSON.stringify(g);
+    const rest = shuffleArr(rng, acts.filter(a => JSON.stringify(a) !== gk));
+    const cand = [g].concat(rest.slice(0, o.cand - 1));
+    const me = pr.p, t0 = Date.now();
+    let best = g, bestV = -Infinity;
+    for (let ci = 0; ci < cand.length; ci++) {
+      if (ci > 0 && Date.now() - t0 > o.ms) break;
+      let v = 0;
+      for (let s = 0; s < o.n; s++) {
+        const c = hiddenClone(st, me, rng);
+        if (!S.apply(c, cand[ci]).ok) { v = -Infinity; break; }
+        if (o.long) rolloutLong(c, rng, st.turn); else rollout(c, rng, st.turn);
+        v += (o.ev === 'h' ? evaluate : evaluateX)(c, me);
+      }
+      v = v / o.n + (ci === 0 ? 60 : 0) + rng();
+      if (v > bestV) { bestV = v; best = cand[ci]; }
+    }
+    return best;
+  }
+
   // Jankenpon (O-14): pilihan acak murni, tidak melihat pilihan lawan.
   const RPS = ['rock', 'paper', 'scissors'];
   function choose(st, style, rng) {
     if (st.prompt && st.prompt.type === 'rps') return { t: 'rps', v: pick(rng, RPS) };
-    return (style === 'random' ? chooseRandom : style === 'hard' ? chooseHard : chooseGreedy)(st, rng);
+    return (style === 'random' ? chooseRandom : style === 'hard' ? chooseHard : style === 'expert' ? chooseExpert : chooseGreedy)(st, rng);
   }
 
-  const API = { makeRng, choose, chooseRandom, chooseGreedy, chooseHard };
+  const API = { makeRng, choose, chooseRandom, chooseGreedy, chooseHard, chooseExpert };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   else root.MHRBot = API;
 })(typeof window !== 'undefined' ? window : this);

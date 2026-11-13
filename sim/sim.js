@@ -418,7 +418,7 @@
   }
 
   /* ---------------- membuat pertandingan (303.1) ---------------- */
-  function newInst(iid, no, p) { return { iid, no, owner: p, fd: false, enT: -1, bbm: -1, atkT: -1, atkN: 0, dclT: -1, tgdT: -1, tgdN: 0, att: [], host: null, mods: [], once: {}, tw: {}, gr: {}, zt: 0, lk: '' }; }
+  function newInst(iid, no, p) { return { iid, no, owner: p, fd: false, enT: -1, bbm: -1, bbmOk: -1, atkT: -1, atkN: 0, dclT: -1, tgdT: -1, tgdN: 0, att: [], host: null, mods: [], once: {}, tw: {}, gr: {}, zt: 0, lk: '' }; }
   function createGame(opts) {
     opts = opts || {};
     if (opts.position) return createFromPosition(opts);
@@ -520,7 +520,7 @@
       const mk = no => { const iid = (p === 0 ? 'a' : 'b') + (++k); st.inst[iid] = newInst(iid, no, p); st.decks[p].push(no); return iid; };
       const place = e => {
         const iid = mk(e.no), x = st.inst[iid];
-        x.fd = !!e.fd; x.enT = e.n ? turn : -1;
+        x.fd = !!e.fd; x.enT = e.n ? turn : -1; x.bbmOk = e.bo ? turn : -1;
         (e.att || []).forEach(no => { const a = mk(no); st.inst[a].host = iid; st.inst[a].enT = e.n ? turn : -1; x.att.push(a); });
         return iid;
       };
@@ -549,6 +549,7 @@
       const x = st.inst[iid], e = { no: x.no };
       if (x.fd) e.fd = 1;
       if (x.enT === st.turn) e.n = 1;
+      if (x.bbmOk === st.turn) e.bo = 1;
       if (x.att.length) e.att = x.att.map(a => st.inst[a].no);
       return e;
     };
@@ -616,7 +617,7 @@
   // Kartu meninggalkan FIELD → status di-refresh, menjadi kartu baru (301.45.b–c).
   function refresh(st, iid) {
     const x = st.inst[iid];
-    x.fd = false; x.enT = -1; x.bbm = -1; x.atkT = -1; x.atkN = 0; x.dclT = -1; x.tgdT = -1; x.tgdN = 0; x.att = []; x.host = null; x.mods = []; x.once = {}; x.tw = {}; x.gr = {};
+    x.fd = false; x.enT = -1; x.bbm = -1; x.bbmOk = -1; x.atkT = -1; x.atkN = 0; x.dclT = -1; x.tgdT = -1; x.tgdN = 0; x.att = []; x.host = null; x.mods = []; x.once = {}; x.tw = {}; x.gr = {};
   }
   // Lepas kartu dari tempatnya di FIELD (slot BATTLE, BASE, atau terpasang).
   function detachFromField(st, iid) {
@@ -916,7 +917,7 @@
     return got;
   }
   // Swap (301.18): dua kartu bertukar posisi, status, dan kartu terpasang.
-  const SWAP_KEYS = ['mods', 'atkT', 'atkN', 'dclT', 'tgdT', 'tgdN', 'bbm', 'enT', 'gr', 'once', 'tw'];
+  const SWAP_KEYS = ['mods', 'atkT', 'atkN', 'dclT', 'tgdT', 'tgdN', 'bbm', 'bbmOk', 'enT', 'gr', 'once', 'tw'];
   function swapCards(st, a, b, why) {
     const La = locate(st, a), Lb = locate(st, b), xa = st.inst[a], xb = st.inst[b];
     if (!La || !Lb) return false;
@@ -1194,6 +1195,7 @@
       bbm(i, to, why) { A.mark(); return effectBbm(st, i, to, why); },
       cover(i, why) { A.mark(); return coverCard(st, i, why); },
       flip(i, why) { A.mark(); return flipCard(st, i, why); },
+      bbmOk(i) { if (st.inst[i]) st.inst[i].bbmOk = st.turn; },
       mill(p, n, why) { A.mark(); return millTop(st, p, n, why); },
       swap(a, b, why) { A.mark(); return swapCards(st, a, b, why); },
       toHand(i, why) {
@@ -1529,6 +1531,13 @@
       if (e && !job.inAfter) e.run(api(st, job, job.c), job);
       if (e && e.after && job.step2) { job.inAfter = true; job.mut = false; e.after(api(st, job, job.c), job); }
       job.done = true;
+      // Laporan #6 (keputusan pemilik 13 Nov 2026): efek bertanda single (mis. BP01-099 Pym Arrow) hanya terselesaikan
+      // SATU KALI per kartu. Trigger lain dari kartu yang sama yang masih menunggu dibatalkan. Trigger yang belum
+      // terselesaikan tetap berjalan walau kartunya sudah keluar dari field (mis. dipilih sebagai target Retreat/Prune).
+      if (e && e.single && job.kind === 'trig') {
+        const drop = st.pend.filter(j => j.c === job.c && j.eff === job.eff);
+        if (drop.length) { st.pend = st.pend.filter(j => !drop.includes(j)); log(st, 'eff', jobLabel(st, job) + ' has already resolved — its other trigger is cancelled.'); }
+      }
     } catch (err) {
       if (err instanceof Ask) {
         st.prompt = Object.assign({ type: err.spec.yesno ? 'yesno' : err.spec.pick ? 'pick' : 'choose', job: job.id, label: jobLabel(st, job) }, err.spec);
@@ -1683,6 +1692,18 @@
     });
     return out;
   }
+  // Laporan #9 (13 Nov 2026): alasan yang jelas saat efek ACTI tidak bisa diaktifkan (dulu hanya "cannot be activated now").
+  function actiWhy(st, p, iid, eff, inCounter) {
+    const def = defOf(st, iid), e = def && def.acti && def.acti.find(x => x.id === eff);
+    const L = locate(st, iid);
+    if (!e || !L || L.p !== p) return 'That Activated Effect cannot be activated now (304.2.b).';
+    const nm = nameOf(st, iid) + (e.label ? ' — ' + e.label : '');
+    if (inCounter && !e.counter) return nm + ': this effect cannot be activated during a Counter (304.2.b).';
+    if (!inZone(st, iid, e.zone)) return nm + ': this effect can only be activated from the ' + ({ HAND: 'HAND', FIELD: 'FIELD', BATTLE: 'BATTLE area', BASE: 'BASE', RETREAT: 'RETREAT', VOID: 'VOID' }[e.zone] || e.zone) + '.';
+    if (e.once && st.inst[iid].once[e.id] === st.turn) return nm + ': already used this turn (once per turn).';
+    if (e.times) { const w = st.inst[iid].tw[e.id]; if (w && w.t === st.turn && w.n >= e.times) return nm + ': already used ' + e.times + 'x this turn.'; }
+    return nm + ': the condition or cost written on the card is not met right now (304.2.b). Read the card text: ' + textEn(card(st.inst[iid].no)).replace(/\s+/g, ' ').slice(0, 220);
+  }
   // 305.1. Tahap 4: counter boleh berupa fungsi (PB01-008: [COUNTER] hanya bila syaratnya terpenuhi).
   function hasCounterAbility(st, iid) {
     // Tahap 6 (SD06-013 Warbringer): [COUNTER] untuk kartu lain di HAND dari aura di FIELD.
@@ -1808,7 +1829,9 @@
         const x = st.inst[a.c], L = x && locate(st, a.c);
         if (!L || L.p !== p || (L.zone !== 'bat' && L.zone !== 'base')) return 'Choose a Character on your FIELD.';
         if (x.fd) return 'A Face-Down Card is not a Character and cannot perform BATTLE-BASE MOVE.';
-        if (x.enT === st.turn) return 'A Character placed onto the FIELD this turn cannot perform BATTLE-BASE MOVE (303.2.a.3.1.3.3).';
+        // Laporan #12 (keputusan pemilik 13 Nov 2026): kartu yang dibalik oleh efek tertentu (SP01-061 Mr. Negative) boleh BBM
+        // walau baru masuk FIELD pada turn ini (bbmOk = turn).
+        if (x.enT === st.turn && x.bbmOk !== st.turn) return 'A Character placed onto the FIELD this turn cannot perform BATTLE-BASE MOVE (303.2.a.3.1.3.3).';
         if (x.bbm === st.turn) return 'This Character has already used its BATTLE-BASE MOVE this turn (303.2.a.3.1.3.2).';
         if (restricted(st, a.c, 'move')) return 'This Character cannot move (card effect).';
         if (L.zone === 'bat') {
@@ -1821,7 +1844,7 @@
         return null;
       }
       case 'acti':
-        return actiOptions(st, p, false).some(o => o.c === a.c && o.eff === a.eff) ? null : 'That Activated Effect cannot be activated now (304.2.b).';
+        return actiOptions(st, p, false).some(o => o.c === a.c && o.eff === a.eff) ? null : actiWhy(st, p, a.c, a.eff, false);
       case 'manual': return checkManual(st, a);
     }
     return 'That action is not available in the Action Phase.';
@@ -2473,7 +2496,7 @@
     validatePosition, positionFrom, exportPosition, parsePosition, emptyPosition,
     manualOps, attachHosts, MANUAL_OPS,
     testDeck, uniqueBlocked, hasAbility, handTriggerCards, placeSpots, bbmDests,
-    lostEffects, abilityCount, costBanned,
+    lostEffects, abilityCount, costBanned, actiWhy,
     HIDDEN_SETS, HIDDEN_MSG, isHiddenNo, hiddenCount, encodeDeckCode,
     viewFor, visibleTo
   };

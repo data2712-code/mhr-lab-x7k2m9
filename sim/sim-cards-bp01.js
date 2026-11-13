@@ -1000,7 +1000,7 @@
     /* 「Pym Arrow」Hawkeye */
     'BP01-099': {
       trig: [{
-        id: 'enter', zone: 'FIELD', optional: true, label: 'Pym Arrow',
+        id: 'enter', zone: 'FIELD', optional: true, single: true, label: 'Pym Arrow',
         text: "Discard 2 cards from your HAND to prune this card and 1 opponent Character in the field?",
         when: (e, self, A) => e.k === 'ENTER' && A.ctrl(e.c) === A.opp(A.p) && A.lv(e.c) >= 4,
         can: A => A.hand(A.p).length >= 2,

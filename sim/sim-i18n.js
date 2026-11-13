@@ -28,11 +28,11 @@
     'Offline games you finish are saved here.': 'Permainan offline yang selesai tersimpan di sini.',
     'Any two decks, human or bot on each side, Sandbox editor, log codes.': 'Dua deck bebas, manusia atau bot di tiap sisi, editor Sandbox, kode log.',
     '← Menu': '← Menu', 'Your name': 'Nama Anda', 'Your deck': 'Deck Anda', 'Deck link or code': 'Link atau kode deck', 'Bot deck': 'Deck bot',
-    'Random test deck': 'Deck uji acak', 'Bot level': 'Level bot', 'Easy': 'Mudah', 'Normal': 'Normal', 'Hard': 'Sulit', 'Match 30:00': 'Pertandingan 30:00', 'Who goes first': 'Siapa jalan duluan',
+    'Random test deck': 'Deck uji acak', 'Bot level': 'Level bot', 'Easy': 'Mudah', 'Normal': 'Normal', 'Hard': 'Sulit', 'Expert': 'Ahli', 'Match 30:00': 'Pertandingan 30:00', 'Who goes first': 'Siapa jalan duluan',
     'Random': 'Acak', 'You': 'Anda', 'Bot': 'Bot', 'Turn clock': 'Jam giliran', 'No clock': 'Tanpa jam', 'Standard': 'Standar', 'Relaxed': 'Santai', 'Long': 'Panjang',
     '▶ Start practice': '▶ Mulai latihan',
-    'The bot is a training opponent: Easy picks random legal moves, Normal plays greedy moves, Hard tries its options ahead before choosing (it never sees your HAND or the Deck order). Match 30:00 simulates an official match: one shared 30-minute clock and no per-turn limit; when time runs out, most Rush Points wins, then most cards left in the Deck, then rock-paper-scissors. Undo is always allowed in practice. Finished games are saved in Match history (offline).':
-      'Bot adalah lawan latihan: Mudah memilih langkah sah secara acak, Normal memilih langkah yang paling menguntungkan saat itu, Sulit mencoba pilihan-pilihannya lebih dulu sebelum memutuskan (tanpa melihat HAND Anda atau urutan Deck). Pertandingan 30:00 menyimulasikan pertandingan resmi: satu jam bersama 30 menit tanpa batas waktu per giliran; bila waktu habis, Rush Point terbanyak menang, lalu sisa kartu Deck terbanyak, lalu jankenpon. Undo selalu boleh di latihan. Permainan yang selesai tersimpan di Riwayat pertandingan (offline).',
+    'The bot is a training opponent: Easy picks random legal moves, Normal plays greedy moves, Hard tries its options ahead before choosing, Expert tries more options and also weighs effect choices and positions (neither sees your HAND or the Deck order). Match 30:00 simulates an official match: one shared 30-minute clock and no per-turn limit; when time runs out, most Rush Points wins, then most cards left in the Deck, then rock-paper-scissors. Undo is always allowed in practice. Finished games are saved in Match history (offline).':
+      'Bot adalah lawan latihan: Mudah memilih langkah sah secara acak, Normal memilih langkah yang paling menguntungkan saat itu, Sulit mencoba pilihan-pilihannya lebih dulu sebelum memutuskan, Ahli mencoba lebih banyak pilihan dan juga menimbang pilihan efek serta posisi (keduanya tanpa melihat HAND Anda atau urutan Deck). Pertandingan 30:00 menyimulasikan pertandingan resmi: satu jam bersama 30 menit tanpa batas waktu per giliran; bila waktu habis, Rush Point terbanyak menang, lalu sisa kartu Deck terbanyak, lalu jankenpon. Undo selalu boleh di latihan. Permainan yang selesai tersimpan di Riwayat pertandingan (offline).',
     'Games played on this device (practice, same-device, custom). In Performance, simulator games form their own group; offline and online games are never combined in one statistic, and never mixed with tournament records. Up to 100 games are kept.':
       'Permainan di perangkat ini (latihan, satu perangkat, kustom). Di Performance, permainan simulator punya kelompok sendiri; angka offline dan online tidak pernah digabung dalam satu statistik, dan tidak dicampur dengan catatan turnamen. Maksimal 100 permainan disimpan.',
     'SIMULATOR · OFFLINE': 'SIMULATOR · OFFLINE', 'No games yet. Finish a game and it appears here.': 'Belum ada permainan. Selesaikan satu permainan dan hasilnya muncul di sini.',
@@ -41,8 +41,8 @@
     'Not available yet.': 'Belum tersedia.',
     'Online play arrives with the online version on mhrdecklab.com, after all testing is finished.': 'Main online hadir bersama versi online di mhrdecklab.com, setelah semua pengujian selesai.',
     'Find a match': 'Cari lawan',
-    ': play someone online. If nobody is found within 45 seconds, you are offered a game against a bot (Easy, Normal or Hard) while you keep waiting; a bot is always shown as a bot.':
-      ': bermain melawan pemain lain secara online. Bila lawan belum ditemukan dalam 45 detik, Anda ditawari main melawan bot (Mudah, Normal, atau Sulit) sambil tetap menunggu; bot selalu ditandai sebagai bot.',
+    ': play someone online. If nobody is found within 45 seconds, you are offered a game against a bot (Easy, Normal, Hard or Expert) while you keep waiting; a bot is always shown as a bot.':
+      ': bermain melawan pemain lain secara online. Bila lawan belum ditemukan dalam 45 detik, Anda ditawari main melawan bot (Mudah, Normal, Sulit, atau Ahli) sambil tetap menunggu; bot selalu ditandai sebagai bot.',
     ': create a room, send the link to a friend, and pick a clock: Standard, Relaxed, Long, no clock, or Match 30:00 (official-match simulation).':
       ': buat room, kirim link-nya ke teman, dan pilih jam: Standar, Santai, Panjang, tanpa jam, atau Pertandingan 30:00 (simulasi pertandingan resmi).',
     'If your phone switches app or tab, your seat is kept for a short time and the simulator reconnects you to the game when you come back.':
@@ -80,6 +80,8 @@
     '★ RUSH POINT': '★ RUSH POINT', 'FIGHT RESULT': 'HASIL PERTARUNGAN', 'TIME RAN OUT': 'WAKTU HABIS', 'TIME UP': 'WAKTU HABIS', 'WHAT HAPPENED': 'YANG TERJADI',
     'End Action Phase': 'Akhiri Action Phase', 'Confirm positions': 'Simpan posisi', 'Skip': 'Lewati', 'Reset': 'Atur ulang', 'No attack': 'Tidak menyerang',
     'Other attacker': 'Penyerang lain', 'Attack!': 'Serang!', 'Change target': 'Ganti target', 'Yes': 'Ya', 'No': 'Tidak', 'Choose cards…': 'Pilih kartu…',
+    'Pass · let it through': 'Pass · biarkan lewat', 'Cancel effect': 'Batalkan efek', '👁 Look at the board': '👁 Lihat papan', 'Read the card texts': 'Baca teks kartu',
+    'Hints ON': 'Petunjuk ON', 'Hints OFF': 'Petunjuk OFF',
     'Pass': 'Pass', 'Continue': 'Lanjut', 'Cancel': 'Batal', 'Close': 'Tutup', 'Confirm': 'Konfirmasi', 'Next: destination': 'Berikutnya: tujuan',
     'CALL to BASE': 'CALL ke BASE', 'Base Deployment (face-down, draw 1)': 'Base Deployment (tertutup, ambil 1 kartu)', 'Move to BASE': 'Pindah ke BASE', 'Move to BATTLE': 'Pindah ke BATTLE',
     'AIR STRIKE: attack as Weakness': 'AIR STRIKE: serang sebagai Weakness', '✓ Keep this hand': '✓ Pertahankan HAND ini',
