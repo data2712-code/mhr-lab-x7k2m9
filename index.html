@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ===================================================================
-     MHR DECK LAB  ·  versi 7.38  ·  12 November 2026
+     MHR DECK LAB  ·  versi 7.39  ·  13 November 2026
      Marvel Hero Rush TCG Deck Builder — fan-made, versi Indonesia
      Live: https://mhrdecklab.com/ (URL lama data2712-code.github.io tetap jalan, redirect otomatis)
      Riwayat update lengkap: lihat README.md di repository
@@ -18,7 +18,7 @@
 <meta property="og:description" content="Free Marvel Hero Rush TCG companion: search every card with official English and Indonesian text, build and share decks, find weekly LGS tournaments, study tournament decklists, and track your collection and win rate.">
 <meta property="og:image" content="https://mhrdecklab.com/og-image.jpg?v=7.03">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="version" content="7.38">
+<meta name="version" content="7.39">
 <!-- PWA: bisa "Add to Home Screen" dan jalan offline (lihat sw.js + manifest.json).
      Ikon dibuat dari palet situs sendiri (ink #0E1216 + accent #F2B01E), bukan
      turunan og-image.jpg — silakan diganti kapan saja kalau mau motif lain,
@@ -2715,6 +2715,7 @@
   .bs-mode i{display:block;font-style:normal;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .bs-hero .bs-play{font-size:16px;padding:14px 26px}
   .bs-note{font-size:12.5px;color:var(--muted)}
+  .bs-lgs{font-size:13px}   /* v7.39 — tautan jadwal Weekly Rush di hero Battle Sim */
   .bs-note button{background:none;border:0;padding:0;font:inherit;color:var(--paper);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
   .bs-me{display:flex;flex-direction:column;gap:2px;margin-top:16px;max-width:560px;background:rgba(59,135,232,.08);border:1px solid #2d5d96;border-radius:12px;padding:10px 14px;text-decoration:none;color:inherit}
   .bs-me span{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#9cc6f5}
@@ -3534,7 +3535,7 @@
 <script src="news.js?v=7.08"></script>
 <script src="news-ui.js?v=7.02"></script>
 <!-- v6.63 — halaman Beranda (#beranda). v7.17: teks My Lab. v7.16: home baru (perkenalan fitur, Welcome back untuk akun login) -->
-<script src="home-ui.js?v=7.38"></script>
+<script src="home-ui.js?v=7.39"></script>
 <!-- v6.64 — halaman Set & Spoiler (#set, #set/<kode>) -->
 <script src="spoilers.js?v=7.02"></script>
 <script src="set-ui.js?v=7.02"></script>
@@ -3581,7 +3582,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.38</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.39</div>
 </footer>
 
 <div class="dview" id="simView" hidden>

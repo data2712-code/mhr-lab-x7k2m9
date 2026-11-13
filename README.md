@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.34** · 12 November 2026
+**Versi saat ini: v7.39** · 13 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -602,6 +602,22 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.39 — Home: narasi Battle Sim jadi sarana latihan & uji deck, bukan pengganti permainan meja — 13 November 2026 *(`home-ui.js`, `index.html`)*
+
+Permintaan pemilik: Battle Sim tidak diposisikan sebagai permainan yang menggantikan versi tabletop, melainkan sarana
+latihan dan uji deck sebelum turnamen offline / Weekly Rush di LGS, untuk pemain baru yang ingin belajar dan pemain
+yang tidak punya akses ke komunitas di daerahnya. Pemilik memilih opsi D dari empat alternatif.
+- **Hero Battle Sim**: kicker "Battle Sim · Practice & deck testing", judul **"Practise here. Win at the table."**,
+  lead "Learn the rules, test a new deck or warm up before your Weekly Rush… even when there is no playgroup near you."
+  Tombol **⚔️ Start practising** + tautan **Find a Weekly Rush near you →** (#lgs). Kartu akun: "Your practice record".
+- Ubin mode Find a match: "Practise vs a real player".
+- Kartu fitur Battle Sim (label "Practise", lencana "● PRACTICE"), langkah 1 "Why make a free account?", FAQ "What is
+  Battle Sim?" (ditambah: tempat persiapan, bukan pengganti bermain di meja), jalur Competitive player ("Test your deck
+  before a tournament"), CTA penutup ("Ready for your next Weekly Rush?" + tombol jadwal Weekly Rush), pintasan Welcome
+  back ("Practise & test decks").
+- **Ranked**: tetap ada, dibingkai sebagai cara melacak progres latihan; tombol "Play ranked" → "Practise in Find a match".
+- `?v=` naik: `home-ui.js?v=7.39`.
 
 ### Data — Battle Sim o2.14: perbaikan dari laporan beta (bug + alur seperti RushDee + Bot Expert) — 13 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 

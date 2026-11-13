@@ -34,6 +34,12 @@
    di bawah hero Battle Sim, plus rank & poin akun di kartu "Your online record". Aturan tier sama dengan
    sim/sim-ranked.js dan fungsi SQL mhr_sim_tier (mhr_decklab_v737_sim_ranked.sql).
 
+   v7.39 (13 Nov 2026) — NARASI BATTLE SIM = SARANA LATIHAN (keputusan pemilik, opsi D): Battle Sim bukan pengganti
+   permainan meja, melainkan tempat belajar, menguji deck dan pemanasan sebelum Weekly Rush / turnamen offline, juga
+   untuk pemain yang tidak punya komunitas di dekatnya. Judul hero "Practise here. Win at the table.", tombol "Start
+   practising" + tautan ke jadwal Weekly Rush (#lgs); kartu fitur, langkah akun, FAQ, CTA penutup, pintasan Welcome
+   back, ubin mode dan papan Ranked ikut disesuaikan (Ranked = cara melacak progres latihan).
+
    Dimuat SEBELUM blok <script> inline di index.html; fungsinya baru
    dipanggil dari setPage('beranda'), jadi global dari blok inline ($, DB,
    LGS, TOURNAMENTS, DECK_KOMUNITAS, decodeDeck, deckStats, previewCards,
@@ -213,7 +219,7 @@
   /* =================== v7.35 — Battle Sim (hero utama) =================== */
   const SIM_API = (window.MHRSIM_ONLINE_API || 'https://mhr-battle-sim-test.dataanggi2712.workers.dev').replace(/\/$/, '');
   const SIM_IMG = 'images/news/battle-sim-open-beta/';
-  const SIM_MODES = [['practice','🤖','Practice vs Bot','Easy · Normal · Hard'],['find','⚔️','Find a match','Play a real opponent'],
+  const SIM_MODES = [['practice','🤖','Practice vs Bot','Easy · Normal · Hard'],['find','⚔️','Find a match','Practise vs a real player'],
     ['online','🔗','Friend online','Private room link'],['custom','👥','Same device','Pass-and-play']];
   let simLive = null;     /* {playing, waiting} dari server; null = belum/gagal dimuat */
   async function loadLive(){
@@ -285,7 +291,7 @@
     if(!d) return '';
     if(d.soon) return `<section class="rk-sec">
       <div class="nh-sec-h"><div><h2>🏆 Ranked is coming</h2><p>Starts 19 November 2026, right after the beta · Season 1 runs until 31 December</p></div><a class="hm-link" href="#sim/ranked">How it works →</a></div>
-      <div class="rk-wrap"><div class="rk-empty"><b>Earn points in every Find a match game.</b><span>Beat stronger players to climb faster, from Recruit all the way to Genius Burden, and race for the top of the leaderboard. Games during the beta are not counted.</span></div>
+      <div class="rk-wrap"><div class="rk-empty"><b>Earn points in every Find a match game.</b><span>Ranked tracks how your practice is going: beat stronger players to climb faster, from Recruit to Genius Burden. Games during the beta are not counted.</span></div>
         <div class="rk-side">${rkTierRow()}<a class="nh-btn main" href="#sim/find">⚔️ Practice in Find a match</a></div></div>
     </section>`;
     const placed = d.rows.filter(r=>r.games >= 5);
@@ -294,12 +300,12 @@
     const top = placed.slice(0,5).map((r,i)=>`<li${r.user_id===uid?' class="you"':''}><span class="n">${['🥇','🥈','🥉'][i]||i+1}</span><b>${E(r.username||'Player')}</b>${rkBadge(rkTier(r.points, r.games))}<span class="p">${r.points.toLocaleString('en-US')}</span></li>`).join('');
     const me = mine ? `<a class="rk-me" href="#sim/ranked"><span>Your rank</span>${rkBadge(rkTier(mine.points, mine.games))}<b>${mine.points.toLocaleString('en-US')} pts</b>${mine.games<5?`<i>placement ${mine.games}/5</i>`:`<i>#${placed.indexOf(mine)+1} of ${placed.length}</i>`}</a>` : '';
     return `<section class="rk-sec">
-      <div class="nh-sec-h"><div><h2>🏆 Ranked leaderboard</h2><p>${d.season === '2026-12' ? 'Season 1 · 19 Nov – 31 Dec 2026' : rkLabel(d.season) + ' season'} · Find a match games only</p></div><a class="hm-link" href="#sim/ranked">Full leaderboard →</a></div>
+      <div class="nh-sec-h"><div><h2>🏆 Ranked leaderboard</h2><p>${d.season === '2026-12' ? 'Season 1 · 19 Nov – 31 Dec 2026' : rkLabel(d.season) + ' season'} · Find a match games only · a way to track your practice</p></div><a class="hm-link" href="#sim/ranked">Full leaderboard →</a></div>
       <div class="rk-wrap">
         ${top ? `<ol class="rk-top">${top}</ol>` : `<div class="rk-empty"><b>${rkLabel(d.season)} has just started.</b><span>Play 5 games in Find a match to get your rank and be the first on the board.</span></div>`}
         <div class="rk-side">${me || `<div class="rk-me"><span>Ranked</span><b>Start at 1,000 points</b><i>Climb from Recruit to Genius Burden</i></div>`}
           ${rkTierRow()}
-          <a class="nh-btn main" href="#sim/find">⚔️ Play ranked</a></div>
+          <a class="nh-btn main" href="#sim/find">⚔️ Practise in Find a match</a></div>
       </div>
     </section>`;
   }
@@ -308,20 +314,20 @@
   function simMeHTML(s){
     if(!s) return '';
     return s.n
-      ? `<a class="bs-me" href="#dashboard" data-hm-tab="perf"><span>Your online record</span><b>${s.n} game${s.n>1?'s':''} · ${simRec(s)}</b><i>See it in Performance →</i></a>`
-      : `<div class="bs-me"><span>Your online record</span><b>No online games yet</b><i>Try Find a match or invite a friend.</i></div>`;
+      ? `<a class="bs-me" href="#dashboard" data-hm-tab="perf"><span>Your practice record</span><b>${s.n} game${s.n>1?'s':''} · ${simRec(s)}</b><i>See it in Performance →</i></a>`
+      : `<div class="bs-me"><span>Your practice record</span><b>No online games yet</b><i>Test a deck in Find a match or invite a friend.</i></div>`;
   }
   function simHeroHTML(mode){
     const user = mode === 'user';
     const tiles = SIM_MODES.map(([k, ic, t, sub])=>`<a class="bs-mode" href="#sim/${k}"><span class="ic" aria-hidden="true">${ic}</span><span><b>${t}</b><i>${sub}</i></span></a>`).join('');
     return `<section class="bs-hero${user?' bs-user':''}">
       <div class="bs-txt">
-        <span class="nh-kick">⚔️ New on MHR Deck Lab · Battle Sim</span>
-        <h2 class="nh-h1">Play Marvel Hero Rush <em>online</em></h2>
-        <p class="lead">Play full games right in your browser, on your phone or computer. Every rule and card effect is handled for you — practice against a bot or challenge real players with your own decks.</p>
+        <span class="nh-kick">⚔️ Battle Sim · Practice &amp; deck testing</span>
+        <h2 class="nh-h1">Practise here. <em>Win at the table.</em></h2>
+        <p class="lead">Learn the rules, test a new deck or warm up before your Weekly Rush. Every rule and card effect is handled for you, so you can practise against a bot or another player from your phone or computer, even when there is no playgroup near you.</p>
         <div id="bsLive">${liveHTML(simLive)}</div>
         <div class="bs-modes">${tiles}</div>
-        <div class="nh-ctas"><a class="nh-btn main bs-play" href="#sim">⚔️ Play now</a>
+        <div class="nh-ctas"><a class="nh-btn main bs-play" href="#sim">⚔️ Start practising</a><a class="hm-link bs-lgs" href="#lgs">Find a Weekly Rush near you →</a>
           ${user ? `<a class="nh-btn" href="#sim/history">Match history</a>` : `<span class="bs-note">Free · just log in with a free account · <button type="button" data-hm="login">Log in / sign up</button></span>`}</div>
         ${user ? `<div id="bsMe">${simMeHTML(simMe.data)}</div>` : ''}
       </div>
@@ -396,9 +402,9 @@
     return `<section id="hmFeats">
       <div class="nh-sec-h"><div><h2>${title}</h2><p>${sub}</p></div></div>
       <div class="nh-feats nh-scroll">
-        ${F('#sim','','Play','Battle Sim',`Play full games online with every rule and card effect automated: practice vs a bot, find a match or invite a friend with a link.`,
+        ${F('#sim','','Practise','Battle Sim',`Practise and test decks with every rule and card effect automated: against a bot, another player or a friend with a link. Then take your deck to the table.`,
           `<div class="pv-bs"><img src="${SIM_IMG}battle.jpg" alt="" loading="lazy"><img src="${SIM_IMG}effect.jpg" alt="" loading="lazy"></div>
-           <span class="pv-live">● ONLINE</span>`, NEW + ACC)}
+           <span class="pv-live">● PRACTICE</span>`, NEW + ACC)}
         ${F('#cards','','Explore','Card database',`Search and filter every card by colour, level, power and keyword. Official English and Indonesian text, alt arts and set spoilers.`,
           `<div class="pv-search">🔍 &nbsp;Search ${nCards()||''} cards…</div><div class="pv-dots">${'RYBGOP'.split('').map(k=>`<i style="background:${COL[k]}"></i>`).join('')}</div>
            <div class="pv-thumbs">${['BP01-011','BP01-015','SP01-027','BP01-066'].map(n=>cardImg(n)).join('')}</div>`)}
@@ -438,7 +444,7 @@
       <div class="nh-sec-h"><div><h2>Where do you want to start?</h2><p>Pick what fits you best.</p></div></div>
       <div class="nh-paths nh-scroll">
         ${P('🌱','New to the game','Learn the rules and start with a deck that already works.',[L('#panduan','Read the rules guide'),L('#sim/practice','Practice against a bot'),L('#meta','Copy a ready-to-use deck'),L('#lgs','Find a store near you')])}
-        ${P('🏆','Competitive player','Study the meta, test your list and track your results.',[L('#tourney','Tournament decklists'),L('#sim/find','Test your deck in Battle Sim'),L('#build','Build &amp; compare decks'),L('#dashboard','Track your matchups','perf')])}
+        ${P('🏆','Competitive player','Study the meta, test your list and track your results.',[L('#tourney','Tournament decklists'),L('#sim/find','Test your deck before a tournament'),L('#build','Build &amp; compare decks'),L('#dashboard','Track your matchups','perf')])}
         ${P('📦','Collector &amp; trader','Know what you own and what you still need.',[L('#set','Browse sets &amp; spoilers'),L('#dashboard','Track your collection','coll'),L('#dashboard','Share a sale/trade binder','bind')])}
         ${P('🏪','Store / organizer','Run your LGS tournament and get your store listed.',[L('#event','Run an event with live pairings'),L('#lgs','See the Weekly Rush list'),L('https://www.instagram.com/deteprtm','Get your store listed or verified')])}
       </div>
@@ -451,7 +457,7 @@
     return `<section class="nh-acct">
       <div class="hm-box"><div class="hm-box-h"><h3>Why make a free account?</h3></div>
         <div class="nh-steps">
-          ${st(1,'Play Battle Sim online','Practice vs a bot, find a match or play a friend — your online results go straight to Performance.')}
+          ${st(1,'Practise in Battle Sim','Learn the game and test decks against a bot or other players. Your practice results go to Performance, kept apart from your tabletop matches.')}
           ${st(2,'Save your decks to the cloud','With version history, on every device — and publish them to User Decks.')}
           ${st(3,'Track your collection &amp; binders','Per set and per version; share a binder for sale or trade.')}
           ${st(4,'Log matches &amp; see your stats','Win rate, matchups and tournament runs in My Lab.')}
@@ -460,15 +466,15 @@
       </div>
       <div class="hm-box nh-faq"><div class="hm-box-h"><h3>Quick answers</h3></div>
         ${qa('Is MHR Deck Lab free?','Yes. Browsing cards and building or sharing decks need no account. A free account only adds saving and tracking.', true)}
-        ${qa('What is Battle Sim?','A free online simulator of Marvel Hero Rush. The rules and card effects run automatically, so you can test decks against a bot or play other players from your phone or computer. You only need a free account.')}
+        ${qa('What is Battle Sim?','A free practice simulator for Marvel Hero Rush. The rules and card effects run automatically, so you can learn the game and test decks against a bot or other players from your phone or computer, especially if there is no playgroup near you. It is a place to prepare, not a replacement for playing at the table: Weekly Rush and tournaments are still where the game happens. You only need a free account.')}
         ${qa('Is the card text official?','Card text comes from the official marvelherorush.com database. Pre-release cards that only have a fan translation are clearly marked.')}
         ${qa('Is this the official Marvel Hero Rush site?','No. MHR Deck Lab is a fan-made tool for the community and is not affiliated with Marvel or the publisher.')}
         ${qa('Can I use it on my phone?','Yes. Open mhrdecklab.com in your browser and add it to your home screen to use it like an app.')}
       </div>
     </section>`;
   }
-  const finalHTML = () => `<section class="nh-final"><div><h2>Ready for your next game?</h2><p>Build a deck, then play it in Battle Sim — free for everyone.</p></div>
-    <div class="nh-ctas"><a class="nh-btn main" href="#sim">⚔️ Play Battle Sim</a><a class="nh-btn" href="#build">🛠 Build a deck</a><a class="nh-btn" href="https://www.instagram.com/deteprtm" target="_blank" rel="noopener">Follow @deteprtm</a></div></section>`;
+  const finalHTML = () => `<section class="nh-final"><div><h2>Ready for your next Weekly Rush?</h2><p>Build a deck, test it in Battle Sim, then bring it to the table.</p></div>
+    <div class="nh-ctas"><a class="nh-btn main" href="#sim">⚔️ Practise in Battle Sim</a><a class="nh-btn" href="#lgs">📅 Weekly Rush schedule</a><a class="nh-btn" href="#build">🛠 Build a deck</a><a class="nh-btn" href="https://www.instagram.com/deteprtm" target="_blank" rel="noopener">Follow @deteprtm</a></div></section>`;
 
   /* =================== v7.16 — sudah login: "Welcome back" =================== */
   /* hint sinkron dari token Supabase di localStorage (supaya tidak berkedip), dipastikan lagi lewat getSession() */
@@ -545,7 +551,7 @@
         <a class="nh-btn" href="#dashboard">Open My Lab →</a>
       </section>
       <section class="nc-sc">
-        ${sc('#sim','', ic('⚔️'), 'Battle Sim', !simMe.data ? 'Play online' : simMe.data.n ? `${simMe.data.n} online game${simMe.data.n>1?'s':''}` : 'Play your first game', simMe.data && simMe.data.n ? simRec(simMe.data) : 'Bot · Find a match · Friend')}
+        ${sc('#sim','', ic('⚔️'), 'Battle Sim', !simMe.data ? 'Practise &amp; test decks' : simMe.data.n ? `${simMe.data.n} practice game${simMe.data.n>1?'s':''}` : 'Play your first practice game', simMe.data && simMe.data.n ? simRec(simMe.data) : 'Bot · Find a match · Friend')}
         ${sc('#build','', top ? cardImg(top.no) : ic('🛠'), tot ? 'Continue deck' : 'Deck builder', tot ? E(deckName) : 'Start a new deck', tot ? `${tot}/50 cards` : 'Curve, share, image &amp; PDF')}
         ${sc('#dashboard','perf', ic('📈'), 'Performance', perfB, perfS)}
         ${sc('#dashboard','coll', ic('📦'), 'Collection', !d ? '…' : d.owned ? `${d.owned} / ${nCards()} cards` : 'Start your collection', 'Per set &amp; per version')}
