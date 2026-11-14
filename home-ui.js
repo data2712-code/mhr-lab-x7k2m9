@@ -257,7 +257,8 @@
     return (simMe = { uid, data: { n: w + l + d, w, l, d } }).data;
   }
   /* ---------- v7.37 — ranked (aturan sama dengan sim/sim-ranked.js & SQL mhr_sim_tier) ---------- */
-  /* v7.38: 8 tier (Myth, Cosmic, puncak Genius Burden 2700+) + ikon SVG orisinal di images/rank/; Season 1 = 19 Nov – 31 Des 2026 */
+  /* v7.38: 8 tier (Myth, Cosmic, puncak Genius Burden 2700+) + ikon SVG orisinal di images/rank/.
+     sim #96 (pemilik 14 Nov 2026): beta sampai 22 Nov; Season 0 = 23 Nov – 31 Des 2026 ('S00'); Season 1 mulai 1 Jan 2027 ('S01'). */
   const RK_T = ['Recruit','Agent','Hero','Avenger','Legend','Myth','Cosmic'];
   const RK_ALL = ['Recruit','Agent','Hero','Avenger','Legend','Myth','Cosmic','Genius Burden'];
   const RK_C = {Recruit:'#9aa5b1',Agent:'#3B87E8',Hero:'#33A45C',Avenger:'#E4442E',Legend:'#F2B01E',Myth:'#E05BD0',Cosmic:'#4FD1E8','Genius Burden':'#A47BFF',Unranked:'#6b7785'};
@@ -269,10 +270,11 @@
     const p = Math.max(points, 600) - 600, t = RK_T[Math.min(6, Math.floor(p/300))];
     return {key:t, name:t + ' ' + ['III','II','I'][Math.floor((p%300)/100)]};
   }
-  const rkSeason = () => { const k = new Date(Date.now() + 7*3600e3).toISOString().slice(0,7); return k < '2027-01' ? '2026-12' : k; };
-  const RK_START = Date.parse('2026-11-19T00:00:00+07:00');      /* ranked aktif setelah beta (= mhr_sim_ranked_start() di SQL) */
+  const rkSeason = () => Date.now() < Date.parse('2027-01-01T00:00:00+07:00') ? 'S00' : 'S01';
+  const RK_START = Date.parse('2026-11-23T00:00:00+07:00');      /* ranked aktif setelah beta (= mhr_sim_ranked_start() di SQL) */
   const rkLive = () => Date.now() >= RK_START;
-  const rkLabel = s => { if(s === '2026-12') return 'Season 1'; const [y,m] = s.split('-'); return `${RK_MONTH[+m-1]} ${y}`; };
+  const rkLabel = s => { const m = /^S(\d+)$/.exec(s); if(m) return 'Season ' + (+m[1]); const [y,mo] = s.split('-'); return `${RK_MONTH[+mo-1]} ${y}`; };
+  const rkRange = s => s === 'S00' ? 'Season 0 · 23 Nov – 31 Dec 2026' : s === 'S01' ? 'Season 1 · from 1 Jan 2027' : rkLabel(s) + ' season';
   const rkBadge = t => `<span class="rk-b" style="--rk:${RK_C[t.key]}">${rkIcon(t.key)}${E(t.name)}</span>`;
   let rank = null;      /* {season, rows} */
   async function loadRank(){
@@ -290,7 +292,7 @@
   function rankHTML(d){
     if(!d) return '';
     if(d.soon) return `<section class="rk-sec">
-      <div class="nh-sec-h"><div><h2>🏆 Ranked is coming</h2><p>Starts 19 November 2026, right after the beta · Season 1 runs until 31 December</p></div><a class="hm-link" href="#sim/ranked">How it works →</a></div>
+      <div class="nh-sec-h"><div><h2>🏆 Ranked is coming</h2><p>Starts 23 November 2026, right after the beta · Season 0 runs until 31 December</p></div><a class="hm-link" href="#sim/ranked">How it works →</a></div>
       <div class="rk-wrap"><div class="rk-empty"><b>Earn points in every Find a match game.</b><span>Ranked tracks how your practice is going: beat stronger players to climb faster, from Recruit to Genius Burden. Games during the beta are not counted.</span></div>
         <div class="rk-side">${rkTierRow()}<a class="nh-btn main" href="#sim/find">⚔️ Practice in Find a match</a></div></div>
     </section>`;
@@ -300,7 +302,7 @@
     const top = placed.slice(0,5).map((r,i)=>`<li${r.user_id===uid?' class="you"':''}><span class="n">${['🥇','🥈','🥉'][i]||i+1}</span><b>${E(r.username||'Player')}</b>${rkBadge(rkTier(r.points, r.games))}<span class="p">${r.points.toLocaleString('en-US')}</span></li>`).join('');
     const me = mine ? `<a class="rk-me" href="#sim/ranked"><span>Your rank</span>${rkBadge(rkTier(mine.points, mine.games))}<b>${mine.points.toLocaleString('en-US')} pts</b>${mine.games<5?`<i>placement ${mine.games}/5</i>`:`<i>#${placed.indexOf(mine)+1} of ${placed.length}</i>`}</a>` : '';
     return `<section class="rk-sec">
-      <div class="nh-sec-h"><div><h2>🏆 Ranked leaderboard</h2><p>${d.season === '2026-12' ? 'Season 1 · 19 Nov – 31 Dec 2026' : rkLabel(d.season) + ' season'} · Find a match games only · a way to track your practice</p></div><a class="hm-link" href="#sim/ranked">Full leaderboard →</a></div>
+      <div class="nh-sec-h"><div><h2>🏆 Ranked leaderboard</h2><p>${rkRange(d.season)} · Find a match games only · a way to track your practice</p></div><a class="hm-link" href="#sim/ranked">Full leaderboard →</a></div>
       <div class="rk-wrap">
         ${top ? `<ol class="rk-top">${top}</ol>` : `<div class="rk-empty"><b>${rkLabel(d.season)} has just started.</b><span>Play 5 games in Find a match to get your rank and be the first on the board.</span></div>`}
         <div class="rk-side">${me || `<div class="rk-me"><span>Ranked</span><b>Start at 1,000 points</b><i>Climb from Recruit to Genius Burden</i></div>`}

@@ -603,6 +603,29 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.40 — Battle Sim o2.21: beta sampai 22 Nov, Ranked Season 0 / Season 1, bagian Updates & Patch Notes — 14 November 2026 *(`home-ui.js`, `sim-host.js`, `index.html`, `sim/` (+ berkas baru `sim/sim-updates.js`); SQL baru `mhr_decklab_v740_sim_season0.sql` di folder internal)*
+
+Riwayat simulator #96. Keputusan pemilik 14 Nov 2026.
+- **Beta diperpanjang sampai 22 November 2026** (dulu 18 Nov): kotak beta di tab Play ("11–22 Nov 2026", sisa hari), tag BETA
+  di tab menu situs (`sim-host.js`), judul Battle Sim.
+- **Ranked Season 0 = 23 Nov – 31 Des 2026** (kode `S00`); **Season 1 mulai 1 Jan 2027** (kode `S01`), lamanya ditentukan
+  setelah tanggal rilis set 2027 diketahui. Ranked mulai menghitung 23 Nov 00:00 WIB (dulu 19 Nov). Dulu Season 1 = kode
+  `2026-12` lalu bulanan; belum ada data ranked, jadi tidak ada migrasi data.
+  - `sim/sim-ranked.js`: `START`, `seasonNow()`, `seasonLabel()`, teks "How ranked works" (EN/ID).
+  - `home-ui.js` (Home): `rkSeason()`, `RK_START`, label season, teks "Ranked is coming".
+  - `sim/sim-modes.js` (subjudul Find a match = Ranked mulai 23 Nov), `sim/sim-online.js` (kalimat ranked).
+  - **SQL `mhr_decklab_v740_sim_season0.sql` harus dijalankan di Supabase sebelum 19 Nov** (fungsi lama akan mulai
+    menghitung 19 Nov dengan kode `2026-12`). Berkas menolak berjalan bila tabel ranked sudah berisi data.
+- **Bagian "Updates & Patch Notes" di tab Play** (permintaan pemilik): bug/feedback yang diselesaikan, patch Battle Sim,
+  aturan baru, dan kartu ban di official regulation. Data di `sim/sim-updates.js` (EN + ID, terbaru di atas, jenis
+  FIXED / IMPROVED / PATCH / RULES / BAN / NEWS, nomor laporan pemain). Tampil 3 entri terakhir + "Show all". Isi awal 6 entri
+  dari o2.14–o2.20 + pengumuman beta/season. Jenis BAN belum dipakai (belum ada pengumuman resmi); daftar ini hanya
+  pengumuman, deck dengan kartu ban belum ditolak otomatis.
+- Sumber: `mhr-simulator\app` → `site-sim.js … o2.21` (daftar berkas + `sim-updates.js`). `SIM_URL ?v=o2.21`,
+  `sim-host.js?v=7.40-sim21`, `home-ui.js?v=7.40`, versi situs v7.40. Server online tidak perlu diubah.
+- Dicek: tab Play desktop 1280 & HP 390 (EN/ID, Show all), panel Ranked "dimulai 23 November 2026", permainan penuh di HP,
+  20 pertandingan bot tanpa error.
+
 ### Data — Battle Sim o2.20: tampilan HP Tahap 2 (alur RushDee) — petunjuk di garis tengah, panel Counter di tengah, kartu tampil penuh — 14 November 2026 *(`sim/index.html`, `sim/sim-ui.js`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #95. Lanjutan o2.19 (Tahap 1). **Hanya layar ≤ 820 px; desktop, mesin, dan server tidak berubah.**

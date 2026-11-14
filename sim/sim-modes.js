@@ -139,7 +139,7 @@
   /* Menu "hub" (riwayat #76, permintaan pemilik 11 Nov 2026): satu layar seperti lobi game — spanduk + tag BETA, baris
      mode yang membuka di tempat (mulai cepat tanpa pindah layar), ubin pintasan, kotak beta (lapor bug / feedback) dan
      permainan terakhir. Rujukan susunan: beranda rushdee.app dan lobi game kartu lain; teks, warna dan isi milik sendiri. */
-  const BETA = { from: '2026-11-11', to: '2026-11-18', label: '11–18 Nov 2026' };      // keputusan pemilik: beta 1 minggu
+  const BETA = { from: '2026-11-11', to: '2026-11-22', label: '11–22 Nov 2026' };      // keputusan pemilik: beta 1 minggu; diperpanjang sampai 22 Nov (riwayat #96)
   const BETA_END = new Date(BETA.to + 'T23:59:59+07:00').getTime();
   // #82 (pemilik 12 Nov 2026: beta berakhir 18 Nov): sesudah tanggal itu tag BETA dan kotak beta hilang sendiri,
   // tombol lapor bug / feedback tetap ada. Kelas html.beta-over juga menyembunyikan tag BETA di judul (index.html).
@@ -154,7 +154,7 @@
      Legends of Runeterra): MODE (4 ubin) → YOUR DECK (ubin deck akun + tempel kode) → pilihan mode → tombol PLAY.
      Kiri: spanduk, pintasan (History, Sandbox, Tools, Feedback), permainan terakhir, kotak beta. Di HP panel Play tampil
      tepat di bawah spanduk. Layar lama (More options, room online, Find a match, satu perangkat) tetap menjadi langkah kedua. */
-  const PB_MODES = [['practice', '🤖', 'Practice', 'vs Bot'], ['find', '⚔️', 'Find a match', Date.now() >= Date.parse('2026-11-19T00:00:00+07:00') ? 'Ranked' : 'Standard clock'] /* Ranked setelah beta (riwayat #87) */, ['online', '🔗', 'Friend online', 'Room link'], ['custom', '👥', 'Same device', 'Pass-and-play']];
+  const PB_MODES = [['practice', '🤖', 'Practice', 'vs Bot'], ['find', '⚔️', 'Find a match', Date.now() >= Date.parse('2026-11-23T00:00:00+07:00') ? 'Ranked' : 'Standard clock'] /* Ranked setelah beta (riwayat #87) */, ['online', '🔗', 'Friend online', 'Room link'], ['custom', '👥', 'Same device', 'Pass-and-play']];
   let pbMode = PB_MODES.some(m => m[0] === prefs.pbMode) ? prefs.pbMode : 'practice';
   let pbDeck = null, pbCode = null, pbPicked = false;   // pilihan deck di panel (my:i atau code); pbPicked = dipilih pemain
   const COLOR_DOT = { Merah: 'r', Kuning: 'y', Biru: 'b', Hijau: 'g', Orange: 'o', Purple: 'p' };
@@ -218,6 +218,29 @@
     const hd = $('hubDeck'); if (hd) { const p = practicePrefs(); hd.value = p.deck === 'code' ? 'code' : p.deck; if (!hd.value) hd.selectedIndex = 0; }
     if (window.MHRSimI18N) window.MHRSimI18N.apply();
   }
+  /* Riwayat #96 (permintaan pemilik 14 Nov 2026): bagian "Updates" di tab Play — bug/feedback yang diselesaikan, patch,
+     aturan baru, dan kartu ban di official regulation. Data di sim-updates.js; teks dibuat dalam bahasa aktif (EN/ID). */
+  let updAll = false;
+  function updatesHTML() {
+    const U = window.MHRSimUpdates; if (!U || !U.list || !U.list.length) return '';
+    const id = !!(window.MHRSimI18N && window.MHRSimI18N.lang === 'id');
+    const T = (en, ind) => id ? ind : en;
+    const MON = id ? ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'] : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const day = d => { const [y, m, dd] = String(d).split('-'); return (+dd) + ' ' + (MON[+m - 1] || m) + ' ' + y; };
+    const list = updAll ? U.list : U.list.slice(0, 3);
+    const item = u => {
+      const tx = (id ? u.id : u.en) || u.en || { h: '', b: [] }, ty = U.TYPES[u.t] || [u.t, u.t];
+      const cards = (u.cards || []).map(no => { const c = S.card(no); return '<li>' + esc(no) + (c ? ' · ' + esc(S.nameEn(c)) : '') + '</li>'; }).join('');
+      return '<article class="upd t-' + esc(u.t) + '"><div class="uh"><span class="ut">' + esc(ty[id ? 1 : 0]) + '</span><span class="ud">' + esc(day(u.d)) + (u.v ? ' · ' + esc(u.v) : '') + '</span></div>' +
+        '<b class="uttl">' + esc(tx.h) + '</b><ul>' + (tx.b || []).map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' +
+        (cards ? '<ul class="ucards">' + cards + '</ul>' : '') +
+        (u.reports && u.reports.length ? '<div class="urep">' + esc(T('From player reports ', 'Dari laporan pemain ')) + u.reports.map(n => '#' + n).join(', ') + '</div>' : '') + '</article>';
+    };
+    return '<div class="updbox" data-noi18n><div class="rh"><b>' + esc(T('UPDATES & PATCH NOTES', 'UPDATE & CATATAN PATCH')) + '</b>' +
+      (U.list.length > 3 ? '<button class="sm" data-upd="toggle">' + esc(updAll ? T('Show less', 'Tampilkan lebih sedikit') : T('Show all', 'Semua') + ' (' + U.list.length + ')') + '</button>' : '') + '</div>' +
+      '<p class="small muted">' + esc(T('Bugs and feedback we fixed, Battle Sim patches, new rules and cards banned in the official regulation.', 'Bug dan masukan yang sudah kami selesaikan, patch Battle Sim, aturan baru, dan kartu yang di-ban di regulasi resmi.')) + '</p>' +
+      list.map(item).join('') + '</div>';
+  }
   function renderHome() {
     const ui = U(), hist = ui ? ui.history() : [];
     const mine = hist.filter(r => r.me != null && r.winner != null);
@@ -241,9 +264,10 @@
         '<button class="sm" data-h="replay" data-id="' + r.id + '">Replay</button></div>';
     });
     h += '</div><div class="betabox">' + (betaOn() ? '<div class="bh"><span class="betatag">BETA</span><b>' + esc(BETA.label) + '</b>' + (left ? '<i>' + esc(left) + '</i>' : '') + '</div>' +
-      '<p>Battle Sim is in a one-week beta. It may end earlier if no bugs are reported and player feedback is positive.</p>' : '<div class="bh"><b>Help us improve</b></div>') +
+      '<p>Battle Sim is in open beta until 22 November. Ranked Season 0 starts on 23 November.</p>' : '<div class="bh"><b>Help us improve</b></div>') +
       '<p class="small">Something wrong with a rule or a card effect? Is anything confusing on your phone? Your report goes straight to the developer.</p>' +
-      '<div class="mgo"><button class="pri" data-rep="open" data-v="bug">🐞 Report a bug</button><button data-rep="open" data-v="feedback">💬 Send feedback</button></div></div></section>';
+      '<div class="mgo"><button class="pri" data-rep="open" data-v="bug">🐞 Report a bug</button><button data-rep="open" data-v="feedback">💬 Send feedback</button></div></div>' +
+      updatesHTML() + '</section>';
     $('home').innerHTML = h;
     drawBlade();
     if (onlineReady()) OL().loadDecks().then(() => { if (view === 'home') drawBlade(); });
@@ -366,9 +390,10 @@
     } catch (e) { /* abaikan */ }
   }
   function onClick(ev) {
-    const t = ev.target.closest('[data-mode],[data-m],[data-h],[data-ht],[data-seg] button,[data-lang],[data-hub],[data-pbmode],[data-pbdeck]');
+    const t = ev.target.closest('[data-mode],[data-m],[data-h],[data-ht],[data-seg] button,[data-lang],[data-hub],[data-pbmode],[data-pbdeck],[data-upd]');
     if (!t || !$('setup').contains(t)) return;
     const ui = U();
+    if (t.dataset.upd === 'toggle') { updAll = !updAll; renderHome(); return; }
     if (t.dataset.hub === 'play') { pbPlay(); return; }
     if (t.dataset.pbmode) { pbMode = t.dataset.pbmode; prefs.pbMode = pbMode; savePrefs(); drawBlade(); return; }
     if (t.dataset.pbdeck) { const c = $('pbCode'); if (c) pbCode = c.value; pbDeck = t.dataset.pbdeck; pbPicked = true; drawBlade(); if (pbDeck === 'code' && $('pbCode')) $('pbCode').focus(); return; }

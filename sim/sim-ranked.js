@@ -10,7 +10,8 @@
      - mulai 1000 poin; Elo K = 48, 5 pertandingan pertama tiap season = placement (K = 96); menang min +4, kalah min -4
      - tier: Recruit, Agent, Hero, Avenger, Legend, Myth, Cosmic (divisi III/II/I, 100 poin per divisi; Recruit < 900),
        Genius Burden 2700+ (puncak, tanpa divisi). Ikon: ../images/rank/<tier>.svg (desain orisinal, v7.38)
-     - Season 1 = 19 Nov – 31 Des 2026 (kode '2026-12'); sesudahnya bulanan
+     - riwayat #96 (pemilik 14 Nov 2026): Season 0 = 23 Nov – 31 Des 2026 (kode 'S00'); Season 1 mulai 1 Jan 2027 (kode 'S01'),
+       lamanya ditentukan setelah tanggal rilis set 2027 diketahui. Dulu: Season 1 = 19 Nov – 31 Des (kode '2026-12'), lalu bulanan.
      - season bulanan (WIB), kode 'YYYY-MM'; soft reset ke 1000 + ½ (poin akhir − 1000)
    Antrean tetap tidak memakai poin: saat pemain masih sedikit, semua pemain bisa bertemu siapa saja.
    =================================================================== */
@@ -26,9 +27,9 @@
   const icon = (k, cls) => '<img class="' + (cls || 'rki') + '" src="' + ICON_BASE + slug(k) + '.svg?v=1" alt="" loading="lazy">';
   const PLACEMENT = 5;
   // Ranked aktif SETELAH BETA (keputusan pemilik 12 Nov 2026) — sama dengan mhr_sim_ranked_start() di SQL
-  const START = Date.parse('2026-11-19T00:00:00+07:00');
+  const START = Date.parse('2026-11-23T00:00:00+07:00');   // beta diperpanjang sampai 22 Nov (riwayat #96)
   const live = () => Date.now() >= START;
-  const START_TXT = '19 November 2026';
+  const START_TXT = '23 November 2026';
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
   // o2.16 (permintaan pemilik 13 Nov 2026): terjemahan Indonesia lengkap. Kalimat yang memuat angka/tebal dibuat langsung dalam
@@ -43,9 +44,14 @@
     const nextAt = points < 600 ? 700 : 600 + (Math.floor(p / 100) + 1) * 100;
     return { key: t, name: t + ' ' + ['III', 'II', 'I'][d], next: nextAt };
   }
-  // Season 1 diperpanjang sampai 31 Des 2026 (keputusan pemilik): kodenya '2026-12'; mulai 2027 bulanan.
-  const seasonNow = () => { const k = new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 7); return k < '2027-01' ? '2026-12' : k; };     // WIB
-  const seasonLabel = s => { if (s === '2026-12') return T('Season 1 · 19 Nov – 31 Dec 2026', 'Season 1 · 19 Nov – 31 Des 2026'); const [y, m] = String(s).split('-'); return ((ID() ? BULAN : MONTHS)[+m - 1] || s) + ' ' + y; };
+  // Riwayat #96: Season 0 = 23 Nov – 31 Des 2026 ('S00'); Season 1 mulai 1 Jan 2027 ('S01', akhir belum ditentukan) — sama dengan mhr_sim_season() di SQL.
+  const seasonNow = () => Date.now() < Date.parse('2027-01-01T00:00:00+07:00') ? 'S00' : 'S01';
+  const seasonLabel = s => {
+    if (s === 'S00') return T('Season 0 · 23 Nov – 31 Dec 2026', 'Season 0 · 23 Nov – 31 Des 2026');
+    if (s === 'S01') return T('Season 1 · from 1 Jan 2027', 'Season 1 · mulai 1 Jan 2027');
+    const m = /^S(\d+)$/.exec(String(s)); if (m) return 'Season ' + (+m[1]);
+    const [y, mo] = String(s).split('-'); return ((ID() ? BULAN : MONTHS)[+mo - 1] || s) + ' ' + y;
+  };
   const badge = (t, small) => '<span class="rkb' + (small ? ' sm' : '') + '" style="--rk:' + COLOR[t.key] + '">' + icon(t.key) + esc(t.name) + '</span>';
   const fmt = n => Number(n || 0).toLocaleString(ID() ? 'id-ID' : 'en-US');
 
@@ -139,8 +145,8 @@
          'Menyerah, keluar, atau kehabisan waktu ke-3 kalinya dihitung kalah.') +
       li('Tiers: Recruit · Agent (900) · Hero (1,200) · Avenger (1,500) · Legend (1,800) · Myth (2,100) · Cosmic (2,400), each with divisions III, II and I (100 points each), and the top tier <b>Genius Burden</b> (2,700+).',
          'Tier: Recruit · Agent (900) · Hero (1.200) · Avenger (1.500) · Legend (1.800) · Myth (2.100) · Cosmic (2.400), masing-masing dengan divisi III, II, dan I (100 poin per divisi), dan tier puncak <b>Genius Burden</b> (2.700+).') +
-      li('Season 1 runs from 19 November to 31 December 2026; after that a new season starts every month. At each new season your points move halfway back toward 1,000 and you play 5 new placement games.',
-         'Season 1 berlangsung 19 November sampai 31 Desember 2026; sesudah itu season baru dimulai setiap bulan. Di awal season baru, poin Anda bergeser setengah jalan kembali ke 1.000 dan Anda bermain 5 pertandingan placement lagi.') +
+      li('Season 0 runs from 23 November to 31 December 2026. Season 1 starts on 1 January 2027; its length will be announced once the 2027 set release date is known. At each new season your points move halfway back toward 1,000 and you play 5 new placement games.',
+         'Season 0 berlangsung 23 November sampai 31 Desember 2026. Season 1 dimulai 1 Januari 2027; lamanya diumumkan setelah tanggal rilis set 2027 diketahui. Di awal season baru, poin Anda bergeser setengah jalan kembali ke 1.000 dan Anda bermain 5 pertandingan placement lagi.') +
       li('While there are few players, the queue matches everyone with everyone; the points system keeps it fair.',
          'Selama pemain masih sedikit, antrean mempertemukan siapa saja dengan siapa saja; sistem poin menjaga hasilnya tetap adil.') +
       '</ul></details>';
@@ -197,7 +203,7 @@
     'How ranked works': 'Cara kerja ranked', 'Play 5 games to get your rank': 'Main 5 kali untuk mendapat rank',
     'No one has finished placement yet this season. Be the first: play 5 games in Find a match.': 'Belum ada yang menyelesaikan placement di season ini. Jadilah yang pertama: mainkan 5 pertandingan di Cari lawan.',
     'Ranked is being set up. Please check again soon.': 'Ranked sedang disiapkan. Coba lagi sebentar lagi.',
-    'Ranked starts on 19 November 2026': 'Ranked dimulai 19 November 2026', 'Starts 19 November 2026, after the beta': 'Mulai 19 November 2026, setelah beta', 'Learn more →': 'Selengkapnya →', 'COMING SOON': 'SEGERA'
+    'Ranked starts on 23 November 2026': 'Ranked dimulai 23 November 2026', 'Starts 23 November 2026, after the beta': 'Mulai 23 November 2026, setelah beta', 'Learn more →': 'Selengkapnya →', 'COMING SOON': 'SEGERA'
   });
 
   window.MHRSimRanked = { tier, seasonNow, seasonLabel, render, fillLine, result, resultHTML, COLOR, PLACEMENT, live, START };

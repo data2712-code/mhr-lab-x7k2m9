@@ -165,6 +165,20 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .betabox .bh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}.betabox .bh b{font-family:var(--disp);font-size:18px;letter-spacing:.03em}.betabox .bh i{font-style:normal;font-size:12px;color:#ffb4a8;margin-left:auto}
 .betabox p{margin:0 0 8px;color:#dfe5ec;font-size:13px}.betabox p.small{color:var(--muted);font-size:12px}.betabox .mgo button{flex:1}
 .recent{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--panel)}
+/* riwayat #96: Updates & patch notes (tab Play) */
+.updbox{grid-column:1/-1;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--panel)}
+.updbox .rh{display:flex;align-items:center;margin-bottom:4px}.updbox .rh b{flex:1;font-family:var(--disp);letter-spacing:.08em;font-size:14px;color:var(--gold)}
+.updbox > p{margin:0 0 8px}
+.upd{border-top:1px solid var(--line);padding:9px 0 6px}
+.upd .uh{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.upd .ut{font-size:10px;font-weight:800;letter-spacing:.08em;padding:1px 7px;border-radius:999px;border:1px solid}
+.upd .ud{font-size:11.5px;color:var(--muted)}
+.upd .uttl{display:block;font-size:13.5px;color:var(--paper);margin-bottom:2px}
+.upd ul{margin:2px 0 0;padding-left:18px;font-size:12.5px;color:#c9d2de;line-height:1.45}
+.upd .ucards{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.upd .ucards li{border:1px solid #7a3328;color:#ffb4a8;border-radius:8px;padding:2px 8px;font-size:12px}
+.upd .urep{font-size:11.5px;color:var(--muted);margin-top:3px}
+.upd.t-fix .ut{color:#9fe0b2;border-color:#3f9a5d}.upd.t-improve .ut{color:#9cc3ff;border-color:#3b6fb8}.upd.t-patch .ut,.upd.t-rules .ut{color:var(--gold2);border-color:#8a6d1c}
+.upd.t-ban .ut{color:#ffb4a8;border-color:#a3392a}.upd.t-news .ut{color:#d9b8ff;border-color:#6b4ea8}
 .recent .rh{display:flex;align-items:center;margin-bottom:6px}.recent .rh b{flex:1;font-family:var(--disp);letter-spacing:.08em;font-size:14px;color:var(--gold)}
 .rrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.rrow .tx{flex:1;min-width:0}.rrow .tx b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rrow .res{flex:none;width:46px;text-align:center;font-size:11px;font-weight:800;padding:3px 0;border-radius:6px;background:#26303c}
@@ -829,7 +843,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   <!-- ================= SETUP: satu mode (riwayat #39) ================= -->
   <div id="setup">
     <div class="topbar">
-      <h1 style="font-size:30px">MHR Battle Sim <span class="betatag" title="Beta 11–18 Nov 2026">BETA</span></h1>
+      <h1 style="font-size:30px">MHR Battle Sim <span class="betatag" title="Beta 11–22 Nov 2026">BETA</span></h1>
       <div class="lang" id="langSw"><button data-lang="en">EN</button><button data-lang="id">ID</button></div>
     </div>
     <!-- Menu mode (riwayat #50), diisi sim-modes.js -->
@@ -958,21 +972,22 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.32-sd56en2" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.38-saweria" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.20"></script>
-<script src="sim-cards.js?v=o2.20"></script>
-<script src="sim-cards-bp01.js?v=o2.20"></script>
-<script src="sim-cards-s4.js?v=o2.20"></script>
-<script src="sim-cards-sp01.js?v=o2.20"></script>
-<script src="sim-cards-t6.js?v=o2.20"></script>
-<script src="sim-bot.js?v=o2.20"></script>
-<script src="sim-sound.js?v=o2.20"></script>
-<script src="sim-shadow.js?v=o2.20"></script>
-<script src="sim-ui.js?v=o2.20"></script>
-<script src="sim-sandbox.js?v=o2.20"></script>
-<script src="sim-report.js?v=o2.20"></script>
-<script src="sim-modes.js?v=o2.20"></script>
-<script src="sim-i18n.js?v=o2.20"></script>
-<script src="sim-online.js?v=o2.20"></script>
-<script src="sim-ranked.js?v=o2.20"></script>
+<script src="sim.js?v=o2.21"></script>
+<script src="sim-cards.js?v=o2.21"></script>
+<script src="sim-cards-bp01.js?v=o2.21"></script>
+<script src="sim-cards-s4.js?v=o2.21"></script>
+<script src="sim-cards-sp01.js?v=o2.21"></script>
+<script src="sim-cards-t6.js?v=o2.21"></script>
+<script src="sim-bot.js?v=o2.21"></script>
+<script src="sim-sound.js?v=o2.21"></script>
+<script src="sim-shadow.js?v=o2.21"></script>
+<script src="sim-ui.js?v=o2.21"></script>
+<script src="sim-sandbox.js?v=o2.21"></script>
+<script src="sim-report.js?v=o2.21"></script>
+<script src="sim-modes.js?v=o2.21"></script>
+<script src="sim-i18n.js?v=o2.21"></script>
+<script src="sim-online.js?v=o2.21"></script>
+<script src="sim-ranked.js?v=o2.21"></script>
+<script src="sim-updates.js?v=o2.21"></script>
 </body>
 </html>

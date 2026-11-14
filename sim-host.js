@@ -18,14 +18,14 @@
    =================================================================== */
 (function () {
   'use strict';
-  const SIM_URL = 'sim/index.html?v=o2.20';
+  const SIM_URL = 'sim/index.html?v=o2.21';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const q = s => document.querySelector(s);
   const admin = () => (typeof isAccountAdmin !== 'undefined' && isAccountAdmin);
   const loggedIn = () => (typeof isLoggedIn !== 'undefined' && isLoggedIn);
   const canPlay = () => loggedIn();        // beta O3: semua akun login (server: AUTH = "user"). Uji O2 dulu: admin()
-  // sim #82: beta berakhir 18 Nov 2026 — sesudahnya tag BETA di tab menu ikut hilang (Battle Sim tetap bisa dimainkan).
-  if (Date.now() > new Date('2026-11-18T23:59:59+07:00').getTime()) {
+  // sim #82: beta berakhir 18 Nov 2026 (#96: diperpanjang sampai 22 Nov) — sesudahnya tag BETA di tab menu ikut hilang (Battle Sim tetap bisa dimainkan).
+  if (Date.now() > new Date('2026-11-22T23:59:59+07:00').getTime()) {
     const hideTag = () => document.querySelectorAll('[data-page="sim"] .sim-beta').forEach(e => { e.hidden = true; });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hideTag); else hideTag();
   }
@@ -81,9 +81,9 @@
     if (!canPlay()) {
       if (frame()) wrap.innerHTML = '';
       const authReady = window.MHRAuth && window.MHRAuth.ready;
-      const beta = Date.now() <= new Date('2026-11-18T23:59:59+07:00').getTime();   // sim #82: beta berakhir 18 Nov 2026
+      const beta = Date.now() <= new Date('2026-11-22T23:59:59+07:00').getTime();   // sim #82 / #96: beta berakhir 22 Nov 2026
       wrap.innerHTML = '<div class="sim-gate"><h2>⚔️ Battle Sim' + (beta ? ' <span class="sim-beta">BETA</span>' : '') + '</h2>' +
-        (beta ? '<p>Battle Sim is in beta (11–18 Nov 2026). Log in with your MHR Deck Lab account to play, and tell us about any bug you find.</p>' : '<p>Log in with your MHR Deck Lab account to play, and tell us about any bug you find.</p>') + (authReady ? '<p><button class="nw-btn ev-main" id="simLogin">Log in</button></p>' : '') +
+        (beta ? '<p>Battle Sim is in beta (11–22 Nov 2026). Log in with your MHR Deck Lab account to play, and tell us about any bug you find.</p>' : '<p>Log in with your MHR Deck Lab account to play, and tell us about any bug you find.</p>') + (authReady ? '<p><button class="nw-btn ev-main" id="simLogin">Log in</button></p>' : '') +
         (lastRoom ? '<p class="ev-muted">Room invite: <b>' + esc(lastRoom) + '</b>. The room opens right after you log in.</p>' : '') +
         (lastReplay ? '<p class="ev-muted">Replay link: the replay opens right after you log in.</p>' : '') +
         '<p class="ev-muted">Free: practice against a bot, find a match or play a friend online. Every rule and card effect is handled for you.</p>' + '</div>';
