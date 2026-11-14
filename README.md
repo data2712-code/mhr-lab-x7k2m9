@@ -603,6 +603,20 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Artikel News rilis SD05/SD06/PB02 di Indonesia + koreksi cara mendapat PB02 — 14 November 2026 *(`data.js`, `index.html`, `sim/index.html`, `images/news/sd05-sd06-pb02-indonesia-release/cover.jpg`)*
+
+- **Koreksi dari pemilik:** PB02 **hanya** didapat dengan membeli SD05 atau SD06, tidak dari Weekly Rush di LGS. Deskripsi set
+  PB02 di `data.js` diperbaiki ("it only comes with a purchase of SD05 or SD06"). Deskripsi SD06: "Cabal" → "The Cabal".
+- **Artikel baru** (Supabase `news`, kategori Rilis Set, sudah terbit), slug `sd05-sd06-pb02-indonesia-release`: "SD05, SD06 and
+  PB02 Are Out in Indonesia: Official English Text Now on MHR Deck Lab". Isi: ringkasan tiap set, galeri kartu, dua kata kunci
+  baru (teks resmi), perubahan dari terjemahan fan (ONSLAUGHT, QUICK ATTACK, The Cabal, Goose → Chewie), dan fitur situs.
+- Tautan "Lihat detail" set SD05, SD06, PB02 dan jadwal rilis Indonesia 14 Nov di `data.js` kini membuka artikel baru.
+- Cover 1200×630 `images/news/sd05-sd06-pb02-indonesia-release/cover.jpg` (tampil setelah di-push). Halaman statis `news/`,
+  `rss.xml` dan `news-sitemap.xml` dibuat otomatis oleh GitHub Actions `news-pages.yml` (Pull origin dulu sebelum push berikutnya).
+- Cache-buster `data.js?v=7.40-pb02only` di `index.html` dan `sim/index.html`.
+- Materi sosmed (gambar statis IG 4:5 + TikTok 9:16 berbahasa Indonesia, carousel IG 8 slide berbahasa Inggris, caption) disimpan di
+  `G:\My Drive\TCG\Marvel Hero Rush\Medsos\MHR_SD05_SD06_PB02_Release_14Nov2026`.
+
 ### Data — Battle Sim o2.22: label efek PB02 memakai judul resmi + catatan di Updates — 14 November 2026 *(`sim/sim-cards-t6.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #97, lanjutan entri PB02 di bawah.

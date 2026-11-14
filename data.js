@@ -135,13 +135,13 @@ window.TOURNAMENTS = [
 window.SETS = [
   { kode:'SD05', nama:'', namaSementara:'SOUL', tipe:'Starter Deck', status:'rilis', rilis:{ id:'2026-11-14', cn:'2026-10-16' },
     deskripsi:'Orange starter deck, released in China on 16 Oct 2026; official Indonesian release on 14 Nov 2026. 18 cards, with Odin in UR, MR and SEC versions: Asgard (Odin, Hela, Heimdall, Sif, Valkyrie), Kamar-Taj (Ancient One, Wong, Doctor Strange) and Captain Marvel.',
-    berita:'sd05-sd06-china-release-all-cards' },
+    berita:'sd05-sd06-pb02-indonesia-release' },
   { kode:'SD06', nama:'', namaSementara:'POWER', tipe:'Starter Deck', status:'rilis', rilis:{ id:'2026-11-14', cn:'2026-10-16' },
-    deskripsi:'Purple starter deck, released in China on 16 Oct 2026; official Indonesian release on 14 Nov 2026. 18 cards, with Thanos in UR, MR and SEC versions: Thanos, the Black Order and Cabal cards.',
-    berita:'sd05-sd06-china-release-all-cards' },
+    deskripsi:'Purple starter deck, released in China on 16 Oct 2026; official Indonesian release on 14 Nov 2026. 18 cards, with Thanos in UR, MR and SEC versions: Thanos, the Black Order and The Cabal cards.',
+    berita:'sd05-sd06-pb02-indonesia-release' },
   { kode:'PB02', nama:'', namaSementara:'Promo Pack', tipe:'Other', status:'rilis', rilis:{ id:'2026-11-14', cn:'2026-10-16' },
-    deskripsi:'Promo pack, not sold separately: you get it when buying SD05/SD06 or by playing Weekly Rush tournaments at LGS. Released in China on 16 Oct 2026; in Indonesia from 14 Nov 2026. 21 PR cards (10 Orange, 10 Purple, 1 Yellow).',
-    berita:'sd05-sd06-china-release-all-cards' },
+    deskripsi:'Promo pack, not sold separately: it only comes with a purchase of SD05 or SD06. Released in China on 16 Oct 2026; in Indonesia from 14 Nov 2026. 21 PR cards (10 Orange, 10 Purple, 1 Yellow).',
+    berita:'sd05-sd06-pb02-indonesia-release' },
   { kode:'SP01', nama:'Era of Spiders', tipe:'Expansion Pack', status:'rilis',
     berita:'sp01-teks-resmi-bahasa-indonesia' },
   { kode:'EB01', nama:'Event Pack', tipe:'Other', status:'rilis' },
@@ -172,7 +172,7 @@ window.RILIS = [
   { nama:'SD05 & SD06 Starter Deck + PB02 (Orange & Purple)', tanggal:'2026-10-16',
     wilayah:'China', zona:'+08:00', berita:'preview-sd05-sd06-pb02-orange-purple' },
   { nama:'SD05 & SD06 Starter Deck + PB02 (Orange & Purple)', tanggal:'2026-11-14',
-    wilayah:'Indonesia', link:'#set' },
+    wilayah:'Indonesia', berita:'sd05-sd06-pb02-indonesia-release' },
 ];
 
 /* ========== DUKUNGAN SUKARELA ==========
