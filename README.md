@@ -603,6 +603,23 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.20: tampilan HP Tahap 2 (alur RushDee) — petunjuk di garis tengah, panel Counter di tengah, kartu tampil penuh — 14 November 2026 *(`sim/index.html`, `sim/sim-ui.js`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #95. Lanjutan o2.19 (Tahap 1). **Hanya layar ≤ 820 px; desktop, mesin, dan server tidak berubah.**
+- **Petunjuk pindah ke garis tengah:** gelembung petunjuk yang menutupi area BACK lawan dihapus. Saat giliran Anda memutuskan,
+  petunjuk (judul + satu kalimat) menggantikan baris kejadian terakhir di garis tengah; saat menunggu lawan, baris kejadian
+  terakhir yang tampil.
+- **Counter Step / Counter Phase = panel di tengah papan** bila ada yang bisa dipakai (COUNTER CALL / ACTI): kalimat akibat,
+  tombol tiap kartu, Pass, dan "Look at the board". HAND dan BASE tetap terlihat. Bila hanya bisa Pass: tetap tombol bulat PASS.
+- **Ketuk kartu = tampilan kartu penuh:** gambar besar, teks efek, tombol besar (CALL, Base Deployment, Activate, Move, Close);
+  ketuk di luar kartu untuk menutup. Menggantikan lembar bawah.
+- Yang masih memakai lembar bawah di HP: pilihan efek (Yes/No, pilih salah satu), urutan efek, pilihan AIR STRIKE, CALL ke BASE
+  vs Base Deployment setelah seret, dan pesan "tidak boleh".
+- Dicek (Playwright, sentuhan, 360×780 dan 360×640): tampilan kartu dan tutup dengan ketuk di luar; panel Counter dengan satu
+  pilihan ACTI + Pass, Look at the board / Show choices, Pass melanjutkan permainan; permainan penuh 390×844 tanpa error JS;
+  desktop 1440 tidak berubah. Belum diuji di HP sungguhan.
+- Sumber: `mhr-simulator\app` → `site-sim.js … o2.20`. Semua skrip `?v=o2.20`; `SIM_URL ?v=o2.20`; `sim-host.js?v=7.39-sim20`.
+
 ### Data — Battle Sim o2.19: tampilan HP Tahap 1 (alur RushDee) — BASE jadi baris, keputusan di papan, sisi kanan ringkas — 14 November 2026 *(`sim/index.html`, `sim/sim-ui.js`, `sim/sim-i18n.js`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #94. Permintaan pemilik: interaksi di HP terlalu banyak di bagian bawah layar (menutupi BASE dan HAND) dan ikon di

@@ -778,6 +778,36 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   #game.sideOn #acts button:not(.dsk){display:flex}
   #game.sideOn #acts #btnMore{display:none}
 }
+@media (max-width:820px){
+  /* ===== Riwayat #95 · Tahap 2 alur RushDee di HP: petunjuk di garis tengah, panel Counter di tengah, kartu tampil penuh ===== */
+  .ohint{display:none}
+  .midzone.hasHint .tl{display:none}
+  .mhint{grid-area:tl;min-width:0;position:relative;z-index:8;padding:3px 8px;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;background:rgba(20,26,33,.85);font-size:11px;line-height:1.25;color:#c9d2de;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .mhint b{color:var(--gold);font-family:var(--disp);font-size:12px;letter-spacing:.02em;margin-right:5px}
+  .mhint b,.mhint span{display:inline}
+  /* panel Counter di tengah */
+  .midzone .abar.sheet.cpanel,.abar.sheet.cpanel{left:10px;right:10px;bottom:auto;top:44%;transform:translateY(-50%);max-height:56dvh;border-radius:16px;border:1px solid var(--gold);border-bottom:1px solid var(--gold);padding:10px 10px 12px;box-shadow:0 14px 44px rgba(0,0,0,.75)}
+  .abar.sheet.cpanel .hint{font-size:12px}
+  .abar.sheet.cpanel .hint > span:last-child{-webkit-line-clamp:4}
+  .abar.sheet.cpanel .acts{flex-direction:column;flex-wrap:nowrap}
+  .abar.sheet.cpanel .acts button{flex:none;width:100%;min-height:46px}
+  .abar.sheet.cpanel .peek{align-self:center;order:9;margin-top:2px}
+  .abar.sheet.cpanel.peeked{top:auto;bottom:calc(var(--hcw) * 1.4 + 26px + 52px + var(--brh) + 8px);transform:none;left:auto;right:56px;padding:4px;border-radius:999px}
+  .abar.sheet.cpanel.peeked .peek{min-height:40px;padding:4px 16px}
+  /* kartu tampil penuh saat diketuk */
+  #pop{left:0 !important;top:0 !important;right:0;bottom:0;width:100%;max-width:none;max-height:none;border:0;border-radius:0;background:rgba(8,10,14,.94);padding:14px 16px calc(14px + env(safe-area-inset-bottom));flex-direction:column;align-items:stretch;justify-content:safe center;gap:8px;overflow:auto;z-index:60}
+  #pop.on{display:flex}
+  #pop > *{flex:none}
+  #pop .cardinfo{flex-direction:column;align-items:center;text-align:center;gap:6px}
+  #pop .cardinfo .big{--cw:min(54vw, 30dvh)}
+  #pop .cardinfo .big .card{cursor:default;border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.7)}
+  #pop .nm{font-size:16px}
+  #pop .eff{max-height:22dvh;margin:0;font-size:12px}
+  #pop .acts{gap:7px}
+  #pop .acts button{min-height:46px;font-size:14px;border-radius:12px}
+  #pop [data-act=cancel]{min-height:42px;width:100%;font-size:13px;border-radius:12px}
+  #pop > div:last-child{margin-top:0 !important}
+}
 @media (max-width:820px) and (max-height:600px){ #acts button{width:30px;height:30px} #acts{gap:4px} .fab{width:64px;height:64px;font-size:12px} }
 @media (min-width:821px){ #acts .mob{display:none} }
 
@@ -928,21 +958,21 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.32-sd56en2" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.38-saweria" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.19"></script>
-<script src="sim-cards.js?v=o2.19"></script>
-<script src="sim-cards-bp01.js?v=o2.19"></script>
-<script src="sim-cards-s4.js?v=o2.19"></script>
-<script src="sim-cards-sp01.js?v=o2.19"></script>
-<script src="sim-cards-t6.js?v=o2.19"></script>
-<script src="sim-bot.js?v=o2.19"></script>
-<script src="sim-sound.js?v=o2.19"></script>
-<script src="sim-shadow.js?v=o2.19"></script>
-<script src="sim-ui.js?v=o2.19"></script>
-<script src="sim-sandbox.js?v=o2.19"></script>
-<script src="sim-report.js?v=o2.19"></script>
-<script src="sim-modes.js?v=o2.19"></script>
-<script src="sim-i18n.js?v=o2.19"></script>
-<script src="sim-online.js?v=o2.19"></script>
-<script src="sim-ranked.js?v=o2.19"></script>
+<script src="sim.js?v=o2.20"></script>
+<script src="sim-cards.js?v=o2.20"></script>
+<script src="sim-cards-bp01.js?v=o2.20"></script>
+<script src="sim-cards-s4.js?v=o2.20"></script>
+<script src="sim-cards-sp01.js?v=o2.20"></script>
+<script src="sim-cards-t6.js?v=o2.20"></script>
+<script src="sim-bot.js?v=o2.20"></script>
+<script src="sim-sound.js?v=o2.20"></script>
+<script src="sim-shadow.js?v=o2.20"></script>
+<script src="sim-ui.js?v=o2.20"></script>
+<script src="sim-sandbox.js?v=o2.20"></script>
+<script src="sim-report.js?v=o2.20"></script>
+<script src="sim-modes.js?v=o2.20"></script>
+<script src="sim-i18n.js?v=o2.20"></script>
+<script src="sim-online.js?v=o2.20"></script>
+<script src="sim-ranked.js?v=o2.20"></script>
 </body>
 </html>

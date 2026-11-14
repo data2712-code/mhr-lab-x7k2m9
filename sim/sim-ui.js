@@ -797,7 +797,11 @@
     mz.insertAdjacentHTML('afterbegin', '<div class="mtitle">' + esc(trayTitle()) + '</div>');
     if (!narrow()) return;
     let b = null;
-    for (const k of ['doAtk', 'pass', 'endAction', 'arrSave', 'noAtk']) { b = tr.querySelector('.acts [data-act="' + k + '"]:not([disabled])'); if (b) break; }
+    // Riwayat #95 (Tahap 2, alur RushDee): Counter dengan pilihan (COUNTER CALL / ACTI) = panel kecil di tengah papan yang juga
+    // memuat Pass, supaya HAND dan BASE tetap terlihat. Tanpa pilihan lain, cukup tombol bulat PASS seperti biasa.
+    const cp = !!(G.prompt && G.prompt.type === 'counter' && !ui.mode && !ui.msg && myTurnPrompt() && tr.querySelector('.acts > button:not([data-act="pass"])'));
+    tr.classList.toggle('cpanel', cp);
+    if (!cp) for (const k of ['doAtk', 'pass', 'endAction', 'arrSave', 'noAtk']) { b = tr.querySelector('.acts [data-act="' + k + '"]:not([disabled])'); if (b) break; }
     if (b) {
       b.classList.add('infab');
       const attrs = Array.from(b.attributes).filter(x => x.name.startsWith('data-')).map(x => x.name + '="' + esc(x.value) + '"').join(' ');
@@ -826,8 +830,11 @@
     const br = $('baseRow');
     if (mb && br) { br.innerHTML = ''; br.appendChild(mb); } else if (mb) $('teamL').appendChild(mb);
     // Petunjuk: saat baki ramping tampil (biaya / tujuan / target), kalimatnya sudah ada di garis tengah.
-    const t = slimMode() ? '' : ohintText(), oh = document.querySelector('#board .side-opp');
-    if (t && oh) oh.insertAdjacentHTML('beforeend', '<div class="ohint">' + t + '</div>');
+    // Riwayat #95 (Tahap 2): petunjuk tidak lagi menutupi area lawan. Saat Anda yang memutuskan, petunjuk menggantikan baris
+    // kejadian terakhir di garis tengah; saat menunggu lawan, baris kejadian terakhir yang tampil.
+    const mz = $('midzone'), waiting = !G.prompt || ui.ctrl[G.prompt.p] === 'bot' || !myTurnPrompt();
+    const t = slimMode() || waiting || document.querySelector('#tray.cpanel') ? '' : ohintText();
+    if (t && mz) { mz.classList.add('hasHint'); mz.insertAdjacentHTML('beforeend', '<div class="mhint">' + t + '</div>'); }
   }
   function ohintText() {
     if (!G || G.result || !G.prompt || ui.replay) return '';
@@ -1468,6 +1475,7 @@
   function onClick(e) {
     if (!G) return;
     if (ui.justDragged && Date.now() - ui.justDragged < 80) { ui.justDragged = 0; return; }
+    if (e.target.id === 'pop' && narrow() && ui.sel && !ui.mode) { ui.sel = null; render(); return; }   // #95: ketuk di luar kartu = tutup
     const lf = e.target.closest('[data-logf]');
     if (lf) { ui.logF = lf.dataset.logf; renderLog(viewer()); return; }
     const t = e.target.closest('[data-act],[data-iid],[data-slot],[data-mull],[data-disc],[data-pick]');
