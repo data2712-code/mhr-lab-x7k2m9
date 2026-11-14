@@ -603,6 +603,21 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.22: label efek PB02 memakai judul resmi + catatan di Updates — 14 November 2026 *(`sim/sim-cards-t6.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #97, lanjutan entri PB02 di bawah.
+- `sim/sim-cards-t6.js`: label efek, teks pilihan, dan log PB02 memakai judul resmi (Rooted Revival, Chewie, Galaxy Scout,
+  Bewildering Dance, Life-and-Death Bond, Soul-Shattering Assault, Power of Stones, Photon Blast, Power Barrage,
+  Soul Resonance, Slayer of Fodder, Hesitation, Fleeting Illusion). Isi efek tidak berubah.
+- `sim/sim-updates.js`: entri baru "PB02 now uses the official English card text" (EN/ID) di bagian Updates tab Play,
+  termasuk dampak trait 【The Cabal】 pada efek SD06.
+- Cache-buster: skrip `sim/` → `?v=o2.22`, `SIM_URL` → `?v=o2.22`, `sim-host.js?v=7.40-sim22`.
+- Sumber `mhr-simulator\app` ikut diperbarui (sama persis kecuali akhir baris).
+- Dicek: 60 pertandingan bot vs bot deck SD06+PB02 ungu melawan SD05+PB02 oranye: 60 selesai, 0 aksi ilegal, 0 error;
+  log memakai judul baru. Bundel server `worker.js` dibangun dengan `build3.js` dari berkas ini (643.852 byte, SHA-256
+  `a2084784…2b26dda`) dan termuat sebagai modul (`MatchRoom` + `default`). **Deploy server menunggu push** (bundel dirakit
+  dari berkas situs yang sudah di-push lalu dicocokkan SHA-nya).
+
 ### Data — PB02: nama, teks & gambar versi Inggris resmi; SD05/SD06 dicek ulang — 14 November 2026 *(`cards.js`, `index.html`, `sim/index.html`, `sitemap.xml`, 16 halaman `cards/`, 21 gambar baru di `images/en/`)*
 
 Permintaan pemilik: SD05, SD06 dan PB02 versi Inggris sudah ada gambar dan terjemahan resminya di

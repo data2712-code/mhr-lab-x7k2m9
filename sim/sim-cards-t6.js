@@ -1,10 +1,11 @@
 /* ===================================================================
-   MHR BATTLE SIM — RESOLVER TAHAP 6: SD05, SD06, PB02 (sim-cards-t6.js)      v0.14 · riwayat #82, #86
+   MHR BATTLE SIM — RESOLVER TAHAP 6: SD05, SD06, PB02 (sim-cards-t6.js)      v0.14 · riwayat #82, #86, #97
    ===================================================================
    Dibuat dari TEKS INGGRIS (e_en) di cards.js. SD05 & SD06: sejak 12 Nov 2026 (riwayat #86) memakai TEKS INGGRIS RESMI
    (fan:1) — nama kartu resmi, trait 【The Cabal】 (dulu Cabal), QUICK ATTACK (dulu QUICK STRIKE), ONSLAUGHT (dulu RAMPAGE).
    Isi efek sama dengan terjemahan pra-rilis, kecuali SD06-004: teks resmi Inggris tidak menulis "this turn"; keputusan
-   pemilik 12 Nov 2026 tetap "this turn" (sesuai teks China). PB02 masih TERJEMAHAN PRA-RILIS (fan:2) sampai teks resmi terbit.
+   pemilik 12 Nov 2026 tetap "this turn" (sesuai teks China). PB02: sejak 14 Nov 2026 (riwayat #97) juga TEKS INGGRIS RESMI (fan:1);
+   label efek memakai judul resmi (mis. Rooted Revival, Chewie, Soul Resonance). Isi efek PB02 tidak berubah.
    - 57 kartu: SD05-001…018 (Orange), SD06-001…018 (Purple), PB02-001…021.
    - Kemampuan baru dari CR 1.05 (belum resmi di Indonesia): QUICK ATTACK (305.7, SD05-003) dan ONSLAUGHT (305.8, SD06-001).
    - Ruling (ruling-simulator.md, RS-064…RS-067; K-48/K-49/K-50 dijawab pemilik 12 Nov): "damaged character" (SD06-002) = Power di bawah
@@ -559,7 +560,7 @@
     },
 
     /* ============================ PB02 ============================ */
-    /* 「Forced Regrowth」Groot */
+    /* 「Rooted Revival」Groot */
     'PB02-001': {
       unique: true,
       acti: [{
@@ -571,7 +572,7 @@
         }
       }],
       trig: [{
-        id: 'grow', zone: 'FIELD', once: true, optional: true, label: 'Forced Regrowth',
+        id: 'grow', zone: 'FIELD', once: true, optional: true, label: 'Rooted Revival',
         text: "Discard 1 card from your HAND to put 1 of this card's Attached Cards into your BATTLE?",
         when: (e, self) => e.k === 'ATTACHED' && e.host === self,
         can: A => A.attached(A.self).length >= 2 && A.hand(A.p).length > 0 && A.emptySlots(A.p).length > 0,
@@ -579,21 +580,21 @@
           const a = A.ask('a', { text: "Choose 1 of Groot's Attached Cards to put into your BATTLE", from: A.attached(A.self), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
           const to = A.pick('to', 'Choose a BATTLE area', slotOpts(A, A.emptySlots(A.p)));
-          if (d.length && A.discard(d[0], 'Forced Regrowth') && a.length && to) A.detachToBattle(a[0], to, 'Forced Regrowth');
+          if (d.length && A.discard(d[0], 'Rooted Revival') && a.length && to) A.detachToBattle(a[0], to, 'Rooted Revival');
         }
       }]
     },
-    /* 「Sweet and Obedient」Goose */
+    /* 「Sweet and Gentle」Chewie */
     'PB02-002': {
       unique: true,
       counter: (A, self) => A.voidOf(A.owner(self)).some(i => nameHas(A, i, 'Nick Fury') || nameHas(A, i, 'Captain Marvel')),
       trig: [{
-        id: 'enter', zone: 'BATTLE', optional: true, label: 'Sweet and Obedient',
+        id: 'enter', zone: 'BATTLE', optional: true, label: 'Sweet and Gentle',
         text: "Attach 1 of your opponent's Lv3-or-lower Characters in BATTLE to this card?",
         when: enterSelf,
         can: A => rpOf(A, A.p) < rpOf(A, A.opp(A.p)) && oppBattle(A).some(i => A.lv(i) <= 3),
         run: A => {
-          const t = A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters in BATTLE to attach to Goose", from: oppBattle(A).filter(i => A.lv(i) <= 3), prefer: 'high' });
+          const t = A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters in BATTLE to attach to Chewie", from: oppBattle(A).filter(i => A.lv(i) <= 3), prefer: 'high' });
           if (inField(A, A.self)) t.forEach(i => A.attach(i, A.self));
         }
       }]
@@ -629,18 +630,18 @@
     'PB02-005': {
       auraAbil: (A, src, tgt) => (A.slot(src) === 'B' && A.ctrl(tgt) === A.ctrl(src) && A.slot(tgt) === 'F' && isGotg(A, tgt) ? ['air'] : [])
     },
-    /* 「Star-Vein Sensing」Rocket Raccoon */
+    /* 「Galaxy Scout」Rocket Raccoon */
     'PB02-006': {
       acti: [{
         id: 'top', zone: 'BASE', once: true, label: 'Reveal the top card of your Deck (Lv2 [GOTG] → HAND, otherwise discard it)',
         can: A => A.deck(A.p).length > 0,
         run: A => {
           const i = A.deck(A.p)[0]; A.reveal(i);
-          if (A.origLv(i) === 2 && isGotg(A, i)) A.toHand(i, 'Star-Vein Sensing'); else A.mill(A.p, 1, 'Star-Vein Sensing');
+          if (A.origLv(i) === 2 && isGotg(A, i)) A.toHand(i, 'Galaxy Scout'); else A.mill(A.p, 1, 'Galaxy Scout');
         }
       }]
     },
-    /* 「Dance of Distraction」Star-Lord */
+    /* 「Bewildering Dance」Star-Lord */
     'PB02-007': {
       unique: true,
       restrict: (A, src, tgt) => {
@@ -651,24 +652,24 @@
         return null;
       }
     },
-    /* 「Bond of Life and Death」Rocket Raccoon */
+    /* 「Life-and-Death Bond」Rocket Raccoon */
     'PB02-008': {
       trig: [{
-        id: 'enter', zone: 'FIELD', optional: true, label: 'Bond of Life and Death',
+        id: 'enter', zone: 'FIELD', optional: true, label: 'Life-and-Death Bond',
         text: 'Discard the top 3 cards of your Deck to return 1 [GOTG] Character with a different name from your RETREAT to your HAND?',
         when: enterSelf,
         can: A => A.deck(A.p).length >= 3,
-        run: A => { if (A.mill(A.p, 3, 'Bond of Life and Death').length === 3) A.job.step2 = true; },
+        run: A => { if (A.mill(A.p, 3, 'Life-and-Death Bond').length === 3) A.job.step2 = true; },
         after: A => {
           const c = A.ask('c', { text: 'Choose 1 [GOTG] Character (not Rocket Raccoon) in your RETREAT to return to your HAND', from: A.ret(A.p).filter(i => isGotg(A, i) && charName(A, i) !== charName(A, A.self)), prefer: 'high' });
-          c.forEach(i => A.toHand(i, 'Bond of Life and Death'));
+          c.forEach(i => A.toHand(i, 'Life-and-Death Bond'));
         }
       }]
     },
-    /* 「Soulshatter Frenzy」Drax */
+    /* 「Soul-Shattering Assault」Drax */
     'PB02-009': {
       trig: [{
-        id: 'enter', zone: 'BATTLE', optional: true, label: 'Soulshatter Frenzy',
+        id: 'enter', zone: 'BATTLE', optional: true, label: 'Soul-Shattering Assault',
         text: "Prune 1 Character from your opponent's RETREAT: 1 of their Characters in BATTLE gets Power-X (X = the pruned card's Power)?",
         when: enterSelf,
         can: A => A.ret(A.opp(A.p)).length > 0 && oppBattle(A).length > 0,
@@ -676,11 +677,11 @@
           const pr = A.ask('pr', { text: "Choose 1 Character in your opponent's RETREAT to Prune", from: A.ret(A.opp(A.p)), prefer: 'high' });
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Power- the pruned card's Power)", from: oppBattle(A), prefer: 'high' });
           const X = pr.length ? A.origP(pr[0]) : 0;
-          if (pr.length && A.prune(pr[0], 'Soulshatter Frenzy') && X > 0) t.forEach(i => A.mod(i, 'p', -X, 'Soulshatter Frenzy'));
+          if (pr.length && A.prune(pr[0], 'Soul-Shattering Assault') && X > 0) t.forEach(i => A.mod(i, 'p', -X, 'Soul-Shattering Assault'));
         }
       }]
     },
-    /* 「Emotional Control」Mantis */
+    /* 「Emotion Control」Mantis */
     'PB02-010': {
       auto: [{ stat: 'r', zone: 'BATTLE', value: (A, src, tgt) => {
         const p = A.ctrl(src);
@@ -688,33 +689,33 @@
         return A.chars(p).some(i => nameHas(A, i, 'Star-Lord')) ? 1 : -1;
       } }]
     },
-    /* 「Power of the Stones」Thanos */
+    /* 「Power of Stones」Thanos */
     'PB02-011': {
       unique: true,
       trig: [{
-        id: 'oppenter', zone: 'FIELD', once: true, optional: true, label: 'Power of the Stones',
+        id: 'oppenter', zone: 'FIELD', once: true, optional: true, label: 'Power of Stones',
         text: "Prune 3 Characters from your RETREAT to Prune 1 of your opponent's Characters in BATTLE?",
         when: (e, self, A) => oppEnters(e, self, A) && A.tp === A.ctrl(self),
         can: A => rpOf(A, A.p) >= 6 && A.ret(A.p).length >= 3 && oppBattle(A).length > 0,
         run: A => {
           const pr = A.ask('pr', { text: 'Choose 3 Characters in your RETREAT to Prune', from: A.ret(A.p), min: 3, max: 3, prefer: 'low' });
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE to Prune", from: oppBattle(A), prefer: 'high' });
-          let n = 0; pr.forEach(i => { if (A.prune(i, 'Power of the Stones')) n++; });
-          if (n === 3) t.forEach(i => A.prune(i, 'Power of the Stones'));
+          let n = 0; pr.forEach(i => { if (A.prune(i, 'Power of Stones')) n++; });
+          if (n === 3) t.forEach(i => A.prune(i, 'Power of Stones'));
         }
       }]
     },
-    /* 「Photon Burst」Captain Marvel */
+    /* 「Photon Blast」Captain Marvel */
     'PB02-012': {
       trig: [{
-        id: 'atk', zone: 'BATTLE', once: true, optional: true, label: 'Photon Burst',
+        id: 'atk', zone: 'BATTLE', once: true, optional: true, label: 'Photon Blast',
         text: 'Prune 1 Character from your RETREAT: the Attack Target gets Power-2000?',
         when: (e, self) => e.k === 'ATTACK' && e.a === self,
         can: A => A.ret(A.p).length > 0 && !!A.cur() && !!A.cur().tg,
         run: A => {
           const pr = askPrune(A, A.ret(A.p), 'Character');
           const c = A.cur(), tg = c && c.tg;
-          if (pr.length && A.prune(pr[0], 'Photon Burst') && tg && inBattle(A, tg)) A.mod(tg, 'p', -2000, 'Photon Burst');
+          if (pr.length && A.prune(pr[0], 'Photon Blast') && tg && inBattle(A, tg)) A.mod(tg, 'p', -2000, 'Photon Blast');
         }
       }]
     },
@@ -750,14 +751,14 @@
         }
       }]
     },
-    /* 「Power Combo」Captain Marvel */
+    /* 「Power Barrage」Captain Marvel */
     'PB02-016': {
       trig: [{
-        id: 'atk', zone: 'BATTLE', once: true, optional: true, label: 'Power Combo',
+        id: 'atk', zone: 'BATTLE', once: true, optional: true, label: 'Power Barrage',
         text: 'Prune 1 Character from your RETREAT: this card gets [DOUBLE ATTACK] this turn?',
         when: (e, self) => e.k === 'ATTACK' && e.a === self,
         can: A => A.ret(A.p).length > 0,
-        run: A => { const pr = askPrune(A, A.ret(A.p), 'Character'); if (pr.length && A.prune(pr[0], 'Power Combo') && inBattle(A, A.self)) A.grant(A.self, 'double', '[DOUBLE ATTACK]'); }
+        run: A => { const pr = askPrune(A, A.ret(A.p), 'Character'); if (pr.length && A.prune(pr[0], 'Power Barrage') && inBattle(A, A.self)) A.grant(A.self, 'double', '[DOUBLE ATTACK]'); }
       }]
     },
     /* 「Iron-Fisted Rule」Thanos */
@@ -771,7 +772,7 @@
         run: A => { const pr = askPrune(A, purpleRet(A), 'purple Character'); if (pr.length && A.prune(pr[0], 'Iron-Fisted Rule')) oppBattle(A).forEach(i => A.mod(i, 'p', -500, 'Iron-Fisted Rule')); }
       }]
     },
-    /* 「Mind Resonance」Yondu — sekali per giliran, +1 kali bila Lv sama */
+    /* 「Soul Resonance」Yondu — sekali per giliran, +1 kali bila Lv sama */
     'PB02-018': {
       acti: [{
         id: 'mind', zone: 'BATTLE', label: "Prune 1 Character from RETREAT: Prune 1 of your opponent's set cards in the BASE at random",
@@ -785,52 +786,52 @@
           if (!pr.length) return;
           const lv = A.origLv(pr[0]);
           const x = A.st.inst[A.self];
-          if (!A.prune(pr[0], 'Mind Resonance')) return;
+          if (!A.prune(pr[0], 'Soul Resonance')) return;
           x.gr = x.gr || {};
           const first = x.gr.yonduT !== A.turn;
           x.gr.yonduN = (x.gr.yonduT === A.turn ? x.gr.yonduN || 0 : 0) + 1; x.gr.yonduT = A.turn;
           const sets = A.set(A.opp(A.p)); if (!sets.length) return;
           const t = sets[A.rand(sets.length)];
-          A.log('Mind Resonance: a random set card is Pruned: ' + A.name(t) + ' (Lv' + A.origLv(t) + ').');
+          A.log('Soul Resonance: a random set card is Pruned: ' + A.name(t) + ' (Lv' + A.origLv(t) + ').');
           const same = A.origLv(t) === lv;
-          A.prune(t, 'Mind Resonance');
-          if (first && same) { x.gr.yonduX = A.turn; A.log('Mind Resonance: same Lv (' + lv + '), the effect can be activated 1 more time this turn.'); }
+          A.prune(t, 'Soul Resonance');
+          if (first && same) { x.gr.yonduX = A.turn; A.log('Soul Resonance: same Lv (' + lv + '), the effect can be activated 1 more time this turn.'); }
         }
       }]
     },
-    /* 「Grunt Turned Godslayer」Yondu */
+    /* 「Slayer of Fodder」Yondu */
     'PB02-019': {
       trig: [{
-        id: 'enter', zone: 'BATTLE', optional: true, label: 'Grunt Turned Godslayer',
+        id: 'enter', zone: 'BATTLE', optional: true, label: 'Slayer of Fodder',
         text: "Prune 1 Character from your RETREAT (if this is the only card in your BATTLE: retreat all of your opponent's Lv1 Characters on the FIELD)?",
         when: enterSelf,
         can: A => A.ret(A.p).length > 0,
         run: A => {
           const pr = askPrune(A, A.ret(A.p), 'Character');
-          if (pr.length && A.prune(pr[0], 'Grunt Turned Godslayer') && A.battle(A.p).length === 1 && inBattle(A, A.self))
-            A.chars(A.opp(A.p)).filter(i => A.lv(i) === 1).forEach(i => A.retreat(i, 'Grunt Turned Godslayer'));
+          if (pr.length && A.prune(pr[0], 'Slayer of Fodder') && A.battle(A.p).length === 1 && inBattle(A, A.self))
+            A.chars(A.opp(A.p)).filter(i => A.lv(i) === 1).forEach(i => A.retreat(i, 'Slayer of Fodder'));
         }
       }]
     },
-    /* 「Indecision」Adam Warlock */
+    /* 「Hesitation」Adam Warlock */
     'PB02-020': {
       trig: [{
-        id: 'enter', zone: 'FIELD', label: 'Indecision', when: enterSelf,
+        id: 'enter', zone: 'FIELD', label: 'Hesitation', when: enterSelf,
         can: A => A.battleChars(A.p).length > 0,
         run: A => {
           const t = A.ask('t', { text: 'Choose 1 of your Characters in BATTLE (R+1, Power+1000)', from: A.battleChars(A.p), prefer: 'high' });
-          t.forEach(i => { A.mod(i, 'r', 1, 'Indecision'); A.mod(i, 'p', 1000, 'Indecision'); });
+          t.forEach(i => { A.mod(i, 'r', 1, 'Hesitation'); A.mod(i, 'p', 1000, 'Hesitation'); });
         }
       }]
     },
-    /* 「Dream Bubble」Mary Jane Watson */
+    /* 「Fleeting Illusion」Mary Jane Watson */
     'PB02-021': {
       unique: true, counter: true,
       auto: [{ stat: 'p', zone: 'BACK', value: (A, src, tgt) => A.tp !== A.ctrl(src) && A.ctrl(tgt) === A.ctrl(src) && A.slot(tgt) === 'F' && hasTrait(A, tgt, 'Web') ? 1000 : 0 }],
       acti: [{
         id: 'prune', zone: 'BASE', once: true, label: 'Prune 1 [Human] Character from your RETREAT',
         can: A => A.ret(A.p).some(i => isHuman(A, i)),
-        run: A => { const pr = askPrune(A, A.ret(A.p).filter(i => isHuman(A, i)), '[Human] Character'); pr.forEach(i => A.prune(i, 'Dream Bubble')); }
+        run: A => { const pr = askPrune(A, A.ret(A.p).filter(i => isHuman(A, i)), '[Human] Character'); pr.forEach(i => A.prune(i, 'Fleeting Illusion')); }
       }]
     }
   };

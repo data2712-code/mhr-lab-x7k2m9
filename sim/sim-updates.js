@@ -16,6 +16,17 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-14', t: 'patch', v: 'o2.22',
+      en: { h: 'PB02 now uses the official English card text', b: [
+        'All 21 PB02 cards use their official English names and text, e.g. 「Rooted Revival」Groot and 「Sweet and Gentle」Chewie.',
+        'Ronan (PB02-014), High Evolutionary (PB02-015) and Adam Warlock (PB02-020) now have the official trait 【The Cabal】, so SD06 effects that look for 【The Cabal】 also count them.',
+        'Rush Point cards SD05-019 and SD06-019 are now on the official English card list.'] },
+      id: { h: 'PB02 kini memakai teks kartu Inggris resmi', b: [
+        'Ke-21 kartu PB02 memakai nama dan teks Inggris resmi, misalnya 「Rooted Revival」Groot dan 「Sweet and Gentle」Chewie.',
+        'Ronan (PB02-014), High Evolutionary (PB02-015), dan Adam Warlock (PB02-020) kini memiliki trait resmi 【The Cabal】, jadi efek SD06 yang mencari 【The Cabal】 juga menghitung kartu-kartu ini.',
+        'Kartu Rush Point SD05-019 dan SD06-019 kini ada di daftar kartu Inggris resmi.'] }
+    },
+    {
       d: '2026-11-14', t: 'news',
       en: { h: 'Beta extended to 22 November · Ranked Season 0 starts 23 November', b: [
         'The open beta now runs until 22 November 2026.',
