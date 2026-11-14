@@ -603,6 +603,36 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — PB02: nama, teks & gambar versi Inggris resmi; SD05/SD06 dicek ulang — 14 November 2026 *(`cards.js`, `index.html`, `sim/index.html`, `sitemap.xml`, 16 halaman `cards/`, 21 gambar baru di `images/en/`)*
+
+Permintaan pemilik: SD05, SD06 dan PB02 versi Inggris sudah ada gambar dan terjemahan resminya di
+https://www.marvelherorush.com/en/cards. Data diambil dari API daftar kartu resmi (`language=en`, 668 kartu) lewat
+browser bawaan.
+- **PB02-001..021**: `nm_en` dan `e_en` = teks resmi Inggris; `fan:2` → `fan:1` (lencana "ID*+EN": teks Inggris resmi, teks
+  Indonesia masih terjemahan belum resmi). `nm` Indonesia ikut judul Inggris resmi. Sekarang tidak ada kartu `fan:2` lagi.
+  Lv, R, Power, warna dan rarity sama dengan data resmi.
+- **Nama berubah** untuk 16 dari 21 kartu, mis. PB02-001 「Forced Regrowth」→「Rooted Revival」Groot, PB02-002
+  「Sweet and Obedient」Goose →「Sweet and Gentle」**Chewie**, PB02-006 → 「Galaxy Scout」, PB02-016 → 「Power Barrage」,
+  PB02-019 → 「Slayer of Fodder」, PB02-021 → 「Fleeting Illusion」.
+- **Trait**: 【Cabal】 → **【The Cabal】** (PB02-014, 015, 020), sama seperti SD06. PB02-015 memakai
+  **Knights of Wundargore** sesuai kartu dan database resmi (sebelumnya Wundagore), mengikuti preseden Niffleheim.
+  Dampak di Battle Sim offline: efek SD06 yang mencari 【The Cabal】 kini juga menghitung Ronan, High Evolutionary dan
+  Adam Warlock dari PB02 (sesuai teks resmi).
+- Tata letak teks mengikuti aturan 12 Nov: baris baru → spasi, "：" → ":", 【UNIQUE】/【COUNTER】 di awal baris ditulis polos.
+  Teks lain dipakai apa adanya (mis. 【Double Attack】, "activation+1").
+- **Gambar**: 21 gambar resmi Inggris (PNG 744×1039, ber-watermark SAMPLE) → `images/en/PB02-0xx.jpg` (JPEG 500×698).
+  `images/` (cetakan China) tetap untuk tampilan Indonesia.
+- **SD05 & SD06**: dicek ulang terhadap data resmi hari ini. Tidak ada perubahan selain salah ketik situs resmi yang sudah
+  dibetulkan 12 Nov. Rush Point SD05-019 / SD06-019 kini ada di daftar resmi Inggris → field `cn` dihapus (keterangan
+  bahasa di tab Rush Point berubah dari "China" ke "Inggris").
+- Cache-buster `cards.js?v=7.40-pb02en` di `index.html` dan `sim/index.html` (sumber simulator mengambil versi yang sama
+  dari `index.html` situs lewat `site-sim.js`). `tools/generate_card_pages.py`: 16 halaman `cards/PB02-*` berubah judul;
+  `<lastmod>`-nya di `sitemap.xml` diperbarui.
+- **Belum**: label efek PB02 di `sim-cards-t6.js` masih memakai judul lama (mis. "Forced Regrowth"); server Battle Sim online
+  masih memakai data kartu saat deploy terakhir.
+- Dicek: `node --check cards.js`; halaman lokal mode Inggris membuka PB02-002 dengan nama, teks dan gambar resmi, lencana
+  ID*+EN, tanpa error JS.
+
 ### v7.40 — Battle Sim o2.21: beta sampai 22 Nov, Ranked Season 0 / Season 1, bagian Updates & Patch Notes — 14 November 2026 *(`home-ui.js`, `sim-host.js`, `index.html`, `sim/` (+ berkas baru `sim/sim-updates.js`); SQL baru `mhr_decklab_v740_sim_season0.sql` di folder internal)*
 
 Riwayat simulator #96. Keputusan pemilik 14 Nov 2026.
