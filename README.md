@@ -603,6 +603,25 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.19: tampilan HP Tahap 1 (alur RushDee) — BASE jadi baris, keputusan di papan, sisi kanan ringkas — 14 November 2026 *(`sim/index.html`, `sim/sim-ui.js`, `sim/sim-i18n.js`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #94. Permintaan pemilik: interaksi di HP terlalu banyak di bagian bawah layar (menutupi BASE dan HAND) dan ikon di
+sisi kanan terlalu banyak; tiru dan modifikasi alur RushDee karena pemain sudah terbiasa. Tahap 1 dari dua tahap. **Hanya layar
+≤ 820 px; desktop, mesin, dan server tidak berubah.**
+- **BASE sendiri = baris 6 kartu** di antara FIELD dan HAND (dulu 6 kotak kecil di pelat pemain). Kartu terbaca (Lv/R/Power),
+  bisa diketuk dan menjadi tujuan seret. BASE lawan tetap kecil di pelat atas.
+- **Biaya CALL dipilih di papan:** ketuk karakter di BATTLE atau kartu di baris BASE; satu baris ramping di garis tengah
+  menampilkan `Lv x/y`, Clear / Change cost, Cancel. Begitu pas, area tujuan menyala (termasuk area kartu biaya) dan diketuk.
+  Panel chip biaya o2.17 tidak tampil lagi di HP (tetap di desktop) — keputusan pemilik 14 Nov 2026.
+- **Tujuan dan target serangan diketuk di papan:** lembar bawah berisi tombol tujuan / daftar target dihapus di HP; label hasil
+  (WIN / LOSE / WEAKNESS) di papan tetap. Yang tersisa di baris ramping: Other attacker; No attack tetap di tombol bulat.
+- **Sisi kanan:** hanya Undo dan "⋯ More" (berlabel). Log, Sound, Counter prompts, Hints, Concede, Menu, Report ada di dalam More.
+- Tinggi baris BASE menyesuaikan layar pendek; di HP 360×640 kartu BATTLE jadi ±20% lebih kecil dari sebelumnya (harga untuk
+  baris BASE). Belum diubah (Tahap 2): lembar kartu saat mengetuk HAND, panel Counter Step, gelembung petunjuk di area lawan.
+- Dicek (Playwright, sentuhan): CALL Lv6 dengan 4 kartu BASE diketuk di baris BASE lalu area WING 1; menu More; permainan penuh
+  di 390×844 tanpa error JS; tata letak 320×568, 360×640, 412×915, 768×1024; desktop 1440 tidak berubah. Belum diuji di HP sungguhan.
+- Sumber: `mhr-simulator\app` → `site-sim.js … o2.19`. Semua skrip `?v=o2.19`; `SIM_URL ?v=o2.19`; `sim-host.js?v=7.39-sim19`.
+
 ### Data — Sinkronisasi sumber Battle Sim: `mhr-simulator\app` = `sim/` o2.18 — 14 November 2026 *(`sim/index.html`, `sim/sim-modes.js`; di luar repo: `mhr-simulator\app\`, `mhr-simulator\online\site-sim.js`)*
 
 Riwayat simulator #93. Permintaan pemilik: sinkronkan berkas. Di komputer pemilik `mhr-simulator\app` masih versi lama (sebelum

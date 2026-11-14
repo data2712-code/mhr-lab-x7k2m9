@@ -98,6 +98,10 @@
     'Optional: tap two of your areas to swap them, then CONFIRM.': 'Opsional: ketuk dua area Anda untuk menukarnya, lalu CONFIRM.',
     'Tap one of your glowing Characters to attack with it.': 'Ketuk salah satu Karakter Anda yang menyala untuk menyerang.',
     'Tap a glowing target, or pick one from the list.': 'Ketuk target yang menyala, atau pilih dari daftar.',
+    // riwayat #94: keputusan di papan (HP)
+    'Tap a glowing target.': 'Ketuk target yang menyala.', 'Tap your FIELD or BASE cards to pay the cost.': 'Ketuk kartu di FIELD atau BASE Anda untuk membayar biaya.',
+    'Tap a glowing area to place it.': 'Ketuk area yang menyala untuk menaruhnya.', 'Too high: tap a chosen card to remove it.': 'Terlalu tinggi: ketuk kartu terpilih untuk melepasnya.',
+    'Change cost': 'Ganti biaya', 'More': 'Lainnya',
     'Last chance to play COUNTER cards this turn.': 'Kesempatan terakhir memainkan kartu COUNTER di giliran ini.', 'Play one, or PASS.': 'Mainkan satu, atau PASS.',
     'Play a COUNTER card, or PASS.': 'Mainkan kartu COUNTER, atau PASS.',
     'If nobody responds: you score 1 Rush Point.': 'Bila tidak ada yang merespons: Anda mendapat 1 Rush Point.',

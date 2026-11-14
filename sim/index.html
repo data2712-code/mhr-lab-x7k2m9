@@ -371,6 +371,7 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .basebox .slot{width:calc(var(--mini) + 6px);height:calc(var(--mini) * 1.4 + 6px);padding:2px}
 .basebox .card{--cw:var(--mini)}
 .basebox .card .st{font-size:7px}
+.baserow{display:none}
 /* Laporan #3/#4/#5/#8 (13 Nov 2026): BASE di desktop terlalu kecil → kartu BASE ±80% kartu BATTLE, Power/R terbaca. */
 @media (min-width:821px){
   .basebox{--bcw:calc(var(--cw) * .8);grid-template-columns:repeat(6,calc(var(--bcw) + 6px))}
@@ -610,7 +611,8 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
 /* ================= layar sempit (HP) ================= */
 @media (max-width:820px){
   /* ===== HP · M1 Arena Portrait (riwayat #55): satu layar tanpa gulir, tombol utama di zona ibu jari, HAND dikipas ===== */
-  :root{--cw: clamp(34px, min(calc((100vw - 134px) / 3), calc((100dvh - 340px) / 5.6)), 84px); --mini: calc(var(--cw) * .5); --hcw: clamp(44px, min(calc((100vw - 40px) / 7), calc((100dvh - 290px) / 7 + 6px)), 66px); --bw: clamp(16px, calc((100vw - 190px) / 6 - 7px), 26px)}
+  :root{--bcw: clamp(30px, min(calc((100vw - 34px) / 6 - 7px), calc((100dvh - 420px) / 6.5)), 54px); --brh: calc(var(--bcw) * 1.4 + 14px);
+    --cw: clamp(34px, min(calc((100vw - 134px) / 3), calc((100dvh - 340px - var(--brh)) / 5.6)), 84px); --mini: calc(var(--cw) * .5); --hcw: clamp(44px, min(calc((100vw - 40px) / 7), calc((100dvh - 290px) / 7 + 6px)), 66px); --bw: clamp(16px, calc((100vw - 190px) / 6 - 7px), 26px)}
   .handbar{flex:none}
   .handbar .hand{flex:none}
   #game{height:100dvh;min-height:0;overflow:hidden}
@@ -718,7 +720,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   .flash b{font-size:20px}
   .flash{position:fixed;top:40%;padding:8px 18px;white-space:nowrap}
   /* tombol kecil (Undo, Log, suara, Menu) di baris pelat Anda; Play-by-play = lembar dari bawah */
-  .rcol{position:fixed;left:auto;right:4px;top:auto;bottom:calc(var(--hcw) * 1.4 + 26px + 52px + 10px);z-index:20;border:0;background:transparent}
+  .rcol{position:fixed;left:auto;right:4px;top:auto;bottom:calc(var(--hcw) * 1.4 + 26px + 52px + var(--brh) + 8px);z-index:20;border:0;background:transparent}
   .rcol .tabs,.rcol #sideBody{display:none}
   #acts{display:flex;flex-direction:column;gap:6px;padding:0}
   #acts button{width:34px;height:34px;padding:0;border-radius:50%;font-size:0;display:flex;align-items:center;justify-content:center}
@@ -735,6 +737,46 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   .sbgrid{grid-template-columns:1fr}
   .sbbat{grid-template-columns:1fr;grid-template-areas:none}
   .sbbat .sbslot{grid-area:auto !important}
+}
+@media (max-width:820px){
+  /* ===== Riwayat #94 · Tahap 1 alur RushDee di HP: BASE = baris sendiri, keputusan di papan, sisi kanan ringkas ===== */
+  .baserow{display:block;flex:none;padding:2px 6px 4px}
+  .baserow .basecol{gap:0;position:relative}
+  .baserow .basecol .zl{position:absolute;left:4px;top:-1px;font-size:8px;letter-spacing:.08em;opacity:.7;z-index:3;pointer-events:none;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .baserow .basebox{grid-template-columns:repeat(6,calc(var(--bcw) + 6px));gap:4px;justify-content:center;padding:9px 3px 3px;border:1px solid #2c3542;border-radius:10px;background:rgba(20,26,33,.6)}
+  .baserow .basebox .slot{width:calc(var(--bcw) + 6px);height:calc(var(--bcw) * 1.4 + 6px);padding:2px;border-radius:7px}
+  .baserow .basebox .card{--cw:var(--bcw)}
+  .baserow .basebox .card .st{font-size:8px}
+  .baserow .basebox .card .st b{display:inline}
+  .baserow .basebox .card.cost{box-shadow:0 0 0 2px var(--gold)}
+  .baserow .basebox.drop,.baserow .basebox:has(.slot.hl){border-color:var(--gold);border-style:dashed;box-shadow:0 0 0 1px var(--gold)}
+  .baserow .basebox.drop.over{background:rgba(242,176,30,.18)}
+  .plate.me{height:44px}
+  .plate .basebox .card .ph{font-size:0}
+  /* baki ramping di garis tengah (biaya / tujuan / target): tidak menutupi BASE dan HAND */
+  .midzone .abar.slim{display:flex;grid-area:tl;position:static;flex-direction:row;align-items:center;gap:6px;width:auto;max-width:none;height:auto;min-height:0;padding:3px 4px 3px 8px;border:1px solid #5a4a1a;border-radius:10px;background:#17130a;z-index:8;box-shadow:none}
+  .midzone:has(.abar.slim) .tl{display:none}
+  .abar.slim .hint{flex:1 1 auto;min-width:0;width:auto;font-size:11px;line-height:1.25}
+  .abar.slim .hint .ttl{display:none}
+  .abar.slim .hint > span:last-child{-webkit-line-clamp:2}
+  .abar.slim .acts{flex:none;display:flex;flex-wrap:nowrap;gap:4px;align-items:center;overflow:visible}
+  .abar.slim .acts button{flex:none;min-width:0;max-width:none;min-height:32px;padding:3px 10px;font-size:11.5px;border-radius:999px;text-align:center;white-space:nowrap}
+  .abar.slim .acts .badge{flex:none;font-size:12px;font-weight:800;padding:3px 8px;border-radius:999px;border:1px solid #5a4a1a;color:var(--gold2)}
+  .abar.slim .acts .badge.ok{border-color:#3f9a5d;color:#9fe0b2}.abar.slim .acts .badge.bad{border-color:#7a3328;color:#ffb4a8}
+  /* sisi kanan: Undo + "⋯" (sisanya di dalam "⋯") */
+  #acts{align-items:flex-end}
+  #acts button{display:none}
+  #acts #btnUndo,#acts #btnMore{display:flex;flex-direction:column;gap:0;width:42px;height:42px;border-radius:12px;font-size:8.5px;font-weight:700;letter-spacing:.02em;line-height:1.1}
+  #acts #btnUndo i,#acts #btnMore i{font-size:16px;line-height:1}
+  #acts #btnUndo{order:8}#acts #btnMore{order:9}
+  #acts.open{background:#12171d;border:1px solid var(--line2);border-radius:14px;padding:8px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+  #acts.open button:not(.dsk),#acts.open .dsk[data-rep]{display:flex;flex-direction:row;justify-content:flex-start;gap:8px;width:auto;min-width:150px;height:38px;border-radius:10px;padding:0 12px;font-size:12.5px;font-weight:600;align-self:stretch}
+  #acts.open button i{font-size:15px}
+  #acts.open #btnSound::after{content:'Sound';font-size:12.5px}
+  #acts.open #btnConf i{font-size:10px}
+  #acts.open #btnUndo,#acts.open #btnMore{flex-direction:row;gap:8px;font-size:12.5px;letter-spacing:0}
+  #game.sideOn #acts button:not(.dsk){display:flex}
+  #game.sideOn #acts #btnMore{display:none}
 }
 @media (max-width:820px) and (max-height:600px){ #acts button{width:30px;height:30px} #acts{gap:4px} .fab{width:64px;height:64px;font-size:12px} }
 @media (min-width:821px){ #acts .mob{display:none} }
@@ -846,6 +888,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
       <div id="board"></div>
       <div class="pill mid" id="pill"><span class="t" id="turnInfo"></span><span class="ph" id="stages"></span><span class="ck"><span id="clock"></span><span class="cbarw"><i id="clockBar"></i></span></span><span class="badge" id="sbBadge" style="display:none">SANDBOX</span></div>
       <div id="tray" class="abar"></div>
+      <div id="baseRow" class="baserow"></div>   <!-- riwayat #94: BASE sendiri sebagai baris di HP (diisi sim-ui.js) -->
       <div class="handbar"><div class="plate team l me" id="teamL"></div><div id="handRow" class="hand"></div></div>
       <div class="flash" id="flash"></div>
       <div class="otoast" id="otoast"></div>
@@ -864,6 +907,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
         <button id="btnHints" title="Hints on/off"><i>💡</i> <span>Hints ON</span></button>
         <button id="btnConcede" title="Concede: you lose and the game ends now"><i>🏳</i> Concede</button>
         <button id="btnMenu" title="Back to the menu"><i>☰</i> Menu</button>
+        <button class="mob" id="btnMore" title="More: log, sound, Counter prompts, hints, concede, menu"><i>⋯</i> More</button>
         <button class="dsk" id="btnCopy" title="Copy the log code to report a bug or resume later">⧉ Log code</button>
         <button class="dsk" data-rep="open" data-v="bug" title="Report a bug or send feedback">🐞 Report</button>
         <button class="dsk" id="btnSiaga" title="Trigger Hand: choose which [TRIG](HAND) cards in your HAND are ready (two-player games)" style="display:none">Siaga</button>
@@ -884,21 +928,21 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.32-sd56en2" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.38-saweria" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.18"></script>
-<script src="sim-cards.js?v=o2.18"></script>
-<script src="sim-cards-bp01.js?v=o2.18"></script>
-<script src="sim-cards-s4.js?v=o2.18"></script>
-<script src="sim-cards-sp01.js?v=o2.18"></script>
-<script src="sim-cards-t6.js?v=o2.18"></script>
-<script src="sim-bot.js?v=o2.18"></script>
-<script src="sim-sound.js?v=o2.18"></script>
-<script src="sim-shadow.js?v=o2.18"></script>
-<script src="sim-ui.js?v=o2.18"></script>
-<script src="sim-sandbox.js?v=o2.18"></script>
-<script src="sim-report.js?v=o2.18"></script>
-<script src="sim-modes.js?v=o2.18"></script>
-<script src="sim-i18n.js?v=o2.18"></script>
-<script src="sim-online.js?v=o2.18"></script>
-<script src="sim-ranked.js?v=o2.18"></script>
+<script src="sim.js?v=o2.19"></script>
+<script src="sim-cards.js?v=o2.19"></script>
+<script src="sim-cards-bp01.js?v=o2.19"></script>
+<script src="sim-cards-s4.js?v=o2.19"></script>
+<script src="sim-cards-sp01.js?v=o2.19"></script>
+<script src="sim-cards-t6.js?v=o2.19"></script>
+<script src="sim-bot.js?v=o2.19"></script>
+<script src="sim-sound.js?v=o2.19"></script>
+<script src="sim-shadow.js?v=o2.19"></script>
+<script src="sim-ui.js?v=o2.19"></script>
+<script src="sim-sandbox.js?v=o2.19"></script>
+<script src="sim-report.js?v=o2.19"></script>
+<script src="sim-modes.js?v=o2.19"></script>
+<script src="sim-i18n.js?v=o2.19"></script>
+<script src="sim-online.js?v=o2.19"></script>
+<script src="sim-ranked.js?v=o2.19"></script>
 </body>
 </html>

@@ -85,6 +85,11 @@
     $('btnConcede').onclick = concede;
     $('btnConf').onclick = confCycle;
     if ($('btnHints')) $('btnHints').onclick = hintsToggle;
+    // Riwayat #94: di HP sisi kanan hanya Undo + "⋯"; tombol lain (Log, suara, Counter prompts, Hints, Concede, Menu) di dalam "⋯".
+    if ($('btnMore')) {
+      $('btnMore').onclick = e => { e.stopPropagation(); $('acts').classList.toggle('open'); };
+      document.addEventListener('click', e => { const a = $('acts'); if (a && a.classList.contains('open') && !e.target.closest('#btnMore')) a.classList.remove('open'); }, true);
+    }
     $('btnMenu').onclick = () => {
       if (net.on) { if (G && G.result || confirm('Leave this online game? Your seat is kept for 2 minutes; open Battle Sim again to return.')) window.MHRSimOnline.leaveGame(); return; }
       const keep = G && !G.result && !ui.replay;
@@ -778,6 +783,15 @@
      CONFIRM / NO ATTACK. Pilihan lain muncul sebagai lembar pendek dari bawah (menutupi HAND sementara); bila tidak ada
      pilihan lain, lembar tidak muncul. Judul momen (ACTION PHASE, CHOOSE ATTACKER, …) tampil kecil di garis tengah. */
   const FAB_LABEL = { endAction: 'END ACTION', arrSave: 'CONFIRM', doAtk: 'ATTACK!', noAtk: 'NO ATTACK', pass: 'PASS' };
+  /* Riwayat #94 (Tahap 1, keputusan pemilik 14 Nov 2026): di HP keputusan dibuat DI PAPAN seperti RushDee, bukan di lembar bawah.
+     Saat memilih biaya CALL, tujuan, atau target serangan, baki menjadi satu baris ramping di garis tengah (penghitung Lv +
+     tombol kecil); HAND dan BASE tetap terlihat. Lembar bawah hanya untuk keputusan yang memang butuh daftar (Counter, efek). */
+  function slimMode() {
+    if (!narrow() || !G || !G.prompt || ui.replay || G.result || ui.msg || !myTurnPrompt()) return false;
+    if (ui.mode === 'call-cost' || ui.mode === 'call-dest' || ui.mode === 'move-dest') return true;
+    if (G.prompt.type === 'attack' && ui.atk && !ui.tg) return true;
+    return false;
+  }
   function mobileArena() {
     const tr = trayEl(), mz = $('midzone'); if (!mz) return;
     mz.insertAdjacentHTML('afterbegin', '<div class="mtitle">' + esc(trayTitle()) + '</div>');
@@ -790,7 +804,9 @@
       mz.insertAdjacentHTML('beforeend', '<button class="fab' + (b.dataset.act === 'noAtk' ? ' warn' : b.dataset.act === 'pass' || b.dataset.act === 'endAction' ? ' next' : '') + '" id="fab" ' + attrs + '>' + FAB_LABEL[b.dataset.act] + '</button>');
     }
     const others = tr.querySelectorAll('.acts > :not(.infab)').length;
-    const sheet = others > 0 || !!ui.msg;
+    const slim = slimMode();
+    const sheet = !slim && (others > 0 || !!ui.msg);
+    tr.classList.toggle('slim', slim);
     tr.classList.toggle('sheet', sheet);
     $('game').classList.toggle('sheetOn', sheet && !ui.peek);
     // Riwayat #57 (studi RushDee): "Lihat papan" — lembar disembunyikan sebentar; kembali otomatis saat keputusan berganti.
@@ -802,11 +818,15 @@
   /* HP (riwayat #57, studi RushDee): BASE menjadi satu baris kecil di pelat pemain (lawan di atas, Anda di bawah), jadi
      BATTLE memakai seluruh lebar layar; petunjuk satu kalimat ditulis di area FIELD lawan. */
   function mobileBoard() {
-    if (!narrow()) return;
+    if (!narrow()) { const br0 = $('baseRow'); if (br0 && br0.firstChild) br0.innerHTML = ''; return; }
     const ob = document.querySelector('#board .side-opp .basecol'), mb = document.querySelector('#board .side-me .basecol');
     if (ob) $('teamR').appendChild(ob);
-    if (mb) $('teamL').appendChild(mb);
-    const t = ohintText(), oh = document.querySelector('#board .side-opp');
+    // Riwayat #94 (Tahap 1 alur RushDee di HP): BASE sendiri = baris 6 kartu yang bisa diketuk, di antara FIELD dan HAND
+    // (dulu kotak kecil di pelat pemain). BASE lawan tetap kecil di pelat atas.
+    const br = $('baseRow');
+    if (mb && br) { br.innerHTML = ''; br.appendChild(mb); } else if (mb) $('teamL').appendChild(mb);
+    // Petunjuk: saat baki ramping tampil (biaya / tujuan / target), kalimatnya sudah ada di garis tengah.
+    const t = slimMode() ? '' : ohintText(), oh = document.querySelector('#board .side-opp');
     if (t && oh) oh.insertAdjacentHTML('beforeend', '<div class="ohint">' + t + '</div>');
   }
   function ohintText() {
@@ -1074,6 +1094,7 @@
         if (!ui.tg) {
           const pl = attackPlan(ui.atk), order = S.SLOTS.filter(s => pl[s] && pl[s].cls !== 'out').sort((a, b) => pl[a].rank - pl[b].rank);
           const atks0 = S.attackersNow(G);
+          if (narrow()) return '<button class="warn" data-act="noAtk">No attack</button>' + (S.attackersNow(G).length > 1 ? '<button data-act="unpickAtk">Other attacker</button>' : '');   // #94: target diketuk di papan
           const hon = hintsOn(), opp = G.P[1 - pr.p].bat;   // Hints OFF: tanpa pratinjau hasil (laporan #2)
           return order.map(s => hon ? '<button class="' + ({ rush: 'rush', win: 'go', both: '', lose: 'bad' })[pl[s].cls] + '" data-act="pickTg" data-slot="' + s + '">' + (pl[s].rank === 0 ? '★ ' : '') + S.SLOT_NAME[s] + ' · ' + esc(pl[s].a) + '<small>' + esc(pl[s].b) + '</small></button>'
             : '<button data-act="pickTg" data-slot="' + s + '">' + S.SLOT_NAME[s] + '<small>' + (opp[s] ? esc(S.nameOf(G, opp[s])) : 'Weakness') + '</small></button>').join('') +
@@ -1122,6 +1143,11 @@
   }
   function callModeActs() {
     if (ui.mode === 'drop-base') return '<button class="pri" data-act="dropCallBase">CALL to BASE</button><button data-act="deploy">Base Deployment (face-down, draw 1)</button><button data-act="cancel">Cancel</button>';
+    if (ui.mode === 'call-cost' && narrow()) {
+      const need = costNeed(), sum = costSum();
+      return '<span class="badge' + (sum === need ? ' ok' : sum > need ? ' bad' : '') + '">Lv ' + sum + '/' + need + '</span>' +
+        (ui.cost.length ? '<button data-act="costClear">' + (sum === need ? 'Change cost' : 'Clear') + '</button>' : '') + '<button data-act="cancel">Cancel</button>';
+    }
     if (ui.mode === 'call-cost') return costPanelHTML();
     if (ui.mode === 'call-dest' || ui.mode === 'move-dest') return '<button data-act="cancel">Cancel</button>';
     return '';
@@ -1234,7 +1260,7 @@
     if (!h) { closePop(); return; }
     pop.innerHTML = h; pop.classList.add('on');
     if (narrow()) { pop.style.left = ''; pop.style.top = ''; return; }    // HP: lembar bawah (CSS)
-    const el = document.querySelector('#board .card.sel,#handRow .card.sel');
+    const el = document.querySelector('#board .card.sel,#handRow .card.sel,#baseRow .card.sel');
     const r = el ? el.getBoundingClientRect() : { left: innerWidth / 2, right: innerWidth / 2, top: innerHeight / 2, bottom: innerHeight / 2 };
     const pw = pop.offsetWidth, ph = pop.offsetHeight;
     let x = r.right + 10; if (x + pw > innerWidth - 8) x = r.left - pw - 10; if (x < 8) x = Math.max(8, Math.min(innerWidth - pw - 8, r.left));
@@ -1307,7 +1333,7 @@
     const pr = G.prompt;
     if (ui.ctrl[pr.p] === 'bot' || !myTurnPrompt() || (net.on && (pr.p !== net.seat || net.pending))) return '';
     const sp = s => '<span>' + esc(s) + '</span>';
-    if (ui.mode === 'call-cost') return costReady() ? sp('Choose where to place it, or tap a glowing area.') : sp('Tap cards below to pay the cost: total Lv ' + costSum() + '/' + costNeed() + '.');
+    if (ui.mode === 'call-cost') return costReady() ? sp('Tap a glowing area to place it.') : costSum() > costNeed() ? sp('Too high: tap a chosen card to remove it.') : sp('Tap your FIELD or BASE cards to pay the cost.');
     if (ui.mode === 'call-dest' || ui.mode === 'move-dest') return sp('Tap a glowing area to place the card.');
     switch (pr.type) {
       case 'main':
@@ -1316,7 +1342,7 @@
       case 'arrange': return sp('Optional: tap two of your areas to swap them, then CONFIRM.') + (arrNoAtk() ? '<span class="arrwarn">' + esc(ARR_WARN) + '</span>' : '');
       case 'attack':
         if (!ui.atk) return sp('Tap one of your glowing Characters to attack with it.');
-        if (!ui.tg) return sp('Tap a glowing target, or pick one from the list.');
+        if (!ui.tg) return sp('Tap a glowing target.');
         return '';
       case 'counter': {
         const b = G.bt && G.bt.cur;
@@ -1994,7 +2020,7 @@
     }
     return spec.kind && (slots.length || spec.base) ? spec : null;
   }
-  const CARD_SEL = '#board .card[data-iid],#handRow .card[data-iid],.plate .card[data-iid]';
+  const CARD_SEL = '#board .card[data-iid],#handRow .card[data-iid],.plate .card[data-iid],#baseRow .card[data-iid]';
   function initDrag() {
     document.addEventListener('pointerdown', e => {
       if (e.button !== 0 || !G) return;
@@ -2011,7 +2037,7 @@
       if (!d.started) {
         // Laporan #2 (13 Nov 2026): di HP, kartu di papan (Reposition / serangan / pindah) langsung bisa diseret tanpa tahan lama;
         // papan HP tidak bisa digulir (satu layar), jadi gerakan jari di atas kartu papan selalu berarti seret.
-        if (d.touch && dist > 10) { if (narrow() && d.el.closest('#board') && d.spec.kind !== 'call') startDrag(d, e.clientX, e.clientY); else { clearTimeout(d.timer); ui.drag = null; return; } }
+        if (d.touch && dist > 10) { if (narrow() && d.el.closest('#board,#baseRow') && d.spec.kind !== 'call') startDrag(d, e.clientX, e.clientY); else { clearTimeout(d.timer); ui.drag = null; return; } }
         else if (d.touch) return;
         if (!d.touch && dist > 6) startDrag(d, e.clientX, e.clientY); else return;
       }
