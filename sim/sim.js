@@ -688,6 +688,9 @@
   function attach(st, iid, host) {
     const x = st.inst[iid], H = st.inst[host];
     const from = locate(st, iid);
+    // Laporan #21 (14 Nov 2026, RS-029): kartu dari luar FIELD yang dipasang = masuk FIELD, jadi UNIQUE ikut dicek.
+    const hostL = locate(st, host), onField = from && (from.zone === 'bat' || from.zone === 'base' || from.zone === 'att');
+    if (!onField && hostL && uniqueBlocked(st, iid, hostL.p)) { log(st, 'eff', nameOf(st, iid) + ' cannot be attached: another card with the same name is on the FIELD (UNIQUE, 305.6.a).'); return false; }
     // 301.25.l: kartu yang terpasang pada kartu ini tidak lagi punya induk karakter → RETREAT.
     x.att.slice().forEach(s => retreat(st, s, 'its Character became an Attached Card, 301.25.l'));
     removeAnywhere(st, iid);
@@ -872,6 +875,7 @@
   function detachToBattle(st, iid, to, why) {
     const x = st.inst[iid], L = locate(st, iid); if (!L || L.zone !== 'att') return false;
     const P = st.P[L.p]; if (P.bat[to]) return false;
+    if (uniqueBlocked(st, iid, L.p)) { log(st, 'eff', nameOf(st, iid) + ' cannot move to BATTLE (UNIQUE, 305.6.a).'); return false; }
     const H = st.inst[x.host]; H.att.splice(H.att.indexOf(iid), 1); x.host = null;
     P.bat[to] = iid;
     log(st, 'move', plabel(st, L.p) + ': ' + nameOf(st, iid) + ' is detached and moves to ' + SLOT_NAME[to] + (why ? ' (' + why + ')' : '') + '.');
@@ -1378,7 +1382,10 @@
       if (def && def.dist && inZone(st, iid, 'BATTLE')) { try { const v = def.dist(readApi(st, iid), iid, s); if (v != null) d = v; } catch (e) { /* abaikan */ } }
       return d;
     };
-    const charOnly = x.gr && x.gr.dblChar === st.turn && x.atkT === st.turn && x.atkN >= 1 && !(def && def.double && opportunities(st, iid) === 2 && !x.gr.dblChar);
+    // Laporan #19 (14 Nov 2026): serangan yang sedang berjalan tidak dihitung, jadi batas "serangan kedua hanya ke Karakter"
+    // (BP01-011) tidak membatalkan serangan PERTAMA ke Weakness saat targetnya dicek ulang di Counter Step.
+    const prior = (x.atkT === st.turn ? x.atkN : 0) - (st.bt && st.bt.cur && st.bt.cur.a === iid ? 1 : 0);
+    const charOnly = x.gr && x.gr.dblChar === st.turn && prior >= 1 && !(def && def.double && opportunities(st, iid) === 2 && !x.gr.dblChar);
     const lim = atkLimits(st, iid);
     return SLOTS.filter(s => dist(s) <= R).filter(s => !charOnly || O.bat[s]).filter(s => lim.every(f => f(O.bat[s] || null, s)))
       .map(s => ({ slot: s, iid: O.bat[s] || null, dist: dist(s) }));

@@ -16,6 +16,17 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-14', t: 'fix', v: 'o2.23', reports: [18, 19, 20, 21],
+      en: { h: 'Fixes from your reports: Thor, UNIQUE and new attack targets', b: [
+        '「Thunder Speed」Thor (BP01-011): its first attack can hit a Weakness again. Only the second attack is limited to Characters.',
+        'UNIQUE: a second copy can no longer join the FIELD by being attached from HAND, RETREAT or VOID, or by moving out from under a Character (for example 「Symbiotic Suit」Spider-Man).',
+        'When a COUNTER CALL removes your Attack Target, the game now shows a button for each new target. You can still tap the target on the board.'] },
+      id: { h: 'Perbaikan dari laporan Anda: Thor, UNIQUE, dan target serangan baru', b: [
+        '「Thunder Speed」Thor (BP01-011): serangan pertamanya kembali bisa mengenai Weakness. Hanya serangan kedua yang dibatasi ke Karakter.',
+        'UNIQUE: kopi kedua tidak bisa lagi masuk FIELD dengan dipasang dari HAND, RETREAT, atau VOID, atau dengan keluar dari bawah Karakter (misalnya 「Symbiotic Suit」Spider-Man).',
+        'Saat COUNTER CALL membuat target serangan Anda hilang, permainan kini menampilkan tombol untuk tiap target baru. Mengetuk target di papan tetap bisa.'] }
+    },
+    {
       d: '2026-11-14', t: 'patch', v: 'o2.22',
       en: { h: 'PB02 now uses the official English card text', b: [
         'All 21 PB02 cards use their official English names and text, e.g. 「Rooted Revival」Groot and 「Sweet and Gentle」Chewie.',

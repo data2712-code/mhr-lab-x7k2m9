@@ -856,7 +856,7 @@
         if (!ui.tg) return T(esc(S.nameOf(G, ui.atk)) + ' attacks', 'Tap a glowing target · an empty area (Weakness) = +1 Rush Point');
         return T('Ready to attack', 'Press ATTACK! or tap another target');
       }
-      case 'retarget': return T('Choose a new target', 'The original Attack Target is gone');
+      case 'retarget': return T('Your target is gone · choose a new one', 'Tap a red target or a button below');
       case 'counter': {
         const b = G.bt && G.bt.cur;
         if (b && pr.kind === 'step') {
@@ -1121,7 +1121,7 @@
         return '<button class="pri" data-act="openPick">Choose cards…</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'pick':
         return pr.options.map(o => '<button data-act="pickOpt" data-v="' + esc(o.v) + '">' + esc(o.label) + '</button>').join('') + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
-      case 'retarget': return airButtons(pr.a);
+      case 'retarget': return airButtons(pr.a) || retargetButtons(pr.a);
       case 'rps':
         return [['rock', '✊ Rock'], ['paper', '✋ Paper'], ['scissors', '✌ Scissors']].map(([v, l]) => '<button class="pri rpsb" data-act="rps" data-v="' + v + '">' + l + '</button>').join('');
     }
@@ -1140,6 +1140,15 @@
     if (!myTurnPrompt('attack') || !ui.atk || !ui.tg) { render(); return; }
     if (airButtons(ui.atk)) { render(); return; }
     act({ t: 'attack', a: ui.atk, tg: ui.tg });
+  }
+  // Laporan #18/#20 (14 Nov 2026): target hilang karena COUNTER CALL → tombol target baru di panel, bukan hanya ketuk papan.
+  function retargetButtons(a) {
+    const plan = attackPlan(a, true), O = G.P[1 - G.prompt.p];
+    return S.targetsFor(G, a).map(t => {
+      const d = O.bat[t.slot], pl = plan[t.slot];
+      const txt = d ? 'Attack ' + esc(S.nameOf(G, d)) + ' · ' + S.SLOT_NAME[t.slot] : 'Weakness · ' + S.SLOT_NAME[t.slot];
+      return '<button class="pri" data-act="rtPick" data-slot="' + t.slot + '">' + txt + (pl ? '<small>' + esc(pl.a) + '</small>' : '') + '</button>';
+    }).join('');
   }
   function airButtons(a) {
     if (!ui.tg || !a || !S.hasAbility(G, a, 'air')) return '';
@@ -1592,6 +1601,11 @@
         return;
       }
       case 'pickOpt': act({ t: 'pick', v: t.dataset.v }); return;
+      case 'rtPick': {
+        const s = t.dataset.slot;
+        if (S.hasAbility(G, G.prompt.a, 'air') && G.P[1 - G.prompt.p].bat[s]) { ui.tg = s; render(); return; }
+        act({ t: 'retarget', tg: s }); return;
+      }
       case 'rps': act({ t: 'rps', v: t.dataset.v }); return;
       case 'peek': ui.peek = !ui.peek; render(); return;
       case 'noAtk': act({ t: 'noAttack', a: ui.atk }); return;

@@ -603,6 +603,26 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.23: perbaikan laporan #18–#21 (Thor, UNIQUE, pilih target baru) — 14 November 2026 *(`sim/sim.js`, `sim/sim-ui.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #98. Empat laporan baru di `sim_feedback` (Practice vs Bot Expert, desktop), dicek dengan memutar ulang lognya.
+- **#19 (bug mesin)** 「Thunder Speed」Thor BP01-011: serangan PERTAMA ke Weakness langsung batal ("No valid Attack Target within R")
+  karena batas "serangan kedua hanya ke Karakter" sudah berlaku begitu serangan pertama dinyatakan (`atkN` sudah 1 saat target
+  dicek ulang). `targetsFor()` kini tidak menghitung serangan yang sedang berjalan. Serangan kedua tetap hanya ke Karakter.
+- **#21 (bug mesin)** UNIQUE (RS-029): kopi kedua 「Symbiotic Suit」Spider-Man masuk FIELD lewat dipasang dari HAND lalu dilepas ke
+  BATTLE. `attach()` dari luar FIELD dan `detachToBattle()` kini menolak kartu bila ada kartu lain bernama sama di FIELD
+  (kartu tetap di tempat asalnya, log menulis alasannya).
+- **#18 & #20 (tampilan)** "freeze" saat lawan COUNTER CALL ke area yang diserang: mesin meminta target baru (303.2.a.4.3.2.2), tetapi
+  panel hanya berisi teks. Kini ada tombol per target ("Attack … · FRONT" / "Weakness · FRONT", dengan hasil WIN/LOSE) dan petunjuk
+  "Your target is gone · choose a new one"; mengetuk papan tetap bisa. AIR STRIKE ke area terisi tetap menanyakan pilihan.
+- Versi mesin tetap 0.14.0. `sim-updates.js`: entri baru (fix o2.23). Cache-buster `sim/` → `?v=o2.23`, `SIM_URL` → `?v=o2.23`,
+  `sim-host.js?v=7.40-sim23`. Sumber `mhr-simulator\app` ikut diperbarui.
+- Dicek: log #19 dibangun ulang, mesin lama = serangan batal, mesin baru = Counter Step lalu Weakness +1 Rush; serangan kedua Thor
+  tanpa target Karakter = tidak ada target. Uji UNIQUE (posisi Sandbox): pasang kopi kedua dari HAND ditolak. 150 pertandingan bot
+  (random/greedy/hard, deck juara turnamen) + 12 Expert vs Hard: 0 aksi ilegal, 0 error, 0 kopi UNIQUE ganda. Playwright desktop
+  1440 dan iPhone 13: tombol target tampil, klik → target baru, tanpa error JS.
+- **Server online perlu deploy** (bundel `online\dist\worker.js`, 644.751 byte, SHA-256 `a3c6b1d2…bffc1bc`) setelah push.
+
 ### Data — Artikel News rilis SD05/SD06/PB02 di Indonesia + koreksi cara mendapat PB02 — 14 November 2026 *(`data.js`, `index.html`, `sim/index.html`, `images/news/sd05-sd06-pb02-indonesia-release/cover.jpg`)*
 
 - **Koreksi dari pemilik:** PB02 **hanya** didapat dengan membeli SD05 atau SD06, tidak dari Weekly Rush di LGS. Deskripsi set
