@@ -1460,12 +1460,16 @@
       const lab = i => { const L = S.locate(G, i); return L ? ({ hand: 'HAND', bat: S.SLOT_NAME[L.slot], base: 'BASE', att: 'attached', ret: 'RETREAT', void: 'VOID', deck: 'Deck' })[L.zone] + (L.p !== pr.p ? ' · opponent' : '') : ''; };
       if (pr.forced && !ui.pick.length && !ui.pickTouched) ui.pick = pr.from.slice();   // satu-satunya pilihan: sudah terisi, tinggal Confirm
       const okN = ui.pick.length >= pr.min && ui.pick.length <= pr.max;
+      // Laporan #24 (15 Nov 2026): lokasi tiap kartu pilihan ditulis sebagai lencana yang jelas (HAND / BATTLE / BASE …),
+      // dan bila semua pilihan dari satu tempat, tempat itu ditulis di depan kalimat petunjuk.
+      const zs = [...new Set(pr.from.map(i => { const L = S.locate(G, i); return L ? ({ hand: 'HAND', bat: 'BATTLE', base: 'BASE', att: 'attached', ret: 'RETREAT', void: 'VOID', deck: 'Deck' })[L.zone] + (L.p !== pr.p ? ' · opponent' : '') : ''; }))];
+      const zHead = zs.length === 1 && zs[0] ? '<b class="pkzone">' + esc(zs[0]) + '</b> ' : '';
       // Laporan #7 (Knull): tampilkan teks efek kartu sumber dan teks setiap kartu pilihan, seperti panel pilihan RushDee.
       const srcI = G.job && G.job.c, srcC = srcI && G.inst[srcI] && S.card(G.inst[srcI].no);
       const srcBox = srcC && (canSee(srcI) || !G.inst[srcI].fd) ? '<div class="pksrc">' + cardHTML(srcI, { reveal: true }).replace('data-iid', 'data-x') + '<div><b>' + esc(S.nameOf(G, srcI)) + '</b><p>' + esc(S.textEn(srcC)) + '</p></div></div>' : '';
       const txt = pr.from.map(i => { const c = S.card(G.inst[i].no); return c && S.textEn(c) ? '<li><b>' + esc(S.nameOf(G, i)) + '</b> — ' + esc(S.textEn(c)) + '</li>' : ''; }).join('');
-      openOv('<h3>' + esc(pr.label) + '</h3>' + srcBox + '<p class="small">' + esc(pr.text) + '</p><p class="small muted">' + (pr.forced ? 'This is the only possible choice. It is already selected: press Confirm.' : 'Choose ' + (pr.min === pr.max ? pr.min : pr.min + '–' + pr.max) + ' card(s).') + '</p><div class="handcards">' +
-        pr.from.map(i => '<div style="text-align:center">' + cardHTML(i, { cls: ui.pick.includes(i) ? 'cost' : '', reveal: true }).replace('data-iid', 'data-pick') + '<div class="small muted">' + esc(lab(i)) + '</div></div>').join('') + '</div>' +
+      openOv('<h3>' + esc(pr.label) + '</h3>' + srcBox + '<p class="small">' + zHead + esc(pr.text) + '</p><p class="small muted">' + (pr.forced ? 'This is the only possible choice. It is already selected: press Confirm.' : 'Choose ' + (pr.min === pr.max ? pr.min : pr.min + '–' + pr.max) + ' card(s).') + '</p><div class="handcards">' +
+        pr.from.map(i => '<div style="text-align:center">' + cardHTML(i, { cls: ui.pick.includes(i) ? 'cost' : '', reveal: true }).replace('data-iid', 'data-pick') + '<div class="pkzone">' + esc(lab(i)) + '</div></div>').join('') + '</div>' +
         (txt ? '<details class="pktxt"' + (/effect/i.test((pr.text || '') + ' ' + (pr.label || '')) ? ' open' : '') + '><summary>Read the card texts</summary><ul>' + txt + '</ul></details>' : '') +
         '<div class="row"><button class="pri" data-act="pickDone" ' + (okN ? '' : 'disabled') + '>Confirm ' + ui.pick.length + '</button><button data-act="pickHide">👁 Look at the board</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '') + '</div>');
       return;

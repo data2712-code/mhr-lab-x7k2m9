@@ -603,6 +603,26 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.24: laporan #22–#24 (urutan biaya → target, lencana lokasi di jendela pilihan) — 15 November 2026 *(`sim/sim-cards-t6.js`, `sim/sim-cards-bp01.js`, `sim/sim-ui.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #99. Tiga laporan baru (Practice, desktop), dicek dengan memutar ulang lognya.
+- **#22** "bot can call 2 unique cards": bukan bug. Bot punya 「Echo of Fate」Spider-Man dan 「The Web of Destiny」Spider-Man (judul
+  berbeda) + satu kopi tertutup di BASE. **Keputusan pemilik 15 Nov 2026: UNIQUE tetap dihitung dari nama lengkap (dengan judul).**
+- **#23** ingin memakai ACTI New Valkyrie di Battle Phase: bukan bug (ACTI hanya di Action Phase). Peringatan saat END ACTION
+  tidak dikerjakan dulu (keputusan pemilik).
+- **#24** "can't choose my target" (「Blessing of Einherjar」New Valkyrie SD05-013): resolver menanyakan target dulu baru kartu buangan,
+  dan pemain punya kartu bernama sama di HAND dan BATTLE. Perbaikan: 7 efek berbiaya buang kartu kini menanyakan **kartu buangan dulu,
+  lalu target** (urutan teks kartu): SD05-003, SD05-011, SD05-013, SD05-014, SD05-015, PB02-001, BP01-096. Jendela pilihan menampilkan
+  **lencana lokasi** tiap kartu (HAND / FRONT / WING / BASE / RETREAT / VOID) dan lokasi di depan kalimat petunjuk bila semua pilihan
+  dari satu tempat.
+- Catatan: urutan jawaban di log berubah untuk 7 efek itu, jadi replay pertandingan lama yang memakai efek tersebut bisa berhenti di
+  aksi itu ("Action #n was rejected"). Versi mesin tetap 0.14.0.
+- `sim-updates.js`: entri improve o2.24. Cache-buster `sim/` → `?v=o2.24`, `SIM_URL` → `?v=o2.24`, `sim-host.js?v=7.41-sim24`.
+  `mhr-simulator\app` ikut diperbarui.
+- Dicek: skenario Sandbox New Valkyrie (buang dulu → pilih Sif → R+1, Power+2000); 90 + 40 pertandingan bot: 0 ilegal, 0 error;
+  Playwright: jendela pilihan dengan lencana, tanpa error JS. **Server online perlu deploy** setelah push (bundel
+  `online\dist\worker.js`).
+
 ### v7.41 — Events: pertandingan perebutan juara 3; Tournament Decks lebih ringkas (filter, kartu turnamen yang bisa dibuka, statistik per periode) — 15 November 2026 *(`events.js`, `events-ui.js`, `perf-ui.js`, `index.html`; migrasi SQL baru `mhr_decklab_v741_events_third_place.sql` di folder internal)*
 
 Permintaan pemilik: top cut sekarang hanya menentukan juara 1 dan 2 (posisi 3–4 cuma "Top 4"), perlu opsi pertandingan juara 3;

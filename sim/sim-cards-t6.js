@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR BATTLE SIM — RESOLVER TAHAP 6: SD05, SD06, PB02 (sim-cards-t6.js)      v0.14 · riwayat #82, #86, #97
+   MHR BATTLE SIM — RESOLVER TAHAP 6: SD05, SD06, PB02 (sim-cards-t6.js)      v0.14 · riwayat #82, #86, #97, #99
    ===================================================================
    Dibuat dari TEKS INGGRIS (e_en) di cards.js. SD05 & SD06: sejak 12 Nov 2026 (riwayat #86) memakai TEKS INGGRIS RESMI
    (fan:1) — nama kartu resmi, trait 【The Cabal】 (dulu Cabal), QUICK ATTACK (dulu QUICK STRIKE), ONSLAUGHT (dulu RAMPAGE).
@@ -108,8 +108,8 @@
         },
         run: A => {
           const X = A.lv(ev(A).c);
-          const c = A.ask('c', { text: 'Choose 1 orange Lv' + X + ' Character in your RETREAT to place into your BATTLE', from: A.ret(A.p).filter(i => A.color(i) === ORANGE && A.origLv(i) === X && A.canPlace(i, A.p)), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 2 cards in your HAND to discard', from: A.hand(A.p), min: 2, max: 2 });
+          const c = A.ask('c', { text: 'Choose 1 orange Lv' + X + ' Character in your RETREAT to place into your BATTLE', from: A.ret(A.p).filter(i => A.color(i) === ORANGE && A.origLv(i) === X && A.canPlace(i, A.p)), prefer: 'high' });
           const to = A.pick('to', 'Choose a BATTLE area', slotOpts(A, A.emptySlots(A.p)));
           let n = 0; d.forEach(i => { if (A.discard(i, 'Guardian of Earth')) n++; });
           if (n === 2 && c.length && to && A.zone(c[0]) === 'RETREAT') A.place(c[0], to, 'Guardian of Earth');
@@ -229,8 +229,8 @@
         when: enterSelf,
         can: A => A.hand(A.p).length > 0 && A.baseRoom(A.opp(A.p)) > 0 && A.wings(A.opp(A.p)).some(i => !A.isFd(i)),
         run: A => {
-          const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in WING to move to their BASE", from: A.wings(A.opp(A.p)).filter(i => !A.isFd(i)), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
+          const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in WING to move to their BASE", from: A.wings(A.opp(A.p)).filter(i => !A.isFd(i)), prefer: 'high' });
           if (d.length && A.discard(d[0], 'Judgment for Exile')) t.forEach(i => A.bbm(i, 'BASE', 'Judgment for Exile'));
         }
       }]
@@ -250,8 +250,8 @@
         id: 'bless', zone: 'BATTLE', once: true, label: 'Discard 1 card: 1 of your Characters gets R+1 and Power+1000 (+1000 more if [Asgard])',
         can: A => A.hand(A.p).length > 0 && A.chars(A.p).length > 0,
         run: A => {
-          const t = A.ask('t', { text: 'Choose 1 of your Characters on the FIELD (R+1, Power+1000; +1000 more if [Asgard])', from: A.chars(A.p), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
+          const t = A.ask('t', { text: 'Choose 1 of your Characters on the FIELD (R+1, Power+1000; +1000 more if [Asgard])', from: A.chars(A.p), prefer: 'high' });
           if (d.length && A.discard(d[0], 'Blessing of Einherjar')) t.forEach(i => { A.mod(i, 'r', 1, 'Blessing of Einherjar'); A.mod(i, 'p', isAsgard(A, i) ? 2000 : 1000, 'Blessing of Einherjar'); });
         }
       }]
@@ -263,8 +263,8 @@
         can: A => A.hand(A.p).length > 0 && A.baseRoom(A.opp(A.p)) > 0 && oppBattle(A).some(i => A.pw(i) <= A.pw(A.self)),
         run: A => {
           const X = A.pw(A.self);
-          const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE with Power " + X + ' or lower to move to their BASE', from: oppBattle(A).filter(i => A.pw(i) <= X), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
+          const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE with Power " + X + ' or lower to move to their BASE', from: oppBattle(A).filter(i => A.pw(i) <= X), prefer: 'high' });
           if (d.length && A.discard(d[0], 'Banishing Bifrost')) t.forEach(i => A.bbm(i, 'BASE', 'Banishing Bifrost'));
         }
       }]
@@ -275,8 +275,8 @@
         id: 'ann', zone: 'BATTLE', once: true, label: "Discard 1 card: 1 opponent's Character in BATTLE gets Power-1000",
         can: A => A.hand(A.p).length > 0 && oppBattle(A).length > 0,
         run: A => {
-          const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Power-1000)", from: oppBattle(A), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
+          const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Power-1000)", from: oppBattle(A), prefer: 'high' });
           if (d.length && A.discard(d[0], 'Annihilating Bifrost')) t.forEach(i => A.mod(i, 'p', -1000, 'Annihilating Bifrost'));
         }
       }]
@@ -577,8 +577,8 @@
         when: (e, self) => e.k === 'ATTACHED' && e.host === self,
         can: A => A.attached(A.self).length >= 2 && A.hand(A.p).length > 0 && A.emptySlots(A.p).length > 0,
         run: A => {
-          const a = A.ask('a', { text: "Choose 1 of Groot's Attached Cards to put into your BATTLE", from: A.attached(A.self), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
+          const a = A.ask('a', { text: "Choose 1 of Groot's Attached Cards to put into your BATTLE", from: A.attached(A.self), prefer: 'high' });
           const to = A.pick('to', 'Choose a BATTLE area', slotOpts(A, A.emptySlots(A.p)));
           if (d.length && A.discard(d[0], 'Rooted Revival') && a.length && to) A.detachToBattle(a[0], to, 'Rooted Revival');
         }

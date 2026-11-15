@@ -970,8 +970,8 @@
         id: 'shield', zone: 'FIELD', counter: true, once: true, label: 'Discard 1: swap this card with your "Captain America" in BATTLE',
         can: A => A.hand(A.p).length > 0 && A.battleChars(A.p).some(i => i !== A.self && nameHas(A, i, 'Captain America')),
         run: A => {
-          const t = A.ask('t', { text: 'Choose your "Captain America" Character in BATTLE to swap with', from: A.battleChars(A.p).filter(i => i !== A.self && nameHas(A, i, 'Captain America')), prefer: 'high' });
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
+          const t = A.ask('t', { text: 'Choose your "Captain America" Character in BATTLE to swap with', from: A.battleChars(A.p).filter(i => i !== A.self && nameHas(A, i, 'Captain America')), prefer: 'high' });
           A.discard(d[0], 'I Am The Shield');
           if (A.loc(t[0])) A.swap(A.self, t[0], 'I Am The Shield');
         }

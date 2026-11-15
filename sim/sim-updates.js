@@ -16,6 +16,15 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-15', t: 'improve', v: 'o2.24', reports: [24],
+      en: { h: 'Clearer choices for effects with a discard cost', b: [
+        'Effects such as 「Blessing of Einherjar」New Valkyrie now ask for the card to discard first, then the target, in the same order as the card text.',
+        'Every card in a choice window shows where it is: HAND, BATTLE, BASE, RETREAT or VOID.'] },
+      id: { h: 'Pilihan lebih jelas untuk efek dengan biaya buang kartu', b: [
+        'Efek seperti 「Blessing of Einherjar」New Valkyrie kini menanyakan kartu yang dibuang dulu, baru targetnya, sesuai urutan teks kartu.',
+        'Setiap kartu di jendela pilihan menampilkan lokasinya: HAND, BATTLE, BASE, RETREAT, atau VOID.'] }
+    },
+    {
       d: '2026-11-14', t: 'fix', v: 'o2.23', reports: [18, 19, 20, 21],
       en: { h: 'Fixes from your reports: Thor, UNIQUE and new attack targets', b: [
         '「Thunder Speed」Thor (BP01-011): its first attack can hit a Weakness again. Only the second attack is limited to Characters.',
