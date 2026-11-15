@@ -186,7 +186,7 @@
 
   /* ================= form event (baru / edit) ================= */
   function openEventForm(ev){
-    const e = ev || { name:'', event_date:new Date().toISOString().slice(0,10), start_time:'', location:'', lgs_name:'', notes:'', best_of:1, rounds:0, top_cut:0, max_players:null, decklist_mode:'required', allow_guests:false };
+    const e = ev || { name:'', event_date:new Date().toISOString().slice(0,10), start_time:'', location:'', lgs_name:'', notes:'', best_of:1, rounds:0, top_cut:0, third_place:false, max_players:null, decklist_mode:'required', allow_guests:false };
     const m = mxOpen(`<h3>${ev ? '✏️ Edit event' : '＋ New event'}</h3>
       <div class="ev-form">
         <label class="ev-f full"><span>Event name *</span><input id="efName" maxlength="120" value="${E(e.name)}" placeholder="Weekly Rush — Ogre Neverland"></label>
@@ -197,6 +197,7 @@
         <label class="ev-f"><span>Match format</span><select id="efBo"><option value="1"${e.best_of==1?' selected':''}>Best of 1</option><option value="3"${e.best_of==3?' selected':''}>Best of 3</option></select></label>
         <label class="ev-f"><span>Swiss rounds</span><select id="efRounds"><option value="0">Auto (by player count)</option>${[1,2,3,4,5,6,7,8,9].map(n=>`<option value="${n}"${e.rounds==n?' selected':''}>${n}</option>`).join('')}</select></label>
         <label class="ev-f"><span>Top cut</span><select id="efTop">${[0,2,4,8,16].map(n=>`<option value="${n}"${e.top_cut==n?' selected':''}>${n?'Top '+n:'None (Swiss only)'}</option>`).join('')}</select></label>
+        <label class="ev-f ev-chk"><input type="checkbox" id="efThird"${e.third_place?' checked':''}><span>3rd place match (Top 4 or bigger): the two semifinal losers play for 3rd and 4th</span></label>
         <label class="ev-f"><span>Max players</span><input id="efMax" type="number" min="2" max="512" value="${e.max_players||''}" placeholder="No limit"></label>
         <label class="ev-f"><span>Decklist</span><select id="efDeck">${[['required','Required — legal 50-card deck'],['optional','Optional'],['none','Not used']].map(([v,l])=>`<option value="${v}"${(e.decklist_mode||'required')===v?' selected':''}>${l}</option>`).join('')}</select></label>
         <label class="ev-f ev-chk"><input type="checkbox" id="efGuests"${e.allow_guests?' checked':''}><span>Allow registration without an account (guests)</span></label>
@@ -210,7 +211,7 @@
       const btn = b.currentTarget;
       const row = { name:q('#efName').value.trim(), event_date:q('#efDate').value, start_time:q('#efTime').value.trim(),
         lgs_name:q('#efLgs').value.trim(), location:q('#efLoc').value.trim(), best_of:+q('#efBo').value,
-        rounds:+q('#efRounds').value, top_cut:+q('#efTop').value, max_players: q('#efMax').value ? +q('#efMax').value : null,
+        rounds:+q('#efRounds').value, top_cut:+q('#efTop').value, third_place: +q('#efTop').value >= 4 && q('#efThird').checked, max_players: q('#efMax').value ? +q('#efMax').value : null,
         decklist_mode:q('#efDeck').value, allow_guests:q('#efGuests').checked,
         notes:q('#efNotes').value.trim() };
       if(!row.name || !row.event_date){ alert('Please fill in the event name and date.'); return; }
@@ -275,11 +276,12 @@
     return [...new Set(m.map(x=>x.round))].sort((a,b)=>a-b).map(r=>({ r, stage: (m.find(x=>x.round===r)||{}).stage, ms: m.filter(x=>x.round===r).sort((a,b)=>a.table_no-b.table_no) }));
   }
   function roundLabel(R){
-    if(R.stage !== 'top') return 'Round ' + R.r;
-    const n = R.ms.length * 2;
-    return n === 2 ? 'Final' : n === 4 ? 'Semifinals' : n === 8 ? 'Quarterfinals' : 'Top ' + n;
+    if(R.stage !== 'top' && R.stage !== 'third') return 'Round ' + R.r;
+    const n = R.ms.filter(m=>m.stage === 'top').length * 2;           // v7.41: meja juara 3 tidak dihitung
+    const has3 = R.ms.some(m=>m.stage === 'third');
+    return n === 2 ? (has3 ? 'Final & 3rd place' : 'Final') : n === 4 ? 'Semifinals' : n === 8 ? 'Quarterfinals' : 'Top ' + n;
   }
-  const opt = () => ({ bestOf: V.data.event.best_of });
+  const opt = () => ({ bestOf: V.data.event.best_of, third: !!V.data.event.third_place });
   /* pemain milik pengunjung ini: lewat akun, atau lewat pendaftaran tamu di browser ini */
   function myPlayer(){
     if(!V.data) return null;
@@ -301,7 +303,7 @@
         <div class="ev-card-top"><span class="ev-badge b-${ev.status}">${STATUS[ev.status]}${ev.status==='running' && R.length?` · ${E(roundLabel(R[R.length-1]))}`:''}</span></div>
         <h1>${E(ev.name)}</h1>
         <div class="ev-muted">${E([tgl(ev.event_date) + (ev.start_time?` · ${ev.start_time}`:''), ev.lgs_name, ev.location].filter(Boolean).join(' · '))}</div>
-        <div class="ev-chips"><i>Best of ${ev.best_of}</i><i>${ev.rounds ? ev.rounds + ' Swiss rounds' : 'Swiss rounds: auto'}</i><i>${ev.top_cut ? 'Top ' + ev.top_cut + ' cut' : 'No top cut'}</i><i>👥 ${players.length}${ev.max_players?` / ${ev.max_players}`:''} players</i><i>${deckMode(ev)==='required'?'Decklist required':deckMode(ev)==='optional'?'Decklist optional':'No decklists'}</i>${ev.allow_guests?'<i>No account needed</i>':''}</div>
+        <div class="ev-chips"><i>Best of ${ev.best_of}</i><i>${ev.rounds ? ev.rounds + ' Swiss rounds' : 'Swiss rounds: auto'}</i><i>${ev.top_cut ? 'Top ' + ev.top_cut + ' cut' + (ev.third_place && ev.top_cut >= 4 ? ' + 3rd place match' : '') : 'No top cut'}</i><i>👥 ${players.length}${ev.max_players?` / ${ev.max_players}`:''} players</i><i>${deckMode(ev)==='required'?'Decklist required':deckMode(ev)==='optional'?'Decklist optional':'No decklists'}</i>${ev.allow_guests?'<i>No account needed</i>':''}</div>
         ${ev.notes ? `<p class="ev-notes">${E(ev.notes)}</p>` : ''}
         ${ev.tournament_id ? `<div class="ev-pub">✓ Top-cut decks are published on <a href="#tourney">Tournament Decks</a>.</div>` : ''}
         ${ev.status !== 'draft' || mgr ? `<div class="ev-row"><button class="btn2" data-ev="qr">📱 QR code</button><button class="btn2" data-ev="link">🔗 Copy link</button></div>` : ''}
@@ -420,10 +422,10 @@
     if(V.round == null || !R.find(x=>x.r === V.round)) V.round = R[R.length-1].r;
     const cur = R.find(x=>x.r === V.round), latest = R[R.length-1].r === V.round;
     const P = pmap();
-    const st = S().standings(V.data.players, V.data.matches.filter(m=>m.stage === 'top' || m.round < V.round), opt());
+    const st = S().standings(V.data.players, V.data.matches.filter(m=>m.stage === 'top' || m.stage === 'third' || m.round < V.round), opt());
     const pts = id => { const s = st.find(x=>x.id===id); return s ? s.mp : 0; };
     const nm = id => id ? E(P.get(id)?.display_name || '?') : '';
-    const bo3 = ev.best_of === 3, top = cur.stage === 'top';
+    const bo3 = ev.best_of === 3, top = cur.stage === 'top' || cur.stage === 'third';
     const resBtns = m => {
       if(m.result === 'bye' || !m.player2) return '<span class="ev-muted">Bye</span>';
       if(!mgr || !latest || ev.status !== 'running') return resText(m);
@@ -434,7 +436,7 @@
     const rows = cur.ms.map(m=>{
       const me = mine && (m.player1 === mine.id || m.player2 === mine.id);
       const w1 = m.result === 'p1' || m.result === 'bye', w2 = m.result === 'p2';
-      return `<tr class="${me?'me':''}"><td class="tn">${m.table_no}</td>
+      return `<tr class="${me?'me':''}"><td class="tn">${m.stage === 'third' ? '3rd' : top && R.find(x=>x.r===V.round).ms.some(x=>x.stage==='third') ? 'Final' : m.table_no}</td>
         <td class="${w1?'win':''}">${nm(m.player1)} <span class="ev-pts">${top?'':pts(m.player1)}</span></td>
         <td class="vs">${m.player2 ? 'vs' : ''}</td>
         <td class="${w2?'win':''}">${m.player2 ? `${nm(m.player2)} <span class="ev-pts">${top?'':pts(m.player2)}</span>` : '<span class="ev-muted">—</span>'}</td>
@@ -613,7 +615,7 @@
     async topnext(){
       const ev = V.data.event; const r = ev.current_round + 1;
       V.tab = 'pairings'; V.round = null;
-      const rows = S().pairTopNext(V.data.matches, r);
+      const rows = S().pairTopNext(V.data.matches, r, opt());
       if(!rows){ alert('Enter every top-cut result first.'); return; }
       await act(async()=>{ if(await insertRound(rows)) await setStatus({ current_round:r }); });
     },
@@ -624,7 +626,7 @@
         const { error } = await API().deleteRound(V.data.event.id, last.r); if(error){ alert(errMsg(error)); return; }
         const rest = V.data.matches.filter(m=>m.round !== last.r);
         const rows = last.stage === 'top'
-          ? (S().topRounds(rest).length ? S().pairTopNext(rest, last.r) : S().pairTopFirst(V.data.players, rest, V.data.event.top_cut, last.r, opt()))
+          ? (S().topRounds(rest).length ? S().pairTopNext(rest, last.r, opt()) : S().pairTopFirst(V.data.players, rest, V.data.event.top_cut, last.r, opt()))
           : S().pairSwiss(V.data.players, rest, last.r, opt());
         if(rows) await insertRound(rows);
       });

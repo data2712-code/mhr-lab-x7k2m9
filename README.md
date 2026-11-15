@@ -603,6 +603,36 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.41 — Events: pertandingan perebutan juara 3; Tournament Decks lebih ringkas (filter, kartu turnamen yang bisa dibuka, statistik per periode) — 15 November 2026 *(`events.js`, `events-ui.js`, `perf-ui.js`, `index.html`; migrasi SQL baru `mhr_decklab_v741_events_third_place.sql` di folder internal)*
+
+Permintaan pemilik: top cut sekarang hanya menentukan juara 1 dan 2 (posisi 3–4 cuma "Top 4"), perlu opsi pertandingan juara 3;
+dan bagian kartu terpopuler per turnamen makin panjang.
+- **Events — opsi "3rd place match"** (kotak centang di form event, berlaku untuk Top 4 / 8 / 16). Kolom baru `events.third_place`
+  (boolean, default false) dan `event_matches.stage` kini boleh `'third'`. Setelah semifinal, "Pair next top-cut round" membuat
+  ronde **Final & 3rd place**: Final (meja 1, stage `top`) + perebutan juara 3 antara dua kalah semifinal (stage `third`, ditulis
+  "3rd" di kolom meja). Event selesai setelah kedua hasil masuk. Peringkat akhir: 1st, 2nd, **3rd, 4th**, lalu Top 8 / Top 16 seperti
+  biasa; label ini juga dipakai saat Publish ke Tournament Decks. Pertandingan juara 3 tidak dihitung ke poin Swiss / tiebreaker,
+  tanpa hasil seri / DL (sama seperti top cut), dan masuk Performance sebagai pertandingan top cut. Re-pair / Undo ikut menangani
+  ronde ini. Event lama (tanpa opsi) tidak berubah. Chip event: "Top 4 cut + 3rd place match".
+- **Tournament Decks**: "📊 Most frequently used cards" di tiap turnamen kini `<details>` yang tertutup (tombol Show ▾ / Hide ▴);
+  Meta Statistics gabungan di atas tidak berubah (sudah menampilkan Orange & Purple).
+- **Tournament Decks lebih ringkas** (rekomendasi yang dipilih pemilik: no. 2, 1, 4):
+  - **Filter** di atas (`#tnyFilters`): Period (All time / Last 30 days / Last 90 days / tiap bulan), Venue (lokasi atau penyelenggara,
+    muncul bila ada >1), dan chip warna "Colour in Top decks" (turnamen yang Top-nya memakai warna itu). Pilihan disimpan per
+    perangkat (`localStorage` `mhr_tny_ui`), tombol Reset filters. Hasil kosong → pesan + reset.
+  - **Tiap turnamen = kartu ringkas** (`<details class="tny-event">`): nama, tanggal, tempat, dan deck juara (bar warna + nama + pemain)
+    + "Show N decks ▾"; turnamen teratas (terbaru) terbuka. Sumber Instagram dan tombol admin pindah ke dalam kartu.
+  - **Meta Statistics ikut filter**: warna, kartu terpopuler, dan tren bulanan dihitung dari turnamen yang sedang tampil (`tnyView()`);
+    keterangan filter ditulis di subjudul. Badge jumlah di menu tetap total semua deck turnamen.
+  - Dicek Playwright (desktop 1280 + iPhone 13, data uji 3 turnamen): turnamen teratas terbuka, filter Purple → 1 turnamen,
+    Last 30 days → 2 turnamen dan statistik ikut berubah, tanpa error JS.
+- SQL `mhr_decklab_v741_events_third_place.sql` **sudah dijalankan** di Supabase (15 Nov 2026): kolom `events.third_place` (boolean,
+  default false) dan `event_matches_stage_check` kini swiss/top/third.
+- Cache-buster `events.js?v=7.41`, `events-ui.js?v=7.41`, `perf-ui.js?v=7.41`, footer v7.41.
+- Dicek: logika bracket di Node (Top 4 + juara 3: final + meja juara 3 dipasangkan dari kalah semifinal, event belum selesai sebelum
+  kedua hasil, peringkat 1st/2nd/3rd/4th/5th…, poin Swiss tidak berubah; tanpa opsi = hanya final); halaman Tournament Decks (salinan
+  lokal, data uji): bagian tertutup default, Show/Hide berfungsi, Meta Statistics menampilkan Orange & Purple, tanpa error JS.
+
 ### Data — Battle Sim o2.23: perbaikan laporan #18–#21 (Thor, UNIQUE, pilih target baru) — 14 November 2026 *(`sim/sim.js`, `sim/sim-ui.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #98. Empat laporan baru di `sim_feedback` (Practice vs Bot Expert, desktop), dicek dengan memutar ulang lognya.

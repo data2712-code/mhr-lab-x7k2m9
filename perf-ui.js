@@ -924,7 +924,7 @@
       if(m.result === 'dl') games = [{ r:'L' }];
       const g = guessArch(opp.deck_name);
       const a = g && g.id ? archById(g.id) : null;
-      return { run_id:run.id, round_no:m.round, is_top: m.stage === 'top', played_on:date, context:'store', best_of:run.best_of,
+      return { run_id:run.id, round_no:m.round, is_top: m.stage === 'top' || m.stage === 'third', played_on:date, context:'store', best_of:run.best_of,
         deck_id:run.deck_id, deck_name:run.deck_name, deck_code:run.deck_code,
         opp_archetype: a ? a.id : null, opp_label: a ? a.name : (opp.deck_name || '').slice(0, 40), opp_colors: a ? (a.colors || []) : (g && g.colors ? g.colors : []),
         opp_name: String(opp.display_name || '').slice(0, 40), notes:'', games: games.map(x=>({ r:x.r, f:null, e:'unk' })),

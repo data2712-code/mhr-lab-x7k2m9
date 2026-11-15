@@ -51,7 +51,7 @@
     const S = new Map();
     players.forEach(p=>S.set(p.id, { id:p.id, name:p.display_name || p.name || '', dropped:!!p.dropped,
       mp:0, w:0, l:0, d:0, byes:0, rounds:0, gp:0, gplayed:0, opps:[] }));
-    matches.filter(m=>m.stage !== 'top' && isFinal(m)).forEach(m=>{
+    matches.filter(m=>m.stage !== 'top' && m.stage !== 'third' && isFinal(m)).forEach(m=>{   // v7.41: perebutan juara 3 bukan Swiss
       const a = S.get(m.player1), b = m.player2 ? S.get(m.player2) : null;
       if(!a) return;
       const g = gamesOf(m, bestOf);
@@ -106,7 +106,7 @@
 
   function pairSwiss(players, matches, round, opt){
     opt = opt || {};
-    const swiss = matches.filter(m=>m.stage !== 'top');
+    const swiss = matches.filter(m=>m.stage !== 'top' && m.stage !== 'third');
     const active = players.filter(p=>!p.dropped);
     const met = new Set();
     swiss.forEach(m=>{ if(m.player2){ met.add(m.player1+'|'+m.player2); met.add(m.player2+'|'+m.player1); } });
@@ -167,18 +167,24 @@
     const rs = [...new Set(matches.filter(m=>m.stage === 'top').map(m=>m.round))].sort((a,b)=>a-b);
     return rs.map(r=>matches.filter(m=>m.stage === 'top' && m.round === r).sort((a,b)=>a.table_no-b.table_no));
   }
-  function pairTopNext(matches, round){
+  /* v7.41 — opsi "perebutan juara 3" (events.third_place): setelah semifinal, ronde final berisi Final (meja 1, stage 'top')
+     + pertandingan juara 3 antara dua kalah semifinal (meja 2, stage 'third'). */
+  function thirdMatch(matches){ return matches.find(m=>m.stage === 'third') || null; }
+  function pairTopNext(matches, round, opt){
     const rs = topRounds(matches); const last = rs[rs.length-1];
     if(!last || last.length < 2) return null;
     if(last.some(m=>!winnerOf(m))) return null;
     const out = [];
     for(let i=0; i<last.length; i+=2)
       out.push({ round, stage:'top', table_no:i/2+1, player1:winnerOf(last[i]), player2:winnerOf(last[i+1]), result:null });
+    if(opt && opt.third && last.length === 2)
+      out.push({ round, stage:'third', table_no:2, player1:loserOf(last[0]), player2:loserOf(last[1]), result:null });
     return out;
   }
   function topComplete(matches){
     const rs = topRounds(matches); const last = rs[rs.length-1];
-    return !!(last && last.length === 1 && winnerOf(last[0]));
+    const t3 = thirdMatch(matches);
+    return !!(last && last.length === 1 && winnerOf(last[0]) && (!t3 || winnerOf(t3)));
   }
 
   /* peringkat akhir: [{id, place, label}] */
@@ -191,9 +197,15 @@
       placed.set(winnerOf(fin), { place:1, label:'1st' });
       placed.set(loserOf(fin), { place:2, label:'2nd' });
       let place = 3;
+      const t3 = thirdMatch(matches);
+      if(t3 && winnerOf(t3)){
+        placed.set(winnerOf(t3), { place:3, label:'3rd' });
+        placed.set(loserOf(t3), { place:4, label:'4th' });
+        place = 5;
+      }
       for(let k = rs.length-2; k >= 0; k--){
         const size = rs[k].length * 2;
-        const losers = rs[k].map(loserOf).filter(Boolean)
+        const losers = rs[k].map(loserOf).filter(id=>id && !placed.has(id))
           .sort((a,b)=>st.findIndex(s=>s.id===a) - st.findIndex(s=>s.id===b));
         losers.forEach(id=>placed.set(id, { place, label:'Top ' + size }));
         place += losers.length;
@@ -206,7 +218,7 @@
   }
   function ordinal(n){ const s = ['th','st','nd','rd'], v = n % 100; return n + (s[(v-20)%10] || s[v] || s[0]); }
 
-  const MHRSwiss = { standings, recommendedRounds, pairSwiss, pairTopFirst, pairTopNext, topComplete, topRounds,
+  const MHRSwiss = { standings, recommendedRounds, pairSwiss, pairTopFirst, pairTopNext, topComplete, topRounds, thirdMatch,
     finalPlacements, winnerOf, loserOf, ordinal, BRACKET };
   root.MHRSwiss = MHRSwiss;
   if(typeof module !== 'undefined' && module.exports) module.exports = MHRSwiss;
@@ -222,7 +234,7 @@
   }
   const off = { message:'offline' };
   const GUEST_KEY = 'mhr_event_guest';
-  const EV_COLS = 'id,organizer_id,name,event_date,start_time,location,lgs_name,notes,best_of,rounds,top_cut,max_players,allow_guests,decklist_mode,status,phase,current_round,tournament_id,created_at,updated_at';
+  const EV_COLS = 'id,organizer_id,name,event_date,start_time,location,lgs_name,notes,best_of,rounds,top_cut,third_place,max_players,allow_guests,decklist_mode,status,phase,current_round,tournament_id,created_at,updated_at';
   /* error tabel belum ada (migrasi v6.98 belum dijalankan) */
   const miss = e => e ? (/PGRST205|42P01|PGRST202|42883/.test(`${e.code||''} ${e.message||''}`) ? {...e, missing:true} : e) : null;
   /* pesan dari RAISE EXCEPTION di RPC (mis. EVENT_FULL) */
@@ -269,7 +281,7 @@
     },
     async saveEvent(row){
       const c = client(); if(!c) return { data:null, error:off };
-      const keys = ['name','event_date','start_time','location','lgs_name','notes','best_of','rounds','top_cut','max_players','allow_guests','decklist_mode','status','phase','current_round'];
+      const keys = ['name','event_date','start_time','location','lgs_name','notes','best_of','rounds','top_cut','third_place','max_players','allow_guests','decklist_mode','status','phase','current_round'];
       const clean = {}; keys.forEach(k=>{ if(k in row) clean[k] = row[k]; });
       const q = row.id ? c.from('events').update(clean).eq('id', row.id) : c.from('events').insert(clean);
       const { data, error } = await q.select(EV_COLS).single();

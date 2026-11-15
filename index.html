@@ -689,6 +689,33 @@
   .tourney-head h2{font-family:var(--disp);font-size:26px;letter-spacing:.05em;text-transform:uppercase}
   .tourney-head p{color:var(--muted);font-size:12.5px;line-height:1.6;margin:5px 0 16px;max-width:640px}
   .tny-event{margin-bottom:34px}
+  /* v7.41 — turnamen sebagai kartu ringkas yang bisa dibuka + filter */
+  details.tny-event{margin-bottom:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  details.tny-event[open]{padding-bottom:18px}
+  details.tny-event>summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+  details.tny-event>summary::-webkit-details-marker{display:none}
+  details.tny-event>summary .tny-event-head{flex:1 1 320px;margin:0;padding:0;border:none}
+  details.tny-event>.tny-grid{margin-top:14px}
+  details.tny-event>.tny-analysis:last-child{margin-bottom:0}
+  .tny-champ{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--paper);min-width:0}
+  .tny-champ b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+  .tny-champ .ev-by{color:var(--muted);font-size:11.5px}
+  .tny-champ-bar{display:flex;width:34px;height:8px;border-radius:4px;overflow:hidden;flex:none;background:var(--line)}
+  .tny-champ-bar i{display:block;height:100%}
+  .tny-event-tg{font-size:11.5px;color:var(--accent);font-weight:700;white-space:nowrap;margin-left:auto}
+  .tny-event-tg::before{content:attr(data-closed) ' ▾'}
+  details.tny-event[open] .tny-event-tg::before{content:attr(data-open) ' ▴'}
+  .tny-event-ex{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}
+  .tny-filters{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;margin:0 0 16px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+  .tny-filters label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted)}
+  .tny-filters select{background:var(--panel2);color:var(--paper);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;max-width:240px}
+  .tny-fcol{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted)}
+  .tny-fcol>div{display:flex;gap:6px;flex-wrap:wrap}
+  .tny-fcol button{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);color:var(--paper);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:12px;cursor:pointer}
+  .tny-fcol button i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+  .tny-fcol button[aria-pressed="true"]{border-color:var(--c);box-shadow:0 0 0 1px var(--c) inset}
+  .tny-freset{background:none;border:1px solid var(--line);color:var(--accent);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer}
+  @media (max-width:640px){ .tny-filters{gap:10px} .tny-filters label{flex:1 1 calc(50% - 5px);min-width:0} .tny-filters select{width:100%;max-width:none} .tny-champ b{max-width:160px} }
   .tny-event-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px;
     border-bottom:1px solid var(--line);padding-bottom:10px}
   .tny-event-nm{font-family:var(--disp);font-weight:800;font-size:19px;letter-spacing:.02em}
@@ -709,6 +736,15 @@
     padding:16px 18px 6px;margin:14px 0 26px}
   .tny-analysis h4{font-family:var(--disp);font-size:14px;letter-spacing:.05em;text-transform:uppercase}
   .tny-analysis .sub{font-size:11px;color:var(--muted);margin:3px 0 12px}
+  /* v7.41 — "Most frequently used cards" per turnamen bisa dibuka/tutup (default tertutup) */
+  details.tny-analysis{padding-top:12px;padding-bottom:12px}
+  details.tny-analysis>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none}
+  details.tny-analysis>summary::-webkit-details-marker{display:none}
+  details.tny-analysis>summary h4{flex:1;margin:0}
+  details.tny-analysis>summary .tny-tg{font-size:11.5px;color:var(--accent);font-weight:700;white-space:nowrap}
+  details.tny-analysis>summary .tny-tg::before{content:attr(data-closed) ' ▾'}
+  details.tny-analysis[open]>summary .tny-tg::before{content:attr(data-open) ' ▴'}
+  details.tny-analysis[open]>summary{margin-bottom:4px}
   .tny-usage-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);
     flex-wrap:wrap;row-gap:5px}
   .tny-usage-row:last-child{border-bottom:none}
@@ -3200,6 +3236,7 @@
     </div>
     <a class="nw-btn" href="#event" style="align-self:flex-start;margin-bottom:12px">🏟 Store tournaments, live pairings & registration → Events</a>
     <div id="tnyAdminBox"></div>
+    <div id="tnyFilters"></div>
     <div id="tnyStats"></div>
     <div id="tourneyList"></div>
   </div>
@@ -3541,8 +3578,8 @@
 <script src="set-ui.js?v=7.02"></script>
 <!-- v6.65 — halaman Tournament Decks (Fase 4): servis data Supabase public.tournaments -->
 <script src="tournaments.js?v=7.02"></script>
-<script src="events.js?v=7.02"></script>
-<script src="events-ui.js?v=7.05"></script>
+<script src="events.js?v=7.41"></script>
+<script src="events-ui.js?v=7.41"></script>
 <script src="binders.js?v=7.23"></script>
 <script src="binders-ui.js?v=7.32"></script>
 <script src="share-preview.js?v=7.32b"></script>
@@ -3551,7 +3588,7 @@
      v7.14 (Tahap 2): tournament runs, import dari Events, share gambar run, grafik tren, detail matchup.
      v7.15 (Tahap 3): data matchup komunitas (opt-in, anonim), detail deck + statistik per versi deck. -->
 <script src="perf.js?v=7.34"></script>
-<script src="perf-ui.js?v=7.34"></script>
+<script src="perf-ui.js?v=7.41"></script>
 <script src="rules-faq.js?v=7.28"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules); v7.26 — FAQ versi Bahasa Indonesia; v7.27 — Copy link ke halaman statis faq/ & errata/; v7.28 — TD-11 -->
 <script src="sim-host.js?v=7.40-sim23"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
@@ -3582,7 +3619,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.40</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.41</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -5021,6 +5058,10 @@ const T = {
   tourneySrc: 'Source',
   /* v6.27: analisis kartu paling sering dipakai (dihitung otomatis dari deck.top) */
   tourneyUsageHead: '📊 Most frequently used cards',
+  tnyShow: 'Show', tnyHide: 'Hide',
+  tnyPeriod: 'Period', tnyAllTime: 'All time', tnyLast30: 'Last 30 days', tnyLast90: 'Last 90 days',
+  tnyPlace: 'Venue', tnyAllPlaces: 'All venues', tnyColor: 'Colour in Top decks', tnyReset: 'Reset filters',
+  tnyNoMatch: 'No tournaments match these filters.', tnyShowDecks: 'Show {n} decks', tnyHideDecks: 'Hide decks',
   tourneyUsageSub: 'Calculated automatically from the Top decks above — the percentage shows how many decks use this card.',
   tourneyUsageDeck: 'deck',
   tourneyUsageCopy: 'copies',
@@ -9553,7 +9594,7 @@ function tourneyCardUsage(ev){
 function tourneyColorUsage(){
   const tally = {};  // warna -> jumlah kartu (dijumlah semua deck valid)
   let totalDeck = 0, totalKartu = 0;
-  TOURNAMENTS.forEach(ev=>(ev.top||[]).forEach(d=>{
+  tnyView().forEach(ev=>(ev.top||[]).forEach(d=>{
     const r = decodeDeck(d.cd);
     if(!r || !Object.keys(r.deck).length) return;
     totalDeck++;
@@ -9573,7 +9614,7 @@ function tourneyColorUsage(){
 function tourneyCardUsageAll(){
   const tally = {};
   let n = 0;
-  TOURNAMENTS.forEach(ev=>(ev.top||[]).forEach(d=>{
+  tnyView().forEach(ev=>(ev.top||[]).forEach(d=>{
     const r = decodeDeck(d.cd);
     if(!r || !Object.keys(r.deck).length) return;
     n++;
@@ -9603,7 +9644,7 @@ function tourneyCardUsageAll(){
    sama seperti tourneyColorUsage), diurutkan kronologis lama→baru. */
 function tourneyMonthlyTrend(){
   const bulan = {};  // 'YYYY-MM' -> {totalDeck, warna:{c:n}, totalKartu}
-  TOURNAMENTS.forEach(ev=>{
+  tnyView().forEach(ev=>{
     const iso = String(ev.tanggal||'').slice(0,7);  // 'YYYY-MM'
     if(!/^\d{4}-\d{2}$/.test(iso)) return;
     (ev.top||[]).forEach(d=>{
@@ -9631,6 +9672,7 @@ function renderTnyStats(){
   const box = $('#tnyStats'); if(!box) return;
   const color = tourneyColorUsage();
   if(!color.totalDeck){ box.innerHTML = ''; return; }
+  /* v7.41: tren bulanan disembunyikan saat periode = satu bulan (cuma satu baris) */
   const usage = tourneyCardUsageAll();
   const trend = tourneyMonthlyTrend();
   const colorHtml = color.rows.map(r=>`<div class="tny-color-row">
@@ -9656,7 +9698,7 @@ function renderTnyStats(){
     </div>`).join('') : `<div class="tny-stats-empty">${t('tnyStatsTrendNone')}</div>`;
   box.innerHTML = `<div class="tny-stats">
     <h3>${t('tnyStatsHead')}</h3>
-    <div class="sub">${t('tnyStatsSub').replace('{n}', TOURNAMENTS.length).replace('{d}', color.totalDeck)}</div>
+    <div class="sub">${t('tnyStatsSub').replace('{n}', tnyView().length).replace('{d}', color.totalDeck)}${tnyFiltered() ? ' · ' + escHtml(tnyFilterLabel()) : ''}</div>
     <div class="tny-stats-grid">
       <div class="tny-stats-block"><h4>${t('tnyStatsColorHead')}</h4>${colorHtml}</div>
       <div class="tny-stats-block"><h4>${t('tnyStatsCardHead')}</h4>${cardHtml}</div>
@@ -9678,20 +9720,83 @@ async function renderTourney(){
   if(state.page === 'tourney'){ renderTnyAdminBox(); renderTourneyBody(); }
 }
 
+/* ======= v7.41 — halaman Tournament Decks lebih ringkas (permintaan pemilik 15 Nov 2026) =======
+   1) Filter periode / tempat / warna (#tnyFilters), disimpan per perangkat. 2) Meta Statistics ikut periode & filter.
+   3) Tiap turnamen = kartu ringkas (nama, tanggal, tempat, deck juara) yang bisa dibuka; turnamen teratas terbuka. */
+const TNY_UI = (()=>{ try{ return Object.assign({ per:'all', loc:'', col:'' }, JSON.parse(localStorage.getItem('mhr_tny_ui')||'{}')); }catch(e){ return { per:'all', loc:'', col:'' }; } })();
+function tnySaveUi(){ try{ localStorage.setItem('mhr_tny_ui', JSON.stringify(TNY_UI)); }catch(e){} }
+const tnyPlace = ev => String(ev.lokasi || ev.penyelenggara || '').trim();
+function tnyEventColors(ev){
+  const set = new Set();
+  (ev.top||[]).forEach(d=>{ const r = decodeDeck(d.cd); if(!r) return; Object.keys(r.deck).forEach(no=>{ const c = DB.find(x=>x.no===no); if(c) set.add(c.c); }); });
+  return set;
+}
+function tnyView(){
+  const now = Date.now();
+  return TOURNAMENTS.filter(ev=>{
+    const iso = String(ev.tanggal||'');
+    if(TNY_UI.per === 'd30' || TNY_UI.per === 'd90'){
+      const days = TNY_UI.per === 'd30' ? 30 : 90, ms = Date.parse(iso + 'T00:00:00');
+      if(!(ms >= now - days*864e5)) return false;
+    } else if(/^\d{4}-\d{2}$/.test(TNY_UI.per) && iso.slice(0,7) !== TNY_UI.per) return false;
+    if(TNY_UI.loc && tnyPlace(ev) !== TNY_UI.loc) return false;
+    if(TNY_UI.col && !tnyEventColors(ev).has(TNY_UI.col)) return false;
+    return true;
+  });
+}
+const tnyFiltered = () => TNY_UI.per !== 'all' || !!TNY_UI.loc || !!TNY_UI.col;
+function tnyMonthLabel(k){ return new Date(k + '-01T00:00:00').toLocaleDateString('en-US', { month:'long', year:'numeric' }); }
+function tnyFilterLabel(){
+  const per = TNY_UI.per === 'd30' ? t('tnyLast30') : TNY_UI.per === 'd90' ? t('tnyLast90') : TNY_UI.per === 'all' ? '' : tnyMonthLabel(TNY_UI.per);
+  return [per, TNY_UI.loc, TNY_UI.col ? t(TNY_UI.col) : ''].filter(Boolean).join(' · ');
+}
+function renderTnyFilters(){
+  const box = $('#tnyFilters'); if(!box) return;
+  if(!TOURNAMENTS.length){ box.innerHTML = ''; return; }
+  const months = [...new Set(TOURNAMENTS.map(ev=>String(ev.tanggal||'').slice(0,7)).filter(k=>/^\d{4}-\d{2}$/.test(k)))].sort().reverse();
+  const places = [...new Set(TOURNAMENTS.map(tnyPlace).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const cols = new Set(); TOURNAMENTS.forEach(ev=>tnyEventColors(ev).forEach(c=>cols.add(c)));
+  if(TNY_UI.loc && !places.includes(TNY_UI.loc)) TNY_UI.loc = '';
+  if(/^\d{4}-\d{2}$/.test(TNY_UI.per) && !months.includes(TNY_UI.per)) TNY_UI.per = 'all';
+  const opt = (v, l, cur) => `<option value="${escHtml(v)}"${v===cur?' selected':''}>${escHtml(l)}</option>`;
+  box.innerHTML = `<div class="tny-filters">
+    <label><span>${t('tnyPeriod')}</span><select data-tnyf="per">${opt('all', t('tnyAllTime'), TNY_UI.per)}${opt('d30', t('tnyLast30'), TNY_UI.per)}${opt('d90', t('tnyLast90'), TNY_UI.per)}${months.map(k=>opt(k, tnyMonthLabel(k), TNY_UI.per)).join('')}</select></label>
+    ${places.length > 1 ? `<label><span>${t('tnyPlace')}</span><select data-tnyf="loc">${opt('', t('tnyAllPlaces'), TNY_UI.loc)}${places.map(x=>opt(x, x, TNY_UI.loc)).join('')}</select></label>` : ''}
+    <div class="tny-fcol"><span>${t('tnyColor')}</span><div>${[...cols].sort((a,b)=>CORDER[a]-CORDER[b]).map(c=>`<button data-tnycol="${escHtml(c)}" aria-pressed="${TNY_UI.col===c}" style="--c:${CMAP[c]}" title="${escHtml(t(c))}"><i></i>${escHtml(t(c))}</button>`).join('')}</div></div>
+    ${tnyFiltered() ? `<button class="tny-freset" data-tnyreset="1">${t('tnyReset')}</button>` : ''}
+  </div>`;
+}
+$('#tnyFilters').addEventListener('change', e=>{
+  const sel = e.target.closest('[data-tnyf]'); if(!sel) return;
+  TNY_UI[sel.dataset.tnyf] = sel.value; tnySaveUi(); renderTourneyBody();
+});
+$('#tnyFilters').addEventListener('click', e=>{
+  const c = e.target.closest('[data-tnycol]');
+  if(c){ TNY_UI.col = TNY_UI.col === c.dataset.tnycol ? '' : c.dataset.tnycol; tnySaveUi(); renderTourneyBody(); return; }
+  if(e.target.closest('[data-tnyreset]')){ TNY_UI.per = 'all'; TNY_UI.loc = ''; TNY_UI.col = ''; tnySaveUi(); renderTourneyBody(); }
+});
+
 function renderTourneyBody(){
   TOURNEY_FLAT = [];
   if(!TOURNAMENTS.length){
     $('#tourneyList').innerHTML = `<div class="empty">${t('tourneyNone')}</div>`;
     $('#navTourney').textContent = 0;
     $('#tnyStats').innerHTML = '';
+    $('#tnyFilters').innerHTML = '';
     return;
   }
+  renderTnyFilters();
+  const view = tnyView();
   const admOn = (typeof isAccountAdmin !== 'undefined' && isAccountAdmin);
-  $('#tourneyList').innerHTML = TOURNAMENTS.map(ev=>{
+  $('#tourneyList').innerHTML = !view.length
+    ? `<div class="empty">${t('tnyNoMatch')} <button class="tny-freset" data-tnyreset2="1">${t('tnyReset')}</button></div>`
+    : view.map((ev, evi)=>{
+    let champ = null;
     const kartu = (ev.top||[]).map(d=>{
       const r = decodeDeck(d.cd);
       if(!r || !Object.keys(r.deck).length) return '';
       const s = deckStats(r.deck);
+      if(!champ) champ = { d, s };
       const idx = TOURNEY_FLAT.push({ev, d}) - 1;
       const strip = previewCards(r.deck, 4).map(c=>
         `<img alt="" data-ext="0" src="images/${c.no}.jpg" loading="lazy"
@@ -9721,10 +9826,11 @@ function renderTourneyBody(){
         </div>
       </div>`;
     }).join('');
+    const nDeck = (ev.top||[]).filter(d=>{ const r = decodeDeck(d.cd); return r && Object.keys(r.deck).length; }).length;
     const meta = [tnyFmtTanggal(ev.tanggal), ev.lokasi, ev.penyelenggara].filter(Boolean).join(' · ');
     const usage = tourneyCardUsage(ev);
-    const usageHtml = usage.rows.length ? `<div class="tny-analysis">
-      <h4>${t('tourneyUsageHead')}</h4>
+    const usageHtml = usage.rows.length ? `<details class="tny-analysis">
+      <summary><h4>${t('tourneyUsageHead')}</h4><span class="tny-tg" data-open="${escHtml(t('tnyHide'))}" data-closed="${escHtml(t('tnyShow'))}"></span></summary>
       <div class="sub">${t('tourneyUsageSub')}</div>
       ${usage.rows.map((r,i)=>`<div class="tny-usage-row">
         <span class="tny-usage-rank">${i+1}</span>
@@ -9736,25 +9842,32 @@ function renderTourneyBody(){
           <span class="tny-usage-meta">${r.deckCount}/${usage.n} ${t('tourneyUsageDeck')} (${r.pct}%) · ${r.copies} ${t('tourneyUsageCopy')}</span>
         </span>
       </div>`).join('')}
-    </div>` : '';
+    </details>` : '';
     const admBtns = admOn ? `<div class="tny-event-adm">
         <button data-tny-edit="${escHtml(ev.id)}">✏️ Edit</button>
         <button data-tny-del="${escHtml(ev.id)}">🗑 Delete</button>
       </div>` : '';
-    return `<div class="tny-event">
-      <div class="tny-event-head">
-        <div class="tny-event-nm">${escHtml(ev.nama)}</div>
-        ${meta?`<div class="tny-event-meta">${escHtml(meta)}</div>`:''}
-        ${ev.sumber?`<div class="tny-event-src">${t('tourneySrc')}: <a href="${escHtml(ev.sumber)}" target="_blank" rel="noopener">Instagram</a></div>`:''}
-        ${admBtns}
-      </div>
+    const champHtml = champ ? `<div class="tny-champ"><span class="tny-champ-bar">${Object.entries(champ.s.col).sort((a,b)=>CORDER[a[0]]-CORDER[b[0]]).map(([c,n])=>`<i style="flex:${n};background:${CMAP[c]}"></i>`).join('')}</span>🏆 <b>${escHtml(namaDeckLokal(champ.d.nm))}</b>${champ.d.cr?` <span class="ev-by">by ${escHtml(champ.d.cr)}</span>`:''}</div>` : '';
+    return `<details class="tny-event"${evi === 0 ? ' open' : ''}>
+      <summary class="tny-event-sum">
+        <div class="tny-event-head">
+          <div class="tny-event-nm">${escHtml(ev.nama)}</div>
+          ${meta?`<div class="tny-event-meta">${escHtml(meta)}</div>`:''}
+        </div>
+        ${champHtml}
+        <span class="tny-event-tg" data-open="${escHtml(t('tnyHideDecks'))}" data-closed="${escHtml(t('tnyShowDecks').replace('{n}', nDeck))}"></span>
+      </summary>
+      ${ev.sumber || admBtns ? `<div class="tny-event-ex">${ev.sumber?`<div class="tny-event-src">${t('tourneySrc')}: <a href="${escHtml(ev.sumber)}" target="_blank" rel="noopener">Instagram</a></div>`:''}${admBtns}</div>` : ''}
       <div class="tny-grid">${kartu}</div>
       ${usageHtml}
-    </div>`;
+    </details>`;
   }).join('');
-  $('#navTourney').textContent = TOURNEY_FLAT.length;
+  $('#navTourney').textContent = TOURNAMENTS.reduce((n, ev)=>n + (ev.top||[]).length, 0);
   renderTnyStats();
 }
+$('#tourneyList').addEventListener('click', e=>{
+  if(e.target.closest('[data-tnyreset2]')){ TNY_UI.per = 'all'; TNY_UI.loc = ''; TNY_UI.col = ''; tnySaveUi(); renderTourneyBody(); }
+});
 
 $('#tourneyList').addEventListener('click', e=>{
   const edit = e.target.closest('[data-tny-edit]');
