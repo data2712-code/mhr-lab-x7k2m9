@@ -660,11 +660,22 @@
     else if (opts.onField && x.enT === G.turn && x.bbmOk !== G.turn) tag = '<span class="tag new">just placed</span>';
     else if (opts.onField && x.dclT === G.turn) tag = '<span class="tag done">attacked</span>';
     if (!G.vanilla && !S.hasResolver(x.no) && !/no effect text/i.test(S.textEn(c))) cls.push('nores');
+    const lent = opts.onField || opts.att ? lentHTML(iid) : '';
+    if (lent) cls.push('lent');
     return '<div class="' + cls.concat(x.fd ? ['fd'] : []).join(' ') + '" data-iid="' + iid + '" title="' + esc(S.nameEn(c)) + '">' +
       '<div class="ph">' + esc(S.nameEn(c)) + '</div>' + imgTag(x.no) +
       '<div class="cbar" style="background:' + (COLOR[c.c] || '#888') + '"></div>' + tag +
-      (x.att && x.att.length ? '<span class="tag att">+' + x.att.length + ' att</span>' : '') +
+      (x.att && x.att.length ? '<span class="tag att">+' + x.att.length + ' att</span>' : '') + lent +
       '<div class="st"><b class="' + cmpCls(S.getLv(G, iid), c.l) + '">Lv' + S.getLv(G, iid) + '</b><i class="' + cmpCls(S.getR(G, iid), c.r) + '">R' + S.getR(G, iid) + '</i><span class="' + cmpCls(S.getPower(G, iid), c.p) + '">' + S.getPower(G, iid) + '</span></div></div>';
+  }
+  /* Masukan pemain 16 Nov 2026 (o2.25): kartu di FIELD yang dikendalikan pemain lain dari pemiliknya (mis. 「Spider-Archenemy」Green
+     Goblin pindah ke BASE lawan) diberi penanda. Sudut pandang pemain: YOURS / OPP'S; tayangan ulang & dua manusia: nama pemilik. */
+  function ownerOf(iid) { const x = G.inst[iid], L = S.locate(G, iid); return x && L && (L.zone === 'bat' || L.zone === 'base' || L.zone === 'att') && x.owner != null && L.p !== x.owner ? { owner: x.owner, ctrl: L.p } : null; }
+  function lentHTML(iid) {
+    const o = ownerOf(iid);
+    if (!o) return '';
+    const v = viewer(), lab = v === 0 || v === 1 ? (o.owner === v ? 'YOURS' : "OPP'S") : String(G.names[o.owner] || 'P' + (o.owner + 1)).slice(0, 8).toUpperCase();
+    return '<div class="own" title="Owner: ' + esc(G.names[o.owner]) + ' · controlled by ' + esc(G.names[o.ctrl]) + '"><i>⇄</i><span>' + esc(lab) + '</span></div>';
   }
   function cmpCls(v, base) { return v > base ? 'up' : v < base ? 'down' : ''; }
   function backHTML() { return '<div class="card fd" style="cursor:default"><div class="fdl">MHR</div></div>'; }
@@ -968,10 +979,24 @@
     const loc = L ? ({ hand: 'HAND', bat: S.SLOT_NAME[L.slot], base: 'BASE', ret: 'RETREAT', void: 'VOID', deck: 'Deck', att: 'attached' })[L.zone] + ' · ' + esc(G.names[L.p]) : '';
     return '<div class="cardinfo"><div class="big">' + cardHTML(iid).replace(/data-iid=/g, 'data-x=') + '</div><div><div class="nm">' + esc(S.nameEn(c)) + '</div><div class="small muted">' + esc(c.no) + ' · ' + loc + '</div>' +
       '<div class="small" style="margin-top:4px">Lv <b>' + S.getLv(G, iid) + '</b> · R <b>' + S.getR(G, iid) + '</b> · Power <b>' + S.getPower(G, iid) + '</b></div><div class="small muted">' + esc(c.f || '') + '</div></div></div>' +
-      breakdownHTML(iid) + '<div class="eff">' + esc(cardText(c)) + (c.fan === 2 ? '\n⚠ This English text is a fan translation of the Chinese text (no official English text yet).' : '') +
+      ownerLineHTML(iid) + attPeekHTML(iid) + breakdownHTML(iid) + '<div class="eff">' + esc(cardText(c)) + (c.fan === 2 ? '\n⚠ This English text is a fan translation of the Chinese text (no official English text yet).' : '') +
       (S.textEn(c) && !/no effect text/i.test(S.textEn(c)) && !S.hasResolver(x.no) ? '\n(No resolver yet: this effect is not applied.)' : '') +
-      (x.att && x.att.length ? '\nAttached: ' + x.att.map(a => S.nameOf(G, a)).join(', ') : '') + (x.host ? '\nAttached to: ' + S.nameOf(G, x.host) : '') + '</div>' +
-      stateHTML(iid);
+      '</div>' + stateHTML(iid);
+  }
+  function ownerLineHTML(iid) {
+    const o = ownerOf(iid);
+    return o ? '<div class="ownl"><i>⇄</i> <span>Owner: ' + esc(G.names[o.owner]) + ' · controlled by ' + esc(G.names[o.ctrl]) + '</span></div>' : '';
+  }
+  /* Masukan pemain 16 Nov 2026 (o2.25): ketuk karakter → kartu yang ter-attach tampil sebagai gambar kecil; ketuk salah satunya untuk membaca
+     teksnya (popover pindah ke kartu itu, tombol kembali ke karakternya). Tidak perlu membuka Play-by-play. */
+  function attPeekHTML(iid) {
+    const x = G.inst[iid], att = (x.att || []).filter(a => G.inst[a]);
+    let h = '';
+    if (att.length) h += '<div class="attpk"><div class="attpkh">ATTACHED · ' + att.length + '</div><div class="attrow">' +
+      att.map(a => '<button class="attc" data-act="peek" data-c="' + a + '" title="' + esc(S.nameOf(G, a)) + '">' + cardHTML(a, { att: true }).replace(/data-iid=/g, 'data-x=') +
+        '<span>' + esc(S.nameOf(G, a).replace(/^「[^」]*」\s*/, '') || S.nameOf(G, a)) + '</span></button>').join('') + '</div></div>';
+    if (x.host && G.inst[x.host]) h += '<div class="attpk"><button class="sm" data-act="peek" data-c="' + x.host + '">← Attached to ' + esc(S.nameOf(G, x.host)) + '</button></div>';
+    return h;
   }
   // Tahap 5: keadaan yang berasal dari efek lain (kehilangan efek, efek pinjaman, kemampuan, larangan biaya CALL).
   function stateHTML(iid) {
@@ -1276,7 +1301,8 @@
     if (!h) { closePop(); return; }
     pop.innerHTML = h; pop.classList.add('on');
     if (narrow()) { pop.style.left = ''; pop.style.top = ''; return; }    // HP: lembar bawah (CSS)
-    const el = document.querySelector('#board .card.sel,#handRow .card.sel,#baseRow .card.sel');
+    const hostI = G.inst[ui.sel] && G.inst[ui.sel].host;
+    const el = document.querySelector('#board .card.sel,#handRow .card.sel,#baseRow .card.sel') || (hostI && document.querySelector('#board .card[data-iid="' + hostI + '"]'));
     const r = el ? el.getBoundingClientRect() : { left: innerWidth / 2, right: innerWidth / 2, top: innerHeight / 2, bottom: innerHeight / 2 };
     const pw = pop.offsetWidth, ph = pop.offsetHeight;
     let x = r.right + 10; if (x + pw > innerWidth - 8) x = r.left - pw - 10; if (x < 8) x = Math.max(8, Math.min(innerWidth - pw - 8, r.left));
@@ -1563,6 +1589,7 @@
       }
       case 'dropCallBase': act({ t: 'call', c: ui.sel, to: 'BASE', cost: [] }); return;
       case 'cancel': resetSel(); render(); return;
+      case 'peek': if (G.inst[t.dataset.c]) { ui.sel = t.dataset.c; ui.mode = null; ui.cost = []; render(); } return;
       case 'call': case 'ccall': {
         const lv = S.getLv(G, ui.sel);
         ui.callType = a; ui.cost = []; ui.mode = lv >= 4 ? 'call-cost' : 'call-dest'; render(); return;

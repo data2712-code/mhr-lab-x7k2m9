@@ -16,6 +16,15 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-16', t: 'improve', v: 'o2.25',
+      en: { h: 'See attached cards at a glance, and who owns a borrowed card', b: [
+        'Tap a Character on the FIELD to see its attached cards as small pictures. Tap one to read its text, then tap "Attached to …" to go back. No need to search the Play-by-play.',
+        'A card that sits on the side of the player who does not own it (for example 「Spider-Archenemy」Green Goblin after it moves to the opponent\'s BASE) gets a teal frame and a ⇄ YOURS / OPP\'S label. Its card details show the owner and who controls it.'] },
+      id: { h: 'Lihat kartu ter-attach sekilas, dan pemilik kartu yang "dipinjam"', b: [
+        'Ketuk Karakter di FIELD untuk melihat kartu yang ter-attach sebagai gambar kecil. Ketuk salah satunya untuk membaca teksnya, lalu ketuk "Ter-attach pada …" untuk kembali. Tidak perlu mencari di Play-by-play.',
+        'Kartu yang berada di sisi pemain yang bukan pemiliknya (misalnya 「Spider-Archenemy」Green Goblin setelah pindah ke BASE lawan) diberi bingkai hijau-biru dan label ⇄ MILIKMU / MILIK LAWAN. Detail kartunya menampilkan pemilik dan pengendalinya.'] }
+    },
+    {
       d: '2026-11-15', t: 'improve', v: 'o2.24', reports: [24],
       en: { h: 'Clearer choices for effects with a discard cost', b: [
         'Effects such as 「Blessing of Einherjar」New Valkyrie now ask for the card to discard first, then the target, in the same order as the card text.',

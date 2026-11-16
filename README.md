@@ -603,6 +603,19 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.25: intip kartu ter-attach + penanda kartu milik lawan — 16 November 2026 *(`sim/sim-ui.js`, `sim/sim-i18n.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #103. Dua masukan pemain (log: pertandingan online regilure vs ferdyzephyr, 16 Nov 2026).
+- **Intip attachment**: ketuk Karakter di FIELD → bagian **ATTACHED · n** berisi gambar kecil kartu yang ter-attach (nama pendek tanpa
+  judul). Ketuk salah satunya → popover pindah ke kartu itu (teks lengkap) dengan tombol **← Attached to …** untuk kembali. Bagian ini
+  ditaruh di atas rincian Power supaya langsung terlihat di HP. Menggantikan baris teks "Attached:" di bawah teks efek.
+- **Penanda kartu milik lawan**: kartu di FIELD yang dikendalikan pemain lain dari pemiliknya (mis. 「Spider-Archenemy」Green Goblin
+  SP01-042 setelah ACTI-nya memindahkannya ke BASE lawan) mendapat bingkai hijau-biru dan pita **⇄ YOURS / OPP'S** (ID: MILIKMU / MILIK
+  LAWAN); tayangan ulang & dua manusia satu perangkat: nama pemilik. Di pelat BASE HP: pita tipis ⇄. Detail kartu menampilkan
+  "Owner: … · controlled by …".
+- Hanya tampilan; mesin & server tidak berubah (versi mesin 0.14.0, **tidak perlu deploy server**).
+- `sim-updates.js`: entri improve o2.25. Cache-buster `sim/` → `?v=o2.25`, `SIM_URL` → `?v=o2.25`, `sim-host.js?v=7.41-sim25`.
+
 ### Data — Battle Sim o2.24: laporan #22–#24 (urutan biaya → target, lencana lokasi di jendela pilihan) — 15 November 2026 *(`sim/sim-cards-t6.js`, `sim/sim-cards-bp01.js`, `sim/sim-ui.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #99. Tiga laporan baru (Practice, desktop), dicek dengan memutar ulang lognya.
