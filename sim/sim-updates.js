@@ -16,6 +16,33 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-16', t: 'rules',
+      en: { h: 'Rulings: UNIQUE, ACTI timing and SD05 / SD06 / PB02 cards', b: [
+        'UNIQUE checks the full card name, including the title. 「Echo of Fate」Spider-Man and 「The Web of Destiny」Spider-Man have different names, so both may be on your FIELD. Two copies of the same card cannot. (Report #22)',
+        'ACTI effects can only be used in your Action Phase. During the Battle Phase you can only use COUNTER effects. (Report #23)',
+        'Wounded (for example 「Peerless Blade」Corvus Glaive): a Character is wounded when its Power is below its printed Power because of a Power-minus effect, from either player.',
+        '「Count Me In」Gamora: the total Power of your Characters in BATTLE must be exactly 6500.',
+        '「Soul Resonance」Yondu: a matching Lv gives only 1 extra activation per turn.',
+        'QUICK ATTACK (「Guardian of Earth」Ancient One): in your turn, this card is not retreated by BOTH LOSE. ONSLAUGHT (「Genius Burden」Thanos): when its attack hits a weakness, you place 1 more Rush Point card (up to 9).',
+        'The Lv of a card in HAND, RETREAT or VOID is its printed Lv.',
+        'A Character that "can not attack" or "can not move" also cannot be repositioned before the Battle Phase.',
+        '「Guardian of Nine Realms」Odin: you draw the extra card only when its Power-X brings that Character to 0 and it is retreated.',
+        '「Reborn from Hell」Hela: "discarding of effect" means sent to RETREAT from HAND or Deck by an effect. A CALL cost does not count.',
+        '"Enters VOID from RETREAT by your effect" (for example 「To The Rescue」Chitauri Flying Chariots): pruned from RETREAT by an effect of that card\'s owner.'] },
+      id: { h: 'Ruling: UNIQUE, waktu ACTI, dan kartu SD05 / SD06 / PB02', b: [
+        'UNIQUE memeriksa nama kartu lengkap, termasuk judulnya. 「Echo of Fate」Spider-Man dan 「The Web of Destiny」Spider-Man namanya berbeda, jadi keduanya boleh ada di FIELD Anda. Dua kopi kartu yang sama tidak boleh. (Laporan #22)',
+        'Efek ACTI hanya bisa dipakai di Action Phase Anda. Saat Battle Phase, hanya efek COUNTER yang bisa dipakai. (Laporan #23)',
+        'Wounded (misalnya 「Peerless Blade」Corvus Glaive): Karakter disebut wounded bila Power-nya di bawah Power cetak karena efek pengurang Power, dari pemain mana pun.',
+        '「Count Me In」Gamora: total Power Karakter Anda di BATTLE harus tepat 6500.',
+        '「Soul Resonance」Yondu: Lv yang sama hanya memberi 1 aktivasi tambahan per giliran.',
+        'QUICK ATTACK (「Guardian of Earth」Ancient One): di giliran Anda, kartu ini tidak di-retreat oleh BOTH LOSE. ONSLAUGHT (「Genius Burden」Thanos): bila serangannya mengenai weakness, Anda menaruh 1 kartu Rush Point lagi (maksimal 9).',
+        'Lv kartu di HAND, RETREAT, atau VOID adalah Lv cetaknya.',
+        'Karakter yang "can not attack" atau "can not move" juga tidak bisa dipindah posisinya sebelum Battle Phase.',
+        '「Guardian of Nine Realms」Odin: kartu tambahan hanya didapat bila Power-X membuat Karakter itu menjadi 0 dan ter-retreat.',
+        '「Reborn from Hell」Hela: "discarding of effect" artinya masuk RETREAT dari HAND atau Deck karena efek. Biaya CALL tidak dihitung.',
+        '"Enters VOID from RETREAT by your effect" (misalnya 「To The Rescue」Chitauri Flying Chariots): di-prune dari RETREAT oleh efek milik pemilik kartu itu.'] }
+    },
+    {
       d: '2026-11-16', t: 'improve', v: 'o2.25',
       en: { h: 'See attached cards at a glance, and who owns a borrowed card', b: [
         'Tap a Character on the FIELD to see its attached cards as small pictures. Tap one to read its text, then tap "Attached to …" to go back. No need to search the Play-by-play.',

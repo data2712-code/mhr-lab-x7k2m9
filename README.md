@@ -603,6 +603,18 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.26: Updates & Patch Notes — entri RULES pertama (ruling yang belum diumumkan) — 16 November 2026 *(`sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #104. Permintaan pemilik: perbarui Updates & Patch Notes berdasarkan ruling terbaru yang belum diinformasikan ke pemain.
+Entri `t: 'rules'` (16 Nov 2026, EN/ID), berisi keputusan pemilik yang sudah dipakai mesin tetapi belum pernah diumumkan:
+- UNIQUE dihitung dari nama lengkap termasuk judul (laporan #22, keputusan 15 Nov).
+- ACTI hanya di Action Phase; di Battle Phase hanya efek COUNTER (laporan #23).
+- Wounded (SD06-002 「Peerless Blade」Corvus Glaive) = Power di bawah Power cetak karena efek pengurang Power dari pemain mana pun (K-48, dikoreksi #84).
+- 「Count Me In」Gamora (PB02-004): total Power BATTLE tepat 6500 (K-49).
+- 「Soul Resonance」Yondu (PB02-018): Lv sama hanya +1 aktivasi per giliran (K-50).
+- QUICK ATTACK / ONSLAUGHT (K-47) dan lima bacaan kecil SD05/SD06/PB02 (K-51: Lv di luar FIELD = Lv cetak, "can not attack/move" juga melarang pindah posisi, Odin, Hela, SD06-014/015/016) — disetujui pemilik 16 Nov 2026.
+- Hanya teks; mesin & server tidak berubah. Cache-buster `sim/` → `?v=o2.26`, `SIM_URL` → `?v=o2.26`, `sim-host.js?v=7.41-sim26`.
+
 ### Data — Battle Sim o2.25: intip kartu ter-attach + penanda kartu milik lawan — 16 November 2026 *(`sim/sim-ui.js`, `sim/sim-i18n.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #103. Dua masukan pemain (log: pertandingan online regilure vs ferdyzephyr, 16 Nov 2026).
