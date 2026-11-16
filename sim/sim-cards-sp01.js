@@ -445,8 +445,9 @@
         can: A => A.deck(A.p).length > 0,
         run: A => {
           const top = A.deck(A.p).slice(0, 3);
-          const c = A.ask('c', { text: 'Top 3 cards of your Deck: choose 1 [Web] card to add to your HAND (the rest are Pruned)', from: top.filter(i => isWeb(A, i)), reveal: true, prefer: 'high' });
-          top.forEach(i => A.reveal(i));
+          const c = A.ask('c', { text: 'Top 3 cards of your Deck (shown to both players): choose 1 [Web] card to add to your HAND. The rest are Pruned to VOID.', from: top.filter(i => isWeb(A, i)), reveal: true, prefer: 'high',
+            show: top, why: 'not 【Web】 · to VOID' });
+          A.showCards(top, 'Gunfire Negotiation');
           c.forEach(i => A.toHand(i, 'Gunfire Negotiation'));
           top.filter(i => !c.includes(i)).forEach(i => A.prune(i, 'Gunfire Negotiation'));
         }

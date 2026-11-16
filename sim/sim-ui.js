@@ -732,6 +732,7 @@
     drawArrows();
     placePop();                                      // riwayat #54: info + aksi kartu = popover di semua layar
     flashCheck(v);
+    revealCheck(v);
     oppToast(v);
     turnBanner(v);
     modals();
@@ -1493,9 +1494,15 @@
       // Laporan #7 (Knull): tampilkan teks efek kartu sumber dan teks setiap kartu pilihan, seperti panel pilihan RushDee.
       const srcI = G.job && G.job.c, srcC = srcI && G.inst[srcI] && S.card(G.inst[srcI].no);
       const srcBox = srcC && (canSee(srcI) || !G.inst[srcI].fd) ? '<div class="pksrc">' + cardHTML(srcI, { reveal: true }).replace('data-iid', 'data-x') + '<div><b>' + esc(S.nameOf(G, srcI)) + '</b><p>' + esc(S.textEn(srcC)) + '</p></div></div>' : '';
-      const txt = pr.from.map(i => { const c = S.card(G.inst[i].no); return c && S.textEn(c) ? '<li><b>' + esc(S.nameOf(G, i)) + '</b> — ' + esc(S.textEn(c)) + '</li>' : ''; }).join('');
+      // o2.27: efek yang memperlihatkan kartu (mis. 3 kartu teratas Deck) menampilkan SEMUA kartu itu; yang tidak memenuhi syarat
+      // diredupkan dengan keterangan (pr.why). Kartu yang sudah dilihat di sini tidak ditampilkan lagi di panel "Revealed".
+      const list = pr.show && pr.show.length ? pr.show.filter(i => G.inst[i]) : pr.from;
+      if (pr.show) ui.shownKey = list.map(i => G.inst[i].no).join(',');
+      const txt = list.map(i => { const c = S.card(G.inst[i].no); return c && S.textEn(c) ? '<li><b>' + esc(S.nameOf(G, i)) + '</b> — ' + esc(S.textEn(c)) + '</li>' : ''; }).join('');
       openOv('<h3>' + esc(pr.label) + '</h3>' + srcBox + '<p class="small">' + zHead + esc(pr.text) + '</p><p class="small muted">' + (pr.forced ? 'This is the only possible choice. It is already selected: press Confirm.' : 'Choose ' + (pr.min === pr.max ? pr.min : pr.min + '–' + pr.max) + ' card(s).') + '</p><div class="handcards">' +
-        pr.from.map(i => '<div style="text-align:center">' + cardHTML(i, { cls: ui.pick.includes(i) ? 'cost' : '', reveal: true }).replace('data-iid', 'data-pick') + '<div class="pkzone">' + esc(lab(i)) + '</div></div>').join('') + '</div>' +
+        list.map(i => pr.from.includes(i)
+          ? '<div style="text-align:center">' + cardHTML(i, { cls: ui.pick.includes(i) ? 'cost' : '', reveal: true }).replace('data-iid', 'data-pick') + '<div class="pkzone">' + esc(pr.show ? 'can choose' : lab(i)) + '</div></div>'
+          : '<div class="pkno" style="text-align:center">' + cardHTML(i, { reveal: true }).replace('data-iid', 'data-x') + '<div class="pkzone no">' + esc(pr.why || 'cannot be chosen') + '</div></div>').join('') + '</div>' +
         (txt ? '<details class="pktxt"' + (/effect/i.test((pr.text || '') + ' ' + (pr.label || '')) ? ' open' : '') + '><summary>Read the card texts</summary><ul>' + txt + '</ul></details>' : '') +
         '<div class="row"><button class="pri" data-act="pickDone" ' + (okN ? '' : 'disabled') + '>Confirm ' + ui.pick.length + '</button><button data-act="pickHide">👁 Look at the board</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '') + '</div>');
       return;
@@ -1589,6 +1596,7 @@
       }
       case 'dropCallBase': act({ t: 'call', c: ui.sel, to: 'BASE', cost: [] }); return;
       case 'cancel': resetSel(); render(); return;
+      case 'revClose': { const r = $('reveal'); if (r) r.classList.remove('on'); return; }
       case 'peek': if (G.inst[t.dataset.c]) { ui.sel = t.dataset.c; ui.mode = null; ui.cost = []; render(); } return;
       case 'call': case 'ccall': {
         const lv = S.getLv(G, ui.sel);
@@ -1883,6 +1891,30 @@
     el.innerHTML = '<div class="vs">' + one(ia, a, pa, ap, res !== 'win') + '<i>×</i>' + one(id, d, pd, 1 - ap, res !== 'lose') + '</div><b>' + esc(head) + '</b>';
     void el.offsetWidth; el.classList.add('on');
     clearTimeout(ui.flashT); ui.flashT = setTimeout(() => el.classList.remove('on'), 2400);
+  }
+  /* o2.27: panel "Revealed" — kartu yang diperlihatkan efek (Thunder Caller Thor, Genius Burden Iron Man, Rebirth of Einherjar,
+     Gunfire Negotiation) tampil untuk kedua pemain, juga bila tidak ada yang bisa dipilih. Hanya tampilan: tombol Continue
+     menutup panel di perangkat ini dan tidak mengirim aksi. Pemain yang sudah melihat kartu itu di jendela pilihan tidak
+     ditampilkan panel lagi. */
+  function noCardHTML(no) {
+    const c = S.card(no); if (!c) return '';
+    return '<div class="card" style="cursor:default" title="' + esc(S.nameEn(c)) + '"><div class="ph">' + esc(S.nameEn(c)) + '</div>' + imgTag(no) +
+      '<div class="cbar" style="background:' + (COLOR[c.c] || '#888') + '"></div><div class="st"><b>Lv' + c.l + '</b><i>R' + c.r + '</i><span>' + c.p + '</span></div></div>';
+  }
+  function revealCheck(v) {
+    const el = $('reveal'); if (!el) return;
+    if (ui.revN == null || ui.replay || ui.revN > G.log.length) { ui.revN = G.log.length; if (ui.replay) el.classList.remove('on'); return; }
+    const ev = S.logFor(G, v == null ? -1 : v).filter(e => e.n >= ui.revN && e.k === 'reveal' && e.nos && e.nos.length);
+    ui.revN = G.log.length;
+    if (!ev.length) return;
+    const e = ev[ev.length - 1], key = e.nos.join(',');
+    if (ui.shownKey === key) { ui.shownKey = null; return; }
+    const who = e.pp === ui.bottomP && v !== 'all' ? 'You show' : (G.names[e.pp] || '') + ' shows';
+    el.className = 'rvl ' + (e.pp === ui.bottomP ? 'me' : 'op');
+    el.innerHTML = '<div class="rvh"><b>REVEALED</b><span>' + esc(who) + (e.src ? ' · ' + esc(e.src) : '') + '</span></div>' +
+      '<div class="rvc">' + e.nos.map(noCardHTML).join('') + '</div><div class="small muted rvt">Top ' + e.nos.length + ' card' + (e.nos.length > 1 ? 's' : '') + ' of the Deck. Full details in the Play-by-play.</div>' +
+      '<div class="row"><button class="pri sm" data-act="revClose">Continue</button></div>';
+    void el.offsetWidth; el.classList.add('on');
   }
   function flashCheck(v) {
     if (ui.flashN == null || ui.replay) { ui.flashN = G.log.length; return; }

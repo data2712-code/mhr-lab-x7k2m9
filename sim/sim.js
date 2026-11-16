@@ -1116,7 +1116,10 @@
         // (pilihan sudah terisi), kecuali bila efek sudah mulai mengubah status (keamanan resolver lama).
         if (from.length === min && min === max && spec.auto !== false && (!st.confirm || job.mut)) { job.ans[key] = from.slice(); return job.ans[key]; }
         if (job.mut) throw new Error('ask() setelah perubahan status: ' + job.eff);
-        throw new Ask({ key, text: spec.text, from, min, max, p: spec.p == null ? job.p : spec.p, prefer: spec.prefer || 'low', reveal: !!spec.reveal, forced: from.length === min && min === max });
+        // o2.27: `show` = semua kartu yang diperlihatkan efek (mis. 3 kartu teratas Deck), termasuk yang tidak bisa dipilih;
+        // `why` = keterangan untuk kartu yang tidak bisa dipilih. Hanya untuk tampilan, tidak mengubah jawaban/log aksi.
+        throw new Ask(Object.assign({ key, text: spec.text, from, min, max, p: spec.p == null ? job.p : spec.p, prefer: spec.prefer || 'low', reveal: !!spec.reveal, forced: from.length === min && min === max },
+          spec.show ? { show: spec.show.slice(), why: spec.why || '' } : {}));
       },
       yes(key, text) {
         if (!job) throw new Error('yes() di luar job');
@@ -1171,6 +1174,14 @@
       skipBattle(why) { A.mark(); st.cnt.skipBattle = true; log(st, 'eff', plabel(st, st.tp) + ' will skip the Battle Phase this turn' + (why ? ' (' + why + ')' : '') + '.'); },
       immune: i => immuneTo(st, i, self),
       reveal(i) { log(st, 'reveal', plabel(st, st.inst[i].owner) + ' shows ' + nameOf(st, i) + ' (Lv' + printedLv(st, i) + ').'); },
+      // o2.27: memperlihatkan beberapa kartu sekaligus (mis. "show the top 3 cards of your deck") — satu baris log yang membawa
+      // nomor kartunya, supaya kedua pemain bisa melihat panel "Revealed" (juga lawan di online, walau kartunya lalu masuk HAND).
+      showCards(cards, label) {
+        if (!cards.length) return;
+        const o = st.inst[cards[0]].owner;
+        log(st, 'reveal', plabel(st, o) + ' shows ' + (label ? '(' + label + ') ' : '') + cards.map(i => nameOf(st, i) + ' (Lv' + printedLv(st, i) + ')').join(', ') + '.',
+          { nos: cards.map(i => st.inst[i].no), pp: o, src: label || '' });
+      },
       log(txt) { log(st, 'eff', txt); },
       // --- Tahap 2 ---
       pick(key, text, options, p) {                             // pilihan non-kartu (mis. area tujuan)
@@ -2483,7 +2494,9 @@
     return st.log.filter(e => e.priv == null || viewer === 'all' || viewer === e.priv).map(e => {
       let t = e.txt;
       if (e.ptxt && (viewer === 'all' || viewer === e.pp)) t += ' [' + e.ptxt + ']';
-      return { n: e.n, turn: e.turn, k: e.k, txt: t };
+      const r = { n: e.n, turn: e.turn, k: e.k, txt: t };
+      if (e.nos) { r.nos = e.nos.slice(); r.pp = e.pp; r.src = e.src; }   // o2.27: kartu yang diperlihatkan (publik)
+      return r;
     });
   }
   // Total kartu milik p di semua zona (untuk uji invarian).

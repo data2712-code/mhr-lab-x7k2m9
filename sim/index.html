@@ -297,6 +297,17 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .handbar .hand{flex:1;min-width:0}
 /* kilasan Rush Point / waktu habis: tanpa tombol, hilang sendiri */
 .flash{position:absolute;left:50%;top:24%;transform:translate(-50%,-50%) scale(.9);z-index:40;pointer-events:none;opacity:0;padding:12px 28px;border-radius:14px;background:rgba(14,18,22,.92);border:2px solid var(--gold);text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.rvl{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);z-index:45;display:none;max-width:min(94%,440px);padding:10px 14px 12px;border-radius:14px;background:rgba(14,18,22,.96);border:2px solid #cdbcf5;box-shadow:0 10px 40px rgba(0,0,0,.6);text-align:center}
+.rvl.on{display:block}
+.rvl.me{border-color:#4f8fe8} .rvl.op{border-color:#e4442e}
+.rvl .rvh{display:flex;align-items:baseline;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.rvl .rvh b{font-family:var(--disp);font-size:18px;letter-spacing:.08em;color:#cdbcf5}
+.rvl .rvh span{font-size:12.5px;color:#d8d4ca}
+.rvl .rvc{display:flex;justify-content:center;gap:8px;--cw:clamp(64px,22vw,96px)}
+.rvl .rvt{margin-top:6px}
+.rvl .row{justify-content:center;margin-top:8px}
+.pkno .card{opacity:.45;filter:grayscale(.6);cursor:default}
+.pkzone.no{color:#ffb4a8;border-color:#7a3b33;background:rgba(228,68,46,.12)}
 .flash b{display:block;font-family:var(--disp);font-size:30px;font-weight:900;letter-spacing:.06em;color:var(--gold2)}
 .flash small{display:block;font-size:13px;color:#d8d4ca;margin-top:2px}
 .flash.me{border-color:var(--you)}.flash.op{border-color:var(--foe)}.flash.to{border-color:var(--red)}
@@ -949,6 +960,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
       <div id="baseRow" class="baserow"></div>   <!-- riwayat #94: BASE sendiri sebagai baris di HP (diisi sim-ui.js) -->
       <div class="handbar"><div class="plate team l me" id="teamL"></div><div id="handRow" class="hand"></div></div>
       <div class="flash" id="flash"></div>
+      <div class="rvl" id="reveal" aria-live="polite"></div>   <!-- o2.27: panel kartu yang diperlihatkan efek -->
       <div class="otoast" id="otoast"></div>
       <div class="turnban" id="turnban" aria-live="polite"></div>
       <div class="tip" id="tip" role="status"></div>
@@ -986,22 +998,22 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.40-pb02en" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.40-pb02only" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.26"></script>
-<script src="sim-cards.js?v=o2.26"></script>
-<script src="sim-cards-bp01.js?v=o2.26"></script>
-<script src="sim-cards-s4.js?v=o2.26"></script>
-<script src="sim-cards-sp01.js?v=o2.26"></script>
-<script src="sim-cards-t6.js?v=o2.26"></script>
-<script src="sim-bot.js?v=o2.26"></script>
-<script src="sim-sound.js?v=o2.26"></script>
-<script src="sim-shadow.js?v=o2.26"></script>
-<script src="sim-ui.js?v=o2.26"></script>
-<script src="sim-sandbox.js?v=o2.26"></script>
-<script src="sim-report.js?v=o2.26"></script>
-<script src="sim-modes.js?v=o2.26"></script>
-<script src="sim-i18n.js?v=o2.26"></script>
-<script src="sim-online.js?v=o2.26"></script>
-<script src="sim-ranked.js?v=o2.26"></script>
-<script src="sim-updates.js?v=o2.26"></script>
+<script src="sim.js?v=o2.27"></script>
+<script src="sim-cards.js?v=o2.27"></script>
+<script src="sim-cards-bp01.js?v=o2.27"></script>
+<script src="sim-cards-s4.js?v=o2.27"></script>
+<script src="sim-cards-sp01.js?v=o2.27"></script>
+<script src="sim-cards-t6.js?v=o2.27"></script>
+<script src="sim-bot.js?v=o2.27"></script>
+<script src="sim-sound.js?v=o2.27"></script>
+<script src="sim-shadow.js?v=o2.27"></script>
+<script src="sim-ui.js?v=o2.27"></script>
+<script src="sim-sandbox.js?v=o2.27"></script>
+<script src="sim-report.js?v=o2.27"></script>
+<script src="sim-modes.js?v=o2.27"></script>
+<script src="sim-i18n.js?v=o2.27"></script>
+<script src="sim-online.js?v=o2.27"></script>
+<script src="sim-ranked.js?v=o2.27"></script>
+<script src="sim-updates.js?v=o2.27"></script>
 </body>
 </html>

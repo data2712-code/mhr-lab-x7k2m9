@@ -16,6 +16,15 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-16', t: 'improve', v: 'o2.27',
+      en: { h: 'See all the cards an effect shows from your Deck', b: [
+        '「Thunder Caller」Thor, 「Genius Burden」Iron Man, 「Rebirth of Einherjar」 (SD05-005) and the CALL effect of 「Gunfire Negotiation」 (SP01) now show all 3 top cards in the choice window. Cards you cannot take are dimmed, with the reason and where they go.',
+        'When none of the cards can be taken, the 3 cards are still shown in a "Revealed" panel. Your opponent sees the same panel, because these effects show the cards to both players.'] },
+      id: { h: 'Lihat semua kartu yang diperlihatkan efek dari Deck', b: [
+        '「Thunder Caller」Thor, 「Genius Burden」Iron Man, 「Rebirth of Einherjar」 (SD05-005), dan efek CALL 「Gunfire Negotiation」 (SP01) kini menampilkan ketiga kartu teratas di jendela pilihan. Kartu yang tidak bisa diambil diredupkan, lengkap dengan alasan dan tujuannya.',
+        'Bila tidak ada kartu yang bisa diambil, ketiga kartu tetap tampil di panel "Revealed". Lawan melihat panel yang sama, karena efek ini memperlihatkan kartunya ke kedua pemain.'] }
+    },
+    {
       d: '2026-11-16', t: 'rules',
       en: { h: 'Rulings: UNIQUE, ACTI timing and SD05 / SD06 / PB02 cards', b: [
         'UNIQUE checks the full card name, including the title. 「Echo of Fate」Spider-Man and 「The Web of Destiny」Spider-Man have different names, so both may be on your FIELD. Two copies of the same card cannot. (Report #22)',

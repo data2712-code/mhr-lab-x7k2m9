@@ -28,10 +28,11 @@
   const oppBattle = A => A.battleChars(A.opp(A.p));
   const oppChars = A => A.chars(A.opp(A.p));
   // "show the top 3 cards of your deck, add 1 of them with X to your HAND and discard the rest"
-  function lookAdd(A, test, label) {
+  function lookAdd(A, test, label, trait) {
     const top = A.deck(A.p).slice(0, 3);
-    const c = A.ask('c', { text: 'Top 3 cards of your Deck: choose 1 to add to your HAND', from: top.filter(i => test(i)), reveal: true, prefer: 'high' });
-    top.forEach(i => A.reveal(i));
+    const c = A.ask('c', { text: 'Top 3 cards of your Deck (shown to both players): choose 1 with ' + trait + ' to add to your HAND. The rest go to RETREAT.', from: top.filter(i => test(i)), reveal: true, prefer: 'high',
+      show: top, why: 'not ' + trait + ' · to RETREAT' });
+    A.showCards(top, label);
     c.forEach(i => A.toHand(i, label));
     const rest = top.length - c.length;
     if (rest > 0) A.mill(A.p, rest, label);
@@ -262,7 +263,7 @@
       trig: [{
         id: 'called', zone: 'FIELD', label: 'Thunder Caller', when: calledSelf,
         can: A => A.deck(A.p).length > 0,
-        run: A => lookAdd(A, i => isHuman(A, i), 'Thunder Caller')
+        run: A => lookAdd(A, i => isHuman(A, i), 'Thunder Caller', '【Human】')
       }]
     },
     /* 「Top Agent」Black Widow — "【AUTO】 in their effects": teks memuat AUTO, termasuk UNIQUE & COUNTER (RS-029). */
@@ -366,7 +367,7 @@
       trig: [{
         id: 'called', zone: 'FIELD', label: 'Genius Burden', when: calledSelf,
         can: A => A.deck(A.p).length > 0,
-        run: A => lookAdd(A, i => isMachine(A, i), 'Genius Burden')
+        run: A => lookAdd(A, i => isMachine(A, i), 'Genius Burden', '【Machine】')
       }]
     },
     /* 「MK44-The Commander」Hulk Buster — "BATTLE Move" = antar area BATTLE (CR 301.23, keputusan pemilik riwayat #27). */

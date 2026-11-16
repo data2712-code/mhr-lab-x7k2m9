@@ -603,6 +603,19 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.27: efek "show the top 3 cards" menampilkan semua kartunya + panel Revealed untuk kedua pemain — 16 November 2026 *(`sim/sim.js`, `sim/sim-cards-bp01.js`, `sim/sim-cards-sp01.js`, `sim/sim-cards-t6.js`, `sim/sim-ui.js`, `sim/sim-i18n.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #105. Pertanyaan pemilik: efek 「Thunder Caller」Thor / 「Genius Burden」Iron Man tidak menampilkan kartunya dulu.
+- Sebelumnya: jendela pilihan hanya berisi kartu yang memenuhi syarat; bila tidak ada yang cocok, tidak ada jendela sama sekali dan
+  ketiga kartu langsung ke RETREAT (hanya di log). Lawan hanya melihat log.
+- Mesin (`sim.js`, versi tetap 0.14.0): `ask()` meneruskan `show` (semua kartu yang diperlihatkan) + `why` (keterangan kartu yang tidak
+  bisa dipilih) ke prompt; API baru `showCards(cards, label)` = satu baris log `reveal` yang membawa nomor kartu (`nos`, `pp`, `src`),
+  diteruskan `logFor()` (juga ke lawan di online). Urutan aksi/jawaban tidak berubah → log lama tetap bisa diputar ulang.
+- Kartu: BP01-021 Thor & BP01-034 Iron Man (`lookAdd`), SP01-025 「Gunfire Negotiation」 (efek CALL), SD05-005 「Rebirth of Einherjar」.
+- Tampilan: jendela pilihan menampilkan ketiga kartu; yang tidak bisa diambil diredupkan + lencana "not 【Human】 · to RETREAT".
+  Panel **REVEALED** (tombol Continue, hanya di perangkat itu) untuk lawan, dan untuk pemilik efek bila tidak ada kartu yang bisa dipilih.
+- **Server perlu deploy** (mesin berubah). Cache-buster `sim/` → `?v=o2.27`, `SIM_URL` → `?v=o2.27`, `sim-host.js?v=7.41-sim27`.
+
 ### Data — Battle Sim o2.26: Updates & Patch Notes — entri RULES pertama (ruling yang belum diumumkan) — 16 November 2026 *(`sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #104. Permintaan pemilik: perbarui Updates & Patch Notes berdasarkan ruling terbaru yang belum diinformasikan ke pemain.

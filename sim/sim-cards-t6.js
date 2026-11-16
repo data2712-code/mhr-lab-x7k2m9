@@ -142,10 +142,11 @@
         can: A => A.deck(A.p).length > 0,
         run: A => {
           const top = A.deck(A.p).slice(0, 3);
-          top.forEach(i => A.reveal(i));
           const cand = top.filter(i => A.color(i) === ORANGE && A.origLv(i) === 3 && (isHuman(A, i) || isAsgard(A, i)) && A.canPlace(i, A.p));
-          const c = A.ask('c', { text: 'Choose 1 orange Lv3 [Human]/[Asgard] Character among the revealed cards to place into your FIELD', from: cand, prefer: 'high' });
+          const c = A.ask('c', { text: 'Top 3 cards of your Deck (shown to both players): choose 1 orange Lv3 [Human]/[Asgard] Character to place into your FIELD. The rest go to RETREAT.', from: cand, prefer: 'high',
+            reveal: true, show: top, why: 'not orange Lv3 【Human】/【Asgard】 · to RETREAT' });
           const to = c.length ? A.pick('to', 'Choose where to place it', slotOpts(A, A.spots(A.p))) : null;
+          A.showCards(top, 'Rebirth of Einherjar');   // sesudah semua pertanyaan: job diulang dari awal setiap kali ada jawaban
           if (c.length && to) A.place(c[0], to, 'Rebirth of Einherjar');
           const rest = top.filter(i => A.zone(i) === 'DECK').length;
           if (rest) A.mill(A.p, rest, 'Rebirth of Einherjar');
