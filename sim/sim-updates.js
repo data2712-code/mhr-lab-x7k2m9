@@ -16,6 +16,21 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-16', t: 'rules', v: 'o2.28',
+      en: { h: 'Ranked: how points work and fair-play rules', b: [
+        'Ranked Season 0 starts on 23 November 2026. While the community is small, Find a match pairs everyone with everyone, whatever their rank, so meeting the same players often is normal.',
+        'Beating a stronger player gives many points (up to about +44); beating a much weaker player gives few (down to +1). Losing to a weaker player costs more. The full table is under Ranked → How ranked works.',
+        'Games that end before turn 4 (an early concede or leave) give no points and do not count as a game.',
+        'Net points won from the same opponent are limited to +75 per day and +200 per season. Mixed results between regular opponents never reach this limit.',
+        'You cannot win more points than your opponent still has. One account per player.'] },
+      id: { h: 'Ranked: cara poin dihitung dan aturan main adil', b: [
+        'Ranked Season 0 dimulai 23 November 2026. Selama komunitas masih kecil, Cari lawan mempertemukan siapa saja tanpa melihat rank, jadi sering bertemu pemain yang sama itu wajar.',
+        'Mengalahkan pemain yang lebih kuat memberi banyak poin (sampai sekitar +44); mengalahkan pemain yang jauh lebih lemah memberi sedikit (sampai +1). Kalah dari pemain yang lebih lemah mengurangi lebih banyak. Tabel lengkapnya ada di Ranked → Cara kerja ranked.',
+        'Pertandingan yang berakhir sebelum giliran ke-4 (menyerah atau keluar terlalu cepat) tidak memberi poin dan tidak dihitung sebagai pertandingan.',
+        'Poin bersih dari lawan yang sama dibatasi +75 per hari dan +200 per season. Hasil yang saling bergantian antara lawan langganan tidak akan menyentuh batas ini.',
+        'Anda tidak bisa mendapat poin lebih banyak dari sisa poin lawan. Satu akun untuk satu pemain.'] }
+    },
+    {
       d: '2026-11-16', t: 'improve', v: 'o2.27',
       en: { h: 'See all the cards an effect shows from your Deck', b: [
         '「Thunder Caller」Thor, 「Genius Burden」Iron Man, 「Rebirth of Einherjar」 (SD05-005) and the CALL effect of 「Gunfire Negotiation」 (SP01) now show all 3 top cards in the choice window. Cards you cannot take are dimmed, with the reason and where they go.',

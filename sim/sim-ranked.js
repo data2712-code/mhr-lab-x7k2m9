@@ -7,7 +7,7 @@
      - sim_ratings     (publik)      → leaderboard + kartu "Your rank"
      - sim_rating_log  (milik akun)  → perubahan poin di layar hasil
    Aturan (sama dengan SQL dan home-ui.js):
-     - mulai 1000 poin; Elo K = 48, 5 pertandingan pertama tiap season = placement (K = 96); menang min +4, kalah min -4
+     - mulai 1000 poin; Elo K = 48, 5 pertandingan pertama tiap season = placement (K = 96); menang min +1, kalah min -1 (v7.42; dulu ±4); main adil v7.42: lihat NOTE
      - tier: Recruit, Agent, Hero, Avenger, Legend, Myth, Cosmic (divisi III/II/I, 100 poin per divisi; Recruit < 900),
        Genius Burden 2700+ (puncak, tanpa divisi). Ikon: ../images/rank/<tier>.svg (desain orisinal, v7.38)
      - riwayat #96 (pemilik 14 Nov 2026): Season 0 = 23 Nov – 31 Des 2026 (kode 'S00'); Season 1 mulai 1 Jan 2027 (kode 'S01'),
@@ -133,22 +133,49 @@
   }
   function helpHTML() {
     const li = (en, id) => '<li>' + T(en, id) + '</li>';
+    const h4 = (en, id) => '<p class="small" style="margin:10px 0 4px"><b>' + T(en, id) + '</b></p>';
+    const row = (en, id, w, l) => '<tr><td>' + T(en, id) + '</td><td data-noi18n style="text-align:right;color:#9fe0b2">' + w + '</td><td data-noi18n style="text-align:right;color:#ffb4a8">' + l + '</td></tr>';
     return '<details class="box rkhelp"' + (live() ? '' : ' open') + '><summary><b>' + T('How ranked works', 'Cara kerja ranked') + '</b></summary>' +
+      h4('Who you play', 'Siapa lawan Anda') +
       '<ul class="small">' +
       li('Only <b>Find a match</b> games count. Private rooms and games against the bot are casual.',
          'Hanya pertandingan <b>Cari lawan</b> yang dihitung. Room privat dan pertandingan melawan bot bersifat santai (casual).') +
-      li('Everyone starts at <b>1,000 points</b>. Beating a higher-rated player gives more points; losing to a lower-rated player costs more. Against an equal opponent a win is about +24.',
-         'Semua pemain mulai dari <b>1.000 poin</b>. Mengalahkan pemain berpoin lebih tinggi memberi poin lebih banyak; kalah dari pemain berpoin lebih rendah mengurangi lebih banyak. Melawan lawan setara, menang bernilai sekitar +24.') +
+      li('The community is still small, so the queue matches everyone with everyone, whatever their rank, to keep waiting times short. You will often meet the same players; that is normal.',
+         'Komunitas masih kecil, jadi antrean mempertemukan siapa saja tanpa melihat rank supaya waktu tunggu tetap singkat. Bertemu pemain yang sama berkali-kali itu wajar.') +
+      '</ul>' +
+      h4('How points move', 'Cara poin dihitung') +
+      '<ul class="small">' +
+      li('Everyone starts at <b>1,000 points</b>. Points depend on the gap between you and your opponent: beating a stronger player gives many points, beating a weaker player gives few, and losing to a weaker player costs more.',
+         'Semua pemain mulai dari <b>1.000 poin</b>. Poin bergantung pada selisih poin Anda dengan lawan: mengalahkan pemain yang lebih kuat memberi banyak poin, mengalahkan pemain yang lebih lemah memberi sedikit, dan kalah dari pemain yang lebih lemah mengurangi lebih banyak.') +
       li('Your first <b>5 games</b> each season are placement games: points move twice as fast.',
          '<b>5 pertandingan</b> pertama di setiap season adalah placement: poin naik-turun dua kali lebih cepat.') +
       li('Conceding, leaving or the 3rd timeout counts as a loss.',
          'Menyerah, keluar, atau kehabisan waktu ke-3 kalinya dihitung kalah.') +
+      '</ul>' +
+      '<table class="small" style="width:100%;border-collapse:collapse;margin:4px 0 6px"><tr><th style="text-align:left">' + T('Your opponent', 'Lawan Anda') + '</th><th style="text-align:right">' + T('Win', 'Menang') + '</th><th style="text-align:right">' + T('Loss', 'Kalah') + '</th></tr>' +
+      row('400 points higher', '400 poin di atas Anda', '+44', '−4') +
+      row('200 points higher', '200 poin di atas Anda', '+36', '−12') +
+      row('Same points', 'Poin sama', '+24', '−24') +
+      row('200 points lower', '200 poin di bawah Anda', '+12', '−36') +
+      row('400 points lower', '400 poin di bawah Anda', '+4', '−44') +
+      '</table><p class="small muted" style="margin:0 0 6px">' + T('After placement. A win always gives at least +1.', 'Setelah placement. Menang selalu memberi minimal +1.') + '</p>' +
+      h4('Fair play', 'Main adil') +
+      '<ul class="small">' +
+      li('A game that ends before <b>turn 4</b> (an early concede or leave) gives no points and does not count as a game.',
+         'Pertandingan yang berakhir sebelum <b>giliran ke-4</b> (menyerah atau keluar terlalu cepat) tidak memberi poin dan tidak dihitung sebagai pertandingan.') +
+      li('The net points you can win from the <b>same opponent</b> are limited to <b>+75 per day</b> (WIB) and <b>+200 per season</b>. After that, wins against that player give fewer or no points, and their losses cost them fewer or none. Playing each other often with mixed results never reaches the limit.',
+         'Poin bersih yang bisa Anda dapat dari <b>lawan yang sama</b> dibatasi <b>+75 per hari</b> (WIB) dan <b>+200 per season</b>. Setelah itu, menang melawan pemain itu memberi poin lebih sedikit atau 0, dan kekalahannya juga mengurangi lebih sedikit atau 0. Sering bertemu dengan hasil yang saling bergantian tidak akan menyentuh batas ini.') +
+      li('You cannot win more points than your opponent still has.',
+         'Anda tidak bisa mendapat poin lebih banyak dari sisa poin lawan.') +
+      li('One account per player. Duplicate accounts or arranged results can lead to disqualification from season rewards.',
+         'Satu akun untuk satu pemain. Akun ganda atau hasil yang diatur bisa membuat pemain didiskualifikasi dari hadiah season.') +
+      '</ul>' +
+      h4('Tiers and seasons', 'Tier dan season') +
+      '<ul class="small">' +
       li('Tiers: Recruit · Agent (900) · Hero (1,200) · Avenger (1,500) · Legend (1,800) · Myth (2,100) · Cosmic (2,400), each with divisions III, II and I (100 points each), and the top tier <b>Genius Burden</b> (2,700+).',
          'Tier: Recruit · Agent (900) · Hero (1.200) · Avenger (1.500) · Legend (1.800) · Myth (2.100) · Cosmic (2.400), masing-masing dengan divisi III, II, dan I (100 poin per divisi), dan tier puncak <b>Genius Burden</b> (2.700+).') +
       li('Season 0 runs from 23 November to 31 December 2026. Season 1 starts on 1 January 2027; its length will be announced once the 2027 set release date is known. At each new season your points move halfway back toward 1,000 and you play 5 new placement games.',
          'Season 0 berlangsung 23 November sampai 31 Desember 2026. Season 1 dimulai 1 Januari 2027; lamanya diumumkan setelah tanggal rilis set 2027 diketahui. Di awal season baru, poin Anda bergeser setengah jalan kembali ke 1.000 dan Anda bermain 5 pertandingan placement lagi.') +
-      li('While there are few players, the queue matches everyone with everyone; the points system keeps it fair.',
-         'Selama pemain masih sedikit, antrean mempertemukan siapa saja dengan siapa saja; sistem poin menjaga hasilnya tetap adil.') +
       '</ul></details>';
   }
 
@@ -176,7 +203,8 @@
     resCache[matchId] = null;
     for (let i = 0; i < 4; i++) {       // trigger berjalan di transaksi yang sama, tetapi beri jeda bila koneksi lambat
       try {
-        const r = await c.from('sim_rating_log').select('result,before,delta,after,placement,season').eq('match_id', matchId).eq('user_id', s.userId).maybeSingle();
+        let r = await c.from('sim_rating_log').select('result,before,delta,after,placement,season,note').eq('match_id', matchId).eq('user_id', s.userId).maybeSingle();
+        if (r.error && /note/.test(r.error.message || '')) r = await c.from('sim_rating_log').select('result,before,delta,after,placement,season').eq('match_id', matchId).eq('user_id', s.userId).maybeSingle();   // kolom note belum ada (SQL v7.42 belum dijalankan)
         if (r.error) return null;
         if (r.data) {
           const g = await c.from('sim_ratings').select('points,games').eq('season', r.data.season).eq('user_id', s.userId).maybeSingle();
@@ -187,11 +215,22 @@
     }
     return (resCache[matchId] = false);   // bukan pertandingan ranked (room privat)
   }
+  /* v7.42 (riwayat #105) main adil: alasan di kolom sim_rating_log.note. 'short' = ±0 dan tidak dihitung; batas pasangan dan
+     'zero' = poin dikurangi (bisa sampai 0) tetapi pertandingan tetap dihitung. */
+  const NOTE = {
+    short: ['Not counted: the game ended before turn 4.', 'Tidak dihitung: pertandingan berakhir sebelum giliran ke-4.'],
+    pair_day: ['Limited: you reached today\'s +75 limit against this opponent.', 'Dibatasi: batas +75 poin dari lawan ini hari ini sudah tercapai.'],
+    pair_season: ['Limited: you reached this season\'s +200 limit against this opponent.', 'Dibatasi: batas +200 poin dari lawan ini di season ini sudah tercapai.'],
+    zero: ['Limited: your opponent had no more points to lose.', 'Dibatasi: poin lawan sudah habis.']
+  };
   function resultHTML(x) {
     if (!x) return '';
+    const n = x.note ? (NOTE[x.note] || ['Limited by the fair-play rules.', 'Dibatasi aturan main adil.']) : null;
+    if (x.note === 'short') return '<div class="rkres"><span class="rktag">RANKED</span><b data-noi18n>±0</b> <span>' + T(n[0], n[1]) + '</span></div>';
     const t = tier(x.after, x.games), up = x.delta > 0;
-    return '<div class="rkres' + (up ? ' up' : x.delta < 0 ? ' down' : '') + '"><span class="rktag">RANKED</span><b data-noi18n>' + (up ? '+' : '') + x.delta + '</b> <span>' + T('points', 'poin') + '</span> → <b data-noi18n>' + fmt(x.after) + '</b> ' + badge(t, true) +
-      (x.games < PLACEMENT ? ' <span class="small">placement ' + x.games + '/' + PLACEMENT + '</span>' : '') + '</div>';
+    return '<div class="rkres' + (up ? ' up' : x.delta < 0 ? ' down' : '') + '"><span class="rktag">RANKED</span><b data-noi18n>' + (up ? '+' : x.delta === 0 ? '±' : '') + x.delta + '</b> <span>' + T('points', 'poin') + '</span> → <b data-noi18n>' + fmt(x.after) + '</b> ' + badge(t, true) +
+      (x.games < PLACEMENT ? ' <span class="small">placement ' + x.games + '/' + PLACEMENT + '</span>' : '') +
+      (n ? '<div class="small muted">' + T(n[0], n[1]) + '</div>' : '') + '</div>';
   }
 
   function tr() { if (window.MHRSimI18N) window.MHRSimI18N.apply(); }

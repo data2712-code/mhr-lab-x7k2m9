@@ -603,6 +603,22 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.28: ranked main adil (anti-farming) + penjelasan mekanisme poin — 16 November 2026 *(`sim/sim-ranked.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`; SQL baru `mhr_decklab_v742_sim_ranked_antifarm.sql` di folder internal)*
+
+Riwayat simulator #107 (dikerjakan bersamaan dengan o2.27 dari device lain). Hadiah Season 0 (1 Booster Box BP02 untuk poin tertinggi) bisa memancing farming poin dengan teman. Karena
+komunitas masih kecil, antrean tetap tanpa batas rank dan bertemu lawan yang sama itu wajar; yang dibatasi adalah poin satu arah:
+- berakhir **sebelum giliran ke-4** → ±0, tidak dihitung;
+- poin **bersih dari lawan yang sama** maks. **+75/hari (WIB)** dan **+200/season** (kekalahan lawan ikut dikurangi);
+- pemenang tidak bisa mendapat lebih dari sisa poin lawan; menang/kalah minimal **±1** (dulu ±4);
+- Elo tetap: rank rendah mengalahkan rank tinggi = poin besar (sampai ±44), sebaliknya kecil.
+- **Battle Sim** menjelaskan semuanya di Ranked → "Cara kerja ranked" (EN/ID, tabel contoh poin), layar hasil menampilkan alasan bila
+  poin dibatasi, entri RULES di Updates & Patch Notes.
+- **SQL `mhr_decklab_v742_sim_ranked_antifarm.sql` dijalankan di Supabase sebelum push** (kolom `sim_rating_log.note`, `mhr_sim_rank_apply`
+  baru, `mhr_sim_rank_suspects(season)` untuk peninjauan admin). Diuji di Postgres 16 lokal.
+- Syarat hadiah Season 0: minimal 20 pertandingan berpoin, 1 akun per pemain, tie-break menang terbanyak lalu yang lebih dulu mencapai
+  poin itu, pengumuman ±2 Jan 2027, kirim ke alamat di Indonesia setelah BP02 tersedia; riwayat pertandingan pemenang ditinjau admin.
+- Mesin & server tidak berubah. Cache-buster `sim/` → `?v=o2.28`, `SIM_URL` → `?v=o2.28`, `sim-host.js?v=7.41-sim28`.
+
 ### Data — Battle Sim o2.27: efek "show the top 3 cards" menampilkan semua kartunya + panel Revealed untuk kedua pemain — 16 November 2026 *(`sim/sim.js`, `sim/sim-cards-bp01.js`, `sim/sim-cards-sp01.js`, `sim/sim-cards-t6.js`, `sim/sim-ui.js`, `sim/sim-i18n.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #105. Pertanyaan pemilik: efek 「Thunder Caller」Thor / 「Genius Burden」Iron Man tidak menampilkan kartunya dulu.
