@@ -16,6 +16,15 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-17', t: 'improve', v: 'o2.30', reports: [27],
+      en: { h: 'Choose an area for an effect by tapping the board', b: [
+        'When an effect asks where to place a card (for example 「Spider-Archenemy」Morbius from RETREAT), the possible areas now glow on the board and you can tap them, just like a CALL. The buttons in the panel still work.',
+        'If an area is still taken by a card that leaves because of the same effect, its button says so (for example "Falcon leaves first").'] },
+      id: { h: 'Pilih area untuk efek dengan mengetuk papan', b: [
+        'Saat efek menanyakan tempat untuk sebuah kartu (misalnya 「Spider-Archenemy」Morbius dari RETREAT), area yang bisa dipilih kini menyala di papan dan bisa diketuk, sama seperti CALL. Tombol di panel tetap bisa dipakai.',
+        'Bila area itu masih terisi kartu yang akan keluar karena efek yang sama, tombolnya menuliskannya (misalnya "Falcon keluar lebih dulu").'] }
+    },
+    {
       d: '2026-11-17', t: 'improve', v: 'o2.29', reports: [26],
       en: { h: 'Play-by-play replaces the Timeline, and a better layout for short desktop screens', b: [
         'Desktop: the Timeline box on the board is gone. The Play-by-play now shows what each line is (ATTACK, EFFECT, CALL …), marks what happened since your last move as NEW, and shows who is acting and your CALL / Deploy / COUNTER CALL limits at the top.',

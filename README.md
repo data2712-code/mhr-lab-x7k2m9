@@ -604,6 +604,19 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.30: efek yang menanyakan area — area menyala di papan & bisa diketuk (laporan #27) — 17 November 2026 *(`sim/sim-ui.js`, `sim/sim-i18n.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #109. Laporan #27 (bug, custom, desktop 1440×765): "Morbius effect but not come to battle". Log diputar ulang: ACTI
+「Spider-Archenemy」Morbius (SP01-076) dari RETREAT sudah memilih Falcon untuk di-retreat lalu menunggu pertanyaan kedua "Choose an
+empty area in your BATTLE" (WING 2 / BACK); log berhenti di sana. Mesin benar (memilih W2 atau B → Falcon ke RETREAT, Morbius ke
+BATTLE). Penyebab kebingungan: pilihan area efek hanya berupa tombol di panel, area di papan tidak menyala/tidak bisa diketuk (beda
+dengan CALL), dan WING 2 masih terisi Falcon saat ditanya.
+- `sim-ui.js`: `pickSlots()` — prompt `pick` yang semua pilihannya area (FRONT/WING/BACK/BASE) → area milik pemain itu menyala
+  (`.slot.hl.pickhl`, juga BASE) dan bisa diketuk (`onSlot` → aksi `pick`); tombol panel tetap, ditambah keterangan "<kartu> leaves
+  first" bila area masih terisi; petunjuk "Tap a glowing area on the board, or a button." Berlaku untuk semua efek yang menanyakan area.
+- Preview disetujui pemilik 17 Nov 2026. Hanya tampilan; mesin & server tidak berubah (tidak perlu deploy). Cache-buster `sim/` →
+  `?v=o2.30`, `SIM_URL` → `?v=o2.30`, `sim-host.js?v=7.41-sim30`.
+
 ### Data — Battle Sim o2.29: Timeline digabung ke Play-by-play (desktop) + tata letak layar desktop pendek (laporan #26) — 17 November 2026 *(`sim/sim-ui.js`, `sim/sim-i18n.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #108. Laporan #26 (feedback, desktop 1280×497): jendela pilih target & pilihan respons terlalu kecil (harus di-scroll)

@@ -287,6 +287,7 @@
     [/^(.+)'S BASE · (\d)\/6$/, 'BASE $1 · $2/6'],
     [/^HAND · (.+)$/, 'HAND · $1'],
     [/^Top (\d+) cards? of the Deck\. Full details in the Play-by-play\.$/, '$1 kartu teratas Deck. Rincian lengkap di Jalannya permainan.'],
+    [/^(.+) leaves first$/, '$1 keluar lebih dulu'], [/^Tap a glowing area, or use the buttons in the panel\.$/, 'Ketuk area yang menyala, atau pakai tombol di panel.'],
     [/^(\d+) new since your last move$/, '$1 baru sejak langkah terakhir Anda'],
     [/^You show(.*)$/, 'Anda memperlihatkan$1'], [/^(.+) shows · (.+)$/, '$1 memperlihatkan · $2'],
     [/^not (【[^】]+】(?:\/【[^】]+】)?) · to (RETREAT|VOID)$/, 'bukan $1 · ke $2'], [/^not orange Lv3 (.+) · to RETREAT$/, 'bukan Lv3 oranye $1 · ke RETREAT'],

@@ -1053,9 +1053,11 @@
     const planA = isTop ? (atkMode && ui.atk ? ui.atk : rtMode ? G.prompt.a : null) : null;
     const plan = planA ? attackPlan(planA) : null;
     const cur = G.bt && G.bt.cur && G.win && G.win.kind === 'step' && p !== G.tp ? G.bt.cur : null;
+    const ps = pickSlots();
     const slots = S.SLOTS.map(s => {
       const iid = bat[s];
       let cls = 'slot';
+      if (ps && p === ps.p && ps.vals.includes(s)) cls += ' hl pickhl';
       if (tgSlots.includes(s)) cls += ' tg' + (ui.tg === s ? ' pick' : '');
       if (G.bt && G.bt.cur && p !== G.tp && G.bt.cur.slot === s) cls += ' under';
       if (destMode && destOk(s)) cls += ' hl';
@@ -1071,7 +1073,7 @@
       else if (cur && cur.slot === s) { const pl = attackPlan(cur.a, true)[s]; inner += '<div class="oc under">UNDER ATTACK' + (pl ? '<small>if both pass: ' + esc(pl.a) + '</small>' : '') + '</div>'; }
       return '<div class="' + cls + '" data-slot="' + s + '" data-side="' + side + '"><span class="sl">' + S.SLOT_NAME[s] + '</span>' + inner + '</div>';
     }).join('');
-    const baseHl = destMode && destOk('BASE');
+    const baseHl = (destMode && destOk('BASE')) || (pickSlots() && p === pickSlots().p && pickSlots().vals.includes('BASE'));
     const base = [];
     for (let k = 0; k < S.BASE_MAX; k++) {
       const iid = P.base[k];
@@ -1149,7 +1151,11 @@
       case 'choose':
         return '<button class="pri" data-act="openPick">Choose cards…</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'pick':
-        return pr.options.map(o => '<button data-act="pickOpt" data-v="' + esc(o.v) + '">' + esc(o.label) + '</button>').join('') + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
+        return pr.options.map(o => {
+          // Laporan #27 (o2.30): area yang sekarang masih terisi kartu yang akan keluar karena efek ini → keterangan.
+          const occ = (S.SLOTS.includes(o.v) && G.P[pr.p].bat[o.v]) || null;
+          return '<button data-act="pickOpt" data-v="' + esc(o.v) + '">' + esc(o.label) + (occ ? '<small>' + esc(S.nameOf(G, occ)) + ' leaves first</small>' : '') + '</button>';
+        }).join('') + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'retarget': return airButtons(pr.a) || retargetButtons(pr.a);
       case 'rps':
         return [['rock', '✊ Rock'], ['paper', '✋ Paper'], ['scissors', '✌ Scissors']].map(([v, l]) => '<button class="pri rpsb" data-act="rps" data-v="' + v + '">' + l + '</button>').join('');
@@ -1441,7 +1447,7 @@
         ? esc(who) + ': new effects triggered while an earlier effect of yours is still waiting. Resolve the new group first, or choose the earlier one now (304.1.f, RS-016).'
         : esc(who) + ': several effects triggered at the same time. Choose which resolves first (304.1.f).';
       case 'choose': return '<b>' + esc(pr.label) + '</b> · ' + esc(pr.text) + ' (' + (pr.min === pr.max ? pr.min : pr.min + '–' + pr.max) + ')';
-      case 'pick': return '<b>' + esc(pr.label) + '</b> · ' + esc(pr.text);
+      case 'pick': return '<b>' + esc(pr.label) + '</b> · ' + esc(pr.text) + (pickSlots() ? '. Tap a glowing area on the board, or a button.' : '');
       case 'retarget': return esc(who) + ': the original Attack Target is no longer valid. Choose a new red target for ' + esc(S.nameOf(G, pr.a)) + ' (303.2.a.4.3.2.2).' + (S.hasAbility(G, pr.a, 'air') ? ' It has AIR STRIKE: an occupied area can be attacked as a Weakness.' : '');
       case 'discard': return esc(who + ': discard ' + pr.n + ' card(s) (HAND limit 9).');
       case 'rps': return '<b>' + esc(who) + '</b>: ' + esc('match time is up and Rush Points and Deck are tied. Choose Rock, Paper or Scissors' + (pr.round > 1 ? ' (round ' + pr.round + ')' : '') + '. Your choice is shown only after both players have chosen.');
@@ -1672,7 +1678,7 @@
     }
     // klik kartu di dalam slot saat memilih tujuan/target/atur → teruskan ke slot
     const slotEl = e.target.closest('[data-slot]');
-    if (slotEl && (ui.mode === 'call-dest' || ui.mode === 'move-dest' || (myTurnPrompt('attack') && ui.atk && slotEl.dataset.side === 'top') || (myTurnPrompt('retarget') && slotEl.dataset.side === 'top') || myTurnPrompt('arrange'))) {
+    if (slotEl && (pickSlots() || ui.mode === 'call-dest' || ui.mode === 'move-dest' || (myTurnPrompt('attack') && ui.atk && slotEl.dataset.side === 'top') || (myTurnPrompt('retarget') && slotEl.dataset.side === 'top') || myTurnPrompt('arrange'))) {
       return onSlot(slotEl.dataset.slot, slotEl.dataset.side);
     }
     if (myTurnPrompt('attack') && S.attackersNow(G).includes(iid)) { ui.atk = iid; ui.tg = null; ui.sel = null; render(); return; }
@@ -1681,7 +1687,20 @@
     ui.sel = ui.sel === iid ? null : iid; ui.mode = null; ui.cost = [];
     render();
   }
+  /* Laporan #27 (o2.30): efek yang menanyakan AREA (mis. 「Spider-Archenemy」Morbius: "Choose an empty area in your BATTLE")
+     — area pilihannya menyala di papan dan bisa diketuk, sama seperti CALL. Tombol di panel tetap ada. */
+  function pickSlots() {
+    if (!G || !myTurnPrompt('pick')) return null;
+    const pr = G.prompt, vals = (pr.options || []).map(o => o.v).filter(v => S.SLOTS.includes(v) || v === 'BASE');
+    return vals.length && vals.length === pr.options.length ? { p: pr.p, vals } : null;
+  }
   function onSlot(slot, side) {
+    const ps = pickSlots();
+    if (ps) {
+      const mine = (side === 'bottom') === (ui.bottomP === ps.p);
+      if (mine && ps.vals.includes(slot)) { act({ t: 'pick', v: slot }); return; }
+      tip('Tap a glowing area, or use the buttons in the panel.'); return;
+    }
     if (ui.mode === 'call-cost') {
       if (side !== 'bottom') { tip("That is your opponent's side. Tap a glowing area on your side."); return; }
       if (!costReady()) { tip('First choose the cost: total Lv ' + costSum() + '/' + costNeed() + '.'); return; }
