@@ -286,8 +286,7 @@
       <div class="bd-shelf">${list.map(bookHTML).join('')}
         ${list.length < MAX_BINDERS ? `<button type="button" class="bd-book bd-new" data-bact="new">＋ New binder<small>Blank pages or a whole set</small></button>` : ''}</div>
       ${list.length >= MAX_BINDERS ? `<p class="auth-note">You have reached the limit of ${MAX_BINDERS} binders.</p>` : ''}
-      ${isAccountAdmin ? '<div class="bd-admin" id="bdAdmin"><b>🛡 Binder reports</b> <span class="bd-mut">Loading…</span></div>' : ''}`;
-    if(isAccountAdmin) renderAdmin();
+`;   /* v7.44 — Binder reports pindah ke 🗼 Control Tower (tower.js) */
   }
 
   /* ---------- buat binder ---------- */
@@ -1000,12 +999,16 @@
         <div class="bd-btns">${r.hidden ? `<button type="button" class="btn2" data-badm="unhide" data-bid="${E(r.id)}">Show again (reports were wrong)</button>` : `<button type="button" class="btn2 bd-red" data-badm="hide" data-bid="${E(r.id)}">Hide binder</button><button type="button" class="btn2" data-badm="dismiss" data-bid="${E(r.id)}">Dismiss reports</button>`}</div></div>`).join('');
   }
 
+  /* v7.44 — tombol Hide / Show again di Binder reports (Control Tower) */
+  document.addEventListener('click', e=>{
+    const adm = e.target.closest('#bdAdmin [data-badm]'); if(!adm) return;
+    (async ()=>{ adm.disabled = true; const { error } = await API().adminModerate(adm.dataset.bid, adm.dataset.badm); if(error) alert(errMsg(error)); renderAdmin(); })();
+  });
+
   /* ---------- event dashboard ---------- */
   document.addEventListener('click', e=>{
     const w = q1('#bindWrap'); if(!w || !w.contains(e.target)) return;
     const op = e.target.closest('[data-bopen]'); if(op){ openBinder(op.dataset.bopen, false); return; }
-    const adm = e.target.closest('[data-badm]');
-    if(adm){ (async ()=>{ adm.disabled = true; const { error } = await API().adminModerate(adm.dataset.bid, adm.dataset.badm); if(error) alert(errMsg(error)); renderAdmin(); })(); return; }
     const pg = e.target.closest('[data-bpg]'); const pgto = e.target.closest('[data-bpgto]');
     if((pg || pgto) && S.cur){
       const per = perSpread(); const nSp = Math.ceil(S.cur.pages / per);
@@ -1514,7 +1517,7 @@
   }
   window.binderCodeFromHash = h => { const m = /^#binder\/([A-Za-z0-9]{6,32})$/.exec(h || ''); return m ? m[1] : null; };
   window.MHRBindersUI = {
-    renderTab, refresh, renderPage,
+    renderTab, refresh, renderPage, renderAdmin,
     reset(){ S.list = null; S.cur = null; S.edit = false; S.err = null; },
     _state: S, _renderPageImage: renderPageImage,
   };

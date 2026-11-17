@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR DECK LAB — admin-roles.js (v7.33)
+   MHR DECK LAB — admin-roles.js (v7.33; v7.44 — pindah ke 🗼 Control Tower)
    ===================================================================
    Peran SUPER-ADMIN (tertinggi) + layar "Admin roles" untuk memberi /
    mencabut peran admin akun lain. Permintaan pemilik 11 Nov 2026:
@@ -18,6 +18,10 @@
    - Skema: mhr_decklab_v733_super_admin.sql (folder internal).
    Dipanggil ulang dari refreshAccountUI() (index.html) lewat
    window.refreshAdminRoles() tiap kali status login berubah.
+   v7.44 — menu di My Lab dihapus. Layar Admin roles kini digambar di tab
+   "👑 Admin roles" halaman 🗼 Control Tower (tower.js) lewat renderInto(el),
+   bukan modal. Status isSuper juga menentukan tampil/tidaknya menu Control
+   Tower (window.refreshTower).
    =================================================================== */
 (function(){
   'use strict';
@@ -46,24 +50,11 @@
       return !error && !!data;
     }catch(e){ return false; }
   }
-  /* item menu My Lab (disisipkan sekali, disembunyikan kalau bukan super-admin) */
-  function ensureItem(){
-    const menu = document.getElementById('labMenu'); if(!menu) return null;
-    let box = document.getElementById('labSuper');
-    if(!box){
-      box = document.createElement('div'); box.id = 'labSuper'; box.className = 'lab-grid lab-super'; box.hidden = true;
-      box.innerHTML = `<button type="button" role="menuitem" data-labact="roles"><span class="lab-ic">👑</span><span class="lab-tx"><b>Admin roles</b><small>Super-admin · give or remove admin access</small></span></button>`;
-      const foot = document.getElementById('labFoot');
-      menu.insertBefore(box, foot || null);
-      box.addEventListener('click', e=>{ if(!e.target.closest('[data-labact="roles"]')) return; if(window.closeLabMenu) window.closeLabMenu(); open(); });
-    }
-    return box;
-  }
   window.refreshAdminRoles = async function(){
     isSuper = await check();
-    const box = ensureItem(); if(box) box.hidden = !isSuper;
+    { const old = document.getElementById('labSuper'); if(old) old.remove(); }   // sisa menu lama (v7.33)
     window.MHRAdminRoles.isSuper = isSuper;
-    if(!isSuper){ const m = document.querySelector('#mxModal .ar-mx'); if(m && typeof mxClose === 'function') mxClose(); }
+    if(window.refreshTower) window.refreshTower();   // v7.44 — menu & halaman 🗼 Control Tower
   };
 
   /* ---------------- layar Admin roles ---------------- */
@@ -115,13 +106,12 @@
     if(had){ const q = document.getElementById('arQ'); if(q){ q.focus(); try{ q.setSelectionRange(pos, pos); }catch(e){} } }
   }
   let tmr = 0;
-  function open(){
-    if(!isSuper || typeof mxOpen !== 'function') return;
+  function renderInto(el){
+    if(!el || !isSuper) return;
     Object.assign(S, { list:null, err:'', q:'', res:null, msg:'', arm:null });
-    const m = mxOpen(`<h3>👑 Admin roles</h3><p class="ar-mut">Only super-admins see this. Admins can use every admin tool on the site (News, Weekly Rush LGS, tournaments, Battle Sim, usage stats, binder reports). Changes apply the next time that person opens the site.</p><div id="arBody"></div>`, 'ar-mx');
-    const box = m.querySelector('.mx-box');
-    box.addEventListener('input', e=>{ if(e.target.id !== 'arQ') return; const v = e.target.value; S.arm = null; S.msg = ''; clearTimeout(tmr); tmr = setTimeout(()=>search(v), 250); });
-    box.addEventListener('click', e=>{
+    el.innerHTML = '<div id="arBody"></div>';
+    el.addEventListener('input', e=>{ if(e.target.id !== 'arQ') return; const v = e.target.value; S.arm = null; S.msg = ''; clearTimeout(tmr); tmr = setTimeout(()=>search(v), 250); });
+    el.addEventListener('click', e=>{
       const b = e.target.closest('[data-ar]'); if(!b) return;
       const key = (b.dataset.ar === 'grant' ? 'gr:' : 'rv:') + b.dataset.u;
       if(S.arm !== key){ S.arm = key; S.msg = ''; draw(); return; }      // klik pertama = minta konfirmasi
@@ -129,7 +119,7 @@
     });
     draw(); load();
   }
-  window.MHRAdminRoles = { isSuper:false, open, refresh: () => window.refreshAdminRoles() };
+  window.MHRAdminRoles = { isSuper:false, renderInto, refresh: () => window.refreshAdminRoles() };
   /* jaga-jaga kalau refreshAccountUI sudah jalan sebelum berkas ini dimuat */
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ()=>window.refreshAdminRoles());
   else window.refreshAdminRoles();

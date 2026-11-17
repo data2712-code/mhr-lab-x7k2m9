@@ -18,7 +18,7 @@
        mhr_decklab_v725_usage.sql; nama di luar daftar diabaikan (klien & server).
      • Kalau migrasi v7.25 belum dijalankan (RPC belum ada), pencatatan berhenti
        diam-diam untuk sesi ini — situs tidak terganggu.
-   Laporan (khusus admin) — kartu "📊 Usage" di My Lab: renderAdmin(el) memanggil
+   Laporan (khusus admin) — v7.44: tab "📊 Usage" di 🗼 Control Tower (tower.js, super-admin); renderAdmin(el) memanggil
    RPC mhr_usage_report (ditolak server untuk akun non-admin).
    Berkas ini tanpa ketergantungan DOM selain renderAdmin(); dimuat sesudah auth.js.
    =================================================================== */

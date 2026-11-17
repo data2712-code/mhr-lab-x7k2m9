@@ -168,15 +168,17 @@
     w.innerHTML = `<div class="ev-head"><h2 class="nw-title">Events</h2>
       <p class="nw-lead">Swiss tournaments run by local game stores and players. Register online and follow pairings and standings live. Anyone with an account can create an event.</p>
       <div class="ev-actions">${V.me ? `<button class="nw-btn ev-main" data-ev="new">＋ New event</button>` : `<button class="nw-btn ev-main" data-ev="login">👤 Log in to create an event</button>`}</div></div>
-      ${isAdmin() ? `<div class="ev-admin" id="evAdmin"><b>🛡 Verified organizers</b> <span class="ev-muted">Every account can create events (max 10 unfinished). Verified organizers have no limit and can publish Top-cut decks to Tournament Decks.</span><div id="evOrgList" class="ev-muted">Loading…</div>
-        <div class="ev-row"><input id="evOrgUser" placeholder="Username"><input id="evOrgLgs" placeholder="Store name (LGS)"><button class="btn2" data-ev="orgAdd">Add organizer</button></div></div>` : ''}
       ${sec('🔴 Live now', grp('running'))}
       ${sec('📣 Registration open', grp('registration'))}
       ${sec('📝 Drafts', mine, '<span class="ev-muted">Only you can see these</span>')}
       ${sec('🏁 Finished', grp('finished'))}
       ${data.length ? '' : `<div class="ev-empty">No events yet.${V.me ? ' Create the first one with “＋ New event”.' : ' Check back soon, or log in to create the first one.'}</div>`}`;
-    if(isAdmin()) renderOrganizers();
   }
+  /* v7.44 — Verified organizers pindah ke 🗼 Control Tower (tower.js, super-admin) */
+  window.MHREventsAdmin = {
+    render(el){ if(!el) return; el.innerHTML = `<div class="ev-admin" id="evAdmin"><b>🛡 Verified organizers</b> <span class="ev-muted">Every account can create events (max 10 unfinished). Verified organizers have no limit and can publish Top-cut decks to Tournament Decks.</span><div id="evOrgList" class="ev-muted">Loading…</div>
+        <div class="ev-row"><input id="evOrgUser" placeholder="Username"><input id="evOrgLgs" placeholder="Store name (LGS)"><button class="btn2" data-ev="orgAdd">Add organizer</button></div></div>`; renderOrganizers(); },
+  };
   async function renderOrganizers(){
     const box = q('#evOrgList'); if(!box) return;
     const { data, error } = await API().listOrganizers();
@@ -758,7 +760,7 @@
   };
 
   document.addEventListener('click', async e=>{
-    if(!e.target.closest('#eventPage')) return;
+    if(!e.target.closest('#eventPage') && !e.target.closest('#evAdmin')) return;   // v7.44: #evAdmin kini di Control Tower
     const b = e.target.closest('[data-ev]');
     if(b){ e.preventDefault(); const h = handlers[b.dataset.ev]; if(h) h(b); return; }
     const tab = e.target.closest('[data-evtab]');

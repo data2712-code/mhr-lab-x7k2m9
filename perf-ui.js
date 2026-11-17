@@ -226,8 +226,8 @@
       w.innerHTML = `${srcBar}<div class="pf-empty"><h3>📈 No tabletop matches logged yet</h3>
         <p>Your Battle Sim online games are under <b>⚔️ Battle Sim</b>. Log the matches you play at the table with <b>＋ Log a casual match</b> or <b>🏆 New run</b>.</p>
         <div class="bd-btns" style="justify-content:center"><button type="button" class="btn2 main" data-pfact="log">＋ Log a casual match</button>
-          ${S.runsOff ? '' : '<button type="button" class="btn2" data-pfact="newrun">🏆 New run</button>'}</div></div>${importBanner()}${communityShell()}${adminHTML()}`;
-      wireAdmin(); loadCommunity(); return;
+          ${S.runsOff ? '' : '<button type="button" class="btn2" data-pfact="newrun">🏆 New run</button>'}</div></div>${importBanner()}${communityShell()}`;
+      loadCommunity(); return;
     }
     if(!logs.length){
       w.innerHTML = `<div class="pf-empty"><h3>📈 Track how your decks really perform</h3>
@@ -235,8 +235,8 @@
         MHR Deck Lab turns it into your win rate, your best and worst matchups, and whether you do better going first or second.</p>
         <div class="bd-btns" style="justify-content:center"><button type="button" class="btn2 main" data-pfact="log">＋ Log a casual match</button>
           ${S.runsOff ? '' : '<button type="button" class="btn2" data-pfact="newrun">🏆 New run</button>'}</div>
-        <p class="bd-mut">Your matches are private. Only you can see them.</p></div>${importBanner()}${communityShell()}${adminHTML()}`;
-      wireAdmin(); loadCommunity(); return;
+        <p class="bd-mut">Your matches are private. Only you can see them.</p></div>${importBanner()}${communityShell()}`;
+      loadCommunity(); return;
     }
     const list = filtered(); const s = stats(list);
     /* pilihan deck untuk filter: deck yang pernah dicatat */
@@ -256,9 +256,8 @@
       ${list.length ? statsHTML(list, s) : '<div class="pf-card"><p class="bd-mut">No matches in this filter yet.</p></div>'}
       ${runsHTML()}
       ${communityShell()}
-      ${recentHTML(list)}
-      ${adminHTML()}`;
-    wireAdmin(); wireTrend(list); loadCommunity();
+      ${recentHTML(list)}`;
+    wireTrend(list); loadCommunity();
   }
   /* v7.34 — tampilan kelompok Battle Sim (hanya baca): statistik yang sama, tanpa tombol catat / run / komunitas */
   function renderSim(w, srcBar){
@@ -653,7 +652,7 @@
         if(!confirm(`Delete "${v('name')}" from the list? Players' past logs keep the name, but it can't be picked any more.`)) return;
         const { error } = await API().removeArchetype(id0);
         if(error){ msg.textContent = errMsg(error); return; }
-        S.arch = S.arch.filter(a=>a.id !== id0); render(); return;
+        S.arch = S.arch.filter(a=>a.id !== id0); redrawAdmin(); return;
       }
       const cols = [v('c0'), v('c1')].filter(Boolean).filter((c, i, arr)=>arr.indexOf(c) === i);
       const row = { id: id0 || slug(v('id') || v('name')), name:String(v('name') || '').trim(), colors:cols, key_card:String(v('key_card') || '').trim().toUpperCase(),
@@ -667,8 +666,20 @@
       if(error || !data){ msg.textContent = error && /duplicate|23505/.test(`${error.code} ${error.message}`) ? 'That ID is already used.' : errMsg(error); return; }
       const i = S.arch.findIndex(a=>a.id === data.id); if(i >= 0) S.arch[i] = data; else S.arch.push(data);
       S.arch.sort((a,b)=>a.sort - b.sort || a.name.localeCompare(b.name));
-      render(); const m2 = q1('#pfAdminMsg'); if(m2) m2.textContent = `Saved “${data.name}” ✓`;
+      redrawAdmin(); const m2 = q1('#pfAdminMsg'); if(m2) m2.textContent = `Saved “${data.name}” ✓`;
     });
+  }
+
+  /* v7.44 — daftar archetype dipindah ke 🗼 Control Tower (tower.js, super-admin): digambar di #ctArchHost */
+  function redrawAdmin(){ const host = q1('#ctArchHost'); if(host){ host.innerHTML = adminHTML(); wireAdmin(); } }
+  async function renderAdmin(el){
+    if(!el) return;
+    if(!S.arch){
+      const a = await API().archetypes();
+      if(a.error){ el.innerHTML = `<p class="bd-mut">${E(errMsg(a.error))}</p>`; return; }
+      S.arch = a.data || [];
+    }
+    el.innerHTML = adminHTML(); wireAdmin();
   }
 
   /* =================== v7.14 — TOURNAMENT RUNS =================== */
@@ -1325,7 +1336,7 @@
     window.MHRAuth.onAuthChange(()=>{ S.logs = null; S.sim = null; S.decks = null; S.runs = null; S.entries = null; S.share = null; S.comm = null; S.backfilled = false; });
   }
   window.MHRPerfUI = {
-    renderTab, refresh, openLog, openRun, openRunForm, openDeck, classifyDeck,
+    renderTab, refresh, openLog, openRun, openRunForm, openDeck, classifyDeck, renderAdmin,
     reset(){ S.logs = null; S.sim = null; S.decks = null; S.err = null; S.runs = null; S.entries = null; },
     _state: S, _stats: stats, _renderRunImage: renderRunImage,
   };

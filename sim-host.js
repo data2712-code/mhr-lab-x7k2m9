@@ -110,15 +110,15 @@
   // Dipanggil setelah status login/admin berubah (refreshAccountUI di index.html).
   window.refreshSimNav = function () {
     const b = q('#navTabs [data-page="sim"]'); if (b) b.hidden = false;      // v7.36: tab selalu tampil (tanpa login → ajakan login)
-    const rb = q('#simRepBox'); if (rb) { rb.hidden = !admin(); if (!admin()) rb.open = false; }
     if (typeof state !== 'undefined' && state.page === 'sim') window.renderSimPage();
     if (!canPlay()) document.body.classList.remove('sim-full');
   };
 
-  /* ---------- My Lab: laporan Battle Sim (admin) ---------- */
+  /* ---------- laporan Battle Sim — v7.44: tampil di 🗼 Control Tower (tower.js, super-admin) ---------- */
   const KIND = { bug: '🐞 Bug', feedback: '💬 Feedback' };
   async function renderReports() {
-    const w = q('#simRepWrap'), c = window.MHRSimHost.client(); if (!w || !c) return;
+    const w = q('#simRepWrap'), c = window.MHRSimHost.client(); if (!w) return;
+    if (!c) { w.innerHTML = '<p class="ev-warn">Not connected.</p>'; return; }
     w.innerHTML = '<p class="ev-muted">Loading…</p>';
     const st = (q('#simRepFilter') && q('#simRepFilter').value) || 'open';
     let qq = c.from('sim_feedback').select('id,created_at,user_id,kind,message,contact,log_code,server_log,match_id,room,engine,mode,device,lang,status').order('created_at', { ascending: false }).limit(100);
@@ -149,5 +149,5 @@
     const { error } = await c.from('sim_feedback').update({ status: s.value }).eq('id', id);
     if (error) alert('Status not saved: ' + error.message);
   });
-  document.addEventListener('toggle', e => { if (e.target && e.target.id === 'simRepBox' && e.target.open && admin()) renderReports(); }, true);
+  window.MHRSimHost.renderReports = renderReports;
 })();

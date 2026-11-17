@@ -39,13 +39,14 @@ mhr-lab-x7k2m9/
 ├── faq/ · errata/     ← halaman statis per poin Rules FAQ (EN & -id) & Errata untuk preview WhatsApp — DIBUAT tools/generate_faq_pages.js, jangan diedit tangan (v7.27)
 ├── promo-popup.js     ← pop-up iklan carousel kampanye (v6.89; TIDAK dimuat sejak v7.05, disimpan untuk kampanye berikutnya)
 ├── home-ui.js         ← halaman Beranda (#beranda): perkenalan fitur untuk pengunjung baru, "Welcome back" untuk akun login (v6.63, dirombak v7.16)
-├── usage.js           ← statistik pemakaian fitur anonim (guest vs login) + laporan admin "📊 Usage" di My Lab (v7.25)
+├── usage.js           ← statistik pemakaian fitur anonim (guest vs login) + laporan "📊 Usage" di 🗼 Control Tower (v7.25; v7.44)
 ├── binders.js         ← servis Supabase binder kartu 3×3 (v7.06, tanpa DOM)
 ├── binders-ui.js      ← tab Binders di My Dashboard + halaman publik #binder/<kode> (v7.06)
 ├── perf.js            ← servis Supabase Performance Analytics: catatan match, archetype, tournament runs, data komunitas (v7.13–v7.15, tanpa DOM)
 ├── perf-ui.js         ← tab Performance di My Dashboard: catat match, statistik, tren, runs, import Events, share gambar, komunitas, versi deck (v7.13–v7.15)
 ├── lgs-admin.js       ← jadwal Weekly Rush LGS dari Supabase (tabel lgs_stores) + editor admin di halaman #lgs; data.js = cadangan (v7.31)
-├── sim-host.js        ← Battle Sim: penghubung situs ↔ simulator (menu untuk akun login sejak beta O3, iframe, link undangan, kartu laporan admin di My Lab) (v7.29)
+├── sim-host.js        ← Battle Sim: penghubung situs ↔ simulator (menu untuk akun login sejak beta O3, iframe, link undangan, laporan Battle Sim untuk 🗼 Control Tower) (v7.29)
+├── tower.js           ← 🗼 Control Tower khusus super-admin: Overview, Usage, Battle Sim reports, Binder reports, Verified organizers, Opponent deck list, Admin roles (v7.44)
 ├── sim/               ← simulator Battle Sim (index.html + 14 skrip) — DIBUAT mhr-simulator\online\site-sim.js, jangan diedit tangan (v7.29)
 ├── CNAME                 ← domain kustom GitHub Pages, isi: mhrdecklab.com (sejak 2 September 2026)
 ├── sitemap.xml           ← SEO: sitemap untuk Google Search Console (sejak v6.21)
@@ -616,6 +617,38 @@ dan menutupi tengah papan saat Battle Phase. Keputusan pemilik 17 Nov 2026 setel
 3. Panel keputusan di desktop normal tetap di tengah papan (keputusan pemilik).
 - Hanya tampilan; mesin & server tidak berubah (tidak perlu deploy). Cache-buster `sim/` → `?v=o2.29`, `SIM_URL` → `?v=o2.29`,
   `sim-host.js?v=7.41-sim29`.
+
+### v7.44 — 🗼 Control Tower: menu terpisah khusus super-admin (Usage, Battle Sim reports, Binder reports, Verified organizers, Opponent deck list, Admin roles) — 17 November 2026 *(`index.html`, berkas BARU `tower.js`, `admin-roles.js`, `sim-host.js`, `binders-ui.js`, `events-ui.js`, `perf-ui.js`, `usage.js`)*
+
+Permintaan pemilik: alat super-admin tidak lagi digabung ke My Lab, tapi menu sendiri sebagai "control tower". Keputusan pemilik:
+**hanya super-admin** yang melihat menu ini (admin biasa tidak lagi melihat Usage, Battle Sim reports, Binder reports, Verified
+organizers, dan daftar archetype), dan ikut dipindah: ringkasan/inbox, Binder reports, Verified organizers, daftar archetype.
+- **Tab nav baru 🗼 Control Tower** (`[data-page="tower"]`, label HP "Tower"), tersembunyi kecuali super-admin. Status super-admin tetap
+  dari tabel `super_admins` (`admin-roles.js` → `window.MHRAdminRoles.isSuper`), yang sekarang memanggil `window.refreshTower()`.
+  **Selain super-admin (admin biasa, user, tamu), Control Tower tidak terlihat sama sekali**: tombol nav tetap tersembunyi, halaman
+  tidak menggambar apa pun, dan `#tower` / `#tower/<tab>` dialihkan ke Home setelah status akun dicek (juga saat logout di halaman ini).
+- **Halaman `#tower`** (`#towerPage`, digambar `tower.js`), tab: Overview · Usage · Battle Sim reports · Binder reports ·
+  Verified organizers · Opponent deck list · Admin roles. Hash `#tower/<tab>` (`usage`, `simrep`, `binders`, `org`, `arch`, `roles`);
+  tab terakhir diingat di `localStorage` `mhr_ct_tab`. Tab Battle Sim reports / Binder reports diberi lencana merah berisi jumlah
+  yang belum ditangani.
+- **Overview**: angka Battle Sim reports yang belum `closed`, binder yang perlu ditinjau, draft News, jumlah verified organizer, dan
+  jumlah admin (klik = buka tabnya; draft News membuka `#berita`), plus pintasan ke alat admin yang tetap di halamannya sendiri
+  (News, Weekly Rush LGS, Tournament Decks, Events, User Decks, Battle Sim).
+- **Dipindah dari tempat lama** (logika & RPC tidak berubah, hanya tempat tampilnya):
+  - 📊 Usage (dulu kartu di My Lab) — `MHRUsage.renderAdmin(el)`; kartu `#usageBox` & pendengarnya dihapus dari `index.html`.
+  - 🐞 Battle Sim reports (dulu kartu di My Lab) — `MHRSimHost.renderReports()` kini diekspor; kartu `#simRepBox` dihapus.
+  - 🛡 Binder reports (dulu di My Lab → Binders) — `MHRBindersUI.renderAdmin()` diekspor; tombol Hide / Show again ditangani
+    pendengar `#bdAdmin [data-badm]` sendiri.
+  - 🏟 Verified organizers (dulu di halaman Events) — `window.MHREventsAdmin.render(el)`; pendengar klik Events kini juga menerima
+    `#evAdmin`.
+  - 📈 Opponent deck list / archetype (dulu di bawah My Lab → Performance) — `MHRPerfUI.renderAdmin(el)` (memuat daftar bila belum ada).
+  - 👑 Admin roles (dulu item menu My Lab yang membuka modal) — kini `MHRAdminRoles.renderInto(el)` di dalam halaman; item `#labSuper`
+    di My Lab dihapus.
+- Keamanan tidak berubah: semua data tetap dijaga RLS / RPC di server; menyembunyikan menu hanya soal tampilan. Tanpa perubahan SQL.
+- `?v=`: `admin-roles.js`, `binders-ui.js`, `events-ui.js`, `perf-ui.js`, `usage.js` → 7.44, `sim-host.js` → 7.44-sim29 (simulator
+  `sim/` tidak berubah), `tower.js?v=7.44` baru. Versi footer → v7.44.
+- Diuji lokal (Playwright 1280 px & 390 px, tanpa koneksi Supabase, status super-admin disimulasikan): semua tab terbuka tanpa error,
+  tanpa scroll mendatar, My Lab & Events tetap normal. **Belum diuji** dengan akun super-admin sungguhan (angka & isi tab).
 
 ### v7.43 — Weekly Rush LGS (Hero Base) dirombak: By day / By store, strip hari & chip kota yang menempel, kartu ringkas, favorit, pencarian — 17 November 2026 *(`index.html`, `lgs-admin.js`)*
 
