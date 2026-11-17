@@ -3633,7 +3633,7 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=7.40-pb02en"></script>
+<script src="cards.js?v=7.44-sd56id"></script>
 <script src="data.js?v=7.40-pb02only"></script>
 <script src="lgs-admin.js?v=7.43"></script>   <!-- v7.31 — jadwal Weekly Rush LGS dari Supabase (lgs_stores) + editor admin; HARUS sesudah data.js (cadangan) -->
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
@@ -3668,7 +3668,7 @@
 <script src="perf.js?v=7.34"></script>
 <script src="perf-ui.js?v=7.44"></script>
 <script src="rules-faq.js?v=7.28"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules); v7.26 — FAQ versi Bahasa Indonesia; v7.27 — Copy link ke halaman statis faq/ & errata/; v7.28 — TD-11 -->
-<script src="sim-host.js?v=7.44-sim30"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
+<script src="sim-host.js?v=7.44-sim31"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
 <script src="tower.js?v=7.44b"></script>   <!-- v7.44 — 🗼 Control Tower (super-admin): Overview, Usage, Battle Sim reports, Binder reports, Verified organizers, Opponent deck list, Admin roles -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
@@ -3874,8 +3874,8 @@ const MECH = {
   attach:  /\bPasang\b|dipasang|terpasang|[Pp]asangkan/,
   set:     /tertutup/i,
   retreat: /(masuk|ditempatkan|dibuang)[^.]{0,40}RETREAT/i,
-  draw:    /(ambil|tarik|mengambil|menarik)\s+\d*\s*kartu/i,
-  debuff:  /Power -/,
+  draw:    /(ambil|tarik|mengambil|menarik|draw)\s+\d*\s*kartu/i,   // 17 Nov 2026: teks resmi ID SD06 menulis "draw 1 kartu"
+  debuff:  /Power ?-/,   // 17 Nov 2026: teks resmi ID SD05-015 menulis "Power-1000" (tanpa spasi)
   /* v6.18: "Kemampuan kunci" — masing-masing cuma 1-6 kartu (lihat rulebook-1.03-
      vs-1.00.md pasal 305), terlalu sedikit untuk tombol sendiri-sendiri di mechBar,
      jadi digabung satu dropdown #fKeyAbil (lihat KEY_ABIL + isiDropdown). */

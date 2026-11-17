@@ -16,6 +16,17 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-17', t: 'patch', v: 'o2.31',
+      en: { h: 'SD05 & SD06 now use the official Indonesian card text and images', b: [
+        'With the card language set to Indonesian, 35 SD05 and SD06 cards now show the official Indonesian text and card images from marvelherorush.com.',
+        'SD06-018 「Arcane Explosion」Adam Warlock keeps the fan translation until its official Indonesian version is published.',
+        'Card effects in Battle Sim still follow the official English text, so nothing changes in how the cards play.'] },
+      id: { h: 'SD05 & SD06 kini memakai teks dan gambar kartu resmi Indonesia', b: [
+        'Saat bahasa kartu Indonesia dipilih, 35 kartu SD05 dan SD06 kini menampilkan teks dan gambar resmi Indonesia dari marvelherorush.com.',
+        'SD06-018 「Arcane Explosion」Adam Warlock masih memakai terjemahan penggemar sampai versi resmi Indonesianya terbit.',
+        'Efek kartu di Battle Sim tetap mengikuti teks resmi Inggris, jadi cara kerja kartu tidak berubah.'] }
+    },
+    {
       d: '2026-11-17', t: 'improve', v: 'o2.30', reports: [27],
       en: { h: 'Choose an area for an effect by tapping the board', b: [
         'When an effect asks where to place a card (for example 「Spider-Archenemy」Morbius from RETREAT), the possible areas now glow on the board and you can tap them, just like a CALL. The buttons in the panel still work.',

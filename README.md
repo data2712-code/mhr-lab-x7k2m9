@@ -604,6 +604,33 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — SD05 & SD06: teks & gambar resmi Bahasa Indonesia (35 kartu, 39 cetakan) + Battle Sim o2.31 — 17 November 2026 *(`cards.js`, `index.html`, `sw.js`, 39 gambar di `images/`, `sim/index.html`, `sim/sim-updates.js`, `sim-host.js`)*
+
+Permintaan pemilik: SD05 dan SD06 versi Indonesia sudah ada di https://www.marvelherorush.com/id/cards → ambil data & gambarnya.
+Sumber: API resmi `server.marvelherorush.com/marvel/card/list?language=id` (422 kartu; SD05 20 cetakan, SD06 19 cetakan). Salinan
+mentah disimpan di `mhr-deck-lab-internal\Data Resmi SD05 SD06 PB02\2026-11-17-id.json`.
+- **`e` (teks Indonesia) = teks resmi** untuk SD05-001..018 dan SD06-001..017; `fan:1` dihapus (lencana kartu jadi "ID+EN" tanpa *).
+  Format disamakan dengan kartu resmi lain di database: label efek `[TRIG BACK]` → `[TRIG](BACK)`, `[ACTI BATTLE / ONCE PER TURN]` →
+  `[ACTI](BATTLE/ONCE PER TURN)`, `[COUNTER.ACTI …]` → `[COUNTER-ACTI](…)`, `[AUTOBATTLE]` → `[AUTO](BATTLE)`; teks pengingat
+  kata kunci menempel (`[QUICK ATTACK](…)`, `[ONSLAUGHT](…)`) supaya filter tetap membuangnya; baris baru → spasi; spasi setelah koma
+  yang hilang; salah ketik "Tunjukan" → "Tunjukkan". Isi kalimat tidak diubah. Teks pengingat UNIQUE/COUNTER/BLOCK yang dulu ditulis
+  di terjemahan lama tidak ada di teks resmi Indonesia, jadi ikut hilang.
+- **SD06-018** 「Arcane Explosion」Adam Warlock belum ada di situs resmi Indonesia → tetap `fan:1` (terjemahan penggemar) dan gambar China.
+- **Data resmi yang TIDAK diikuti** (salah ketik/salah data di situs resmi; database memakai bentuk yang benar): nama SD05-003
+  "Guardian of Earths" (gambar resmi: Guardian of Earth), SD05-018 "Anitmate the Dead", SD06-009 "TDrain the CosmosJ"; **Lv SD05-012**
+  ditulis 6 di data Indonesia, tetapi gambar kartu Indonesia dan data Inggris = **Lv3** (tetap 3). Nama, Lv, R, Power, warna, trait, dan
+  rarity lain sama dengan database.
+- **Gambar**: 39 gambar resmi Indonesia (PNG 744×1039 ber-watermark SAMPLE) → JPEG 500×698 progresif, latar hitam (sama dengan
+  `images/en/`), menimpa `images/<no>.jpg` (cetakan China): UR = `<no>.jpg`, MR = `_MR`, SEC = `_SEC` untuk SD05-001 & SD06-001.
+  Karena gambar lama ditimpa dan `images/**` cache-first, `sw.js` `CACHE_VERSION` **v12 → v13**.
+- **Filter Mechanic**: `draw` kini juga mengenali "draw 1 kartu" (teks resmi SD06-009/014) dan `debuff` mengenali "Power-1000" tanpa
+  spasi (SD05-015). Catatan: chip area VOID/RETREAT untuk beberapa kartu SD05/SD06 berkurang karena teks resmi tidak lagi menulis
+  "ke VOID"/"ke RETREAT" secara eksplisit (mis. "Prune … dari RETREAT Anda"); filter area membaca kata di teks apa adanya.
+- Cache-buster `cards.js?v=7.44-sd56id`. `cards/` & `sitemap.xml` tidak berubah (nama kartu sama). `api/v1/` tidak berubah (SD05/SD06
+  belum ada di API). Battle Sim **o2.31**: `sim/` dibuat ulang (cards.js baru), entri patch di Updates; efek tetap mengikuti teks Inggris.
+  `SIM_URL ?v=o2.31`, `sim-host.js?v=7.44-sim31`.
+- Dicek: `node --check cards.js`; halaman Kartu (salinan lokal) SD05-003 menampilkan teks & gambar resmi Indonesia, lencana ID+EN, tanpa error JS.
+
 ### Data — Battle Sim o2.30: efek yang menanyakan area — area menyala di papan & bisa diketuk (laporan #27) — 17 November 2026 *(`sim/sim-ui.js`, `sim/sim-i18n.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 
 Riwayat simulator #109. Laporan #27 (bug, custom, desktop 1440×765): "Morbius effect but not come to battle". Log diputar ulang: ACTI
