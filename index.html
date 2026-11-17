@@ -833,40 +833,69 @@
   .lgs-wrap{padding:22px 20px 90px;max-width:1000px;margin:0 auto}
   .lgs-head h2{font-family:var(--disp);font-size:26px;letter-spacing:.05em;text-transform:uppercase}
   .lgs-head p{color:var(--muted);font-size:12.5px;line-height:1.6;margin:5px 0 18px;max-width:620px}
-  .lgs-today{background:rgba(242,176,30,.1);border:1px solid var(--accent);border-radius:12px;
-    padding:13px 16px;margin-bottom:20px}
-  .lgs-today .t{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);
-    font-weight:700;margin-bottom:8px}
-  .lgs-today .row{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;padding:4px 0;font-size:13.5px}
-  .lgs-today .row .jam{font-family:var(--mono);font-size:12px;color:var(--muted)}
-  /* ikon peta di panel "hari ini" sempat tampil sebesar layar karena belum
-     punya ukuran — samakan dengan ikon di kartu per hari */
-  .lgs-today .row a{display:inline-flex;align-items:center;gap:5px}
-  .lgs-today .row a svg{width:12px;height:12px;flex:none;opacity:.65}
-  .lgs-today .kosong{font-size:13px;color:#C9CFD8}
-  .lgs-days{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px;margin-bottom:26px}
-  .lgs-day{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px 15px}
-  .lgs-day.now{border-color:var(--accent)}
-  .lgs-day h3{font-family:var(--disp);font-size:17px;letter-spacing:.04em;text-transform:uppercase;
-    margin-bottom:2px}
-  .lgs-day.now h3{color:var(--accent)}
-  .lgs-day .badge{font-family:var(--mono);font-size:10px;color:var(--accent);
-    border:1px solid var(--accent);border-radius:5px;padding:1px 6px;margin-left:7px;vertical-align:2px}
-  .lgs-item{display:flex;flex-direction:column;gap:1px;padding:9px 0;border-bottom:1px solid var(--line)}
-  .lgs-item:last-child{border-bottom:none;padding-bottom:0}
-  .lgs-item a{color:var(--paper);text-decoration:none;font-size:13.5px;font-weight:600;
-    display:inline-flex;align-items:center;gap:5px}
-  .lgs-item a:hover{color:var(--accent)}
-  .lgs-item a svg{width:12px;height:12px;flex:none;opacity:.65}
-  .lgs-item .jam{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
-  .lgs-store{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    padding:13px 16px;margin-bottom:9px;display:flex;gap:14px;justify-content:space-between;
-    align-items:flex-start;flex-wrap:wrap}
-  .lgs-store .nm{font-family:var(--disp);font-weight:800;font-size:16px;letter-spacing:.02em;
-    display:block;margin-bottom:5px}
-  .lgs-store .sch{display:flex;gap:7px;flex-wrap:wrap}
-  .lgs-store .sch span{font-family:var(--mono);font-size:11px;background:var(--panel2);
-    border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:#C9CFD8}
+  /* v7.43 — Hero Base dirombak: satu tampilan aktif (By day / By store), strip hari + chip kota
+     yang menempel saat scroll, kartu toko ringkas yang bisa dibuka, favorit, pencarian. */
+  .lgs-bar{position:sticky;top:42px;z-index:5;background:var(--ink);margin:0 -20px 4px;padding:10px 20px 8px;
+    border-bottom:1px solid var(--line)}
+  .lgs-seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;
+    margin-bottom:9px;max-width:420px}
+  .lgs-seg button{flex:1;border:none;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:700;
+    padding:8px;border-radius:8px;cursor:pointer}
+  .lgs-seg button[aria-pressed="true"]{background:var(--accent);color:#1A1200}
+  .lgs-strip{display:flex;gap:6px;max-width:560px}
+  .lgs-d{flex:1;min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--paper);border-radius:10px;
+    padding:6px 0 5px;text-align:center;cursor:pointer;position:relative;font:inherit}
+  .lgs-d b{display:block;font-size:12.5px}
+  .lgs-d i{display:block;font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:1px}
+  .lgs-d[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#1A1200}
+  .lgs-d[aria-pressed="true"] i{color:#4A3600}
+  .lgs-d.now::after{content:"";position:absolute;top:4px;right:5px;width:6px;height:6px;border-radius:50%;background:#39D66C}
+  .lgs-search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:0 12px;max-width:560px}
+  .lgs-search:focus-within{border-color:var(--accent)}
+  .lgs-search input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--paper);font:inherit;
+    font-size:13.5px;padding:10px 0}
+  .lgs-chips{display:flex;gap:6px;overflow-x:auto;padding-top:9px;scrollbar-width:none}
+  .lgs-chips::-webkit-scrollbar{display:none}
+  .lgs-chip{flex:none;border:1px solid var(--line);background:none;color:#C9CFD8;border-radius:999px;padding:6px 12px;
+    font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .lgs-chip small{font-family:var(--mono);font-size:10.5px;opacity:.7;margin-left:3px}
+  .lgs-chip[aria-pressed="true"]{background:var(--paper);border-color:var(--paper);color:#111}
+  .lgs-chip.fav[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#1A1200}
+  .lgs-grp{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+  .lgs-grp.top{color:var(--paper);margin-top:12px;font-size:12px}
+  .lgs-grid{display:grid;grid-template-columns:1fr;gap:8px;align-items:start}
+  @media (min-width:761px){ .lgs-grid{grid-template-columns:1fr 1fr} }
+  .lgs-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;min-width:0}
+  .lgs-card.past{opacity:.5}
+  .lgs-chead{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;outline:none}
+  .lgs-chead:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
+  .lgs-time{font-family:var(--disp);font-weight:700;font-size:16px;color:var(--accent);width:46px;flex:none}
+  .lgs-nm{flex:1;min-width:0}
+  .lgs-nm b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lgs-nm span{font-size:11.5px;color:var(--muted)}
+  .lgs-pill{font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 8px;white-space:nowrap;flex:none}
+  .lgs-pill.live{background:rgba(57,214,108,.15);color:#39D66C}
+  .lgs-pill.soon{background:rgba(242,176,30,.14);color:var(--accent)}
+  .lgs-pill.past{background:var(--panel2);color:var(--muted)}
+  .lgs-star{border:none;background:none;font-size:19px;line-height:1;color:#4A5361;cursor:pointer;padding:4px 2px 6px;flex:none}
+  .lgs-star[aria-pressed="true"]{color:var(--accent)}
+  .lgs-chev{color:var(--muted);font-size:11px;flex:none;transition:transform .15s}
+  .lgs-card.open .lgs-chev{transform:rotate(180deg)}
+  .lgs-dots{display:flex;gap:3px;margin-top:5px}
+  .lgs-dots u{text-decoration:none;width:18px;height:18px;border-radius:5px;background:var(--panel2);color:#566070;
+    font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .lgs-dots u.y{background:rgba(242,176,30,.2);color:var(--accent)}
+  .lgs-dots u.t{outline:1px solid #39D66C}
+  .lgs-cbody{display:none;border-top:1px solid var(--line);padding:10px 12px 12px;background:var(--panel2)}
+  .lgs-card.open .lgs-cbody{display:block}
+  .lgs-row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12.5px;padding:3px 0;color:#C9CFD8}
+  .lgs-row.t{color:var(--paper);font-weight:700}
+  .lgs-row .jam{font-family:var(--mono);font-size:11.5px}
+  .lgs-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .lgs-acts .lgs-map{background:var(--panel)}
+  .lgs-empty{color:var(--muted);text-align:center;padding:34px 10px;font-size:13px;line-height:1.6}
   .lgs-map{background:var(--panel2);border:1px solid var(--line);color:var(--paper);
     border-radius:8px;padding:8px 13px;font-size:12.5px;text-decoration:none;white-space:nowrap;
     display:inline-flex;align-items:center;gap:6px;flex:none}
@@ -877,12 +906,10 @@
   /* lencana kota — dipakai di panel hari ini, kartu per hari, dan daftar toko */
   .kota{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted);
     border:1px solid var(--line);border-radius:5px;padding:1px 6px;white-space:nowrap}
-  .lgs-store .kota{vertical-align:3px;margin-left:7px}
-  .lgs-item .baris{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
   /* catatan jadwal (field n di data.js), mis. "Starter deck only" */
   .lgs-ntag{display:inline-block;align-self:flex-start;font-size:10.5px;font-weight:700;letter-spacing:.02em;
     color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:1px 8px;margin-top:3px;line-height:1.5}
-  .lgs-today .row .lgs-ntag{margin-top:0}
+  .lgs-row .lgs-ntag{margin-top:0}
 
   /* halaman: PANDUAN */
   body:not(.page-panduan) #panduanPage{display:none}
@@ -1448,6 +1475,7 @@
   /* ================= MOBILE: navigasi bawah ================= */
   @media (max-width:920px){
     .filters{top:0}
+    .lgs-bar{top:0}   /* v7.43 — nav pindah ke bawah di HP */
     nav.tabs{position:fixed;bottom:0;left:0;right:0;top:auto;border-bottom:none;
       border-top:2px solid var(--line);padding:0;z-index:30;
       background:#0B0F13;justify-content:space-around}
@@ -3251,11 +3279,17 @@
         their time zone (WIB / WITA / WIT). To confirm the schedule, ask about the tournament format, or
         request the community WhatsApp group link, contact the store directly — full details are below.</p>
     </div>
-    <div class="meta-filter" id="lgsFilter"></div>
-    <div class="lgs-today" id="lgsToday"></div>
-    <div class="lgs-days" id="lgsDays"></div>
-    <div class="deck-sec-title" style="max-width:none">Local Game Shop List</div>
-    <div id="lgsStores"></div>
+    <div id="lgsFilter"></div>
+    <div class="lgs-bar" id="lgsBar">
+      <div class="lgs-seg" role="group" aria-label="View">
+        <button type="button" data-lgs-view="day" aria-pressed="true">By day</button>
+        <button type="button" data-lgs-view="store" aria-pressed="false">By store</button>
+      </div>
+      <div class="lgs-strip" id="lgsStrip"></div>
+      <label class="lgs-search" id="lgsSearch" hidden><span aria-hidden="true">🔍</span><input type="search" id="lgsQ" placeholder="Search store or city" autocomplete="off" aria-label="Search store or city"></label>
+      <div class="lgs-chips" id="lgsChips"></div>
+    </div>
+    <div id="lgsList"></div>
     <div class="lgs-note" id="lgsNote"></div>
   </div>
 </section>
@@ -3557,7 +3591,7 @@
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
 <script src="cards.js?v=7.40-pb02en"></script>
 <script src="data.js?v=7.40-pb02only"></script>
-<script src="lgs-admin.js?v=7.31"></script>   <!-- v7.31 — jadwal Weekly Rush LGS dari Supabase (lgs_stores) + editor admin; HARUS sesudah data.js (cadangan) -->
+<script src="lgs-admin.js?v=7.43"></script>   <!-- v7.31 — jadwal Weekly Rush LGS dari Supabase (lgs_stores) + editor admin; HARUS sesudah data.js (cadangan) -->
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
@@ -3619,7 +3653,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.41</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.43</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -7406,93 +7440,136 @@ function jamTz(w, tz){
   if(!tz) return w;
   return /\d{1,2}[.:]\d{2}/.test(w) ? w.replace(/(\d{1,2}[.:]\d{2})/, `$1 ${tz}`) : w;
 }
-let lgsFilterKota = '';
+/* v7.43 — Hero Base dirombak (permintaan pemilik 17 Nov 2026: 37 toko, halaman ±10.000 px di HP).
+   Satu tampilan aktif: "By day" (strip hari + sesi hari itu, dikelompokkan per waktu) atau "By store"
+   (kartu toko + pencarian). Filter kota = chip multi-pilih; favorit ★ disimpan di perangkat.
+   Pilihan tampilan / kota / favorit diingat di localStorage (mhr_lgs_ui). */
+const LGS_UI = (()=>{
+  const d = { view:'day', kota:[], fav:[], favOnly:false };
+  try{ const v = JSON.parse(localStorage.getItem('mhr_lgs_ui') || '{}');
+    if(v.view === 'store') d.view = 'store';
+    if(Array.isArray(v.kota)) d.kota = v.kota.filter(x=>typeof x === 'string');
+    if(Array.isArray(v.fav)) d.fav = v.fav.filter(x=>typeof x === 'string');
+    d.favOnly = !!v.favOnly;
+  }catch(e){}
+  return d;
+})();
+function lgsSimpan(){ try{ localStorage.setItem('mhr_lgs_ui', JSON.stringify(LGS_UI)); }catch(e){} }
+let lgsDay = 0;                 // hari yang dipilih di strip (0 = belum dipilih → hari ini)
+let lgsQ = '';                  // kata cari (tampilan By store)
+const lgsOpen = new Set();      // kartu yang sedang terbuka (kunci: 'd'|'s' + indeks toko)
+
+/* Jam mulai / selesai dalam menit dari teks jadwal ("19:00 - Close", "19.30 - 22.00", "On Demand" → null). */
+function lgsMenit(w, ke){
+  const m = String(w || '').match(/\d{1,2}[.:]\d{2}/g);
+  if(!m || m.length <= ke) return null;
+  const p = m[ke].split(/[.:]/); return +p[0] * 60 + +p[1];
+}
+/* Hari + menit SEKARANG menurut zona waktu toko (bukan zona perangkat). */
+function lgsKini(tz){
+  const d = new Date(Date.now() + (({WIB:7, WITA:8, WIT:9})[tz] || 7) * 3600e3), g = d.getUTCDay();
+  return { h: g === 0 ? 7 : g, m: d.getUTCHours() * 60 + d.getUTCMinutes() };
+}
+/* Label status sesi: hanya untuk sesi yang jatuh hari ini (menurut zona toko). */
+function lgsStatus(j, tz){
+  const s = lgsMenit(j.w, 0); if(s == null) return null;
+  const k = lgsKini(tz); if(k.h !== j.h) return null;
+  if(k.m < s){
+    const d = s - k.m; if(d > 360) return null;
+    const hh = Math.floor(d / 60), mm = d % 60;
+    return { c:'soon', t:'Starts in ' + (hh ? hh + 'h' : '') + (hh && mm ? ' ' : '') + (mm ? mm + 'm' : '') };
+  }
+  const e = lgsMenit(j.w, 1);
+  if(e != null && e > s && k.m > e) return { c:'past', t:'Ended' };
+  return { c:'live', t:'Live now' };
+}
 
 function renderLgs(){
   const hi = hariIni();
+  if(!lgsDay) lgsDay = hi;
   const semuaKota = kotaLGS();
-  if(lgsFilterKota && !semuaKota.includes(lgsFilterKota)) lgsFilterKota = '';
-  const daftar = LGS.filter(t=>!lgsFilterKota || t.kota === lgsFilterKota);
-
-  const perHari = {};
-  daftar.forEach(t=>t.jd.forEach(j=>{
-    (perHari[j.h] = perHari[j.h] || []).push({nm:t.nm, map:t.map, w:j.w, kota:t.kota, tz:t.tz, n:j.n});
-  }));
-
-  $('#navLgs').textContent = daftar.length;
-
-  // filter kota (dropdown, dikelompokkan per wilayah) — hanya ditampilkan
-  // kalau memang ada lebih dari satu kota
-  if(semuaKota.length > 1){
-    const grup = {};
-    semuaKota.forEach(k=>{
-      const w = wilayahKota(k);
-      (grup[w] = grup[w] || []).push(k);
-    });
-    const opsi = w => grup[w].map(k=>
-      `<option value="${k}"${lgsFilterKota===k?' selected':''}>${k} (${LGS.filter(t=>t.kota===k).length})</option>`
-    ).join('');
-    $('#lgsFilter').innerHTML =
-      `<select class="lgs-select" id="lgsFilterSel">` +
-        `<option value=""${lgsFilterKota?'':' selected'}>All cities (${LGS.length})</option>` +
-        Object.keys(grup).map(w=>`<optgroup label="${w}">${opsi(w)}</optgroup>`).join('') +
-      `</select>`;
-  } else {
-    $('#lgsFilter').innerHTML = '';
-  }
-
-  const lencana = k => k ? `<span class="kota">${k}</span>` : '';
-  // catatan opsional per jadwal (mis. 'Starter deck only') — field n di data.js
+  LGS_UI.kota = LGS_UI.kota.filter(k=>semuaKota.includes(k));
+  const favSet = new Set(LGS_UI.fav);
+  const fav = t => favSet.has(t.nm);
+  const lolos = t => (!LGS_UI.kota.length || LGS_UI.kota.includes(t.kota)) && (!LGS_UI.favOnly || fav(t));
+  const daftar = LGS.filter(lolos);
   const catatan = n => n ? `<span class="lgs-ntag">${n}</span>` : '';
 
-  // panel hari ini
-  const kini = perHari[hi] || [];
-  $('#lgsToday').innerHTML =
-    `<div class="t">Today — ${HARI[hi]}${lgsFilterKota ? ' · ' + lgsFilterKota : ''}</div>` +
-    (kini.length
-      ? kini.map(x=>`<div class="row">
-            <a href="${x.map}" target="_blank" rel="noopener"
-              style="color:var(--paper);text-decoration:none;font-weight:700">${x.nm} ${PIN}</a>
-            ${lencana(x.kota)}
-            <span class="jam">${jamTz(x.w, x.tz)}</span>${catatan(x.n)}
-          </div>`).join('')
-      : `<div class="kosong">No tournament scheduled today${lgsFilterKota ? ' in ' + lgsFilterKota : ''}. ` +
-        `Check the list below for other days.</div>`);
+  $('#navLgs').textContent = LGS.length;
 
-  // kartu per hari (hanya hari yang ada jadwalnya), dimulai dari hari ini
-  const urut = [];
-  for(let i=0;i<7;i++){ const h = ((hi-1+i) % 7) + 1; if(perHari[h]) urut.push(h); }
-  $('#lgsDays').innerHTML = urut.map(h=>`
-    <div class="lgs-day${h===hi?' now':''}">
-      <h3>${HARI[h]}${h===hi?'<span class="badge">today</span>':''}</h3>
-      ${perHari[h].map(x=>`<div class="lgs-item">
-          <div class="baris">
-            <a href="${x.map}" target="_blank" rel="noopener">${x.nm} ${PIN}</a>
-            ${lencana(x.kota)}
-          </div>
-          <span class="jam">${jamTz(x.w, x.tz)}</span>${catatan(x.n)}
-        </div>`).join('')}
-    </div>`).join('') ||
-    `<div class="lgs-day"><h3>No schedule yet</h3>
-      <div class="lgs-item"><span class="jam">No schedule for this city.</span></div></div>`;
+  // ---- bar: tab tampilan, strip hari / pencarian, chip kota ----
+  document.querySelectorAll('#lgsBar [data-lgs-view]').forEach(b=>
+    b.setAttribute('aria-pressed', String(b.dataset.lgsView === LGS_UI.view)));
+  const strip = $('#lgsStrip'), cari = $('#lgsSearch'), chips = $('#lgsChips');
+  strip.hidden = LGS_UI.view !== 'day';
+  strip.style.display = LGS_UI.view === 'day' ? '' : 'none';
+  cari.hidden = LGS_UI.view !== 'store';
+  cari.style.display = LGS_UI.view === 'store' ? '' : 'none';
+  strip.innerHTML = [1,2,3,4,5,6,7].map(h=>{
+    const n = daftar.filter(t=>t.jd.some(j=>j.h === h)).length;
+    return `<button type="button" class="lgs-d${h===hi?' now':''}" data-lgs-day="${h}" aria-pressed="${h===lgsDay}" ` +
+      `aria-label="${HARI[h]}${h===hi?' (today)':''}, ${n} session${n===1?'':'s'}"><b>${HARI[h].slice(0,3)}</b><i>${n}</i></button>`;
+  }).join('');
+  const geser = chips.scrollLeft;
+  chips.innerHTML =
+    `<button type="button" class="lgs-chip fav" data-lgs-favonly aria-pressed="${LGS_UI.favOnly}">★ Favorites${favSet.size?` <small>${LGS.filter(fav).length}</small>`:''}</button>` +
+    (semuaKota.length > 1
+      ? `<button type="button" class="lgs-chip" data-lgs-kota="" aria-pressed="${!LGS_UI.kota.length}">All cities <small>${LGS.length}</small></button>` +
+        semuaKota.map((k,i)=>`<button type="button" class="lgs-chip" data-lgs-kota="${i}" aria-pressed="${LGS_UI.kota.includes(k)}">${k} <small>${LGS.filter(t=>t.kota===k).length}</small></button>`).join('')
+      : '');
+  chips.scrollLeft = geser;
 
-  // daftar per toko
-  $('#lgsStores').innerHTML = daftar.map(t=>`
-    <div class="lgs-store">
-      <div>
-        <span class="nm">${t.nm}${lencana(t.kota)}</span>
-        <div class="sch">${t.jd.slice().sort((a,b)=>a.h-b.h)
-          .map(j=>`<span${j.h===hi?' style="border-color:var(--accent);color:var(--accent)"':''}>${HARI[j.h]} · ${jamTz(j.w, t.tz)}${j.n?' · '+j.n:''}</span>`).join('')}</div>
-      </div>
-      <div style="display:flex;gap:7px;flex-wrap:wrap">
-        <a class="lgs-map" href="${t.map}" target="_blank" rel="noopener">${PIN} Location</a>
-        ${t.hp?`<a class="lgs-map" href="https://wa.me/${t.hp}" target="_blank" rel="noopener">${WA} Chat store</a>`:''}
-        ${t.wa?`<a class="lgs-map" href="${t.wa}" target="_blank" rel="noopener">${WA} WA Group</a>`:''}
-        ${t.ig
-          ? `<a class="lgs-map" href="https://www.instagram.com/${t.ig}/" target="_blank" rel="noopener" title="@${t.ig} on Instagram">${IG} Instagram</a>`
-          : `<a class="lgs-map" href="https://www.google.com/search?q=${encodeURIComponent(t.nm + ' ' + (t.kota || '') + ' instagram')}" target="_blank" rel="noopener" title="Search for ${t.nm.replace(/"/g,'&quot;')} on Instagram">${IG} Instagram</a>`}
-      </div>
-    </div>`).join('');
+  // ---- isi kartu (dipakai dua tampilan) ----
+  const bintang = (t,i) => `<button type="button" class="lgs-star" data-lgs-fav="${i}" aria-pressed="${fav(t)}" ` +
+    `aria-label="${fav(t)?'Remove from':'Add to'} favorites" title="${fav(t)?'Remove from':'Add to'} favorites">${fav(t)?'★':'☆'}</button>`;
+  const badan = (t, sorot) => `<div class="lgs-cbody">` +
+    t.jd.slice().sort((a,b)=>a.h-b.h).map(j=>
+      `<div class="lgs-row${j.h===sorot?' t':''}"><span>${HARI[j.h]}${j.n?' '+catatan(j.n):''}</span><span class="jam">${jamTz(j.w, t.tz)}</span></div>`).join('') +
+    `<div class="lgs-acts">` +
+      `<a class="lgs-map" href="${t.map}" target="_blank" rel="noopener">${PIN} Location</a>` +
+      (t.hp?`<a class="lgs-map" href="https://wa.me/${t.hp}" target="_blank" rel="noopener">${WA} Chat store</a>`:'') +
+      (t.wa?`<a class="lgs-map" href="${t.wa}" target="_blank" rel="noopener">${WA} WA Group</a>`:'') +
+      (t.ig
+        ? `<a class="lgs-map" href="https://www.instagram.com/${t.ig}/" target="_blank" rel="noopener" title="@${t.ig} on Instagram">${IG} Instagram</a>`
+        : `<a class="lgs-map" href="https://www.google.com/search?q=${encodeURIComponent(t.nm + ' ' + (t.kota || '') + ' instagram')}" target="_blank" rel="noopener" title="Search for ${t.nm.replace(/"/g,'&quot;')} on Instagram">${IG} Instagram</a>`) +
+    `</div></div>`;
+  const kartu = (t, kunci, kepala, sorot, kelas) => {
+    const buka = lgsOpen.has(kunci);
+    return `<div class="lgs-card${buka?' open':''}${kelas||''}" data-lgs-k="${kunci}" data-lgs-id="${t._id == null ? '' : t._id}">` +
+      `<div class="lgs-chead" role="button" tabindex="0" aria-expanded="${buka}">${kepala}<span class="lgs-chev" aria-hidden="true">▾</span></div>` +
+      badan(t, sorot) + `</div>`;
+  };
+
+  let h = '';
+  if(LGS_UI.view === 'day'){
+    const baris = [];
+    daftar.forEach(t=>t.jd.forEach(j=>{ if(j.h === lgsDay) baris.push({ t, j, i:LGS.indexOf(t), m:lgsMenit(j.w, 0) }); }));
+    baris.sort((a,b)=>(fav(b.t) - fav(a.t)) || ((a.m == null ? 9999 : a.m) - (b.m == null ? 9999 : b.m)));
+    h += `<div class="lgs-grp top"><span>${HARI[lgsDay]}${lgsDay===hi?' · today':''}</span><span>${baris.length} session${baris.length===1?'':'s'}</span></div>`;
+    [['Morning', x=>x.m != null && x.m < 720], ['Afternoon', x=>x.m != null && x.m >= 720 && x.m < 1080],
+     ['Evening', x=>x.m != null && x.m >= 1080], ['Other times', x=>x.m == null]].forEach(([nama, uji])=>{
+      const rs = baris.filter(uji); if(!rs.length) return;
+      h += `<div class="lgs-grp"><span>${nama}</span></div><div class="lgs-grid">` + rs.map(({t,j,i})=>{
+        const st = lgsStatus(j, t.tz), mulai = (String(j.w).match(/\d{1,2}[.:]\d{2}/) || ['—'])[0];
+        return kartu(t, 'd'+i,
+          `<span class="lgs-time">${mulai}</span><div class="lgs-nm"><b>${t.nm}</b><span>${[t.kota, t.tz].filter(Boolean).join(' · ')}${j.n?' · '+j.n:''}</span></div>` +
+          (st ? `<span class="lgs-pill ${st.c}">${st.c==='live'?'● ':''}${st.t}</span>` : '') + bintang(t,i),
+          lgsDay, st && st.c === 'past' ? ' past' : '');
+      }).join('') + `</div>`;
+    });
+    if(!baris.length) h += `<div class="lgs-empty">No sessions on ${HARI[lgsDay]}${LGS_UI.favOnly?' at your favorite stores':''}${LGS_UI.kota.length?' in '+LGS_UI.kota.join(', '):''}.<br>Try another day${LGS_UI.kota.length||LGS_UI.favOnly?' or clear the filters':''}.</div>`;
+  } else {
+    const q = lgsQ;
+    const toko = daftar.filter(t=>!q || (t.nm + ' ' + (t.kota || '')).toLowerCase().includes(q))
+      .map(t=>({ t, i:LGS.indexOf(t) })).sort((a,b)=>fav(b.t) - fav(a.t));
+    h += `<div class="lgs-grp top"><span>Local Game Shops</span><span>${toko.length}</span></div><div class="lgs-grid">` +
+      toko.map(({t,i})=>kartu(t, 's'+i,
+        `<div class="lgs-nm"><b>${t.nm}</b><span>${t.kota || ''}</span><div class="lgs-dots" aria-label="Play days: ${t.jd.slice().sort((a,b)=>a.h-b.h).map(j=>HARI[j.h]).join(', ')}">` +
+          [1,2,3,4,5,6,7].map(d=>`<u class="${t.jd.some(j=>j.h===d)?'y':''}${d===hi?' t':''}" aria-hidden="true">${HARI[d][0]}</u>`).join('') +
+        `</div></div>` + bintang(t,i), hi, '')).join('') + `</div>`;
+    if(!toko.length) h += `<div class="lgs-empty">${LGS_UI.favOnly && !favSet.size ? 'No favorite stores yet. Tap ☆ on a store to add it.' : 'No store matches.'}</div>`;
+  }
+  $('#lgsList').innerHTML = h;
 
   $('#lgsNote').innerHTML =
     `<b style="color:var(--paper)">Confirm before you go.</b> Schedules and play times can change, ` +
@@ -7511,12 +7588,48 @@ function renderLgs(){
     `<a href="https://www.tiktok.com/@deteprtm" target="_blank" rel="noopener">@deteprtm</a>.`;
 }
 
-$('#lgsFilter').addEventListener('change', e=>{
-  const sel = e.target.closest('#lgsFilterSel');
-  if(!sel) return;
-  lgsFilterKota = sel.value;
-  renderLgs();
+/* Semua interaksi Hero Base lewat satu pendengar di #lgsPage (tombol ✎ Edit admin ditangani lgs-admin.js). */
+$('#lgsPage').addEventListener('click', e=>{
+  const t = e.target; let b;
+  if(t.closest('.lgs-acts') || t.closest('#lgsAdminBar')) return;
+  if((b = t.closest('[data-lgs-view]'))){ LGS_UI.view = b.dataset.lgsView === 'store' ? 'store' : 'day'; }
+  else if((b = t.closest('[data-lgs-day]'))){ lgsDay = +b.dataset.lgsDay || hariIni(); }
+  else if((b = t.closest('[data-lgs-favonly]'))){ LGS_UI.favOnly = !LGS_UI.favOnly; }
+  else if((b = t.closest('[data-lgs-kota]'))){
+    const k = b.dataset.lgsKota === '' ? '' : kotaLGS()[+b.dataset.lgsKota];
+    if(!k) LGS_UI.kota = [];
+    else if(LGS_UI.kota.includes(k)) LGS_UI.kota = LGS_UI.kota.filter(x=>x !== k);
+    else LGS_UI.kota.push(k);
+  }
+  else if((b = t.closest('[data-lgs-fav]'))){
+    const s = LGS[+b.dataset.lgsFav]; if(!s) return;
+    if(LGS_UI.fav.includes(s.nm)) LGS_UI.fav = LGS_UI.fav.filter(x=>x !== s.nm); else LGS_UI.fav.push(s.nm);
+  }
+  else if((b = t.closest('.lgs-chead'))){
+    const k = b.parentNode.dataset.lgsK;
+    if(lgsOpen.has(k)) lgsOpen.delete(k); else lgsOpen.add(k);
+    b.parentNode.classList.toggle('open', lgsOpen.has(k));
+    b.setAttribute('aria-expanded', String(lgsOpen.has(k)));
+    return;
+  }
+  else return;
+  lgsSimpan(); renderLgs();
 });
+$('#lgsPage').addEventListener('keydown', e=>{
+  if((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('lgs-chead')){ e.preventDefault(); e.target.click(); }
+});
+$('#lgsQ').addEventListener('input', e=>{ lgsQ = e.target.value.trim().toLowerCase(); renderLgs(); });
+/* Geser kiri / kanan di daftar (HP) = pindah hari. */
+(()=>{
+  let x0 = 0, y0 = 0;
+  const el = $('#lgsList');
+  el.addEventListener('touchstart', e=>{ x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, {passive:true});
+  el.addEventListener('touchend', e=>{
+    if(LGS_UI.view !== 'day') return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    if(Math.abs(dx) > 70 && Math.abs(dx) > 2 * Math.abs(dy)){ lgsDay = dx < 0 ? lgsDay % 7 + 1 : (lgsDay + 5) % 7 + 1; renderLgs(); }
+  }, {passive:true});
+})();
 
 /* ==================== HALAMAN PANDUAN ====================
    Isi disimpan sebagai satu blok HTML siap-pakai (bukan lewat kamus T satu-

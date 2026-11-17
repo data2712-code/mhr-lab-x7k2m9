@@ -617,6 +617,32 @@ dan menutupi tengah papan saat Battle Phase. Keputusan pemilik 17 Nov 2026 setel
 - Hanya tampilan; mesin & server tidak berubah (tidak perlu deploy). Cache-buster `sim/` → `?v=o2.29`, `SIM_URL` → `?v=o2.29`,
   `sim-host.js?v=7.41-sim29`.
 
+### v7.43 — Weekly Rush LGS (Hero Base) dirombak: By day / By store, strip hari & chip kota yang menempel, kartu ringkas, favorit, pencarian — 17 November 2026 *(`index.html`, `lgs-admin.js`)*
+
+Permintaan pemilik: halaman makin padat (37 toko di 12 kota). Di HP tingginya ±10.000 px karena tiap toko tampil sampai tiga kali
+(panel Today, kartu 7 hari, daftar toko) dan dropdown kota ikut tergulir. Mockup disetujui pemilik sebelum dikerjakan.
+- **Satu tampilan aktif**, dipilih lewat tab **By day / By store** (`[data-lgs-view]`). Panel "Today", kartu per hari, dan daftar toko
+  yang ditumpuk (`#lgsToday`, `#lgsDays`, `#lgsStores`) dihapus, diganti `#lgsBar` + `#lgsList`. Tinggi halaman di HP turun ke ±2.000 px.
+- **Strip hari** (`#lgsStrip`, Mon–Sun): hari ini terpilih otomatis dan bertitik hijau, tiap hari menampilkan jumlah sesi (mengikuti
+  filter kota / favorit). Di HP, geser kiri / kanan di daftar = pindah hari.
+- **Filter kota jadi chip multi-pilih** (`#lgsChips`, menggantikan dropdown `#lgsFilterSel`) + chip **★ Favorites**.
+  Bar (`.lgs-bar`) menempel di atas saat scroll (`top:42px` desktop, `top:0` di ≤920px karena nav di bawah).
+- **By day**: sesi dikelompokkan Morning (<12:00) / Afternoon (<18:00) / Evening / Other times (tanpa jam, mis. "On Demand"), urut jam,
+  favorit di atas. Label status untuk sesi hari ini dihitung menurut **zona waktu toko** (`lgsKini()`): "Starts in 2h 30m" (≤6 jam
+  sebelum mulai), "● Live now" (sudah mulai), "Ended" + kartu diredupkan (hanya kalau jadwal punya jam selesai; "Close" tidak punya).
+- **Kartu ringkas yang bisa dibuka** (`.lgs-card`, tap kepala kartu / Enter / Spasi): jadwal lengkap toko + tombol Location, Chat store,
+  WA Group, Instagram (sama seperti sebelumnya). Membuka kartu tidak merender ulang daftar.
+- **By store**: kotak cari (nama toko / kota) dan kotak hari main M T W T F S S (hari ini bergaris hijau).
+- **Favorit ☆/★** per toko (kunci = nama toko), tampil paling atas di kedua tampilan.
+- **Diingat di perangkat**: tampilan, kota terpilih, favorit, dan "favorit saja" di `localStorage` `mhr_lgs_ui` (tanpa login, tidak
+  ikut akun). Hari yang dipilih dan kata cari tidak disimpan.
+- **`lgs-admin.js`**: tombol **✎ Edit** kini dipasang lewat `data-lgs-id` di tiap kartu (di dalam `.lgs-acts`, terlihat setelah kartu
+  dibuka), bukan lagi dicocokkan lewat urutan + nilai dropdown kota. Bar ADMIN / ＋ Add store tetap di atas (`#lgsFilter` kini hanya jangkar).
+- CSS lama `.lgs-today`, `.lgs-days`, `.lgs-day`, `.lgs-item`, `.lgs-store` dihapus (tidak dipakai berkas lain; `home-ui.js` punya
+  kelasnya sendiri). `?v=` `lgs-admin.js` → 7.43, versi footer → v7.43. Tanpa perubahan data / SQL.
+- Diuji lokal (Playwright, 390 px dan 1280 px, data cadangan `data.js`): tanpa error halaman, tanpa scroll mendatar, pilihan tersimpan
+  setelah muat ulang. **Belum diuji**: tombol Edit dengan akun admin sungguhan dan gestur geser di HP sungguhan.
+
 ### Data — Battle Sim o2.28: ranked main adil (anti-farming) + penjelasan mekanisme poin — 16 November 2026 *(`sim/sim-ranked.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`; SQL baru `mhr_decklab_v742_sim_ranked_antifarm.sql` di folder internal)*
 
 Riwayat simulator #107 (dikerjakan bersamaan dengan o2.27 dari device lain). Hadiah Season 0 (1 Booster Box BP02 untuk poin tertinggi) bisa memancing farming poin dengan teman. Karena

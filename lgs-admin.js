@@ -125,12 +125,11 @@
     if (bar) { if (bar.dataset.h !== html) { bar.innerHTML = html; bar.dataset.h = html; } }
     else { const b = document.createElement('div'); b.id = 'lgsAdminBar'; b.innerHTML = html; b.dataset.h = html; host.parentNode.insertBefore(b, host); }
     if (!dbReady) return;
-    const sel = q('#lgsFilterSel'), kota = sel ? sel.value : '';
-    const shown = window.LGS.filter(t => !kota || t.kota === kota);
-    document.querySelectorAll('#lgsStores .lgs-store').forEach((el, i) => {
-      const t = shown[i]; if (!t || t._id == null || el.querySelector('.lgs-edit')) return;
-      const box = el.lastElementChild; if (!box) return;
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'lgs-edit'; b.dataset.lgsEdit = t._id; b.textContent = '✎ Edit';
+    // v7.43 — kartu toko kini membawa data-lgs-id (bukan lagi dicocokkan lewat urutan + dropdown kota)
+    document.querySelectorAll('#lgsList .lgs-card[data-lgs-id]').forEach(el => {
+      const id = el.dataset.lgsId; if (!id || el.querySelector('.lgs-edit')) return;
+      const box = el.querySelector('.lgs-acts'); if (!box) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'lgs-edit'; b.dataset.lgsEdit = id; b.textContent = '✎ Edit';
       box.appendChild(b);
     });
   }
