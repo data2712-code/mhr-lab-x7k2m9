@@ -721,8 +721,11 @@
     $('midzone').appendChild(pillEl());
     $('midzone').appendChild(tr);
     $('midzone').insertAdjacentHTML('beforeend', timelineHTML(v));
-    tr.className = 'abar' + (ui.msg ? ' err' : '');
     tr.innerHTML = abarHTML();
+    // Laporan #26 (o2.29): panel berisi pilihan → .dock (di layar desktop pendek menempel di kolom kanan, lewat CSS).
+    const dockable = !!tr.querySelector('.acts > *') && !tr.querySelector('.cpay');
+    tr.className = 'abar' + (ui.msg ? ' err' : '') + (dockable ? ' dock' : '') + (dockable && ui.trayMin ? ' min' : '');
+    if (dockable) tr.insertAdjacentHTML('beforeend', '<button class="sm tmin" data-act="trayMin">' + (ui.trayMin ? '▸ Show' : '▾ Hide') + '</button>');
     if (net.on) { const nb = netBarHTML(); if (nb) tr.insertAdjacentHTML('afterbegin', nb); }
     mobileArena();
     mobileBoard();
@@ -1021,7 +1024,7 @@
      diketuk/diklik; isi RETREAT/VOID dibuka dari tumpukan di papan. */
   function renderSide(v) {
     $('game').classList.toggle('sideOn', ui.sideOn);
-    if (!$('log') || !document.querySelector('#sideBody .logbar')) $('sideBody').innerHTML = '<div class="lfil" id="logFil"></div><div class="log" id="log"></div>' +
+    if (!$('log') || !document.querySelector('#sideBody .logbar')) $('sideBody').innerHTML = '<div class="lhead" id="logHead"></div><div class="lfil" id="logFil"></div><div class="log" id="log"></div>' +
       '<div class="logbar"><button class="sm" data-act="copyLog">⧉ Copy log code</button><button class="sm" data-rep="open" data-v="bug">🐞 Report a bug / feedback</button></div>';
     renderLog(v);
   }
@@ -1596,6 +1599,7 @@
       }
       case 'dropCallBase': act({ t: 'call', c: ui.sel, to: 'BASE', cost: [] }); return;
       case 'cancel': resetSel(); render(); return;
+      case 'trayMin': ui.trayMin = !ui.trayMin; render(); return;
       case 'revClose': { const r = $('reveal'); if (r) r.classList.remove('on'); return; }
       case 'peek': if (G.inst[t.dataset.c]) { ui.sel = t.dataset.c; ui.mode = null; ui.cost = []; render(); } return;
       case 'call': case 'ccall': {
@@ -1834,9 +1838,19 @@
     const BAT = ['attack', 'judge', 'rp', 'battle', 'step', 'retreat', 'timeout'];
     const keep = e => f === 'all' || e.k === 'turn' || (f === 'p0' && e.txt.startsWith(G.names[0])) || (f === 'p1' && e.txt.startsWith(G.names[1])) ||
       (f === 'battle' && BAT.includes(e.k)) || (f === 'rush' && (e.k === 'rp' || e.k === 'over'));
+    // o2.29 (keputusan pemilik: gabung Timeline ke Play-by-play, desktop): penanda NEW sejak langkah terakhir Anda, label jenis kejadian,
+    // jumlah kejadian baru, dan baris "siapa yang beraksi · batas CALL" (dulu di kaki Timeline).
+    const sk = annKey(v); if (ui.seenN[sk] == null) ui.seenN[sk] = G.log.length;
+    const seen = ui.replay ? Infinity : ui.seenN[sk];
+    const nNew = lg.filter(e => e.n >= seen && !TL_SKIP.includes(e.k)).length;
+    const lh = $('logHead');
+    if (lh) { const wf = waitForText(v), lim = limitsHTML();
+      lh.innerHTML = (nNew ? '<div class="lht"><span class="nw">' + nNew + ' new since your last move</span></div>' : '') +
+        (wf || lim ? '<div class="lhs">' + wf + ' ' + lim + '</div>' : ''); }
     $('log').innerHTML = lg.filter(keep).slice(-250).map(e => {
-      const pcls = povCls(e.txt);
-      return '<div class="k-' + e.k + ' ' + pcls + (e.n >= fresh && fresh > 0 ? ' fresh' : '') + '">' + esc(e.txt).replace(NAME_RE, m => '<span class="q">' + m + '</span>') + '</div>';
+      const pcls = povCls(e.txt), isNew = e.n >= seen && !TL_SKIP.includes(e.k);
+      const lab = TL_SKIP.includes(e.k) || e.k === 'turn' ? '' : '<i class="lk">' + (TL_LABEL[e.k] || String(e.k).toUpperCase()) + (isNew ? '<em>NEW</em>' : '') + '</i>';
+      return '<div class="k-' + e.k + ' ' + pcls + (isNew ? ' nw' : '') + (e.n >= fresh && fresh > 0 ? ' fresh' : '') + '">' + lab + esc(e.txt).replace(NAME_RE, m => '<span class="q">' + m + '</span>') + '</div>';
     }).join('');
     lg0.scrollTop = stick ? lg0.scrollHeight : top0;
     ui.logHid = !lg0.clientHeight;                     // lembar Log di HP tertutup: saat dibuka lagi mulai dari kejadian terbaru

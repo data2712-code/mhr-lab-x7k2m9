@@ -16,6 +16,19 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-17', t: 'improve', v: 'o2.29', reports: [26],
+      en: { h: 'Play-by-play replaces the Timeline, and a better layout for short desktop screens', b: [
+        'Desktop: the Timeline box on the board is gone. The Play-by-play now shows what each line is (ATTACK, EFFECT, CALL …), marks what happened since your last move as NEW, and shows who is acting and your CALL / Deploy / COUNTER CALL limits at the top.',
+        'Short desktop screens (650 px high or less): the decision panel (attack targets, COUNTER responses, effect choices) sits at the top of the right column instead of over the board. All choices are listed, Pass is always visible, and Hide shrinks the panel so you can read the Play-by-play.',
+        'Card choice windows shrink their cards to fit short screens, and Confirm stays visible.',
+        'Phone layout is unchanged.'] },
+      id: { h: 'Play-by-play menggantikan Timeline, dan tata letak lebih baik untuk layar desktop pendek', b: [
+        'Desktop: kotak Timeline di papan dihapus. Play-by-play kini menampilkan jenis tiap baris (ATTACK, EFFECT, CALL …), menandai kejadian sejak langkah terakhir Anda sebagai NEW, dan menampilkan siapa yang beraksi serta batas CALL / Deploy / COUNTER CALL Anda di bagian atas.',
+        'Layar desktop pendek (tinggi 650 px ke bawah): panel keputusan (target serangan, respons COUNTER, pilihan efek) berada di atas kolom kanan, tidak lagi menutupi papan. Semua pilihan tersusun ke bawah, Pass selalu terlihat, dan tombol Sembunyikan mengecilkan panel supaya Play-by-play bisa dibaca.',
+        'Jendela pilihan kartu mengecilkan kartunya di layar pendek, dan tombol Confirm selalu terlihat.',
+        'Tampilan HP tidak berubah.'] }
+    },
+    {
       d: '2026-11-16', t: 'rules', v: 'o2.28',
       en: { h: 'Ranked: how points work and fair-play rules', b: [
         'Ranked Season 0 starts on 23 November 2026. While the community is small, Find a match pairs everyone with everyone, whatever their rank, so meeting the same players often is normal.',

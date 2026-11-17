@@ -603,6 +603,20 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Data — Battle Sim o2.29: Timeline digabung ke Play-by-play (desktop) + tata letak layar desktop pendek (laporan #26) — 17 November 2026 *(`sim/sim-ui.js`, `sim/sim-i18n.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+
+Riwayat simulator #108. Laporan #26 (feedback, desktop 1280×497): jendela pilih target & pilihan respons terlalu kecil (harus di-scroll)
+dan menutupi tengah papan saat Battle Phase. Keputusan pemilik 17 Nov 2026 setelah melihat preview:
+1. **Timeline dihapus dari papan (desktop)** dan isinya masuk Play-by-play: label jenis kejadian di tiap baris, penanda NEW sejak langkah
+   terakhir pemain, lencana "x new since your last move", dan baris status (siapa yang beraksi · CALL / Deploy / COUNTER CALL) di atas.
+   HP tidak berubah (Timeline satu baris di garis tengah tetap, karena Play-by-play HP ada di menu More).
+2. **Layar desktop pendek (lebar > 820 px, tinggi ≤ 650 px)**: panel keputusan yang berisi pilihan (bukan panel bayar biaya CALL)
+   menempel di atas kolom kanan (`.abar.dock`), pilihan tersusun ke bawah dan ringkas, Pass selalu terlihat, tombol ▾ Hide / ▸ Show.
+   Jendela pilihan kartu: ukuran kartu mengikuti tinggi layar, baris Confirm menempel di bawah.
+3. Panel keputusan di desktop normal tetap di tengah papan (keputusan pemilik).
+- Hanya tampilan; mesin & server tidak berubah (tidak perlu deploy). Cache-buster `sim/` → `?v=o2.29`, `SIM_URL` → `?v=o2.29`,
+  `sim-host.js?v=7.41-sim29`.
+
 ### Data — Battle Sim o2.28: ranked main adil (anti-farming) + penjelasan mekanisme poin — 16 November 2026 *(`sim/sim-ranked.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`; SQL baru `mhr_decklab_v742_sim_ranked_antifarm.sql` di folder internal)*
 
 Riwayat simulator #107 (dikerjakan bersamaan dengan o2.27 dari device lain). Hadiah Season 0 (1 Booster Box BP02 untuk poin tertinggi) bisa memancing farming poin dengan teman. Karena
