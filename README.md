@@ -604,6 +604,13 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Battle Sim o2.32 — laporan #28–#31: Undo online, tempat kartu biaya CALL, layar sedang — 18 November 2026 *(`sim/`, `sim-host.js`, `index.html`; server Battle Sim perlu deploy untuk tombol Batal Undo)*
+- #28: setelah sambung ulang, pertanyaan Izinkan/Tolak Undo muncul lagi (dulu server hanya mengirim state tanpa `undo_ask`).
+- #30: peminta Undo bisa membatalkan permintaannya (tombol Batal → pesan `undo_cancel`, server `Match.undoCancel`).
+- #31: CALL Lv4+ — setelah biaya pas, kartu biaya yang tempatnya sah ikut menyala; ketuk = kartu baru ke tempat itu (termasuk BASE penuh). HP: tombol Lihat papan berfungsi lagi (sejak o2.25 bentrok dengan `data-act="peek"` intip lampiran → kini `attPeek`).
+- #29: desktop 821–1199 px — ukuran kartu mengikuti lebar & tinggi jendela, tombol panel keputusan dibungkus (Ya/Tidak tidak terpotong).
+- `SIM_URL ?v=o2.32`, `sim-host.js?v=7.44-sim32`.
+
 ### Data — SD05 & SD06: teks & gambar resmi Bahasa Indonesia (35 kartu, 39 cetakan) + Battle Sim o2.31 — 17 November 2026 *(`cards.js`, `index.html`, `sw.js`, 39 gambar di `images/`, `sim/index.html`, `sim/sim-updates.js`, `sim-host.js`)*
 
 Permintaan pemilik: SD05 dan SD06 versi Indonesia sudah ada di https://www.marvelherorush.com/id/cards → ambil data & gambarnya.

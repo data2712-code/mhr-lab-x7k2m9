@@ -16,6 +16,21 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-18', t: 'fix', v: 'o2.32', reports: [28, 29, 30, 31],
+      en: { h: 'Undo requests, CALL cost spots and mid-size screens', b: [
+        'Online: if your connection dropped while your opponent was asking for an undo, the Allow / Decline question now comes back when you reconnect. Before, the request could only wait until it ran out.',
+        'Online: the player who asked for an undo can now cancel the request with the Cancel button next to "waiting for … to answer".',
+        'CALL with a cost: after the cost is paid, the cards you chose to Retreat also glow if the new card can take their spot. Tap one to place the new card there, including the BASE when it is full. To remove a card from the cost, use the chips in the cost panel.',
+        'Phone: the "Look at the board" button works again. Since o2.25 it did nothing, so you could not see the board while deciding in the Counter window or other choice panels.',
+        'Desktop windows between 821 and 1199 px wide: the board and cards now shrink to fit, and the decision panel wraps its buttons so options like Yes and No are no longer cut off.'] },
+      id: { h: 'Permintaan Undo, tempat kartu biaya CALL, dan layar ukuran sedang', b: [
+        'Online: bila koneksi Anda terputus saat lawan meminta Undo, pertanyaan Izinkan / Tolak kini muncul lagi setelah tersambung kembali. Sebelumnya permintaan hanya menunggu sampai waktunya habis.',
+        'Online: pemain yang meminta Undo kini bisa membatalkan permintaannya dengan tombol Batal di samping "menunggu jawaban …".',
+        'CALL dengan biaya: setelah biaya pas, kartu yang dipilih untuk Retreat ikut menyala bila kartu baru bisa menempati tempatnya. Ketuk salah satunya untuk menaruh kartu baru di sana, termasuk BASE yang sedang penuh. Untuk melepas kartu dari biaya, pakai chip di panel biaya.',
+        'HP: tombol "Lihat papan" berfungsi lagi. Sejak o2.25 tombol ini tidak bereaksi, sehingga papan tidak bisa dilihat saat memutuskan di jendela Counter atau panel pilihan lain.',
+        'Desktop dengan lebar jendela 821–1199 px: papan dan kartu kini mengecil agar muat, dan panel keputusan membungkus tombolnya sehingga pilihan seperti Ya dan Tidak tidak lagi terpotong.'] }
+    },
+    {
       d: '2026-11-17', t: 'patch', v: 'o2.31',
       en: { h: 'SD05 & SD06 now use the official Indonesian card text and images', b: [
         'With the card language set to Indonesian, 35 SD05 and SD06 cards now show the official Indonesian text and card images from marvelherorush.com.',

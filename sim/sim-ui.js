@@ -479,6 +479,8 @@
       hostGame(true);
     }
     if (promptKey() !== key) { resetSel(); ui.pickClosed = false; ui.msg = ''; }
+    // Laporan #28 (o2.32): setelah sambung ulang, server hanya mengirim state (undoPending) tanpa undo_ask lagi → tanya lagi di sini.
+    if (msg.undoPending && msg.undoPending.from !== net.seat && !net.ask && !G.result) { netUndoAsk(); netAutoPass(msg); return; }
     render();
     netAutoPass(msg);
   }
@@ -524,7 +526,8 @@
   function netUndoResult(m) {
     net.ask = null; net.waitUndo = false;
     const mine = m.from === net.seat;
-    const t = mine ? (m.accepted ? 'Undo accepted: your last move was taken back.' : 'Your opponent declined the undo.') : (m.accepted ? 'You allowed the undo.' : '');
+    const t = m.cancelled ? (mine ? 'Undo request cancelled.' : (G ? G.names[m.from] : 'Opponent') + ' cancelled the undo request.') :
+      mine ? (m.accepted ? 'Undo accepted: your last move was taken back.' : 'Your opponent declined the undo.') : (m.accepted ? 'You allowed the undo.' : '');
     net.note = t ? { text: t, at: Date.now() } : null;
     closeOv(); if (G) render();
   }
@@ -544,7 +547,7 @@
     const m = net.last; if (!m || G.result) return '';
     const o = 1 - net.seat, so = m.seats && m.seats[o], out = [];
     if (net.note && Date.now() - net.note.at < 6000) out.push(esc(net.note.text));
-    if (net.waitUndo || (m.undoPending && m.undoPending.from === net.seat)) out.push('Undo request sent · waiting for ' + esc(G.names[o]) + ' to answer…');
+    if (net.waitUndo || (m.undoPending && m.undoPending.from === net.seat)) out.push('Undo request sent · waiting for ' + esc(G.names[o]) + ' to answer… <button class="sm" data-act="undoCancel">Cancel</button>');
     if (so && !so.connected) {
       const left = Math.max(0, 120 - (so.away || 0));
       out.push('⚠ ' + esc(G.names[o]) + ' is disconnected (' + (so.away || 0) + 's).' + (left > 0 ? ' Their clock keeps running; you can claim the win after 2:00.' : '') +
@@ -997,9 +1000,9 @@
     const x = G.inst[iid], att = (x.att || []).filter(a => G.inst[a]);
     let h = '';
     if (att.length) h += '<div class="attpk"><div class="attpkh">ATTACHED · ' + att.length + '</div><div class="attrow">' +
-      att.map(a => '<button class="attc" data-act="peek" data-c="' + a + '" title="' + esc(S.nameOf(G, a)) + '">' + cardHTML(a, { att: true }).replace(/data-iid=/g, 'data-x=') +
+      att.map(a => '<button class="attc" data-act="attPeek" data-c="' + a + '" title="' + esc(S.nameOf(G, a)) + '">' + cardHTML(a, { att: true }).replace(/data-iid=/g, 'data-x=') +
         '<span>' + esc(S.nameOf(G, a).replace(/^「[^」]*」\s*/, '') || S.nameOf(G, a)) + '</span></button>').join('') + '</div></div>';
-    if (x.host && G.inst[x.host]) h += '<div class="attpk"><button class="sm" data-act="peek" data-c="' + x.host + '">← Attached to ' + esc(S.nameOf(G, x.host)) + '</button></div>';
+    if (x.host && G.inst[x.host]) h += '<div class="attpk"><button class="sm" data-act="attPeek" data-c="' + x.host + '">← Attached to ' + esc(S.nameOf(G, x.host)) + '</button></div>';
     return h;
   }
   // Tahap 5: keadaan yang berasal dari efek lain (kehilangan efek, efek pinjaman, kemampuan, larangan biaya CALL).
@@ -1077,7 +1080,9 @@
     const base = [];
     for (let k = 0; k < S.BASE_MAX; k++) {
       const iid = P.base[k];
-      base.push('<div class="slot' + (baseHl && !iid ? ' hl' : '') + '" data-slot="BASE" data-side="' + side + '">' + (iid ? cardHTML(iid, { onField: true }) : '') + '</div>');
+      // Laporan #31 (o2.32): BASE penuh tetapi kartu biaya ada di BASE → kartu biaya itu ikut menyala; ketuk = kartu baru ke BASE.
+      const costSpot = !!iid && baseHl && ui.mode === 'call-cost' && ui.cost.includes(iid);
+      base.push('<div class="slot' + (baseHl && (!iid || costSpot) ? ' hl' : '') + '" data-slot="BASE" data-side="' + side + '">' + (iid ? cardHTML(iid, { onField: true }) : '') + '</div>');
     }
     return '<div class="half field side-' + (isTop ? 'opp' : 'me') + ' side ' + (isTop ? 'opp' : 'me') + '">' + railHTML(p, isTop) +
       '<div class="battle">' + slots + '</div>' +
@@ -1570,6 +1575,7 @@
       }
       case 'closeov': ui.pileOpen = false; closeOv(); render(); return;
       case 'closeOverModal': ui.overClosed = true; closeOv(); render(); return;
+      case 'undoCancel': net.waitUndo = false; net.send({ type: 'undo_cancel' }); render(); return;
       case 'undoYes': case 'undoNo': net.ask = null; closeOv(); net.send({ type: 'undo_answer', accept: a === 'undoYes' }); render(); return;
       case 'claimWin': if (confirm('Claim the win? Your opponent has been disconnected for more than 2 minutes.')) net.send({ type: 'claim_win' }); return;
       case 'netMenu': window.MHRSimOnline.leaveGame(true); return;
@@ -1607,7 +1613,8 @@
       case 'cancel': resetSel(); render(); return;
       case 'trayMin': ui.trayMin = !ui.trayMin; render(); return;
       case 'revClose': { const r = $('reveal'); if (r) r.classList.remove('on'); return; }
-      case 'peek': if (G.inst[t.dataset.c]) { ui.sel = t.dataset.c; ui.mode = null; ui.cost = []; render(); } return;
+      // Laporan #31 (o2.32): dulu 'peek' — bentrok dengan tombol "Lihat papan" (case 'peek' di bawah tidak pernah tercapai sejak o2.25).
+      case 'attPeek': if (G.inst[t.dataset.c]) { ui.sel = t.dataset.c; ui.mode = null; ui.cost = []; render(); } return;
       case 'call': case 'ccall': {
         const lv = S.getLv(G, ui.sel);
         ui.callType = a; ui.cost = []; ui.mode = lv >= 4 ? 'call-cost' : 'call-dest'; render(); return;
@@ -1671,6 +1678,7 @@
         // Laporan #17 (alur RushDee, 14 Nov 2026): biaya sudah pas dan kartu biaya di BATTLE diketuk → kartu baru langsung
         // menempati area kartu itu (kartu biaya Retreat dulu). Untuk melepas kartu biaya, pakai chip di panel atau Clear.
         if (costReady() && ui.cost.includes(iid) && L.zone === 'bat' && destOkWith(L.slot)) { act({ t: ui.callType, c: ui.sel, to: L.slot, cost: ui.cost.slice() }); return; }
+        if (costReady() && ui.cost.includes(iid) && L.zone === 'base' && destOkWith('BASE')) { act({ t: ui.callType, c: ui.sel, to: 'BASE', cost: ui.cost.slice() }); return; }
         ui.cost = ui.cost.includes(iid) ? ui.cost.filter(x => x !== iid) : ui.cost.concat(iid);
         render();
       }
