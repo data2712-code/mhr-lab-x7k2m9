@@ -16,6 +16,23 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-18', t: 'improve', v: 'o2.33',
+      en: { h: 'New 📈 Stats tab for your Find a match games', b: [
+        'Your win rate, going first vs second, average game length and last 10 results.',
+        'My decks: record and win rate for each deck you played. Tap a deck to filter everything else.',
+        'Matchups: your record against each opponent colour combination.',
+        'Cards: how often you called each card and your win rate when you did, plus the opponent cards that showed up most in your losses.',
+        'Match history with filters, ranked points per game, and Replay / Share.',
+        'Only Find a match games count. Opponent decks are read from the game log after the game, never during it.'] },
+      id: { h: 'Tab baru 📈 Statistik untuk pertandingan Cari lawan', b: [
+        'Win rate, jalan pertama vs kedua, rata-rata durasi game, dan 10 hasil terakhir.',
+        'Deck saya: rekor dan win rate tiap deck yang Anda pakai. Ketuk satu deck untuk memfilter semua bagian lain.',
+        'Matchup: rekor Anda melawan tiap kombinasi warna lawan.',
+        'Kartu: seberapa sering tiap kartu Anda panggil dan win rate saat kartu itu dipanggil, plus kartu lawan yang paling sering muncul saat Anda kalah.',
+        'Riwayat pertandingan dengan filter, poin ranked per game, serta Replay / Share.',
+        'Hanya pertandingan Cari lawan yang dihitung. Deck lawan dibaca dari log setelah pertandingan selesai, tidak pernah selama pertandingan.'] }
+    },
+    {
       d: '2026-11-18', t: 'fix', v: 'o2.32', reports: [28, 29, 30, 31],
       en: { h: 'Undo requests, CALL cost spots and mid-size screens', b: [
         'Online: if your connection dropped while your opponent was asking for an undo, the Allow / Decline question now comes back when you reconnect. Before, the request could only wait until it ran out.',

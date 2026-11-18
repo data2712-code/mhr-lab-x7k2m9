@@ -15,7 +15,7 @@
   const KEY_PREF = 'mhrsim.prefs.v1';
   const prefs = (() => { try { return JSON.parse(localStorage.getItem(KEY_PREF) || '{}') || {}; } catch (e) { return {}; } })();
   const savePrefs = () => { try { localStorage.setItem(KEY_PREF, JSON.stringify(prefs)); } catch (e) { /* abaikan */ } };
-  const VIEWS = { home: 'home', practice: 'panelPractice', history: 'panelHistory', online: 'panelOnline', find: 'panelOnline', custom: 'panelCustom', tools: 'panelCustom', ranked: 'panelRanked' };   // ranked: o2.12 (riwayat #87)
+  const VIEWS = { home: 'home', practice: 'panelPractice', history: 'panelHistory', online: 'panelOnline', find: 'panelOnline', custom: 'panelCustom', tools: 'panelCustom', ranked: 'panelRanked', stats: 'panelStats' };   // ranked: o2.12 (riwayat #87)
   let histTab = null;                    // #85: default Online (akun) bila tersedia, kalau tidak Offline
   const MODE_LABEL = { practice: 'Practice vs Bot', friend: 'Friend · same device', custom: 'Custom game', sandbox: 'Sandbox' };
   // Kartu di hero menu Battle Sim (permintaan pemilik 13 Nov 2026): kiri, tengah, kanan. Gambar Inggris (images/en/).
@@ -81,9 +81,9 @@
   // o2.16 (permintaan pemilik 13 Nov 2026): tab menu berpindah di tempat, tanpa rasa "pindah halaman" dan tanpa tombol kembali.
   // Bilah tab #simNav tetap tampil; Play / Ranked / History / Tools menyala sesuai layar. Practice, Online, Find, Same device
   // adalah bagian dari tab Play.
-  const TAB_OF = { home: 'home', practice: 'home', online: 'home', find: 'home', custom: 'home', ranked: 'ranked', history: 'history', tools: 'tools' };
+  const TAB_OF = { home: 'home', practice: 'home', online: 'home', find: 'home', custom: 'home', ranked: 'ranked', stats: 'stats', history: 'history', tools: 'tools' };
   function navHTML() {
-    return '<button data-mode="home">Play</button><button data-mode="ranked">🏆 Ranked</button><button data-mode="history">History</button><button data-hub="sandbox">Sandbox</button>' +
+    return '<button data-mode="home">Play</button><button data-mode="ranked">🏆 Ranked</button><button data-mode="stats">📈 Stats</button><button data-mode="history">History</button><button data-hub="sandbox">Sandbox</button>' +
       '<button data-mode="tools">Tools</button><button data-rep="open" data-v="feedback">Feedback</button>';
   }
   function syncNav() {
@@ -96,7 +96,7 @@
     const prev = view;
     view = VIEWS[v] ? v : 'home';
     $('home').style.display = view === 'home' ? '' : 'none';
-    ['panelPractice', 'panelHistory', 'panelOnline', 'panelCustom', 'panelRanked'].forEach(id => { const el = $(id); if (el) el.classList.toggle('on', VIEWS[view] === id); });
+    ['panelPractice', 'panelHistory', 'panelOnline', 'panelCustom', 'panelRanked', 'panelStats'].forEach(id => { const el = $(id); if (el) el.classList.toggle('on', VIEWS[view] === id); });
     syncNav();
     { const pc = $('panelCustom'); if (pc) pc.classList.toggle('tools', view === 'tools'); }
     renderResume();
@@ -104,6 +104,7 @@
     if (view === 'practice') renderPractice();
     if (view === 'history') renderHistory();
     if (view === 'ranked' && window.MHRSimRanked) window.MHRSimRanked.render($('panelRanked'));
+    if (view === 'stats' && window.MHRSimStats) window.MHRSimStats.render($('panelStats'));   // o2.33 (riwayat #112): tab 📈 Stats
     if (view === 'find' && onlineReady()) window.MHRSimOnline.renderFind();
     else if (view === 'online' && onlineReady()) window.MHRSimOnline.renderPanel();
     else if (view === 'online' || view === 'find') renderOnline();

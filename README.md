@@ -604,6 +604,20 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Battle Sim o2.33 — tab 📈 Stats: statistik & riwayat Find a match untuk analisa pemain — 18 November 2026 *(`sim/` (berkas BARU `sim/sim-stats.js`), `sim-host.js`, `index.html`)*
+Permintaan pemilik: pemain bisa melihat statistik deck yang dipakai dan riwayat permainan untuk analisa. Keputusan pemilik: tab
+sendiri, **hanya pertandingan online Find a match** (`sim_matches.mode = 'queue'`); pertandingan offline tetap di My Lab → Performance.
+- Tab baru **📈 Stats** di bilah Battle Sim (Play · Ranked · Stats · History · …): filter periode / deck saya / warna lawan; ringkasan
+  (jumlah game, win rate, jalan pertama vs kedua, rata-rata giliran, poin ranked, 10 hasil terakhir + streak); **Deck saya** (rekor,
+  win rate, 1st/2nd per deck, ketuk = filter); **Matchup** per kombinasi warna lawan; **cara game berakhir**; **Kartu** (per deck:
+  dipanggil di berapa game, jumlah panggilan & serangan, win rate saat dipanggil vs tidak; tanpa deck: kartu paling sering dipanggil)
+  + **ancaman lawan** (kartu lawan yang paling sering dipanggil saat pemain kalah); **riwayat** dengan filter hasil, poin ranked per
+  game, Replay / Share.
+- Tanpa tabel / SQL / deploy server baru: membaca `sim_matches` (RLS milik sendiri, maks. 300 terakhir) dan `sim_rating_log`. Deck
+  kedua pemain dibaca dari kode log setelah pertandingan; statistik kartu dihitung di perangkat (pemetaan iid → kartu lewat
+  `createGame` dengan seed log, tanpa memutar ulang game).
+- `SIM_URL ?v=o2.33`, `sim-host.js?v=7.44-sim33`.
+
 ### Battle Sim o2.32 — laporan #28–#31: Undo online, tempat kartu biaya CALL, layar sedang — 18 November 2026 *(`sim/`, `sim-host.js`, `index.html`; server Battle Sim perlu deploy untuk tombol Batal Undo)*
 - #28: setelah sambung ulang, pertanyaan Izinkan/Tolak Undo muncul lagi (dulu server hanya mengirim state tanpa `undo_ask`).
 - #30: peminta Undo bisa membatalkan permintaannya (tombol Batal → pesan `undo_cancel`, server `Match.undoCancel`).

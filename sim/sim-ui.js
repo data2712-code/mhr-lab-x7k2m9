@@ -534,6 +534,7 @@
   function netSaved(id) {
     net.matchId = id; net.rank = null; if (G && G.result) render();
     // o2.12 (riwayat #87): perubahan poin ranked (Find a match) dari Supabase; room privat → tidak ada baris → tidak tampil
+    if (window.MHRSimStats) window.MHRSimStats.reload();   // o2.33: tab Stats memuat ulang pertandingan sesudah game online selesai
     if (window.MHRSimRanked) window.MHRSimRanked.result(id).then(x => { if (x && net.matchId === id) { net.rank = x; if (G && G.result && !ui.overClosed) render(); } }).catch(() => {});
   }
   function netChips(p) {
