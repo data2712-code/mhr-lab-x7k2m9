@@ -998,6 +998,68 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
 .roomcode{font-family:var(--disp);font-size:42px;font-weight:900;letter-spacing:.22em;color:var(--gold2);margin:4px 0 6px}
 .spin{width:26px;height:26px;margin:10px auto 2px;border:3px solid rgba(242,176,30,.25);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* ================= o2.37 (feedback pemain 19 Nov 2026, riwayat #116): kartu jadi fokus ================= */
+/* Lv / Power / R = lencana kecil di sudut, tidak lagi satu baris berdempet */
+.card .st{inset:0;top:0;bottom:0;background:none;display:block;padding:0;pointer-events:none}
+.card .st>b,.card .st>i,.card .st>span{position:absolute;background:rgba(10,13,17,.9);border-radius:4px;padding:0 3px;line-height:1.35;font-size:clamp(8px,calc(var(--cw) * .15),12px);font-weight:800;font-style:normal;box-shadow:0 1px 2px rgba(0,0,0,.5)}
+.card .st>b{left:2px;top:2px}
+.card .st>span{left:2px;bottom:2px;color:#fff}
+.card .st>i{right:2px;bottom:2px;color:var(--gold2)}
+.card .st>.up{color:#9fe0b2}.card .st>.down{color:#ffb4a8}
+/* "just placed" = titik kecil; "attacked" = ikon kecil */
+.card .tag.new{width:9px;height:9px;padding:0;border-radius:50%;background:#4FD1E8;box-shadow:0 0 0 2px rgba(10,13,17,.85);top:3px;right:3px;font-size:0}
+.card .tag.done{top:2px;right:2px;font-size:9px;padding:0 2px;color:#9aa5b1}
+.card .tag.att{left:50%;right:auto;top:auto;bottom:calc(2px + 1.6em);transform:translateX(-50%);font-size:8.5px;white-space:nowrap}
+.slot .weak{font-size:9px;letter-spacing:0}
+/* kartu tertutup milik sendiri: art tetap terlihat (diredupkan), label kecil "SET" di sudut */
+.card.fd .fdv{background:none;align-items:flex-start;justify-content:flex-end;padding:2px}
+.card.fd .fdv span{font-size:clamp(7px,calc(var(--cw) * .13),10px);padding:0 4px;border-radius:4px;background:rgba(10,13,17,.9);border:1px dashed #8a96a6;letter-spacing:.06em}
+.card.fd:not(:has(.fdl)) img{filter:brightness(.55) saturate(.65)}
+/* HAND: kartu yang bisa dimainkan naik dan menyala dengan warna berbeda */
+.handcards .card.hcall{box-shadow:0 0 0 2px var(--gold),0 0 14px rgba(242,176,30,.55);transform:translateY(-8px)}
+.handcards .card.hcost{box-shadow:0 0 0 2px #A47BFF,0 0 14px rgba(164,123,255,.55);transform:translateY(-8px)}
+.handcards .card.hacti{box-shadow:0 0 0 2px #4FD1E8,0 0 14px rgba(79,209,232,.5);transform:translateY(-8px)}
+.handcards .card.hdep{filter:brightness(.72) saturate(.7)}
+/* penanda fase */
+.phstep{display:flex;align-items:center;gap:4px;font-size:11px;color:#6e7a89;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.phstep i{font-style:normal;color:#3e4856}
+.phstep span{padding:1px 6px;border-radius:999px}
+.phstep span.on{color:#14110a;background:var(--gold)}
+.phstep span.skip{text-decoration:line-through;opacity:.55}
+.phstep small{margin-left:4px;font-size:9px;color:#ff9b8c}
+.phstep span.on small{color:#5a1a10}
+/* hasil serangan: label pendek di tepi bawah + warna bingkai area */
+.oc.sm{top:auto;bottom:-7px;transform:translateX(-50%);font-size:10px;padding:1px 6px;max-width:none}
+.slot.pl-win{box-shadow:0 0 0 2px var(--green) inset}.slot.pl-lose{box-shadow:0 0 0 2px var(--red) inset}.slot.pl-both{box-shadow:0 0 0 2px #c08a1e inset}.slot.pl-rush{box-shadow:0 0 0 2px var(--gold) inset,0 0 16px rgba(242,176,30,.35)}
+/* Deck / RETREAT / VOID = tumpukan berbentuk kartu, urutan playmat */
+.rail{gap:8px}
+.pile{flex-direction:column;align-items:center;gap:2px;font-size:8.5px}
+.pile .stk{width:34px;height:47px;border-radius:5px}
+.pile.void .stk{border-style:dashed}
+/* detail kartu dari RETREAT / VOID */
+.czoom{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:14px}
+.czin{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:14px;max-width:520px;width:100%;max-height:88vh;overflow:auto}
+.czin .cardinfo .big .card{--cw:120px}
+[data-zoom]{cursor:zoom-in}
+@media (max-width:820px){
+  :root{--hcw:clamp(58px, min(calc((100vw - 20px) / 4.4), calc((100dvh - 290px) / 5.2)), 86px);
+    --cw: clamp(34px, min(calc((100vw - 134px) / 3), calc((100dvh - 340px - var(--brh) - (var(--hcw) - 48px) * 1.4) / 5.6)), 84px)}
+  .handcards .card .st>i{right:auto;left:2px;bottom:auto;top:calc(2px + 1.45em)}   /* kartu bertumpuk: R di bawah Lv supaya tetap terlihat */
+  .hand .card .st>*{font-size:clamp(9px, calc(var(--cw) * .15), 12px)}
+  .handcards{justify-content:flex-start;padding-left:4px}
+  .handcards .card{box-shadow:-3px 0 6px rgba(0,0,0,.45)}
+  .handcards .card.hcall,.handcards .card.hcost,.handcards .card.hacti{transform:translateY(-12px)}
+  .battle .card .st>b,.basebox .card .st>b{display:none}
+  .card .st>span,.card .st>i{font-size:clamp(8px, calc(var(--cw) * .16), 11px)}
+  .midzone{grid-template-areas:"ph fab" "pill fab" "tl fab"}
+  .phstep{grid-area:ph;font-size:10px;gap:2px}
+  .phstep span{padding:1px 5px}
+  .rail{flex-direction:column;top:2px;left:2px;gap:5px}
+  .pile{font-size:6.5px;letter-spacing:.04em;gap:1px}
+  .pile .stk{width:24px;height:33px;font-size:11px;box-shadow:1px 1px 0 #171b21,2px 2px 0 #13171c}
+  .fab{font-size:12px}
+}
+
 </style>
 </head>
 <body>
@@ -1140,25 +1202,25 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.44-sd56id" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.40-pb02only" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.36"></script>
-<script src="sim-cards.js?v=o2.36"></script>
-<script src="sim-cards-bp01.js?v=o2.36"></script>
-<script src="sim-cards-s4.js?v=o2.36"></script>
-<script src="sim-cards-sp01.js?v=o2.36"></script>
-<script src="sim-cards-t6.js?v=o2.36"></script>
-<script src="sim-bot.js?v=o2.36"></script>
-<script src="sim-sound.js?v=o2.36"></script>
-<script src="sim-shadow.js?v=o2.36"></script>
-<script src="sim-ui.js?v=o2.36"></script>
-<script src="sim-sandbox.js?v=o2.36"></script>
-<script src="sim-report.js?v=o2.36"></script>
-<script src="sim-modes.js?v=o2.36"></script>
-<script src="sim-i18n.js?v=o2.36"></script>
-<script src="sim-online.js?v=o2.36"></script>
-<script src="sim-ranked.js?v=o2.36"></script>
-<script src="sim-stats.js?v=o2.36"></script>
-<script src="sim-updates.js?v=o2.36"></script>
-<script src="sim-rules.js?v=o2.36"></script>
-<script src="sim-learn.js?v=o2.36"></script>
+<script src="sim.js?v=o2.37"></script>
+<script src="sim-cards.js?v=o2.37"></script>
+<script src="sim-cards-bp01.js?v=o2.37"></script>
+<script src="sim-cards-s4.js?v=o2.37"></script>
+<script src="sim-cards-sp01.js?v=o2.37"></script>
+<script src="sim-cards-t6.js?v=o2.37"></script>
+<script src="sim-bot.js?v=o2.37"></script>
+<script src="sim-sound.js?v=o2.37"></script>
+<script src="sim-shadow.js?v=o2.37"></script>
+<script src="sim-ui.js?v=o2.37"></script>
+<script src="sim-sandbox.js?v=o2.37"></script>
+<script src="sim-report.js?v=o2.37"></script>
+<script src="sim-modes.js?v=o2.37"></script>
+<script src="sim-i18n.js?v=o2.37"></script>
+<script src="sim-online.js?v=o2.37"></script>
+<script src="sim-ranked.js?v=o2.37"></script>
+<script src="sim-stats.js?v=o2.37"></script>
+<script src="sim-updates.js?v=o2.37"></script>
+<script src="sim-rules.js?v=o2.37"></script>
+<script src="sim-learn.js?v=o2.37"></script>
 </body>
 </html>

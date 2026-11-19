@@ -604,6 +604,14 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Battle Sim o2.37 — kartu jadi fokus (feedback pemain): HAND besar, papan bersih, START BATTLE — 19 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+- HAND lebih besar & bertumpuk, drag langsung ke atas; highlight emas (CALL), ungu (CALL berbiaya), biru (ACTI), lainnya redup.
+- Lencana Lv/Power/R di sudut kartu; "just placed" = titik; kartu tertutup sendiri tetap terlihat (label SET).
+- Tombol ⚔ START BATTLE / END TURN; bilah fase Draw › Action › Battle › Counter › End.
+- Target serangan: warna bingkai + label pendek, tidak menutupi kartu lawan.
+- Tumpukan VOID–RETREAT–Deck berbentuk kartu (urutan playmat); kartu di RETREAT/VOID bisa diketuk untuk detail.
+- `SIM_URL ?v=o2.37`, `sim-host.js?v=7.45-sim37`.
+
 ### Battle Sim o2.36 — info hadiah Season 0 (1 Booster Box BP02 Doomsday) di tab 🏆 Ranked — 19 November 2026 *(`sim/sim-ranked.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
 Permintaan pemilik: hadiah dan syarat di poster Ranked Season 0 belum tercantum di situs.
 - **Kotak 🎁 Hadiah Season 0** di tab Ranked (juga saat ranked belum dibuka sampai 23 Nov): 1 Booster Box BP02 Doomsday (20 pack) untuk

@@ -683,9 +683,9 @@
       return '<div class="' + cls.concat('fd').join(' ') + '" data-iid="' + iid + '"><div class="fdl">Face-down</div></div>';
     }
     let tag = '';
-    if (x.fd) tag = '<div class="fdv" aria-label="Face-down"><span>FACE-DOWN</span></div>';   // #65: kartu sendiri yang tertutup digelapkan + label (juga di pelat HP)
-    else if (opts.onField && x.enT === G.turn && x.bbmOk !== G.turn) tag = '<span class="tag new">just placed</span>';
-    else if (opts.onField && x.dclT === G.turn) tag = '<span class="tag done">attacked</span>';
+    if (x.fd) tag = '<div class="fdv" aria-label="Face-down" title="Face-down (only you can see it)"><span>SET</span></div>';   // o2.37 (feedback pemain 19 Nov): art tetap terlihat, label kecil di sudut   // #65: kartu sendiri yang tertutup digelapkan + label (juga di pelat HP)
+    else if (opts.onField && x.enT === G.turn && x.bbmOk !== G.turn) tag = '<span class="tag new" title="Just placed this turn (cannot BATTLE-BASE MOVE)"></span>';   // o2.37: titik kecil, tidak menutupi art
+    else if (opts.onField && x.dclT === G.turn) tag = '<span class="tag done" title="Already attacked this turn">⚔</span>';
     if (!G.vanilla && !S.hasResolver(x.no) && !/no effect text/i.test(S.textEn(c))) cls.push('nores');
     const lent = opts.onField || opts.att ? lentHTML(iid) : '';
     if (lent) cls.push('lent');
@@ -746,6 +746,7 @@
     $('board').innerHTML = (both ? ohandHTML(top) : '') +
       halfHTML(top, true) + '<div class="midzone" id="midzone"></div>' + halfHTML(bottom, false);
     $('midzone').appendChild(pillEl());
+    $('midzone').insertAdjacentHTML('beforeend', phStepHTML());   // o2.37: penanda fase Draw › Action › Battle › Counter › End
     $('midzone').appendChild(tr);
     $('midzone').insertAdjacentHTML('beforeend', timelineHTML(v));
     tr.innerHTML = abarHTML();
@@ -791,7 +792,7 @@
     const mine = G.tp === v;
     if (busy) return;
     el.className = 'turnban on ' + (mine ? 'me' : 'opp');
-    el.innerHTML = '<b>' + (mine ? 'YOUR TURN' : esc(G.names[G.tp]) + "'s turn") + '</b><span>' + (mine ? (G.turn === 1 ? 'First turn: 1 CALL, no Battle Phase' : 'Play your cards, then END ACTION') : 'You can respond when they attack') + '</span>';
+    el.innerHTML = '<b>' + (mine ? 'YOUR TURN' : esc(G.names[G.tp]) + "'s turn") + '</b><span>' + (mine ? (G.turn === 1 ? 'First turn: 1 CALL, no Battle Phase' : 'Play your cards, then START BATTLE') : 'You can respond when they attack') + '</span>';
     clearTimeout(ui.tbT); ui.tbT = setTimeout(() => el.classList.remove('on'), 1500);
   }
   /* Riwayat #66: alasan singkat saat mengetuk sesuatu yang tidak bisa dipakai (tanpa menggambar ulang papan). */
@@ -807,12 +808,12 @@
     document.querySelectorAll('#handRow .handcards, #board .ohand .handcards').forEach(hc => {
       const cards = hc.querySelectorAll('.card'); if (!cards.length) return;
       if (narrow() && hc.closest('#handRow')) {
+        // o2.37 (feedback pemain): kartu HAND besar dan bertumpuk seperti dipegang (kipas); tidak perlu digeser ke samping,
+        // jadi kartu bisa langsung diseret ke atas tanpa ditahan lama.
         hc.style.removeProperty('--cw');
-        const n = cards.length, max = cards[0].offsetWidth, avail = hc.clientWidth - 4;
-        const w = Math.max(44, Math.min(max, Math.floor((avail - (n - 1) * 4) / n)));
-        if (w < max) hc.style.setProperty('--cw', w + 'px');
-        const gap = n > 1 ? Math.min(4, Math.floor((avail - n * w) / (n - 1))) : 0;
-        cards.forEach((c, i) => { c.style.marginRight = i === n - 1 ? '0' : gap + 'px'; c.style.transform = ''; c.style.zIndex = ''; });
+        const n = cards.length, w = cards[0].offsetWidth, avail = hc.clientWidth - 4;
+        const step = n > 1 ? Math.min(w + 4, Math.floor((avail - w) / (n - 1))) : 0;
+        cards.forEach((c, i) => { c.style.marginRight = i === n - 1 ? '0' : (step - w) + 'px'; c.style.zIndex = String(i + 1); });
         return;
       }
       if (cards.length < 2) return;
@@ -826,6 +827,9 @@
      CONFIRM / NO ATTACK. Pilihan lain muncul sebagai lembar pendek dari bawah (menutupi HAND sementara); bila tidak ada
      pilihan lain, lembar tidak muncul. Judul momen (ACTION PHASE, CHOOSE ATTACKER, …) tampil kecil di garis tengah. */
   const FAB_LABEL = { endAction: 'END ACTION', arrSave: 'CONFIRM', doAtk: 'ATTACK!', noAtk: 'NO ATTACK', pass: 'PASS' };
+  // o2.37 (feedback pemain): tombol akhir Action Phase = "START BATTLE" (atau "END TURN" bila Battle Phase dilewati)
+  const battleNext = () => !!G && G.turn !== 1 && !(G.cnt && G.cnt.skipBattle);
+  Object.defineProperty(FAB_LABEL, 'endAction', { get: () => battleNext() ? '⚔ START BATTLE' : 'END TURN', enumerable: true });
   /* Riwayat #94 (Tahap 1, keputusan pemilik 14 Nov 2026): di HP keputusan dibuat DI PAPAN seperti RushDee, bukan di lembar bawah.
      Saat memilih biaya CALL, tujuan, atau target serangan, baki menjadi satu baris ramping di garis tengah (penghitung Lv +
      tombol kecil); HAND dan BASE tetap terlihat. Lembar bawah hanya untuk keputusan yang memang butuh daftar (Counter, efek). */
@@ -892,7 +896,7 @@
     if (ui.mode === 'call-dest' || ui.mode === 'move-dest') return T('Choose a zone', 'Tap a glowing area');
     if (ui.mode === 'drop-base') return T('CALL face-up or set face-down?', 'Choose in the sheet below');
     switch (pr.type) {
-      case 'main': return T('Your turn · CALL ' + G.cnt.call + '/' + S.callLimit(G), 'Tap a HAND card to play it · END ACTION when done');
+      case 'main': return T('Your turn · CALL ' + G.cnt.call + '/' + S.callLimit(G), 'Tap a glowing HAND card to play it · ' + (battleNext() ? 'START BATTLE when ready' : 'END TURN when done'));
       case 'arrange': return T('Reposition (optional)', arrNoAtk() ? '⚠ No Character can attack from these positions' : 'Tap two areas to swap, then CONFIRM');
       case 'attack': {
         if (!ui.atk) return T('Choose an attacker', 'Tap a glowing Character');
@@ -1062,10 +1066,11 @@
   }
   function railHTML(p, isTop) {
     const P = G.P[p];
-    return '<div class="rail"><div class="pile"><span class="stk">' + P.deck.length + '</span>DECK</div>' +
-      '<div class="pile click" data-act="pile" data-p="' + p + '" data-z="ret" title="Open RETREAT"><span class="stk">' + P.ret.length + '</span>RETREAT</div>' +
-      '<div class="pile click" data-act="pile" data-p="' + p + '" data-z="void" title="Open VOID"><span class="stk v">' + P.void.length + '</span>VOID</div>' +
-      '</div>';   // laporan #2: jumlah HAND lawan cukup di pelat pemain (✋), tidak diulang di sini
+    // o2.37 (feedback pemain): urutan seperti playmat resmi — VOID di atas, RETREAT di tengah, DECK di bawah (sisi lawan dicerminkan)
+    const deck = '<div class="pile deck" title="Deck"><span class="stk">' + P.deck.length + '</span>DECK</div>';
+    const ret = '<div class="pile click ret" data-act="pile" data-p="' + p + '" data-z="ret" title="Open RETREAT"><span class="stk">' + P.ret.length + '</span>RETREAT</div>';
+    const vd = '<div class="pile click void" data-act="pile" data-p="' + p + '" data-z="void" title="Open VOID"><span class="stk v">' + P.void.length + '</span>VOID</div>';
+    return '<div class="rail">' + (isTop ? deck + ret + vd : vd + ret + deck) + '</div>';   // laporan #2: jumlah HAND lawan cukup di pelat pemain (✋), tidak diulang di sini
   }
 
   function halfHTML(p, isTop) {
@@ -1090,6 +1095,7 @@
       if (G.bt && G.bt.cur && p !== G.tp && G.bt.cur.slot === s) cls += ' under';
       if (destMode && destOk(s)) cls += ' hl';
       if (plan && plan[s] && plan[s].cls === 'out') cls += ' outr';
+      else if (plan && plan[s]) cls += ' pl-' + plan[s].cls;
       if (arrMode && ui.arrPick === s) cls += ' hl';
       let inner = '';
       if (iid) {
@@ -1097,7 +1103,8 @@
         const isAtk = (ui.atk === iid) || (G.bt && G.bt.cur && G.bt.cur.a === iid && G.phase === 'battle');
         inner = cardHTML(iid, { onField: true, cls: isAtk ? 'atk' : can ? 'can' : '' });
       } else if (tgSlots.includes(s)) inner = '<div class="weak">WEAKNESS</div>';
-      if (plan && plan[s]) inner += '<div class="oc ' + plan[s].cls + '">' + esc(plan[s].a) + '<small>' + esc(plan[s].b) + '</small></div>';
+      // o2.37 (feedback pemain): hasil serangan = label pendek di tepi bawah kartu + warna bingkai; rincian di judul (title)
+      if (plan && plan[s] && plan[s].cls !== 'out') inner += '<div class="oc sm ' + plan[s].cls + '" title="' + esc(plan[s].a + ' · ' + plan[s].b) + '">' + esc(({ win: 'WIN', lose: 'LOSE', both: 'BOTH LOSE', rush: '+1 ★ RUSH' })[plan[s].cls] || plan[s].a) + '</div>';
       else if (cur && cur.slot === s) { const pl = attackPlan(cur.a, true)[s]; inner += '<div class="oc under">UNDER ATTACK' + (pl ? '<small>if both pass: ' + esc(pl.a) + '</small>' : '') + '</div>'; }
       return '<div class="' + cls + '" data-slot="' + s + '" data-side="' + side + '"><span class="sl">' + S.SLOT_NAME[s] + '</span>' + inner + '</div>';
     }).join('');
@@ -1120,9 +1127,13 @@
     return '<span class="zl">HAND · ' + esc(G.names[p]).toUpperCase() + '</span><div class="handcards">' +
       G.P[p].hand.map(i => cardHTML(i, { cls: handCls(i) })).join('') + '</div>';
   }
+  /* o2.37 (feedback pemain 19 Nov 2026): kartu HAND yang bisa langsung di-CALL (emas), yang butuh biaya dan biayanya tersedia
+     (ungu), dan yang punya ACTI dari HAND (biru) naik dan menyala; kartu lain tetap bisa di-Base Deployment tetapi tidak menyala. */
   function handCls(i) {
     if (!myTurnPrompt('main') || G.inst[i].owner !== G.prompt.p) return '';
-    return (!callReason(i) || !deployReason(i) || (!G.vanilla && S.actiOptions(G, G.prompt.p, false).some(o => o.c === i))) ? 'can' : '';
+    if (!callReason(i)) return S.getLv(G, i) >= 4 ? 'can hcost' : 'can hcall';
+    if (!G.vanilla && S.actiOptions(G, G.prompt.p, false).some(o => o.c === i)) return 'can hacti';
+    return deployReason(i) ? '' : 'hdep';
   }
 
   /* ---------------- bar aksi (petunjuk + tombol utama) ---------------- */
@@ -1154,7 +1165,7 @@
   function abarCore(pr) {
     switch (pr.type) {
       case 'main':
-        return callModeActs() || (pileActis(false) + '<button class="next" data-act="endAction">End Action Phase</button>');
+        return callModeActs() || (pileActis(false) + '<button class="next" data-act="endAction">' + (battleNext() ? '⚔ Start Battle' : 'End Turn') + '</button>');
       case 'arrange':
         return '<button class="pri" data-act="arrSave">Confirm positions</button><button data-act="arrSkip">Skip</button>' + (ui.arr ? '<button data-act="arrReset">Reset</button>' : '');
       case 'attack': {
@@ -1420,7 +1431,7 @@
     switch (pr.type) {
       case 'main':
         if (ui.mode) return '';
-        return sp('Tap a card in your HAND to play it.') + ' ' + sp('Press END ACTION when you are done.');
+        return sp('Tap a card in your HAND to play it.') + ' ' + sp(battleNext() ? 'Press START BATTLE when you are ready.' : 'Press END TURN when you are done.');
       case 'arrange': return sp('Optional: tap two of your areas to swap them, then CONFIRM.') + (arrNoAtk() ? '<span class="arrwarn">' + esc(ARR_WARN) + '</span>' : '');
       case 'attack':
         if (!ui.atk) return sp('Tap one of your glowing Characters to attack with it.');
@@ -1617,7 +1628,8 @@
         openOv('<h3>' + (z === 'ret' ? 'RETREAT · can come back' : 'VOID · gone for good') + ' · ' + esc(G.names[p]) + ' (' + list.length + ')</h3><p class="small muted">Public area, cards are face-up (302.8, 302.9).</p><div class="handcards">' +
           (list.length ? list.map(i => {
             const opts = (myTurnPrompt('main') || myTurnPrompt('counter')) && !G.vanilla ? S.actiOptions(G, G.prompt.p, myTurnPrompt('counter')).filter(o => o.c === i) : [];
-            return opts.length ? '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;max-width:120px">' + cardHTML(i).replace('data-iid', 'data-x') + opts.map(o => '<button class="sm pri" data-act="acti" data-c="' + o.c + '" data-eff="' + o.eff + '" title="' + esc(o.label) + '">Activate</button>').join('') + '</div>' : cardHTML(i).replace('data-iid', 'data-x');
+            const ch = cardHTML(i).replace('data-iid', 'data-zoom="' + i + '" data-x');   // o2.37: ketuk kartu = lihat detail
+            return opts.length ? '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;max-width:120px">' + ch + opts.map(o => '<button class="sm pri" data-act="acti" data-c="' + o.c + '" data-eff="' + o.eff + '" title="' + esc(o.label) + '">Activate</button>').join('') + '</div>' : ch;
           }).join('') : '<p class="small muted">Empty.</p>') + '</div><div class="row"><button data-act="closeov">Close</button></div>');
         return;
       }
@@ -1781,6 +1793,13 @@
   const kfmt = n => (n >= 1000 && n % 100 === 0 ? (n / 1000) + 'k' : String(n));
 
   /* ---------- bar sekarang (#1, #2, #10) ---------- */
+  function phStepHTML() {
+    if (!G || G.result || !G.phase || G.phase === 'mulligan' || G.phase === 'setup') return '';
+    const cur = ({ start: 'draw', draw: 'draw', action: 'action', battle: 'battle', counterPhase: 'counter', end: 'end' })[G.phase] || '';
+    const step = G.phase === 'battle' && G.win && G.win.kind === 'step';
+    return '<div class="phstep" id="phStep" data-noi18n>' + [['draw', 'Draw'], ['action', 'Action'], ['battle', 'Battle'], ['counter', 'Counter'], ['end', 'End']].map(([k, l]) =>
+      '<span class="' + (k === cur ? 'on' : '') + (k === 'battle' && G.turn === 1 ? ' skip' : '') + '">' + l + (k === 'battle' && step ? '<small>counter step</small>' : '') + '</span>').join('<i>›</i>') + '</div>';
+  }
   function stagesHTML() {
     if (!G) return '';
     if (G.result) return 'GAME OVER';
@@ -2172,6 +2191,16 @@
     return spec.kind && (slots.length || spec.base) ? spec : null;
   }
   const CARD_SEL = '#board .card[data-iid],#handRow .card[data-iid],.plate .card[data-iid],#baseRow .card[data-iid]';
+  // o2.37 (feedback pemain): kartu di RETREAT / VOID bisa diketuk untuk melihat detailnya (lapisan di atas jendela tumpukan)
+  document.addEventListener('click', e => {
+    const z = e.target.closest('[data-zoom]'); if (!z || !G || !G.inst[z.dataset.zoom]) return;
+    e.stopPropagation();
+    const el = document.createElement('div'); el.className = 'czoom';
+    el.innerHTML = '<div class="czin">' + infoHTML(z.dataset.zoom, false) + '<div class="row"><button class="pri" data-czclose>Close</button></div></div>';
+    el.addEventListener('click', ev => { if (ev.target === el || ev.target.closest('[data-czclose]')) el.remove(); });
+    document.body.appendChild(el);
+    if (window.MHRSimI18N) window.MHRSimI18N.apply();
+  }, true);
   function initDrag() {
     document.addEventListener('pointerdown', e => {
       if (e.button !== 0 || !G) return;
@@ -2188,7 +2217,11 @@
       if (!d.started) {
         // Laporan #2 (13 Nov 2026): di HP, kartu di papan (Reposition / serangan / pindah) langsung bisa diseret tanpa tahan lama;
         // papan HP tidak bisa digulir (satu layar), jadi gerakan jari di atas kartu papan selalu berarti seret.
-        if (d.touch && dist > 10) { if (narrow() && d.el.closest('#board,#baseRow') && d.spec.kind !== 'call') startDrag(d, e.clientX, e.clientY); else { clearTimeout(d.timer); ui.drag = null; return; } }
+        if (d.touch && dist > 10) {
+          // o2.37: dari HAND (kipas, tidak bergulir) gerakan ke atas langsung men-drag kartu; geser ke samping dibiarkan.
+          const up = d.el.closest('#handRow') && (d.y - e.clientY) > Math.abs(e.clientX - d.x) * 0.8;
+          if ((narrow() && d.el.closest('#board,#baseRow') && d.spec.kind !== 'call') || up) startDrag(d, e.clientX, e.clientY); else { clearTimeout(d.timer); ui.drag = null; return; }
+        }
         else if (d.touch) return;
         if (!d.touch && dist > 6) startDrag(d, e.clientX, e.clientY); else return;
       }

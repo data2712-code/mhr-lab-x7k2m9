@@ -16,6 +16,23 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-19', t: 'improve', v: 'o2.37',
+      en: { h: 'Cards first: bigger HAND, cleaner board, START BATTLE', b: [
+        'Bigger HAND cards, held like a real hand. Drag a card straight up to play it, with no long press.',
+        'Playable HAND cards rise and glow: gold = CALL now, purple = CALL with a cost you can pay, blue = ACTI from HAND. Other cards are dimmed.',
+        'Lv, Power and R are small badges in the card corners. "Just placed" is a small blue dot, and your own face-down cards stay visible with a small SET label.',
+        'The Action Phase button is now ⚔ START BATTLE (END TURN when there is no Battle Phase), and a phase bar shows Draw › Action › Battle › Counter › End.',
+        'Choosing an attack target no longer covers the opponent\'s cards: the frame colour and a short WIN / LOSE / +1 ★ RUSH label show the result.',
+        'VOID, RETREAT and Deck are card-shaped piles in the order of the official playmat. Tap a card inside RETREAT or VOID to see its details.'] },
+      id: { h: 'Kartu jadi fokus: HAND lebih besar, papan lebih bersih, START BATTLE', b: [
+        'Kartu HAND lebih besar dan bertumpuk seperti dipegang. Tarik kartu ke atas untuk memainkannya, tanpa menahan lama.',
+        'Kartu HAND yang bisa dimainkan naik dan menyala: emas = bisa langsung di-CALL, ungu = CALL dengan biaya yang tersedia, biru = ACTI dari HAND. Kartu lain diredupkan.',
+        'Lv, Power, dan R jadi lencana kecil di sudut kartu. "Just placed" jadi titik biru kecil, dan kartu tertutup milik sendiri tetap terlihat dengan label kecil SET.',
+        'Tombol Action Phase kini ⚔ START BATTLE (END TURN bila tidak ada Battle Phase), dan bilah fase menampilkan Draw › Action › Battle › Counter › End.',
+        'Saat memilih target serangan, kartu lawan tidak lagi tertutup teks: warna bingkai dan label pendek WIN / LOSE / +1 ★ RUSH menunjukkan hasilnya.',
+        'VOID, RETREAT, dan Deck jadi tumpukan berbentuk kartu dengan urutan playmat resmi. Ketuk kartu di RETREAT atau VOID untuk melihat detailnya.'] }
+    },
+    {
       d: '2026-11-19', t: 'news', v: 'o2.36',
       en: { h: 'Season 0 prize: 1 Booster Box BP02 Doomsday', b: [
         'Ranked Season 0 runs from 23 November to 31 December 2026. The player with the most points on 31 December, 23:59 WIB wins 1 Booster Box BP02 Doomsday (20 packs).',
