@@ -604,6 +604,17 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Battle Sim o2.36 — info hadiah Season 0 (1 Booster Box BP02 Doomsday) di tab 🏆 Ranked — 19 November 2026 *(`sim/sim-ranked.js`, `sim/sim-updates.js`, `sim/index.html`, `sim-host.js`, `index.html`)*
+Permintaan pemilik: hadiah dan syarat di poster Ranked Season 0 belum tercantum di situs.
+- **Kotak 🎁 Hadiah Season 0** di tab Ranked (juga saat ranked belum dibuka sampai 23 Nov): 1 Booster Box BP02 Doomsday (20 pack) untuk
+  poin tertinggi per 31 Des 2026 23:59 WIB, pemain yang sedang memimpin (teratas yang memenuhi syarat), progres "pertandingan berpoin
+  Anda x/20", dan daftar syarat (min. 20 pertandingan berpoin, 1 akun per pemain, tie-break, pengumuman ±2 Jan 2027, kirim ke alamat
+  Indonesia setelah BP02 tersedia). Isi sama dengan poster `Konten Sosmed/Teaser Ranked Season 0 Nov 2026`.
+- **Leaderboard Season 0**: tiap pemain diberi tanda `✓ 20+` (memenuhi syarat, 🎁 untuk pemimpin) atau `x/20`; ringkasan menambah
+  jumlah pemain yang memenuhi syarat. "Pertandingan berpoin" = kolom `games` di `sim_ratings` (game sebelum giliran ke-4 tidak dihitung).
+- Entri baru di Updates (o2.36). Dibuat ulang di atas o2.35 dari perangkat lain (Learn to Play, Rules, batas harian) setelah konflik repo; isi o2.35 tetap. Hanya tampilan; tidak ada SQL baru. Pemenang tetap dicek manual oleh admin.
+- `SIM_URL ?v=o2.36`, `sim-host.js?v=7.45-sim36`.
+
 ### v7.45 — Laporan Battle Sim di 🗼 Control Tower → 📊 Usage + statistik pemakaian Battle Sim (o2.34) — 19 November 2026 *(`usage.js`, `sim-host.js`, `index.html`, `sim/sim-ui.js`, `sim/index.html`; SQL baru `mhr_decklab_v745_sim_usage.sql` di folder internal)*
 Permintaan pemilik: monitoring pemakaian Battle Sim di fitur Usage (super-admin).
 - **Bagian baru "⚔️ Battle Sim — online games"** di bawah tabel Usage (`MHRUsage.renderSim`, RPC `mhr_sim_usage_report(30)`, khusus

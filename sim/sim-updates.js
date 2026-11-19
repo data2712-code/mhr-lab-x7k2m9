@@ -16,6 +16,17 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-19', t: 'news', v: 'o2.36',
+      en: { h: 'Season 0 prize: 1 Booster Box BP02 Doomsday', b: [
+        'Ranked Season 0 runs from 23 November to 31 December 2026. The player with the most points on 31 December, 23:59 WIB wins 1 Booster Box BP02 Doomsday (20 packs).',
+        'To qualify you need at least 20 rated games in Season 0. The Ranked tab shows your progress and marks every player on the leaderboard who qualifies.',
+        'One account per player. Same points: most wins, then whoever reached those points first. Winner announced around 2 January 2027; the box ships to an address in Indonesia once BP02 is available.'] },
+      id: { h: 'Hadiah Season 0: 1 Booster Box BP02 Doomsday', b: [
+        'Ranked Season 0 berlangsung 23 November sampai 31 Desember 2026. Pemain dengan poin tertinggi per 31 Desember, 23:59 WIB mendapat 1 Booster Box BP02 Doomsday (20 pack).',
+        'Syaratnya minimal 20 pertandingan berpoin di Season 0. Tab Ranked menampilkan progres Anda dan menandai setiap pemain di leaderboard yang sudah memenuhi syarat.',
+        '1 akun per pemain. Poin sama: menang terbanyak, lalu yang lebih dulu mencapai poin itu. Pemenang diumumkan sekitar 2 Januari 2027; box dikirim ke alamat di Indonesia setelah BP02 tersedia.'] }
+    },
+    {
       d: '2026-11-19', t: 'improve', v: 'o2.35',
       en: { h: 'New: Learn to Play, Rules tab, and a daily limit for Ranked points', b: [
         'Learn to Play (🎓 Learn tab): 5 short lessons with a coach for new players — the board, your first turn, big Characters with a cost, defending with a COUNTER, and finishing the game. You press the real buttons; the coach tells you what to do next.',

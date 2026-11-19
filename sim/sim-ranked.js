@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR BATTLE SIM — RANKED (sim-ranked.js)                    o2.16 · riwayat #87, #90 · situs v7.37
+   MHR BATTLE SIM — RANKED (sim-ranked.js)                    o2.36 · riwayat #87, #90, #114, #115 · situs v7.37+
    ===================================================================
    Poin, tier, dan leaderboard untuk pertandingan Find a match (keputusan pemilik 12 Nov 2026).
    Perhitungan poin TIDAK di sini: trigger Supabase (mhr_decklab_v737_sim_ranked.sql) menghitungnya saat server Battle Sim
@@ -27,6 +27,10 @@
   const slug = k => k.toLowerCase().replace(/\s+/g, '-');
   const icon = (k, cls) => '<img class="' + (cls || 'rki') + '" src="' + ICON_BASE + slug(k) + '.svg?v=1" alt="" loading="lazy">';
   const PLACEMENT = 5;
+  // o2.36 (pemilik 19 Nov 2026): hadiah Season 0 = 1 Booster Box BP02 Doomsday untuk poin tertinggi per 31 Des 2026 23:59 WIB,
+  // syarat min. 20 pertandingan berpoin (= kolom games di sim_ratings; game yang berakhir sebelum giliran ke-4 tidak dihitung).
+  // Sama dengan poster Konten Sosmed/Teaser Ranked Season 0 Nov 2026. Hanya tampilan; pemenang tetap dicek manual oleh admin.
+  const PRIZE_SEASON = 'S00', PRIZE_MIN = 20;
   const DAY_CAP = 200;            // o2.35: poin bersih maks. per hari (WIB) — sama dengan mhr_sim_rank_apply di SQL
   // awal hari ini (WIB, UTC+7) dalam ISO UTC
   const dayStartISO = () => { const n = Date.now() + 7 * 3600e3; return new Date(n - n % 86400e3 - 7 * 3600e3).toISOString(); };
@@ -100,6 +104,7 @@
         '<p class="small">' + T('Right after the beta, every Find a match game earns or loses points. Climb from Recruit to Genius Burden and race for the top of the leaderboard. Games played during the beta are not counted.',
           'Begitu beta selesai, setiap pertandingan Cari lawan menambah atau mengurangi poin. Naik dari Recruit sampai Genius Burden dan bersainglah di puncak leaderboard. Pertandingan selama beta tidak dihitung.') + '</p>' +
         '<div class="rktiers">' + ALL.map(k => '<span style="--rk:' + COLOR[k] + '">' + icon(k, 'rkti') + '<i>' + k + '</i></span>').join('') + '</div></div>' +
+        (seasonNow() === PRIZE_SEASON ? prizeHTML(null, null) : '') +
         helpHTML();
       tr(); return;
     }
@@ -136,13 +141,18 @@
     } else {
       h += '<div class="box"><p><b>Log in to play ranked.</b></p><p class="small muted">Ranked games are played in Find a match with your mhrdecklab.com account.</p><div class="startbar"><button class="pri" data-on="login">Log in</button></div></div>';
     }
+    // hadiah (o2.36): pemimpin = pemain teratas yang sudah memenuhi syarat
+    const prize = curSeason === PRIZE_SEASON, elig = prize ? placed.filter(x => x.games >= PRIZE_MIN) : [];
+    if (prize) h += prizeHTML(isNow && mine ? mine : null, elig[0] || null);
     // leaderboard
-    h += '<div class="rkh"><b>🏆 Leaderboard · ' + esc(seasonLabel(curSeason)) + '</b><span class="small muted">' + T(placed.length + ' ranked · ' + placing.length + ' in placement', placed.length + ' punya rank · ' + placing.length + ' masih placement') + '</span></div>';
+    h += '<div class="rkh"><b>🏆 Leaderboard · ' + esc(seasonLabel(curSeason)) + '</b><span class="small muted">' + T(placed.length + ' ranked · ' + placing.length + ' in placement', placed.length + ' punya rank · ' + placing.length + ' masih placement') + (prize ? T(' · ' + elig.length + ' qualify for the prize', ' · ' + elig.length + ' memenuhi syarat hadiah') : '') + '</span></div>';
     if (!placed.length) h += '<div class="box small muted">' + (isNow ? T('No one has finished placement yet this season. Be the first: play 5 games in Find a match.', 'Belum ada yang menyelesaikan placement di season ini. Jadilah yang pertama: mainkan 5 pertandingan di Cari lawan.') : T('No ranked players in this season.', 'Tidak ada pemain ber-rank di season ini.')) + '</div>';
     else h += '<div class="rklist">' + placed.map((x, i) => {
       const t = tier(x.points, x.games), you = s && x.user_id === s.userId;
       return '<div class="rkrow' + (you ? ' me' : '') + (i < 3 ? ' top' : '') + '"><span class="n">' + (i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1) + '</span>' +
-        '<span class="u"><b data-noi18n>' + esc(x.username || 'Player') + '</b>' + badge(t, true) + '</span>' +
+        '<span class="u"><b data-noi18n>' + esc(x.username || 'Player') + '</b>' + badge(t, true) +
+        (prize ? (x.games >= PRIZE_MIN ? '<span class="rkel ok" title="' + T('Qualifies for the Season 0 prize', 'Memenuhi syarat hadiah Season 0') + '">' + (x === elig[0] ? '🎁 ' : '') + '✓ ' + PRIZE_MIN + '+</span>'
+          : '<span class="rkel" title="' + T('Rated games toward the prize requirement', 'Pertandingan berpoin menuju syarat hadiah') + '" data-noi18n>' + x.games + '/' + PRIZE_MIN + '</span>') : '') + '</span>' +
         '<span class="wl small" data-noi18n>' + x.wins + '–' + x.losses + (x.draws ? '–' + x.draws : '') + '</span><span class="p" data-noi18n>' + fmt(x.points) + '</span></div>';
     }).join('') + '</div>';
     if (placing.length) h += '<p class="small muted" style="margin:10px 2px">' + T('In placement: ', 'Masih placement: ') + '<span data-noi18n>' + placing.map(x => esc(x.username || 'Player') + ' (' + x.games + '/' + PLACEMENT + ')').join(', ') + '</span></p>';
@@ -150,6 +160,29 @@
     el.innerHTML = h;
     const sel = $('rkSeason'); if (sel) sel.onchange = () => { curSeason = sel.value; render(el); };
     tr();
+  }
+  /* ---------- hadiah Season 0 (o2.36) ---------- */
+  function prizeHTML(mine, lead) {
+    let me = '';
+    if (mine) {
+      const g = mine.games || 0, ok = g >= PRIZE_MIN;
+      me = '<div class="rkpz-me' + (ok ? ' ok' : '') + '"><span>' + T('Your rated games', 'Pertandingan berpoin Anda') + '</span><b data-noi18n>' + Math.min(g, PRIZE_MIN) + '/' + PRIZE_MIN + '</b>' +
+        '<div class="rkbar"><i style="width:' + Math.max(4, Math.min(100, g / PRIZE_MIN * 100)) + '%"></i></div>' +
+        '<span class="small">' + (ok ? T('✓ You qualify for the prize. Keep climbing!', '✓ Anda memenuhi syarat hadiah. Terus naik!')
+          : T((PRIZE_MIN - g) + ' more rated games to qualify.', (PRIZE_MIN - g) + ' pertandingan berpoin lagi untuk memenuhi syarat.')) + '</span></div>';
+    }
+    const leadTxt = lead ? '<p class="small rkpz-lead">' + T('Leading now: ', 'Memimpin saat ini: ') + '<b data-noi18n>' + esc(lead.username || 'Player') + '</b> <span data-noi18n>(' + fmt(lead.points) + ')</span></p>' : '';
+    return '<div class="box rkpz"><div class="rkpz-h"><span class="rkpz-i" aria-hidden="true">🎁</span><div><span class="rktag">' + T('SEASON 0 PRIZE', 'HADIAH SEASON 0') + '</span>' +
+      '<h3>' + T('1 Booster Box BP02 Doomsday', '1 Booster Box BP02 Doomsday') + '</h3>' +
+      '<p class="small">' + T('20 packs for the player with the most points on 31 December 2026, 23:59 WIB.', '20 pack untuk pemain dengan poin tertinggi per 31 Desember 2026, 23:59 WIB.') + '</p></div></div>' +
+      leadTxt + me +
+      '<details class="rkpz-d"><summary class="small">' + T('Requirements', 'Syarat') + '</summary><ul class="small">' +
+      '<li>' + T('At least <b>20 rated games</b> in Season 0 (Find a match games that count for points).', 'Minimal <b>20 pertandingan berpoin</b> di Season 0 (pertandingan Cari lawan yang dihitung poinnya).') + '</li>' +
+      '<li>' + T('<b>One account per player.</b> Duplicate accounts or point farming = disqualified.', '<b>1 akun per pemain.</b> Akun ganda atau farming poin = diskualifikasi.') + '</li>' +
+      '<li>' + T('Same points: most wins, then whoever reached those points first.', 'Poin sama: menang terbanyak, lalu yang lebih dulu mencapai poin itu.') + '</li>' +
+      '<li>' + T('Winner announced around <b>2 January 2027</b> in mhrdecklab.com News and on @deteprtm.', 'Pemenang diumumkan sekitar <b>2 Januari 2027</b> di News mhrdecklab.com dan @deteprtm.') + '</li>' +
+      '<li>' + T('Shipped to an address in Indonesia once BP02 is available.', 'Dikirim ke alamat di Indonesia setelah BP02 tersedia.') + '</li>' +
+      '</ul></details></div>';
   }
   function helpHTML() {
     const li = (en, id) => '<li>' + T(en, id) + '</li>';
@@ -269,5 +302,5 @@
     'Ranked starts on 23 November 2026': 'Ranked dimulai 23 November 2026', 'Starts 23 November 2026, after the beta': 'Mulai 23 November 2026, setelah beta', 'Learn more →': 'Selengkapnya →', 'COMING SOON': 'SEGERA'
   });
 
-  window.MHRSimRanked = { tier, seasonNow, seasonLabel, render, fillLine, result, resultHTML, COLOR, PLACEMENT, live, START };
+  window.MHRSimRanked = { tier, seasonNow, seasonLabel, render, fillLine, result, resultHTML, COLOR, PLACEMENT, PRIZE_MIN, live, START };
 })();
