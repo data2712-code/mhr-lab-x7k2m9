@@ -604,6 +604,11 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Battle Sim o2.38 — Counter Step / Counter Phase berpusat di HAND (feedback pemain, Tahap C) — 19 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+- HP: papan tetap terlihat saat Counter; satu baris petunjuk + tombol PASS; kartu yang bisa merespons (COUNTER CALL dari HAND, COUNTER·ACTI di FIELD/BASE) menyala oranye; "≡ List" membuka daftar lama.
+- Area yang diserang = label "⚔ UNDER ATTACK"; banner giliran tidak menutupi keputusan Counter.
+- `SIM_URL ?v=o2.38`, `sim-host.js?v=7.45-sim38`.
+
 ### Battle Sim o2.37 — kartu jadi fokus (feedback pemain): HAND besar, papan bersih, START BATTLE — 19 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 - HAND lebih besar & bertumpuk, drag langsung ke atas; highlight emas (CALL), ungu (CALL berbiaya), biru (ACTI), lainnya redup.
 - Lencana Lv/Power/R di sudut kartu; "just placed" = titik; kartu tertutup sendiri tetap terlihat (label SET).

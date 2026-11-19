@@ -715,6 +715,7 @@
     const bottom = ui.sandbox && !ui.replay ? actor() : (v === 'all' || v == null ? 0 : v);
     const top = 1 - bottom;
     ui.bottomP = bottom;
+    ui.cIds = counterIds();                           // o2.38: kartu yang bisa merespons di Counter Step / Phase
     renderScore(v, bottom, top);
     $('btnUndo').style.display = ui.replay ? 'none' : '';
     $('btnConcede').style.display = ui.replay || ui.sandbox || G.result || !humans().length ? 'none' : '';
@@ -788,6 +789,7 @@
     const key = G.turn + ':' + G.tp + ':' + v;
     const busy = ['flash', 'otoast'].some(id => { const x = $(id); return x && x.classList.contains('on'); });   // jangan menumpuk dengan kilasan pertarungan / toast lawan
     if (ui.tbKey === key) { if (busy) el.classList.remove('on'); return; }
+    if (myTurnPrompt('counter')) { ui.tbKey = key; el.classList.remove('on'); return; }   // o2.38: banner giliran tidak menutupi keputusan Counter
     ui.tbKey = key;
     const mine = G.tp === v;
     if (busy) return;
@@ -837,7 +839,19 @@
     if (!narrow() || !G || !G.prompt || ui.replay || G.result || ui.msg || !myTurnPrompt()) return false;
     if (ui.mode === 'call-cost' || ui.mode === 'call-dest' || ui.mode === 'move-dest') return true;
     if (G.prompt.type === 'attack' && ui.atk && !ui.tg) return true;
+    if (counterSlim()) return true;
     return false;
+  }
+  /* o2.38 (feedback pemain 19 Nov 2026, Tahap C): Counter Step / Counter Phase berpusat di HAND. Papan tetap terlihat; kartu yang
+     bisa merespons (COUNTER CALL dari HAND, COUNTER·ACTI di FIELD / BASE / HAND) naik dan menyala merah-oranye; ketuk kartu = pilihan
+     di panel kartu. Garis tengah hanya satu baris + tombol bulat PASS. Daftar teks lama tetap ada lewat "Show list". */
+  function counterSlim() { return !!(narrow() && G && G.prompt && G.prompt.type === 'counter' && !ui.mode && !ui.msg && myTurnPrompt() && !ui.cList); }
+  function counterIds() {
+    if (!G || G.vanilla || !myTurnPrompt('counter')) return null;
+    const p = G.prompt.p, ids = new Set();
+    try { S.actiOptions(G, p, true).forEach(o => { ids.add(o.c); const h = G.inst[o.c] && G.inst[o.c].host; if (h) ids.add(h); }); } catch (e) { /* abaikan */ }
+    G.P[p].hand.forEach(i => { if (S.hasCounterAbility(G, i) && !ccallReason(i)) ids.add(i); });
+    return ids;
   }
   function mobileArena() {
     const tr = trayEl(), mz = $('midzone'); if (!mz) return;
@@ -846,7 +860,8 @@
     let b = null;
     // Riwayat #95 (Tahap 2, alur RushDee): Counter dengan pilihan (COUNTER CALL / ACTI) = panel kecil di tengah papan yang juga
     // memuat Pass, supaya HAND dan BASE tetap terlihat. Tanpa pilihan lain, cukup tombol bulat PASS seperti biasa.
-    const cp = !!(G.prompt && G.prompt.type === 'counter' && !ui.mode && !ui.msg && myTurnPrompt() && tr.querySelector('.acts > button:not([data-act="pass"])'));
+    const cp = !counterSlim() && !!(G.prompt && G.prompt.type === 'counter' && !ui.mode && !ui.msg && myTurnPrompt() && tr.querySelector('.acts > button:not([data-act="pass"])'));
+    tr.classList.toggle('cslim', counterSlim());
     tr.classList.toggle('cpanel', cp);
     if (!cp) for (const k of ['doAtk', 'pass', 'endAction', 'arrSave', 'noAtk']) { b = tr.querySelector('.acts [data-act="' + k + '"]:not([disabled])'); if (b) break; }
     if (b) {
@@ -862,7 +877,10 @@
     $('game').classList.toggle('sheetOn', sheet && !ui.peek);
     // Riwayat #57 (studi RushDee): "Lihat papan" — lembar disembunyikan sebentar; kembali otomatis saat keputusan berganti.
     const key = G.actions.length + ':' + (G.prompt ? G.prompt.type + G.prompt.p : '');
-    if (ui.peekKey !== key) { ui.peekKey = key; ui.peek = false; }
+    if (ui.peekKey !== key) { ui.peekKey = key; ui.peek = false; ui.cList = false; }
+    // o2.38: Counter di HP = satu baris + PASS; daftar teks lama tetap bisa dibuka
+    if (counterSlim() && ui.cIds && ui.cIds.size) { const ac = tr.querySelector('.acts'); if (ac) ac.insertAdjacentHTML('afterbegin', '<button class="sm clist" data-act="cList">≡ List</button>'); }
+    else if (ui.cList && G.prompt && G.prompt.type === 'counter' && myTurnPrompt()) tr.insertAdjacentHTML('afterbegin', '<button class="peek" data-act="cList">▾ Back to the board</button>');
     if (sheet) tr.insertAdjacentHTML('afterbegin', '<button class="peek" data-act="peek">' + (ui.peek ? '▲ Show choices' : '👁 Look at the board') + '</button>');
     tr.classList.toggle('peeked', sheet && !!ui.peek);
   }
@@ -1101,11 +1119,12 @@
       if (iid) {
         const can = atkMode && !isTop && S.attackersNow(G).includes(iid);
         const isAtk = (ui.atk === iid) || (G.bt && G.bt.cur && G.bt.cur.a === iid && G.phase === 'battle');
-        inner = cardHTML(iid, { onField: true, cls: isAtk ? 'atk' : can ? 'can' : '' });
+        const cr = !isTop && ui.cIds && ui.cIds.has(iid);   // o2.38: kartu FIELD dengan COUNTER·ACTI menyala
+        inner = cardHTML(iid, { onField: true, cls: isAtk ? 'atk' : can ? 'can' : cr ? 'can hcounter' : '' });
       } else if (tgSlots.includes(s)) inner = '<div class="weak">WEAKNESS</div>';
       // o2.37 (feedback pemain): hasil serangan = label pendek di tepi bawah kartu + warna bingkai; rincian di judul (title)
       if (plan && plan[s] && plan[s].cls !== 'out') inner += '<div class="oc sm ' + plan[s].cls + '" title="' + esc(plan[s].a + ' · ' + plan[s].b) + '">' + esc(({ win: 'WIN', lose: 'LOSE', both: 'BOTH LOSE', rush: '+1 ★ RUSH' })[plan[s].cls] || plan[s].a) + '</div>';
-      else if (cur && cur.slot === s) { const pl = attackPlan(cur.a, true)[s]; inner += '<div class="oc under">UNDER ATTACK' + (pl ? '<small>if both pass: ' + esc(pl.a) + '</small>' : '') + '</div>'; }
+      else if (cur && cur.slot === s) { const pl = attackPlan(cur.a, true)[s]; inner += '<div class="oc sm under" title="' + esc(pl ? 'If both pass: ' + pl.a : '') + '">⚔ UNDER ATTACK</div>'; }   // o2.38: label pendek; akibatnya ada di garis tengah
       return '<div class="' + cls + '" data-slot="' + s + '" data-side="' + side + '"><span class="sl">' + S.SLOT_NAME[s] + '</span>' + inner + '</div>';
     }).join('');
     const baseHl = (destMode && destOk('BASE')) || (pickSlots() && p === pickSlots().p && pickSlots().vals.includes('BASE'));
@@ -1114,7 +1133,8 @@
       const iid = P.base[k];
       // Laporan #31 (o2.32): BASE penuh tetapi kartu biaya ada di BASE → kartu biaya itu ikut menyala; ketuk = kartu baru ke BASE.
       const costSpot = !!iid && baseHl && ui.mode === 'call-cost' && ui.cost.includes(iid);
-      base.push('<div class="slot' + (baseHl && (!iid || costSpot) ? ' hl' : '') + '" data-slot="BASE" data-side="' + side + '">' + (iid ? cardHTML(iid, { onField: true }) : '') + '</div>');
+      const crB = !!iid && !isTop && ui.cIds && ui.cIds.has(iid);
+      base.push('<div class="slot' + (baseHl && (!iid || costSpot) ? ' hl' : '') + '" data-slot="BASE" data-side="' + side + '">' + (iid ? cardHTML(iid, { onField: true, cls: crB ? 'can hcounter' : '' }) : '') + '</div>');
     }
     return '<div class="half field side-' + (isTop ? 'opp' : 'me') + ' side ' + (isTop ? 'opp' : 'me') + '">' + railHTML(p, isTop) +
       '<div class="battle">' + slots + '</div>' +
@@ -1130,6 +1150,7 @@
   /* o2.37 (feedback pemain 19 Nov 2026): kartu HAND yang bisa langsung di-CALL (emas), yang butuh biaya dan biayanya tersedia
      (ungu), dan yang punya ACTI dari HAND (biru) naik dan menyala; kartu lain tetap bisa di-Base Deployment tetapi tidak menyala. */
   function handCls(i) {
+    if (myTurnPrompt('counter')) { const ids = ui.cIds || counterIds(); return ids && ids.has(i) ? 'can hcounter' : ''; }
     if (!myTurnPrompt('main') || G.inst[i].owner !== G.prompt.p) return '';
     if (!callReason(i)) return S.getLv(G, i) >= 4 ? 'can hcost' : 'can hcall';
     if (!G.vanilla && S.actiOptions(G, G.prompt.p, false).some(o => o.c === i)) return 'can hacti';
@@ -1439,9 +1460,10 @@
         return '';
       case 'counter': {
         const b = G.bt && G.bt.cur;
-        if (!b || pr.kind !== 'step') return sp('Last chance to play COUNTER cards this turn.') + ' ' + sp('Play one, or PASS.');
+        const n = ui.cIds ? ui.cIds.size : 0, nx = n ? sp('Tap a glowing card to respond, or PASS.') : sp('No COUNTER to play. PASS when ready.');   // o2.38
+        if (!b || pr.kind !== 'step') return sp('Counter Phase: last chance this turn.') + ' ' + nx;
         const out = passOutcome(attackPlan(b.a, true)[b.slot], pr.p === G.tp);   // siapa menyerang apa sudah tampil di petunjuk atas & penanda UNDER ATTACK
-        return (out ? '<b>' + esc(out) + '</b> ' : '') + sp('Play a COUNTER card, or PASS.');
+        return (out ? '<b>' + esc(out) + '</b> ' : '') + nx;
       }
       case 'order': return sp('Several effects triggered together.') + ' ' + sp('Tap the one to resolve first.');
     }
@@ -1701,6 +1723,7 @@
       }
       case 'rps': act({ t: 'rps', v: t.dataset.v }); return;
       case 'peek': ui.peek = !ui.peek; render(); return;
+      case 'cList': ui.cList = !ui.cList; render(); return;
       case 'noAtk': act({ t: 'noAttack', a: ui.atk }); return;
       case 'pass': act({ t: 'pass' }); return;
       case 'mullDone': act({ t: 'mulligan', cards: ui.mullSel.slice() }); return;

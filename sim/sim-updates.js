@@ -16,6 +16,19 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-19', t: 'improve', v: 'o2.38',
+      en: { h: 'Counter Step and Counter Phase from your HAND', b: [
+        'On phones the board stays visible during Counter Step and Counter Phase: one line in the middle tells you what happens if nobody responds, with a big PASS button.',
+        'Cards that can respond glow orange: [COUNTER] cards in your HAND and cards with COUNTER·ACTI on your FIELD or in your BASE. Tap one to COUNTER CALL or activate it. "≡ List" still opens the full list.',
+        'The attacked area shows a short ⚔ UNDER ATTACK label instead of a text box, and the turn banner no longer covers your Counter decision.',
+        'Online, the Counter window still opens even when you have nothing to play, so your opponent cannot tell. Against the bot it is skipped when you have nothing (change it with "Counter prompts").'] },
+      id: { h: 'Counter Step dan Counter Phase dari HAND Anda', b: [
+        'Di HP papan tetap terlihat selama Counter Step dan Counter Phase: satu baris di tengah menjelaskan akibatnya bila tidak ada yang merespons, dengan tombol PASS besar.',
+        'Kartu yang bisa merespons menyala oranye: kartu [COUNTER] di HAND dan kartu dengan COUNTER·ACTI di FIELD atau BASE. Ketuk untuk COUNTER CALL atau mengaktifkannya. "≡ Daftar" tetap membuka daftar lengkap.',
+        'Area yang diserang cukup diberi label pendek ⚔ DISERANG, bukan kotak teks, dan banner giliran tidak lagi menutupi keputusan Counter Anda.',
+        'Online, jendela Counter tetap terbuka walaupun Anda tidak punya kartu untuk dimainkan, jadi lawan tidak bisa menebak. Melawan bot, jendela dilewati bila Anda tidak punya apa-apa (ubah lewat "Counter prompts").'] }
+    },
+    {
       d: '2026-11-19', t: 'improve', v: 'o2.37',
       en: { h: 'Cards first: bigger HAND, cleaner board, START BATTLE', b: [
         'Bigger HAND cards, held like a real hand. Drag a card straight up to play it, with no long press.',

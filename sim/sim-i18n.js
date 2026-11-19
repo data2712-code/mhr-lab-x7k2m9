@@ -126,7 +126,12 @@
     'Play your cards, then START BATTLE': 'Mainkan kartu Anda, lalu START BATTLE', '⚔ Start Battle': '⚔ Mulai Battle', 'End Turn': 'Akhiri giliran',
     'Tap a glowing HAND card to play it · START BATTLE when ready': 'Ketuk kartu HAND yang menyala untuk memainkannya · START BATTLE bila siap',
     'Tap a glowing HAND card to play it · END TURN when done': 'Ketuk kartu HAND yang menyala untuk memainkannya · END TURN bila selesai',
-    'Press START BATTLE when you are ready.': 'Tekan START BATTLE bila sudah siap.', 'Press END TURN when you are done.': 'Tekan END TURN bila sudah selesai.', 'You can respond when they attack': 'Anda bisa merespons saat lawan menyerang',
+    'Press START BATTLE when you are ready.': 'Tekan START BATTLE bila sudah siap.', 'Press END TURN when you are done.': 'Tekan END TURN bila sudah selesai.',
+    // o2.38 (Tahap C): Counter berpusat di HAND
+    '≡ List': '≡ Daftar', '▾ Back to the board': '▾ Kembali ke papan', '⚔ UNDER ATTACK': '⚔ DISERANG',
+    'Tap a glowing card to respond, or PASS.': 'Ketuk kartu yang menyala untuk merespons, atau PASS.',
+    'No COUNTER to play. PASS when ready.': 'Tidak ada COUNTER yang bisa dimainkan. PASS bila siap.',
+    'Counter Phase: last chance this turn.': 'Counter Phase: kesempatan terakhir giliran ini.', 'You can respond when they attack': 'Anda bisa merespons saat lawan menyerang',
     'This card cannot go there. Tap a glowing area.': 'Kartu ini tidak bisa ke sana. Ketuk area yang menyala.',
     "That is your opponent's side. Tap a glowing area on your side.": 'Itu sisi lawan. Ketuk area yang menyala di sisi Anda.',
     'This card cannot move there. Tap a glowing area.': 'Kartu ini tidak bisa pindah ke sana. Ketuk area yang menyala.',
