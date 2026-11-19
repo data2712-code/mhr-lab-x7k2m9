@@ -80,6 +80,8 @@
     '★ RUSH POINT': '★ RUSH POINT', 'FIGHT RESULT': 'HASIL PERTARUNGAN', 'TIME RAN OUT': 'WAKTU HABIS', 'TIME UP': 'WAKTU HABIS', 'WHAT HAPPENED': 'YANG TERJADI',
     'End Action Phase': 'Akhiri Action Phase', 'Confirm positions': 'Simpan posisi', 'Skip': 'Lewati', 'Reset': 'Atur ulang', 'No attack': 'Tidak menyerang',
     'Other attacker': 'Penyerang lain', 'Attack!': 'Serang!', 'Change target': 'Ganti target', 'Yes': 'Ya', 'No': 'Tidak', 'Choose cards…': 'Pilih kartu…',
+    '🎓 Learn': '🎓 Belajar', '📖 Rules': '📖 Aturan', 'Learn to Play': 'Belajar Bermain', 'Rules': 'Aturan',   // o2.35
+    'New to Marvel Hero Rush?': 'Baru di Marvel Hero Rush?', 'Learn to play in 5 short lessons with a coach.': 'Belajar bermain dalam 5 pelajaran singkat bersama pelatih.', 'Start →': 'Mulai →',
     'Pass · let it through': 'Pass · biarkan lewat', 'Cancel effect': 'Batalkan efek', '👁 Look at the board': '👁 Lihat papan', 'Read the card texts': 'Baca teks kartu',
     'Hints ON': 'Petunjuk ON', 'Hints OFF': 'Petunjuk OFF',
     '▾ Hide': '▾ Sembunyikan', '▸ Show': '▸ Tampilkan',

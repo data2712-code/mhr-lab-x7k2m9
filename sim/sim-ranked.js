@@ -8,6 +8,7 @@
      - sim_rating_log  (milik akun)  → perubahan poin di layar hasil
    Aturan (sama dengan SQL dan home-ui.js):
      - mulai 1000 poin; Elo K = 48, 5 pertandingan pertama tiap season = placement (K = 96); menang min +1, kalah min -1 (v7.42; dulu ±4); main adil v7.42: lihat NOTE
+     - o2.35 / SQL v7.45 (daycap) (pemilik 19 Nov 2026): batas harian pribadi +200 poin bersih per hari WIB; setelahnya menang maks. +5, kalah maks. -5
      - tier: Recruit, Agent, Hero, Avenger, Legend, Myth, Cosmic (divisi III/II/I, 100 poin per divisi; Recruit < 900),
        Genius Burden 2700+ (puncak, tanpa divisi). Ikon: ../images/rank/<tier>.svg (desain orisinal, v7.38)
      - riwayat #96 (pemilik 14 Nov 2026): Season 0 = 23 Nov – 31 Des 2026 (kode 'S00'); Season 1 mulai 1 Jan 2027 (kode 'S01'),
@@ -26,6 +27,23 @@
   const slug = k => k.toLowerCase().replace(/\s+/g, '-');
   const icon = (k, cls) => '<img class="' + (cls || 'rki') + '" src="' + ICON_BASE + slug(k) + '.svg?v=1" alt="" loading="lazy">';
   const PLACEMENT = 5;
+  const DAY_CAP = 200;            // o2.35: poin bersih maks. per hari (WIB) — sama dengan mhr_sim_rank_apply di SQL
+  // awal hari ini (WIB, UTC+7) dalam ISO UTC
+  const dayStartISO = () => { const n = Date.now() + 7 * 3600e3; return new Date(n - n % 86400e3 - 7 * 3600e3).toISOString(); };
+  async function todayNet(c, uid) {
+    try {
+      const r = await c.from('sim_rating_log').select('delta').eq('season', seasonNow()).eq('user_id', uid).gte('created_at', dayStartISO());
+      if (r.error) return null;
+      return (r.data || []).reduce((a, x) => a + (x.delta || 0), 0);
+    } catch (e) { return null; }
+  }
+  function todayHTML(n) {
+    if (n == null) return '';
+    const capped = n >= DAY_CAP, w = Math.max(0, Math.min(100, n / DAY_CAP * 100));
+    return '<div class="rkday' + (capped ? ' cap' : '') + '"><div class="small"><span>' + T('Today', 'Hari ini') + '</span> <b data-noi18n>' + (n > 0 ? '+' : '') + n + ' / +' + DAY_CAP + '</b>' +
+      (capped ? ' <span class="muted">· ' + T('daily limit reached: wins +5, losses −5 until 00:00 WIB', 'batas harian tercapai: menang +5, kalah −5 sampai 00:00 WIB') + '</span>' : '') + '</div>' +
+      '<div class="rkbar day"><i style="width:' + w + '%"></i></div></div>';
+  }
   // Ranked aktif SETELAH BETA (keputusan pemilik 12 Nov 2026) — sama dengan mhr_sim_ranked_start() di SQL
   const START = Date.parse('2026-11-23T00:00:00+07:00');   // beta diperpanjang sampai 22 Nov (riwayat #96)
   const live = () => Date.now() >= START;
@@ -95,6 +113,7 @@
     }
     const rows = r.data, placed = rows.filter(x => x.games >= PLACEMENT), placing = rows.filter(x => x.games < PLACEMENT);
     const mine = s && rows.find(x => x.user_id === s.userId);
+    const today = mine && curSeason === seasonNow() ? await todayNet(client(), s.userId) : null;
     const pos = mine && mine.games >= PLACEMENT ? placed.indexOf(mine) + 1 : 0;
     const isNow = curSeason === seasonNow();
     let h = head;
@@ -109,6 +128,7 @@
           '<div class="rkme-s small"><span><b>' + mine.wins + '</b> ' + T('W', 'M') + '</span><span><b>' + mine.losses + '</b> ' + T('L', 'K') + '</span>' + (mine.draws ? '<span><b>' + mine.draws + '</b> ' + T('D', 'S') + '</span>' : '') +
           '<span>' + T('Peak', 'Tertinggi') + ' <b data-noi18n>' + fmt(mine.peak) + '</b></span>' + (mine.streak > 1 ? '<span class="hot">🔥 ' + T(mine.streak + ' wins in a row', mine.streak + ' kali menang beruntun') + '</span>' : '') + '</div>' +
           (t.next ? '<div class="rkbar"><i style="width:' + Math.max(4, Math.min(100, 100 - (t.next - mine.points))) + '%"></i></div><div class="small muted">' + T((t.next - mine.points) + ' points to ', (t.next - mine.points) + ' poin lagi ke ') + esc(tier(t.next, PLACEMENT).name) + '</div>' : '') +
+          todayHTML(today) +
           '</div>';
       } else if (isNow) {
         h += '<div class="box rkme"><b>You are not ranked yet this season.</b><p class="small muted">Play 5 games in Find a match to finish your placement and get your rank.</p><div class="startbar"><button class="pri" data-mode="find">⚔️ Find a match</button></div></div>';
@@ -165,6 +185,8 @@
          'Pertandingan yang berakhir sebelum <b>giliran ke-4</b> (menyerah atau keluar terlalu cepat) tidak memberi poin dan tidak dihitung sebagai pertandingan.') +
       li('The net points you can win from the <b>same opponent</b> are limited to <b>+75 per day</b> (WIB) and <b>+200 per season</b>. After that, wins against that player give fewer or no points, and their losses cost them fewer or none. Playing each other often with mixed results never reaches the limit.',
          'Poin bersih yang bisa Anda dapat dari <b>lawan yang sama</b> dibatasi <b>+75 per hari</b> (WIB) dan <b>+200 per season</b>. Setelah itu, menang melawan pemain itu memberi poin lebih sedikit atau 0, dan kekalahannya juga mengurangi lebih sedikit atau 0. Sering bertemu dengan hasil yang saling bergantian tidak akan menyentuh batas ini.') +
+      li('<b>Daily limit:</b> you can gain at most <b>+' + DAY_CAP + ' net points per day</b> (00:00–23:59 WIB), so players with less time to play are not left behind. After that, your games that day still count, but a win gives at most +5 and a loss costs at most −5. Losses earlier in the day free up room again. Your opponent\'s points are counted normally.',
+         '<b>Batas harian:</b> Anda bisa mendapat paling banyak <b>+' + DAY_CAP + ' poin bersih per hari</b> (00:00–23:59 WIB), supaya pemain yang waktunya terbatas tidak tertinggal jauh. Setelah itu, pertandingan Anda hari itu tetap dihitung, tetapi menang paling banyak +5 dan kalah paling banyak −5. Kekalahan di hari yang sama membuka ruang lagi. Poin lawan Anda dihitung normal.') +
       li('You cannot win more points than your opponent still has.',
          'Anda tidak bisa mendapat poin lebih banyak dari sisa poin lawan.') +
       li('One account per player. Duplicate accounts or arranged results can lead to disqualification from season rewards.',
@@ -221,7 +243,9 @@
     short: ['Not counted: the game ended before turn 4.', 'Tidak dihitung: pertandingan berakhir sebelum giliran ke-4.'],
     pair_day: ['Limited: you reached today\'s +75 limit against this opponent.', 'Dibatasi: batas +75 poin dari lawan ini hari ini sudah tercapai.'],
     pair_season: ['Limited: you reached this season\'s +200 limit against this opponent.', 'Dibatasi: batas +200 poin dari lawan ini di season ini sudah tercapai.'],
-    zero: ['Limited: your opponent had no more points to lose.', 'Dibatasi: poin lawan sudah habis.']
+    zero: ['Limited: your opponent had no more points to lose.', 'Dibatasi: poin lawan sudah habis.'],
+    // o2.35 (SQL daycap, pemilik 19 Nov 2026): batas harian pribadi +200 poin bersih per hari (WIB); setelahnya menang +5 / kalah -5.
+    day_cap: ['Daily limit: you have reached +' + DAY_CAP + ' points today, so this game counts ±5 at most. It resets at 00:00 WIB.', 'Batas harian: Anda sudah mencapai +' + DAY_CAP + ' poin hari ini, jadi pertandingan ini paling banyak ±5. Batas kembali pukul 00:00 WIB.']
   };
   function resultHTML(x) {
     if (!x) return '';

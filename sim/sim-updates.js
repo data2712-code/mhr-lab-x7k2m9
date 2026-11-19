@@ -16,6 +16,17 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-19', t: 'improve', v: 'o2.35',
+      en: { h: 'New: Learn to Play, Rules tab, and a daily limit for Ranked points', b: [
+        'Learn to Play (🎓 Learn tab): 5 short lessons with a coach for new players — the board, your first turn, big Characters with a cost, defending with a COUNTER, and finishing the game. You press the real buttons; the coach tells you what to do next.',
+        'Rules (📖 Rules tab): every ruling Battle Sim uses, in English and Indonesian, with where it comes from (official rules, Head Judge, or MHR Deck Lab ruling). Search by keyword or card, filter by topic, and copy a direct link to share a ruling.',
+        'Ranked daily limit: from Season 0 you can gain at most +200 net points per day (WIB). After that, your games that day count ±5 at most, so players with less time to play are not left behind. Your progress for today shows on the Ranked tab.'] },
+      id: { h: 'Baru: Belajar Bermain, tab Aturan, dan batas harian poin Ranked', b: [
+        'Belajar Bermain (tab 🎓 Belajar): 5 pelajaran singkat dengan pelatih untuk pemain baru — papan, giliran pertama, Karakter besar dengan biaya, bertahan dengan COUNTER, dan menyelesaikan permainan. Anda menekan tombol sungguhan; pelatih memberi tahu langkah berikutnya.',
+        'Aturan (tab 📖 Aturan): semua ruling yang dipakai Battle Sim, dalam bahasa Inggris dan Indonesia, beserta sumbernya (aturan resmi, Head Judge, atau ruling MHR Deck Lab). Cari dengan kata kunci atau nama kartu, saring per topik, dan salin tautan langsung untuk membagikan sebuah ruling.',
+        'Batas harian Ranked: mulai Season 0, poin bersih yang bisa didapat paling banyak +200 per hari (WIB). Setelah itu, pertandingan Anda hari itu paling banyak ±5, supaya pemain yang waktunya terbatas tidak tertinggal. Kemajuan hari ini tampil di tab Ranked.'] }
+    },
+    {
       d: '2026-11-18', t: 'improve', v: 'o2.33',
       en: { h: 'New 📈 Stats tab for your Find a match games', b: [
         'Your win rate, going first vs second, average game length and last 10 results.',

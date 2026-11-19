@@ -204,7 +204,7 @@
   }
   // Simpan otomatis setelah setiap langkah; saat permainan selesai, catat ke riwayat offline lalu hapus simpanan.
   function persist() {
-    if (!G || ui.replay || net.on) return;
+    if (!G || ui.replay || net.on || ui.lesson) return;      // o2.35: pelajaran Learn to Play tidak disimpan / tidak masuk riwayat
     if (G.result) {
       if (!ui.recorded && !ui.sandbox) { const h = history(); h.unshift(matchRecord()); histSet(h); track('sim_finish'); }
       ui.recorded = true; clearSaved(); return;
@@ -277,6 +277,18 @@
     begin();
     return [];
   }
+  /* o2.35 Learn to Play (sim-learn.js): pelajaran = posisi Sandbox + lawan yang diatur skrip + panel pelatih. */
+  function startLesson(pos, lesson) {
+    const errs = S.validatePosition(pos);
+    if (errs.length) return errs;
+    clearTimeout(ui.botTimer);
+    ui.lesson = lesson; ui.ctrl = ['human', 'bot']; ui.botLevel = 'easy'; ui.manualCounter = false; ui.sandbox = false; ui.gmode = 'lesson';
+    ui.recorded = true; ui.lastLaunch = null; ui.timer = 'off'; ui.mleft = null;
+    G = S.createGame({ position: pos, names: pos.names, vanilla: false, confirm: true });
+    ui.hist = []; ui.replay = null; ui.msg = '';
+    begin();
+    return [];
+  }
   function editPosition() {
     if (!G || ui.replay) return;
     const pos = S.positionFrom(G);
@@ -306,6 +318,7 @@
     clearTimeout(ui.botTimer);
     net.on = false; hostGame(false);
     G = null; ui.replay = null; ui.sandbox = false; ui.sideOn = false; $('game').classList.remove('sideOn');
+    if (ui.lesson) { ui.lesson = null; if (window.MHRSimLearn) window.MHRSimLearn.after(null, ui); }
     $('game').classList.remove('on'); document.querySelector('.wrap').style.display = ''; $('setup').style.display = 'block'; closePop();
     if ($('sandbox')) $('sandbox').style.display = 'none';
     closeOv();
@@ -318,6 +331,8 @@
     if (net.on) return netAct(a);
     if (!G || !G.prompt || ui.replay) return false;
     const p = a.t === 'arm' ? a.p : G.prompt.p, vk = annKey(viewer());
+    // o2.35 Learn to Play: pelajaran bisa menahan aksi yang keluar dari jalur (pesan dari pelatih)
+    if (ui.lesson && ui.lesson.allow && !auto) { const why = ui.lesson.allow(G, a); if (why) { ui.msg = why; if (window.MHRSound) MHRSound.play('error'); render(); return false; } }
     const r = S.apply(G, a);
     if (!r.ok) { ui.msg = r.err; if (window.MHRSound) MHRSound.play('error'); render(); return false; }
     ui.hist.push({ p, auto: !!auto });
@@ -355,7 +370,7 @@
       ui.botTimer = setTimeout(() => {
         if (!G || !G.prompt || ui.ctrl[G.prompt.p] !== 'bot') return;
         const p = G.prompt.p;
-        const a = Bot.choose(G, ui.botLevel === 'easy' ? 'random' : ui.botLevel === 'hard' ? 'hard' : ui.botLevel === 'expert' ? 'expert' : 'greedy', ui.botRng);
+        const a = (ui.lesson && ui.lesson.opp && ui.lesson.opp(G)) || Bot.choose(G, ui.botLevel === 'easy' ? 'random' : ui.botLevel === 'hard' ? 'hard' : ui.botLevel === 'expert' ? 'expert' : 'greedy', ui.botRng);   // o2.35: lawan pelajaran diatur skrip
         const r = S.apply(G, a);
         if (!r.ok) { ui.msg = 'The test bot made an illegal action (report it to Claude with the log code): ' + r.err; render(); return; }
         ui.hist.push({ p, auto: true });
@@ -752,6 +767,7 @@
     turnBanner(v);
     modals();
     updateClockView();
+    if (window.MHRSimLearn) window.MHRSimLearn.after(G, ui);     // o2.35: panel pelatih Learn to Play
   }
   /* Laporan #8 (13 Nov 2026, alur seperti RushDee): penyerang dipilih otomatis berurutan FRONT → WING 1 → WING 2 → BACK,
      jadi pemain cukup mengetuk target. "Other attacker" tetap bisa dipakai; pilihan manual tidak ditimpa. */
@@ -1491,7 +1507,7 @@
         '<div class="row">' + (net.replay ? '<button data-act="netReplay">Replay</button><button data-act="shareReplay">🔗 Share replay</button><button data-act="copy">Copy log code</button>' : '') + '<button data-act="closeOverModal">View board</button><button class="pri" data-act="netMenu">Menu</button><button data-rep="open" data-v="bug">🐞 Report a bug</button></div>');
       return;
     }
-    if (G.result && !ui.replay && !ui.overClosed) {
+    if (G.result && !ui.replay && !ui.overClosed && !ui.lesson) {
       openOv('<h2>' + (G.result.winner < 0 ? 'Draw' : esc(G.names[G.result.winner]) + ' wins') + '</h2><p>' + esc(G.result.cause) + '</p>' +
         '<p class="small muted">' + G.turn + ' turns · ' + G.actions.length + ' actions · seed ' + G.seed + '</p>' +
         '<div class="row"><button class="pri" data-act="copy">Copy log code</button><button data-act="toReplay">Replay</button>' + (window.MHRSimOnline && window.MHRSimOnline.host() ? '<button data-act="shareReplay">🔗 Share replay</button>' : '') + '<button data-act="closeOverModal">View board</button>' + (ui.lastLaunch && !ui.sandbox ? '<button class="pri" data-act="rematch">Rematch</button>' : '') + '<button data-act="menu">Menu</button><button data-rep="open" data-v="bug">🐞 Report a bug</button></div>');
@@ -2250,7 +2266,7 @@
   }
 
   // Kait untuk uji otomatis Claude (Playwright). Hanya membaca status.
-  window.MHRSimUI = { state: () => G, ui: () => ui, startSandbox, resumeGame, timeoutNow, attackPlan: a => attackPlan(a), render: () => render(),
+  window.MHRSimUI = { state: () => G, ui: () => ui, startSandbox, startLesson, resumeGame, timeoutNow, attackPlan: a => attackPlan(a), render: () => render(),
     // Riwayat #50 (mode, simpan otomatis, riwayat offline)
     launch, deckFrom, resumeSaved, savedGame, clearSaved, history, histDel, histSet, toMenu, CLOCK, MATCH, timeUp, act: a => act(a),
     online: { enter: netEnter, state: netState, error: netError, undoAsk: netUndoAsk, undoResult: netUndoResult, saved: netSaved, active: () => net.on, seat: () => net.seat, last: () => net.last },

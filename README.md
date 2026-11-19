@@ -619,6 +619,12 @@ Permintaan pemilik: monitoring pemakaian Battle Sim di fitur Usage (super-admin)
   dijalankan, fitur baru diabaikan server dan bagian Battle Sim menampilkan pesan "isn't switched on yet".
 - `usage.js?v=7.45`, `sim-host.js?v=7.45-sim34`, `SIM_URL ?v=o2.34`, footer v7.45. Mesin & server Battle Sim tidak berubah.
 
+### Battle Sim o2.35 — Learn to Play, tab Rules, batas harian poin Ranked — 19 November 2026 *(`sim/` + `sim/sim-rules.js`, `sim/sim-learn.js`, `sim-host.js`, `index.html`; SQL internal `mhr_decklab_v745_sim_ranked_daycap.sql`)*
+- **Learn to Play** (tab 🎓 Learn + ajakan di hero Play): 5 pelajaran interaktif dengan pelatih (papan, giliran pertama, CALL berbiaya, COUNTER, menang) memakai kartu Hero File tanpa efek; lawan diatur skrip; kemajuan di localStorage `mhrsim.learn.v1`.
+- **Rules** (tab 📖 Rules): 70 ruling (9 dasar permainan GB-xx + ruling RS-xxx dari `ruling-simulator.md`), Inggris + Indonesia, label sumber (Aturan resmi / Head Judge / Ruling MHR Deck Lab), cari, saring topik, tautan langsung `#sim/rules/RS-023` (VIEW_RE sim-host diperluas).
+- **Ranked**: batas harian +200 poin bersih per hari WIB; setelahnya menang +5 / kalah −5 (catatan `day_cap`), baris "Hari ini +X / +200" di kartu Ranked. Butuh SQL v7.45 dijalankan di Supabase sebelum Season 0 (23 Nov).
+- `SIM_URL ?v=o2.35`, `sim-host.js?v=7.45-sim35`. (VIEW_RE juga menerima `stats`.)
+
 ### Battle Sim o2.33 — tab 📈 Stats: statistik & riwayat Find a match untuk analisa pemain — 18 November 2026 *(`sim/` (berkas BARU `sim/sim-stats.js`), `sim-host.js`, `index.html`)*
 Permintaan pemilik: pemain bisa melihat statistik deck yang dipakai dan riwayat permainan untuk analisa. Keputusan pemilik: tab
 sendiri, **hanya pertandingan online Find a match** (`sim_matches.mode = 'queue'`); pertandingan offline tetap di My Lab → Performance.

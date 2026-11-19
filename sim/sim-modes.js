@@ -15,7 +15,7 @@
   const KEY_PREF = 'mhrsim.prefs.v1';
   const prefs = (() => { try { return JSON.parse(localStorage.getItem(KEY_PREF) || '{}') || {}; } catch (e) { return {}; } })();
   const savePrefs = () => { try { localStorage.setItem(KEY_PREF, JSON.stringify(prefs)); } catch (e) { /* abaikan */ } };
-  const VIEWS = { home: 'home', practice: 'panelPractice', history: 'panelHistory', online: 'panelOnline', find: 'panelOnline', custom: 'panelCustom', tools: 'panelCustom', ranked: 'panelRanked', stats: 'panelStats' };   // ranked: o2.12 (riwayat #87)
+  const VIEWS = { home: 'home', practice: 'panelPractice', history: 'panelHistory', online: 'panelOnline', find: 'panelOnline', custom: 'panelCustom', tools: 'panelCustom', ranked: 'panelRanked', stats: 'panelStats', rules: 'panelRules', learn: 'panelLearn' };   // ranked: o2.12 (riwayat #87); rules & learn: o2.35 (riwayat #114)
   let histTab = null;                    // #85: default Online (akun) bila tersedia, kalau tidak Offline
   const MODE_LABEL = { practice: 'Practice vs Bot', friend: 'Friend · same device', custom: 'Custom game', sandbox: 'Sandbox' };
   // Kartu di hero menu Battle Sim (permintaan pemilik 13 Nov 2026): kiri, tengah, kanan. Gambar Inggris (images/en/).
@@ -81,9 +81,10 @@
   // o2.16 (permintaan pemilik 13 Nov 2026): tab menu berpindah di tempat, tanpa rasa "pindah halaman" dan tanpa tombol kembali.
   // Bilah tab #simNav tetap tampil; Play / Ranked / History / Tools menyala sesuai layar. Practice, Online, Find, Same device
   // adalah bagian dari tab Play.
-  const TAB_OF = { home: 'home', practice: 'home', online: 'home', find: 'home', custom: 'home', ranked: 'ranked', stats: 'stats', history: 'history', tools: 'tools' };
+  const TAB_OF = { home: 'home', practice: 'home', online: 'home', find: 'home', custom: 'home', ranked: 'ranked', stats: 'stats', history: 'history', tools: 'tools', rules: 'rules', learn: 'learn' };
   function navHTML() {
-    return '<button data-mode="home">Play</button><button data-mode="ranked">🏆 Ranked</button><button data-mode="stats">📈 Stats</button><button data-mode="history">History</button><button data-hub="sandbox">Sandbox</button>' +
+    // o2.35 (pemilik 19 Nov 2026): tab Learn (Learn To Play, sim-learn.js) dan Rules (ruling, sim-rules.js)
+    return '<button data-mode="home">Play</button><button data-mode="learn">🎓 Learn</button><button data-mode="ranked">🏆 Ranked</button><button data-mode="stats">📈 Stats</button><button data-mode="rules">📖 Rules</button><button data-mode="history">History</button><button data-hub="sandbox">Sandbox</button>' +
       '<button data-mode="tools">Tools</button><button data-rep="open" data-v="feedback">Feedback</button>';
   }
   function syncNav() {
@@ -96,7 +97,7 @@
     const prev = view;
     view = VIEWS[v] ? v : 'home';
     $('home').style.display = view === 'home' ? '' : 'none';
-    ['panelPractice', 'panelHistory', 'panelOnline', 'panelCustom', 'panelRanked', 'panelStats'].forEach(id => { const el = $(id); if (el) el.classList.toggle('on', VIEWS[view] === id); });
+    ['panelPractice', 'panelHistory', 'panelOnline', 'panelCustom', 'panelRanked', 'panelStats', 'panelRules', 'panelLearn'].forEach(id => { const el = $(id); if (el) el.classList.toggle('on', VIEWS[view] === id); });
     syncNav();
     { const pc = $('panelCustom'); if (pc) pc.classList.toggle('tools', view === 'tools'); }
     renderResume();
@@ -105,6 +106,8 @@
     if (view === 'history') renderHistory();
     if (view === 'ranked' && window.MHRSimRanked) window.MHRSimRanked.render($('panelRanked'));
     if (view === 'stats' && window.MHRSimStats) window.MHRSimStats.render($('panelStats'));   // o2.33 (riwayat #112): tab 📈 Stats
+    if (view === 'rules' && window.MHRSimRules) window.MHRSimRules.render($('panelRules'));
+    if (view === 'learn' && window.MHRSimLearn) window.MHRSimLearn.render($('panelLearn'));
     if (view === 'find' && onlineReady()) window.MHRSimOnline.renderFind();
     else if (view === 'online' && onlineReady()) window.MHRSimOnline.renderPanel();
     else if (view === 'online' || view === 'find') renderOnline();
@@ -252,6 +255,8 @@
       '<h2>CALL. ATTACK.<br><em>RUSH.</em></h2><p>Every rule and card effect is handled for you. Pick a mode, pick your deck, press PLAY.</p>' +
       '<div class="hstats">' + (mine.length ? '<span><b>' + mine.length + '</b> <i>games</i></span><span class="w"><b>' + W + '</b> <i>wins</i></span><span class="l"><b>' + L + '</b> <i>losses</i></span>' : '<span><i>No games yet: start with the bot</i></span>') +
       '<span class="e"><i>Engine</i> <b>v' + esc(S.VERSION) + '</b></span></div><div class="fan">' + FAN_CARDS.map(f => '<i><img src="' + (window.MHRSIM_BASE || '../') + 'images/en/' + f + '.jpg" alt="" loading="lazy" onerror="this.remove()"></i>').join('') + '</div></section>';
+    // o2.35: ajakan Learn to Play untuk pemula (sim-learn.js), di dalam hero supaya tetap tampil di atas (grid #home)
+    h = h.replace(/<\/section>$/, '<button class="lnbanner" data-mode="learn"><span class="ic">🎓</span><span class="tx"><b>New to Marvel Hero Rush?</b><small>Learn to play in 5 short lessons with a coach.</small></span><span class="go">Start →</span></button></section>');
     h += '<aside class="pblade"><div class="pblbl">MODE</div><div class="pbmodes">' +
       PB_MODES.map(([k, ic, t, s]) => '<button data-pbmode="' + k + '"' + (k === pbMode ? ' class="on"' : '') + '><b><i class="pbic">' + ic + '</i>' + esc(t) + '</b><span>' + esc(s) + '</span></button>').join('') +
       '</div><div id="pbBody"></div></aside>';
@@ -417,8 +422,10 @@
 
   function init() {
     document.addEventListener('click', onClick);
-    window.addEventListener('hashchange', () => { const v = (location.hash || '').slice(1) || 'home'; if (VIEWS[v] && v !== view && !document.getElementById('game').classList.contains('on')) show(v); });
-    const h = (location.hash || '').slice(1);
+    // o2.35: tautan langsung ke satu ruling = #rules/RS-023 (situs: #sim/rules/RS-023)
+    const route = h => { const m = /^rules\/([A-Z]{2}-\d{3}|GB-\d{2})$/.exec(h); if (m && window.MHRSimRules) { window.MHRSimRules.focus(m[1]); return 'rules'; } return h; };
+    window.addEventListener('hashchange', () => { const raw = (location.hash || '').slice(1) || 'home', v = route(raw); if (VIEWS[v] && (v !== view || raw !== v) && !document.getElementById('game').classList.contains('on')) show(v); });
+    const h = route((location.hash || '').slice(1));
     show(VIEWS[h] ? h : 'home');
   }
   window.MHRSimModes = { show, renderHome, renderResume, view: () => view };

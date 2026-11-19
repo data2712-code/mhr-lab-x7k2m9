@@ -204,6 +204,47 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .rkme-p{margin:10px 0 4px}.rkme-p b{font-size:34px;font-weight:900;letter-spacing:.01em}.rkme-p span{color:var(--muted)}
 .rkme-s{display:flex;gap:12px;flex-wrap:wrap;color:#c9d2de}.rkme-s .hot{color:#ffb35c}
 .rkbar{height:6px;border-radius:99px;background:#1a2028;margin:10px 0 4px;overflow:hidden}.rkbar i{display:block;height:100%;background:var(--rk,var(--gold));border-radius:99px}
+/* ---------- o2.35 (riwayat #114): Rules (sim-rules.js) ---------- */
+.rlpage{max-width:860px}
+.rlhow{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0 12px}.rlhow summary{cursor:pointer;font-weight:700}.rlhow ol{margin:8px 0 6px 18px;padding:0}
+.rlbar input{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px}
+.rlchips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0}.rlchips button{border-radius:99px;font-size:12.5px;padding:5px 11px}.rlchips button.on{background:var(--gold);color:#111;border-color:var(--gold);font-weight:700}
+.rlchips.cats{margin-bottom:6px}
+.rlcat{margin:22px 2px 8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.rlitem{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 10px;scroll-margin-top:70px}
+.rlitem[data-hit]{border-color:var(--gold);box-shadow:0 0 0 2px rgba(242,176,30,.25)}
+.rlhd{display:flex;align-items:center;gap:8px}.rlid{font-family:var(--mono,monospace);font-size:12px;color:#9aa5b1}
+.rlsrc{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid var(--line2)}
+.rlsrc.s-cr{color:#7fe0a0;border-color:#2f6b45;background:#14261b}.rlsrc.s-hj{color:#8fc1ff;border-color:#2b4f80;background:#121e2e}.rlsrc.s-owner{color:var(--gold2);border-color:#6b5420;background:#261f0f}
+.rlcopy{margin-left:auto;padding:2px 7px;font-size:13px;background:transparent}
+.rlitem h3{margin:8px 0 6px;font-size:15.5px;line-height:1.35}.rlitem ul{margin:0;padding-left:18px}.rlitem li{margin:3px 0;line-height:1.45;font-size:14px}
+.rlcards{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.rlcard{font-size:12px;padding:3px 9px;border-radius:99px}
+.rlpop{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px}
+.rlpopin{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:14px;max-width:560px;width:100%;display:flex;gap:14px;align-items:flex-start;max-height:90vh;overflow:auto}
+.rlpopin img{width:170px;border-radius:9px;flex:none}.rlpopin p{white-space:pre-wrap}
+@media (max-width:560px){.rlpopin{flex-direction:column;align-items:center}.rlpopin img{width:60%}}
+/* ---------- o2.35: Learn To Play (sim-learn.js) ---------- */
+.lnbanner{position:relative;z-index:2;display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin:14px 0 0;padding:12px 14px;border-radius:14px;border:1px solid #6b5420;background:linear-gradient(90deg,#2a2210,#171d24);white-space:normal}
+.lnbanner .ic,.lnitem .ic{font-size:24px;flex:none}.lnbanner .tx,.lnitem .tx{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.lnbanner small,.lnitem small{color:#aeb6c2;font-weight:400}
+.lnbanner .go{color:var(--gold);font-weight:800;flex:none}
+.lnhero{border-color:#6b5420}.lntag{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gold)}.lnhero h3{margin:6px 0;font-size:20px;letter-spacing:0;text-transform:none}
+.lnprog{height:6px;border-radius:99px;background:#1a2028;margin:10px 0 4px;overflow:hidden}.lnprog i{display:block;height:100%;background:var(--gold)}
+.lnlist{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-width:720px}
+.lnitem{display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:12px;white-space:normal}
+.lnitem .st{flex:none;font-weight:800;color:var(--gold)}.lnitem.ok .st{color:#7fe0a0}.lnitem.ok{border-color:#2f6b45}
+#coach{position:fixed;z-index:8500;top:10px;left:50%;transform:translateX(-50%);width:min(520px,calc(100vw - 20px));background:#11161c;border:1px solid var(--gold);border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.7);padding:10px 12px 12px;color:var(--text)}
+#coach .ch-h{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--gold)}
+#coach .ch-dots{display:flex;gap:4px;margin-left:auto}#coach .ch-dots i{width:7px;height:7px;border-radius:99px;background:#2c3644}#coach .ch-dots i.on{background:var(--gold)}#coach .ch-dots i.ok{background:#33A45C}
+#coach .ch-x{padding:1px 7px;font-size:12px;background:transparent}
+#coach .ch-b .ch-t{display:block;margin:6px 0 2px;font-size:13px;color:#cfd6df}#coach .ch-b p b{color:var(--gold2)}
+#coach.mini .ch-b,#coach.mini .ch-a{display:none}#coach .ch-b p{margin:0;font-size:14px;line-height:1.45}
+#coach .ch-a{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#coach .ch-a button{white-space:normal}
+#coach.fin{border-color:#33A45C}
+.coachhl{outline:3px solid var(--gold)!important;outline-offset:2px;border-radius:10px;animation:coachpulse 1.2s ease-in-out infinite}
+@keyframes coachpulse{0%,100%{outline-color:rgba(242,176,30,1)}50%{outline-color:rgba(242,176,30,.35)}}
+@media (max-width:820px){#coach{top:6px;padding:8px 10px 10px;max-height:42dvh;overflow:auto}#coach .ch-b p{font-size:13px}#coach.low,#coach.mini{top:auto;bottom:calc(var(--hcw,60px) * 1.4 + 40px)}}
+
+.rkday{margin-top:10px;padding-top:8px;border-top:1px solid #222a35}.rkday .rkbar.day{height:4px;margin:6px 0 0}.rkday .rkbar.day i{background:#4FD1E8}.rkday.cap .rkbar.day i{background:var(--gold)}  /* o2.35 batas harian */
 .rkh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:14px 2px 8px;flex-wrap:wrap}
 .rklist{display:flex;flex-direction:column;gap:6px}
 .rkrow{display:grid;grid-template-columns:34px minmax(0,1fr) auto 64px;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
@@ -968,6 +1009,8 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
     <div class="panelx" id="panelOnline"></div>
     <div class="panelx" id="panelRanked"></div>  <!-- o2.12: Ranked & leaderboard (sim-ranked.js) -->
     <div class="panelx" id="panelStats"></div>  <!-- o2.33: 📈 Stats, Find a match saja (sim-stats.js, riwayat #112) -->
+    <div class="panelx" id="panelRules"></div>   <!-- o2.35: Rules & ruling (sim-rules.js) -->
+    <div class="panelx" id="panelLearn"></div>   <!-- o2.35: Learn To Play (sim-learn.js) -->
     <div class="panelx" id="panelCustom">
     <div class="hd"><button data-mode="home">← Menu</button><h2 id="customTitle">Play with a friend · same device</h2></div>
     <p class="muted small">Two decks of your choice, each side played by a human or the test bot. With two humans this is pass-and-play on one device, with a handover screen between players. All cards of SD01–SD04, BP01, PB01, EB01, TB01 and SP01 have automatic effects; SD05, SD06 and PB02 are hidden until their official Indonesian release.</p>
@@ -1087,23 +1130,25 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.44-sd56id" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.40-pb02only" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.34"></script>
-<script src="sim-cards.js?v=o2.34"></script>
-<script src="sim-cards-bp01.js?v=o2.34"></script>
-<script src="sim-cards-s4.js?v=o2.34"></script>
-<script src="sim-cards-sp01.js?v=o2.34"></script>
-<script src="sim-cards-t6.js?v=o2.34"></script>
-<script src="sim-bot.js?v=o2.34"></script>
-<script src="sim-sound.js?v=o2.34"></script>
-<script src="sim-shadow.js?v=o2.34"></script>
-<script src="sim-ui.js?v=o2.34"></script>
-<script src="sim-sandbox.js?v=o2.34"></script>
-<script src="sim-report.js?v=o2.34"></script>
-<script src="sim-modes.js?v=o2.34"></script>
-<script src="sim-i18n.js?v=o2.34"></script>
-<script src="sim-online.js?v=o2.34"></script>
-<script src="sim-ranked.js?v=o2.34"></script>
-<script src="sim-stats.js?v=o2.34"></script>
-<script src="sim-updates.js?v=o2.34"></script>
+<script src="sim.js?v=o2.35"></script>
+<script src="sim-cards.js?v=o2.35"></script>
+<script src="sim-cards-bp01.js?v=o2.35"></script>
+<script src="sim-cards-s4.js?v=o2.35"></script>
+<script src="sim-cards-sp01.js?v=o2.35"></script>
+<script src="sim-cards-t6.js?v=o2.35"></script>
+<script src="sim-bot.js?v=o2.35"></script>
+<script src="sim-sound.js?v=o2.35"></script>
+<script src="sim-shadow.js?v=o2.35"></script>
+<script src="sim-ui.js?v=o2.35"></script>
+<script src="sim-sandbox.js?v=o2.35"></script>
+<script src="sim-report.js?v=o2.35"></script>
+<script src="sim-modes.js?v=o2.35"></script>
+<script src="sim-i18n.js?v=o2.35"></script>
+<script src="sim-online.js?v=o2.35"></script>
+<script src="sim-ranked.js?v=o2.35"></script>
+<script src="sim-stats.js?v=o2.35"></script>
+<script src="sim-updates.js?v=o2.35"></script>
+<script src="sim-rules.js?v=o2.35"></script>
+<script src="sim-learn.js?v=o2.35"></script>
 </body>
 </html>
