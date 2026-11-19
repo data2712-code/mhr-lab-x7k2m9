@@ -18,7 +18,7 @@
    =================================================================== */
 (function () {
   'use strict';
-  const SIM_URL = 'sim/index.html?v=o2.33';
+  const SIM_URL = 'sim/index.html?v=o2.34';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const q = s => document.querySelector(s);
   const admin = () => (typeof isAccountAdmin !== 'undefined' && isAccountAdmin);
@@ -55,7 +55,9 @@
     openLogin() { if (window.MHRUI && window.MHRUI.openAuthModal) window.MHRUI.openAuthModal(); },
     gameMode(on) { document.body.classList.toggle('sim-full', !!on); sizeFrame(); },
     shareUrl(code) { return location.origin + '/#sim/room/' + code; },
-    replayUrl(code) { return location.origin + '/#sim/replay/' + code; }      // o2.5: link replay = kode log di alamat
+    replayUrl(code) { return location.origin + '/#sim/replay/' + code; },     // o2.5: link replay = kode log di alamat
+    // v7.45 — statistik pemakaian anonim dari simulator (o2.34): hanya nama fitur sim_*, diteruskan ke usage.js
+    mark(f) { if (/^sim_[a-z]{3,12}$/.test(String(f)) && window.MHRUsage) window.MHRUsage.mark(f); }
   };
 
   /* ---------- halaman #sim ---------- */

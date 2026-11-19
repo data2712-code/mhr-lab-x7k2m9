@@ -168,8 +168,14 @@
   }
   /* Mulai permainan baru dari mode mana pun (riwayat #50). o: { decks, names, ctrl, first, seed, timer, botLevel, gmode,
      deckNames, youIdx }. Mode Siaga hanya di pass-and-play dua orang (kartu di HAND tetap rahasia). */
+  /* o2.34 (riwayat #113): statistik pemakaian anonim untuk laporan Battle Sim di Control Tower. Situs induk mencatat lewat
+     MHRSimHost.mark (usage.js: satu kali per fitur per hari per perangkat, tanpa akun / isi permainan). Tanpa situs induk = diam. */
+  function track(f) {
+    try { const h = (window.parent !== window && window.parent.MHRSimHost) || window.MHRSimHost; if (h && h.mark) h.mark(f); } catch (e) { /* abaikan */ }
+  }
   function launch(o) {
     clearTimeout(ui.botTimer);
+    track('sim_' + (['practice', 'friend', 'custom'].includes(o.gmode) ? o.gmode : 'custom'));
     ui.ctrl = o.ctrl.slice(); ui.manualCounter = false; ui.sandbox = false;
     ui.timer = o.timer || 'standard'; ui.botLevel = o.botLevel || 'normal'; ui.gmode = o.gmode || 'custom';
     ui.deckNames = (o.deckNames || []).slice(); ui.youIdx = o.youIdx == null ? null : o.youIdx; ui.recorded = false;
@@ -200,7 +206,7 @@
   function persist() {
     if (!G || ui.replay || net.on) return;
     if (G.result) {
-      if (!ui.recorded && !ui.sandbox) { const h = history(); h.unshift(matchRecord()); histSet(h); }
+      if (!ui.recorded && !ui.sandbox) { const h = history(); h.unshift(matchRecord()); histSet(h); track('sim_finish'); }
       ui.recorded = true; clearSaved(); return;
     }
     store.set(KEY_CUR, { v: 1, code: S.exportLog(G), gmode: ui.sandbox ? 'sandbox' : ui.gmode, ctrl: ui.ctrl, timer: ui.timer, botLevel: ui.botLevel,
@@ -263,6 +269,7 @@
   function startSandbox(pos) {
     const errs = S.validatePosition(pos);
     if (errs.length) return errs;
+    track('sim_sandbox');
     clearTimeout(ui.botTimer);
     ui.ctrl = ['human', 'human']; ui.manualCounter = false; ui.sandbox = true;
     G = S.createGame({ position: pos, names: pos.names, vanilla: false, confirm: true });   // satu mode: efek selalu aktif
@@ -455,6 +462,7 @@
     clearTimeout(ui.botTimer);
     Object.assign(net, { on: true, seat: o.seat, send: o.send, last: null, recvAt: 0, pending: false, replay: null, matchId: null, ask: null, waitUndo: false, clock: o.clock || 'standard', overAt: 0 });
     ui.ctrl = o.seat === 0 ? ['human', 'remote'] : ['remote', 'human'];
+    track('sim_online');
     ui.sandbox = false; ui.replay = null; ui.gmode = 'online'; ui.timer = net.clock; ui.mleft = null; ui.hist = []; ui.recorded = true; ui.lastLaunch = null;
     ui.youIdx = o.seat; ui.deckNames = (o.deckNames || []).slice(); ui.msg = ''; ui.overClosed = false;
     G = null;
@@ -2246,7 +2254,7 @@
     // Riwayat #50 (mode, simpan otomatis, riwayat offline)
     launch, deckFrom, resumeSaved, savedGame, clearSaved, history, histDel, histSet, toMenu, CLOCK, MATCH, timeUp, act: a => act(a),
     online: { enter: netEnter, state: netState, error: netError, undoAsk: netUndoAsk, undoResult: netUndoResult, saved: netSaved, active: () => net.on, seat: () => net.seat, last: () => net.last },
-    replayCode: code => { const o = S.parseLog(code); if (!o) return false; readSetupSafe(o); ui.replay = { o, n: 0, max: (o.a || []).length }; G = S.replay(o, 0); ui.hist = []; begin(); replayTo(ui.replay.max); return true; } };
+    replayCode: code => { const o = S.parseLog(code); if (!o) return false; track('sim_replay'); readSetupSafe(o); ui.replay = { o, n: 0, max: (o.a || []).length }; G = S.replay(o, 0); ui.hist = []; begin(); replayTo(ui.replay.max); return true; } };
   function readSetupSafe(o) { ui.ctrl = ['human', 'human']; ui.sandbox = !!o.q; ui.timer = 'off'; }
   boot();
 })();

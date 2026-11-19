@@ -2151,6 +2151,12 @@
   .us-leg{display:flex;gap:14px;font-size:12px;color:var(--muted)}
   .us-leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
   .us-chart{width:100%;height:auto;display:block;margin-top:4px}
+  /* v7.45 — laporan Battle Sim di Usage (usage.js renderSim) */
+  .us-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:10px 0 4px}
+  .us-kpis>div{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;display:flex;flex-direction:column;gap:1px;min-width:0}
+  .us-kpis span{font-size:11.5px;color:var(--muted)}.us-kpis b{font-family:var(--disp);font-size:24px;line-height:1.15}.us-kpis small{font-size:11px;color:var(--muted)}
+  .us-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}.us-tbl.us-sm{min-width:0}
+  @media (max-width:760px){ .us-two{grid-template-columns:1fr} }
   /* v7.23 — pilihan warna binder */
   .bd-colors{display:flex;flex-wrap:wrap;gap:8px}
   .bd-col{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;width:52px;position:relative}
@@ -3641,7 +3647,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
 <script src="auth.js?v=7.19"></script>
 <!-- v7.25 — statistik pemakaian fitur anonim (guest vs login), laporan admin di My Lab -->
-<script src="usage.js?v=7.44"></script>
+<script src="usage.js?v=7.45"></script>
 <script src="decks.js?v=7.02"></script>
 <!-- v6.37 — like+komentar galeri publik (Phase 5) dan koleksi kartu pribadi (Phase 4) -->
 <script src="social.js?v=7.02"></script>
@@ -3668,7 +3674,7 @@
 <script src="perf.js?v=7.34"></script>
 <script src="perf-ui.js?v=7.44"></script>
 <script src="rules-faq.js?v=7.28"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules); v7.26 — FAQ versi Bahasa Indonesia; v7.27 — Copy link ke halaman statis faq/ & errata/; v7.28 — TD-11 -->
-<script src="sim-host.js?v=7.44-sim33"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
+<script src="sim-host.js?v=7.45-sim34"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
 <script src="tower.js?v=7.44b"></script>   <!-- v7.44 — 🗼 Control Tower (super-admin): Overview, Usage, Battle Sim reports, Binder reports, Verified organizers, Opponent deck list, Admin roles -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
@@ -3698,7 +3704,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.44</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.45</div>
 </footer>
 
 <div class="dview" id="simView" hidden>

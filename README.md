@@ -604,6 +604,21 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.45 — Laporan Battle Sim di 🗼 Control Tower → 📊 Usage + statistik pemakaian Battle Sim (o2.34) — 19 November 2026 *(`usage.js`, `sim-host.js`, `index.html`, `sim/sim-ui.js`, `sim/index.html`; SQL baru `mhr_decklab_v745_sim_usage.sql` di folder internal)*
+Permintaan pemilik: monitoring pemakaian Battle Sim di fitur Usage (super-admin).
+- **Bagian baru "⚔️ Battle Sim — online games"** di bawah tabel Usage (`MHRUsage.renderSim`, RPC `mhr_sim_usage_report(30)`, khusus
+  super-admin; hari = WIB). Angka gabungan dari `sim_matches`: game hari ini / 7 / 30 hari (Find a match vs room privat), pemain unik
+  (hari ini / 7 / 30 hari, pemain Find a match, pemain baru = game pertama), rata-rata giliran & menit per game, Ranked season berjalan
+  (punya rank / masih placement), laporan Battle Sim yang masih terbuka, grafik harian (batang game per mode + garis pemain), cara game
+  berakhir (9 RP, deck habis, menyerah, …), dan 10 pemain teraktif. Tidak menampilkan isi pertandingan.
+- **Tabel Usage + grup ⚔️ Battle Sim** (perangkat unik guest / login, sama seperti fitur lain): membuka Battle Sim (`page_sim`),
+  mulai Practice vs Bot, main online, pass-and-play, custom game, Sandbox, menyelesaikan game offline, menonton replay. Simulator o2.34
+  mengirim nama fitur lewat `MHRSimHost.mark()` (hanya `sim_*`, diteruskan ke `MHRUsage.mark`); tidak ada data akun atau isi game.
+  Pemakaian offline (Practice, Sandbox, dll.) sebelumnya tidak terlihat sama sekali di server.
+- **Wajib jalankan `mhr_decklab_v745_sim_usage.sql` di Supabase** (menambah 8 fitur ke `mhr_usage_features()` + fungsi laporan). Sebelum
+  dijalankan, fitur baru diabaikan server dan bagian Battle Sim menampilkan pesan "isn't switched on yet".
+- `usage.js?v=7.45`, `sim-host.js?v=7.45-sim34`, `SIM_URL ?v=o2.34`, footer v7.45. Mesin & server Battle Sim tidak berubah.
+
 ### Battle Sim o2.33 — tab 📈 Stats: statistik & riwayat Find a match untuk analisa pemain — 18 November 2026 *(`sim/` (berkas BARU `sim/sim-stats.js`), `sim-host.js`, `index.html`)*
 Permintaan pemilik: pemain bisa melihat statistik deck yang dipakai dan riwayat permainan untuk analisa. Keputusan pemilik: tab
 sendiri, **hanya pertandingan online Find a match** (`sim_matches.mode = 'queue'`); pertandingan offline tetap di My Lab → Performance.
