@@ -29,7 +29,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = '0.14.1';   // o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068)
+  const VERSION = '0.14.2';   // o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
   const SLOTS = ['F', 'W1', 'W2', 'B'];
   const SLOT_NAME = { F: 'FRONT', W1: 'WING 1', W2: 'WING 2', B: 'BACK', BASE: 'BASE' };
   // Posisi pada garis serangan (303.2.a.4.3.1.1): BACK sendiri = 0, WING = 1,
@@ -1629,6 +1629,14 @@
       return r.warn.length ? r.warn.join('; ') + '.' : null;
     } catch (e) { return null; }
   }
+  /* o2.44 (laporan #37): info tampilan untuk prompt urutan efek — opt = efek opsional (UI menawarkan "Skip" = pilih lalu
+     jawab No), dead = saat ini tidak ada yang bisa diselesaikan (syarat/target tidak ada). Tidak mengubah aksi. */
+  function orderJob(st, j) {
+    const o = { id: j.id, label: jobLabel(st, j) };
+    if (j.opt) o.opt = true;
+    try { const e = jobDef(st, j); if (j.kind === 'trig' && e && e.can && !e.can(api(st, j, j.c), j)) o.dead = true; } catch (x) { /* abaikan */ }
+    return o;
+  }
   // Pilih efek tertunda berikutnya (304.1.f–h). Mengembalikan true kalau ada prompt.
   function processPending(st) {
     for (let guard = 0; guard < 200; guard++) {
@@ -1655,7 +1663,7 @@
       const older = (gs && gs.b === maxB && gs.p === g && gs.started) ? [] : st.pend.filter(j => j.p === g && (j.b || 0) < maxB);
       if (group.length > 1 || older.length) {
         st.prompt = { type: 'order', p: g, b: maxB, rs016: older.length > 0,
-          jobs: group.map(j => ({ id: j.id, label: jobLabel(st, j) })).concat(older.map(j => ({ id: j.id, label: jobLabel(st, j), older: true }))) };
+          jobs: group.map(j => orderJob(st, j)).concat(older.map(j => Object.assign(orderJob(st, j), { older: true }))) };
         return true;
       }
       st.grpSel = { b: maxB, p: g, started: true };
@@ -2509,6 +2517,7 @@
       : createGame({ decks: o.d, seed: o.s, first: o.f, names: o.n, vanilla: !o.x, siaga: !!o.g, confirm: !!o.k, opaque: !!o.o, toLimit: o.t || 0 });
     // o2.41: log lama (mesin < 0.14.1) tetap diputar dengan aturan lamanya, supaya replay & room yang dipulihkan tidak macet.
     if (o.e && verLt(o.e, '0.14.1')) { st.engine = o.e; st.lg021 = true; }        // SP01-021 dulu memicu dirinya sendiri
+    if (o.e && verLt(o.e, '0.14.2')) { st.engine = o.e; st.lg066 = true; }        // o2.44: BP01-066 dulu menaruh ke FIELD pemilik kartu
     const acts = o.a || [], lim = n == null ? acts.length : Math.min(n, acts.length);
     for (let i = 0; i < lim; i++) {
       const r = apply(st, acts[i]);

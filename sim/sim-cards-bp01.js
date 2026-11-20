@@ -706,7 +706,9 @@
         run: A => {
           const to = A.pick('to', 'Choose where to place ' + A.name(ev(A).c), slotOpts(A, A.spots(A.p)));
           A.prune(A.self, 'Turn The Tide');
-          if (to) A.place(ev(A).c, to, 'Turn The Tide');
+          // o2.44 (laporan #37): "you place that character into YOUR field" — karakter lawan yang dikuasai (mis. diambil Phage)
+          // masuk RETREAT pemiliknya; dulu A.place menaruhnya ke FIELD pemilik (area penuh → gagal diam-diam, kartu TTT terbuang).
+          if (to) { if (A.st.lg066) A.place(ev(A).c, to, 'Turn The Tide'); else A.placeOnto(ev(A).c, to, A.p, 'Turn The Tide'); }
         }
       }]
     },

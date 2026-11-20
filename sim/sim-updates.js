@@ -16,6 +16,17 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-20', t: 'fix', v: 'o2.44', reports: [37],
+      en: { h: 'Online pop-ups, skipping effects, and Turn The Tide on a taken Character', b: [
+        'Online games: the RUSH POINT / fight pop-up from an earlier attack no longer appears again after every action (for example during Base Deployment).',
+        'When several effects trigger together, optional effects now have a Skip button, so you do not have to choose the effect first and then press No. Effects that have no valid target right now are marked "No valid target now".',
+        '「Turn The Tide」Captain America now works on a Character you took from your opponent (for example with 「Spider-Archenemy」Phage): that Character is placed onto YOUR field as the card says. Before, the card was pruned but nothing was placed.'] },
+      id: { h: 'Pop-up online, melewati efek, dan Turn The Tide pada Karakter yang diambil', b: [
+        'Permainan online: pop-up RUSH POINT / hasil pertarungan dari serangan sebelumnya tidak lagi muncul lagi setiap kali Anda melakukan aksi (misalnya saat Base Deployment).',
+        'Saat beberapa efek terpicu bersamaan, efek opsional kini punya tombol Lewati, jadi tidak perlu memilih efeknya dulu lalu menekan Tidak. Efek yang saat ini tidak punya target ditandai "Saat ini tidak ada target".',
+        '「Turn The Tide」Captain America kini berfungsi untuk Karakter yang Anda ambil dari lawan (misalnya dengan 「Spider-Archenemy」Phage): Karakter itu ditaruh ke FIELD ANDA sesuai teks kartu. Dulu kartunya di-prune tetapi tidak ada yang ditaruh.'] }
+    },
+    {
       d: '2026-11-20', t: 'fix', v: 'o2.43',
       en: { h: 'RETREAT / VOID ACTI no longer covers your HAND on phones', b: [
         'On phones, an ACTI you can use from RETREAT or VOID (for example 「Phoenix Host」Jean Grey) no longer opens the decision panel over your HAND in the Action Phase. The RETREAT or VOID pile now glows with ⚡ and the hint line says so: tap the pile, then Activate under the card.',

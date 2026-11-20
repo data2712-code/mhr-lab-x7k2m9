@@ -604,6 +604,11 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Battle Sim o2.44 — laporan #37 (mesin v0.14.2) — 20 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+- Online: kilasan RUSH POINT / pertarungan lama tidak muncul lagi di setiap aksi. Prompt urutan efek: tombol Skip + tanda "tidak ada target".
+- Turn The Tide pada karakter yang diambil (Phage) kini menaruhnya ke FIELD pemakai TTT.
+- `SIM_URL ?v=o2.44`, `sim-host.js?v=7.45-sim44`. Server perlu deploy (mesin).
+
 ### Battle Sim o2.43 — ACTI dari RETREAT/VOID tidak menutupi HAND di HP — 20 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 - Di HP, ACTI dari RETREAT/VOID (mis. Jean Grey SP01-003) ditandai dengan tumpukan yang menyala ⚡, bukan panel yang menutupi HAND.
 - `SIM_URL ?v=o2.43`, `sim-host.js?v=7.45-sim43`.

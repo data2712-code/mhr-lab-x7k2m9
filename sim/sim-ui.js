@@ -255,7 +255,7 @@
   function begin() {
     $('setup').style.display = 'none'; document.querySelector('.wrap').style.display = 'none'; $('game').classList.add('on');
     ui.viewer = null; ui.overClosed = false; resetSel(); ui.tbKey = null;
-    ui.sndN = G.log.length; ui.logPrevN = G.log.length; ui.seenN = {}; ui.flashN = G.log.length; ui.toastN = G.log.length; ui.peek = false; ui.clk = null; ui.mlast = Date.now();
+    ui.sndN = logEnd(); ui.logPrevN = logEnd(); ui.seenN = {}; ui.flashN = logEnd(); ui.toastN = logEnd(); ui.peek = false; ui.clk = null; ui.mlast = Date.now();
     ui.botRng = Bot.makeRng((G.seed ^ 0x9e3779b9) >>> 0);
     $('replayBar').classList.toggle('on', !!ui.replay);
     $('sbBadge').style.display = ui.sandbox ? '' : 'none';
@@ -336,7 +336,7 @@
     const r = S.apply(G, a);
     if (!r.ok) { ui.msg = r.err; if (window.MHRSound) MHRSound.play('error'); render(); return false; }
     ui.hist.push({ p, auto: !!auto });
-    if (!auto) ui.seenN[vk] = G.log.length;          // Timeline: kejadian setelah langkah ini ditandai "baru"
+    if (!auto) ui.seenN[vk] = logEnd();          // Timeline: kejadian setelah langkah ini ditandai "baru"
     ui.msg = ''; resetSel(); ui.pickClosed = false;
     step();
     return true;
@@ -387,7 +387,7 @@
     if (i < 0) { ui.msg = 'There is no move of yours to undo.'; render(); return; }
     const o = S.parseLog(S.exportLog(G));
     G = S.replay(o, i);
-    ui.hist.length = i; ui.clk = null; ui.sndN = G.log.length; ui.seenN = {}; ui.flashN = G.log.length; ui.toastN = G.log.length;
+    ui.hist.length = i; ui.clk = null; ui.sndN = logEnd(); ui.seenN = {}; ui.flashN = logEnd(); ui.toastN = logEnd();
     ui.msg = ui.sandbox || ui.gmode === 'practice' ? 'Move undone.' : 'Move undone (test mode). Undo can reveal hidden information; use it for testing only.';
     resetSel(); step();
   }
@@ -403,7 +403,7 @@
     if (!canCancelEff()) return;
     const n = ui.actiMark.n, o = S.parseLog(S.exportLog(G));
     G = S.replay(o, n);
-    ui.hist.length = n; ui.clk = null; ui.sndN = G.log.length; ui.seenN = {}; ui.flashN = G.log.length; ui.toastN = G.log.length;
+    ui.hist.length = n; ui.clk = null; ui.sndN = logEnd(); ui.seenN = {}; ui.flashN = logEnd(); ui.toastN = logEnd();
     ui.actiMark = null; ui.pick = []; ui.pickTouched = false; ui.pickClosed = false; closeOv();
     ui.msg = ''; resetSel(); tip('Effect cancelled. Nothing was paid or changed.'); step();
   }
@@ -497,7 +497,7 @@
     if (first) {
       $('setup').style.display = 'none'; document.querySelector('.wrap').style.display = 'none'; $('game').classList.add('on');
       ui.viewer = null; resetSel();
-      ui.sndN = G.log.length; ui.logPrevN = G.log.length; ui.seenN = {}; ui.flashN = G.log.length; ui.toastN = G.log.length; ui.peek = false; ui.clk = null;
+      ui.sndN = logEnd(); ui.logPrevN = logEnd(); ui.seenN = {}; ui.flashN = logEnd(); ui.toastN = logEnd(); ui.peek = false; ui.clk = null;
       $('replayBar').classList.remove('on'); $('sbBadge').style.display = 'none'; $('btnCopyPos').style.display = 'none';
       hostGame(true);
     }
@@ -527,7 +527,7 @@
     }
     net.send({ type: 'act', action: a });
     if (a.t !== 'arm') net.pending = true;
-    ui.seenN[annKey(viewer())] = G.log.length;
+    ui.seenN[annKey(viewer())] = logEnd();
     ui.msg = ''; resetSel(); ui.pickClosed = false;
     render();
     return true;
@@ -711,6 +711,12 @@
   const narrow = () => innerWidth <= 820;
   function render() {
     if (!G) return;
+    // o2.44: lanjutan tombol "Skip" di prompt urutan efek — begitu efek itu menanyakan "pakai?", jawab No.
+    if (ui.autoNo != null) {
+      const pr = G.prompt, j = ui.autoNo;
+      if (pr && pr.type === 'opt' && pr.job === j && myTurnPrompt('opt')) { ui.autoNo = null; setTimeout(() => { if (G.prompt && G.prompt.type === 'opt' && G.prompt.job === j) act({ t: 'opt', yes: false }); }, 0); }
+      else if (!pr || pr.type !== 'order') ui.autoNo = null;
+    }
     const v = viewer();
     const bottom = ui.sandbox && !ui.replay ? actor() : (v === 'all' || v == null ? 0 : v);
     const top = 1 - bottom;
@@ -775,7 +781,7 @@
      jadi pemain cukup mengetuk target. "Other attacker" tetap bisa dipakai; pilihan manual tidak ditimpa. */
   function autoAttacker() {
     if (!myTurnPrompt('attack') || ui.atk || net.on && net.seat !== G.prompt.p) return;
-    const key = G.turn + ':' + G.prompt.stage + ':' + G.log.length;
+    const key = G.turn + ':' + G.prompt.stage + ':' + logEnd();
     if (ui.atkManual === key) return;
     const atk = S.attackersNow(G); if (!atk.length) return;
     const bat = G.P[G.prompt.p].bat, order = S.SLOTS.map(s => bat[s]).filter(i => i && atk.includes(i));
@@ -954,10 +960,10 @@
     return best;
   }
   function oppToast(v) {
-    if (ui.toastN == null || ui.replay || ui.sandbox || v == null || v === 'all') { ui.toastN = G.log.length; return; }
+    if (ui.toastN == null || ui.replay || ui.sandbox || v == null || v === 'all') { ui.toastN = logEnd(); return; }
     const opp = 1 - v, on = G.names[opp];
     const ev = S.logFor(G, v).filter(e => e.n >= ui.toastN && TOAST_K[e.k] && (e.txt.startsWith(on + ':') || e.txt.startsWith(on + ' ')));
-    ui.toastN = G.log.length;
+    ui.toastN = logEnd();
     if (!ev.length) return;
     // Satu toast per giliran render: langkah utama (CALL, MOVE, SET) didahulukan dari efek yang mengikutinya.
     const PRI = ['call', 'move', 'deploy', 'place', 'swap', 'attach', 'acti', 'trig', 'eff'];
@@ -1017,7 +1023,7 @@
     pass: 'PASS', mulligan: 'STARTING HAND', arrange: 'REPOSITION', noattack: 'NO ATTACK', concede: 'CONCEDE', over: 'GAME OVER', manual: 'MANUAL' };
   function timelineHTML(v) {
     const k = annKey(v);
-    if (ui.seenN[k] == null) ui.seenN[k] = G.log.length;
+    if (ui.seenN[k] == null) ui.seenN[k] = logEnd();
     const seen = ui.seenN[k], all = S.logFor(G, v === null ? -1 : v).filter(e => !TL_SKIP.includes(e.k));
     const lg = all.slice(-3), fresh = ui.replay ? 0 : all.filter(e => e.n >= seen).length, more = Math.max(0, fresh - lg.length);
     const wf = waitForText(v), lim = limitsHTML();
@@ -1216,7 +1222,11 @@
         return (pr.warn ? '<div class="pwarn optwarn">⚠ ' + esc(pr.warn) + '</div>' : '') +     // o2.40 (laporan #33): akibat efek, tidak terpotong
           '<button class="pri" data-act="yes">Yes</button><button data-act="no">No</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'order':
-        return pr.jobs.map(j => '<button data-act="order" data-job="' + j.id + '"' + (j.older ? ' title="Triggered earlier and still waiting (RS-016)"' : '') + '>' + esc(j.label) + (j.older ? ' (earlier)' : '') + '</button>').join('');
+        // o2.44 (laporan #37): efek opsional punya tombol "Skip" (= pilih efeknya lalu jawab No otomatis); efek yang saat ini
+        // tidak punya target/syarat ditandai.
+        return pr.jobs.map(j => '<span class="ordj"><button data-act="order" data-job="' + j.id + '"' + (j.older ? ' title="Triggered earlier and still waiting (RS-016)"' : '') + '>' + esc(j.label) + (j.older ? ' (earlier)' : '') +
+          (j.dead ? '<small>No valid target now: it will be skipped</small>' : '') + '</button>' +
+          (j.opt && !j.dead ? '<button class="sm warn" data-act="orderSkip" data-job="' + j.id + '" title="Do not use this effect">Skip</button>' : '') + '</span>').join('');
       case 'choose':
         return '<button class="pri" data-act="openPick">Choose cards…</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'pick':
@@ -1703,6 +1713,7 @@
       case 'yes': act({ t: G.prompt.type === 'opt' ? 'opt' : 'yesno', yes: true }); return;
       case 'no': act({ t: G.prompt.type === 'opt' ? 'opt' : 'yesno', yes: false }); return;
       case 'order': act({ t: 'order', job: +t.dataset.job }); return;
+      case 'orderSkip': ui.autoNo = +t.dataset.job; if (!act({ t: 'order', job: ui.autoNo })) ui.autoNo = null; return;
       case 'openPick': ui.pickClosed = false; render(); return;
       case 'pickHide': ui.pickClosed = true; closeOv(); render(); return;
       case 'pickDone': { const cs = ui.pick.slice(); ui.pick = []; ui.pickTouched = false; ui.pickClosed = false; act({ t: 'choose', cards: cs }); return; }
@@ -1726,7 +1737,7 @@
       case 'arrSkip': act({ t: 'arrange', map: null }); return;
       case 'arrReset': ui.arr = null; ui.arrPick = null; render(); return;
       case 'pickAtk': ui.atk = t.dataset.iid; ui.tg = null; render(); return;
-      case 'unpickAtk': ui.atkManual = G.turn + ':' + G.prompt.stage + ':' + G.log.length; ui.atk = null; ui.tg = null; render(); return;
+      case 'unpickAtk': ui.atkManual = G.turn + ':' + G.prompt.stage + ':' + logEnd(); ui.atk = null; ui.tg = null; render(); return;
       case 'clearTg': ui.tg = null; render(); return;
       case 'doAtk': act({ t: 'attack', a: ui.atk, tg: ui.tg }); return;
       case 'airAtk': {
@@ -1942,7 +1953,7 @@
   const NAME_RE = /「[^」]+」[A-Z][\w'’.\-]*(?: [A-Z][\w'’.\-]*)*/g;
   function renderLog(v) {
     const lg = S.logFor(G, v === null ? -1 : v), f = ui.logF, fresh = ui.logPrevN;
-    ui.logPrevN = G.log.length;
+    ui.logPrevN = logEnd();
     const fil = [['all', 'All'], ['p0', G.names[0]], ['p1', G.names[1]], ['battle', 'Battle'], ['rush', '★ Rush']];
     const lg0 = $('log'); if (!lg0) return;
     // Riwayat #74: daftar ikut turun ke kejadian terbaru, kecuali pemain sedang menggulir ke atas untuk membaca.
@@ -1954,7 +1965,7 @@
       (f === 'battle' && BAT.includes(e.k)) || (f === 'rush' && (e.k === 'rp' || e.k === 'over'));
     // o2.29 (keputusan pemilik: gabung Timeline ke Play-by-play, desktop): penanda NEW sejak langkah terakhir Anda, label jenis kejadian,
     // jumlah kejadian baru, dan baris "siapa yang beraksi · batas CALL" (dulu di kaki Timeline).
-    const sk = annKey(v); if (ui.seenN[sk] == null) ui.seenN[sk] = G.log.length;
+    const sk = annKey(v); if (ui.seenN[sk] == null) ui.seenN[sk] = logEnd();
     const seen = ui.replay ? Infinity : ui.seenN[sk];
     const nNew = lg.filter(e => e.n >= seen && !TL_SKIP.includes(e.k)).length;
     const lh = $('logHead');
@@ -1995,8 +2006,8 @@
   }
   function playEvents(v) {
     if (!G) return;
-    const from = ui.sndN; ui.sndN = G.log.length;
-    if (ui.replay || from >= G.log.length || !window.MHRSound) return;
+    const from = ui.sndN; ui.sndN = logEnd();
+    if (ui.replay || from >= logEnd() || !window.MHRSound) return;
     const kinds = S.logFor(G, v == null ? -1 : v).filter(e => e.n >= from).map(sndKind).filter(Boolean);
     kinds.sort((a, b) => SND_PRI.indexOf(a) - SND_PRI.indexOf(b));
     MHRSound.playSeq(kinds);
@@ -2029,11 +2040,15 @@
     return '<div class="card" style="cursor:default" title="' + esc(S.nameEn(c)) + '"><div class="ph">' + esc(S.nameEn(c)) + '</div>' + imgTag(no) +
       '<div class="cbar" style="background:' + (COLOR[c.c] || '#888') + '"></div><div class="st"><b>Lv' + c.l + '</b><i>R' + c.r + '</i><span>' + c.p + '</span></div></div>';
   }
+  /* o2.44 (laporan #37): di permainan online G.log adalah log yang sudah disaring untuk pemain ini (entri rahasia lawan tidak
+     dikirim), jadi panjangnya < nomor entri (e.n). Penanda "sudah dilihat" dulu memakai G.log.length → kilasan RUSH POINT /
+     pertarungan terakhir dan bunyi muncul lagi di setiap aksi. Sekarang memakai nomor entri terakhir + 1. */
+  function logEnd() { const L = G && G.log; return L && L.length ? (L[L.length - 1].n == null ? L.length : L[L.length - 1].n + 1) : 0; }
   function revealCheck(v) {
     const el = $('reveal'); if (!el) return;
-    if (ui.revN == null || ui.replay || ui.revN > G.log.length) { ui.revN = G.log.length; if (ui.replay) el.classList.remove('on'); return; }
+    if (ui.revN == null || ui.replay || ui.revN > logEnd()) { ui.revN = logEnd(); if (ui.replay) el.classList.remove('on'); return; }
     const ev = S.logFor(G, v == null ? -1 : v).filter(e => e.n >= ui.revN && e.k === 'reveal' && e.nos && e.nos.length);
-    ui.revN = G.log.length;
+    ui.revN = logEnd();
     if (!ev.length) return;
     const e = ev[ev.length - 1], key = e.nos.join(',');
     if (ui.shownKey === key) { ui.shownKey = null; return; }
@@ -2045,9 +2060,9 @@
     void el.offsetWidth; el.classList.add('on');
   }
   function flashCheck(v) {
-    if (ui.flashN == null || ui.replay) { ui.flashN = G.log.length; return; }
+    if (ui.flashN == null || ui.replay) { ui.flashN = logEnd(); return; }
     const ev = S.logFor(G, v == null ? -1 : v).filter(e => e.n >= ui.flashN && (e.k === 'rp' || e.k === 'timeout' || e.k === 'timeup' || e.k === 'judge'));
-    ui.flashN = G.log.length;
+    ui.flashN = logEnd();
     if (!ev.length) return;
     const e = ev[ev.length - 1], el = $('flash'); if (!el) return;
     if (e.k === 'judge') { fightFlash(e, el); return; }
