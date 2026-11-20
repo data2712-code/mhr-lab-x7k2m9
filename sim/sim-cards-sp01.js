@@ -373,7 +373,9 @@
       trig: [{
         id: 'base', zone: 'BASE', once: true, optional: true, label: 'The Web of Destiny',
         text: 'Attach 1 [Web] Character from your HAND to 1 Character in the field?',
-        when: (e, self, A) => e.k === 'ENTER' && e.p === A.p && isWeb(A, e.c),
+        // o2.41 (laporan #35, keputusan pemilik 20 Nov 2026, RS-068): hanya kartu [Web] LAIN yang memicu; Web of Destiny
+        // yang masuk FIELD tidak memicu efeknya sendiri.
+        when: (e, self, A) => e.k === 'ENTER' && (e.c !== self || !!A.st.lg021) && e.p === A.p && isWeb(A, e.c),   // lg021: log mesin < 0.14.1
         can: A => A.hand(A.p).some(i => isWeb(A, i)) && A.allChars().length > 0,
         run: A => {
           const c = A.ask('c', { text: 'Choose 1 [Web] Character in your HAND to attach', from: A.hand(A.p).filter(i => isWeb(A, i)), prefer: 'high' });

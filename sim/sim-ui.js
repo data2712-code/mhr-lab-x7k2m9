@@ -1391,6 +1391,7 @@
   /* ---------------- alasan (pola UX: alasan tertulis) ---------------- */
   function ccallReason(iid) {
     const p = G.prompt.p, lv = S.getLv(G, iid);
+    const nc = S.noCallWhy && S.noCallWhy(G, iid); if (nc) return nc;    // o2.41 (laporan #36)
     if (S.counterCallUsed(G, p) >= 1) return 'COUNTER CALL was already used this turn here.';
     if (lv >= 4 && !S.costOptions(G, p, lv).length) return 'A Lv' + lv + ' COUNTER CALL needs cards on your FIELD with a combined Lv of exactly ' + lv + '.';
     return null;
@@ -1402,6 +1403,7 @@
   }
   function callReason(iid) {
     const p = G.prompt.p, lv = S.getLv(G, iid);
+    const nc = S.noCallWhy && S.noCallWhy(G, iid); if (nc) return nc;    // o2.41 (laporan #36): dulu menyala ungu & tombol CALL aktif
     if (G.cnt.call >= S.callLimit(G)) return 'Action CALL limit reached for this turn (' + G.cnt.call + '/' + S.callLimit(G) + ').';
     const ur = uniqueReason(iid, p, lv); if (ur) return ur;
     if (lv >= 4) {

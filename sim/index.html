@@ -257,6 +257,8 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .rkpz-h{display:flex;gap:12px;align-items:flex-start}.rkpz-i{font-size:34px;line-height:1}
 .rkpz h3{margin:6px 0 4px;font-size:20px;letter-spacing:normal;color:#fff}.rkpz .rktag{background:var(--gold);color:#1a1200}
 .rkpz-lead{margin:8px 0 0;color:#ffd77a}
+.rkpz-l{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}.rkpz-l li{display:grid;grid-template-columns:24px 1fr;align-items:center;gap:2px 8px;padding:7px 10px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid rgba(242,176,30,.25)}
+.rkpz-l .m{font-size:20px;line-height:1}.rkpz-l .z{min-width:0}.rkpz-l .z b{color:#ffd77a}.rkpz-l .w{grid-column:2;color:#c9d2de}
 .rkpz-me{margin-top:10px;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center}.rkpz-me .rkbar,.rkpz-me .small{grid-column:1/-1}
 .rkpz-me b{font-weight:900}.rkpz-me.ok .small{color:#9fe0b2}
 .rkpz-d{margin-top:8px}.rkpz-d summary{cursor:pointer;color:var(--muted)}.rkpz-d ul{margin:6px 0 0;padding-left:18px}
@@ -1075,6 +1077,12 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   .abar.slim.cslim .hint .ord{display:none}
 }
 /* o2.40 (laporan #33): peringatan akibat efek di prompt "pakai efek?" dan di tombol pilihan area */
+/* o2.42: banner maintenance server & penanda server staging */
+#maintBar{position:fixed;left:50%;transform:translateX(-50%);top:6px;z-index:9000;max-width:min(680px,calc(100vw - 16px));display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border-radius:10px;font-size:12.5px;line-height:1.35;color:#1a1405;background:#ffd56b;box-shadow:0 4px 18px rgba(0,0,0,.45)}
+#maintBar.on{background:#ff9f6b}#maintBar.stg{background:#c9b6ff}
+#maintBar button{flex:none;min-height:0;padding:0 6px;border:0;background:transparent;color:inherit;font-size:14px;font-weight:700}
+#maintBar .stgb{flex:none;padding:1px 6px;border-radius:6px;background:#3b1e8a;color:#fff;font-size:11px}
+.mtadm{border-color:#c98a12}
 .pwarn{display:block;margin-top:3px;font-size:12px;color:#ffcf6b;font-weight:600}
 .acts .optwarn{flex:1 1 100%;width:100%;grid-column:1/-1;margin:0 0 2px;padding:6px 8px;border:1px solid #c98a12;border-radius:8px;background:rgba(201,138,18,.12);line-height:1.3}
 button small.pwarn{display:block;margin-top:2px;font-size:10.5px;color:#ffcf6b}
@@ -1221,25 +1229,25 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.44-sd56id" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.40-pb02only" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.40"></script>
-<script src="sim-cards.js?v=o2.40"></script>
-<script src="sim-cards-bp01.js?v=o2.40"></script>
-<script src="sim-cards-s4.js?v=o2.40"></script>
-<script src="sim-cards-sp01.js?v=o2.40"></script>
-<script src="sim-cards-t6.js?v=o2.40"></script>
-<script src="sim-bot.js?v=o2.40"></script>
-<script src="sim-sound.js?v=o2.40"></script>
-<script src="sim-shadow.js?v=o2.40"></script>
-<script src="sim-ui.js?v=o2.40"></script>
-<script src="sim-sandbox.js?v=o2.40"></script>
-<script src="sim-report.js?v=o2.40"></script>
-<script src="sim-modes.js?v=o2.40"></script>
-<script src="sim-i18n.js?v=o2.40"></script>
-<script src="sim-online.js?v=o2.40"></script>
-<script src="sim-ranked.js?v=o2.40"></script>
-<script src="sim-stats.js?v=o2.40"></script>
-<script src="sim-updates.js?v=o2.40"></script>
-<script src="sim-rules.js?v=o2.40"></script>
-<script src="sim-learn.js?v=o2.40"></script>
+<script src="sim.js?v=o2.42"></script>
+<script src="sim-cards.js?v=o2.42"></script>
+<script src="sim-cards-bp01.js?v=o2.42"></script>
+<script src="sim-cards-s4.js?v=o2.42"></script>
+<script src="sim-cards-sp01.js?v=o2.42"></script>
+<script src="sim-cards-t6.js?v=o2.42"></script>
+<script src="sim-bot.js?v=o2.42"></script>
+<script src="sim-sound.js?v=o2.42"></script>
+<script src="sim-shadow.js?v=o2.42"></script>
+<script src="sim-ui.js?v=o2.42"></script>
+<script src="sim-sandbox.js?v=o2.42"></script>
+<script src="sim-report.js?v=o2.42"></script>
+<script src="sim-modes.js?v=o2.42"></script>
+<script src="sim-i18n.js?v=o2.42"></script>
+<script src="sim-online.js?v=o2.42"></script>
+<script src="sim-ranked.js?v=o2.42"></script>
+<script src="sim-stats.js?v=o2.42"></script>
+<script src="sim-updates.js?v=o2.42"></script>
+<script src="sim-rules.js?v=o2.42"></script>
+<script src="sim-learn.js?v=o2.42"></script>
 </body>
 </html>

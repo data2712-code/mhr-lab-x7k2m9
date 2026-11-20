@@ -13,7 +13,10 @@
 (function () {
   'use strict';
   const S = window.MHRSim, U = () => window.MHRSimUI;
-  const API = (window.MHRSIM_ONLINE_API || 'https://mhr-battle-sim-test.dataanggi2712.workers.dev').replace(/\/$/, '');
+  // o2.42: server staging (uji sebelum deploy ke server utama). Admin bisa beralih di panel Online; tersimpan di perangkat ini.
+  const API_PROD = 'https://mhr-battle-sim-test.dataanggi2712.workers.dev', API_STAGING = 'https://mhr-battle-sim-staging.dataanggi2712.workers.dev';
+  const STAGING = (() => { try { return localStorage.getItem('mhrsim.server') === 'staging'; } catch (e) { return false; } })();
+  const API = (window.MHRSIM_ONLINE_API || (STAGING ? API_STAGING : API_PROD)).replace(/\/$/, '');
   const KEY = 'mhrsim.online.v1', KEY_PREF = 'mhrsim.onlinePrefs.v1';
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -40,6 +43,7 @@
       const r = await fetch(API + path, o);
       const j = await r.json().catch(() => ({}));
       if (!r.ok && !j.error) j.error = 'Server error (' + r.status + ').';
+      if (j && 'maint' in j) setMaint(j.maint);           // o2.42: status maintenance ikut di /api/queue dan di penolakan 503
       return j;
     } catch (e) { return { error: 'Cannot reach the Battle Sim server. Check your internet connection.' }; }
   }
@@ -170,6 +174,7 @@
         '<button class="pri" data-on="back" style="min-height:44px">Back to the game</button><button data-on="forget" style="min-height:44px">Forget</button></div>';
     }
     h += '<p class="small muted" style="margin:0 2px 10px">Playing as <b>' + esc(s.username || 'Player') + '</b>' + (s.admin ? ' · admin' : '') + '</p>';
+    if (s.admin) h += '<div class="box mtadm" id="mtAdmin" data-noi18n></div>';      // o2.42: saklar maintenance + server staging
     // Gabung (dari link / kode)
     h += '<div class="box"><h3 style="margin:0 0 8px">Join a room</h3><div class="form">' +
       '<div class="f"><label>Room code</label><input id="onJoinCode" maxlength="6" autocomplete="off" style="text-transform:uppercase;letter-spacing:.2em;font-weight:700" value="' + esc(pendingJoin || '') + '" placeholder="e.g. 7KQ2MX"></div>' +
@@ -192,6 +197,7 @@
     wire('onDeck', 'onCodeWrap'); wire('onJoinDeck', 'onJoinCodeWrap');
     $('onJoinCode').oninput = e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); if (e.target.value.length === 6) roomInfo(e.target.value); };
     if (pendingJoin) roomInfo(pendingJoin);
+    if (s.admin) adminDraw();
     tr();
   }
   async function roomInfo(code) {
@@ -467,7 +473,8 @@
     timeout: 'No opponent was found within 10 minutes. Try again later, or share a private room link with a friend.',
     replaced: 'A new search was started with this account on another device or tab.',
     left: 'The search stopped because the connection was lost.',
-    expired: 'The search stopped (the server restarted). Please search again.'
+    expired: 'The search stopped (the server restarted). Please search again.',
+    maint: 'Online play is paused for a server update. Games already running can be finished. Please try again later.'
   };
   function fqApply(r) {
     const prev = (fq.st || {}).state;
@@ -609,6 +616,92 @@
     if (sv && !sv.over && Date.now() - (sv.at || 0) < 24 * 3600 * 1000 && host()) back();
   }
   function openReplay(code) { try { if (S.parseLog(code)) window.MHRSimUI.replayCode(code); } catch (e) { /* kode rusak: tetap di menu */ } }
-  window.MHRSimOnline = { findWith, loadDecks, myDecks: () => decks.mine.slice(), deckOptionsHTML, noDecksText: NO_DECKS, renderFind, liveInto, finding: () => fq.on, shareReplay, openReplay, renderPanel, renderHistory, leaveGame, sendReport, reportContext, host, api: API, joinRoom: code => { pendingJoin = code; if (window.MHRSimModes) window.MHRSimModes.show('online'); } };
+
+  /* ---------- o2.42: mode maintenance (saklar + banner) & server staging ----------
+     Server menyimpan status di objek antrean: { start, end, msg }. Sebelum `start` = pengumuman (banner kuning: "update pukul
+     HH:MM"); sejak `start` = maintenance (Cari lawan, buat room, dan gabung room ditolak; permainan yang sedang berjalan tetap
+     bisa diselesaikan; pemain yang sedang mencari dikeluarkan dari antrean). Status dibaca dari GET /api/queue setiap 60 detik
+     selama halaman terlihat. Admin mengubahnya lewat POST /api/admin/maint (panel di Online · private room). */
+  const IDL = () => !!(window.MHRSimI18N && window.MHRSimI18N.lang === 'id');
+  const TT = (en, id) => IDL() ? id : en;
+  const hhmm = t => { const d = new Date(t); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+  let maint = null, maintSeen = false, mtLive = null;
+  function setMaint(m) {
+    const k = JSON.stringify(m || null), changed = k !== JSON.stringify(maint);
+    maint = m || null; maintSeen = true;
+    if (changed) { maintBar(); if ($('mtAdmin')) adminDraw(); }
+  }
+  const maintOn = () => !!(maint && maint.start && Date.now() >= maint.start);
+  function maintText() {
+    if (!maint) return '';
+    const msg = maint.msg ? ' ' + maint.msg : '';
+    if (!maintOn()) {
+      const min = Math.max(1, Math.ceil((maint.start - Date.now()) / 60000));
+      return TT('🔧 Server update at ' + hhmm(maint.start) + ' (in ' + min + ' min). Online search and new rooms pause then; games already running can be finished.',
+        '🔧 Update server pukul ' + hhmm(maint.start) + ' (' + min + ' menit lagi). Cari lawan dan room baru dihentikan saat itu; permainan yang sedang berjalan tetap bisa diselesaikan.') + msg;
+    }
+    return TT('🔧 Server update in progress: online search and new rooms are paused. Games already running can be finished.',
+      '🔧 Server sedang diperbarui: Cari lawan dan room baru dihentikan sementara. Permainan yang sedang berjalan tetap bisa diselesaikan.') +
+      (maint.end ? TT(' Back around ' + hhmm(maint.end) + '.', ' Kembali sekitar pukul ' + hhmm(maint.end) + '.') : '') + msg;
+  }
+  function maintBar() {
+    let el = $('maintBar');
+    const key = maint ? String(maint.start) + (maintOn() ? ':on' : ':soon') : '';
+    let hid = ''; try { hid = sessionStorage.getItem('mhrsim.maintHide') || ''; } catch (e) { /* abaikan */ }
+    const show = (maint && hid !== key) || STAGING;
+    if (!show) { if (el) el.remove(); return; }
+    if (!el) { el = document.createElement('div'); el.id = 'maintBar'; el.setAttribute('data-noi18n', ''); document.body.appendChild(el); }
+    el.className = maint ? (maintOn() ? 'on' : 'soon') : 'stg';
+    el.innerHTML = (STAGING ? '<b class="stgb">STAGING SERVER</b> ' : '') + (maint && hid !== key ? '<span>' + esc(maintText()) + '</span>' : '') +
+      (maint ? '<button type="button" aria-label="Hide" data-mt="hide" data-k="' + esc(key) + '">✕</button>' : '');
+  }
+  async function maintPoll() {
+    if (document.visibilityState === 'hidden') return;
+    const st = await apiFetch('/api/queue');
+    if (st && !st.error) { mtLive = st; if (!('maint' in st)) setMaint(null); }
+  }
+  // panel admin
+  function adminDraw() {
+    const el = $('mtAdmin'); if (!el) return;
+    const L = mtLive || {}, st = maint ? (maintOn() ? TT('ACTIVE since ', 'AKTIF sejak ') + hhmm(maint.start) : TT('Scheduled for ', 'Dijadwalkan pukul ') + hhmm(maint.start)) + (maint.end ? TT(' · until ~', ' · sampai ~') + hhmm(maint.end) : '') : TT('Off', 'Mati');
+    el.innerHTML = '<h3 style="margin:0 0 6px">🔧 ' + TT('Admin · server maintenance', 'Admin · maintenance server') + '</h3>' +
+      '<p class="small" style="margin:0 0 6px">' + TT('Status: ', 'Status: ') + '<b>' + esc(st) + '</b>' + (maint && maint.msg ? ' · "' + esc(maint.msg) + '"' : '') + '</p>' +
+      '<p class="small muted" style="margin:0 0 8px">' + TT('Live now: ', 'Sedang berjalan: ') + '<b>' + (L.games != null ? L.games : '?') + '</b> ' + TT('game(s)', 'permainan') + ' · <b>' + (L.waiting != null ? L.waiting : '?') + '</b> ' + TT('searching', 'mencari') +
+      ' · ' + TT('server: ', 'server: ') + '<b>' + (STAGING ? 'STAGING' : 'PRODUCTION') + '</b> <button class="sm" data-mt="refresh">↻</button></p>' +
+      '<div class="form"><div class="f full"><label>' + TT('Message for players (optional)', 'Pesan untuk pemain (opsional)') + '</label><input id="mtMsg" maxlength="300" value="' + esc(maint && maint.msg || '') + '" placeholder="' + TT('e.g. New card effects for BP02', 'mis. Efek kartu baru BP02') + '"></div>' +
+      '<div class="f"><label>' + TT('Expected duration', 'Perkiraan lama') + '</label><select id="mtDur"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="60">60 min</option><option value="0">' + TT('unknown', 'belum tahu') + '</option></select></div></div>' +
+      '<div class="startbar" style="flex-wrap:wrap;gap:6px"><button data-mt="in" data-n="30">' + TT('Announce: in 30 min', 'Umumkan: 30 menit lagi') + '</button><button data-mt="in" data-n="15">' + TT('In 15 min', '15 menit lagi') + '</button>' +
+      '<button class="warn" data-mt="in" data-n="0">' + TT('Start now', 'Mulai sekarang') + '</button>' + (maint ? '<button class="pri" data-mt="off">' + TT('End maintenance', 'Selesai maintenance') + '</button>' : '') + '</div>' +
+      '<p class="small muted" style="margin:8px 0 0">' + TT('Deploy the server when "Live now" shows 0 games. Running games are never stopped by this switch. The switch stays on after a deploy: end it when the new server works.',
+        'Deploy server saat "Sedang berjalan" menunjukkan 0 permainan. Saklar ini tidak pernah menghentikan permainan yang sedang berjalan. Saklar tetap menyala setelah deploy: matikan setelah server baru berjalan baik.') + '</p>' +
+      '<div class="startbar" style="margin-top:8px"><button data-mt="server">' + (STAGING ? TT('Switch to the PRODUCTION server', 'Pindah ke server PRODUCTION') : TT('Test on the STAGING server (this device)', 'Uji di server STAGING (perangkat ini)')) + '</button></div>' +
+      '<div id="mtErr" class="err"></div>';
+  }
+  async function adminSet(body) {
+    const r = await apiFetch('/api/admin/maint', { method: 'POST', auth: true, body: JSON.stringify(body) });
+    const e = $('mtErr');
+    if (r.error) { if (e) e.textContent = r.error; return; }
+    mtLive = r; setMaint(r.maint || null); adminDraw();
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('[data-mt]'); if (!b) return;
+    const a = b.dataset.mt;
+    if (a === 'hide') { try { sessionStorage.setItem('mhrsim.maintHide', b.dataset.k || ''); } catch (x) { /* abaikan */ } maintBar(); return; }
+    if (a === 'refresh') { maintPoll().then(adminDraw); return; }
+    if (a === 'in') {
+      const n = +b.dataset.n;
+      if (n === 0 && !confirm(TT('Start maintenance now? Online search and new rooms stop immediately (running games continue).', 'Mulai maintenance sekarang? Cari lawan dan room baru langsung berhenti (permainan yang berjalan tetap lanjut).'))) return;
+      adminSet({ inMin: n, durMin: +($('mtDur') || {}).value || 0, msg: ($('mtMsg') || {}).value || '' }); return;
+    }
+    if (a === 'off') { adminSet({ off: true }); return; }
+    if (a === 'server') { try { if (STAGING) localStorage.removeItem('mhrsim.server'); else localStorage.setItem('mhrsim.server', 'staging'); } catch (x) { /* abaikan */ } location.reload(); }
+  });
+  setInterval(maintPoll, 60000);
+  setInterval(() => { if (maint) maintBar(); }, 30000);          // hitung mundur "N menit lagi" & peralihan ke status aktif
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') maintPoll(); });
+  setTimeout(maintPoll, 1500);
+  if (STAGING) setTimeout(maintBar, 0);
+
+  window.MHRSimOnline = { maint: () => maint, maintOn, staging: STAGING, findWith, loadDecks, myDecks: () => decks.mine.slice(), deckOptionsHTML, noDecksText: NO_DECKS, renderFind, liveInto, finding: () => fq.on, shareReplay, openReplay, renderPanel, renderHistory, leaveGame, sendReport, reportContext, host, api: API, joinRoom: code => { pendingJoin = code; if (window.MHRSimModes) window.MHRSimModes.show('online'); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else setTimeout(init, 0);
 })();

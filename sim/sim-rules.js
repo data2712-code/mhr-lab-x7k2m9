@@ -703,6 +703,15 @@
     'Yondu: aktivasi tambahan hanya satu kali per giliran. Odin: ambil kartu terjadi saat Power-X membuat Karakter itu menjadi 0.',
     'Hela: "dibuang" = dikirim ke RETREAT dari HAND atau Deck oleh efek.'
   ]);
+  r('RS-068', 'cards', 'owner', ['SP01-021'], [
+    'The Web of Destiny does not trigger for itself',
+    '「The Web of Destiny」Spider-Man: "When your card with 【Web】 enters the field" counts only your OTHER [Web] cards. Web of Destiny itself entering the field (CALL, or placed from VOID by its own effect) does not trigger its BASE effect.',
+    'Other [Web] cards entering while it is already in your BASE still trigger it (including cards attached from HAND, RETREAT or VOID). Once per turn is unchanged.'
+  ], [
+    'The Web of Destiny tidak memicu dirinya sendiri',
+    '「The Web of Destiny」Spider-Man: "Saat kartu Anda dengan 【Web】 masuk field" hanya menghitung kartu [Web] Anda yang LAIN. Web of Destiny sendiri yang masuk field (CALL, atau ditaruh dari VOID oleh efeknya sendiri) tidak memicu efek BASE-nya.',
+    'Kartu [Web] lain yang masuk saat Web of Destiny sudah ada di BASE Anda tetap memicunya (termasuk kartu yang dipasang dari HAND, RETREAT, atau VOID). Sekali per giliran tidak berubah.'
+  ]);
 
   /* ===================== tampilan ===================== */
   const S = () => window.MHRSim;

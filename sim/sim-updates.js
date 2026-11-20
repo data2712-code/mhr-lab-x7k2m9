@@ -16,6 +16,33 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-20', t: 'improve', v: 'o2.42',
+      en: { h: 'Server update notices', b: [
+        'Before an online server update you now see a yellow notice with the time. While the update runs, Find a match and new rooms pause for a few minutes; games already running can always be finished.'] },
+      id: { h: 'Pemberitahuan update server', b: [
+        'Sebelum server online diperbarui, kini muncul pemberitahuan kuning beserta jamnya. Selama update, Cari lawan dan room baru berhenti beberapa menit; permainan yang sedang berjalan selalu bisa diselesaikan.'] }
+    },
+    {
+      d: '2026-11-20', t: 'news', v: 'o2.42',
+      en: { h: 'Season 0 prizes for the top 3', b: [
+        'Ranked Season 0 now has prizes for the top 3 players on 31 December 2026, 23:59 WIB: Rank 1 · 1 Booster Box BP02 Doomsday, Rank 2 · Playmat Spider-Man CB01, Rank 3 · Card Sleeves Spider-Man CB01.',
+        'Same requirement for all three: at least 20 rated games in Season 0, one account per player. See 🏆 Ranked for the current top 3.'] },
+      id: { h: 'Hadiah Season 0 untuk 3 teratas', b: [
+        'Ranked Season 0 kini punya hadiah untuk 3 pemain teratas per 31 Desember 2026, 23:59 WIB: Peringkat 1 · 1 Booster Box BP02 Doomsday, Peringkat 2 · Playmat Spider-Man CB01, Peringkat 3 · Card Sleeve Spider-Man CB01.',
+        'Syaratnya sama untuk ketiganya: minimal 20 pertandingan berpoin di Season 0, 1 akun per pemain. Lihat 🏆 Ranked untuk 3 teratas saat ini.'] }
+    },
+    {
+      d: '2026-11-20', t: 'rules', v: 'o2.41', reports: [35, 36],
+      en: { h: 'The Web of Destiny no longer triggers itself · Gamora «Count Me In» CALL fix', b: [
+        'Rules decision (report #35, ruling RS-068): 「The Web of Destiny」Spider-Man only triggers when your OTHER [Web] cards enter the field. CALLing it (or placing it from VOID with its own effect) no longer lets it attach a [Web] card from your HAND right away.',
+        'Report #36: 「Count Me In」Gamora (PB02-004) and other cards that "cannot be called" no longer light up in your HAND as if you could CALL them. The CALL button is greyed out with the reason. (The engine already blocked the CALL; only the screen was wrong.)',
+        'Replays of games played before this update still play back with the old rule.'] },
+      id: { h: 'The Web of Destiny tidak lagi memicu dirinya sendiri · perbaikan CALL Gamora «Count Me In»', b: [
+        'Keputusan aturan (laporan #35, ruling RS-068): 「The Web of Destiny」Spider-Man hanya terpicu saat kartu [Web] Anda yang LAIN masuk field. Men-CALL-nya (atau menaruhnya dari VOID dengan efeknya sendiri) tidak lagi langsung memasang kartu [Web] dari HAND.',
+        'Laporan #36: 「Count Me In」Gamora (PB02-004) dan kartu lain yang "tidak bisa dipanggil" tidak lagi menyala di HAND seolah bisa di-CALL. Tombol CALL redup beserta alasannya. (Mesin sudah menolak CALL-nya; hanya tampilannya yang salah.)',
+        'Replay permainan sebelum pembaruan ini tetap diputar dengan aturan lama.'] }
+    },
+    {
       d: '2026-11-20', t: 'fix', v: 'o2.40', reports: [32, 33, 34],
       en: { h: 'Clearer effect warnings and ACTI reasons', b: [
         'Before you answer an optional effect, the sim now warns you about surprising results. Example: The Milano «Ace Rescue» cannot attach another The Milano (UNIQUE), and in BATTLE it may Retreat at once when an opponent\'s effect makes its Power 0. The area buttons show the same warning (report #33).',

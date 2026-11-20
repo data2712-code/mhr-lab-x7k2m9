@@ -308,6 +308,7 @@
     [/^already used this turn \(once per turn\)\.$/, 'Sudah dipakai giliran ini (sekali per giliran).'],
     [/^already used (\d+)x this turn\.$/, 'Sudah dipakai $1x giliran ini.'],
     [/^Activate: (.+)$/, 'Aktifkan: $1'],
+    [/^This card can not be called \(its own effect\)\.$/, 'Kartu ini tidak bisa di-CALL (efek kartu ini sendiri).'],   // o2.41 (laporan #36)
     [/^HAND · (.+)$/, 'HAND · $1'],
     [/^Top (\d+) cards? of the Deck\. Full details in the Play-by-play\.$/, '$1 kartu teratas Deck. Rincian lengkap di Jalannya permainan.'],
     [/^(.+) leaves first$/, '$1 keluar lebih dulu'], [/^Tap a glowing area, or use the buttons in the panel\.$/, 'Ketuk area yang menyala, atau pakai tombol di panel.'],

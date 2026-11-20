@@ -604,6 +604,16 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Battle Sim o2.42 — hadiah Ranked 3 teratas, mode maintenance, server staging — 20 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+- Ranked: hadiah Season 0 untuk peringkat 1–3 (Box BP02 Doomsday, Playmat Spider-Man CB01, Card Sleeve Spider-Man CB01).
+- Banner pemberitahuan update server + panel Admin maintenance; admin bisa menguji di server staging.
+- `SIM_URL ?v=o2.42`, `sim-host.js?v=7.45-sim42`.
+
+### Battle Sim o2.41 — laporan pemain #35 & #36 (mesin v0.14.1) — 20 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+- RS-068: 「The Web of Destiny」Spider-Man tidak memicu efek BASE-nya sendiri (hanya kartu [Web] lain). Log lama tetap diputar dengan aturan lama.
+- Kartu yang tidak bisa di-CALL (PB02-004, SD05-012) tidak lagi menyala di HAND; tombol CALL redup + alasan.
+- `SIM_URL ?v=o2.41`, `sim-host.js?v=7.45-sim41`. Server online perlu deploy ulang (mesin).
+
 ### Battle Sim o2.40 — laporan pemain #32–#34 — 20 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 - Peringatan akibat efek sebelum menjawab efek opsional / memilih area (mis. The Milano tidak bisa dipasang karena UNIQUE, langsung Retreat karena Power 0).
 - ACTI yang tidak bisa dipakai ditampilkan redup beserta alasannya (mis. Spider Suit hanya berfungsi saat terpasang).

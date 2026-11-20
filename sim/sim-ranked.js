@@ -28,6 +28,7 @@
   const icon = (k, cls) => '<img class="' + (cls || 'rki') + '" src="' + ICON_BASE + slug(k) + '.svg?v=1" alt="" loading="lazy">';
   const PLACEMENT = 5;
   // o2.36 (pemilik 19 Nov 2026): hadiah Season 0 = 1 Booster Box BP02 Doomsday untuk poin tertinggi per 31 Des 2026 23:59 WIB,
+  // o2.42 (pemilik 20 Nov 2026): hadiah jadi 3 peringkat — #1 Box BP02 Doomsday, #2 Playmat Spider-Man CB01, #3 Card Sleeve Spider-Man CB01.
   // syarat min. 20 pertandingan berpoin (= kolom games di sim_ratings; game yang berakhir sebelum giliran ke-4 tidak dihitung).
   // Sama dengan poster Konten Sosmed/Teaser Ranked Season 0 Nov 2026. Hanya tampilan; pemenang tetap dicek manual oleh admin.
   const PRIZE_SEASON = 'S00', PRIZE_MIN = 20;
@@ -143,7 +144,7 @@
     }
     // hadiah (o2.36): pemimpin = pemain teratas yang sudah memenuhi syarat
     const prize = curSeason === PRIZE_SEASON, elig = prize ? placed.filter(x => x.games >= PRIZE_MIN) : [];
-    if (prize) h += prizeHTML(isNow && mine ? mine : null, elig[0] || null);
+    if (prize) h += prizeHTML(isNow && mine ? mine : null, elig.slice(0, 3));
     // leaderboard
     h += '<div class="rkh"><b>🏆 Leaderboard · ' + esc(seasonLabel(curSeason)) + '</b><span class="small muted">' + T(placed.length + ' ranked · ' + placing.length + ' in placement', placed.length + ' punya rank · ' + placing.length + ' masih placement') + (prize ? T(' · ' + elig.length + ' qualify for the prize', ' · ' + elig.length + ' memenuhi syarat hadiah') : '') + '</span></div>';
     if (!placed.length) h += '<div class="box small muted">' + (isNow ? T('No one has finished placement yet this season. Be the first: play 5 games in Find a match.', 'Belum ada yang menyelesaikan placement di season ini. Jadilah yang pertama: mainkan 5 pertandingan di Cari lawan.') : T('No ranked players in this season.', 'Tidak ada pemain ber-rank di season ini.')) + '</div>';
@@ -151,7 +152,7 @@
       const t = tier(x.points, x.games), you = s && x.user_id === s.userId;
       return '<div class="rkrow' + (you ? ' me' : '') + (i < 3 ? ' top' : '') + '"><span class="n">' + (i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1) + '</span>' +
         '<span class="u"><b data-noi18n>' + esc(x.username || 'Player') + '</b>' + badge(t, true) +
-        (prize ? (x.games >= PRIZE_MIN ? '<span class="rkel ok" title="' + T('Qualifies for the Season 0 prize', 'Memenuhi syarat hadiah Season 0') + '">' + (x === elig[0] ? '🎁 ' : '') + '✓ ' + PRIZE_MIN + '+</span>'
+        (prize ? (x.games >= PRIZE_MIN ? '<span class="rkel ok" title="' + T('Qualifies for the Season 0 prize', 'Memenuhi syarat hadiah Season 0') + '">' + (elig.indexOf(x) > -1 && elig.indexOf(x) < 3 ? '🎁 ' : '') + '✓ ' + PRIZE_MIN + '+</span>'
           : '<span class="rkel" title="' + T('Rated games toward the prize requirement', 'Pertandingan berpoin menuju syarat hadiah') + '" data-noi18n>' + x.games + '/' + PRIZE_MIN + '</span>') : '') + '</span>' +
         '<span class="wl small" data-noi18n>' + x.wins + '–' + x.losses + (x.draws ? '–' + x.draws : '') + '</span><span class="p" data-noi18n>' + fmt(x.points) + '</span></div>';
     }).join('') + '</div>';
@@ -162,26 +163,33 @@
     tr();
   }
   /* ---------- hadiah Season 0 (o2.36) ---------- */
+  const PRIZES = [
+    ['🥇', '1 Booster Box BP02 Doomsday', '1 Booster Box BP02 Doomsday'],
+    ['🥈', 'Playmat Spider-Man CB01', 'Playmat Spider-Man CB01'],
+    ['🥉', 'Card Sleeves Spider-Man CB01', 'Card Sleeve Spider-Man CB01']
+  ];
   function prizeHTML(mine, lead) {
     let me = '';
     if (mine) {
       const g = mine.games || 0, ok = g >= PRIZE_MIN;
       me = '<div class="rkpz-me' + (ok ? ' ok' : '') + '"><span>' + T('Your rated games', 'Pertandingan berpoin Anda') + '</span><b data-noi18n>' + Math.min(g, PRIZE_MIN) + '/' + PRIZE_MIN + '</b>' +
         '<div class="rkbar"><i style="width:' + Math.max(4, Math.min(100, g / PRIZE_MIN * 100)) + '%"></i></div>' +
-        '<span class="small">' + (ok ? T('✓ You qualify for the prize. Keep climbing!', '✓ Anda memenuhi syarat hadiah. Terus naik!')
+        '<span class="small">' + (ok ? T('✓ You qualify for the prizes. Keep climbing!', '✓ Anda memenuhi syarat hadiah. Terus naik!')
           : T((PRIZE_MIN - g) + ' more rated games to qualify.', (PRIZE_MIN - g) + ' pertandingan berpoin lagi untuk memenuhi syarat.')) + '</span></div>';
     }
-    const leadTxt = lead ? '<p class="small rkpz-lead">' + T('Leading now: ', 'Memimpin saat ini: ') + '<b data-noi18n>' + esc(lead.username || 'Player') + '</b> <span data-noi18n>(' + fmt(lead.points) + ')</span></p>' : '';
-    return '<div class="box rkpz"><div class="rkpz-h"><span class="rkpz-i" aria-hidden="true">🎁</span><div><span class="rktag">' + T('SEASON 0 PRIZE', 'HADIAH SEASON 0') + '</span>' +
-      '<h3>' + T('1 Booster Box BP02 Doomsday', '1 Booster Box BP02 Doomsday') + '</h3>' +
-      '<p class="small">' + T('20 packs for the player with the most points on 31 December 2026, 23:59 WIB.', '20 pack untuk pemain dengan poin tertinggi per 31 Desember 2026, 23:59 WIB.') + '</p></div></div>' +
-      leadTxt + me +
+    const top = Array.isArray(lead) ? lead : lead ? [lead] : [];
+    const list = '<ol class="rkpz-l">' + PRIZES.map((z, i) => '<li><span class="m" aria-hidden="true">' + z[0] + '</span><span class="z"><b>' + T('Rank ' + (i + 1), 'Peringkat ' + (i + 1)) + '</b> · ' + T(z[1], z[2]) + '</span>' +
+      (top[i] ? '<span class="w small">' + T('now: ', 'saat ini: ') + '<b data-noi18n>' + esc(top[i].username || 'Player') + '</b> <span data-noi18n>(' + fmt(top[i].points) + ')</span></span>' : '') + '</li>').join('') + '</ol>';
+    return '<div class="box rkpz"><div class="rkpz-h"><span class="rkpz-i" aria-hidden="true">🎁</span><div><span class="rktag">' + T('SEASON 0 PRIZES', 'HADIAH SEASON 0') + '</span>' +
+      '<h3>' + T('Prizes for the top 3 players', 'Hadiah untuk 3 pemain teratas') + '</h3>' +
+      '<p class="small">' + T('For the 3 players with the most points on 31 December 2026, 23:59 WIB.', 'Untuk 3 pemain dengan poin tertinggi per 31 Desember 2026, 23:59 WIB.') + '</p></div></div>' +
+      list + me +
       '<details class="rkpz-d"><summary class="small">' + T('Requirements', 'Syarat') + '</summary><ul class="small">' +
-      '<li>' + T('At least <b>20 rated games</b> in Season 0 (Find a match games that count for points).', 'Minimal <b>20 pertandingan berpoin</b> di Season 0 (pertandingan Cari lawan yang dihitung poinnya).') + '</li>' +
+      '<li>' + T('At least <b>20 rated games</b> in Season 0 (Find a match games that count for points). Only players who meet this count for ranks 1–3.', 'Minimal <b>20 pertandingan berpoin</b> di Season 0 (pertandingan Cari lawan yang dihitung poinnya). Hanya pemain yang memenuhi syarat ini yang dihitung untuk peringkat 1–3.') + '</li>' +
       '<li>' + T('<b>One account per player.</b> Duplicate accounts or point farming = disqualified.', '<b>1 akun per pemain.</b> Akun ganda atau farming poin = diskualifikasi.') + '</li>' +
       '<li>' + T('Same points: most wins, then whoever reached those points first.', 'Poin sama: menang terbanyak, lalu yang lebih dulu mencapai poin itu.') + '</li>' +
-      '<li>' + T('Winner announced around <b>2 January 2027</b> in mhrdecklab.com News and on @deteprtm.', 'Pemenang diumumkan sekitar <b>2 Januari 2027</b> di News mhrdecklab.com dan @deteprtm.') + '</li>' +
-      '<li>' + T('Shipped to an address in Indonesia once BP02 is available.', 'Dikirim ke alamat di Indonesia setelah BP02 tersedia.') + '</li>' +
+      '<li>' + T('Winners announced around <b>2 January 2027</b> in mhrdecklab.com News and on @deteprtm.', 'Pemenang diumumkan sekitar <b>2 Januari 2027</b> di News mhrdecklab.com dan @deteprtm.') + '</li>' +
+      '<li>' + T('Prizes ship to an address in Indonesia. The BP02 box ships once BP02 is available.', 'Hadiah dikirim ke alamat di Indonesia. Box BP02 dikirim setelah BP02 tersedia.') + '</li>' +
       '</ul></details></div>';
   }
   function helpHTML() {

@@ -29,7 +29,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = '0.14.0';
+  const VERSION = '0.14.1';   // o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068)
   const SLOTS = ['F', 'W1', 'W2', 'B'];
   const SLOT_NAME = { F: 'FRONT', W1: 'WING 1', W2: 'WING 2', B: 'BACK', BASE: 'BASE' };
   // Posisi pada garis serangan (303.2.a.4.3.1.1): BACK sendiri = 0, WING = 1,
@@ -2057,6 +2057,8 @@
     if (!x.fd && st.cnt && st.cnt.noCost5 && st.cnt.noCost5[p] && getLv(st, iid) >= 5) return true;
     return x.att.some(a => { const d = defOf(st, a); if (!d || !d.noCostHost || st.inst[a].fd) return false; try { return !!d.noCostHost(readApi(st, a), a, iid); } catch (e) { return false; } });
   }
+  // o2.41 (laporan #36): kartu yang tidak bisa di-CALL karena efeknya sendiri (SD05-012, PB02-004) — dipakai tampilan.
+  function noCallWhy(st, iid) { const d = st.vanilla ? null : defOf(st, iid); return d && d.noCall ? 'This card can not be called (its own effect).' : null; }
   function checkCallCore(st, a, p, P) {                  // 301.19
     if (!P.hand.includes(a.c)) return 'Choose a Character from your HAND.';
     { const d = defOf(st, a.c); if (d && d.noCall) return 'This card can not be called (its own effect).'; }   // Tahap 6: SD05-012, PB02-004
@@ -2484,7 +2486,7 @@
     return b.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
   function exportLog(st) {
-    const o = { v: 1, e: VERSION, s: st.seed, f: st.firstOpt, n: st.names, d: st.decks, x: st.vanilla ? 0 : 1, a: st.actions };
+    const o = { v: 1, e: st.engine || VERSION, s: st.seed, f: st.firstOpt, n: st.names, d: st.decks, x: st.vanilla ? 0 : 1, a: st.actions };
     if (st.pos) o.q = st.pos;                    // permainan Sandbox: posisi awal ikut disimpan
     if (st.siaga) o.g = 1;                       // mode Siaga (pass-and-play dua orang)
     if (st.confirm) o.k = 1;                     // pilihan tunggal tetap ditanyakan (UI v3, 6 Nov 2026)
@@ -2497,9 +2499,16 @@
     if (!m) return null;
     try { return JSON.parse(b64urlDecode(m[1])); } catch (e) { return null; }
   }
+  function verLt(a, b) {
+    const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number);
+    for (let i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) < (y[i] || 0); }
+    return false;
+  }
   function replay(o, n) {
     const st = o.q ? createGame({ position: o.q, names: o.n, vanilla: !o.x, siaga: !!o.g, confirm: !!o.k })
       : createGame({ decks: o.d, seed: o.s, first: o.f, names: o.n, vanilla: !o.x, siaga: !!o.g, confirm: !!o.k, opaque: !!o.o, toLimit: o.t || 0 });
+    // o2.41: log lama (mesin < 0.14.1) tetap diputar dengan aturan lamanya, supaya replay & room yang dipulihkan tidak macet.
+    if (o.e && verLt(o.e, '0.14.1')) { st.engine = o.e; st.lg021 = true; }        // SP01-021 dulu memicu dirinya sendiri
     const acts = o.a || [], lim = n == null ? acts.length : Math.min(n, acts.length);
     for (let i = 0; i < lim; i++) {
       const r = apply(st, acts[i]);
@@ -2592,7 +2601,7 @@
     validatePosition, positionFrom, exportPosition, parsePosition, emptyPosition,
     manualOps, attachHosts, MANUAL_OPS,
     testDeck, uniqueBlocked, hasAbility, handTriggerCards, placeSpots, bbmDests,
-    lostEffects, abilityCount, costBanned, actiWhy, actiBlocked,
+    lostEffects, abilityCount, costBanned, actiWhy, actiBlocked, noCallWhy,
     HIDDEN_SETS, HIDDEN_MSG, isHiddenNo, hiddenCount, encodeDeckCode,
     viewFor, visibleTo
   };
