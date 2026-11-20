@@ -16,6 +16,15 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-19', t: 'improve', v: 'o2.39',
+      en: { h: 'Bigger cards on desktop and laptop screens', b: [
+        'On laptop screens up to 900 px tall (for example 1366×768), the decision panel now sits at the top of the right column, so the board and the cards are about 20–30% bigger.',
+        'Choosing a CALL cost also uses that panel. On big screens (1080p and up) the cards grow up to 124 px wide.'] },
+      id: { h: 'Kartu lebih besar di desktop dan laptop', b: [
+        'Di layar laptop dengan tinggi sampai 900 px (misalnya 1366×768), panel keputusan kini menempel di atas kolom kanan, sehingga papan dan kartu sekitar 20–30% lebih besar.',
+        'Memilih biaya CALL juga memakai panel itu. Di layar besar (1080p ke atas) kartu bisa membesar sampai lebar 124 px.'] }
+    },
+    {
       d: '2026-11-19', t: 'improve', v: 'o2.38',
       en: { h: 'Counter Step and Counter Phase from your HAND', b: [
         'On phones the board stays visible during Counter Step and Counter Phase: one line in the middle tells you what happens if nobody responds, with a big PASS button.',

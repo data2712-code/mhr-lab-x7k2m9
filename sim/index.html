@@ -666,8 +666,13 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
 /* Laporan #29 (o2.32): desktop sempit (821–1199 px, mis. 970 px). Kartu juga dibatasi LEBAR layar supaya papan tidak
    terpotong / BASE tidak menumpuk BATTLE; pilihan di panel keputusan pindah baris (tidak perlu scroll ke samping). */
 @media (min-width:821px){
-  #game{--cw: clamp(40px, min(calc((100vh - 300px) / 7.1), calc((100vw - 520px) / 7.8)), 98px); --ch: calc(var(--cw) * 1.4); --mini: calc(var(--cw) * .5)}
+  #game{--cw: clamp(40px, min(calc((100vh - 330px) / 7.1), calc((100vw - 520px) / 7.8)), 124px);   /* o2.39: dulu maks. 98 px */ --ch: calc(var(--cw) * 1.4); --mini: calc(var(--cw) * .5)}
   #game.both{--cw: clamp(36px, min(calc((100vh - 360px) / 8.2), calc((100vw - 520px) / 8.6)), 88px); --ch: calc(var(--cw) * 1.4); --mini: calc(var(--cw) * .5)}
+}
+/* o2.39 (feedback pemain: kartu FIELD desktop lebih besar; riwayat #118). Layar ≤ 900 px tinggi: panel keputusan menempel di kolom kanan (lihat
+   media max-height:900px), jadi garis tengah hanya kapsul fase dan kartu bisa memakai tinggi yang dibebaskan. */
+@media (min-width:821px) and (max-height:900px){
+  #game{--cw: clamp(40px, min(calc((100vh - 245px) / 6.8), calc((100vw - 560px) / 7.4)), 112px)}
 }
 @media (min-width:821px) and (max-width:1199px){
   .midzone{padding-left:8px;padding-right:8px}
@@ -719,7 +724,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
    COUNTER, efek) tidak lagi di tengah papan: menempel di kolom kanan, pilihan tersusun ke bawah dan ringkas, Pass selalu terlihat.
    Jendela pilihan kartu: kartu mengecil mengikuti tinggi layar, tombol Confirm selalu terlihat. */
 .abar .tmin{display:none}
-@media (min-width:821px) and (max-height:650px){
+@media (min-width:821px) and (max-height:900px){   /* o2.39: dulu ≤650 px; laptop 768–900 px juga memakai panel di kolom kanan supaya kartu FIELD lebih besar */
   .midzone .abar.dock{position:fixed;right:8px;top:8px;width:284px;max-width:none;height:auto;max-height:calc(100vh - 16px);flex-direction:column;gap:6px;z-index:35;padding:8px 10px 10px;overflow:auto;border:1px solid var(--gold);background:#12171d}
   .midzone .abar.dock .hint{width:auto;flex:none;max-height:6.2em;padding-right:54px}
   .midzone .abar.dock .acts{flex:none;flex-direction:column;overflow:visible;gap:5px;padding:0}
@@ -1211,25 +1216,25 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.44-sd56id" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.40-pb02only" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.38"></script>
-<script src="sim-cards.js?v=o2.38"></script>
-<script src="sim-cards-bp01.js?v=o2.38"></script>
-<script src="sim-cards-s4.js?v=o2.38"></script>
-<script src="sim-cards-sp01.js?v=o2.38"></script>
-<script src="sim-cards-t6.js?v=o2.38"></script>
-<script src="sim-bot.js?v=o2.38"></script>
-<script src="sim-sound.js?v=o2.38"></script>
-<script src="sim-shadow.js?v=o2.38"></script>
-<script src="sim-ui.js?v=o2.38"></script>
-<script src="sim-sandbox.js?v=o2.38"></script>
-<script src="sim-report.js?v=o2.38"></script>
-<script src="sim-modes.js?v=o2.38"></script>
-<script src="sim-i18n.js?v=o2.38"></script>
-<script src="sim-online.js?v=o2.38"></script>
-<script src="sim-ranked.js?v=o2.38"></script>
-<script src="sim-stats.js?v=o2.38"></script>
-<script src="sim-updates.js?v=o2.38"></script>
-<script src="sim-rules.js?v=o2.38"></script>
-<script src="sim-learn.js?v=o2.38"></script>
+<script src="sim.js?v=o2.39"></script>
+<script src="sim-cards.js?v=o2.39"></script>
+<script src="sim-cards-bp01.js?v=o2.39"></script>
+<script src="sim-cards-s4.js?v=o2.39"></script>
+<script src="sim-cards-sp01.js?v=o2.39"></script>
+<script src="sim-cards-t6.js?v=o2.39"></script>
+<script src="sim-bot.js?v=o2.39"></script>
+<script src="sim-sound.js?v=o2.39"></script>
+<script src="sim-shadow.js?v=o2.39"></script>
+<script src="sim-ui.js?v=o2.39"></script>
+<script src="sim-sandbox.js?v=o2.39"></script>
+<script src="sim-report.js?v=o2.39"></script>
+<script src="sim-modes.js?v=o2.39"></script>
+<script src="sim-i18n.js?v=o2.39"></script>
+<script src="sim-online.js?v=o2.39"></script>
+<script src="sim-ranked.js?v=o2.39"></script>
+<script src="sim-stats.js?v=o2.39"></script>
+<script src="sim-updates.js?v=o2.39"></script>
+<script src="sim-rules.js?v=o2.39"></script>
+<script src="sim-learn.js?v=o2.39"></script>
 </body>
 </html>

@@ -604,6 +604,10 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Battle Sim o2.39 — kartu FIELD desktop lebih besar — 19 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+- Panel keputusan & panel biaya CALL menempel di kolom kanan untuk layar ≤ 900 px tinggi; kartu 1366×768 66 → 77 px, 1920×1080 98 → 106 px (maks. 124 px).
+- `SIM_URL ?v=o2.39`, `sim-host.js?v=7.45-sim39`.
+
 ### Battle Sim o2.38 — Counter Step / Counter Phase berpusat di HAND (feedback pemain, Tahap C) — 19 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 - HP: papan tetap terlihat saat Counter; satu baris petunjuk + tombol PASS; kartu yang bisa merespons (COUNTER CALL dari HAND, COUNTER·ACTI di FIELD/BASE) menyala oranye; "≡ List" membuka daftar lama.
 - Area yang diserang = label "⚔ UNDER ATTACK"; banner giliran tidak menutupi keputusan Counter.

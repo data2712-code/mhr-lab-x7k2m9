@@ -752,7 +752,7 @@
     $('midzone').insertAdjacentHTML('beforeend', timelineHTML(v));
     tr.innerHTML = abarHTML();
     // Laporan #26 (o2.29): panel berisi pilihan → .dock (di layar desktop pendek menempel di kolom kanan, lewat CSS).
-    const dockable = !!tr.querySelector('.acts > *') && !tr.querySelector('.cpay');
+    const dockable = !!tr.querySelector('.acts > *') && (!tr.querySelector('.cpay') || (!narrow() && innerHeight <= 900));   // o2.39: panel biaya ikut menempel di kolom kanan di laptop
     tr.className = 'abar' + (ui.msg ? ' err' : '') + (dockable ? ' dock' : '') + (dockable && ui.trayMin ? ' min' : '');
     if (dockable) tr.insertAdjacentHTML('beforeend', '<button class="sm tmin" data-act="trayMin">' + (ui.trayMin ? '▸ Show' : '▾ Hide') + '</button>');
     if (net.on) { const nb = netBarHTML(); if (nb) tr.insertAdjacentHTML('afterbegin', nb); }
