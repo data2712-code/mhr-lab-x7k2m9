@@ -308,6 +308,7 @@
     [/^already used this turn \(once per turn\)\.$/, 'Sudah dipakai giliran ini (sekali per giliran).'],
     [/^already used (\d+)x this turn\.$/, 'Sudah dipakai $1x giliran ini.'],
     [/^Activate: (.+)$/, 'Aktifkan: $1'],
+    [/^Tap a glowing HAND card to play it · ⚡ (RETREAT|VOID) has an ACTI · (START BATTLE when ready|END TURN when done)$/, (m, z, e) => 'Ketuk kartu HAND yang menyala untuk memainkannya · ⚡ ' + z + ' punya ACTI · ' + (e[0] === 'S' ? 'START BATTLE bila siap' : 'END TURN bila selesai')],   // o2.43
     [/^This card can not be called \(its own effect\)\.$/, 'Kartu ini tidak bisa di-CALL (efek kartu ini sendiri).'],   // o2.41 (laporan #36)
     [/^HAND · (.+)$/, 'HAND · $1'],
     [/^Top (\d+) cards? of the Deck\. Full details in the Play-by-play\.$/, '$1 kartu teratas Deck. Rincian lengkap di Jalannya permainan.'],

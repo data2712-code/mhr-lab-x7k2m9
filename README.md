@@ -604,6 +604,10 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Battle Sim o2.43 — ACTI dari RETREAT/VOID tidak menutupi HAND di HP — 20 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+- Di HP, ACTI dari RETREAT/VOID (mis. Jean Grey SP01-003) ditandai dengan tumpukan yang menyala ⚡, bukan panel yang menutupi HAND.
+- `SIM_URL ?v=o2.43`, `sim-host.js?v=7.45-sim43`.
+
 ### Battle Sim o2.42 — hadiah Ranked 3 teratas, mode maintenance, server staging — 20 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 - Ranked: hadiah Season 0 untuk peringkat 1–3 (Box BP02 Doomsday, Playmat Spider-Man CB01, Card Sleeve Spider-Man CB01).
 - Banner pemberitahuan update server + panel Admin maintenance; admin bisa menguji di server staging.

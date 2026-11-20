@@ -914,7 +914,10 @@
     if (ui.mode === 'call-dest' || ui.mode === 'move-dest') return T('Choose a zone', 'Tap a glowing area');
     if (ui.mode === 'drop-base') return T('CALL face-up or set face-down?', 'Choose in the sheet below');
     switch (pr.type) {
-      case 'main': return T('Your turn · CALL ' + G.cnt.call + '/' + S.callLimit(G), 'Tap a glowing HAND card to play it · ' + (battleNext() ? 'START BATTLE when ready' : 'END TURN when done'));
+      case 'main': {
+        const pz = !G.vanilla && narrow() ? S.actiOptions(G, pr.p, false).map(o => (S.locate(G, o.c) || {}).zone).filter(z => z === 'ret' || z === 'void') : [];
+        return T('Your turn · CALL ' + G.cnt.call + '/' + S.callLimit(G), 'Tap a glowing HAND card to play it · ' + (pz.length ? '⚡ ' + (pz.includes('ret') ? 'RETREAT' : 'VOID') + ' has an ACTI · ' : '') + (battleNext() ? 'START BATTLE when ready' : 'END TURN when done'));
+      }
       case 'arrange': return T('Reposition (optional)', arrNoAtk() ? '⚠ No Character can attack from these positions' : 'Tap two areas to swap, then CONFIRM');
       case 'attack': {
         if (!ui.atk) return T('Choose an attacker', 'Tap a glowing Character');
@@ -1086,8 +1089,11 @@
     const P = G.P[p];
     // o2.37 (feedback pemain): urutan seperti playmat resmi — VOID di atas, RETREAT di tengah, DECK di bawah (sisi lawan dicerminkan)
     const deck = '<div class="pile deck" title="Deck"><span class="stk">' + P.deck.length + '</span>DECK</div>';
-    const ret = '<div class="pile click ret" data-act="pile" data-p="' + p + '" data-z="ret" title="Open RETREAT"><span class="stk">' + P.ret.length + '</span>RETREAT</div>';
-    const vd = '<div class="pile click void" data-act="pile" data-p="' + p + '" data-z="void" title="Open VOID"><span class="stk v">' + P.void.length + '</span>VOID</div>';
+    // o2.43: tumpukan yang punya ACTI yang bisa dipakai sekarang menyala (⚡)
+    let az = {};
+    try { if (!G.vanilla && G.prompt && G.prompt.p === p && (myTurnPrompt('main') || myTurnPrompt('counter'))) S.actiOptions(G, p, myTurnPrompt('counter')).forEach(o => { const L = S.locate(G, o.c); if (L && (L.zone === 'ret' || L.zone === 'void')) az[L.zone] = 1; }); } catch (e) { az = {}; }
+    const ret = '<div class="pile click ret' + (az.ret ? ' hasacti' : '') + '" data-act="pile" data-p="' + p + '" data-z="ret" title="Open RETREAT"><span class="stk">' + P.ret.length + '</span>RETREAT</div>';
+    const vd = '<div class="pile click void' + (az.void ? ' hasacti' : '') + '" data-act="pile" data-p="' + p + '" data-z="void" title="Open VOID"><span class="stk v">' + P.void.length + '</span>VOID</div>';
     return '<div class="rail">' + (isTop ? deck + ret + vd : vd + ret + deck) + '</div>';   // laporan #2: jumlah HAND lawan cukup di pelat pemain (✋), tidak diulang di sini
   }
 
@@ -1230,7 +1236,12 @@
   // Tahap 4 (PB01-011): ACTI dari RETREAT/VOID tidak terlihat di papan, jadi ditawarkan di baki keputusan.
   function pileActis(inC) {
     if (G.vanilla || !G.prompt) return '';
-    return S.actiOptions(G, G.prompt.p, inC).filter(o => { const L = S.locate(G, o.c); return L && (L.zone === 'ret' || L.zone === 'void'); })
+    const opts = S.actiOptions(G, G.prompt.p, inC).filter(o => { const L = S.locate(G, o.c); return L && (L.zone === 'ret' || L.zone === 'void'); });
+    // o2.43 (laporan pemain 20 Nov 2026): di HP, kartu ACTI dari RETREAT/VOID membuat baki Action Phase muncul dan menutupi
+    // HAND. Di HP baki tidak dipakai untuk itu: tumpukan RETREAT/VOID menyala ⚡ dan petunjuk tengah menyebutnya; ketuk
+    // tumpukannya → tombol Activate di bawah kartu.
+    if (!inC && narrow()) return '';
+    return opts
       .map(o => '<button class="go" data-act="acti" data-c="' + o.c + '" data-eff="' + o.eff + '">' + esc(S.nameOf(G, o.c)) + ' (' + (S.locate(G, o.c).zone === 'ret' ? 'RETREAT' : 'VOID') + ')<small>ACTI: ' + esc(o.label) + '</small></button>').join('');
   }
   // AIR STRIKE (305.5): area lawan yang terisi boleh diserang sebagai Weakness.

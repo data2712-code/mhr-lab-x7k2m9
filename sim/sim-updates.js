@@ -16,6 +16,15 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-20', t: 'fix', v: 'o2.43',
+      en: { h: 'RETREAT / VOID ACTI no longer covers your HAND on phones', b: [
+        'On phones, an ACTI you can use from RETREAT or VOID (for example 「Phoenix Host」Jean Grey) no longer opens the decision panel over your HAND in the Action Phase. The RETREAT or VOID pile now glows with ⚡ and the hint line says so: tap the pile, then Activate under the card.',
+        'This is not a bot hint: it shows in every mode (Practice, online and ranked) whenever the effect can be used.'] },
+      id: { h: 'ACTI dari RETREAT / VOID tidak lagi menutupi HAND di HP', b: [
+        'Di HP, ACTI yang bisa dipakai dari RETREAT atau VOID (misalnya 「Phoenix Host」Jean Grey) tidak lagi membuka panel keputusan di atas HAND saat Action Phase. Tumpukan RETREAT atau VOID kini menyala ⚡ dan baris petunjuk menyebutkannya: ketuk tumpukannya, lalu Aktifkan di bawah kartunya.',
+        'Ini bukan petunjuk bot: tampil di semua mode (Practice, online, dan ranked) setiap kali efeknya bisa dipakai.'] }
+    },
+    {
       d: '2026-11-20', t: 'improve', v: 'o2.42',
       en: { h: 'Server update notices', b: [
         'Before an online server update you now see a yellow notice with the time. While the update runs, Find a match and new rooms pause for a few minutes; games already running can always be finished.'] },

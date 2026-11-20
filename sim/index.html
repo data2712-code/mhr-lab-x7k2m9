@@ -482,6 +482,10 @@ button.str{cursor:pointer}button.str:hover{border-color:#5a4a1a}.str.on,.stm.on{
 .pile .stk{width:30px;height:40px;border-radius:4px;background:#20262e;border:1px solid #3a4452;box-shadow:2px 2px 0 #171b21,4px 4px 0 #13171c;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:900;color:var(--text);font-size:15px;flex:none}
 .pile .stk.v{border-style:dashed;box-shadow:none;background:transparent}
 .pile.click{cursor:pointer}.pile.click:hover .stk{border-color:var(--gold)}
+/* o2.43: tumpukan RETREAT/VOID dengan ACTI yang bisa dipakai + tombol kecil di baki (HP) */
+.pile.hasacti .stk{border-color:#3B87E8;box-shadow:0 0 0 2px rgba(59,135,232,.55),0 0 12px rgba(59,135,232,.6)}
+.pile.hasacti .stk::after{content:'⚡';position:absolute;transform:translate(13px,-17px);font-size:11px}
+.pile .stk{position:relative}
 .zl{font-size:10px;color:var(--muted);letter-spacing:.12em;font-weight:700}
 .basecol{display:flex;flex-direction:column;gap:5px}
 .basebox{display:grid;grid-template-columns:repeat(3,calc(var(--mini) + 6px));gap:4px}
@@ -1229,25 +1233,25 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.44-sd56id" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.40-pb02only" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.42"></script>
-<script src="sim-cards.js?v=o2.42"></script>
-<script src="sim-cards-bp01.js?v=o2.42"></script>
-<script src="sim-cards-s4.js?v=o2.42"></script>
-<script src="sim-cards-sp01.js?v=o2.42"></script>
-<script src="sim-cards-t6.js?v=o2.42"></script>
-<script src="sim-bot.js?v=o2.42"></script>
-<script src="sim-sound.js?v=o2.42"></script>
-<script src="sim-shadow.js?v=o2.42"></script>
-<script src="sim-ui.js?v=o2.42"></script>
-<script src="sim-sandbox.js?v=o2.42"></script>
-<script src="sim-report.js?v=o2.42"></script>
-<script src="sim-modes.js?v=o2.42"></script>
-<script src="sim-i18n.js?v=o2.42"></script>
-<script src="sim-online.js?v=o2.42"></script>
-<script src="sim-ranked.js?v=o2.42"></script>
-<script src="sim-stats.js?v=o2.42"></script>
-<script src="sim-updates.js?v=o2.42"></script>
-<script src="sim-rules.js?v=o2.42"></script>
-<script src="sim-learn.js?v=o2.42"></script>
+<script src="sim.js?v=o2.43"></script>
+<script src="sim-cards.js?v=o2.43"></script>
+<script src="sim-cards-bp01.js?v=o2.43"></script>
+<script src="sim-cards-s4.js?v=o2.43"></script>
+<script src="sim-cards-sp01.js?v=o2.43"></script>
+<script src="sim-cards-t6.js?v=o2.43"></script>
+<script src="sim-bot.js?v=o2.43"></script>
+<script src="sim-sound.js?v=o2.43"></script>
+<script src="sim-shadow.js?v=o2.43"></script>
+<script src="sim-ui.js?v=o2.43"></script>
+<script src="sim-sandbox.js?v=o2.43"></script>
+<script src="sim-report.js?v=o2.43"></script>
+<script src="sim-modes.js?v=o2.43"></script>
+<script src="sim-i18n.js?v=o2.43"></script>
+<script src="sim-online.js?v=o2.43"></script>
+<script src="sim-ranked.js?v=o2.43"></script>
+<script src="sim-stats.js?v=o2.43"></script>
+<script src="sim-updates.js?v=o2.43"></script>
+<script src="sim-rules.js?v=o2.43"></script>
+<script src="sim-learn.js?v=o2.43"></script>
 </body>
 </html>
