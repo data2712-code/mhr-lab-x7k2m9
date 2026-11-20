@@ -298,6 +298,16 @@
     [/^Undo request cancelled\.$/, 'Permintaan Undo dibatalkan.'], [/^(.+) cancelled the undo request\.$/, '$1 membatalkan permintaan Undo.'],
     [/^Checking room (\w+)…$/, 'Memeriksa room $1…'],
     [/^(.+)'S BASE · (\d)\/6$/, 'BASE $1 · $2/6'],
+    // o2.40 (laporan #33/#34): peringatan akibat efek & alasan ACTI tidak bisa dipakai
+    [/^⚠ ([\s\S]+)$/, (m, w) => '⚠ ' + w.replace(/cannot be attached \(UNIQUE: same name already on your FIELD\)/g, 'tidak bisa dipasang (UNIQUE: nama yang sama sudah ada di FIELD Anda)')
+      .replace(/cannot be placed \(UNIQUE: same name already on your FIELD\)/g, 'tidak bisa ditempatkan (UNIQUE: nama yang sama sudah ada di FIELD Anda)')
+      .replace(/would Retreat at once \(Power 0\)/g, 'akan langsung Retreat (Power 0)').replace(/Retreats at once \(Power 0\)/g, 'langsung Retreat (Power 0)')
+      .replace(/cannot attach \(UNIQUE\)/g, 'tidak bisa dipasang (UNIQUE)').replace(/no other problem/g, 'tidak ada masalah lain').replace(/\bIn ([A-Z0-9 /]+):/g, 'Di $1:')],
+    [/^only works while this card is attached to a Character\. It is not attached right now\.$/, 'Hanya bisa dipakai saat kartu ini terpasang pada Karakter. Sekarang kartu ini tidak terpasang.'],
+    [/^the condition or cost written on the card is not met right now \(304\.2\.b\)\.$/, 'Syarat atau biaya yang tertulis di kartu belum terpenuhi sekarang (304.2.b).'],
+    [/^already used this turn \(once per turn\)\.$/, 'Sudah dipakai giliran ini (sekali per giliran).'],
+    [/^already used (\d+)x this turn\.$/, 'Sudah dipakai $1x giliran ini.'],
+    [/^Activate: (.+)$/, 'Aktifkan: $1'],
     [/^HAND · (.+)$/, 'HAND · $1'],
     [/^Top (\d+) cards? of the Deck\. Full details in the Play-by-play\.$/, '$1 kartu teratas Deck. Rincian lengkap di Jalannya permainan.'],
     [/^(.+) leaves first$/, '$1 keluar lebih dulu'], [/^Tap a glowing area, or use the buttons in the panel\.$/, 'Ketuk area yang menyala, atau pakai tombol di panel.'],

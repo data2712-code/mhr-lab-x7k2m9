@@ -151,6 +151,7 @@
     let c;
     try { c = S.clone(st); } finally { st.log = L; st.actions = A; }
     c.log = new Array(L.length); c.actions = [];
+    c.noPreview = true;                    // o2.40: pratinjau akibat efek hanya untuk tampilan, tidak perlu di simulasi bot
     const o = 1 - me, O = c.P[o], hn = O.hand.length;
     const pool = shuffleArr(rng, O.hand.concat(O.deck));
     O.hand = pool.slice(0, hn); O.deck = pool.slice(hn); O.armed = [];

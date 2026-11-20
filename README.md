@@ -604,6 +604,11 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### Battle Sim o2.40 — laporan pemain #32–#34 — 20 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
+- Peringatan akibat efek sebelum menjawab efek opsional / memilih area (mis. The Milano tidak bisa dipasang karena UNIQUE, langsung Retreat karena Power 0).
+- ACTI yang tidak bisa dipakai ditampilkan redup beserta alasannya (mis. Spider Suit hanya berfungsi saat terpasang).
+- `SIM_URL ?v=o2.40`, `sim-host.js?v=7.45-sim40`. Server online perlu deploy ulang (mesin).
+
 ### Battle Sim o2.39 — kartu FIELD desktop lebih besar — 19 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 - Panel keputusan & panel biaya CALL menempel di kolom kanan untuk layar ≤ 900 px tinggi; kartu 1366×768 66 → 77 px, 1920×1080 98 → 106 px (maks. 124 px).
 - `SIM_URL ?v=o2.39`, `sim-host.js?v=7.45-sim39`.

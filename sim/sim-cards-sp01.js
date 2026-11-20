@@ -458,6 +458,7 @@
       unique: true,
       acti: [{
         id: 'swap', zone: 'FIELD', once: true, label: 'Swap this card with the [Human] Character it is attached to',
+        needHost: true,
         can: A => !!host(A) && isHuman(A, host(A)),
         run: A => A.swapAtt(A.self, host(A), 'Vigil of Love')
       }, {
@@ -575,6 +576,7 @@
       }],
       acti: [{
         id: 'suit', zone: 'FIELD', counter: true, once: true, label: 'Prune 1 [Web] Character in your RETREAT: the Character this card is attached to gets Power+1000',
+        needHost: true,
         can: A => !!host(A) && A.ret(A.p).some(i => isWeb(A, i)),
         run: A => {
           const c = A.ask('c', { text: 'Choose 1 [Web] Character in your RETREAT to Prune', from: A.ret(A.p).filter(i => isWeb(A, i)) });
@@ -970,6 +972,7 @@
     'SP01-064': {
       acti: [{
         id: 'swap', zone: 'FIELD', once: true, label: 'Swap this card with the [Web] Character it is attached to ([AIR STRIKE] this turn)',
+        needHost: true,
         can: A => !!host(A) && isWeb(A, host(A)),
         run: A => { if (A.swapAtt(A.self, host(A), 'Dual Destiny')) A.grant(A.self, 'air', '[AIR STRIKE]'); }
       }],

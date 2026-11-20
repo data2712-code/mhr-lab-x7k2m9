@@ -16,6 +16,17 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-20', t: 'fix', v: 'o2.40', reports: [32, 33, 34],
+      en: { h: 'Clearer effect warnings and ACTI reasons', b: [
+        'Before you answer an optional effect, the sim now warns you about surprising results. Example: The Milano «Ace Rescue» cannot attach another The Milano (UNIQUE), and in BATTLE it may Retreat at once when an opponent\'s effect makes its Power 0. The area buttons show the same warning (report #33).',
+        'Tap one of your cards: ACTI effects you cannot use right now are shown greyed out, with the reason. Example: «Ultimate Mode» Spider Suit only works while it is attached to a Character, not when it is CALLed into the BASE (report #34).',
+        'Rules note (report #32): «Spider-Archenemy» Mr. Negative has no UNIQUE, so two copies on your FIELD are allowed.'] },
+      id: { h: 'Peringatan efek dan alasan ACTI lebih jelas', b: [
+        'Sebelum menjawab efek opsional, simulator kini memperingatkan akibat yang mengejutkan. Contoh: The Milano «Ace Rescue» tidak bisa memasang The Milano lain (UNIQUE), dan di BATTLE bisa langsung Retreat bila efek lawan membuat Power-nya 0. Tombol pilihan area juga menampilkan peringatan yang sama (laporan #33).',
+        'Ketuk kartu Anda: efek ACTI yang tidak bisa dipakai sekarang ditampilkan redup beserta alasannya. Contoh: «Ultimate Mode» Spider Suit hanya berfungsi saat terpasang pada Karakter, tidak saat di-CALL ke BASE (laporan #34).',
+        'Catatan aturan (laporan #32): «Spider-Archenemy» Mr. Negative tidak punya UNIQUE, jadi dua kopi di FIELD Anda diperbolehkan.'] }
+    },
+    {
       d: '2026-11-19', t: 'improve', v: 'o2.39',
       en: { h: 'Bigger cards on desktop and laptop screens', b: [
         'On laptop screens up to 900 px tall (for example 1366×768), the decision panel now sits at the top of the right column, so the board and the cards are about 20–30% bigger.',

@@ -1207,7 +1207,8 @@
       }
       case 'counter': return callModeActs() || counterActs(pr);
       case 'opt': case 'yesno':
-        return '<button class="pri" data-act="yes">Yes</button><button data-act="no">No</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
+        return (pr.warn ? '<div class="pwarn optwarn">⚠ ' + esc(pr.warn) + '</div>' : '') +     // o2.40 (laporan #33): akibat efek, tidak terpotong
+          '<button class="pri" data-act="yes">Yes</button><button data-act="no">No</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'order':
         return pr.jobs.map(j => '<button data-act="order" data-job="' + j.id + '"' + (j.older ? ' title="Triggered earlier and still waiting (RS-016)"' : '') + '>' + esc(j.label) + (j.older ? ' (earlier)' : '') + '</button>').join('');
       case 'choose':
@@ -1216,7 +1217,9 @@
         return pr.options.map(o => {
           // Laporan #27 (o2.30): area yang sekarang masih terisi kartu yang akan keluar karena efek ini → keterangan.
           const occ = (S.SLOTS.includes(o.v) && G.P[pr.p].bat[o.v]) || null;
-          return '<button data-act="pickOpt" data-v="' + esc(o.v) + '">' + esc(o.label) + (occ ? '<small>' + esc(S.nameOf(G, occ)) + ' leaves first</small>' : '') + '</button>';
+          // o2.40 (laporan #33): akibat yang mengejutkan di area ini (mis. langsung Retreat karena Power 0).
+          const wn = o.warn ? [/Retreat at once/.test(o.warn) ? 'Retreats at once (Power 0)' : '', /cannot be attached/.test(o.warn) ? 'cannot attach (UNIQUE)' : '', /cannot be placed/.test(o.warn) ? 'cannot be placed (UNIQUE)' : ''].filter(Boolean).join(' · ') : '';
+          return '<button data-act="pickOpt" data-v="' + esc(o.v) + '"' + (o.warn ? ' class="haswarn" title="' + esc(o.warn) + '"' : '') + '>' + esc(o.label) + (occ ? '<small>' + esc(S.nameOf(G, occ)) + ' leaves first</small>' : '') + (wn ? '<small class="pwarn">⚠ ' + esc(wn) + '</small>' : '') + '</button>';
         }).join('') + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'retarget': return airButtons(pr.a) || retargetButtons(pr.a);
       case 'rps':
@@ -1332,6 +1335,10 @@
       const att = (x.att || []);
       S.actiOptions(G, G.prompt.p, inC).filter(o => o.c === iid || att.includes(o.c)).forEach(o => {
         acts += '<button class="pri" data-act="acti" data-c="' + o.c + '" data-eff="' + o.eff + '">Activate' + (o.c !== iid ? ' (attached ' + esc(S.nameOf(G, o.c)) + ')' : '') + ': ' + esc(o.label) + '</button>';
+      });
+      // o2.40 (laporan #34): ACTI yang tidak bisa dipakai sekarang tetap ditampilkan (redup) beserta alasannya.
+      if (S.actiBlocked) S.actiBlocked(G, G.prompt.p, iid, inC).forEach(o => {
+        acts += '<button disabled>Activate: ' + esc(o.label) + '</button><div class="reason">' + esc(o.short || o.why || '') + '</div>';
       });
       if (inC && L.zone === 'hand' && S.hasCounterAbility(G, iid)) {
         const cr = ccallReason(iid);

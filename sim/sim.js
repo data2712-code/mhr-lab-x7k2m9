@@ -1559,6 +1559,10 @@
     } catch (err) {
       if (err instanceof Ask) {
         st.prompt = Object.assign({ type: err.spec.yesno ? 'yesno' : err.spec.pick ? 'pick' : 'choose', job: job.id, label: jobLabel(st, job) }, err.spec);
+        if (err.spec.pick && !st.noPreview) {                 // o2.40: tandai area yang membuat kartu langsung Retreat dll.
+          const w = previewWarn(st, err.spec.key, err.spec.options || []);
+          if (w && Object.keys(w).length) st.prompt.options = st.prompt.options.map(o => w[o.v] ? Object.assign({}, o, { warn: w[o.v] }) : o);
+        }
         return false;
       }
       throw err;
@@ -1567,13 +1571,71 @@
     settle(st);
     return true;
   }
+  /* o2.40 (laporan #33): pratinjau akibat efek. Sebelum pemain menjawab "pakai efek ini?" atau memilih area tujuan, mesin
+     menjalankan efek itu di salinan state (jawaban lain diisi otomatis) dan mencari akibat yang mengejutkan: kartu tidak bisa
+     dipasang / ditempatkan (UNIQUE) atau langsung Retreat karena Power 0. Hanya untuk tampilan (prompt.warn / option.warn);
+     tidak mengubah aturan, aksi, log, maupun hash. Pilihan pertama yang berupa area dicoba satu per satu. */
+  function previewRun(st, extra) {
+    const L = st.log, Ac = st.actions; st.log = []; st.actions = [];
+    let c; try { c = clone(st); } finally { st.log = L; st.actions = Ac; }
+    c.noPreview = true; c.prompt = null;
+    const job = c.job; if (!job) return null;
+    if (job.stage === 'opt') job.stage = null;
+    Object.assign(job.ans, extra || {});
+    let first = null;
+    for (let g = 0; g < 12; g++) {
+      let done;
+      try { done = runJob(c, job); } catch (e) { return null; }
+      if (done) break;
+      const pr = c.prompt; if (!pr || !pr.key) return null;
+      if (!first) first = pr;
+      job.ans[pr.key] = pr.pick ? (pr.options[0] || {}).v : pr.yesno ? true : (pr.from || []).slice(0, Math.max(pr.min || 0, 1));
+      c.prompt = null;
+    }
+    const warn = [];
+    c.log.forEach(e => {
+      const t = e.txt || ''; let m;
+      if ((m = /^(.+?) cannot be (attached|placed): .*UNIQUE/.exec(t))) warn.push(m[1] + ' cannot be ' + m[2] + ' (UNIQUE: same name already on your FIELD)');
+      else if (e.k === 'retreat' && (m = /^.+?: (.+?) Retreats \(Attack Power reduced to 0/.exec(t))) warn.push(m[1] + ' would Retreat at once (Power 0)');
+    });
+    return { warn: warn.filter((w, i) => warn.indexOf(w) === i), first };
+  }
+  function previewWarn(st, key, options) {
+    if (st.vanilla || st.noPreview || !st.job) return null;
+    try {
+      if (key) {                                  // prompt pilihan area: coba tiap pilihan
+        const out = {};
+        options.forEach(o => { const r = previewRun(st, { [key]: o.v }); if (r && r.warn.length) out[o.v] = r.warn.join('; '); });
+        return out;
+      }
+      const r = previewRun(st);
+      if (!r) return null;
+      const f = r.first;
+      if (f && f.pick && f.options && f.options.length > 1) {
+        const per = f.options.map(o => ({ o, w: (previewRun(st, { [f.key]: o.v }) || { warn: [] }).warn }));
+        if (!per.some(x => x.w.length)) return null;
+        const common = per[0].w.filter(w => per.every(x => x.w.includes(w)));
+        const groups = [];
+        per.forEach(x => {
+          const rest = x.w.filter(w => !common.includes(w)), k = rest.join('; ');
+          const g = groups.find(y => y.k === k); if (g) g.l.push(x.o.label); else groups.push({ k, l: [x.o.label] });
+        });
+        const parts = common.length ? [common.join('; ')] : [];
+        groups.filter(g => g.k).forEach(g => parts.push('In ' + g.l.join(' / ') + ': ' + g.k));
+        const okg = groups.find(g => !g.k);
+        if (okg && groups.length > 1) parts.push('In ' + okg.l.join(' / ') + ': ' + (common.length ? 'no other problem' : 'OK'));
+        return parts.join('. ') + '.';
+      }
+      return r.warn.length ? r.warn.join('; ') + '.' : null;
+    } catch (e) { return null; }
+  }
   // Pilih efek tertunda berikutnya (304.1.f–h). Mengembalikan true kalau ada prompt.
   function processPending(st) {
     for (let guard = 0; guard < 200; guard++) {
       if (st.result) return false;
       if (st.job) {
         const job = st.job;
-        if (job.stage === 'opt') { const jd = jobDef(st, job) || {}; st.prompt = { type: 'opt', p: job.p, job: job.id, label: jobLabel(st, job), text: jd.text || 'Use this effect?', hand: jd.zone === 'HAND' }; return true; }
+        if (job.stage === 'opt') { const jd = jobDef(st, job) || {}; st.prompt = { type: 'opt', p: job.p, job: job.id, label: jobLabel(st, job), text: jd.text || 'Use this effect?', hand: jd.zone === 'HAND' }; const w = previewWarn(st); if (w) st.prompt.warn = w; return true; }
         if (!runJob(st, job)) return true;
         continue;
       }
@@ -1720,7 +1782,21 @@
     if (!inZone(st, iid, e.zone)) return nm + ': this effect can only be activated from the ' + ({ HAND: 'HAND', FIELD: 'FIELD', BATTLE: 'BATTLE area', BASE: 'BASE', RETREAT: 'RETREAT', VOID: 'VOID' }[e.zone] || e.zone) + '.';
     if (e.once && st.inst[iid].once[e.id] === st.turn) return nm + ': already used this turn (once per turn).';
     if (e.times) { const w = st.inst[iid].tw[e.id]; if (w && w.t === st.turn && w.n >= e.times) return nm + ': already used ' + e.times + 'x this turn.'; }
+    if (e.needHost && !st.inst[iid].host) return nm + ': only works while this card is attached to a Character. It is not attached right now.';   // o2.40 (laporan #34)
     return nm + ': the condition or cost written on the card is not met right now (304.2.b). Read the card text: ' + textEn(card(st.inst[iid].no)).replace(/\s+/g, ' ').slice(0, 220);
+  }
+  /* o2.40 (laporan #34): ACTI milik kartu ini yang berada di zona yang benar tetapi tidak bisa diaktifkan sekarang, beserta
+     alasannya — supaya pemain tahu kenapa tombolnya tidak ada (mis. Spider Suit di BASE yang tidak terpasang). */
+  function actiBlocked(st, p, iid, inCounter) {
+    if (st.vanilla || !st.inst[iid] || st.inst[iid].fd) return [];
+    const def = defOf(st, iid), L = locate(st, iid);
+    if (!def || !def.acti || !L || L.p !== p) return [];
+    const ok = actiOptions(st, p, inCounter).filter(o => o.c === iid).map(o => o.eff);
+    return def.acti.filter(e => !ok.includes(e.id) && (!inCounter || e.counter) && inZone(st, iid, e.zone))
+      .map(e => {
+        const why = actiWhy(st, p, iid, e.id, inCounter), nm = nameOf(st, iid) + (e.label ? ' — ' + e.label : '') + ': ';
+        return { eff: e.id, label: e.label || 'Activate', why, short: (why.indexOf(nm) === 0 ? why.slice(nm.length) : why).replace(/ Read the card text:.*$/, '') };
+      });
   }
   // 305.1. Tahap 4: counter boleh berupa fungsi (PB01-008: [COUNTER] hanya bila syaratnya terpenuhi).
   function hasCounterAbility(st, iid) {
@@ -2516,7 +2592,7 @@
     validatePosition, positionFrom, exportPosition, parsePosition, emptyPosition,
     manualOps, attachHosts, MANUAL_OPS,
     testDeck, uniqueBlocked, hasAbility, handTriggerCards, placeSpots, bbmDests,
-    lostEffects, abilityCount, costBanned, actiWhy,
+    lostEffects, abilityCount, costBanned, actiWhy, actiBlocked,
     HIDDEN_SETS, HIDDEN_MSG, isHiddenNo, hiddenCount, encodeDeckCode,
     viewFor, visibleTo
   };
