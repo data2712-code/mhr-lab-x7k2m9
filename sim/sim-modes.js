@@ -81,10 +81,10 @@
   // o2.16 (permintaan pemilik 13 Nov 2026): tab menu berpindah di tempat, tanpa rasa "pindah halaman" dan tanpa tombol kembali.
   // Bilah tab #simNav tetap tampil; Play / Ranked / History / Tools menyala sesuai layar. Practice, Online, Find, Same device
   // adalah bagian dari tab Play.
-  const TAB_OF = { home: 'home', practice: 'home', online: 'home', find: 'home', custom: 'home', ranked: 'ranked', stats: 'stats', history: 'history', tools: 'tools', rules: 'rules', learn: 'learn' };
+  const TAB_OF = { home: 'home', practice: 'home', online: 'home', find: 'home', custom: 'home', ranked: 'ranked', stats: 'stats', history: 'stats', tools: 'tools', rules: 'rules', learn: 'learn' };
   function navHTML() {
     // o2.35 (pemilik 19 Nov 2026): tab Learn (Learn To Play, sim-learn.js) dan Rules (ruling, sim-rules.js)
-    return '<button data-mode="home">Play</button><button data-mode="learn">🎓 Learn</button><button data-mode="ranked">🏆 Ranked</button><button data-mode="stats">📈 Stats</button><button data-mode="rules">📖 Rules</button><button data-mode="history">History</button><button data-hub="sandbox">Sandbox</button>' +
+    return '<button data-mode="home">Play</button><button data-mode="learn">🎓 Learn</button><button data-mode="ranked">🏆 Ranked</button><button data-mode="stats">📈 Stats & History</button><button data-mode="rules">📖 Rules</button><button data-hub="sandbox">Sandbox</button>' +
       '<button data-mode="tools">Tools</button><button data-rep="open" data-v="feedback">Feedback</button>';
   }
   function syncNav() {
@@ -348,11 +348,19 @@
       deckNames: [mine.name || 'Deck', bot.name || 'Deck'], youIdx: 0 });
   }
 
+  /* o2.48 (pemilik 23 Nov 2026): tab Stats dan History digabung menjadi satu tab "📈 Stats & History" dengan dua sub-tab. */
+  function shHead(cur) {
+    const T = (en, id) => (window.MHRSimI18N && window.MHRSimI18N.lang === 'id') ? id : en;
+    return '<div class="hd"><button data-mode="home">← Menu</button><h2>' + T('Stats & History', 'Statistik & Riwayat') + '</h2></div>' +
+      '<div class="seg shseg" style="margin:0 0 12px">' + [['stats', T('📈 Stats · Find a match', '📈 Statistik · Cari lawan')], ['history', T('🗂 Match history', '🗂 Riwayat pertandingan')]]
+        .map(([v, l]) => '<button data-mode="' + v + '"' + (v === cur ? ' class="on"' : '') + ' data-noi18n>' + l + '</button>').join('') + '</div>';
+  }
+  window.MHRSimStatsHead = shHead;
   function renderHistory() {
     const ui = U(), list = ui.history();
     const prac = list.filter(r => r.me != null && r.winner != null);
     const W = prac.filter(r => r.winner === r.me).length, L = prac.filter(r => r.winner >= 0 && r.winner !== r.me).length, D = prac.filter(r => r.winner < 0).length;
-    let h = '<div class="hd"><button data-mode="home">← Menu</button><h2>Match history</h2></div>';
+    let h = shHead('history');   // o2.48: Stats & History satu tab
     if (!histTab) histTab = onlineReady() ? 'online' : 'offline';
     if (onlineReady()) {
       h += '<div class="seg" style="margin:0 0 10px" data-histtab>' + [['online', 'Online (account)'], ['offline', 'Offline (this device)']].map(([v, l]) => '<button data-ht="' + v + '"' + (v === histTab ? ' class="on"' : '') + '>' + l + '</button>').join('') + '</div>';

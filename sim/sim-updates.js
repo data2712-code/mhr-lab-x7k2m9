@@ -16,6 +16,21 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-23', t: 'improve', v: 'o2.48',
+      en: { h: 'Ranked: tiers on top, leaderboard pages, fair fast wins · Stats & History in one tab', b: [
+        'Rank tiers now sit at the top of the Ranked tab, side by side from Recruit to Genius Burden (swipe on a phone).',
+        'The leaderboard shows 20 players per page: swipe left/right or use the ‹ › buttons. It opens on the page with your name.',
+        'A real win before turn 4 (9 Rush Points or deck out) now counts for points. Games that end early by a concede, a leave, time or timeouts still do not count.',
+        'Stats and Match history are now one tab, 📈 Stats & History, with two sub-tabs.'
+      ] },
+      id: { h: 'Ranked: tier di atas, leaderboard per halaman, menang cepat yang sah · Statistik & Riwayat jadi satu tab', b: [
+        'Tingkatan rank sekarang di paling atas tab Ranked, berjajar dari Recruit sampai Genius Burden (geser di HP).',
+        'Leaderboard menampilkan 20 pemain per halaman: geser kiri/kanan atau pakai tombol ‹ ›. Halaman yang memuat nama Anda dibuka lebih dulu.',
+        'Kemenangan sah sebelum giliran ke-4 (9 Rush Point atau deck habis) sekarang dihitung. Pertandingan yang berakhir cepat karena menyerah, keluar, waktu, atau timeout tetap tidak dihitung.',
+        'Statistik dan Riwayat pertandingan sekarang satu tab, 📈 Statistik & Riwayat, dengan dua sub-tab.'
+      ] }
+    },
+    {
       d: '2026-11-23', t: 'fix', v: 'o2.47', reports: [51, 52, 53, 54, 55, 56],
       en: { h: 'Fixes: frozen game, Hostile Focus, Multiple Hits, Silk and more', b: [
         'The game no longer freezes when one of your cards is turned face-down in your opponent\'s BASE (for example by 「Spider-Archenemy」Electro).',

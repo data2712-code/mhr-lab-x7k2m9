@@ -36,6 +36,7 @@
     ['org',      '🏟', 'Verified organizers'],
     ['arch',     '📈', 'Opponent deck list'],
     ['roles',    '👑', 'Admin roles'],
+    ['pin',      '🔑', 'PIN accounts'],   // v7.50 — kode pemulihan baru untuk akun username + PIN
   ];
   const KEY = 'mhr_ct_tab';
   let tab = 'overview', checked = false;
@@ -98,6 +99,12 @@
       return;
     }
     if(tab === 'server'){ drawServer(p); return; }
+    if(tab === 'pin'){   // v7.50 — pemain akun PIN yang kehilangan kode pemulihan: buat kode baru, berikan ke pemain (DM)
+      p.innerHTML = box('🔑 PIN accounts', 'A player who signed up with a PIN and lost both the PIN and the recovery code: make a new recovery code and send it to them privately (after checking it is really them). They then use "Forgot PIN?" with that code.',
+        '<div class="ct-sv-act"><input id="ctPinUser" placeholder="username" autocomplete="off" style="flex:1;min-width:160px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--ink);color:var(--paper)">' +
+        '<button type="button" class="ct-sv-b main" data-pinreset="1">Make new recovery code</button></div><div id="ctPinOut" class="ct-mut" style="margin-top:10px"></div>');
+      return;
+    }
     if(tab === 'binders'){
       p.innerHTML = '<div class="bd-admin ct-bd" id="bdAdmin"><b>🛡 Binder reports</b> <span class="bd-mut">Loading…</span></div>';
       if(window.MHRBindersUI && window.MHRBindersUI.renderAdmin) window.MHRBindersUI.renderAdmin();
@@ -225,7 +232,18 @@
   }
 
   /* ---------- interaksi ---------- */
-  document.addEventListener('click', e=>{
+  document.addEventListener('click', async e=>{
+    const pr = e.target.closest('[data-pinreset]');
+    if(pr){
+      const u = (q('#ctPinUser') || {}).value || '', out = q('#ctPinOut'), c = window.MHRAuth && window.MHRAuth.client;
+      if(!u.trim() || !c || !out) return;
+      pr.disabled = true; out.textContent = 'Working…';
+      const { data, error } = await c.rpc('mhr_admin_pin_reset', { p_username: u.trim() });
+      pr.disabled = false;
+      if(error){ out.textContent = /USER_NOT_FOUND/.test(error.message) ? 'No account with that username.' : /NOT_PIN_ACCOUNT/.test(error.message) ? 'That account uses email or Google, not a PIN.' : 'Failed: ' + error.message; return; }
+      out.innerHTML = 'New recovery code for <b>@' + E(u.trim()) + '</b>: <b style="font-size:18px;letter-spacing:.08em;color:var(--paper)">' + E(data) + '</b><br>Send it privately. The old code no longer works.';
+      return;
+    }
     if(!e.target.closest('#towerPage')) return;
     const t = e.target.closest('[data-cttab]'); if(t){ setTab(t.dataset.cttab); return; }
     const g = e.target.closest('[data-ctgo]');

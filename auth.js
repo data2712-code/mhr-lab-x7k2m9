@@ -27,6 +27,11 @@
    otomatis tersambung oleh Supabase (identitas dengan email yang sama). Perlu: provider Google aktif di Supabase
    (Authentication → Sign In / Providers → Google) dengan Client ID & Secret dari Google Cloud.
 
+   v7.50 — daftar dengan USERNAME + PIN tanpa email (pemilik 23 Nov 2026, seperti RushDee). Akun PIN memakai alamat pengganti
+   acak p<16 hex>@pin.mhrdecklab.com (tidak pernah dikirimi email) dengan PIN 6–12 angka sebagai kata sandi. Masuk tetap lewat
+   signIn(username, PIN). Kode pemulihan dibuat server (mhr_pin_set_recovery) dan hanya ditampilkan sekali; lupa PIN →
+   resetPin(username, kode, PIN baru). Lihat mhr_decklab_v750_pin_login.sql.
+
    v6.32 — kolom `display_name` di tabel profiles diganti jadi `username`
    (unik, case-insensitive, 3-20 karakter huruf/angka/underscore — lihat
    USERNAME_RE) supaya orang bisa dikenali dengan nama pilihan sendiri,
@@ -80,6 +85,11 @@
       changePassword: async ()=>({error:{message:'UPDATE_FAILED'}}),
       signInWithGoogle: async ()=>({error:{message:'Supabase SDK failed to load'}}),
       setUsername: async ()=>({error:{message:'UPDATE_FAILED'}}),
+      signUpPin: async ()=>({error:{message:'Supabase SDK failed to load'}}),
+      resetPin: async ()=>({error:{message:'Supabase SDK failed to load'}}),
+      newRecoveryCode: async ()=>({error:{message:'Supabase SDK failed to load'}}),
+      isPinAccount: ()=>false,
+      checkPin: ()=>'INVALID_PIN',
       providers: ()=>[],
       isTempUsername: ()=>false,
       oauthBack: ()=>null,
@@ -314,6 +324,46 @@
       }catch(e){
         return { error:{ message:'UPDATE_FAILED' } };
       }
+    },
+
+    /* v7.50 — akun username + PIN (tanpa email). Kode error: INVALID_USERNAME, USERNAME_TAKEN, INVALID_PIN, WEAK_PIN,
+       PIN_NOT_ALLOWED (setelan kata sandi Supabase menolak PIN angka), SIGNUP_FAILED. Berhasil → { data:{ code } }. */
+    checkPin(pin){
+      const p = String(pin || '');
+      if(!/^[0-9]{6,12}$/.test(p)) return 'INVALID_PIN';
+      if(/^(\d)\1+$/.test(p) || '01234567890123'.includes(p) || '98765432109876'.includes(p)) return 'WEAK_PIN';
+      return null;
+    },
+    isPinAccount(session){ return /@pin\.mhrdecklab\.com$/i.test((session && session.user && session.user.email) || ''); },
+    async signUpPin(username, pin){
+      const uname = (username || '').trim();
+      if(!USERNAME_RE.test(uname)) return { error:{ message:'INVALID_USERNAME' } };
+      const bad = this.checkPin(pin); if(bad) return { error:{ message: bad } };
+      try{
+        const { data: existing } = await client.from('profiles').select('id').ilike('username', uname.replace(/_/g, '\\_')).maybeSingle();
+        if(existing) return { error:{ message:'USERNAME_TAKEN' } };
+      }catch(e){ /* jaring pengaman: unique index di database */ }
+      const rnd = Array.from(crypto.getRandomValues(new Uint8Array(8)), b => b.toString(16).padStart(2, '0')).join('');
+      const { data, error } = await client.auth.signUp({ email: 'p' + rnd + '@pin.mhrdecklab.com', password: String(pin), options: { data: { username: uname } } });
+      if(error){
+        const m = error.message || '';
+        if(/database error saving new user/i.test(m)) return { error:{ message:'USERNAME_TAKEN' } };
+        if(/password/i.test(m)) return { error:{ message:'PIN_NOT_ALLOWED', detail: m } };
+        return { error:{ message:'SIGNUP_FAILED', detail: m } };
+      }
+      if(!data || !data.session) return { error:{ message:'SIGNUP_FAILED', detail:'no session (is "Confirm email" off?)' } };
+      const r = await client.rpc('mhr_pin_set_recovery');
+      return { data:{ code: r.error ? null : r.data } };
+    },
+    async newRecoveryCode(){
+      const r = await client.rpc('mhr_pin_set_recovery');
+      return r.error ? { error:{ message:'FAILED' } } : { data:{ code: r.data } };
+    },
+    async resetPin(username, code, pin){
+      const bad = this.checkPin(pin); if(bad) return { error:{ message: bad } };
+      const r = await client.rpc('mhr_pin_reset', { p_username: (username || '').trim(), p_code: code || '', p_new_pin: String(pin) });
+      if(r.error || !r.data) return { error:{ message:'RESET_FAILED' } };
+      return { data:{ code: r.data } };
     },
 
     /* true kalau akun yang sedang login ada di tabel admin_users. Tabel itu

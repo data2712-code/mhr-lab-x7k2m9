@@ -19,7 +19,7 @@
     // menu & mode
     'Resume': 'Lanjutkan', 'Discard': 'Buang', '▶ Unfinished game': '▶ Permainan belum selesai',
     'Practice vs Bot': 'Latihan lawan Bot', 'Play with a friend · same device': 'Main dengan teman · satu perangkat',
-    'Find a match': 'Cari lawan', 'Private room with a link': 'Room privat dengan link', 'Match history': 'Riwayat pertandingan',
+    'Find a match': 'Cari lawan', 'Private room with a link': 'Room privat dengan link', 'Match history': 'Riwayat pertandingan', '📈 Stats & History': '📈 Statistik & Riwayat',
     'Custom game & test tools': 'Permainan kustom & alat uji', 'Online version': 'Versi online', 'Online play': 'Main online',
     'Train against the bot with your deck. Choose the bot level; clock is optional and undo is free.': 'Berlatih melawan bot dengan deck Anda. Pilih level bot; jam boleh dimatikan dan Undo bebas.',
     'Pass-and-play on one phone or tablet. Choose a flexible turn clock or a 30-minute match clock.': 'Bergantian di satu HP atau tablet. Pilih jam giliran yang fleksibel atau jam pertandingan 30 menit.',

@@ -1841,6 +1841,16 @@
   .auth-emailtip.err{background:rgba(228,68,46,.15);border-color:rgba(228,68,46,.4);color:#FF8A75}
   .auth-emailtip button{background:none;border:none;color:inherit;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer;padding:0;margin-left:4px}
   .auth-hint{font-size:11px;color:var(--muted);line-height:1.45;margin:-4px 0 10px}
+  /* v7.50 — daftar dengan PIN, kode pemulihan */
+  .auth-mode{display:flex;gap:6px;margin-bottom:4px}.auth-mode button{flex:1;padding:8px 6px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+  .auth-mode button.on{border-color:var(--accent);color:var(--paper);background:rgba(242,176,30,.12)}
+  .sg-email,.sg-pin{display:flex;flex-direction:column;gap:8px}.sg-email[hidden],.sg-pin[hidden]{display:none}
+  #authFormPinReset{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}#authFormPinReset[hidden]{display:none}
+  #authFormPinReset label{font-size:11.5px;color:var(--muted);margin-top:4px}
+  #authFormPinReset input{background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:9px 10px;font-size:13px;font-family:var(--body)}
+  .auth-code{border:1px solid rgba(242,176,30,.5);background:rgba(242,176,30,.08);border-radius:12px;padding:12px;margin:8px 0;text-align:center}.auth-code[hidden]{display:none}
+  .auth-code-v{font-family:var(--mono);font-size:22px;font-weight:800;letter-spacing:.08em;color:var(--paper);margin:6px 0;user-select:all}
+  #authNewCodeBtn[hidden]{display:none}
   /* v7.48 — Continue with Google + pilih username untuk akun Google baru */
   .auth-google{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#1f1f1f;border:1px solid #dadce0;font-weight:600}
   .auth-google:hover{background:#f6f8fa}
@@ -3589,7 +3599,7 @@
       <form id="authFormLogin">
         <label data-i18n="acctUsername">Username</label>
         <input type="text" id="authLoginUsername" required autocomplete="username">
-        <label data-i18n="acctPassword">Kata sandi</label>
+        <label data-i18n="acctPasswordOrPin">Password or PIN</label>
         <input type="password" id="authLoginPassword" required autocomplete="current-password">
         <button class="btn2 main" type="submit" data-i18n="acctLoginCta">Masuk</button>
       </form>
@@ -3598,16 +3608,30 @@
       <button class="auth-link" id="authForgotLink" type="button" data-i18n="acctForgotLink">Lupa kata sandi?</button>
 
       <form id="authFormSignup" hidden>
+        <!-- v7.50 — daftar dengan email + kata sandi, atau username + PIN tanpa email (lihat auth.js v7.50) -->
+        <div class="auth-mode" role="tablist">
+          <button type="button" class="on" data-signmode="email" data-i18n="acctModeEmail">With email</button>
+          <button type="button" data-signmode="pin" data-i18n="acctModePin">With PIN (no email)</button>
+        </div>
         <label data-i18n="acctUsername">Username</label>
         <input type="text" id="authSignupUsername" required minlength="3" maxlength="20"
           pattern="[A-Za-z0-9_]{3,20}" autocomplete="nickname" data-i18n-ph="acctUsernamePh"
           placeholder="3-20 karakter: huruf, angka, _ (tanpa spasi)">
+        <div class="sg-email">
         <label data-i18n="acctEmail">Email</label>
         <input type="email" id="authSignupEmail" required autocomplete="email" autocapitalize="off" spellcheck="false">
         <p class="auth-emailtip" id="authSignupEmailTip" hidden></p>
         <p class="auth-hint" data-i18n="acctEmailHint">Use an email you can open: it is the only way to reset your password if you forget it.</p>
         <label data-i18n="acctPassword">Kata sandi</label>
         <input type="password" id="authSignupPassword" required minlength="6" autocomplete="new-password">
+        </div>
+        <div class="sg-pin" hidden>
+        <label data-i18n="acctPin">PIN (6–12 digits)</label>
+        <input type="password" id="authSignupPin" inputmode="numeric" pattern="[0-9]{6,12}" minlength="6" maxlength="12" autocomplete="new-password">
+        <label data-i18n="acctPin2">Repeat PIN</label>
+        <input type="password" id="authSignupPin2" inputmode="numeric" pattern="[0-9]{6,12}" minlength="6" maxlength="12" autocomplete="new-password">
+        <p class="auth-hint" data-i18n="acctPinHint">No email needed. You log in with your username and PIN. After signing up you get a recovery code: keep it, it is the only way to reset a forgotten PIN.</p>
+        </div>
         <button class="btn2 main" type="submit" data-i18n="acctSignupCta">Buat akun</button>
       </form>
 
@@ -3624,6 +3648,22 @@
         <p class="auth-emailtip" id="authForgotEmailTip" hidden></p>
         <button class="btn2 main" type="submit" data-i18n="acctForgotCta">Kirim link reset</button>
         <button class="auth-link" id="authForgotBack" type="button" data-i18n="acctForgotBack">← Kembali ke Masuk</button>
+        <button class="auth-link" id="authPinResetLink" type="button" data-i18n="acctPinResetLink">Signed up with a PIN? Reset it with your recovery code</button>
+      </form>
+
+      <!-- v7.50 — lupa PIN: username + kode pemulihan + PIN baru (mhr_pin_reset) -->
+      <form id="authFormPinReset" hidden>
+        <p class="auth-note" data-i18n="acctPinResetNote">Enter your username, the recovery code you saved when you signed up, and a new PIN.</p>
+        <label data-i18n="acctUsername">Username</label>
+        <input type="text" id="authPrUser" required autocomplete="username" autocapitalize="off" spellcheck="false">
+        <label data-i18n="acctRecoveryCode">Recovery code</label>
+        <input type="text" id="authPrCode" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX">
+        <label data-i18n="acctNewPin">New PIN (6–12 digits)</label>
+        <input type="password" id="authPrPin" required inputmode="numeric" pattern="[0-9]{6,12}" minlength="6" maxlength="12" autocomplete="new-password">
+        <label data-i18n="acctPin2">Repeat PIN</label>
+        <input type="password" id="authPrPin2" required inputmode="numeric" pattern="[0-9]{6,12}" minlength="6" maxlength="12" autocomplete="new-password">
+        <button class="btn2 main" type="submit" data-i18n="acctPinResetCta">Save new PIN</button>
+        <button class="auth-link" id="authPrBack" type="button" data-i18n="acctForgotBack">← Back to Login</button>
       </form>
 
       <p class="auth-note" id="authNoteDefault" data-i18n="acctNote">Akun dipakai untuk menyimpan &amp; membagikan deck, dan melacak koleksi kartu Anda (segera hadir).</p>
@@ -3645,6 +3685,15 @@
 
     <p class="auth-msg" id="authMsg" hidden></p>
 
+    <!-- v7.50 — kode pemulihan akun PIN (ditampilkan sekali) -->
+    <div class="auth-code" id="authCodeBox" hidden>
+      <p><b data-i18n="acctCodeTitle">Your recovery code</b></p>
+      <div class="auth-code-v" id="authCodeVal" data-noi18n></div>
+      <p class="auth-note" data-i18n="acctCodeNote">Save it now (screenshot or write it down). It is the only way to reset your PIN if you forget it, and it is shown only once. Each code works once; you get a new one after using it.</p>
+      <div class="auth-row"><button class="btn2" id="authCodeCopy" type="button" data-i18n="acctCodeCopy">Copy</button>
+        <button class="btn2 main" id="authCodeDone" type="button" data-i18n="acctCodeDone">I saved it</button></div>
+    </div>
+
     <div class="auth-loggedin" id="authLoggedIn" hidden>
       <p class="auth-hi"><span data-i18n="acctHi">Masuk sebagai</span> <b id="authWhoAmI"></b></p>
       <!-- v7.48 — akun baru dari Google: pilih username (dipakai di deck, Battle Sim, leaderboard) -->
@@ -3658,6 +3707,7 @@
       <!-- v7.19 — ganti kata sandi saat sedang login (lihat changePassword() di auth.js) -->
       <div class="auth-acts" id="authActs">
         <button class="btn2" id="authChangePwBtn" type="button" data-i18n="acctChangePw">🔑 Change password</button>
+        <button class="btn2" id="authNewCodeBtn" type="button" hidden data-i18n="acctNewCode">🧾 New recovery code</button>
         <button class="btn2 danger" id="authLogout" type="button" data-i18n="acctLogout">Keluar</button>
       </div>
       <form id="authFormChange" hidden novalidate>
@@ -3690,7 +3740,7 @@
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=7.48"></script>
+<script src="auth.js?v=7.50"></script>
 <!-- v7.25 — statistik pemakaian fitur anonim (guest vs login), laporan admin di My Lab -->
 <script src="usage.js?v=7.45"></script>
 <script src="decks.js?v=7.02"></script>
@@ -3719,8 +3769,8 @@
 <script src="perf.js?v=7.34"></script>
 <script src="perf-ui.js?v=7.44"></script>
 <script src="rules-faq.js?v=7.28"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules); v7.26 — FAQ versi Bahasa Indonesia; v7.27 — Copy link ke halaman statis faq/ & errata/; v7.28 — TD-11 -->
-<script src="sim-host.js?v=7.49-sim47"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
-<script src="tower.js?v=7.46"></script>   <!-- v7.44 — 🗼 Control Tower (super-admin): Overview, Usage, Battle Sim reports, Binder reports, Verified organizers, Opponent deck list, Admin roles -->
+<script src="sim-host.js?v=7.50-sim48"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
+<script src="tower.js?v=7.50"></script>   <!-- v7.44 — 🗼 Control Tower (super-admin): Overview, Usage, Battle Sim reports, Binder reports, Verified organizers, Opponent deck list, Admin roles -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
      berikutnya; pasang lagi dengan tag script promo-popup.js (pakai defer + ?v= baru). -->
@@ -3749,7 +3799,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.49</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.50</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -5347,6 +5397,32 @@ const T = {
   acctErrInvalid: 'Incorrect username/password.',
   acctSignupOk: 'Account created! You can log in with your username and password.',
   /* v7.48 — pemeriksaan email sebelum daftar / kirim link reset (email Supabase 23 Nov 2026: banyak email bounce) */
+  acctPasswordOrPin: 'Password or PIN',
+  acctModeEmail: 'With email',
+  acctModePin: 'With PIN (no email)',
+  acctPin: 'PIN (6–12 digits)',
+  acctPin2: 'Repeat PIN',
+  acctNewPin: 'New PIN (6–12 digits)',
+  acctPinHint: 'No email needed. You log in with your username and PIN. After signing up you get a recovery code: keep it, it is the only way to reset a forgotten PIN.',
+  acctPinBad: 'The PIN must be 6 to 12 digits (numbers only).',
+  acctPinWeak: 'That PIN is too easy to guess (like 111111 or 123456). Choose another one.',
+  acctPinMismatch: 'The two PINs don\'t match.',
+  acctPinNotAllowed: 'PIN sign-up is not available right now. Please sign up with email, or try again later.',
+  acctPinResetLink: 'Signed up with a PIN? Reset it with your recovery code',
+  acctPinResetNote: 'Enter your username, the recovery code you saved when you signed up, and a new PIN.',
+  acctRecoveryCode: 'Recovery code',
+  acctPinResetCta: 'Save new PIN',
+  acctPinResetFail: 'Username or recovery code is incorrect (or too many tries: wait 15 minutes).',
+  acctPinResetOk: 'PIN updated. Log in with your username and new PIN. Here is your NEW recovery code:',
+  acctSignupPinOk: 'Account created! You are logged in.',
+  acctCodeTitle: 'Your recovery code',
+  acctCodeNote: 'Save it now (screenshot or write it down). It is the only way to reset your PIN if you forget it, and it is shown only once. Each code works once; you get a new one after using it.',
+  acctCodeCopy: 'Copy',
+  acctCodeCopied: 'Copied',
+  acctCodeDone: 'I saved it',
+  acctNewCode: '🧾 New recovery code',
+  acctNewCodeAsk: 'Make a new recovery code? Your old code will stop working.',
+  acctChangePin: '🔑 Change PIN',
   acctGoogle: 'Continue with Google',
   acctOr: 'or with username',
   acctGoogleOff: 'Google login is not available yet. Please use your username and password.',
@@ -10859,6 +10935,7 @@ window.addEventListener('hashchange', ()=>{
   window.MHRUI = window.MHRUI || {};
   window.MHRUI.openAuthModal = openAuthModal;
 
+  const codeBox = $('#authCodeBox');   // v7.50
   let pickAsked = false;   // v7.48 — form pilih username dibuka otomatis sekali per muatan halaman
   async function refreshAccountUI(session){
     if(inPasswordRecovery) return; // lihat komentar di deklarasi inPasswordRecovery di atas
@@ -10875,13 +10952,18 @@ window.addEventListener('hashchange', ()=>{
         btnAccount.innerHTML = '👤 <span id="acctBtnLabel" data-i18n="acctLogin">' + t('acctLogin') + '</span>';
       }
     }
-    if(loggedInBlock) loggedInBlock.hidden = !loggedIn;
-    if(loggedOutBlock) loggedOutBlock.hidden = loggedIn;
+    const codeOpen = codeBox && !codeBox.hidden;   // v7.50: kode pemulihan sedang tampil
+    if(loggedInBlock) loggedInBlock.hidden = !loggedIn || codeOpen;
+    if(loggedOutBlock) loggedOutBlock.hidden = loggedIn || codeOpen;
     /* v7.48 — login Google: akun tanpa kata sandi (hanya Google) tidak punya tombol ganti kata sandi; akun Google baru
        (username sementara player_xxxxxxxx) langsung diminta memilih username; kembali ke halaman sebelum ke Google. */
     if(loggedIn && window.MHRAuth.providers){
       const prov = window.MHRAuth.providers(session), pwd = prov.includes('email');
       const cpw = $('#authChangePwBtn'); if(cpw) cpw.hidden = !pwd;
+      const isPin = window.MHRAuth.isPinAccount && window.MHRAuth.isPinAccount(session);   // v7.50
+      if(cpw) cpw.textContent = t(isPin ? 'acctChangePin' : 'acctChangePw');
+      const ncb = $('#authNewCodeBtn'); if(ncb) ncb.hidden = !isPin;
+      const cfg = $('#authChangeForgot'); if(cfg) cfg.hidden = !!isPin;
       const gNote = $('#authGoogleNote'); if(gNote) gNote.hidden = pwd || !prov.includes('google');
       const nm = $('#authWhoAmI') ? $('#authWhoAmI').textContent : '';
       const temp = window.MHRAuth.isTempUsername(nm), fu = $('#authFormUsername');
@@ -10927,10 +11009,11 @@ window.addEventListener('hashchange', ()=>{
   function setAuthView(which){
     clearAuthMsg();
     const isLogin = which === 'login', isSignup = which === 'signup',
-          isForgot = which === 'forgot', isReset = which === 'reset';
+          isForgot = which === 'forgot', isReset = which === 'reset', isPinReset = which === 'pinreset';   // v7.50
+    const fpr = $('#authFormPinReset'); if(fpr) fpr.hidden = !isPinReset;
     if(tabLogin) tabLogin.setAttribute('aria-pressed', String(isLogin));
     if(tabSignup) tabSignup.setAttribute('aria-pressed', String(isSignup));
-    if(authTabsEl) authTabsEl.hidden = isForgot || isReset;
+    if(authTabsEl) authTabsEl.hidden = isForgot || isReset || isPinReset;
     if(formLogin) formLogin.hidden = !isLogin;
     if(forgotLink) forgotLink.hidden = !isLogin;
     if(formSignup) formSignup.hidden = !isSignup;
@@ -10938,8 +11021,8 @@ window.addEventListener('hashchange', ()=>{
     if(formReset) formReset.hidden = !isReset;
     if(authNoteDefault) authNoteDefault.hidden = isReset;
     const gBtn = $('#authGoogle'), gOr = $('#authOr');   // v7.48
-    if(gBtn) gBtn.hidden = isForgot || isReset;
-    if(gOr) gOr.hidden = isForgot || isReset;
+    if(gBtn) gBtn.hidden = isForgot || isReset || isPinReset;
+    if(gOr) gOr.hidden = isForgot || isReset || isPinReset;
   }
   if(tabLogin) tabLogin.addEventListener('click', ()=>setAuthView('login'));
   if(tabSignup) tabSignup.addEventListener('click', ()=>setAuthView('signup'));
@@ -10967,7 +11050,7 @@ window.addEventListener('hashchange', ()=>{
      - Domain contoh/sekali pakai (example.com, test.com, mailinator, ...) atau format rusak → ditolak. */
   const EMAIL_POP = ['gmail.com','yahoo.com','yahoo.co.id','ymail.com','hotmail.com','outlook.com','live.com','icloud.com','protonmail.com','protonmail.ch','proton.me','pm.me','googlemail.com'];
   const EMAIL_FIX = { 'gmail.co':'gmail.com','gmail.con':'gmail.com','gmail.cm':'gmail.com','gmail.om':'gmail.com','gmail.cmo':'gmail.com','gmail.comm':'gmail.com','gmail.com.com':'gmail.com','gmail.id':'gmail.com','gmail.co.id':'gmail.com','gmai.com':'gmail.com','gmial.com':'gmail.com','gamil.com':'gmail.com','gmal.com':'gmail.com','gmil.com':'gmail.com','gnail.com':'gmail.com','gmaill.com':'gmail.com','gmeil.com':'gmail.com','gemail.com':'gmail.com','googlemail.co':'googlemail.com','yaho.com':'yahoo.com','yahooo.com':'yahoo.com','yahoo.co':'yahoo.com','yahoo.con':'yahoo.com','yaho.co.id':'yahoo.co.id','yahoo.id':'yahoo.co.id','hotmial.com':'hotmail.com','hotmal.com':'hotmail.com','hotmail.co':'hotmail.com','hotmail.con':'hotmail.com','outlok.com':'outlook.com','outlook.co':'outlook.com','outlook.con':'outlook.com','iclod.com':'icloud.com','icloud.co':'icloud.com','icloud.con':'icloud.com' };
-  const EMAIL_FAKE = /^(example\.(com|net|org)|test\.(com|id)|email\.com|mail\.com\.com|domain\.com|abc\.com|asd\.com|aaa\.com|xxx\.com|mailinator\.com|guerrillamail\.[a-z]+|10minutemail\.[a-z]+|tempmail\.[a-z]+|temp-mail\.[a-z]+|yopmail\.com|sharklasers\.com|trashmail\.[a-z]+|getnada\.com|dispostable\.com|maildrop\.cc)$/;
+  const EMAIL_FAKE = /^(example\.(com|net|org)|test\.(com|id)|email\.com|mail\.com\.com|domain\.com|abc\.com|asd\.com|aaa\.com|xxx\.com|mailinator\.com|guerrillamail\.[a-z]+|10minutemail\.[a-z]+|tempmail\.[a-z]+|temp-mail\.[a-z]+|yopmail\.com|sharklasers\.com|trashmail\.[a-z]+|getnada\.com|dispostable\.com|maildrop\.cc|pin\.mhrdecklab\.com)$/;   // v7.50: + domain akun PIN
   function lev(a, b){
     const m = a.length, n = b.length; if(Math.abs(m - n) > 2) return 9;
     let p = Array.from({length:n+1}, (_, j)=>j);
@@ -11035,9 +11118,78 @@ window.addEventListener('hashchange', ()=>{
     showAuthMsg(t('acctPickOk'), 'ok');
   });
 
+  /* v7.50 — daftar dengan PIN (tanpa email), kode pemulihan, lupa PIN */
+  let signMode = 'email';
+  function setSignMode(m){
+    signMode = m;
+    document.querySelectorAll('[data-signmode]').forEach(b => b.classList.toggle('on', b.dataset.signmode === m));
+    const se = formSignup && formSignup.querySelector('.sg-email'), sp = formSignup && formSignup.querySelector('.sg-pin');
+    if(se) se.hidden = m !== 'email'; if(sp) sp.hidden = m !== 'pin';
+    ['#authSignupEmail', '#authSignupPassword'].forEach(id => { const el = $(id); if(el) el.required = m === 'email'; });
+    ['#authSignupPin', '#authSignupPin2'].forEach(id => { const el = $(id); if(el) el.required = m === 'pin'; });
+    clearAuthMsg();
+  }
+  document.querySelectorAll('[data-signmode]').forEach(b => b.addEventListener('click', () => setSignMode(b.dataset.signmode)));
+  const pinErr = m => t(m === 'INVALID_USERNAME' ? 'acctErrUsernameFormat' : m === 'USERNAME_TAKEN' ? 'acctErrUsernameTaken' : m === 'INVALID_PIN' ? 'acctPinBad' :
+    m === 'WEAK_PIN' ? 'acctPinWeak' : m === 'PIN_NOT_ALLOWED' ? 'acctPinNotAllowed' : 'acctErrGeneric');
+  function showCode(code){
+    if(!codeBox || !code) return;
+    $('#authCodeVal').textContent = code;
+    codeBox.hidden = false;
+    if(authView) authView.hidden = false;
+    const lo = $('#authLoggedOut'), li = $('#authLoggedIn');
+    if(lo) lo.hidden = true; if(li) li.hidden = true;
+  }
+  const codeCopy = $('#authCodeCopy');
+  if(codeCopy) codeCopy.addEventListener('click', async ()=>{
+    try{ await navigator.clipboard.writeText($('#authCodeVal').textContent); codeCopy.textContent = t('acctCodeCopied'); setTimeout(()=>{ codeCopy.textContent = t('acctCodeCopy'); }, 1800); }catch(e){}
+  });
+  const codeDone = $('#authCodeDone');
+  if(codeDone) codeDone.addEventListener('click', async ()=>{
+    codeBox.hidden = true; $('#authCodeVal').textContent = '';
+    clearAuthMsg();
+    const s2 = await window.MHRAuth.getSession();
+    await refreshAccountUI(s2);
+    if(!s2) setAuthView('login');
+  });
+  const prLink = $('#authPinResetLink'), prBack = $('#authPrBack'), formPr = $('#authFormPinReset');
+  if(prLink) prLink.addEventListener('click', ()=>setAuthView('pinreset'));
+  if(prBack) prBack.addEventListener('click', ()=>setAuthView('login'));
+  if(formPr) formPr.addEventListener('submit', async e=>{
+    e.preventDefault(); clearAuthMsg();
+    const pin = $('#authPrPin').value, pin2 = $('#authPrPin2').value;
+    if(pin !== pin2){ showAuthMsg(t('acctPinMismatch'), 'err'); return; }
+    const btn = formPr.querySelector('button[type="submit"]'); if(btn) btn.disabled = true;
+    const { data, error } = await window.MHRAuth.resetPin($('#authPrUser').value, $('#authPrCode').value, pin);
+    if(btn) btn.disabled = false;
+    if(error){ showAuthMsg(error.message === 'RESET_FAILED' ? t('acctPinResetFail') : pinErr(error.message), 'err'); return; }
+    formPr.reset(); setAuthView('login');
+    showCode(data.code); showAuthMsg(t('acctPinResetOk'), 'ok');
+  });
+  const newCodeBtn = $('#authNewCodeBtn');
+  if(newCodeBtn) newCodeBtn.addEventListener('click', async ()=>{
+    if(!confirm(t('acctNewCodeAsk'))) return;
+    newCodeBtn.disabled = true;
+    const { data, error } = await window.MHRAuth.newRecoveryCode();
+    newCodeBtn.disabled = false;
+    if(error){ showAuthMsg(t('acctErrGeneric'), 'err'); return; }
+    clearAuthMsg(); showCode(data.code);
+  });
+
   if(formSignup) formSignup.addEventListener('submit', async e=>{
     e.preventDefault();
     clearAuthMsg();
+    if(signMode === 'pin'){   // v7.50
+      const pin = $('#authSignupPin').value, pin2 = $('#authSignupPin2').value;
+      if(pin !== pin2){ showAuthMsg(t('acctPinMismatch'), 'err'); return; }
+      const b = formSignup.querySelector('button[type="submit"]'); if(b) b.disabled = true;
+      const { data, error } = await window.MHRAuth.signUpPin($('#authSignupUsername').value, pin);
+      if(b) b.disabled = false;
+      if(error){ if(error.detail) console.warn('[PIN sign-up]', error.detail); showAuthMsg(pinErr(error.message), 'err'); return; }
+      formSignup.reset(); setSignMode('email');
+      showCode(data.code); showAuthMsg(t('acctSignupPinOk'), 'ok');
+      return;
+    }
     const uname = $('#authSignupUsername').value.trim();
     const email = $('#authSignupEmail').value.trim();
     const pass = $('#authSignupPassword').value;

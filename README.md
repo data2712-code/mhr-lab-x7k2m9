@@ -604,6 +604,19 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.50 — Daftar & masuk dengan username + PIN (tanpa email) + Battle Sim o2.48 — 23 November 2026 *(`index.html`, `auth.js`, `tower.js`, `sim-host.js`, `sim/`; SQL `mhr_decklab_v750_pin_login.sql`, `mhr_decklab_v750_sim_ranked_shortwin.sql`)*
+Pemilik (23 Nov 2026, seperti RushDee):
+- **Sign Up → "With PIN (no email)"**: username + PIN 6–12 angka (PIN mudah seperti 111111 / 123456 ditolak). `auth.js`
+  `signUpPin()` membuat akun dengan alamat pengganti acak `p<16 hex>@pin.mhrdecklab.com` (tidak pernah dikirimi email; form email
+  menolak domain ini), lalu `mhr_pin_set_recovery()` → **kode pemulihan** `XXXX-XXXX-XXXX` tampil sekali (Copy / I saved it).
+- Masuk tetap di form Login ("Password or PIN") lewat `verify_login`; akun PIN terkunci 15 menit setelah 5 PIN salah.
+- **Lupa PIN**: Forgot password → "Signed up with a PIN? Reset it with your recovery code" → username + kode + PIN baru
+  (`mhr_pin_reset`) → kode pemulihan baru. Panel akun PIN: "🔑 Change PIN" dan "🧾 New recovery code" (tombol email reset disembunyikan).
+- **Control Tower → 🔑 PIN accounts**: super-admin membuat kode pemulihan baru untuk pemain yang kehilangan kodenya (`mhr_admin_pin_reset`).
+- Battle Sim o2.48 (riwayat simulator #128): tier rank di atas & mendatar, leaderboard 20 per halaman, tab Stats & History,
+  menang sah sebelum giliran ke-4 dihitung (SQL shortwin).
+- `auth.js?v=7.50`, `tower.js?v=7.50`, `sim-host.js?v=7.50-sim48`, `SIM_URL ?v=o2.48`, footer v7.50.
+
 ### v7.49 — Battle Sim o2.47 (mesin 0.14.4): laporan #51–#56 + feedback pemain — 23 November 2026 *(`sim-host.js`, `index.html`, `sim/`)*
 - Permainan online macet setelah kartu sendiri ditutup di BASE lawan (Electro, laporan #55/#56) → diperbaiki di `sim-ui.js` (`canSee`).
 - Urutan efek menyebut kartu yang dimaksud + asal efek (feedback Silk), Hostile Focus bisa "tetap" (#54), penyerang yang kembali

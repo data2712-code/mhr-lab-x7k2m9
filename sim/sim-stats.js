@@ -146,7 +146,7 @@
   const cname = no => { const c = S.card(no); return c ? (c.nm_en || c.nm) : no; };
   function fmtDate(t) { try { const d = new Date(t); return d.toLocaleDateString(ID() ? 'id-ID' : 'en-GB', { day: 'numeric', month: 'short' }) + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
 
-  function head() { return '<div class="hd"><button data-mode="home">← Menu</button><h2>' + T('Stats', 'Statistik') + '</h2></div>'; }
+  function head() { return window.MHRSimStatsHead ? window.MHRSimStatsHead('stats') : '<div class="hd"><button data-mode="home">← Menu</button><h2>' + T('Stats', 'Statistik') + '</h2></div>'; }   // o2.48: + sub-tab Stats / History
   async function render(el) {
     el = el || $('panelStats'); if (!el) return;
     const h = host();

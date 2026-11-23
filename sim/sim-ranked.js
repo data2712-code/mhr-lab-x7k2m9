@@ -30,7 +30,7 @@
   // o2.36 (pemilik 19 Nov 2026): hadiah Season 0 = 1 Booster Box BP02 Doomsday untuk poin tertinggi per 31 Des 2026 23:59 WIB,
   // o2.42 (pemilik 20 Nov 2026): hadiah jadi 3 peringkat — #1 Box BP02 Doomsday, #2 Playmat Spider-Man CB01, #3 Card Sleeve Spider-Man CB01.
   // o2.46 (pemilik 23 Nov 2026): + peringkat 4 = 1 Booster Box SP01 Era of Spiders (hadiah jadi 4 peringkat).
-  // syarat min. 20 pertandingan berpoin (= kolom games di sim_ratings; game yang berakhir sebelum giliran ke-4 tidak dihitung).
+  // syarat min. 20 pertandingan berpoin (= kolom games di sim_ratings; game yang berakhir sebelum giliran ke-4 tanpa kemenangan sah tidak dihitung, v7.50).
   // Sama dengan poster Konten Sosmed/Teaser Ranked Season 0 Nov 2026. Hanya tampilan; pemenang tetap dicek manual oleh admin.
   const PRIZE_SEASON = 'S00', PRIZE_MIN = 20, PRIZE_N = 4;
   const DAY_CAP = 200;            // o2.35: poin bersih maks. per hari (WIB) — sama dengan mhr_sim_rank_apply di SQL
@@ -78,15 +78,16 @@
   };
   // o2.46 (pemilik 23 Nov 2026): tangga tier lengkap selalu tampil di tab Ranked, dengan rentang poin dan jumlah pemain per tier.
   const RANGE = { Recruit: [0, 899], Agent: [900, 1199], Hero: [1200, 1499], Avenger: [1500, 1799], Legend: [1800, 2099], Myth: [2100, 2399], Cosmic: [2400, 2699], 'Genius Burden': [2700, null] };
+  // o2.48 (pemilik 23 Nov 2026): tangga tier di PALING ATAS tab Ranked, mendatar (Recruit → Genius Burden, geser di HP).
   function ladderHTML(placed, mineKey) {
     const cnt = {}; (placed || []).forEach(x => { const k = tier(x.points, x.games).key; cnt[k] = (cnt[k] || 0) + 1; });
-    const rng = k => { const r = RANGE[k]; return r[1] == null ? fmt(r[0]) + '+' : r[0] === 0 ? T('below ', 'di bawah ') + fmt(r[1] + 1) : fmt(r[0]) + '–' + fmt(r[1]); };
-    return '<div class="box rkladder"><div class="rkh" style="margin:0 0 8px"><b>' + T('Rank tiers', 'Tingkatan rank') + '</b><span class="small muted">' + T('highest to lowest', 'dari tertinggi ke terendah') + '</span></div>' +
-      '<ol class="rkld">' + ALL.map((k, i) => '<li class="' + (k === mineKey ? 'me' : '') + '" style="--rk:' + COLOR[k] + '"><span class="i">' + icon(k, 'rkti') + '</span>' +
-        '<span class="t"><b>' + (i + 1) + '. ' + k + '</b><span class="small muted">' + (k === 'Genius Burden' ? T('top tier, no divisions', 'tier puncak, tanpa divisi') : T('divisions III · II · I', 'divisi III · II · I')) + '</span></span>' +
-        '<span class="r small" data-noi18n>' + rng(k) + ' ' + T('pts', 'poin') + '</span>' +
-        (placed ? '<span class="c small" title="' + T('Players in this tier', 'Pemain di tier ini') + '">👤 ' + (cnt[k] || 0) + '</span>' : '') + '</li>').reverse().join('') + '</ol>' +
-      '<p class="small muted" style="margin:8px 2px 0">' + T('New players start at 1,000 points and get their rank after 5 placement games.', 'Pemain baru mulai dari 1.000 poin dan mendapat rank setelah 5 pertandingan placement.') + (mineKey && mineKey !== 'Unranked' ? T(' Your tier is highlighted.', ' Tier Anda ditandai.') : '') + '</p></div>';
+    const rng = k => { const r = RANGE[k]; return r[1] == null ? fmt(r[0]) + '+' : r[0] === 0 ? '< ' + fmt(r[1] + 1) : fmt(r[0]) + '–' + fmt(r[1]); };
+    return '<div class="box rkladder"><div class="rkh" style="margin:0 0 8px"><b>' + T('Rank tiers', 'Tingkatan rank') + '</b><span class="small muted">' + T('lowest → highest', 'terendah → tertinggi') + '</span></div>' +
+      '<ol class="rkld">' + ALL.map((k, i) => '<li class="' + (k === mineKey ? 'me' : '') + '" style="--rk:' + COLOR[k] + '"' + (k === mineKey ? ' aria-current="true"' : '') + '>' + icon(k, 'rkti') +
+        '<b>' + k + '</b><span class="r" data-noi18n>' + rng(k) + '</span>' +
+        '<span class="d">' + (k === 'Genius Burden' ? T('top tier', 'tier puncak') : 'III · II · I') + '</span>' +
+        (placed ? '<span class="c" title="' + T('Players in this tier', 'Pemain di tier ini') + '">👤 ' + (cnt[k] || 0) + '</span>' : '') + '</li>').join('') + '</ol>' +
+      '<p class="small muted" style="margin:8px 2px 0">' + T('Points per tier. Each tier has divisions III, II and I (100 points each). New players start at 1,000 points and get their rank after 5 placement games.', 'Poin per tier. Tiap tier punya divisi III, II, dan I (100 poin per divisi). Pemain baru mulai dari 1.000 poin dan mendapat rank setelah 5 pertandingan placement.') + '</p></div>';
   }
   const badge = (t, small) => '<span class="rkb' + (small ? ' sm' : '') + '" style="--rk:' + COLOR[t.key] + '">' + icon(t.key) + esc(t.name) + '</span>';
   const fmt = n => Number(n || 0).toLocaleString(ID() ? 'id-ID' : 'en-US');
@@ -110,32 +111,39 @@
 
   /* ---------- panel Ranked (menu → 🏆 Ranked) ---------- */
   let curSeason = null;
-  async function render(el) {
+  const PAGE = 20; let pg = { season: null, n: 0 }, last = null;   // o2.48: halaman leaderboard
+  async function render(el, fromPage) {
     if (!el) return;
     const head = '<div class="hd"><button data-mode="home">← Menu</button><h2>Ranked</h2></div>';   // tombol disembunyikan CSS sejak o2.16 (tab selalu tampil)
     if (!live()) {
-      el.innerHTML = head + '<div class="box rkme rksoon"><span class="rktag">' + T('COMING SOON', 'SEGERA') + '</span><h3>' + T('Ranked starts on ', 'Ranked dimulai ') + START_TXT + '</h3>' +
+      el.innerHTML = head + ladderHTML(null, null) + '<div class="box rkme rksoon"><span class="rktag">' + T('COMING SOON', 'SEGERA') + '</span><h3>' + T('Ranked starts on ', 'Ranked dimulai ') + START_TXT + '</h3>' +
         '<p class="small">' + T('Right after the beta, every Find a match game earns or loses points. Climb from Recruit to Genius Burden and race for the top of the leaderboard. Games played during the beta are not counted.',
           'Begitu beta selesai, setiap pertandingan Cari lawan menambah atau mengurangi poin. Naik dari Recruit sampai Genius Burden dan bersainglah di puncak leaderboard. Pertandingan selama beta tidak dihitung.') + '</p>' +
         '<div class="rktiers">' + ALL.map(k => '<span style="--rk:' + COLOR[k] + '">' + icon(k, 'rkti') + '<i>' + k + '</i></span>').join('') + '</div></div>' +
-        (seasonNow() === PRIZE_SEASON ? prizeHTML(null, null) : '') + ladderHTML(null, null) +
+        (seasonNow() === PRIZE_SEASON ? prizeHTML(null, null) : '') +
         helpHTML();
       tr(); return;
     }
-    el.innerHTML = head + '<div class="box small muted">' + T('Loading…', 'Memuat…') + '</div>'; tr();
-    const [s, list] = await Promise.all([me(), seasons()]);
-    if (!curSeason) curSeason = seasonNow();
-    const r = await board(curSeason);
+    let s, list, r, todayC;
+    if (fromPage && last && last.season === curSeason) ({ s, list, r, todayC } = last);   // o2.48: ganti halaman tanpa memuat ulang
+    else {
+      el.innerHTML = head + '<div class="box small muted">' + T('Loading…', 'Memuat…') + '</div>'; tr();
+      [s, list] = await Promise.all([me(), seasons()]);
+      if (!curSeason) curSeason = seasonNow();
+      r = await board(curSeason);
+    }
     if (r.error) {
       el.innerHTML = head + '<div class="box small ' + (missing(r.error) ? 'muted">' + T('Ranked is being set up. Please check again soon.', 'Ranked sedang disiapkan. Coba lagi sebentar lagi.') : 'err">' + T('The leaderboard could not be loaded: ', 'Leaderboard tidak bisa dimuat: ') + esc(r.error.message || r.error)) + '</div>';
       tr(); return;
     }
     const rows = r.data, placed = rows.filter(x => x.games >= PLACEMENT), placing = rows.filter(x => x.games < PLACEMENT);
     const mine = s && rows.find(x => x.user_id === s.userId);
-    const today = mine && curSeason === seasonNow() ? await todayNet(client(), s.userId) : null;
+    const today = todayC !== undefined ? todayC : mine && curSeason === seasonNow() ? await todayNet(client(), s.userId) : null;
+    last = { season: curSeason, s, list, r, todayC: today };
     const pos = mine && mine.games >= PLACEMENT ? placed.indexOf(mine) + 1 : 0;
     const isNow = curSeason === seasonNow();
     let h = head;
+    h += ladderHTML(placed, mine ? tier(mine.points, mine.games).key : null);   // o2.48: paling atas
     h += '<div class="rkseason"><label>Season</label><select id="rkSeason" data-noi18n>' + list.map(x => '<option value="' + esc(x) + '"' + (x === curSeason ? ' selected' : '') + '>' + esc(seasonLabel(x)) + (x === seasonNow() ? T(' (current)', ' (sekarang)') : '') + '</option>').join('') + '</select></div>';
     // kartu saya
     if (s) {
@@ -162,24 +170,45 @@
     h += '<div class="rkh"><b>🏆 Leaderboard · ' + esc(seasonLabel(curSeason)) + '</b><span class="small muted">' + T(placed.length + ' ranked · ' + placing.length + ' in placement', placed.length + ' punya rank · ' + placing.length + ' masih placement') + (prize ? T(' · ' + elig.length + ' qualify for the prize', ' · ' + elig.length + ' memenuhi syarat hadiah') : '') + '</span></div>';
     // o2.46 (pemilik 23 Nov 2026): SEMUA pemain tampil di leaderboard — yang masih placement juga punya baris sendiri (di bawah, tanpa nomor).
     if (!placed.length && !placing.length) h += '<div class="box small muted">' + (isNow ? T('No one has finished placement yet this season. Be the first: play 5 games in Find a match.', 'Belum ada yang menyelesaikan placement di season ini. Jadilah yang pertama: mainkan 5 pertandingan di Cari lawan.') : T('No ranked players in this season.', 'Tidak ada pemain ber-rank di season ini.')) + '</div>';
-    else h += '<div class="rklist">' + placed.map((x, i) => {
+    else {
+    const rowsH = placed.map((x, i) => {
       const t = tier(x.points, x.games), you = s && x.user_id === s.userId;
       return '<div class="rkrow' + (you ? ' me' : '') + (i < 3 ? ' top' : '') + (prize && elig.indexOf(x) > -1 && elig.indexOf(x) < PRIZE_N ? ' prz' : '') + '"><span class="n">' + (i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1) + '</span>' +
         '<span class="u"><b data-noi18n>' + esc(x.username || 'Player') + '</b>' + badge(t, true) +
         (prize ? (x.games >= PRIZE_MIN ? '<span class="rkel ok" title="' + T('Qualifies for the Season 0 prize', 'Memenuhi syarat hadiah Season 0') + '">' + (elig.indexOf(x) > -1 && elig.indexOf(x) < PRIZE_N ? '🎁 ' : '') + '✓ ' + PRIZE_MIN + '+</span>'
           : '<span class="rkel" title="' + T('Rated games toward the prize requirement', 'Pertandingan berpoin menuju syarat hadiah') + '" data-noi18n>' + x.games + '/' + PRIZE_MIN + '</span>') : '') + '</span>' +
         '<span class="wl small" data-noi18n>' + x.wins + '–' + x.losses + (x.draws ? '–' + x.draws : '') + '</span><span class="p" data-noi18n>' + fmt(x.points) + '</span></div>';
-    }).join('') + placing.map(x => {
+    }).concat(placing.map(x => {
       const you = s && x.user_id === s.userId;
       return '<div class="rkrow plc' + (you ? ' me' : '') + '"><span class="n">–</span>' +
         '<span class="u"><b data-noi18n>' + esc(x.username || 'Player') + '</b><span class="rkb sm" style="--rk:' + COLOR.Unranked + '">' + icon('Unranked') + 'Placement <span data-noi18n>' + x.games + '/' + PLACEMENT + '</span></span></span>' +
         '<span class="wl small" data-noi18n>' + x.wins + '–' + x.losses + (x.draws ? '–' + x.draws : '') + '</span><span class="p muted" data-noi18n>' + fmt(x.points) + '</span></div>';
-    }).join('') + '</div>';
+    }));
+    // o2.48 (pemilik 23 Nov 2026): 20 pemain per halaman; geser kiri/kanan (HP) atau tombol ‹ ›. Halaman awal = halaman Anda.
+    const pages = Math.max(1, Math.ceil(rowsH.length / PAGE));
+    if (pg.season !== curSeason) { const mi = s ? placed.concat(placing).findIndex(x => x.user_id === s.userId) : -1; pg = { season: curSeason, n: mi > -1 ? Math.floor(mi / PAGE) : 0 }; }
+    pg.n = Math.max(0, Math.min(pages - 1, pg.n));
+    h += '<div class="rklist" id="rkList">' + rowsH.slice(pg.n * PAGE, pg.n * PAGE + PAGE).join('') + '</div>';
+    if (pages > 1) h += '<div class="rkpg"><button class="sm" data-rkpg="-1"' + (pg.n ? '' : ' disabled') + ' aria-label="Previous page">‹</button>' +
+      '<span class="small" data-noi18n>' + (pg.n * PAGE + 1) + '–' + Math.min(rowsH.length, pg.n * PAGE + PAGE) + ' / ' + rowsH.length + '</span>' +
+      Array.from({ length: pages }, (_, k) => '<button class="sm dot' + (k === pg.n ? ' on' : '') + '" data-rkpg-to="' + k + '" aria-label="Page ' + (k + 1) + '">' + (k + 1) + '</button>').join('') +
+      '<button class="sm" data-rkpg="1"' + (pg.n < pages - 1 ? '' : ' disabled') + ' aria-label="Next page">›</button></div>';
+    }
     if (placing.length) h += '<p class="small muted" style="margin:8px 2px 0">' + T('Players still in placement (fewer than 5 games) are listed at the bottom without a position.', 'Pemain yang masih placement (kurang dari 5 pertandingan) ada di bagian bawah tanpa nomor urut.') + '</p>';
-    h += ladderHTML(placed, mine ? tier(mine.points, mine.games).key : null);
     h += helpHTML();
     el.innerHTML = h;
     const sel = $('rkSeason'); if (sel) sel.onchange = () => { curSeason = sel.value; render(el); };
+    // o2.48: halaman leaderboard — tombol & geser (tanpa memuat ulang data)
+    el.querySelectorAll('[data-rkpg],[data-rkpg-to]').forEach(b => b.onclick = () => { pg.n = b.dataset.rkpgTo != null ? +b.dataset.rkpgTo : pg.n + (+b.dataset.rkpg); render(el, true); });
+    const lst = $('rkList');
+    if (lst) {
+      let x0 = null, y0 = null;
+      lst.addEventListener('touchstart', e => { const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; }, { passive: true });
+      lst.addEventListener('touchend', e => {
+        if (x0 == null) return; const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) { const b = el.querySelector('[data-rkpg="' + (dx < 0 ? 1 : -1) + '"]'); if (b && !b.disabled) b.click(); }
+      }, { passive: true });
+    }
     tr();
   }
   /* ---------- hadiah Season 0 (o2.36) ---------- */
@@ -243,8 +272,8 @@
       '</table><p class="small muted" style="margin:0 0 6px">' + T('After placement. A win always gives at least +1.', 'Setelah placement. Menang selalu memberi minimal +1.') + '</p>' +
       h4('Fair play', 'Main adil') +
       '<ul class="small">' +
-      li('A game that ends before <b>turn 4</b> (an early concede or leave) gives no points and does not count as a game.',
-         'Pertandingan yang berakhir sebelum <b>giliran ke-4</b> (menyerah atau keluar terlalu cepat) tidak memberi poin dan tidak dihitung sebagai pertandingan.') +
+      li('A game that ends before <b>turn 4</b> by a concede, a leave, time or timeouts gives no points and does not count as a game. A real win before turn 4 (9 Rush Points or deck out, with no timeouts by the loser) counts as normal.',
+         'Pertandingan yang berakhir sebelum <b>giliran ke-4</b> karena menyerah, keluar, waktu habis, atau timeout tidak memberi poin dan tidak dihitung. Kemenangan sah sebelum giliran ke-4 (9 Rush Point atau deck habis, tanpa timeout dari yang kalah) dihitung normal.') +
       li('The net points you can win from the <b>same opponent</b> are limited to <b>+75 per day</b> (WIB) and <b>+200 per season</b>. After that, wins against that player give fewer or no points, and their losses cost them fewer or none. Playing each other often with mixed results never reaches the limit.',
          'Poin bersih yang bisa Anda dapat dari <b>lawan yang sama</b> dibatasi <b>+75 per hari</b> (WIB) dan <b>+200 per season</b>. Setelah itu, menang melawan pemain itu memberi poin lebih sedikit atau 0, dan kekalahannya juga mengurangi lebih sedikit atau 0. Sering bertemu dengan hasil yang saling bergantian tidak akan menyentuh batas ini.') +
       li('<b>Daily limit:</b> you can gain at most <b>+' + DAY_CAP + ' net points per day</b> (00:00–23:59 WIB), so players with less time to play are not left behind. After that, your games that day still count, but a win gives at most +5 and a loss costs at most −5. Losses earlier in the day free up room again. Your opponent\'s points are counted normally.',
@@ -302,7 +331,7 @@
   /* v7.42 (riwayat #105) main adil: alasan di kolom sim_rating_log.note. 'short' = ±0 dan tidak dihitung; batas pasangan dan
      'zero' = poin dikurangi (bisa sampai 0) tetapi pertandingan tetap dihitung. */
   const NOTE = {
-    short: ['Not counted: the game ended before turn 4.', 'Tidak dihitung: pertandingan berakhir sebelum giliran ke-4.'],
+    short: ['Not counted: the game ended before turn 4 without a real win (concede, leave, time or timeouts).', 'Tidak dihitung: pertandingan berakhir sebelum giliran ke-4 tanpa kemenangan sah (menyerah, keluar, waktu, atau timeout).'],
     pair_day: ['Limited: you reached today\'s +75 limit against this opponent.', 'Dibatasi: batas +75 poin dari lawan ini hari ini sudah tercapai.'],
     pair_season: ['Limited: you reached this season\'s +200 limit against this opponent.', 'Dibatasi: batas +200 poin dari lawan ini di season ini sudah tercapai.'],
     zero: ['Limited: your opponent had no more points to lose.', 'Dibatasi: poin lawan sudah habis.'],
