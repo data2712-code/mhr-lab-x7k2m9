@@ -604,6 +604,18 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.47 — Battle Sim o2.46: Ranked (leaderboard lengkap, tangga tier, hadiah peringkat 4) + alias Battle Sim — 23 November 2026 *(`sim-host.js`, `index.html`, `sim/`; SQL `mhr_decklab_v747_sim_alias.sql`; server Battle Sim)*
+Permintaan pemilik:
+- **Leaderboard menampilkan semua pemain**: pemain ber-rank seperti sebelumnya, ditambah pemain yang masih placement sebagai baris
+  sendiri di bawah (tanpa nomor urut, lencana "Placement x/5"). Dulu hanya ditulis sebagai satu kalimat kecil.
+- **Hadiah Season 0 jadi 4 peringkat**: + peringkat 4 = 1 Booster Box SP01 Era of Spiders (`PRIZES`, `PRIZE_N = 4`, teks "4 pemain teratas", syarat "peringkat 1–4").
+- **Kotak "Tingkatan rank"**: 8 tier Recruit → Genius Burden dengan ikon, rentang poin, jumlah pemain per tier, dan tier pemain sendiri ditandai.
+- **Alias Battle Sim**: tabel `sim_aliases` (RLS: hanya pemilik akun yang bisa membaca barisnya). Akun super-admin tampil sebagai
+  "Uatu the Watcher" di Battle Sim (Playing as, lawan, leaderboard). Login, deck, News, dan Control Tower tetap memakai username.
+  `sim-host.js` `session()` memakai alias bila ada; server (`authUser` di `server-tail.min.js`) membaca alias yang sama untuk nama
+  di pertandingan online, sedangkan catatan "set by" maintenance tetap memakai username asli. Perlu SQL v7.47 + deploy server.
+- `sim-host.js?v=7.47-sim46`, `SIM_URL ?v=o2.46`, footer v7.47.
+
 ### v7.46 — 🗼 Control Tower → 🔧 Battle Sim server (maintenance) + Battle Sim o2.45 (laporan #40, #41, #43, #44/#45, #49; jam + cadangan waktu) — 23 November 2026 *(`tower.js`, `index.html`, `sim-host.js`, `sim/`)*
 Permintaan pemilik: kontrol maintenance server Battle Sim dipindah ke Control Tower; perbaikan laporan pemain.
 - **Tab baru 🔧 Battle Sim server** di Control Tower (super-admin): status maintenance (terbuka / dijadwalkan / aktif), jumlah

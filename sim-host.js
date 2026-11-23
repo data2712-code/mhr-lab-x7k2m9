@@ -18,7 +18,7 @@
    =================================================================== */
 (function () {
   'use strict';
-  const SIM_URL = 'sim/index.html?v=o2.45';
+  const SIM_URL = 'sim/index.html?v=o2.46';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const q = s => document.querySelector(s);
   const admin = () => (typeof isAccountAdmin !== 'undefined' && isAccountAdmin);
@@ -30,6 +30,17 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hideTag); else hideTag();
   }
 
+  /* v7.47 — alias Battle Sim (tabel sim_aliases, hanya bisa dibaca pemilik akunnya sendiri; diisi lewat SQL v7.47).
+     Bila akun punya alias, Battle Sim menampilkan alias itu (Playing as, lawan, leaderboard ranked) — login & bagian situs lain tetap memakai username.
+     Server Battle Sim membaca alias yang sama (authUser) sehingga nama di pertandingan online ikut alias. */
+  const aliasCache = {};
+  async function simAlias(uid) {
+    if (Object.prototype.hasOwnProperty.call(aliasCache, uid)) return aliasCache[uid];
+    let a = null;
+    try { const c = window.MHRAuth.client; const r = c ? await c.from('sim_aliases').select('alias').eq('user_id', uid).maybeSingle() : null; if (r && !r.error && r.data && r.data.alias) a = String(r.data.alias); } catch (e) { /* tabel belum ada = tanpa alias */ }
+    aliasCache[uid] = a; return a;
+  }
+
   /* ---------- jembatan untuk simulator di dalam iframe ---------- */
   window.MHRSimHost = {
     version: 1,
@@ -37,7 +48,7 @@
       if (!window.MHRAuth || !window.MHRAuth.ready) return null;
       const s = await window.MHRAuth.getSession();
       if (!s || !s.user) return null;
-      return { token: s.access_token, userId: s.user.id, username: await window.MHRAuth.getUsername(s), admin: admin() };
+      return { token: s.access_token, userId: s.user.id, username: (await simAlias(s.user.id)) || await window.MHRAuth.getUsername(s), admin: admin() };
     },
     async myDecks() {
       if (!window.MHRDecks || !window.MHRDecks.ready) return [];

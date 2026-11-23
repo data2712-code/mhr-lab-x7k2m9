@@ -16,6 +16,19 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-23', t: 'improve', v: 'o2.46',
+      en: { h: 'Ranked: full leaderboard, all rank tiers and a 4th prize', b: [
+        'The leaderboard now lists every ranked player, and players still in placement appear at the bottom.',
+        'New "Rank tiers" box: all tiers from Recruit to Genius Burden with their point ranges and how many players are in each.',
+        'Season 0 prizes now go to the top 4: rank 4 wins 1 Booster Box SP01 Era of Spiders.'
+      ] },
+      id: { h: 'Ranked: leaderboard lengkap, semua tier rank, dan hadiah ke-4', b: [
+        'Leaderboard sekarang menampilkan semua pemain ber-rank, dan pemain yang masih placement tampil di bagian bawah.',
+        'Kotak baru "Tingkatan rank": semua tier dari Recruit sampai Genius Burden lengkap dengan rentang poin dan jumlah pemain di tiap tier.',
+        'Hadiah Season 0 sekarang untuk 4 besar: peringkat 4 mendapat 1 Booster Box SP01 Era of Spiders.'
+      ] }
+    },
+    {
       d: '2026-11-23', t: 'improve', v: 'o2.45',
       en: { h: 'More time on the Standard clock + a time bank', b: [
         'Standard clock (used by Find a match): 2:30 per turn and 0:45 per response (was 2:00 / 0:30).',

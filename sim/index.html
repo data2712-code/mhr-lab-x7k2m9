@@ -269,6 +269,14 @@ h1,h2{font-family:var(--disp);letter-spacing:.03em}
 .rktag{font-size:10px;font-weight:900;letter-spacing:.12em;color:#1A1206;background:var(--gold);border-radius:5px;padding:2px 6px}
 .rksoon h3{margin:10px 0 6px;font-size:20px}.rktiers{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.rktiers .rkti{width:34px;height:34px}.rktiers span{flex:1;min-width:42px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:18px;border:1px solid var(--rk);border-radius:10px;padding:6px 4px;background:color-mix(in srgb,var(--rk) 10%,transparent)}.rktiers i{font-style:normal;font-size:9.5px;font-weight:800;color:var(--rk);text-transform:uppercase}
 .rkres{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin:6px 0 10px;font-size:14px}.rkres.up b{color:#5fd38a}.rkres.down b{color:#ff8a78}
+.rkrow.plc{opacity:.78}.rkrow.prz:not(.top) .n{color:#ffd77a}
+/* o2.46: tangga tier lengkap */
+.rkladder{margin-top:12px}.rkld{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.rkld li{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:4px 10px;align-items:center;padding:6px 10px;border-radius:10px;border:1px solid color-mix(in srgb,var(--rk) 45%,transparent);background:color-mix(in srgb,var(--rk) 8%,transparent)}
+.rkld li.me{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.rkld .rkti{width:34px;height:34px;display:block}.rkld .t{display:flex;flex-direction:column;min-width:0}.rkld .t b{color:var(--rk)}
+.rkld .r{font-weight:800;text-align:right;white-space:nowrap}.rkld .c{color:var(--muted);min-width:38px;text-align:right}
+@media (max-width:560px){.rkld li{grid-template-columns:34px minmax(0,1fr) auto}.rkld .c{display:none}.rkld .rkti{width:28px;height:28px}}
 @media (max-width:560px){.rkrow{grid-template-columns:28px minmax(0,1fr) 56px;padding:8px 10px}.rkrow .wl{display:none}.rkme-p b{font-size:28px}}
 .panelx .hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}.panelx .hd h2{flex:1;margin:0;font-size:24px}
 .form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}
@@ -1243,25 +1251,25 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.44-sd56id" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.40-pb02only" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.45"></script>
-<script src="sim-cards.js?v=o2.45"></script>
-<script src="sim-cards-bp01.js?v=o2.45"></script>
-<script src="sim-cards-s4.js?v=o2.45"></script>
-<script src="sim-cards-sp01.js?v=o2.45"></script>
-<script src="sim-cards-t6.js?v=o2.45"></script>
-<script src="sim-bot.js?v=o2.45"></script>
-<script src="sim-sound.js?v=o2.45"></script>
-<script src="sim-shadow.js?v=o2.45"></script>
-<script src="sim-ui.js?v=o2.45"></script>
-<script src="sim-sandbox.js?v=o2.45"></script>
-<script src="sim-report.js?v=o2.45"></script>
-<script src="sim-modes.js?v=o2.45"></script>
-<script src="sim-i18n.js?v=o2.45"></script>
-<script src="sim-online.js?v=o2.45"></script>
-<script src="sim-ranked.js?v=o2.45"></script>
-<script src="sim-stats.js?v=o2.45"></script>
-<script src="sim-updates.js?v=o2.45"></script>
-<script src="sim-rules.js?v=o2.45"></script>
-<script src="sim-learn.js?v=o2.45"></script>
+<script src="sim.js?v=o2.46"></script>
+<script src="sim-cards.js?v=o2.46"></script>
+<script src="sim-cards-bp01.js?v=o2.46"></script>
+<script src="sim-cards-s4.js?v=o2.46"></script>
+<script src="sim-cards-sp01.js?v=o2.46"></script>
+<script src="sim-cards-t6.js?v=o2.46"></script>
+<script src="sim-bot.js?v=o2.46"></script>
+<script src="sim-sound.js?v=o2.46"></script>
+<script src="sim-shadow.js?v=o2.46"></script>
+<script src="sim-ui.js?v=o2.46"></script>
+<script src="sim-sandbox.js?v=o2.46"></script>
+<script src="sim-report.js?v=o2.46"></script>
+<script src="sim-modes.js?v=o2.46"></script>
+<script src="sim-i18n.js?v=o2.46"></script>
+<script src="sim-online.js?v=o2.46"></script>
+<script src="sim-ranked.js?v=o2.46"></script>
+<script src="sim-stats.js?v=o2.46"></script>
+<script src="sim-updates.js?v=o2.46"></script>
+<script src="sim-rules.js?v=o2.46"></script>
+<script src="sim-learn.js?v=o2.46"></script>
 </body>
 </html>
