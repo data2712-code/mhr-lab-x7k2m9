@@ -20,6 +20,13 @@
    lewat SQL Editor Supabase langsung oleh pemilik, tidak pernah lewat situs
    ini sendiri (mencegah siapa pun menaikkan hak aksesnya sendiri).
 
+   v7.48 — login Google DIPASANG LAGI (pemilik 23 Nov 2026: email Supabase soal bounce; login Google tidak mengirim email
+   sama sekali dan emailnya pasti asli). Username + kata sandi tetap ada. signInWithGoogle() → Google → kembali ke situs
+   (implicit flow, token di #hash dibaca SDK seperti link reset kata sandi). Akun baru dari Google mendapat username sementara
+   player_xxxxxxxx (trigger handle_new_user) lalu diminta memilih username (setUsername). Akun lama dengan email Gmail yang sama
+   otomatis tersambung oleh Supabase (identitas dengan email yang sama). Perlu: provider Google aktif di Supabase
+   (Authentication → Sign In / Providers → Google) dengan Client ID & Secret dari Google Cloud.
+
    v6.32 — kolom `display_name` di tabel profiles diganti jadi `username`
    (unik, case-insensitive, 3-20 karakter huruf/angka/underscore — lihat
    USERNAME_RE) supaya orang bisa dikenali dengan nama pilihan sendiri,
@@ -71,6 +78,11 @@
       resetPassword: async ()=>({error:{message:'Supabase SDK failed to load'}}),
       updatePassword: async ()=>({error:{message:'Supabase SDK failed to load'}}),
       changePassword: async ()=>({error:{message:'UPDATE_FAILED'}}),
+      signInWithGoogle: async ()=>({error:{message:'Supabase SDK failed to load'}}),
+      setUsername: async ()=>({error:{message:'UPDATE_FAILED'}}),
+      providers: ()=>[],
+      isTempUsername: ()=>false,
+      oauthBack: ()=>null,
       isAdmin: async ()=>false,
     };
     return;
@@ -256,6 +268,51 @@
         return { data, error };
       }catch(e){
         return { data:null, error:{ message:'UPDATE_FAILED' } };
+      }
+    },
+
+    /* v7.48 — login Google. Halaman yang sedang dibuka (#hash) disimpan dulu supaya sesudah kembali dari Google
+       pengguna diantar lagi ke halaman itu (oauthBack). prompt=select_account: selalu bisa memilih akun Google. */
+    async signInWithGoogle(){
+      try{ sessionStorage.setItem('mhr.oauthBack', window.location.hash || ''); }catch(e){}
+      try{
+        const { error } = await client.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { prompt: 'select_account' } },
+        });
+        return { error };
+      }catch(e){
+        return { error:{ message:'OAUTH_FAILED' } };
+      }
+    },
+    oauthBack(){
+      try{ const h = sessionStorage.getItem('mhr.oauthBack'); sessionStorage.removeItem('mhr.oauthBack'); return h; }catch(e){ return null; }
+    },
+    /* cara login yang terhubung ke akun ini: ['email'], ['google'], atau keduanya */
+    providers(session){
+      const m = session && session.user && session.user.app_metadata;
+      if(!m) return [];
+      return Array.isArray(m.providers) ? m.providers : (m.provider ? [m.provider] : []);
+    },
+    /* username sementara dari trigger handle_new_user (akun Google yang belum memilih username) */
+    isTempUsername(name){ return /^player_[0-9a-f]{8}$/.test(String(name || '')); },
+    /* v7.48 — ganti username akun sendiri (RLS profiles: "users can update own profile"; constraint username_format dan
+       unique index lower(username) tetap jadi jaring pengaman). Kode error: INVALID_USERNAME, USERNAME_TAKEN, NOT_LOGGED_IN, UPDATE_FAILED. */
+    async setUsername(username){
+      const uname = (username || '').trim();
+      if(!USERNAME_RE.test(uname) || /^player_[0-9a-f]{8}$/i.test(uname)) return { error:{ message:'INVALID_USERNAME' } };
+      try{
+        const { data:{ session } } = await client.auth.getSession();
+        const uid = session && session.user && session.user.id;
+        if(!uid) return { error:{ message:'NOT_LOGGED_IN' } };
+        const { data: existing } = await client.from('profiles').select('id').ilike('username', uname.replace(/_/g, '\\_')).maybeSingle();   // _ = wildcard di LIKE
+        if(existing && existing.id !== uid) return { error:{ message:'USERNAME_TAKEN' } };
+        const { data, error } = await client.from('profiles').update({ username: uname }).eq('id', uid).select('username').maybeSingle();
+        if(error) return { error:{ message: error.code === '23505' ? 'USERNAME_TAKEN' : 'UPDATE_FAILED' } };
+        if(!data) return { error:{ message:'UPDATE_FAILED' } };
+        return { data };
+      }catch(e){
+        return { error:{ message:'UPDATE_FAILED' } };
       }
     },
 

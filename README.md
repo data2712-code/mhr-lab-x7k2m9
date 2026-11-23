@@ -604,6 +604,26 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.48 — Login with Google + pemeriksaan email di form Daftar & Lupa kata sandi — 23 November 2026 *(`index.html`, `auth.js`)*
+Email Supabase 23 Nov 2026: tingkat bounce email project tinggi, pengiriman email bawaan bisa dibatasi. Cek database: 664 akun,
+konfirmasi email MATI (tidak ada email konfirmasi terkirim), 10 email reset kata sandi dalam 7 hari — jadi bounce datang dari
+email reset ke alamat yang salah/palsu yang lolos saat daftar.
+- `emailCheck()` / `emailGate()`: format rusak dan domain contoh/sekali pakai (example.com, test.com, mailinator, yopmail, …)
+  ditolak; salah ketik domain populer (gmial.com, gmail.con, gmail.co.id, yaho.com, hotmial.com, outlok.com, akhiran .con/.cm …,
+  atau jarak edit 1–2 dari gmail/yahoo/hotmail/outlook/icloud/proton) → "Did you mean …? Use it". Menekan tombol lagi dengan alamat
+  yang sama = tetap dipakai. Dipasang di form Sign Up dan Forgot password.
+- Catatan baru di bawah kolom email Sign Up: email dipakai untuk reset kata sandi.
+- `acctSignupOk` diperbaiki: tidak lagi menyuruh cek email verifikasi (konfirmasi email memang mati).
+- **Login with Google** (pemilik 23 Nov 2026; dulu dicabut di v6.31). Tombol "Continue with Google" di atas tab Login/Sign Up
+  (disembunyikan di form lupa/reset kata sandi). `auth.js`: `signInWithGoogle()` (implicit flow, `prompt=select_account`,
+  halaman asal disimpan di sessionStorage `mhr.oauthBack` lalu dibuka lagi sesudah kembali), `providers()`, `isTempUsername()`,
+  `setUsername()`. Akun baru dari Google mendapat username sementara `player_xxxxxxxx` (trigger `handle_new_user`) → modal akun
+  terbuka otomatis dengan form "Choose a username" (RLS profiles "users can update own profile", constraint `username_format`,
+  unique index `lower(username)`). Akun yang hanya punya login Google tidak melihat tombol ganti kata sandi. Akun lama dengan
+  Gmail yang sama otomatis tersambung oleh Supabase. Tanpa SQL. **Perlu provider Google aktif di Supabase** sebelum push
+  (kalau belum, tombol menampilkan "Google login is not available yet").
+- `auth.js?v=7.48`, footer v7.48.
+
 ### v7.47 — Battle Sim o2.46: Ranked (leaderboard lengkap, tangga tier, hadiah peringkat 4) + alias Battle Sim — 23 November 2026 *(`sim-host.js`, `index.html`, `sim/`; SQL `mhr_decklab_v747_sim_alias.sql`; server Battle Sim)*
 Permintaan pemilik:
 - **Leaderboard menampilkan semua pemain**: pemain ber-rank seperti sebelumnya, ditambah pemain yang masih placement sebagai baris

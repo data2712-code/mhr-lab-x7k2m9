@@ -1800,7 +1800,7 @@
     color:var(--muted);border-radius:8px;padding:8px 6px;cursor:pointer;
     font-size:12.5px;font-weight:700}
   .auth-tab[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
-  #authFormLogin,#authFormSignup,#authFormForgot,#authFormReset{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+  #authFormLogin,#authFormSignup,#authFormForgot,#authFormReset,#authFormUsername{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
   /* v6.33 fix — tanpa baris ini, atribut [hidden] pada form login/signup
      KALAH oleh aturan display:flex di atas (yang berlaku ke keduanya tanpa
      syarat), jadi form Daftar tetap kelihatan walau atribut hidden-nya
@@ -1811,10 +1811,10 @@
      baru (forgot/reset) ke aturan yang sama supaya tidak mengulang bug yang
      sama. */
   #authFormLogin[hidden],#authFormSignup[hidden],#authFormForgot[hidden],#authFormReset[hidden],#authFormChange[hidden]{display:none}
-  #authFormLogin label,#authFormSignup label,#authFormForgot label,#authFormReset label,#authFormChange label{font-size:11.5px;color:var(--muted);margin-top:4px}
-  #authFormLogin input,#authFormSignup input,#authFormForgot input,#authFormReset input,#authFormChange input{background:var(--ink);border:1px solid var(--line);
+  #authFormLogin label,#authFormSignup label,#authFormUsername label,#authFormForgot label,#authFormReset label,#authFormChange label{font-size:11.5px;color:var(--muted);margin-top:4px}
+  #authFormLogin input,#authFormSignup input,#authFormUsername input,#authFormForgot input,#authFormReset input,#authFormChange input{background:var(--ink);border:1px solid var(--line);
     color:var(--paper);border-radius:8px;padding:9px 10px;font-size:13px;font-family:var(--body)}
-  #authFormLogin input:focus,#authFormSignup input:focus,#authFormForgot input:focus,#authFormReset input:focus,#authFormChange input:focus{border-color:var(--accent);outline:none}
+  #authFormLogin input:focus,#authFormSignup input:focus,#authFormUsername input:focus,#authFormForgot input:focus,#authFormReset input:focus,#authFormChange input:focus{border-color:var(--accent);outline:none}
   /* v7.19 — ganti kata sandi (di panel "sudah login") */
   #authFormChange{display:flex;flex-direction:column;gap:8px;text-align:left;margin-top:4px}
   #authFormChange input[hidden]{display:none}
@@ -1835,6 +1835,21 @@
   .auth-msg.err{background:rgba(228,68,46,.15);color:#FF8A75;border:1px solid rgba(228,68,46,.4)}
   .auth-msg.ok{background:rgba(51,164,92,.15);color:#7CE0A2;border:1px solid rgba(51,164,92,.4)}
   .auth-note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:6px}
+  /* v7.48 — pemeriksaan email (salah ketik / alamat palsu) di form daftar & lupa kata sandi */
+  .auth-emailtip{font-size:12px;line-height:1.45;margin:-4px 0 10px;padding:7px 10px;border-radius:8px;background:rgba(242,176,30,.12);border:1px solid rgba(242,176,30,.4);color:#FFD77A}
+  .auth-emailtip[hidden]{display:none}
+  .auth-emailtip.err{background:rgba(228,68,46,.15);border-color:rgba(228,68,46,.4);color:#FF8A75}
+  .auth-emailtip button{background:none;border:none;color:inherit;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer;padding:0;margin-left:4px}
+  .auth-hint{font-size:11px;color:var(--muted);line-height:1.45;margin:-4px 0 10px}
+  /* v7.48 — Continue with Google + pilih username untuk akun Google baru */
+  .auth-google{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#1f1f1f;border:1px solid #dadce0;font-weight:600}
+  .auth-google:hover{background:#f6f8fa}
+  .auth-google[hidden],.auth-or[hidden]{display:none}
+  .auth-or{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+  .auth-or::before,.auth-or::after{content:'';flex:1;height:1px;background:var(--line)}
+  #authFormUsername{text-align:left;margin-top:8px}
+  #authFormUsername .auth-note{margin:0 0 2px}
+  #authFormUsername[hidden]{display:none}
   .auth-loggedin{text-align:center;padding:6px 0}
   .auth-hi{font-size:13.5px;margin-bottom:14px}
 
@@ -3563,6 +3578,9 @@
     </div>
 
     <div id="authLoggedOut">
+      <!-- v7.48 — login Google (lihat komentar v7.48 di auth.js) -->
+      <button class="btn2 auth-google" id="authGoogle" type="button"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span data-i18n="acctGoogle">Continue with Google</span></button>
+      <div class="auth-or" id="authOr"><span data-i18n="acctOr">or with username</span></div>
       <div class="auth-tabs">
         <button class="auth-tab" id="authTabLogin" type="button" aria-pressed="true" data-i18n="acctLogin">Masuk</button>
         <button class="auth-tab" id="authTabSignup" type="button" aria-pressed="false" data-i18n="acctSignup">Daftar</button>
@@ -3585,7 +3603,9 @@
           pattern="[A-Za-z0-9_]{3,20}" autocomplete="nickname" data-i18n-ph="acctUsernamePh"
           placeholder="3-20 karakter: huruf, angka, _ (tanpa spasi)">
         <label data-i18n="acctEmail">Email</label>
-        <input type="email" id="authSignupEmail" required autocomplete="email">
+        <input type="email" id="authSignupEmail" required autocomplete="email" autocapitalize="off" spellcheck="false">
+        <p class="auth-emailtip" id="authSignupEmailTip" hidden></p>
+        <p class="auth-hint" data-i18n="acctEmailHint">Use an email you can open: it is the only way to reset your password if you forget it.</p>
         <label data-i18n="acctPassword">Kata sandi</label>
         <input type="password" id="authSignupPassword" required minlength="6" autocomplete="new-password">
         <button class="btn2 main" type="submit" data-i18n="acctSignupCta">Buat akun</button>
@@ -3600,7 +3620,8 @@
       <form id="authFormForgot" hidden>
         <p class="auth-note" data-i18n="acctForgotNote">Masukkan email yang Anda pakai saat mendaftar. Kalau email itu terdaftar, kami akan mengirim link untuk membuat kata sandi baru.</p>
         <label data-i18n="acctEmail">Email</label>
-        <input type="email" id="authForgotEmail" required autocomplete="email">
+        <input type="email" id="authForgotEmail" required autocomplete="email" autocapitalize="off" spellcheck="false">
+        <p class="auth-emailtip" id="authForgotEmailTip" hidden></p>
         <button class="btn2 main" type="submit" data-i18n="acctForgotCta">Kirim link reset</button>
         <button class="auth-link" id="authForgotBack" type="button" data-i18n="acctForgotBack">← Kembali ke Masuk</button>
       </form>
@@ -3626,6 +3647,14 @@
 
     <div class="auth-loggedin" id="authLoggedIn" hidden>
       <p class="auth-hi"><span data-i18n="acctHi">Masuk sebagai</span> <b id="authWhoAmI"></b></p>
+      <!-- v7.48 — akun baru dari Google: pilih username (dipakai di deck, Battle Sim, leaderboard) -->
+      <form id="authFormUsername" hidden>
+        <p class="auth-note" data-i18n="acctPickNote">Welcome! Choose a username. It is shown on your decks, binders and in Battle Sim.</p>
+        <label data-i18n="acctUsername">Username</label>
+        <input type="text" id="authPickUsername" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" autocomplete="nickname" autocapitalize="off" spellcheck="false" data-i18n-ph="acctUsernamePh" placeholder="3-20 karakter: huruf, angka, _ (tanpa spasi)">
+        <button class="btn2 main" type="submit" data-i18n="acctPickCta">Save username</button>
+      </form>
+      <p class="auth-note" id="authGoogleNote" hidden data-i18n="acctGoogleNote">You log in with Google. Use the Continue with Google button next time.</p>
       <!-- v7.19 — ganti kata sandi saat sedang login (lihat changePassword() di auth.js) -->
       <div class="auth-acts" id="authActs">
         <button class="btn2" id="authChangePwBtn" type="button" data-i18n="acctChangePw">🔑 Change password</button>
@@ -3661,7 +3690,7 @@
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
-<script src="auth.js?v=7.19"></script>
+<script src="auth.js?v=7.48"></script>
 <!-- v7.25 — statistik pemakaian fitur anonim (guest vs login), laporan admin di My Lab -->
 <script src="usage.js?v=7.45"></script>
 <script src="decks.js?v=7.02"></script>
@@ -3720,7 +3749,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.47</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.48</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -5316,7 +5345,21 @@ const T = {
   acctModalTitleAccount: 'My account',   /* v7.19 — judul modal saat sudah login */
   acctErrGeneric: 'Something went wrong. Please try again.',
   acctErrInvalid: 'Incorrect username/password.',
-  acctSignupOk: 'Account created! Check your email to verify it before logging in.',
+  acctSignupOk: 'Account created! You can log in with your username and password.',
+  /* v7.48 — pemeriksaan email sebelum daftar / kirim link reset (email Supabase 23 Nov 2026: banyak email bounce) */
+  acctGoogle: 'Continue with Google',
+  acctOr: 'or with username',
+  acctGoogleOff: 'Google login is not available yet. Please use your username and password.',
+  acctPickNote: 'Welcome! Choose a username. It is shown on your decks, binders and in Battle Sim.',
+  acctPickCta: 'Save username',
+  acctPickOk: 'Username saved.',
+  acctGoogleNote: 'You log in with Google. Use the Continue with Google button next time.',
+  acctEmailHint: 'Use an email you can open: it is the only way to reset your password if you forget it.',
+  acctEmailTypo: 'Did you mean {s}?',
+  acctEmailUse: 'Use it',
+  acctEmailTypoKeep: 'If your email is right as typed, press the button again.',
+  acctEmailBad: 'That email address can\'t receive mail. Please use your real email.',
+  acctEmailFormat: 'Please check your email address. It should look like name@gmail.com.',
   acctErrUsernameFormat: 'Username must be 3-20 characters: letters, numbers, or underscores only (no spaces).',
   acctErrUsernameTaken: 'That username is already taken — try another one.',
   acctForgotLink: 'Forgot password?',
@@ -10816,6 +10859,7 @@ window.addEventListener('hashchange', ()=>{
   window.MHRUI = window.MHRUI || {};
   window.MHRUI.openAuthModal = openAuthModal;
 
+  let pickAsked = false;   // v7.48 — form pilih username dibuka otomatis sekali per muatan halaman
   async function refreshAccountUI(session){
     if(inPasswordRecovery) return; // lihat komentar di deklarasi inPasswordRecovery di atas
     const loggedIn = !!(session && session.user);
@@ -10833,6 +10877,20 @@ window.addEventListener('hashchange', ()=>{
     }
     if(loggedInBlock) loggedInBlock.hidden = !loggedIn;
     if(loggedOutBlock) loggedOutBlock.hidden = loggedIn;
+    /* v7.48 — login Google: akun tanpa kata sandi (hanya Google) tidak punya tombol ganti kata sandi; akun Google baru
+       (username sementara player_xxxxxxxx) langsung diminta memilih username; kembali ke halaman sebelum ke Google. */
+    if(loggedIn && window.MHRAuth.providers){
+      const prov = window.MHRAuth.providers(session), pwd = prov.includes('email');
+      const cpw = $('#authChangePwBtn'); if(cpw) cpw.hidden = !pwd;
+      const gNote = $('#authGoogleNote'); if(gNote) gNote.hidden = pwd || !prov.includes('google');
+      const nm = $('#authWhoAmI') ? $('#authWhoAmI').textContent : '';
+      const temp = window.MHRAuth.isTempUsername(nm), fu = $('#authFormUsername');
+      if(fu) fu.hidden = !temp;
+      if(authActs) authActs.hidden = temp;
+      if(temp && authView && !pickAsked){ pickAsked = true; clearAuthMsg(); authView.hidden = false; const pi = $('#authPickUsername'); if(pi) setTimeout(()=>pi.focus(), 60); }
+      const back = window.MHRAuth.oauthBack();
+      if(back && back !== location.hash && back.length > 1) location.hash = back;
+    }
     const ttl = $('#authTitle'); if(ttl) ttl.textContent = t(loggedIn ? 'acctModalTitleAccount' : 'acctModalTitleLogin');   // v7.19
 
     /* v6.31 — cek status admin akun (tabel admin_users di Supabase) tiap
@@ -10879,6 +10937,9 @@ window.addEventListener('hashchange', ()=>{
     if(formForgot) formForgot.hidden = !isForgot;
     if(formReset) formReset.hidden = !isReset;
     if(authNoteDefault) authNoteDefault.hidden = isReset;
+    const gBtn = $('#authGoogle'), gOr = $('#authOr');   // v7.48
+    if(gBtn) gBtn.hidden = isForgot || isReset;
+    if(gOr) gOr.hidden = isForgot || isReset;
   }
   if(tabLogin) tabLogin.addEventListener('click', ()=>setAuthView('login'));
   if(tabSignup) tabSignup.addEventListener('click', ()=>setAuthView('signup'));
@@ -10899,12 +10960,88 @@ window.addEventListener('hashchange', ()=>{
     closeAuthModal();
   });
 
+  /* v7.48 — pemeriksaan email sebelum Supabase mengirim email (email Supabase 23 Nov 2026: tingkat bounce tinggi).
+     Konfirmasi email di Supabase MATI, jadi alamat salah ketik/palsu bisa mendaftar lalu email reset kata sandinya mental.
+     - Salah ketik domain populer (gmial.com, gmail.con, yaho.com, ...) → saran "Did you mean …?" + tombol pakai. Kirim ulang
+       dengan alamat yang sama = tetap dipakai (pemakai yakin alamatnya benar).
+     - Domain contoh/sekali pakai (example.com, test.com, mailinator, ...) atau format rusak → ditolak. */
+  const EMAIL_POP = ['gmail.com','yahoo.com','yahoo.co.id','ymail.com','hotmail.com','outlook.com','live.com','icloud.com','protonmail.com','protonmail.ch','proton.me','pm.me','googlemail.com'];
+  const EMAIL_FIX = { 'gmail.co':'gmail.com','gmail.con':'gmail.com','gmail.cm':'gmail.com','gmail.om':'gmail.com','gmail.cmo':'gmail.com','gmail.comm':'gmail.com','gmail.com.com':'gmail.com','gmail.id':'gmail.com','gmail.co.id':'gmail.com','gmai.com':'gmail.com','gmial.com':'gmail.com','gamil.com':'gmail.com','gmal.com':'gmail.com','gmil.com':'gmail.com','gnail.com':'gmail.com','gmaill.com':'gmail.com','gmeil.com':'gmail.com','gemail.com':'gmail.com','googlemail.co':'googlemail.com','yaho.com':'yahoo.com','yahooo.com':'yahoo.com','yahoo.co':'yahoo.com','yahoo.con':'yahoo.com','yaho.co.id':'yahoo.co.id','yahoo.id':'yahoo.co.id','hotmial.com':'hotmail.com','hotmal.com':'hotmail.com','hotmail.co':'hotmail.com','hotmail.con':'hotmail.com','outlok.com':'outlook.com','outlook.co':'outlook.com','outlook.con':'outlook.com','iclod.com':'icloud.com','icloud.co':'icloud.com','icloud.con':'icloud.com' };
+  const EMAIL_FAKE = /^(example\.(com|net|org)|test\.(com|id)|email\.com|mail\.com\.com|domain\.com|abc\.com|asd\.com|aaa\.com|xxx\.com|mailinator\.com|guerrillamail\.[a-z]+|10minutemail\.[a-z]+|tempmail\.[a-z]+|temp-mail\.[a-z]+|yopmail\.com|sharklasers\.com|trashmail\.[a-z]+|getnada\.com|dispostable\.com|maildrop\.cc)$/;
+  function lev(a, b){
+    const m = a.length, n = b.length; if(Math.abs(m - n) > 2) return 9;
+    let p = Array.from({length:n+1}, (_, j)=>j);
+    for(let i = 1; i <= m; i++){ const c = [i]; for(let j = 1; j <= n; j++) c[j] = Math.min(p[j]+1, c[j-1]+1, p[j-1]+(a[i-1]===b[j-1]?0:1)); p = c; }
+    return p[n];
+  }
+  function emailCheck(addr){
+    const a = String(addr || '').trim().toLowerCase();
+    const m = /^([^\s@]+)@([a-z0-9-]+(\.[a-z0-9-]+)+)$/.exec(a);
+    if(!m || m[1].length > 64 || /\.\.|^\.|\.$/.test(m[1])) return { bad:'format' };
+    const dom = m[2];
+    if(EMAIL_FAKE.test(dom)) return { bad:'fake' };
+    if(EMAIL_POP.includes(dom)) return {};
+    let fix = EMAIL_FIX[dom];
+    if(!fix && /\.(con|cmo|cm|om|vom|xom|comm)$/.test(dom)) fix = dom.replace(/\.[a-z]+$/, '.com');
+    if(!fix){ const near = EMAIL_POP.find(p => lev(dom, p) === 1 || (lev(dom, p) === 2 && dom.length >= 8)); if(near) fix = near; }
+    return fix && fix !== dom ? { suggest: m[1] + '@' + fix } : {};
+  }
+  function emailGate(input, tip){
+    if(!input) return true;
+    const val = input.value.trim(), r = emailCheck(val);
+    if(!tip) return !r.bad;
+    if(r.bad){ tip.className = 'auth-emailtip err'; tip.textContent = t(r.bad === 'fake' ? 'acctEmailBad' : 'acctEmailFormat'); tip.hidden = false; input.focus(); return false; }
+    if(r.suggest && input.dataset.okTypo !== val){
+      input.dataset.okTypo = val;   // kirim kedua kali dengan alamat yang sama = pemakai yakin
+      tip.className = 'auth-emailtip'; tip.textContent = '';
+      tip.append(t('acctEmailTypo').replace('{s}', r.suggest) + ' ');
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = t('acctEmailUse');
+      b.addEventListener('click', ()=>{ input.value = r.suggest; delete input.dataset.okTypo; tip.hidden = true; input.focus(); });
+      tip.append(b, document.createElement('br'), t('acctEmailTypoKeep'));
+      tip.hidden = false; return false;
+    }
+    tip.hidden = true; return true;
+  }
+  [['#authSignupEmail', '#authSignupEmailTip'], ['#authForgotEmail', '#authForgotEmailTip']].forEach(([i, tp])=>{
+    const el = $(i), tipEl = $(tp);
+    if(el && tipEl) el.addEventListener('input', ()=>{ tipEl.hidden = true; });
+  });
+
+  /* v7.48 — Continue with Google & simpan username pilihan */
+  const googleBtn = $('#authGoogle');
+  if(googleBtn) googleBtn.addEventListener('click', async ()=>{
+    clearAuthMsg();
+    googleBtn.disabled = true;
+    const { error } = await window.MHRAuth.signInWithGoogle();
+    googleBtn.disabled = false;   // berhasil = halaman pindah ke Google
+    if(error) showAuthMsg(/not enabled|unsupported provider/i.test(error.message || '') ? t('acctGoogleOff') : t('acctErrGeneric'), 'err');
+  });
+  const formPick = $('#authFormUsername');
+  if(formPick) formPick.addEventListener('submit', async e=>{
+    e.preventDefault();
+    clearAuthMsg();
+    const btn = formPick.querySelector('button[type="submit"]'); if(btn) btn.disabled = true;
+    const { data, error } = await window.MHRAuth.setUsername($('#authPickUsername').value);
+    if(btn) btn.disabled = false;
+    if(error){
+      const m = error.message;
+      showAuthMsg(t(m === 'INVALID_USERNAME' ? 'acctErrUsernameFormat' : m === 'USERNAME_TAKEN' ? 'acctErrUsernameTaken' : 'acctErrGeneric'), 'err');
+      return;
+    }
+    const nm = data.username;
+    const who = $('#authWhoAmI'); if(who) who.textContent = nm;
+    if(btnAccount) btnAccount.innerHTML = '👤 ' + escHtml(nm);
+    formPick.hidden = true; if(authActs) authActs.hidden = false;
+    showAuthMsg(t('acctPickOk'), 'ok');
+  });
+
   if(formSignup) formSignup.addEventListener('submit', async e=>{
     e.preventDefault();
     clearAuthMsg();
     const uname = $('#authSignupUsername').value.trim();
     const email = $('#authSignupEmail').value.trim();
     const pass = $('#authSignupPassword').value;
+    if(!emailGate($('#authSignupEmail'), $('#authSignupEmailTip'))) return;   // v7.48
     const submitBtn = formSignup.querySelector('button[type="submit"]');
     if(submitBtn) submitBtn.disabled = true;
     const { error } = await window.MHRAuth.signUp(email, pass, uname);
@@ -10932,6 +11069,7 @@ window.addEventListener('hashchange', ()=>{
     e.preventDefault();
     clearAuthMsg();
     const email = $('#authForgotEmail').value.trim();
+    if(!emailGate($('#authForgotEmail'), $('#authForgotEmailTip'))) return;   // v7.48
     const submitBtn = formForgot.querySelector('button[type="submit"]');
     if(submitBtn) submitBtn.disabled = true;
     const { error } = await window.MHRAuth.resetPassword(email);
