@@ -156,6 +156,7 @@
           '<span>' + T('Peak', 'Tertinggi') + ' <b data-noi18n>' + fmt(mine.peak) + '</b></span>' + (mine.streak > 1 ? '<span class="hot">🔥 ' + T(mine.streak + ' wins in a row', mine.streak + ' kali menang beruntun') + '</span>' : '') + '</div>' +
           (t.next ? '<div class="rkbar"><i style="width:' + Math.max(4, Math.min(100, 100 - (t.next - mine.points))) + '%"></i></div><div class="small muted">' + T((t.next - mine.points) + ' points to ', (t.next - mine.points) + ' poin lagi ke ') + esc(tier(t.next, PLACEMENT).name) + '</div>' : '') +
           todayHTML(today) +
+          (isNow ? '<div class="startbar"><button class="pri" data-mode="find">⚔️ ' + T('Find a match', 'Cari lawan') + '</button></div>' : '') +   // o2.50: tombol main ranked selalu ada (laporan pemain)
           '</div>';
       } else if (isNow) {
         h += '<div class="box rkme"><b>You are not ranked yet this season.</b><p class="small muted">Play 5 games in Find a match to finish your placement and get your rank.</p><div class="startbar"><button class="pri" data-mode="find">⚔️ Find a match</button></div></div>';

@@ -604,6 +604,11 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.52 — Battle Sim o2.50: tombol Find a match di tab Ranked — 23 November 2026 *(`sim-host.js`, `index.html`, `sim/`)*
+- Laporan pemain: tombol Find a match tidak ada di tab Ranked setelah punya rank. Kartu rank (season berjalan) kini punya tombol
+  "⚔️ Find a match". Riwayat simulator #130.
+- `sim-host.js?v=7.52-sim50`, `SIM_URL ?v=o2.50`, footer v7.52.
+
 ### v7.51 — Battle Sim online lewat domain sendiri sim.mhrdecklab.com (o2.49) — 23 November 2026 *(`home-ui.js`, `tower.js`, `sim-host.js`, `index.html`, `sim/`)*
 Laporan pemain (23 Nov 2026): Battle Sim online hanya bisa dipakai dengan VPN / DNS 1.1.1.1. Server lama
 `mhr-battle-sim-test.dataanggi2712.workers.dev` diblokir DNS sebagian ISP Indonesia (`*.workers.dev`).

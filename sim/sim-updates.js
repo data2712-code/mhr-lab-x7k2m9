@@ -16,6 +16,15 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-23', t: 'fix', v: 'o2.50',
+      en: { h: 'Find a match button in the Ranked tab', b: [
+        'Your rank card in 🏆 Ranked now has a ⚔️ Find a match button, so you can start a ranked game straight from the leaderboard.'
+      ] },
+      id: { h: 'Tombol Cari lawan di tab Ranked', b: [
+        'Kartu rank Anda di 🏆 Ranked sekarang punya tombol ⚔️ Cari lawan, jadi pertandingan ranked bisa dimulai langsung dari leaderboard.'
+      ] }
+    },
+    {
       d: '2026-11-23', t: 'fix', v: 'o2.49',
       en: { h: 'Online play without VPN', b: [
         'The online server now runs at sim.mhrdecklab.com. Some Indonesian internet providers blocked the old server address, so a few players needed a VPN or DNS 1.1.1.1 to play online.',
