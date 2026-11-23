@@ -29,7 +29,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = '0.14.3';   // o2.45: BP01-022 UNIQUE/[COUNTER] = AUTO (laporan #49), PB02-008 nama lengkap (#43), SP01-034 tanpa syarat terpasang (#44/#45), SP01-050 kebal Lv1 juga saat sendiri (#40), BP01-067 + AIR STRIKE (#41) · o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
+  const VERSION = '0.14.4';   // o2.47: penyerang/target yang keluar FIELD lalu kembali = kartu baru, serangannya berakhir (laporan #52), BP01-032 Both Lose dengan BATTLE penuh (#53), SD06-011 tanpa target lawan (#51), BP01-067 bisa batal/tetap (#54) · o2.45: BP01-022 UNIQUE/[COUNTER] = AUTO (laporan #49), PB02-008 nama lengkap (#43), SP01-034 tanpa syarat terpasang (#44/#45), SP01-050 kebal Lv1 juga saat sendiri (#40), BP01-067 + AIR STRIKE (#41) · o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
   const SLOTS = ['F', 'W1', 'W2', 'B'];
   const SLOT_NAME = { F: 'FRONT', W1: 'WING 1', W2: 'WING 2', B: 'BACK', BASE: 'BASE' };
   // Posisi pada garis serangan (303.2.a.4.3.1.1): BACK sendiri = 0, WING = 1,
@@ -617,6 +617,9 @@
   // Kartu meninggalkan FIELD → status di-refresh, menjadi kartu baru (301.45.b–c).
   function refresh(st, iid) {
     const x = st.inst[iid];
+    // o2.47 (laporan #52): kartu yang sedang menyerang / diserang keluar dari FIELD → kartu baru (301.45). Kalau kemudian kembali
+    // (mis. Turn The Tide), itu bukan lagi penyerang/target yang sama: serangannya berakhir / target harus dipilih ulang.
+    if (st.bt && st.bt.cur && !st.lg144) { if (st.bt.cur.a === iid) st.bt.cur.agone = true; if (st.bt.cur.tg === iid) st.bt.cur.tggone = true; }
     x.fd = false; x.enT = -1; x.bbm = -1; x.bbmOk = -1; x.atkT = -1; x.atkN = 0; x.dclT = -1; x.tgdT = -1; x.tgdN = 0; x.att = []; x.host = null; x.mods = []; x.once = {}; x.tw = {}; x.gr = {};
   }
   // Lepas kartu dari tempatnya di FIELD (slot BATTLE, BASE, atau terpasang).
@@ -1166,7 +1169,7 @@
         A.mark();
         const c = st.bt && st.bt.cur; if (!c) return false;
         const O = st.P[opp(st.tp)];
-        c.slot = slot; c.tg = O.bat[slot] || null; c.air = false;
+        c.slot = slot; c.tg = O.bat[slot] || null; c.air = false; c.tggone = false;
         markTarget(st, c.tg);
         log(st, 'attack', 'The Attack Target of ' + nameOf(st, c.a) + ' changes to ' + (c.tg ? nameOf(st, c.tg) : 'the Weakness') + ' (' + SLOT_NAME[slot] + ')' + (why ? ' (' + why + ')' : '') + '.');
         return true;
@@ -1291,7 +1294,7 @@
       redirect(i, why) {                                           // ubah Attack Target ke kartu ini (BLOCK, 305.2)
         A.mark();
         const c = st.bt && st.bt.cur, L = locate(st, i); if (!c || !L || L.zone !== 'bat') return false;
-        c.slot = L.slot; c.tg = i; c.air = false;
+        c.slot = L.slot; c.tg = i; c.air = false; c.tggone = false;
         markTarget(st, i);
         log(st, 'attack', 'The Attack Target of ' + nameOf(st, c.a) + ' changes to ' + nameOf(st, i) + ' (' + SLOT_NAME[L.slot] + ')' + (why ? ' (' + why + ')' : '') + '.');
         return true;
@@ -1445,12 +1448,14 @@
   // Target serangan masih sah? (303.2.a.4.3.1.6, 303.2.a.4.3.2.2)
   function targetValid(st) {
     const b = st.bt.cur, O = st.P[opp(st.tp)];
+    if (b.tggone) return false;                                     // o2.47: target keluar FIELD lalu kembali = kartu baru
     if (!targetsFor(st, b.a).some(t => t.slot === b.slot)) return false;
     if (b.air) return hasAbility(st, b.a, 'air');                  // AIR STRIKE: area dianggap Weakness (305.5)
     return b.tg ? O.bat[b.slot] === b.tg : !O.bat[b.slot];
   }
   function attackerOk(st) {
     const b = st.bt.cur, L = locate(st, b.a);
+    if (b.agone) return false;                                      // o2.47 (laporan #52): penyerang keluar FIELD lalu kembali
     return !!L && L.zone === 'bat' && L.p === st.tp && getR(st, b.a) > 0;
   }
   function weaknessHit(st, a, slot, how) {
@@ -1539,7 +1544,20 @@
     if (!def || !def.trig) return null;
     return def.trig.find(e => e.id === job.eff) || null;
   }
-  function jobLabel(st, job) { const e = jobDef(st, job); return nameOf(st, job.c) + (e && e.label ? ' — ' + e.label : ''); }
+  function jobLabel(st, job, subj) {
+    const e = jobDef(st, job);
+    let s = nameOf(st, job.c) + (e && e.label ? ' — ' + e.label : '');
+    // o2.47 (feedback pemain: Silk "Sense of Multiverse" ×3 terlihat sama): efek yang terpicu oleh kartu LAIN menyebut kartu itu.
+    if (subj) { const t = jobSubj(st, job); if (t) s += ' → ' + t; }
+    return s;
+  }
+  function jobSubj(st, job) {
+    const ev = job.ev || {}, i = [ev.c, ev.a].find(x => x && x !== job.c && st.inst[x]);
+    if (!i) return '';
+    const L = locate(st, i), x = st.inst[i];
+    if (x.fd && L && (L.zone === 'bat' || L.zone === 'base') && L.p !== job.p) return '';
+    return nameOf(st, i) + (L ? ' (' + (L.zone === 'bat' ? SLOT_NAME[L.slot] : ({ base: 'BASE', ret: 'RETREAT', void: 'VOID', hand: 'HAND', deck: 'Deck', att: 'attached' })[L.zone] || L.zone) + ')' : '');
+  }
   // Jalankan job sampai selesai atau sampai butuh jawaban.
   function runJob(st, job) {
     const e = jobDef(st, job);
@@ -1560,7 +1578,7 @@
       }
     } catch (err) {
       if (err instanceof Ask) {
-        st.prompt = Object.assign({ type: err.spec.yesno ? 'yesno' : err.spec.pick ? 'pick' : 'choose', job: job.id, label: jobLabel(st, job) }, err.spec);
+        st.prompt = Object.assign({ type: err.spec.yesno ? 'yesno' : err.spec.pick ? 'pick' : 'choose', job: job.id, label: jobLabel(st, job, true) }, err.spec);
         if (err.spec.pick && !st.noPreview) {                 // o2.40: tandai area yang membuat kartu langsung Retreat dll.
           const w = previewWarn(st, err.spec.key, err.spec.options || []);
           if (w && Object.keys(w).length) st.prompt.options = st.prompt.options.map(o => w[o.v] ? Object.assign({}, o, { warn: w[o.v] }) : o);
@@ -1634,7 +1652,8 @@
   /* o2.44 (laporan #37): info tampilan untuk prompt urutan efek — opt = efek opsional (UI menawarkan "Skip" = pilih lalu
      jawab No), dead = saat ini tidak ada yang bisa diselesaikan (syarat/target tidak ada). Tidak mengubah aksi. */
   function orderJob(st, j) {
-    const o = { id: j.id, label: jobLabel(st, j) };
+    const o = { id: j.id, label: jobLabel(st, j, true) };
+    const L = locate(st, j.c); if (L) o.from = L.zone === 'bat' ? SLOT_NAME[L.slot] : ({ base: 'BASE', hand: 'HAND', ret: 'RETREAT', void: 'VOID', att: 'attached' })[L.zone] || L.zone;
     if (j.opt) o.opt = true;
     try { const e = jobDef(st, j); if (j.kind === 'trig' && e && e.can && !e.can(api(st, j, j.c), j)) o.dead = true; } catch (x) { /* abaikan */ }
     return o;
@@ -1645,7 +1664,7 @@
       if (st.result) return false;
       if (st.job) {
         const job = st.job;
-        if (job.stage === 'opt') { const jd = jobDef(st, job) || {}; st.prompt = { type: 'opt', p: job.p, job: job.id, label: jobLabel(st, job), text: jd.text || 'Use this effect?', hand: jd.zone === 'HAND' }; const w = previewWarn(st); if (w) st.prompt.warn = w; return true; }
+        if (job.stage === 'opt') { const jd = jobDef(st, job) || {}; let tx = jd.text; if (typeof tx === 'function') { try { tx = tx(api(st, job, job.c)); } catch (x) { tx = null; } } st.prompt = { type: 'opt', p: job.p, job: job.id, label: jobLabel(st, job, true), text: tx || 'Use this effect?', hand: jd.zone === 'HAND' }; const w = previewWarn(st); if (w) st.prompt.warn = w; return true; }
         if (!runJob(st, job)) return true;
         continue;
       }
@@ -2363,7 +2382,7 @@
       }
       case 'retarget': {
         const O = st.P[opp(p)], tg0 = O.bat[a.tg], air = !!(a.air && tg0), tg = air ? null : tg0;
-        st.bt.cur.slot = a.tg; st.bt.cur.tg = tg || null; st.bt.cur.air = air;
+        st.bt.cur.slot = a.tg; st.bt.cur.tg = tg || null; st.bt.cur.air = air; st.bt.cur.tggone = false;
         markTarget(st, tg);
         log(st, 'attack', plabel(st, p) + ': ' + nameOf(st, pr.a) + ' selects a new Attack Target: ' + (air ? "the opponent's " + SLOT_NAME[a.tg] + ' as a Weakness (AIR STRIKE)' : tg ? nameOf(st, tg) : "the Weakness at the opponent's " + SLOT_NAME[a.tg]) + ' (303.2.a.4.3.2.2).');
         st.win = { kind: 'step', next: opp(p), passes: 0 };
@@ -2519,7 +2538,8 @@
       : createGame({ decks: o.d, seed: o.s, first: o.f, names: o.n, vanilla: !o.x, siaga: !!o.g, confirm: !!o.k, opaque: !!o.o, toLimit: o.t || 0 });
     // o2.41: log lama (mesin < 0.14.1) tetap diputar dengan aturan lamanya, supaya replay & room yang dipulihkan tidak macet.
     if (o.e && verLt(o.e, '0.14.1')) { st.engine = o.e; st.lg021 = true; }        // SP01-021 dulu memicu dirinya sendiri
-    if (o.e && verLt(o.e, '0.14.2')) { st.engine = o.e; st.lg066 = true; }        // o2.44: BP01-066 dulu menaruh ke FIELD pemilik kartu
+    if (o.e && verLt(o.e, '0.14.2')) { st.engine = o.e; st.lg066 = true; }
+    if (o.e && verLt(o.e, '0.14.4')) { st.engine = o.e; st.lg144 = true; }        // o2.47: aturan lama #51–#54 untuk log lama        // o2.44: BP01-066 dulu menaruh ke FIELD pemilik kartu
     const acts = o.a || [], lim = n == null ? acts.length : Math.min(n, acts.length);
     for (let i = 0; i < lim; i++) {
       const r = apply(st, acts[i]);

@@ -638,6 +638,7 @@
   }
   function canSee(iid) {
     const v = viewer(); const x = G.inst[iid];
+    if (!x || x.hidden) return false;                // o2.47 (laporan #55/#56): kartu sendiri yang tertutup di BASE lawan tidak terlihat
     return v === 'all' || v === x.owner;
   }
   function myTurnPrompt(type) {
@@ -1229,6 +1230,7 @@
         // o2.44 (laporan #37): efek opsional punya tombol "Skip" (= pilih efeknya lalu jawab No otomatis); efek yang saat ini
         // tidak punya target/syarat ditandai.
         return pr.jobs.map(j => '<span class="ordj"><button data-act="order" data-job="' + j.id + '"' + (j.older ? ' title="Triggered earlier and still waiting (RS-016)"' : '') + '>' + esc(j.label) + (j.older ? ' (earlier)' : '') +
+          (j.from ? '<small class="ordfrom">from ' + esc(j.from) + '</small>' : '') +   // o2.47: asal efek (mis. HAND, WING 1)
           (j.dead ? '<small>No valid target now: it will be skipped</small>' : '') + '</button>' +
           (j.opt && !j.dead ? '<button class="sm warn" data-act="orderSkip" data-job="' + j.id + '" title="Do not use this effect">Skip</button>' : '') + '</span>').join('');
       case 'choose':

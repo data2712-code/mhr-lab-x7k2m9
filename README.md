@@ -604,6 +604,13 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.49 — Battle Sim o2.47 (mesin 0.14.4): laporan #51–#56 + feedback pemain — 23 November 2026 *(`sim-host.js`, `index.html`, `sim/`)*
+- Permainan online macet setelah kartu sendiri ditutup di BASE lawan (Electro, laporan #55/#56) → diperbaiki di `sim-ui.js` (`canSee`).
+- Urutan efek menyebut kartu yang dimaksud + asal efek (feedback Silk), Hostile Focus bisa "tetap" (#54), penyerang yang kembali
+  ke FIELD = kartu baru (#52, RS-074), Multiple Hits saat BATTLE penuh (#53, RS-075), Swarming Assault tanpa target (#51, RS-076).
+  Rincian di riwayat simulator #127. **Server Battle Sim perlu di-deploy** (mesin berjalan di server).
+- `sim-host.js?v=7.49-sim47`, `SIM_URL ?v=o2.47`, footer v7.49.
+
 ### v7.48 — Login with Google + pemeriksaan email di form Daftar & Lupa kata sandi — 23 November 2026 *(`index.html`, `auth.js`)*
 Email Supabase 23 Nov 2026: tingkat bounce email project tinggi, pengiriman email bawaan bisa dibatasi. Cek database: 664 akun,
 konfirmasi email MATI (tidak ada email konfirmasi terkirim), 10 email reset kata sandi dalam 7 hari — jadi bounce datang dari

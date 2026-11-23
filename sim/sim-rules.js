@@ -758,6 +758,29 @@
     'COUNTER·ACTI 「Ultimate Mode」Spider Suit bisa diaktifkan walau tidak terpasang ke Karakter: Anda tetap mem-Prune 1 Karakter [Web] dari RETREAT.',
     'Bagian Power+1000 hanya berlaku saat Spider Suit terpasang; kalau tidak, hanya Prune yang terjadi.'
   ]);
+  r('RS-074', 'battle', 'cr', ['BP01-066'], [
+    'An attacker that leaves the field and comes back is a new card: its attack ends',
+    'If the attacking Character leaves the field during the battle (for example it is retreated in the Counter Step) and is then put back (for example by 「Turn The Tide」Captain America), it is a new card (CR 301.45). The attack ends: no fight and no Rush Point. The new card has not attacked this turn, so it may attack again later in the Battle Phase.',
+    'The same applies to the Attack Target: if it leaves and comes back, the attacker must choose a new target.'
+  ], [
+    'Penyerang yang keluar FIELD lalu kembali adalah kartu baru: serangannya berakhir',
+    'Kalau Karakter yang menyerang keluar dari FIELD selama pertarungan (mis. di-Retreat pada Counter Step) lalu dikembalikan (mis. oleh 「Turn The Tide」Captain America), itu kartu baru (CR 301.45). Serangannya berakhir: tidak ada pertarungan dan tidak ada Rush Point. Kartu baru itu belum menyerang giliran ini, jadi boleh menyerang lagi nanti di Battle Phase.',
+    'Hal yang sama berlaku untuk Attack Target: kalau target keluar lalu kembali, penyerang memilih target baru.'
+  ]);
+  r('RS-075', 'cards', 'cr', ['BP01-032'], [
+    'Multiple Hits Black Panther works with a full BATTLE',
+    '「Multiple Hits」Black Panther triggers at BOTH LOSE, before the two Characters retreat. Your Character in that BOTH LOSE will leave its area, so a full BATTLE does not stop the effect: place Black Panther into the emptied area.'
+  ], [
+    'Multiple Hits Black Panther tetap bisa dipakai saat BATTLE penuh',
+    '「Multiple Hits」Black Panther terpicu saat BOTH LOSE, sebelum kedua Karakter Retreat. Karakter Anda yang ikut BOTH LOSE akan meninggalkan areanya, jadi BATTLE yang penuh tidak menghalangi: tempatkan Black Panther ke area yang kosong itu.'
+  ]);
+  r('RS-076', 'cards', 'cr', ['SD06-011'], [
+    '"You may do A. If you do, B": A can be done even when B has no target',
+    '「Swarming Assault」Chitauri Infantry: you may discard the top card of your Deck even when your opponent has no Character in BATTLE; the Power-1000 part then does nothing (same idea as RS-022).'
+  ], [
+    '"Anda dapat melakukan A. Jika dilakukan, B": A boleh dilakukan walau B tidak punya target',
+    '「Swarming Assault」Chitauri Infantry: kartu teratas Deck tetap boleh dibuang walau lawan tidak punya Karakter di BATTLE; bagian Power-1000 lalu tidak berpengaruh (sama seperti RS-022).'
+  ]);
 
   /* ===================== tampilan ===================== */
   const S = () => window.MHRSim;

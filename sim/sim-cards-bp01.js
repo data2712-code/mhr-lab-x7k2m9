@@ -345,8 +345,12 @@
         id: 'hand', zone: 'HAND', optional: true, label: 'Multiple Hits',
         text: "Place this card from your HAND into your BATTLE (1 opponent Character in BATTLE gets Power-1000 this turn)?",
         when: (e, self, A) => e.k === 'BOTH_LOSE' && [e.a, e.d].some(i => A.owner(i) === A.p && A.color(i) === YELLOW),
-        can: A => A.zone(A.self) === 'HAND' && A.emptySlots(A.p).length > 0 && A.canPlace(A.self, A.p),
+        // o2.47 (laporan #53): dicek saat BOTH LOSE terjadi, SEBELUM kedua Karakter Retreat — Karakter sendiri yang ikut Both Lose
+        // akan mengosongkan areanya, jadi BATTLE yang (masih) penuh tidak menghalangi.
+        can: A => A.zone(A.self) === 'HAND' && A.canPlace(A.self, A.p) && (A.emptySlots(A.p).length > 0 ||
+          (!A.st.lg144 && [ev(A).a, ev(A).d].some(i => i && A.owner(i) === A.p && A.zone(i) === 'BATTLE'))),
         run: A => {
+          if (!A.emptySlots(A.p).length) return;
           const to = A.pick('to', 'Choose a BATTLE area for 「Multiple Hits」Black Panther', slotOpts(A, A.emptySlots(A.p)));
           const t = A.ask('t', { text: 'Choose 1 opponent Character in BATTLE (Power-1000 this turn)', from: oppBattle(A), prefer: 'high' });
           if (to && A.place(A.self, to, 'Multiple Hits')) t.forEach(i => { if (A.loc(i)) A.mod(i, 'p', -1000, 'Multiple Hits'); });
@@ -719,7 +723,8 @@
     'BP01-067': {
       trig: [{
         id: 'focus', zone: 'FIELD', once: true, optional: true, label: 'Hostile Focus',
-        text: "Change the attacking Character's target to another target it can attack (you choose)?",
+        // o2.47 (laporan #54): teks menyebut target saat ini; pilihan "tetap" supaya tidak pernah terpaksa mengalihkan.
+        text: A => { const c = A.cur(); return c ? 'The attack now targets ' + A.spotLabel(c.slot) + ' · ' + (c.tg ? A.name(c.tg) : 'Weakness') + '. Change it to another target it can attack (you choose)?' : "Change the attacking Character's target to another target it can attack (you choose)?"; },
         when: (e, self, A) => e.k === 'ATTACK' && A.ctrl(e.a) === A.opp(A.p),
         // o2.45 (laporan #41, keputusan pemilik): serangan AIR STRIKE (area dianggap Weakness) juga bisa dialihkan — termasuk ke
         // Karakter di area yang sama (serangan biasa ke Karakter itu).
@@ -727,8 +732,9 @@
         run: A => {
           const c = A.cur();
           const opts = A.targetsOf(c.a).filter(t => focusAlt(c, t)).map(t => ({ v: t.slot, label: A.spotLabel(t.slot) + (t.iid ? ' · ' + A.name(t.iid) : ' · Weakness') }));
+          opts.push({ v: 'keep', label: 'Keep the current target (' + A.spotLabel(c.slot) + ' · ' + (c.tg ? A.name(c.tg) : 'Weakness') + ')' });
           const s = A.pick('s', 'Hostile Focus: choose the new Attack Target', opts);
-          if (s) A.redirectSlot(s, 'Hostile Focus');
+          if (s && s !== 'keep') A.redirectSlot(s, 'Hostile Focus');
         }
       }]
     },

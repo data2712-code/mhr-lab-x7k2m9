@@ -16,6 +16,25 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-23', t: 'fix', v: 'o2.47', reports: [51, 52, 53, 54, 55, 56],
+      en: { h: 'Fixes: frozen game, Hostile Focus, Multiple Hits, Silk and more', b: [
+        'The game no longer freezes when one of your cards is turned face-down in your opponent\'s BASE (for example by 「Spider-Archenemy」Electro).',
+        'When several effects trigger together, each one now shows the card it is about (for example which [Web] Character 「Sense of Multiverse」Silk would bring back) and where it comes from.',
+        '「Hostile Focus」Winter Soldier: the question shows the current Attack Target, and you can keep the current target after saying Yes. A second Hostile Focus never forces a change.',
+        'An attacker that is retreated and then put back (for example by 「Turn The Tide」Captain America) is a new card: its attack ends with no Rush Point.',
+        '「Multiple Hits」Black Panther now works at BOTH LOSE even when your BATTLE is full.',
+        '「Swarming Assault」Chitauri Infantry can discard the top card even when your opponent has no Character in BATTLE.'
+      ] },
+      id: { h: 'Perbaikan: permainan macet, Hostile Focus, Multiple Hits, Silk, dan lainnya', b: [
+        'Permainan tidak lagi macet saat salah satu kartu Anda ditutup (face-down) di BASE lawan (mis. oleh 「Spider-Archenemy」Electro).',
+        'Saat beberapa efek terpicu bersamaan, tiap efek sekarang menyebut kartu yang dimaksud (mis. Karakter [Web] mana yang akan dikembalikan 「Sense of Multiverse」Silk) dan asalnya.',
+        '「Hostile Focus」Winter Soldier: pertanyaannya menyebut Attack Target saat ini, dan Anda tetap bisa mempertahankan target setelah menjawab Yes. Hostile Focus kedua tidak pernah memaksa pengalihan.',
+        'Penyerang yang di-Retreat lalu dikembalikan (mis. oleh 「Turn The Tide」Captain America) adalah kartu baru: serangannya berakhir tanpa Rush Point.',
+        '「Multiple Hits」Black Panther sekarang bisa dipakai saat BOTH LOSE walau BATTLE Anda penuh.',
+        '「Swarming Assault」Chitauri Infantry bisa membuang kartu teratas walau lawan tidak punya Karakter di BATTLE.'
+      ] }
+    },
+    {
       d: '2026-11-23', t: 'improve', v: 'o2.46',
       en: { h: 'Ranked: full leaderboard, all rank tiers and a 4th prize', b: [
         'The leaderboard now lists every ranked player, and players still in placement appear at the bottom.',

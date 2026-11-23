@@ -472,9 +472,10 @@
         id: 'enter', zone: 'BATTLE', optional: true, label: 'Swarming Assault',
         text: "Discard the top card of your Deck: 1 of your opponent's Characters in BATTLE gets Power-1000?",
         when: enterSelf,
-        can: A => A.deck(A.p).length > 0 && oppBattle(A).length > 0,
+        // o2.47 (laporan #51): kartu teratas tetap boleh dibuang walau lawan tidak punya Karakter di BATTLE ("if you do" hanya bagian kedua).
+        can: A => A.deck(A.p).length > 0 && (!A.st.lg144 || oppBattle(A).length > 0),
         run: A => {
-          const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Power-1000)", from: oppBattle(A), prefer: 'high' });
+          const t = oppBattle(A).length ? A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Power-1000)", from: oppBattle(A), prefer: 'high' }) : [];
           if (A.mill(A.p, 1, 'Swarming Assault').length) t.forEach(i => A.mod(i, 'p', -1000, 'Swarming Assault'));
         }
       }]
