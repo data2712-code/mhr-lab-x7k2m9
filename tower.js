@@ -132,7 +132,7 @@
      Selama maintenance: Cari lawan, buat room, dan gabung room ditolak; permainan yang sedang berjalan tetap bisa diselesaikan.
      Pemain melihat banner kuning di Battle Sim (sim-online.js). Server staging dipilih per perangkat (localStorage
      mhrsim.server, asal sama dengan iframe sim/) — Battle Sim di perangkat ini memakainya setelah dimuat ulang. */
-  const SV_PROD = 'https://mhr-battle-sim-test.dataanggi2712.workers.dev', SV_STG = 'https://mhr-battle-sim-staging.dataanggi2712.workers.dev';
+  const SV_PROD = 'https://sim.mhrdecklab.com' /* v7.51: domain sendiri (workers.dev diblokir DNS sebagian ISP) */, SV_STG = 'https://mhr-battle-sim-staging.dataanggi2712.workers.dev';
   const svStaging = () => { try { return localStorage.getItem('mhrsim.server') === 'staging'; } catch(e){ return false; } };
   const svApi = () => svStaging() ? SV_STG : SV_PROD;
   const hhmm = t => { const d = new Date(t); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };

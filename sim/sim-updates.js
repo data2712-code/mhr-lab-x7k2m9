@@ -16,6 +16,17 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-23', t: 'fix', v: 'o2.49',
+      en: { h: 'Online play without VPN', b: [
+        'The online server now runs at sim.mhrdecklab.com. Some Indonesian internet providers blocked the old server address, so a few players needed a VPN or DNS 1.1.1.1 to play online.',
+        'Nothing else changes: same queue, rooms, Ranked and match history. If online play still fails, reload the page once.'
+      ] },
+      id: { h: 'Main online tanpa VPN', b: [
+        'Server online sekarang berjalan di sim.mhrdecklab.com. Sebagian provider internet di Indonesia memblokir alamat server lama, sehingga beberapa pemain harus memakai VPN atau DNS 1.1.1.1 untuk main online.',
+        'Selain itu tidak ada yang berubah: antrean, room, Ranked, dan riwayat pertandingan tetap sama. Bila main online masih gagal, muat ulang halaman sekali.'
+      ] }
+    },
+    {
       d: '2026-11-23', t: 'improve', v: 'o2.48',
       en: { h: 'Ranked: tiers on top, leaderboard pages, fair fast wins · Stats & History in one tab', b: [
         'Rank tiers now sit at the top of the Ranked tab, side by side from Recruit to Genius Burden (swipe on a phone).',

@@ -217,7 +217,7 @@
   }
 
   /* =================== v7.35 — Battle Sim (hero utama) =================== */
-  const SIM_API = (window.MHRSIM_ONLINE_API || 'https://mhr-battle-sim-test.dataanggi2712.workers.dev').replace(/\/$/, '');
+  const SIM_API = (window.MHRSIM_ONLINE_API || 'https://sim.mhrdecklab.com').replace(/\/$/, '');   // v7.51: domain sendiri (workers.dev diblokir DNS sebagian ISP)
   const SIM_IMG = 'images/news/battle-sim-open-beta/';
   const SIM_MODES = [['practice','🤖','Practice vs Bot','Easy · Normal · Hard'],['find','⚔️','Find a match','Practise vs a real player'],
     ['online','🔗','Friend online','Private room link'],['custom','👥','Same device','Pass-and-play']];

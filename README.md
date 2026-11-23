@@ -604,6 +604,13 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.51 — Battle Sim online lewat domain sendiri sim.mhrdecklab.com (o2.49) — 23 November 2026 *(`home-ui.js`, `tower.js`, `sim-host.js`, `index.html`, `sim/`)*
+Laporan pemain (23 Nov 2026): Battle Sim online hanya bisa dipakai dengan VPN / DNS 1.1.1.1. Server lama
+`mhr-battle-sim-test.dataanggi2712.workers.dev` diblokir DNS sebagian ISP Indonesia (`*.workers.dev`).
+- Cloudflare: Worker `mhr-battle-sim-test` diberi **Custom Domain `sim.mhrdecklab.com`** (server & data sama; alamat lama tetap hidup).
+- `sim/sim-online.js` (o2.49), `home-ui.js` (widget Battle Sim di Home), `tower.js` (Control Tower → maintenance) memakai alamat baru.
+- `home-ui.js?v=7.51`, `tower.js?v=7.51`, `sim-host.js?v=7.51-sim49`, `SIM_URL ?v=o2.49`, footer v7.51. Riwayat simulator #129.
+
 ### v7.50 — Daftar & masuk dengan username + PIN (tanpa email) + Battle Sim o2.48 — 23 November 2026 *(`index.html`, `auth.js`, `tower.js`, `sim-host.js`, `sim/`; SQL `mhr_decklab_v750_pin_login.sql`, `mhr_decklab_v750_sim_ranked_shortwin.sql`)*
 Pemilik (23 Nov 2026, seperti RushDee):
 - **Sign Up → "With PIN (no email)"**: username + PIN 6–12 angka (PIN mudah seperti 111111 / 123456 ditolak). `auth.js`

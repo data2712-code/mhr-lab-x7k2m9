@@ -14,7 +14,9 @@
   'use strict';
   const S = window.MHRSim, U = () => window.MHRSimUI;
   // o2.42: server staging (uji sebelum deploy ke server utama). Admin bisa beralih di panel Online; tersimpan di perangkat ini.
-  const API_PROD = 'https://mhr-battle-sim-test.dataanggi2712.workers.dev', API_STAGING = 'https://mhr-battle-sim-staging.dataanggi2712.workers.dev';
+  // o2.49: server utama lewat domain sendiri sim.mhrdecklab.com (Custom Domain Worker mhr-battle-sim-test). Sebagian ISP
+  // Indonesia memblokir *.workers.dev lewat DNS (pemain harus memakai VPN / DNS 1.1.1.1). Alamat workers.dev tetap hidup.
+  const API_PROD = 'https://sim.mhrdecklab.com', API_STAGING = 'https://mhr-battle-sim-staging.dataanggi2712.workers.dev';
   const STAGING = (() => { try { return localStorage.getItem('mhrsim.server') === 'staging'; } catch (e) { return false; } })();
   const API = (window.MHRSIM_ONLINE_API || (STAGING ? API_STAGING : API_PROD)).replace(/\/$/, '');
   const KEY = 'mhrsim.online.v1', KEY_PREF = 'mhrsim.onlinePrefs.v1';
