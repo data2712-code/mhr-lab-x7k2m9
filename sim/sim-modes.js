@@ -33,7 +33,7 @@
     ["Red-Green · MVB August 2026 winner","1.UmVkLUdyZWVuIMK3IE1WQiBBdWd1c3QgMjAyNiB3aW5uZXI.A0221A0022A0052A0113A0271A0941A0293A0131A0011A0151A1002A1041A1063A0973A0993A1073A1081H0013H0032H0093H0103H0123A0931H0023"]];
   window.MHRSIM_WINNER_DECKS = WINNER_DECKS;
   const LEVEL_LABEL = { easy: 'Easy', normal: 'Normal', hard: 'Hard', expert: 'Expert' };
-  const CLOCK_LABEL = { off: 'No clock', standard: 'Standard 2:00 / 0:30', relaxed: 'Relaxed 5:00 / 1:00', long: 'Long 10:00 / 2:00', match30: 'Match 30:00' };
+  const CLOCK_LABEL = { off: 'No clock', standard: 'Standard 2:30 / 0:45 + 1:00 bank', relaxed: 'Relaxed 5:00 / 1:00', long: 'Long 10:00 / 2:00', match30: 'Match 30:00' };
   let view = 'home';
 
   function ago(ts) {
@@ -200,7 +200,7 @@
         '<div id="hubErr" class="err"></div><button class="pbplay" data-hub="play">PLAY</button><button class="pbmore" data-mode="practice">More options (name, bot deck, clock, first player)</button>';
     } else if (pbMode === 'find') {
       h += on ? '<div class="pblbl">YOUR DECK · SAVED TO YOUR ACCOUNT</div>' + pbDecksHTML() +
-        '<p class="small muted">You are matched with the next player who is searching: Standard clock 2:00 / 0:30, random first player. After 45 seconds you can play the bot while you keep searching; a bot is always shown as a bot.</p>' +
+        '<p class="small muted">You are matched with the next player who is searching: Standard clock 2:30 / 0:45 + 1:00 time bank, random first player. After 45 seconds you can play the bot while you keep searching; a bot is always shown as a bot.</p>' +
         '<div id="pbRank"></div><div id="pbLive"></div><div id="hubErr" class="err"></div><button class="pbplay long" data-hub="play">FIND A MATCH</button>'
         : offline + '<button class="pbmore" data-mode="find">Details</button>';
     } else if (pbMode === 'online') {

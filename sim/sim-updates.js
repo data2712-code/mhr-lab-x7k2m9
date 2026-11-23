@@ -16,6 +16,32 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-23', t: 'improve', v: 'o2.45',
+      en: { h: 'More time on the Standard clock + a time bank', b: [
+        'Standard clock (used by Find a match): 2:30 per turn and 0:45 per response (was 2:00 / 0:30).',
+        'New: each player has a 1:00 time bank per game. When your turn or response clock runs out, the bank is used automatically before a timeout counts. It does not refill.',
+        'Clearer warnings: the clock turns yellow at 0:30 and red at 0:10, your phone vibrates once at 10 seconds, and a large notice appears near the bottom of the screen when your time is almost up or the bank is running.'] },
+      id: { h: 'Waktu jam Standar lebih panjang + cadangan waktu', b: [
+        'Jam Standar (dipakai Cari lawan): 2:30 per giliran dan 0:45 per respons (dulu 2:00 / 0:30).',
+        'Baru: tiap pemain punya cadangan waktu 1:00 per game. Saat jam giliran atau respons habis, cadangan dipakai otomatis sebelum timeout dihitung. Cadangan tidak terisi ulang.',
+        'Peringatan lebih jelas: jam menjadi kuning di 0:30 dan merah di 0:10, HP bergetar sekali di 10 detik, dan muncul pemberitahuan besar di bagian bawah layar saat waktu Anda hampir habis atau cadangan sedang dipakai.'] }
+    },
+    {
+      d: '2026-11-23', t: 'fix', v: 'o2.45', reports: [40, 41, 43, 44, 45, 49],
+      en: { h: 'Top Agent, Phage, Hostile Focus, Spider Suit and Rocket Raccoon rulings', b: [
+        '「Top Agent」Black Widow: UNIQUE and [COUNTER] count as AUTO effects, so it can now Retreat a UNIQUE Character such as 「Rooted Revival」Groot (Lv3 or lower).',
+        '「Spider-Archenemy」Phage: cards with Lv1 cannot affect Phage, also when it is on the field without being attached. Top Agent no longer offers it (or a Character protected by Phage) as a target.',
+        '「Hostile Focus」Winter Soldier can now redirect an AIR STRIKE attack, including to the Character in the same area (it becomes a normal attack on that Character).',
+        '「Ultimate Mode」Spider Suit: its COUNTER·ACTI can be used even when it is not attached. You still prune 1 [Web] Character from RETREAT; the Power+1000 only applies while it is attached.',
+        '「Life-and-Death Bond」Rocket Raccoon: "a different name" means a different card name, so 「Galaxy Scout」Rocket Raccoon can now be returned to your HAND.'] },
+      id: { h: 'Ruling Top Agent, Phage, Hostile Focus, Spider Suit, dan Rocket Raccoon', b: [
+        '「Top Agent」Black Widow: UNIQUE dan [COUNTER] termasuk efek AUTO, jadi kini bisa me-Retreat Karakter UNIQUE seperti 「Rooted Revival」Groot (Lv3 ke bawah).',
+        '「Spider-Archenemy」Phage: kartu Lv1 tidak bisa memengaruhi Phage, juga saat Phage ada di field tanpa terpasang. Top Agent tidak lagi menawarkan Phage (atau Karakter yang dilindungi Phage) sebagai target.',
+        '「Hostile Focus」Winter Soldier kini bisa mengalihkan serangan AIR STRIKE, termasuk ke Karakter di area yang sama (menjadi serangan biasa ke Karakter itu).',
+        '「Ultimate Mode」Spider Suit: COUNTER·ACTI-nya bisa dipakai walau tidak terpasang. Anda tetap mem-Prune 1 Karakter [Web] dari RETREAT; Power+1000 hanya berlaku saat terpasang.',
+        '「Life-and-Death Bond」Rocket Raccoon: "nama berbeda" berarti nama kartu berbeda, jadi 「Galaxy Scout」Rocket Raccoon kini bisa diambil ke HAND.'] }
+    },
+    {
       d: '2026-11-20', t: 'fix', v: 'o2.44', reports: [37],
       en: { h: 'Online pop-ups, skipping effects, and Turn The Tide on a taken Character', b: [
         'Online games: the RUSH POINT / fight pop-up from an earlier attack no longer appears again after every action (for example during Base Deployment).',

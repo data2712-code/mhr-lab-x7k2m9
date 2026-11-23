@@ -378,7 +378,15 @@ button.str{cursor:pointer}button.str:hover{border-color:#5a4a1a}.str.on,.stm.on{
 .pill .ck{display:inline-flex;flex-direction:column;align-items:center}
 #clock{font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;white-space:nowrap}
 #clock.resp{color:#ff9b8c}#clock.paused{color:var(--muted)}
-#clock.warn{animation:clkp 1s infinite}
+#clock.warn{animation:clkp 1s infinite;color:#ff5a45;font-size:13px}
+#clock.low{color:#ffd24a}#clock.bank{color:#ffd24a}
+#clockBar.bank{background:#ffd24a}
+/* o2.45 — peringatan jam (laporan #50) */
+#clkWarn{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translate(-50%,40px);opacity:0;pointer-events:none;z-index:85;max-width:min(92vw,560px);
+  background:#3a0f0a;border:2px solid #ff5a45;color:#ffe1db;font-weight:800;font-size:15px;padding:10px 16px;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.55);text-align:center;transition:opacity .2s,transform .2s}
+#clkWarn.on{opacity:1;transform:translate(-50%,0);animation:clkw 1s infinite}
+#clkWarn.bank{background:#3a2d08;border-color:#ffd24a;color:#fff1c2;animation:none}
+@keyframes clkw{50%{border-color:#ffd7cf}}
 @keyframes clkp{50%{color:#ff5a45}}
 .cbarw{width:120px;height:3px;border-radius:2px;background:#2a313b;overflow:hidden;margin-top:2px}
 #clockBar{display:block;height:100%;background:var(--gold);transition:width .25s linear}
@@ -1147,7 +1155,7 @@ button.haswarn{border-color:#c98a12}
         </div>
         <div>
           <h3>TURN CLOCK</h3>
-          <div class="row"><label>Clock</label><select id="clk"><option value="standard">Standard · 2:00 turn / 0:30 response</option><option value="relaxed">Relaxed · 5:00 / 1:00</option><option value="long">Long · 10:00 / 2:00</option><option value="off">No clock</option><option value="match30">Match 30:00 · no per-turn limit (official match)</option></select></div>
+          <div class="row"><label>Clock</label><select id="clk"><option value="standard">Standard · 2:30 turn / 0:45 response + 1:00 bank</option><option value="relaxed">Relaxed · 5:00 / 1:00</option><option value="long">Long · 10:00 / 2:00</option><option value="off">No clock</option><option value="match30">Match 30:00 · no per-turn limit (official match)</option></select></div>
           <div class="row"><label>First player</label><select id="first"><option value="random">Random</option><option value="0">Player 1</option><option value="1">Player 2</option></select></div>
           <div class="row"><label>Seed (testing)</label><input id="seed" placeholder="empty = random" style="width:150px"></div>
           <div class="row" style="justify-content:flex-end"><button class="pri" id="btnStart" style="font-size:16px;padding:10px 22px">▶ Start game</button></div>
@@ -1235,25 +1243,25 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.44-sd56id" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.40-pb02only" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.44"></script>
-<script src="sim-cards.js?v=o2.44"></script>
-<script src="sim-cards-bp01.js?v=o2.44"></script>
-<script src="sim-cards-s4.js?v=o2.44"></script>
-<script src="sim-cards-sp01.js?v=o2.44"></script>
-<script src="sim-cards-t6.js?v=o2.44"></script>
-<script src="sim-bot.js?v=o2.44"></script>
-<script src="sim-sound.js?v=o2.44"></script>
-<script src="sim-shadow.js?v=o2.44"></script>
-<script src="sim-ui.js?v=o2.44"></script>
-<script src="sim-sandbox.js?v=o2.44"></script>
-<script src="sim-report.js?v=o2.44"></script>
-<script src="sim-modes.js?v=o2.44"></script>
-<script src="sim-i18n.js?v=o2.44"></script>
-<script src="sim-online.js?v=o2.44"></script>
-<script src="sim-ranked.js?v=o2.44"></script>
-<script src="sim-stats.js?v=o2.44"></script>
-<script src="sim-updates.js?v=o2.44"></script>
-<script src="sim-rules.js?v=o2.44"></script>
-<script src="sim-learn.js?v=o2.44"></script>
+<script src="sim.js?v=o2.45"></script>
+<script src="sim-cards.js?v=o2.45"></script>
+<script src="sim-cards-bp01.js?v=o2.45"></script>
+<script src="sim-cards-s4.js?v=o2.45"></script>
+<script src="sim-cards-sp01.js?v=o2.45"></script>
+<script src="sim-cards-t6.js?v=o2.45"></script>
+<script src="sim-bot.js?v=o2.45"></script>
+<script src="sim-sound.js?v=o2.45"></script>
+<script src="sim-shadow.js?v=o2.45"></script>
+<script src="sim-ui.js?v=o2.45"></script>
+<script src="sim-sandbox.js?v=o2.45"></script>
+<script src="sim-report.js?v=o2.45"></script>
+<script src="sim-modes.js?v=o2.45"></script>
+<script src="sim-i18n.js?v=o2.45"></script>
+<script src="sim-online.js?v=o2.45"></script>
+<script src="sim-ranked.js?v=o2.45"></script>
+<script src="sim-stats.js?v=o2.45"></script>
+<script src="sim-updates.js?v=o2.45"></script>
+<script src="sim-rules.js?v=o2.45"></script>
+<script src="sim-learn.js?v=o2.45"></script>
 </body>
 </html>

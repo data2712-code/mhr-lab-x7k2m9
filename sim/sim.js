@@ -29,7 +29,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = '0.14.2';   // o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
+  const VERSION = '0.14.3';   // o2.45: BP01-022 UNIQUE/[COUNTER] = AUTO (laporan #49), PB02-008 nama lengkap (#43), SP01-034 tanpa syarat terpasang (#44/#45), SP01-050 kebal Lv1 juga saat sendiri (#40), BP01-067 + AIR STRIKE (#41) · o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
   const SLOTS = ['F', 'W1', 'W2', 'B'];
   const SLOT_NAME = { F: 'FRONT', W1: 'WING 1', W2: 'WING 2', B: 'BACK', BASE: 'BASE' };
   // Posisi pada garis serangan (303.2.a.4.3.1.1): BACK sendiri = 0, WING = 1,
@@ -1260,6 +1260,8 @@
       attackedThisTurn: i => st.inst[i].dclT === st.turn,      // RS-027: hanya serangan yang dinyatakan
       timesTargeted: i => st.inst[i] && st.inst[i].tgdT === st.turn ? st.inst[i].tgdN : 0,   // Tahap 4 (PB01-002)
       text: i => textEn(cardOf(st, i)) || '',
+      // o2.45 (laporan #49, RS-?? BP01-022): "【AUTO】 in their effects" = teks AUTO, [UNIQUE], atau kemampuan [COUNTER] (keduanya efek AUTO, CR 305.6.a / RS-029).
+      hasAuto: i => /AUTO/.test(textEn(cardOf(st, i)) || '') || isUnique(st, i) || (!lostEffects(st, i) && hasCounterAbility(st, i)),
       origLv: i => printedLv(st, i),
       handCount: p => st.P[p].hand.length,
       setFlag(i, f, why, label) { A.mark(); st.inst[i].gr[f] = st.turn; if (label) log(st, 'mod', nameOf(st, i) + ' ' + label + ' this turn' + (why ? ' (' + why + ')' : '') + '.'); },

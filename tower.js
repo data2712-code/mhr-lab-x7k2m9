@@ -1,5 +1,5 @@
 /* ===================================================================
-   MHR DECK LAB — tower.js (v7.44, 🗼 Control Tower)
+   MHR DECK LAB — tower.js (v7.44, 🗼 Control Tower; v7.46 + 🔧 Battle Sim server)
    ===================================================================
    Permintaan pemilik 17 Nov 2026: alat super-admin dipisah dari My Lab
    ke menu sendiri. HANYA super-admin (tabel super_admins, dicek di
@@ -13,6 +13,7 @@
      overview  — ringkasan angka + pintasan ke alat admin di halaman lain
      usage     — usage.js        MHRUsage.renderAdmin(el)
      simrep    — sim-host.js     MHRSimHost.renderReports()  (#simRepWrap)
+     server    — (berkas ini)    v7.46: maintenance server Battle Sim (dulu panel admin di Battle Sim → Online · private room)
      binders   — binders-ui.js   MHRBindersUI.renderAdmin()  (#bdAdmin)
      org       — events-ui.js    MHREventsAdmin.render(el)
      arch      — perf-ui.js      MHRPerfUI.renderAdmin(el)   (#ctArchHost)
@@ -30,6 +31,7 @@
     ['overview', '🧭', 'Overview'],
     ['usage',    '📊', 'Usage'],
     ['simrep',   '🐞', 'Battle Sim reports'],
+    ['server',   '🔧', 'Battle Sim server'],
     ['binders',  '🛡', 'Binder reports'],
     ['org',      '🏟', 'Verified organizers'],
     ['arch',     '📈', 'Opponent deck list'],
@@ -95,6 +97,7 @@
       if(window.MHRSimHost && window.MHRSimHost.renderReports) window.MHRSimHost.renderReports();
       return;
     }
+    if(tab === 'server'){ drawServer(p); return; }
     if(tab === 'binders'){
       p.innerHTML = '<div class="bd-admin ct-bd" id="bdAdmin"><b>🛡 Binder reports</b> <span class="bd-mut">Loading…</span></div>';
       if(window.MHRBindersUI && window.MHRBindersUI.renderAdmin) window.MHRBindersUI.renderAdmin();
@@ -114,6 +117,72 @@
       p.innerHTML = box('👑 Admin roles', 'Admins can use every admin tool on the site (News, Weekly Rush LGS, tournaments, Battle Sim). Changes apply the next time that person opens the site.', '<div class="ct-roles" id="ctRoles"></div>');
       if(window.MHRAdminRoles && window.MHRAdminRoles.renderInto) window.MHRAdminRoles.renderInto(q('#ctRoles'));
     }
+  }
+
+  /* ---------- 🔧 Battle Sim server (v7.46, pindahan dari Battle Sim o2.42) ----------
+     Server pertandingan menyimpan status maintenance { start, end, msg } di objek antrean. GET /api/queue = status + jumlah
+     permainan berjalan & pemain mencari; POST /api/admin/maint (token login, akun admin) = umumkan / mulai / selesai.
+     Selama maintenance: Cari lawan, buat room, dan gabung room ditolak; permainan yang sedang berjalan tetap bisa diselesaikan.
+     Pemain melihat banner kuning di Battle Sim (sim-online.js). Server staging dipilih per perangkat (localStorage
+     mhrsim.server, asal sama dengan iframe sim/) — Battle Sim di perangkat ini memakainya setelah dimuat ulang. */
+  const SV_PROD = 'https://mhr-battle-sim-test.dataanggi2712.workers.dev', SV_STG = 'https://mhr-battle-sim-staging.dataanggi2712.workers.dev';
+  const svStaging = () => { try { return localStorage.getItem('mhrsim.server') === 'staging'; } catch(e){ return false; } };
+  const svApi = () => svStaging() ? SV_STG : SV_PROD;
+  const hhmm = t => { const d = new Date(t); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };
+  let SV = { st:null, err:'', busy:false }, svTimer = null;
+  async function svFetch(path, opt){
+    const o = Object.assign({ headers:{ 'content-type':'application/json' } }, opt || {});
+    if(o.auth){
+      delete o.auth;
+      const s = window.MHRSimHost && window.MHRSimHost.session ? await window.MHRSimHost.session() : null;
+      if(!s || !s.token) return { error:'Log in first.' };
+      o.headers.Authorization = 'Bearer ' + s.token;
+    }
+    try{
+      const r = await fetch(svApi() + path, o);
+      const j = await r.json().catch(()=>({}));
+      if(!r.ok && !j.error) j.error = 'Server error (' + r.status + ').';
+      return j;
+    }catch(e){ return { error:'Cannot reach the Battle Sim server.' }; }
+  }
+  async function svLoad(){
+    const j = await svFetch('/api/queue');
+    if(j.error){ SV.err = j.error; } else { SV.st = j; SV.err = ''; }
+    if(tab === 'server' && q('#ctSv')) svDraw();
+  }
+  async function svSet(body){
+    SV.busy = true; svDraw();
+    const j = await svFetch('/api/admin/maint', { method:'POST', auth:true, body:JSON.stringify(body) });
+    SV.busy = false;
+    if(j.error) SV.err = j.error; else { SV.st = j; SV.err = ''; }
+    svDraw();
+  }
+  function drawServer(p){
+    p.innerHTML = box('🔧 Battle Sim server', 'Maintenance switch for online play (Find a match & private rooms)', '<div id="ctSv"><p class="ct-mut">Loading…</p></div>');
+    svLoad();
+    clearInterval(svTimer);
+    svTimer = setInterval(()=>{ if(tab !== 'server' || !q('#ctSv')){ clearInterval(svTimer); return; } if(document.visibilityState !== 'hidden') svLoad(); }, 30000);
+  }
+  function svDraw(){
+    const el = q('#ctSv'); if(!el) return;
+    const st = SV.st || {}, m = st.maint || null, on = !!(m && m.start && Date.now() >= m.start);
+    const status = !SV.st ? '…' : !m ? '🟢 Open — online play is running normally'
+      : on ? '🔴 MAINTENANCE since ' + hhmm(m.start) + (m.end ? ' · until ~' + hhmm(m.end) : '')
+      : '🟡 Scheduled for ' + hhmm(m.start) + (m.end ? ' · until ~' + hhmm(m.end) : '') + ' (players see a yellow notice)';
+    const dis = SV.busy ? ' disabled' : '';
+    el.innerHTML =
+      `<div class="ct-sv-st${on ? ' on' : m ? ' soon' : ''}"><b>${E(status)}</b>${m && m.msg ? `<span>"${E(m.msg)}"</span>` : ''}${m && m.by ? `<small>set by ${E(m.by)}</small>` : ''}</div>` +
+      `<div class="ct-sv-live"><span><b>${st.games != null ? st.games : '?'}</b> game(s) running</span><span><b>${st.waiting != null ? st.waiting : '?'}</b> player(s) searching</span>` +
+        `<span>Server: <b>${svStaging() ? 'STAGING (this device)' : 'PRODUCTION'}</b></span><button type="button" class="ct-sv-b sm" data-sv="refresh"${dis}>↻ Refresh</button></div>` +
+      `<div class="ct-sv-form"><label>Message for players (optional)<input id="ctSvMsg" maxlength="300" value="${E(m && m.msg || '')}" placeholder="e.g. Fixing card rulings, back soon"></label>` +
+        `<label>Expected duration<select id="ctSvDur"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="60">60 min</option><option value="120">2 hours</option><option value="0">Unknown</option></select></label></div>` +
+      `<div class="ct-sv-act"><button type="button" class="ct-sv-b" data-sv="in" data-n="30"${dis}>Announce: in 30 min</button><button type="button" class="ct-sv-b" data-sv="in" data-n="15"${dis}>In 15 min</button>` +
+        `<button type="button" class="ct-sv-b warn" data-sv="in" data-n="0"${dis}>Start now</button>` +
+        (m ? `<button type="button" class="ct-sv-b main" data-sv="off"${dis}>End maintenance</button>` : '') + `</div>` +
+      (SV.err ? `<p class="ct-sv-err">${E(SV.err)}</p>` : '') +
+      `<p class="ct-mut" style="margin:10px 0 0">Running games are never stopped by this switch. To deploy a new server: turn maintenance on, wait until "game(s) running" shows 0, deploy, then press <b>End maintenance</b> once the new server works (the switch stays on after a deploy).</p>` +
+      `<div class="ct-sv-act" style="margin-top:10px"><button type="button" class="ct-sv-b" data-sv="server">${svStaging() ? 'Switch this device back to the PRODUCTION server' : 'Test on the STAGING server (this device)'}</button></div>` +
+      `<p class="ct-mut" style="margin:6px 0 0">The staging switch only affects Battle Sim on this device (reload Battle Sim after switching).</p>`;
   }
 
   /* ---------- Overview: angka + pintasan ---------- */
@@ -160,6 +229,20 @@
     if(!e.target.closest('#towerPage')) return;
     const t = e.target.closest('[data-cttab]'); if(t){ setTab(t.dataset.cttab); return; }
     const g = e.target.closest('[data-ctgo]');
-    if(g){ if(g.dataset.ctgo === 'news'){ location.hash = '#berita'; return; } setTab(g.dataset.ctgo); }
+    if(g){ if(g.dataset.ctgo === 'news'){ location.hash = '#berita'; return; } setTab(g.dataset.ctgo); return; }
+    const v = e.target.closest('[data-sv]'); if(!v || v.disabled) return;
+    const a = v.dataset.sv;
+    if(a === 'refresh'){ svLoad(); return; }
+    if(a === 'off'){ svSet({ off:true }); return; }
+    if(a === 'in'){
+      const n = +v.dataset.n;
+      if(n === 0 && !confirm('Start maintenance now? Find a match and new rooms stop immediately (running games continue).')) return;
+      svSet({ inMin:n, durMin:+(q('#ctSvDur')||{}).value || 0, msg:(q('#ctSvMsg')||{}).value || '' });
+      return;
+    }
+    if(a === 'server'){
+      try{ if(svStaging()) localStorage.removeItem('mhrsim.server'); else localStorage.setItem('mhrsim.server','staging'); }catch(x){}
+      SV.st = null; svDraw(); svLoad();
+    }
   });
 })();

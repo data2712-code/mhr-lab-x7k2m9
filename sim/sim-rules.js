@@ -713,6 +713,52 @@
     'Kartu [Web] lain yang masuk saat Web of Destiny sudah ada di BASE Anda tetap memicunya (termasuk kartu yang dipasang dari HAND, RETREAT, atau VOID). Sekali per giliran tidak berubah.'
   ]);
 
+  r('RS-069', 'cards', 'owner', ['BP01-022', 'PB02-001'], [
+    'Top Agent: UNIQUE and [COUNTER] count as AUTO effects',
+    '「Top Agent」Black Widow (BP01-022) can Retreat an opponent\'s Lv3-or-lower Character that has an AUTO effect. UNIQUE and the [COUNTER] ability are AUTO effects too, so a UNIQUE Character such as 「Rooted Revival」Groot is a valid target even if its text has no other AUTO effect.',
+    'A Character that cannot be affected by this card (for example a Character protected by Phage, RS-071) is not offered as a target.'
+  ], [
+    'Top Agent: UNIQUE dan [COUNTER] termasuk efek AUTO',
+    '「Top Agent」Black Widow (BP01-022) bisa me-Retreat Karakter lawan Lv3 ke bawah yang punya efek AUTO. UNIQUE dan kemampuan [COUNTER] juga efek AUTO, jadi Karakter UNIQUE seperti 「Rooted Revival」Groot bisa menjadi target walau teksnya tidak punya efek AUTO lain.',
+    'Karakter yang tidak bisa dipengaruhi kartu ini (misalnya yang dilindungi Phage, RS-071) tidak ditawarkan sebagai target.'
+  ]);
+  r('RS-070', 'cards', 'owner', ['PB02-008', 'PB02-006'], [
+    'Life-and-Death Bond: "different name" means a different card name',
+    '「Life-and-Death Bond」Rocket Raccoon returns a [GOTG] Character "with a different name from this card". The name is the full card name including the title in 「」 (CR 101.1.d), as everywhere in the simulator.',
+    'So 「Galaxy Scout」Rocket Raccoon can be returned; another copy of 「Life-and-Death Bond」Rocket Raccoon cannot.'
+  ], [
+    'Life-and-Death Bond: "nama berbeda" = nama kartu berbeda',
+    '「Life-and-Death Bond」Rocket Raccoon mengambil Karakter [GOTG] "dengan nama berbeda dari kartu ini". Nama yang dimaksud adalah nama kartu lengkap termasuk julukan di 「」 (CR 101.1.d), sama seperti di seluruh simulator.',
+    'Jadi 「Galaxy Scout」Rocket Raccoon boleh diambil; kopi lain 「Life-and-Death Bond」Rocket Raccoon tidak boleh.'
+  ]);
+  r('RS-071', 'cards', 'owner', ['SP01-050', 'BP01-022'], [
+    'Phage cannot be affected by Lv1 cards',
+    '「Spider-Archenemy」Phage: the Character it is attached to and all cards attached to that Character cannot be affected by the effects of cards with Lv1.',
+    'Owner decision: Phage on the field that is not attached is also not affected by the effects of Lv1 cards. Example: 「Top Agent」Black Widow (Lv1) cannot Retreat Phage.'
+  ], [
+    'Phage tidak bisa dipengaruhi kartu Lv1',
+    '「Spider-Archenemy」Phage: Karakter tempat Phage terpasang dan semua kartu yang terpasang pada Karakter itu tidak bisa dipengaruhi efek kartu Lv1.',
+    'Keputusan pemilik: Phage di field yang tidak terpasang juga tidak bisa dipengaruhi efek kartu Lv1. Contoh: 「Top Agent」Black Widow (Lv1) tidak bisa me-Retreat Phage.'
+  ]);
+  r('RS-072', 'cards', 'owner', ['BP01-067', 'SP01-052'], [
+    'Hostile Focus can redirect an AIR STRIKE attack',
+    '「Hostile Focus」Winter Soldier can change the target of an attack made with AIR STRIKE (the area counted as a Weakness).',
+    'The new target may also be the Character in that same area: the attack then becomes a normal attack on that Character. Any other area the attacker may attack can be chosen as usual.'
+  ], [
+    'Hostile Focus bisa mengalihkan serangan AIR STRIKE',
+    '「Hostile Focus」Winter Soldier bisa mengubah target serangan yang memakai AIR STRIKE (area dianggap Weakness).',
+    'Target baru boleh juga Karakter di area yang sama: serangan menjadi serangan biasa ke Karakter itu. Area lain yang bisa diserang penyerang tetap bisa dipilih seperti biasa.'
+  ]);
+  r('RS-073', 'cards', 'owner', ['SP01-034'], [
+    'Ultimate Mode Spider Suit works without being attached',
+    '「Ultimate Mode」Spider Suit\'s COUNTER·ACTI can be activated even when it is not attached to a Character: you still prune 1 [Web] Character from your RETREAT.',
+    'The Power+1000 part applies only while Spider Suit is attached; otherwise only the prune happens.'
+  ], [
+    'Ultimate Mode Spider Suit bisa dipakai tanpa terpasang',
+    'COUNTER·ACTI 「Ultimate Mode」Spider Suit bisa diaktifkan walau tidak terpasang ke Karakter: Anda tetap mem-Prune 1 Karakter [Web] dari RETREAT.',
+    'Bagian Power+1000 hanya berlaku saat Spider Suit terpasang; kalau tidak, hanya Prune yang terjadi.'
+  ]);
+
   /* ===================== tampilan ===================== */
   const S = () => window.MHRSim;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);

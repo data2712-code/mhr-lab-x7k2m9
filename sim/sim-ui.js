@@ -592,13 +592,17 @@
     }
     const pre = CLOCK[c.mode];
     if (!pre || c.left == null || !G.prompt) { el.textContent = 'No clock'; el.className = 'paused'; bar.style.width = '0'; ring(G.prompt ? c.p : null, null, false); return; }
-    const left = Math.max(0, c.left - el2), kind = c.kind;
-    const total = kind === 'turn' ? pre[0] : (G.prompt.type === 'mulligan' ? pre[1] * 2 : pre[1]);
-    el.textContent = (stop ? '⏸ ' : '⏱ ') + Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0') + (narrow() ? '' : ' · ' + G.names[c.p] + (kind === 'turn' ? '\'s turn' : ' responding')) + (stop ? ' · paused' : '');
-    el.className = (kind === 'resp' ? 'resp' : '') + (left <= 10 ? ' warn' : '') + (stop ? ' paused' : '');
-    bar.className = (kind === 'resp' ? 'resp' : '') + (stop ? ' paused' : '');
+    const main = Math.max(0, c.left - el2), kind = c.kind;
+    // o2.45: setelah jam utama habis, sisa cadangan waktu (c.bank) yang berjalan.
+    const inBank = main <= 0 && c.bank != null && c.bank - Math.max(0, el2 - c.left) > 0;
+    const left = main > 0 ? main : inBank ? Math.max(0, c.bank - Math.max(0, el2 - c.left)) : 0;
+    const total = inBank ? (BANK[c.mode] || 60) : kind === 'turn' ? pre[0] : (G.prompt.type === 'mulligan' ? pre[1] * 2 : pre[1]);
+    el.textContent = (stop ? '⏸ ' : inBank ? '⏳ ' : '⏱ ') + mmss(left) + (inBank ? ' bank' : '') + (narrow() ? '' : ' · ' + G.names[c.p] + (kind === 'turn' ? '\'s turn' : ' responding')) + (stop ? ' · paused' : '');
+    el.className = (kind === 'resp' ? 'resp' : '') + (left <= 10 ? ' warn' : left <= 30 || inBank ? ' low' : '') + (inBank ? ' bank' : '') + (stop ? ' paused' : '');
+    bar.className = (kind === 'resp' ? 'resp' : '') + (inBank ? ' bank' : '') + (stop ? ' paused' : '');
     bar.style.width = Math.max(0, Math.min(100, left / total * 100)) + '%';
     ring(c.p, left / total, kind === 'resp');
+    clkAlert(!stop && c.p === net.seat && G.prompt.type !== 'rps', left, inBank, kind, 'n' + c.p + ':' + (m.seq || 0) + ':' + kind + (inBank ? 'b' : ''));
   }
 
   /* ---------------- replay ---------------- */
@@ -2098,7 +2102,26 @@
   /* ---------- jam giliran & respons (keputusan pemilik 6 Nov 2026: jam giliran + respons; waktu habis =
      simulator bertindak, tanpa kalah) ---------- */
   // Riwayat #50: durasi standar (riwayat #39) + pilihan fleksibel untuk latihan (lawan bot / dengan teman). off = tanpa jam.
-  const CLOCK = { standard: [120, 30], relaxed: [300, 60], long: [600, 120], off: null };
+  // o2.45 (keputusan pemilik 23 Nov 2026, opsi B): Standar 2:30 / 0:45 + cadangan 1:00 per pemain per game (sama dengan sim-server.js).
+  const CLOCK = { standard: [150, 45], relaxed: [300, 60], long: [600, 120], off: null };
+  const BANK = { standard: 60 };
+  const mmss = s => Math.floor(s / 60) + ':' + String(Math.max(0, s) % 60).padStart(2, '0');
+  // o2.45 (laporan #50): peringatan jam yang lebih terlihat — kuning ≤30 dtk, merah berdenyut ≤10 dtk, getar sekali di 10 dtk,
+  // dan pita besar di bawah layar saat giliran/respons Anda hampir habis atau cadangan waktu sedang dipakai.
+  let clkVib = null;
+  function clkAlert(mine, sec, inBank, kind, key) {
+    let el = $('clkWarn');
+    const show = mine && (inBank || sec <= 10);
+    if (!show) { if (el) el.classList.remove('on'); return; }
+    if (!el) { el = document.createElement('div'); el.id = 'clkWarn'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.classList.add('on'); el.classList.toggle('bank', !!inBank && sec > 10);
+    const id = !!(window.MHRSimI18N && window.MHRSimI18N.lang === 'id');
+    el.setAttribute('data-noi18n', '');
+    el.textContent = inBank && sec > 10 ? (id ? '⏳ Memakai cadangan waktu · sisa ' + mmss(sec) + ' untuk game ini' : '⏳ Using your time bank · ' + mmss(sec) + ' left this game')
+      : '⚠ ' + sec + (id ? ' detik lagi' : 's left') + (inBank ? (id ? ' (cadangan)' : ' (time bank)') : '') +
+        (kind === 'turn' ? (id ? ' — lalu giliranmu berakhir otomatis' : ' — then your turn ends automatically') : (id ? ' — lalu jawaban bawaan dipakai' : ' — then the default answer is used'));
+    if (sec <= 10 && sec > 0 && clkVib !== key) { clkVib = key; try { if (navigator.vibrate) navigator.vibrate(200); } catch (e) { /* abaikan */ } }
+  }
   // O-14 (keputusan pemilik 7 Nov 2026): satu jam pertandingan bersama 30 menit, tanpa batas waktu per giliran/respons.
   // Berjalan terus (juga saat bot berpikir); berhenti hanya saat halaman tersembunyi atau layar serah-terima perangkat.
   // Habis → aksi {t:'timeup'} di mesin: Rush Point terbanyak, lalu sisa Deck terbanyak, lalu jankenpon.
@@ -2134,7 +2157,7 @@
   function clockSync() {
     if (!clockActive()) return null;
     const pr = G.prompt, pre = CLOCK[ui.timer];
-    if (!ui.clk) ui.clk = { turnKey: null, turnLeft: 0, respKey: null, respLeft: 0, last: Date.now(), hurry: null, warnS: null };
+    if (!ui.clk) ui.clk = { turnKey: null, turnLeft: 0, respKey: null, respLeft: 0, last: Date.now(), hurry: null, warnS: null, bank: BANK[ui.timer] ? [BANK[ui.timer], BANK[ui.timer]] : null };
     const c = ui.clk, tk = G.turn + ':' + G.tp, rk = G.actions.length + ':' + pr.type + ':' + pr.p;
     if (c.turnKey !== tk) { c.turnKey = tk; c.turnLeft = pre[0]; }
     if (c.respKey !== rk) { c.respKey = rk; c.respLeft = pr.type === 'mulligan' ? pre[1] * 2 : pre[1]; }
@@ -2147,17 +2170,20 @@
     if (!c) { if (ui.clk) ui.clk.last = Date.now(); updateClockView(); return; }
     const now = Date.now(), dt = (now - c.last) / 1000; c.last = now;
     if (!clockPaused() && dt < 5) {
-      const kind = clockKind(G.prompt);
-      if (kind === 'turn') c.turnLeft -= dt; else c.respLeft -= dt;
-      const left = kind === 'turn' ? c.turnLeft : c.respLeft;
+      const kind = clockKind(G.prompt), key = kind === 'turn' ? 'turnLeft' : 'respLeft', bp = G.prompt.p;
+      // o2.45: jam utama dulu, lalu cadangan waktu pemain itu; timeout baru setelah keduanya habis.
+      if (c[key] > 0) c[key] -= dt; else if (c.bank && c.bank[bp] > 0) c.bank[bp] -= dt;
+      if (c[key] < 0) { if (c.bank && c.bank[bp] > 0) c.bank[bp] += c[key]; c[key] = 0; }
+      const left = c[key] > 0 ? c[key] : (c.bank ? c.bank[bp] : 0);
       const sec = Math.ceil(left);
       if (sec <= 10 && sec > 0 && c.warnS !== sec) { c.warnS = sec; if (window.MHRSound) MHRSound.play('tick'); }
-      if (left <= 0) { timeoutNow(kind); return; }
+      if (left <= 0) { if (c.bank) c.bank[bp] = Math.max(0, c.bank[bp]); timeoutNow(kind); return; }
     }
     updateClockView();
   }
   function updateClockView() {
     const el = $('clock'), bar = $('clockBar'); if (!el) return;
+    clkAlert(false);
     if (net.on) { netClockView(el, bar); return; }
     if (G && MATCH[ui.timer] && !ui.sandbox && !ui.replay) {
       const total = MATCH[ui.timer], left = Math.max(0, ui.mleft || 0), sec = Math.ceil(left);
@@ -2177,15 +2203,18 @@
       el.textContent = !G || G.result ? '' : ui.sandbox ? 'Sandbox · no clock' : ui.replay ? 'Replay' : G.prompt && ui.ctrl[G.prompt.p] === 'bot' ? 'Bot is acting' : !CLOCK[ui.timer] ? 'No clock' : '';
       return;
     }
-    const kind = clockKind(G.prompt), left = Math.max(0, kind === 'turn' ? c.turnLeft : c.respLeft), sec = Math.ceil(left);
+    const kind = clockKind(G.prompt), bp = G.prompt.p, main = Math.max(0, kind === 'turn' ? c.turnLeft : c.respLeft);
+    const inBank = main <= 0 && !!c.bank && c.bank[bp] > 0;
+    const left = main > 0 ? main : inBank ? c.bank[bp] : 0, sec = Math.ceil(left);
     const pre = CLOCK[ui.timer] || CLOCK.standard;
-    const total = kind === 'turn' ? pre[0] : (G.prompt.type === 'mulligan' ? pre[1] * 2 : pre[1]);
+    const total = inBank ? (BANK[ui.timer] || 60) : kind === 'turn' ? pre[0] : (G.prompt.type === 'mulligan' ? pre[1] * 2 : pre[1]);
     const paused = clockPaused();
-    el.textContent = (paused ? '⏸ ' : '⏱ ') + Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0') + (narrow() ? '' : ' · ' + G.names[G.prompt.p] + (kind === 'turn' ? '\'s turn' : ' responding')) + (paused ? ' · paused' : '');
-    el.className = (kind === 'resp' ? 'resp' : '') + (sec <= 10 ? ' warn' : '') + (paused ? ' paused' : '');
-    bar.className = (kind === 'resp' ? 'resp' : '') + (paused ? ' paused' : '');
+    el.textContent = (paused ? '⏸ ' : inBank ? '⏳ ' : '⏱ ') + mmss(sec) + (inBank ? ' bank' : '') + (narrow() ? '' : ' · ' + G.names[bp] + (kind === 'turn' ? '\'s turn' : ' responding')) + (paused ? ' · paused' : '');
+    el.className = (kind === 'resp' ? 'resp' : '') + (sec <= 10 ? ' warn' : sec <= 30 || inBank ? ' low' : '') + (inBank ? ' bank' : '') + (paused ? ' paused' : '');
+    bar.className = (kind === 'resp' ? 'resp' : '') + (inBank ? ' bank' : '') + (paused ? ' paused' : '');
     bar.style.width = Math.max(0, Math.min(100, left / total * 100)) + '%';
-    ring(G.prompt.p, left / total, kind === 'resp');
+    ring(bp, left / total, kind === 'resp');
+    clkAlert(!paused && ui.ctrl[bp] === 'human', sec, inBank, kind, 'o' + bp + ':' + G.actions.length + ':' + kind + (inBank ? 'b' : ''));
   }
   // Cincin jam di avatar pemain yang sedang bertindak (Alternatif A). frac null = tanpa jam (cincin penuh).
   function ring(p, frac, resp) {

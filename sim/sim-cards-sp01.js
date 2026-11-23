@@ -577,9 +577,10 @@
         run: A => { A.attached(host(A)).filter(i => i !== A.self).forEach(i => A.retreat(i, 'Ultimate Mode')); }
       }],
       acti: [{
-        id: 'suit', zone: 'FIELD', counter: true, once: true, label: 'Prune 1 [Web] Character in your RETREAT: the Character this card is attached to gets Power+1000',
-        needHost: true,
-        can: A => !!host(A) && A.ret(A.p).some(i => isWeb(A, i)),
+        // o2.45 (laporan #44/#45, keputusan pemilik): bisa diaktifkan walau tidak terpasang — biaya Prune tetap dibayar; Power+1000
+        // hanya bila kartu ini terpasang ke Karakter. Dulu needHost (o2.40).
+        id: 'suit', zone: 'FIELD', counter: true, once: true, label: 'Prune 1 [Web] Character in your RETREAT: the Character this card is attached to (if any) gets Power+1000',
+        can: A => A.ret(A.p).some(i => isWeb(A, i)),
         run: A => {
           const c = A.ask('c', { text: 'Choose 1 [Web] Character in your RETREAT to Prune', from: A.ret(A.p).filter(i => isWeb(A, i)) });
           if (A.prune(c[0], 'Ultimate Mode') && host(A)) A.mod(host(A), 'p', 1000, 'Ultimate Mode');
@@ -792,6 +793,8 @@
     /* 「Spider-Archenemy」Phage */
     'SP01-050': {
       shield: (A, a, src) => !A.isFd(src) && A.lv(src) === 1,
+      // o2.45 (laporan #40, keputusan pemilik): Phage di FIELD yang tidak terpasang juga tidak bisa dipengaruhi efek kartu Lv1.
+      immune: (A, self, src) => !A.isFd(src) && A.lv(src) === 1 && ['BATTLE', 'BASE'].includes(A.zone(self)),
       trig: [{
         id: 'called', zone: 'FIELD', optional: true, label: 'Spider-Archenemy Phage',
         text: "Place 1 of your opponent's Lv3 [Human] Characters from their RETREAT onto your BATTLE and attach Phage to it?",

@@ -657,12 +657,14 @@
     'PB02-008': {
       trig: [{
         id: 'enter', zone: 'FIELD', optional: true, label: 'Life-and-Death Bond',
-        text: 'Discard the top 3 cards of your Deck to return 1 [GOTG] Character with a different name from your RETREAT to your HAND?',
+        text: 'Discard the top 3 cards of your Deck to return 1 [GOTG] Character with a different card name from your RETREAT to your HAND?',
         when: enterSelf,
         can: A => A.deck(A.p).length >= 3,
         run: A => { if (A.mill(A.p, 3, 'Life-and-Death Bond').length === 3) A.job.step2 = true; },
         after: A => {
-          const c = A.ask('c', { text: 'Choose 1 [GOTG] Character (not Rocket Raccoon) in your RETREAT to return to your HAND', from: A.ret(A.p).filter(i => isGotg(A, i) && charName(A, i) !== charName(A, A.self)), prefer: 'high' });
+          // o2.45 (laporan #43, keputusan pemilik): "different name" = nama kartu lengkap termasuk julukan (CR 101.1.d), seperti di
+          // seluruh mesin; 「Galaxy Scout」Rocket Raccoon boleh diambil.
+          const c = A.ask('c', { text: 'Choose 1 [GOTG] Character with a different card name in your RETREAT to return to your HAND', from: A.ret(A.p).filter(i => isGotg(A, i) && A.name(i) !== A.name(A.self)), prefer: 'high' });
           c.forEach(i => A.toHand(i, 'Life-and-Death Bond'));
         }
       }]

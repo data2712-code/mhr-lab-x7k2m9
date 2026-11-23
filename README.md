@@ -604,6 +604,24 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.46 — 🗼 Control Tower → 🔧 Battle Sim server (maintenance) + Battle Sim o2.45 (laporan #40, #41, #43, #44/#45, #49; jam + cadangan waktu) — 23 November 2026 *(`tower.js`, `index.html`, `sim-host.js`, `sim/`)*
+Permintaan pemilik: kontrol maintenance server Battle Sim dipindah ke Control Tower; perbaikan laporan pemain.
+- **Tab baru 🔧 Battle Sim server** di Control Tower (super-admin): status maintenance (terbuka / dijadwalkan / aktif), jumlah
+  permainan berjalan & pemain mencari (GET `/api/queue`, segar tiap 30 detik), pesan untuk pemain + perkiraan lama, tombol
+  Umumkan 30 / 15 menit lagi, Mulai sekarang, End maintenance (POST `/api/admin/maint` dengan token login), dan pilihan server
+  STAGING per perangkat (localStorage `mhrsim.server`, dipakai Battle Sim di perangkat itu setelah dimuat ulang). Panel lama di
+  Battle Sim → Online · private room dihapus (diganti satu baris petunjuk); banner kuning untuk pemain tetap.
+- **Battle Sim o2.45 / mesin v0.14.3** (riwayat simulator #125, RS-069–073): Top Agent menganggap UNIQUE & [COUNTER] sebagai AUTO
+  (Groot bisa di-Retreat) dan tidak menawarkan target yang kebal; Phage kebal efek kartu Lv1 juga saat tidak terpasang; Hostile
+  Focus bisa mengalihkan serangan AIR STRIKE; Spider Suit bisa diaktifkan tanpa terpasang (Power+1000 hanya bila terpasang);
+  Life-and-Death Bond Rocket membandingkan nama kartu lengkap (Galaxy Scout Rocket boleh diambil).
+- **Jam Standar (Find a match) opsi B** (laporan #48/#50): 2:30 per giliran / 0:45 per respons + cadangan waktu 1:00 per pemain
+  per game (dipakai otomatis setelah jam habis, sebelum timeout), jam kuning ≤30 dtk / merah ≤10 dtk, getar sekali di 10 dtk, dan pita
+  peringatan besar di bawah layar. Jam berjalan di server (`online\server-tail.min.js`).
+- **Server Battle Sim perlu di-deploy ulang** setelah push (mesinnya dibangun dari `sim/` situs): nyalakan maintenance di tab baru,
+  tunggu 0 permainan, jalankan `online\deploy-production.cmd`, lalu End maintenance.
+- `tower.js?v=7.46`, `sim-host.js?v=7.46-sim45`, `SIM_URL ?v=o2.45`, footer v7.46.
+
 ### Battle Sim o2.44 — laporan #37 (mesin v0.14.2) — 20 November 2026 *(`sim/`, `sim-host.js`, `index.html`)*
 - Online: kilasan RUSH POINT / pertarungan lama tidak muncul lagi di setiap aksi. Prompt urutan efek: tombol Skip + tanda "tidak ada target".
 - Turn The Tide pada karakter yang diambil (Phage) kini menaruhnya ke FIELD pemakai TTT.

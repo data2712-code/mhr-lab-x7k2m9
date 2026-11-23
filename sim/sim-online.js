@@ -26,7 +26,7 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* abaikan */ } },
     del(k) { try { localStorage.removeItem(k); } catch (e) { /* abaikan */ } }
   };
-  const CLOCK_LABEL = { standard: 'Standard 2:00 / 0:30', relaxed: 'Relaxed 5:00 / 1:00', long: 'Long 10:00 / 2:00', off: 'No clock', match30: 'Match 30:00' };
+  const CLOCK_LABEL = { standard: 'Standard 2:30 / 0:45 + 1:00 bank', relaxed: 'Relaxed 5:00 / 1:00', long: 'Long 10:00 / 2:00', off: 'No clock', match30: 'Match 30:00' };
   const TEST_LABEL = { sd01: 'SD01', sd02: 'SD02', sd03: 'SD03', sd04: 'SD04', sd05: 'SD05', sd06: 'SD06', bp01r: 'BP01R', bp01y: 'BP01Y', bp01b: 'BP01B', bp01g: 'BP01G', s4r: 'S4R', s4y: 'S4Y', s4b: 'S4B', s4g: 'S4G', spr: 'SPR', spy: 'SPY', spb: 'SPB', spg: 'SPG' };
 
   /* ---------- situs induk (iframe Battle Sim di mhrdecklab.com) ---------- */
@@ -174,7 +174,8 @@
         '<button class="pri" data-on="back" style="min-height:44px">Back to the game</button><button data-on="forget" style="min-height:44px">Forget</button></div>';
     }
     h += '<p class="small muted" style="margin:0 2px 10px">Playing as <b>' + esc(s.username || 'Player') + '</b>' + (s.admin ? ' · admin' : '') + '</p>';
-    if (s.admin) h += '<div class="box mtadm" id="mtAdmin" data-noi18n></div>';      // o2.42: saklar maintenance + server staging
+    // o2.45 (pemilik 23 Nov 2026): saklar maintenance & server staging dipindah ke situs, 🗼 Control Tower → 🔧 Battle Sim server.
+    if (s.admin) h += '<p class="small muted" style="margin:-4px 2px 10px" data-noi18n>🔧 ' + TT('Server maintenance controls are in 🗼 Control Tower → Battle Sim server (super-admin).', 'Kontrol maintenance server ada di 🗼 Control Tower → Battle Sim server (super-admin).') + '</p>';
     // Gabung (dari link / kode)
     h += '<div class="box"><h3 style="margin:0 0 8px">Join a room</h3><div class="form">' +
       '<div class="f"><label>Room code</label><input id="onJoinCode" maxlength="6" autocomplete="off" style="text-transform:uppercase;letter-spacing:.2em;font-weight:700" value="' + esc(pendingJoin || '') + '" placeholder="e.g. 7KQ2MX"></div>' +
@@ -187,7 +188,7 @@
       '<div class="f full" id="onCodeWrap" style="display:none"><label>Deck link or code</label><textarea id="onDeckCode" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder">' + esc(pref.code || '') + '</textarea></div>' +
       '<div class="f"><label>Clock</label>' + seg('onClock', [['standard', 'Standard'], ['relaxed', 'Relaxed'], ['long', 'Long'], ['off', 'No clock'], ['match30', 'Match 30:00']], pref.clock) + '</div>' +
       '<div class="f"><label>Who goes first</label>' + seg('onFirst', [['random', 'Random'], ['host', 'Me'], ['guest', 'My friend']], pref.first) + '</div>' +
-      '</div><p class="small muted">Standard 2:00 per turn / 0:30 per response, Relaxed 5:00 / 1:00, Long 10:00 / 2:00. The 3rd timeout loses the game. Match 30:00 = one shared 30-minute clock (most Rush Points, then most cards left in the Deck, then rock-paper-scissors). Undo needs your opponent\'s permission, at most 3 per player. If someone disconnects, their seat is kept for 2 minutes and the clock keeps running.</p>' +
+      '</div><p class="small muted">Standard 2:30 per turn / 0:45 per response + a 1:00 time bank per game, Relaxed 5:00 / 1:00, Long 10:00 / 2:00. The 3rd timeout loses the game. Match 30:00 = one shared 30-minute clock (most Rush Points, then most cards left in the Deck, then rock-paper-scissors). Undo needs your opponent\'s permission, at most 3 per player. If someone disconnects, their seat is kept for 2 minutes and the clock keeps running.</p>' +
       '<div class="startbar"><button class="pri" data-on="create">Create room & get the link</button></div></div>';
     h += '<div id="onErr" class="err"></div>';
     el.innerHTML = h;
@@ -197,7 +198,6 @@
     wire('onDeck', 'onCodeWrap'); wire('onJoinDeck', 'onJoinCodeWrap');
     $('onJoinCode').oninput = e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); if (e.target.value.length === 6) roomInfo(e.target.value); };
     if (pendingJoin) roomInfo(pendingJoin);
-    if (s.admin) adminDraw();
     tr();
   }
   async function roomInfo(code) {
@@ -368,8 +368,8 @@
       '<div class="f full" id="fqCodeWrap" style="display:none"><label>Deck link or code</label><textarea id="fqDeckCode" placeholder="Paste a deck link/code from the mhrdecklab Deck Builder">' + esc(pref.code || '') + '</textarea></div></div>' +
       // o2.16: kalimat dengan teks tebal dibuat langsung dalam bahasa aktif (kamus kalimat utuh tidak bisa menerjemahkan potongan)
       ((window.MHRSimI18N && window.MHRSimI18N.lang === 'id')
-        ? '<p class="small muted">Anda dipertemukan dengan pemain berikutnya yang sedang mencari. ' + (window.MHRSimRanked && window.MHRSimRanked.live() ? 'Cari lawan bersifat <b>ranked</b>: Anda menambah atau kehilangan poin (lihat 🏆 Ranked). ' : 'Poin ranked mulai 23 November 2026, setelah beta. ') + 'Jam: Standar 2:00 per giliran / 0:30 per respons; kehabisan waktu ke-3 kalinya berarti kalah. Siapa yang jalan duluan diacak. Pertandingan tersimpan di akun Anda. Selama beta pemain online mungkin masih sedikit: setelah 45 detik Anda bisa melawan bot sambil tetap mencari.</p>'
-        : '<p class="small muted">You are matched with the next player who is searching. ' + (window.MHRSimRanked && window.MHRSimRanked.live() ? 'Find a match is <b>ranked</b>: you win or lose points (see 🏆 Ranked). ' : 'Ranked points start on 23 November 2026, after the beta. ') + 'Clock: Standard 2:00 per turn / 0:30 per response; the 3rd timeout loses the game. Who goes first is random. The game is saved to your account. During the beta there may be few players online: after 45 seconds you can play the bot while you keep searching.</p>') +
+        ? '<p class="small muted">Anda dipertemukan dengan pemain berikutnya yang sedang mencari. ' + (window.MHRSimRanked && window.MHRSimRanked.live() ? 'Cari lawan bersifat <b>ranked</b>: Anda menambah atau kehilangan poin (lihat 🏆 Ranked). ' : 'Poin ranked mulai 23 November 2026, setelah beta. ') + 'Jam: Standar 2:30 per giliran / 0:45 per respons + cadangan 1:00; kehabisan waktu ke-3 kalinya berarti kalah. Siapa yang jalan duluan diacak. Pertandingan tersimpan di akun Anda. Selama beta pemain online mungkin masih sedikit: setelah 45 detik Anda bisa melawan bot sambil tetap mencari.</p>'
+        : '<p class="small muted">You are matched with the next player who is searching. ' + (window.MHRSimRanked && window.MHRSimRanked.live() ? 'Find a match is <b>ranked</b>: you win or lose points (see 🏆 Ranked). ' : 'Ranked points start on 23 November 2026, after the beta. ') + 'Clock: Standard 2:30 per turn / 0:45 per response + a 1:00 time bank; the 3rd timeout loses the game. Who goes first is random. The game is saved to your account. During the beta there may be few players online: after 45 seconds you can play the bot while you keep searching.</p>') +
       '<div id="fqRank"></div><p class="small livep" id="fqStat">' + liveHTML(st) + '</p>' +
       '<div id="onErr" class="err">' + esc(fq.note || '') + '</div><div class="startbar"><button class="pri" data-on="fqStart">⚔️ Find a match</button></div></div><div id="fqBusy"></div>';
     fq.note = '';
@@ -621,15 +621,16 @@
      Server menyimpan status di objek antrean: { start, end, msg }. Sebelum `start` = pengumuman (banner kuning: "update pukul
      HH:MM"); sejak `start` = maintenance (Cari lawan, buat room, dan gabung room ditolak; permainan yang sedang berjalan tetap
      bisa diselesaikan; pemain yang sedang mencari dikeluarkan dari antrean). Status dibaca dari GET /api/queue setiap 60 detik
-     selama halaman terlihat. Admin mengubahnya lewat POST /api/admin/maint (panel di Online · private room). */
+     selama halaman terlihat. Admin mengubahnya lewat POST /api/admin/maint — sejak o2.45 dari situs (🗼 Control Tower → 🔧 Battle
+     Sim server, tower.js); dulu panel di Online · private room. Server staging juga dipilih di sana (localStorage mhrsim.server). */
   const IDL = () => !!(window.MHRSimI18N && window.MHRSimI18N.lang === 'id');
   const TT = (en, id) => IDL() ? id : en;
   const hhmm = t => { const d = new Date(t); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
-  let maint = null, maintSeen = false, mtLive = null;
+  let maint = null, maintSeen = false;
   function setMaint(m) {
     const k = JSON.stringify(m || null), changed = k !== JSON.stringify(maint);
     maint = m || null; maintSeen = true;
-    if (changed) { maintBar(); if ($('mtAdmin')) adminDraw(); }
+    if (changed) maintBar();
   }
   const maintOn = () => !!(maint && maint.start && Date.now() >= maint.start);
   function maintText() {
@@ -658,43 +659,12 @@
   async function maintPoll() {
     if (document.visibilityState === 'hidden') return;
     const st = await apiFetch('/api/queue');
-    if (st && !st.error) { mtLive = st; if (!('maint' in st)) setMaint(null); }
-  }
-  // panel admin
-  function adminDraw() {
-    const el = $('mtAdmin'); if (!el) return;
-    const L = mtLive || {}, st = maint ? (maintOn() ? TT('ACTIVE since ', 'AKTIF sejak ') + hhmm(maint.start) : TT('Scheduled for ', 'Dijadwalkan pukul ') + hhmm(maint.start)) + (maint.end ? TT(' · until ~', ' · sampai ~') + hhmm(maint.end) : '') : TT('Off', 'Mati');
-    el.innerHTML = '<h3 style="margin:0 0 6px">🔧 ' + TT('Admin · server maintenance', 'Admin · maintenance server') + '</h3>' +
-      '<p class="small" style="margin:0 0 6px">' + TT('Status: ', 'Status: ') + '<b>' + esc(st) + '</b>' + (maint && maint.msg ? ' · "' + esc(maint.msg) + '"' : '') + '</p>' +
-      '<p class="small muted" style="margin:0 0 8px">' + TT('Live now: ', 'Sedang berjalan: ') + '<b>' + (L.games != null ? L.games : '?') + '</b> ' + TT('game(s)', 'permainan') + ' · <b>' + (L.waiting != null ? L.waiting : '?') + '</b> ' + TT('searching', 'mencari') +
-      ' · ' + TT('server: ', 'server: ') + '<b>' + (STAGING ? 'STAGING' : 'PRODUCTION') + '</b> <button class="sm" data-mt="refresh">↻</button></p>' +
-      '<div class="form"><div class="f full"><label>' + TT('Message for players (optional)', 'Pesan untuk pemain (opsional)') + '</label><input id="mtMsg" maxlength="300" value="' + esc(maint && maint.msg || '') + '" placeholder="' + TT('e.g. New card effects for BP02', 'mis. Efek kartu baru BP02') + '"></div>' +
-      '<div class="f"><label>' + TT('Expected duration', 'Perkiraan lama') + '</label><select id="mtDur"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="60">60 min</option><option value="0">' + TT('unknown', 'belum tahu') + '</option></select></div></div>' +
-      '<div class="startbar" style="flex-wrap:wrap;gap:6px"><button data-mt="in" data-n="30">' + TT('Announce: in 30 min', 'Umumkan: 30 menit lagi') + '</button><button data-mt="in" data-n="15">' + TT('In 15 min', '15 menit lagi') + '</button>' +
-      '<button class="warn" data-mt="in" data-n="0">' + TT('Start now', 'Mulai sekarang') + '</button>' + (maint ? '<button class="pri" data-mt="off">' + TT('End maintenance', 'Selesai maintenance') + '</button>' : '') + '</div>' +
-      '<p class="small muted" style="margin:8px 0 0">' + TT('Deploy the server when "Live now" shows 0 games. Running games are never stopped by this switch. The switch stays on after a deploy: end it when the new server works.',
-        'Deploy server saat "Sedang berjalan" menunjukkan 0 permainan. Saklar ini tidak pernah menghentikan permainan yang sedang berjalan. Saklar tetap menyala setelah deploy: matikan setelah server baru berjalan baik.') + '</p>' +
-      '<div class="startbar" style="margin-top:8px"><button data-mt="server">' + (STAGING ? TT('Switch to the PRODUCTION server', 'Pindah ke server PRODUCTION') : TT('Test on the STAGING server (this device)', 'Uji di server STAGING (perangkat ini)')) + '</button></div>' +
-      '<div id="mtErr" class="err"></div>';
-  }
-  async function adminSet(body) {
-    const r = await apiFetch('/api/admin/maint', { method: 'POST', auth: true, body: JSON.stringify(body) });
-    const e = $('mtErr');
-    if (r.error) { if (e) e.textContent = r.error; return; }
-    mtLive = r; setMaint(r.maint || null); adminDraw();
+    if (st && !st.error && !('maint' in st)) setMaint(null);
   }
   document.addEventListener('click', e => {
     const b = e.target.closest && e.target.closest('[data-mt]'); if (!b) return;
     const a = b.dataset.mt;
     if (a === 'hide') { try { sessionStorage.setItem('mhrsim.maintHide', b.dataset.k || ''); } catch (x) { /* abaikan */ } maintBar(); return; }
-    if (a === 'refresh') { maintPoll().then(adminDraw); return; }
-    if (a === 'in') {
-      const n = +b.dataset.n;
-      if (n === 0 && !confirm(TT('Start maintenance now? Online search and new rooms stop immediately (running games continue).', 'Mulai maintenance sekarang? Cari lawan dan room baru langsung berhenti (permainan yang berjalan tetap lanjut).'))) return;
-      adminSet({ inMin: n, durMin: +($('mtDur') || {}).value || 0, msg: ($('mtMsg') || {}).value || '' }); return;
-    }
-    if (a === 'off') { adminSet({ off: true }); return; }
-    if (a === 'server') { try { if (STAGING) localStorage.removeItem('mhrsim.server'); else localStorage.setItem('mhrsim.server', 'staging'); } catch (x) { /* abaikan */ } location.reload(); }
   });
   setInterval(maintPoll, 60000);
   setInterval(() => { if (maint) maintBar(); }, 30000);          // hitung mundur "N menit lagi" & peralihan ke status aktif

@@ -27,6 +27,8 @@
   const slotOpts = (A, spots) => spots.map(v => ({ v, label: A.spotLabel(v) }));
   const oppBattle = A => A.battleChars(A.opp(A.p));
   const oppChars = A => A.chars(A.opp(A.p));
+  const focusAlt = (c, t) => t.slot !== c.slot || (c.air && !!t.iid);              // BP01-067 (o2.45)
+  const topAgentOk = (A, i) => A.lv(i) <= 3 && A.hasAuto(i) && !A.immune(i);       // BP01-022 (o2.45)
   // "show the top 3 cards of your deck, add 1 of them with X to your HAND and discard the rest"
   function lookAdd(A, test, label, trait) {
     const top = A.deck(A.p).slice(0, 3);
@@ -270,11 +272,12 @@
     'BP01-022': {
       trig: [{
         id: 'called', zone: 'FIELD', optional: true, label: 'Top Agent',
-        text: 'Retreat 1 opponent Character with Lv3 or lower that has [AUTO] in its effects?',
+        text: 'Retreat 1 opponent Character with Lv3 or lower that has [AUTO] in its effects (UNIQUE and [COUNTER] count as AUTO)?',
         when: calledSelf,
-        can: A => A.chars(A.p).some(i => i !== A.self && isAvengers(A, i)) && oppChars(A).some(i => A.lv(i) <= 3 && /AUTO/.test(A.text(i))),
+        // o2.45: UNIQUE dan [COUNTER] termasuk efek AUTO (laporan #49); target yang kebal efek kartu ini (mis. Phage, #40) tidak ditawarkan.
+        can: A => A.chars(A.p).some(i => i !== A.self && isAvengers(A, i)) && oppChars(A).some(i => topAgentOk(A, i)),
         run: A => {
-          const t = A.ask('t', { text: 'Choose 1 opponent Character (Lv3 or lower, with [AUTO]) in the field to Retreat', from: oppChars(A).filter(i => A.lv(i) <= 3 && /AUTO/.test(A.text(i))), prefer: 'high' });
+          const t = A.ask('t', { text: 'Choose 1 opponent Character (Lv3 or lower, with [AUTO]) in the field to Retreat', from: oppChars(A).filter(i => topAgentOk(A, i)), prefer: 'high' });
           t.forEach(i => A.retreat(i, 'Top Agent'));
         }
       }]
@@ -718,10 +721,12 @@
         id: 'focus', zone: 'FIELD', once: true, optional: true, label: 'Hostile Focus',
         text: "Change the attacking Character's target to another target it can attack (you choose)?",
         when: (e, self, A) => e.k === 'ATTACK' && A.ctrl(e.a) === A.opp(A.p),
-        can: A => { const c = A.cur(); return !!c && c.a === ev(A).a && A.targetsOf(c.a).some(t => t.slot !== c.slot); },
+        // o2.45 (laporan #41, keputusan pemilik): serangan AIR STRIKE (area dianggap Weakness) juga bisa dialihkan — termasuk ke
+        // Karakter di area yang sama (serangan biasa ke Karakter itu).
+        can: A => { const c = A.cur(); return !!c && c.a === ev(A).a && A.targetsOf(c.a).some(t => focusAlt(c, t)); },
         run: A => {
           const c = A.cur();
-          const opts = A.targetsOf(c.a).filter(t => t.slot !== c.slot).map(t => ({ v: t.slot, label: A.spotLabel(t.slot) + (t.iid ? ' · ' + A.name(t.iid) : ' · Weakness') }));
+          const opts = A.targetsOf(c.a).filter(t => focusAlt(c, t)).map(t => ({ v: t.slot, label: A.spotLabel(t.slot) + (t.iid ? ' · ' + A.name(t.iid) : ' · Weakness') }));
           const s = A.pick('s', 'Hostile Focus: choose the new Attack Target', opts);
           if (s) A.redirectSlot(s, 'Hostile Focus');
         }
