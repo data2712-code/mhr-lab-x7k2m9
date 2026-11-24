@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.55** · 24 November 2026
+**Versi saat ini: v7.56** · 24 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -603,6 +603,13 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.56 — Text Differences TD-12: CB01-003 / SP01-025 「Gunfire Negotiation」 ikuti teks Inggris — 24 November 2026 *(`rules-faq.js`, `index.html`, berkas baru `errata/TD-12.html`)*
+- Pemilik (24 Nov 2026): "untuk CB01-003 gunakan versi inggris sudah saya konfirmasi". EN: efek kedua terpicu "when this card enters the field
+  **by calling**"; ID: "Saat kartu ini **ditempatkan** ke FIELD" (termasuk karena efek). Ikuti EN: hanya saat dipanggil. SP01-025 = kartu yang sama
+  (nama & teks sama), jadi TD-12 berlaku untuk keduanya. Battle Sim sudah begitu untuk SP01-025 (`calledEnter`); CB01 masih disembunyikan.
+- Temuan dari pengecekan teks ID vs EN 24 Nov 2026 (PDF internal `mhr-deck-lab-internal\Rules FAQ & Errata\MHR Perbedaan Teks ID vs EN (24 Nov 2026).pdf`).
+- `tools/generate_faq_pages.js` dijalankan: halaman baru `errata/TD-12.html` (halaman lain tidak berubah isi). `rules-faq.js?v=7.56`, footer v7.56.
 
 ### v7.55 — CB01 Destined Convergence (7 kartu, teks resmi ID & EN) + halaman kartu BP02/CB01 + API; Battle Sim o2.53 — 24 November 2026 *(`cards.js`, `data.js`, `index.html`, `sim-host.js`, `sim/`, `sitemap.xml`, `api/v1/*`, 54 halaman baru `cards/`, 28 gambar baru `images/CB01-*` + `images/en/CB01-*`)*
 Pemilik (24 Nov 2026): "tambahkan CB01" (LP01 tidak ditambahkan — pemilik mengecek ulang dulu; LP01 di situs resmi Inggris =
