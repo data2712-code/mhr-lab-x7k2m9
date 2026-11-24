@@ -48,7 +48,7 @@
   let DEFS = {};
   /* Set yang DISEMBUNYIKAN (keputusan pemilik 7 Nov 2026, riwayat #48): belum rilis resmi di Indonesia dan teks efeknya
      belum terjemahan resmi. Kartunya tidak dimuat sama sekali: tidak bisa dipakai di deck, kode deck, maupun Sandbox. */
-  const HIDDEN_SETS = ['BP02'];   // riwayat #133 (pemilik 24 Nov 2026): BP02 Doomsday disimpan dulu — kartunya sudah ada di cards.js situs (pra-rilis, rilis Indonesia 16 Des 2026), efek dicicil di sim-cards-bp02.js; buka dengan mengosongkan lagi. Sebelumnya: riwayat #82 (keputusan pemilik 12 Nov 2026): SD05, SD06, PB02 dibuka dengan terjemahan pra-rilis (Tahap 6). Dulu ['SD05','SD06','PB02'] (#48).
+  const HIDDEN_SETS = ['BP02', 'CB01'];   // riwayat #134 (24 Nov 2026): + CB01 Destined Convergence — kartunya baru masuk cards.js situs v7.55, efeknya belum dibuat di simulator. Riwayat #133 (pemilik 24 Nov 2026): BP02 Doomsday disimpan dulu — kartunya sudah ada di cards.js situs (pra-rilis, rilis Indonesia 16 Des 2026), efek dicicil di sim-cards-bp02.js; buka dengan mengosongkan lagi. Sebelumnya: riwayat #82 (keputusan pemilik 12 Nov 2026): SD05, SD06, PB02 dibuka dengan terjemahan pra-rilis (Tahap 6). Dulu ['SD05','SD06','PB02'] (#48).
   const isHiddenNo = no => HIDDEN_SETS.includes(String(no || '').slice(0, 4).toUpperCase());
   let hiddenN = 0;
   function init(cards) {
@@ -91,7 +91,7 @@
   }
 
   /* ---------------- kode deck mhrdecklab (format versi 1) ---------------- */
-  const SER2L = { BP01: 'A', PB01: 'B', EB01: 'C', TB01: 'D', SD01: 'E', SD02: 'F', SD03: 'G', SD04: 'H', SP01: 'I', SD05: 'J', SD06: 'K', PB02: 'L', BP02: 'M' };   // #133: + BP02 'M' (sama dengan situs)
+  const SER2L = { BP01: 'A', PB01: 'B', EB01: 'C', TB01: 'D', SD01: 'E', SD02: 'F', SD03: 'G', SD04: 'H', SP01: 'I', SD05: 'J', SD06: 'K', PB02: 'L', BP02: 'M', CB01: 'N' };   // #133: + BP02 'M', #134: + CB01 'N' (sama dengan situs)
   const L2SER = Object.fromEntries(Object.entries(SER2L).map(([k, v]) => [v, k]));
   function b64urlDecode(str) {
     str = str.replace(/-/g, '+').replace(/_/g, '/');
@@ -123,7 +123,7 @@
   }
 
   const hiddenList = () => HIDDEN_SETS.length > 1 ? HIDDEN_SETS.slice(0, -1).join(', ') + ' and ' + HIDDEN_SETS[HIDDEN_SETS.length - 1] : HIDDEN_SETS.join('');   // #133
-  const HIDDEN_MSG = 'Cards from ' + hiddenList() + ' are not available in the simulator yet (not released in Indonesia yet)';
+  const HIDDEN_MSG = 'Cards from ' + hiddenList() + ' are not available in the simulator yet (their card effects are still being added)';
   // Kode deck format situs (versi 1, sama dengan encodeDeck() di index.html situs) — untuk riwayat pertandingan.
   function encodeDeckCode(list, name) {
     const q = {}, order = [];

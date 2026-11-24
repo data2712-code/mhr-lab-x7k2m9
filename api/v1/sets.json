@@ -1,7 +1,35 @@
 {
   "api_version": 1,
-  "updated": "2026-11-02",
+  "updated": "2026-11-24",
   "sets": [
+    {
+      "code": "CB01",
+      "name": "Destined Convergence",
+      "type": "Other",
+      "cards": 7,
+      "versions": 14
+    },
+    {
+      "code": "SD05",
+      "name": "SOUL",
+      "type": "Starter Deck",
+      "cards": 19,
+      "versions": 21
+    },
+    {
+      "code": "SD06",
+      "name": "POWER",
+      "type": "Starter Deck",
+      "cards": 19,
+      "versions": 21
+    },
+    {
+      "code": "PB02",
+      "name": "Promo Pack",
+      "type": "Other",
+      "cards": 21,
+      "versions": 21
+    },
     {
       "code": "SP01",
       "name": "Era of Spiders",

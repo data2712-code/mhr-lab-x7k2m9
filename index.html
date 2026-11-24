@@ -3734,8 +3734,8 @@
      menganggapnya URL baru tiap kali angkanya berubah, jadi tidak memakai salinan
      lama dari cache HTTP-nya. WAJIB dinaikkan (ke nomor versi baru) setiap kali
      cards.js/data.js/auth.js/decks.js/social.js/collection.js diubah. -->
-<script src="cards.js?v=7.54-bp02a"></script>
-<script src="data.js?v=7.54-bp02a"></script>
+<script src="cards.js?v=7.55-cb01"></script>
+<script src="data.js?v=7.55-cb01"></script>
 <script src="lgs-admin.js?v=7.43"></script>   <!-- v7.31 — jadwal Weekly Rush LGS dari Supabase (lgs_stores) + editor admin; HARUS sesudah data.js (cadangan) -->
 <!-- v6.30 — akun pengguna: Supabase SDK (versi dipin, BUKAN "@2" mengambang,
      supaya perilaku situs tidak bisa berubah diam-diam kalau ada rilis baru) -->
@@ -3769,7 +3769,7 @@
 <script src="perf.js?v=7.34"></script>
 <script src="perf-ui.js?v=7.44"></script>
 <script src="rules-faq.js?v=7.28"></script>   <!-- v7.24 — Rules FAQ & Errata (window.MHRRules); v7.26 — FAQ versi Bahasa Indonesia; v7.27 — Copy link ke halaman statis faq/ & errata/; v7.28 — TD-11 -->
-<script src="sim-host.js?v=7.54-sim52"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
+<script src="sim-host.js?v=7.55-sim53"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
 <script src="tower.js?v=7.51"></script>   <!-- v7.44 — 🗼 Control Tower (super-admin): Overview, Usage, Battle Sim reports, Binder reports, Verified organizers, Opponent deck list, Admin roles -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
@@ -3799,7 +3799,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.54</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.55</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -4123,14 +4123,15 @@ function renderDeckSelect(){
    dropdown filter rarity dan tooltip lencana rarity di kartu. */
 const RARITY_INFO = {R:'Rare', SR:'Super Rare', GR:'Grand Rare', UR:'Ultimate Rare',
   MR:'Alternate Art tingkat 1', SEC:'Alternate Art tingkat 2', HR:'Alternate Art tingkat 3',
-  LR:'Legendary Alternate Art', PR:'Promotional Rare', ER:'Event Rare', TR:'Treasure Rare', C:'Common'};
-const RARITY_ORDER = ['R','SR','GR','UR','MR','SEC','HR','LR','PR','ER','TR','C'];
+  LR:'Legendary Alternate Art', PR:'Promotional Rare', ER:'Event Rare', TR:'Treasure Rare', C:'Common',
+  CR:'Destined Convergence (CB01)'};   /* v7.55 — CB01: kode rarity resmi "CR" (artinya belum dijelaskan di Comprehensive Rules) */
+const RARITY_ORDER = ['R','SR','GR','UR','MR','SEC','HR','LR','PR','ER','TR','CR','C'];
 /* v6.91 — versi berbeda dengan kode rarity SAMA (dicek ke gambar resmi & folder
    Database Image Kartu): kodenya diberi akhiran "_TAG" di cards.js, mis. HR_616.
    rarBase() = kode rarity aslinya (dipakai filter & arti rarity), rarLabel() =
    teks yang ditampilkan. Kalau kartu punya versi bertag, versi tanpa tag ikut
    diberi label pembeda (HR → "HR /99", ER → "ER Top 4", TR → "TR Gold"). */
-const VARIANT_LABEL = {HR_616:'HR /616', ER_CHAMPION:'ER Champion', TR_SILVER:'TR Silver', TR_FULLART:'TR Full Art'};
+const VARIANT_LABEL = {HR_616:'HR /616', ER_CHAMPION:'ER Champion', TR_SILVER:'TR Silver', TR_FULLART:'TR Full Art', CR_199:'CR /199'};   // v7.55 — CB01 bernomor seri 001/199
 const VARIANT_BASE_LABEL = {HR_616:['HR','HR /99'], ER_CHAMPION:['ER','ER Top 4'], TR_SILVER:['TR','TR Gold']};
 function rarBase(r){ return String(r||'').split('_')[0]; }
 function rarLabel(r, c){
@@ -7372,8 +7373,8 @@ function tanggalDMY(iso){
    Kode kartu: 1 huruf seri + 3 digit nomor + jumlah (basis36, 1 karakter).
    Angka "1" di depan adalah versi format — jangan diubah artinya; kalau nanti
    formatnya berganti, naikkan jadi 2 dan tetap dukung pembacaan versi 1. */
-/* v7.02 — + SD05 'J', SD06 'K', PB02 'L'. 24 Nov 2026: + BP02 'M'. Huruf lama JANGAN diubah (link deck lama). */
-const SER2L = {BP01:'A', PB01:'B', EB01:'C', TB01:'D', SD01:'E', SD02:'F', SD03:'G', SD04:'H', SP01:'I', SD05:'J', SD06:'K', PB02:'L', BP02:'M'};
+/* v7.02 — + SD05 'J', SD06 'K', PB02 'L'. 24 Nov 2026: + BP02 'M', CB01 'N'. Huruf lama JANGAN diubah (link deck lama). */
+const SER2L = {BP01:'A', PB01:'B', EB01:'C', TB01:'D', SD01:'E', SD02:'F', SD03:'G', SD04:'H', SP01:'I', SD05:'J', SD06:'K', PB02:'L', BP02:'M', CB01:'N'};
 const L2SER = Object.fromEntries(Object.entries(SER2L).map(([k,v])=>[v,k]));
 
 function b64urlEncode(str){

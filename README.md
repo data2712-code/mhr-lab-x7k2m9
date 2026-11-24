@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.54** · 24 November 2026
+**Versi saat ini: v7.55** · 24 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -603,6 +603,26 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.55 — CB01 Destined Convergence (7 kartu, teks resmi ID & EN) + halaman kartu BP02/CB01 + API; Battle Sim o2.53 — 24 November 2026 *(`cards.js`, `data.js`, `index.html`, `sim-host.js`, `sim/`, `sitemap.xml`, `api/v1/*`, 54 halaman baru `cards/`, 28 gambar baru `images/CB01-*` + `images/en/CB01-*`)*
+Pemilik (24 Nov 2026): "tambahkan CB01" (LP01 tidak ditambahkan — pemilik mengecek ulang dulu; LP01 di situs resmi Inggris =
+cetak ulang 72 karakter SD01–SD04/BP01 dengan beberapa perbaikan kalimat, plus 33 Rush Point).
+- **CB01 「Destined Convergence」** (kotak koleksi Spider-Man, kategori Others): 7 kartu rarity resmi **CR**, tiap kartu juga punya
+  cetakan bernomor seri **001/199** (kode `CR_199`, label "CR /199"). Sumber: API resmi `marvel/card/list` (id & en) + gambar resmi.
+  Rilis Indonesia **23 Nov 2026** (daftar produk resmi) → langsung legal di Events, bukan pre-release.
+- Teks Indonesia mengikuti gambar kartu resmi bila data situs berbeda: CB01-004 `[Archenemy]` (data situs `[Nemesis]`), CB01-007
+  "di FRONT" (data situs "di area BACK"). Beda resmi ID/EN yang dibiarkan: CB01-003 "ditempatkan ke FIELD" vs "enters the field by calling".
+- Gambar: `images/en/<no>.jpg` + `images/en/<no>_CR_199.jpg` (14); `images/` 001/003/004/005 = cetakan CR Indonesia, 002/006/007 =
+  cetakan /199 Indonesia (`_CR_199`); cetakan yang belum ada versi Indonesianya = salinan gambar Inggris (7 berkas, ganti bila terbit). CB01-007 Indonesia memakai ilustrasi lain (potret).
+  Diambil dari situs resmi lewat browser (500×698, ber-watermark SAMPLE).
+- `index.html`: `RARITY_INFO.CR`, `RARITY_ORDER` + CR, `VARIANT_LABEL.CR_199`, huruf link deck `SER2L` CB01 → `'N'`.
+- `tools/generate_card_pages.py` dijalankan: 54 halaman baru (`cards/CB01-*` 7 + `cards/BP02-*` 47, yang terlewat di v7.54);
+  halaman lama tidak berubah isi (hanya akhir baris), jadi tidak ikut di-commit; `sitemap.xml` +54 URL.
+- `tools/generate_api.js` dijalankan: `api/v1` kini 525 versi kartu dari 13 set — SD05, SD06, PB02 (sudah rilis 14 Nov) dan CB01 masuk;
+  BP02 tidak (pre-release).
+- **Battle Sim o2.53** (riwayat simulator #134): CB01 **disembunyikan** dulu (`HIDDEN_SETS = ['BP02','CB01']`) sampai efeknya dibuat;
+  pesan kartu tersembunyi kini "their card effects are still being added". Huruf link deck CB01 'N' juga di simulator.
+- `cards.js?v=7.55-cb01`, `data.js?v=7.55-cb01`, `sim-host.js?v=7.55-sim53`, `SIM_URL ?v=o2.53`, footer v7.55.
 
 ### v7.54 — BP02 Doomsday cicilan 1 (47 kartu pra-rilis) + hitung mundur rilis BP02 di Home; Battle Sim o2.52 (BP02 disimpan) — 24 November 2026 *(`cards.js`, `data.js`, `set-ui.js`, `sim-host.js`, `index.html`, `sim/`, 83 gambar baru `images/BP02-*.jpg` + `images/en/BP02-*.jpg`)*
 Pemilik (24 Nov 2026): "mulai cicil menambahkan set BP02 ke website dari kartu yang sudah ada"; rilis Indonesia **16 Desember 2026**;

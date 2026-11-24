@@ -135,6 +135,8 @@ window.TOURNAMENTS = [
 window.SETS = [
   { kode:'BP02', nama:'Doomsday', tipe:'Expansion Pack', status:'rilis', rilis:{ id:'2026-12-16' },
     deskripsi:'Second expansion pack. Indonesian release on 16 December 2026. Cards are added here as they are revealed: official English text where available (Indonesian text is an unofficial translation), the rest unofficial translations of the Chinese spoilers.' },
+  { kode:'CB01', nama:'Destined Convergence', tipe:'Other', status:'rilis', rilis:{ id:'2026-11-23' },
+    deskripsi:'Spider-Man collector box. 7 CR cards (Symbiotic Suit Spider-Man, Amazing Spider-Man, Spider-Man Noir, Kingpin, Venom, Green Goblin, Mary Jane Watson), each also in a serial-numbered 001/199 version. Official Indonesian and English text.' },
   { kode:'SD05', nama:'', namaSementara:'SOUL', tipe:'Starter Deck', status:'rilis', rilis:{ id:'2026-11-14', cn:'2026-10-16' },
     deskripsi:'Orange starter deck, released in China on 16 Oct 2026; official Indonesian release on 14 Nov 2026. 18 cards, with Odin in UR, MR and SEC versions: Asgard (Odin, Hela, Heimdall, Sif, Valkyrie), Kamar-Taj (Ancient One, Wong, Doctor Strange) and Captain Marvel.',
     berita:'sd05-sd06-pb02-indonesia-release' },

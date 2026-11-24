@@ -367,7 +367,7 @@
     [/^: match time is up and Rush Points and Deck are tied\. Choose Rock, Paper or Scissors( \(round (\d+)\))?\. Your choice is shown only after both players have chosen\.$/,
       (m, r, n) => ': waktu pertandingan habis dan Rush Point serta Deck sama. Pilih Batu, Kertas, atau Gunting' + (n ? ' (ronde ' + n + ')' : '') + '. Pilihan Anda baru ditampilkan setelah kedua pemain memilih.'],
     [/^(\d+) turns · (\d+) actions · seed (\d+)$/, '$1 giliran · $2 aksi · seed $3'],
-    [/^Data: (\d+) Characters from (.+?) \(English card text\) · engine v([\d.]+)\.(.*)$/, (m, n, f, v, rest) => 'Data: ' + n + ' Karakter dari ' + f + ' (teks kartu Inggris) · mesin v' + v + '.' + rest.replace(/ (.+?) \((\d+) cards\) are hidden until their official Indonesian release\./, (x, s, k) => ' ' + s.replace(' and ', ' dan ') + ' (' + k + ' kartu) disembunyikan sampai rilis resmi Indonesia.')],
+    [/^Data: (\d+) Characters from (.+?) \(English card text\) · engine v([\d.]+)\.(.*)$/, (m, n, f, v, rest) => 'Data: ' + n + ' Karakter dari ' + f + ' (teks kartu Inggris) · mesin v' + v + '.' + rest.replace(/ (.+?) \((\d+) cards\) are hidden until their card effects are ready\./, (x, s, k) => ' ' + s.replace(' and ', ' dan ') + ' (' + k + ' kartu) disembunyikan sampai efek kartunya siap.')],
     [/^Concede this game\? You will lose.*$/, 'Menyerah di permainan ini? Anda kalah dan permainan langsung berakhir. Tidak bisa dibatalkan.'],
     [/^Concede this game as (.+?)\? .*$/, 'Menyerah sebagai $1? $1 kalah dan permainan langsung berakhir. Tidak bisa dibatalkan.'],
     [/^([0-9]+) days left$/, '$1 hari lagi'], [/^([0-9]+) saved$/, '$1 tersimpan'],

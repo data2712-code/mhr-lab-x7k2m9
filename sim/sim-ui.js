@@ -65,7 +65,7 @@
     }
     const n = S.init(window.CARDS);
     $('dbinfo').textContent = 'Data: ' + n + ' Characters from ' + BASE + 'cards.js (English card text) · engine v' + S.VERSION + '.' +
-      (S.hiddenCount() ? ' ' + S.hiddenList() + ' (' + S.hiddenCount() + ' cards) are hidden until their official Indonesian release.' : '');
+      (S.hiddenCount() ? ' ' + S.hiddenList() + ' (' + S.hiddenCount() + ' cards) are hidden until their card effects are ready.' : '');
     ['0', '1'].forEach(k => {
       // Tahap 5: deck komunitas dari data.js situs (nama deck saja) sebagai pilihan tambahan.
       const dk = $('dk' + k), cds = Array.isArray(window.DECK_KOMUNITAS) ? window.DECK_KOMUNITAS : [];
