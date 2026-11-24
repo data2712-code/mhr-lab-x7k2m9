@@ -133,6 +133,8 @@ window.TOURNAMENTS = [
      berita    : opsional, slug artikel Berita terkait
    Nama resmi diambil dari halaman produk marvelherorush.com (September 2026). */
 window.SETS = [
+  { kode:'BP02', nama:'Doomsday', tipe:'Expansion Pack', status:'rilis', rilis:{ id:'2026-12-16' },
+    deskripsi:'Second expansion pack. Indonesian release on 16 December 2026. Cards are added here as they are revealed: official English text where available (Indonesian text is an unofficial translation), the rest unofficial translations of the Chinese spoilers.' },
   { kode:'SD05', nama:'', namaSementara:'SOUL', tipe:'Starter Deck', status:'rilis', rilis:{ id:'2026-11-14', cn:'2026-10-16' },
     deskripsi:'Orange starter deck, released in China on 16 Oct 2026; official Indonesian release on 14 Nov 2026. 18 cards, with Odin in UR, MR and SEC versions: Asgard (Odin, Hela, Heimdall, Sif, Valkyrie), Kamar-Taj (Ancient One, Wong, Doctor Strange) and Captain Marvel.',
     berita:'sd05-sd06-pb02-indonesia-release' },
@@ -173,6 +175,7 @@ window.RILIS = [
     wilayah:'China', zona:'+08:00', berita:'preview-sd05-sd06-pb02-orange-purple' },
   { nama:'SD05 & SD06 Starter Deck + PB02 (Orange & Purple)', tanggal:'2026-11-14',
     wilayah:'Indonesia', berita:'sd05-sd06-pb02-indonesia-release' },
+  { nama:'BP02 Doomsday', tanggal:'2026-12-16', wilayah:'Indonesia', link:'#set/BP02' },
 ];
 
 /* ========== DUKUNGAN SUKARELA ==========

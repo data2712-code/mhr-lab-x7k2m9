@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.39** · 13 November 2026
+**Versi saat ini: v7.54** · 24 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -603,6 +603,23 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.54 — BP02 Doomsday cicilan 1 (47 kartu pra-rilis) + hitung mundur rilis BP02 di Home; Battle Sim o2.52 (BP02 disimpan) — 24 November 2026 *(`cards.js`, `data.js`, `set-ui.js`, `sim-host.js`, `index.html`, `sim/`, 83 gambar baru `images/BP02-*.jpg` + `images/en/BP02-*.jpg`)*
+Pemilik (24 Nov 2026): "mulai cicil menambahkan set BP02 ke website dari kartu yang sudah ada"; rilis Indonesia **16 Desember 2026**;
+"untuk bp02 simpan dulu jangan dikeluarkan di battle sim … tambahkan juga countdown di menu home untuk set bp02".
+- `cards.js`: 47 kartu BP02 (8 SR, 38 R, 1 SEC) di akhir daftar. **fan:1** (36 kartu) = teks Inggris resmi, teks Indonesia
+  terjemahan tidak resmi; **fan:2** (11 kartu: BP02-008…010, 018…020, 084…088) = terjemahan tidak resmi spoiler China, gambar cetakan China.
+  Reminder kata kunci baru: UNIQUE, BLOCK, DOUBLE ATTACK. Kartu sisanya ditambahkan saat terungkap.
+- `data.js`: `SETS` BP02 Doomsday (Expansion Pack, `rilis.id` 2026-12-16 → **PRE-RELEASE**: sudah di Cards & Deck Builder, belum
+  sah di Events sampai 16 Des); `RILIS` + `{ nama:'BP02 Doomsday', tanggal:'2026-12-16', wilayah:'Indonesia', link:'#set/BP02' }`
+  → kotak **Next release** + hitung mundur di Home menunjuk BP02 (tombol "See details →" ke halaman set).
+- `index.html`: huruf link deck `SER2L` BP02 → `'M'` (huruf lama tidak berubah). `set-ui.js`: catatan "Partly unofficial" untuk set
+  campuran teks resmi + terjemahan (bila semua kartu fan:2 tetap catatan "Unofficial translation").
+- **Battle Sim o2.52** (riwayat simulator #133): BP02 **disembunyikan** (`HIDDEN_SETS = ['BP02']`) — kartu BP02 tidak dimuat,
+  deck berisi BP02 ditolak dengan pesan "Cards from BP02 are not available in the simulator yet". Efek kartu dicicil di berkas baru
+  `sim/sim-cards-bp02.js` (cicilan 1: 13 kartu). Huruf link deck BP02 'M' juga di simulator.
+- `cards.js?v=7.54-bp02a`, `data.js?v=7.54-bp02a`, `set-ui.js?v=7.54-bp02a`, `sim-host.js?v=7.54-sim52`, `SIM_URL ?v=o2.52`, footer v7.54.
+  Server Battle Sim tidak wajib di-deploy sekarang (BP02 tetap tersembunyi di server lama maupun baru).
 
 ### v7.53 — Battle Sim o2.51: perbaikan God Of Story (#59), Groot (#60), tampilan #63–#65 — 24 November 2026 *(`sim-host.js`, `index.html`, `sim/`)*
 - 「God Of Story」Loki: kartu set lawan kurang dari X → semua yang ada bisa di-Retreat. 「Rooted Revival」Groot: buang 1 kartu

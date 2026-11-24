@@ -144,7 +144,7 @@
     else if (v === 'code') { code = codeText; name = 'Deck'; }
     const d = S.decodeDeckCode(code || '');
     if (!d) return { err: 'The deck code could not be read. Paste a link or a "1.xxx.xxx" code from the Deck Builder.' };
-    if (d.hidden) return { err: 'This deck has ' + d.hidden + ' card(s) from SD05, SD06 or PB02. ' + S.HIDDEN_MSG + '.' };
+    if (d.hidden) return { err: 'This deck has ' + d.hidden + ' card(s) from ' + S.HIDDEN_SETS.join(' / ') + '. ' + S.HIDDEN_MSG + '.' };
     if (d.unknown) return { err: 'This deck has ' + d.unknown + ' unknown card code(s).' };
     const errs = S.validateDeck(d.list);
     if (errs.length) return { err: '"' + name + '" is not a legal deck:\n- ' + errs.join('\n- ') };

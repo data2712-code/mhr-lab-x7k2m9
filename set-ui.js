@@ -143,6 +143,7 @@
     const dd = daysTo(s);
     const pre = preRel(s);
     const fan2 = d.prints.some(p=>p.fan2);
+    const fan2All = fan2 && d.prints.every(p=>p.fan2);   // 24 Nov 2026 (BP02): set campuran teks Inggris resmi + terjemahan China
     const out = (d.spoiler || pre) && cnOut(s);
     const shown = d.prints.slice().sort((a,b)=>a.no.localeCompare(b.no) || (b.base-a.base));
     const series = !d.spoiler ? [...new Set((DB||[]).filter(c=>c.no.startsWith(kode)).map(c=>c.s))] : [];
@@ -176,7 +177,7 @@
         <div class="hm-box"><h3 class="st-h3">Level spread</h3>${levelBars(d.uniq)}</div>
       </div>`:''}
       ${out?`<div class="st-note st-note-cn"><b>Released in China on ${E(tgl(s.rilis.cn))}.</b> ${s.rilis.id?`Indonesian release: ${E(tgl(s.rilis.id))}.`:'Not released in Indonesia yet; the Indonesian release date hasn\'t been announced.'} ${pre ? 'Its cards are already in the Cards page and the Deck Builder, but they aren\'t tournament-legal in Events until the Indonesian release.' : 'Until then this set stays a spoiler on MHR Deck Lab.'}</div>`:''}
-      ${fan2?'<div class="st-note"><b>Unofficial translation.</b> The Indonesian and English card text of this set is a fan-made translation of the official Chinese cards, and the images are the Chinese print. It will be updated regularly once the official Indonesian and English text is published on the official website.</div>':''}
+      ${fan2&&fan2All?'<div class="st-note"><b>Unofficial translation.</b> The Indonesian and English card text of this set is a fan-made translation of the official Chinese cards, and the images are the Chinese print. It will be updated regularly once the official Indonesian and English text is published on the official website.</div>':fan2?'<div class="st-note"><b>Partly unofficial.</b> Cards marked ID*+EN* are fan-made translations of the Chinese spoilers (Chinese print image); the others use the official English text, with an unofficial Indonesian translation. They will be updated once the official text is published.</div>':''}
       ${d.spoiler?'<div class="st-note">Spoiler card text is a <b>fan translation</b> from Chinese product sheets and may differ from the official version. These cards can\'t be used in the Deck Builder yet.</div>':''}
       <div class="hm-sec-h" style="margin-top:6px"><h2>Card list</h2><span class="st-muted">${shown.length} images</span></div>
       <div class="st-cards">${shown.map(p=>`<button class="st-card" data-${p.spoiler?'spoil':'card'}="${E(p.no)}" data-ra="${E(p.ra)}">

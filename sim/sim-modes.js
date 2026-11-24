@@ -338,7 +338,7 @@
     const errs = [];
     [[mine, 'Your deck'], [bot, "Bot's deck"]].forEach(([d, who]) => {
       if (d.err) { errs.push(d.err); return; }
-      if (d.hidden) errs.push(who + ': ' + d.hidden + ' card(s) from SD05, SD06 or PB02. ' + S.HIDDEN_MSG + '.');
+      if (d.hidden) errs.push(who + ': ' + d.hidden + ' card(s) from ' + S.HIDDEN_SETS.join(' / ') + '. ' + S.HIDDEN_MSG + '.');
       const v = S.validateDeck(d.list); if (v.length) errs.push(who + ' (' + d.name + '):\n- ' + v.join('\n- '));
     });
     if (errs.length) { errEl.textContent = errs.join('\n\n'); if (window.MHRSimI18N) window.MHRSimI18N.apply(); return; }

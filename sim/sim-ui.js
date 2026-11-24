@@ -65,7 +65,7 @@
     }
     const n = S.init(window.CARDS);
     $('dbinfo').textContent = 'Data: ' + n + ' Characters from ' + BASE + 'cards.js (English card text) · engine v' + S.VERSION + '.' +
-      (S.hiddenCount() ? ' SD05, SD06 and PB02 (' + S.hiddenCount() + ' cards) are hidden until their official Indonesian release.' : '');
+      (S.hiddenCount() ? ' ' + S.hiddenList() + ' (' + S.hiddenCount() + ' cards) are hidden until their official Indonesian release.' : '');
     ['0', '1'].forEach(k => {
       // Tahap 5: deck komunitas dari data.js situs (nama deck saja) sebagai pilihan tambahan.
       const dk = $('dk' + k), cds = Array.isArray(window.DECK_KOMUNITAS) ? window.DECK_KOMUNITAS : [];
@@ -152,7 +152,7 @@
       if (d.err) { errs.push(d.err); return; }
       const v = S.validateDeck(d.list);
       if (v.length) errs.push('Player ' + (+k + 1) + "'s deck (" + d.name + '):\n- ' + v.join('\n- '));
-      if (d.hidden) errs.push('Player ' + (+k + 1) + "'s deck has " + d.hidden + ' card(s) from SD05, SD06 or PB02. ' + S.HIDDEN_MSG + '.');
+      if (d.hidden) errs.push('Player ' + (+k + 1) + "'s deck has " + d.hidden + ' card(s) from ' + S.HIDDEN_SETS.join(' / ') + '. ' + S.HIDDEN_MSG + '.');
       if (d.unknown) errs.push('Player ' + (+k + 1) + "'s deck: " + d.unknown + ' unknown card code(s).');
       decks.push(d.list);
     });
