@@ -16,6 +16,25 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-24', t: 'fix', v: 'o2.51', reports: [59, 60, 63, 64, 65],
+      en: { h: 'God Of Story and Groot fixes · Confirm cost · pick targets on the board', b: [
+        '「God Of Story」Loki: if your opponent has fewer face-down cards than X, you can now Retreat all of the ones they have (do as much as you can).',
+        '「Rooted Revival」Groot: you can discard 1 card even when your BATTLE is full. The Attached Card then stays on Groot.',
+        'CALL with a cost: when the total Lv is right, press ✓ Confirm cost before choosing where the card goes. Until then, tapping a chosen cost card removes it.',
+        'A Lv changed by an effect now shows on the card (red Lv▼ or green Lv▲), also on phones.',
+        'Effects that choose cards already on the board (BATTLE or BASE): tap the glowing cards on the board, then Confirm. ☰ List opens the old window.',
+        'After a Find a match game, Menu goes back to Find a match. A card you are reading stays open when your opponent acts.'
+      ] },
+      id: { h: 'Perbaikan God Of Story dan Groot · Confirm cost · pilih target di papan', b: [
+        '「God Of Story」Loki: bila kartu set lawan lebih sedikit dari X, sekarang semua kartu set yang ada bisa di-Retreat (lakukan sebanyak mungkin).',
+        '「Rooted Revival」Groot: 1 kartu tetap bisa dibuang walau BATTLE Anda penuh. Attached Card-nya tetap di Groot.',
+        'CALL dengan biaya: saat total Lv pas, tekan ✓ Confirm cost sebelum memilih area. Sebelum itu, mengetuk kartu biaya yang dipilih akan melepasnya.',
+        'Lv yang berubah karena efek sekarang tampil di kartu (merah Lv▼ atau hijau Lv▲), juga di HP.',
+        'Efek yang memilih kartu yang sudah ada di papan (BATTLE atau BASE): ketuk kartu yang menyala di papan, lalu Confirm. ☰ List membuka jendela lama.',
+        'Setelah pertandingan Cari lawan, tombol Menu kembali ke Cari lawan. Keterangan kartu yang sedang dibaca tetap terbuka saat lawan beraksi.'
+      ] }
+    },
+    {
       d: '2026-11-23', t: 'fix', v: 'o2.50',
       en: { h: 'Find a match button in the Ranked tab', b: [
         'Your rank card in 🏆 Ranked now has a ⚔️ Find a match button, so you can start a ranked game straight from the leaderboard.'

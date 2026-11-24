@@ -326,7 +326,7 @@
   }
 
   /* ---------------- menjalankan aksi ---------------- */
-  function resetSel() { ui.sel = null; ui.mode = null; ui.callType = 'call'; ui.pick = []; ui.cost = []; ui.arr = null; ui.arrPick = null; ui.atk = null; ui.tg = null; ui.mullSel = []; ui.discSel = []; ui.dropDest = null; ui.pickTouched = false; }
+  function resetSel() { ui.sel = null; ui.mode = null; ui.callType = 'call'; ui.pick = []; ui.cost = []; ui.costOk = false; ui.pickList = false; ui.arr = null; ui.arrPick = null; ui.atk = null; ui.tg = null; ui.mullSel = []; ui.discSel = []; ui.dropDest = null; ui.pickTouched = false; }
   function act(a, auto) {
     if (net.on) return netAct(a);
     if (!G || !G.prompt || ui.replay) return false;
@@ -501,7 +501,8 @@
       $('replayBar').classList.remove('on'); $('sbBadge').style.display = 'none'; $('btnCopyPos').style.display = 'none';
       hostGame(true);
     }
-    if (promptKey() !== key) { resetSel(); ui.pickClosed = false; ui.msg = ''; }
+    // o2.51 (laporan #64): keterangan kartu yang sedang dibuka tetap terbuka saat lawan beraksi (hanya mode pilihan yang direset).
+    if (promptKey() !== key) { const keep = !ui.mode && ui.sel && G.inst[ui.sel] && S.locate(G, ui.sel) ? ui.sel : null; resetSel(); if (keep) ui.sel = keep; ui.pickClosed = false; ui.msg = ''; }
     // Laporan #28 (o2.32): setelah sambung ulang, server hanya mengirim state (undoPending) tanpa undo_ask lagi → tanya lagi di sini.
     if (msg.undoPending && msg.undoPending.from !== net.seat && !net.ask && !G.result) { netUndoAsk(); netAutoPass(msg); return; }
     render();
@@ -684,6 +685,7 @@
     if (opts.cls) cls.push(opts.cls);
     if (ui.sel === iid || ui.atk === iid) cls.push('sel');
     if (ui.cost.includes(iid)) cls.push('cost');
+    if (boardPick() && G.prompt.from.includes(iid)) cls.push(ui.pick.includes(iid) ? 'cost' : 'pickable');   // o2.51 (#63)
     if (x.fd && !canSee(iid)) {
       return '<div class="' + cls.concat('fd').join(' ') + '" data-iid="' + iid + '"><div class="fdl">Face-down</div></div>';
     }
@@ -691,6 +693,8 @@
     if (x.fd) tag = '<div class="fdv" aria-label="Face-down" title="Face-down (only you can see it)"><span>SET</span></div>';   // o2.37 (feedback pemain 19 Nov): art tetap terlihat, label kecil di sudut   // #65: kartu sendiri yang tertutup digelapkan + label (juga di pelat HP)
     else if (opts.onField && x.enT === G.turn && x.bbmOk !== G.turn) tag = '<span class="tag new" title="Just placed this turn (cannot BATTLE-BASE MOVE)"></span>';   // o2.37: titik kecil, tidak menutupi art
     else if (opts.onField && x.dclT === G.turn) tag = '<span class="tag done" title="Already attacked this turn">⚔</span>';
+    // o2.51 (laporan #63): Lv yang berubah karena efek (mis. Venom Lv-1) selalu terlihat di papan, juga di HP.
+    { const lvNow = S.getLv(G, iid); if (opts.onField && !x.fd && lvNow !== c.l) tag += '<span class="lvmod ' + (lvNow < c.l ? 'down' : 'up') + '" title="Lv changed by an effect (printed Lv' + c.l + ')">Lv' + lvNow + (lvNow < c.l ? '▼' : '▲') + '</span>'; }
     if (!G.vanilla && !S.hasResolver(x.no) && !/no effect text/i.test(S.textEn(c))) cls.push('nores');
     const lent = opts.onField || opts.att ? lentHTML(iid) : '';
     if (lent) cls.push('lent');
@@ -1234,6 +1238,12 @@
           (j.dead ? '<small>No valid target now: it will be skipped</small>' : '') + '</button>' +
           (j.opt && !j.dead ? '<button class="sm warn" data-act="orderSkip" data-job="' + j.id + '" title="Do not use this effect">Skip</button>' : '') + '</span>').join('');
       case 'choose':
+        if (boardPick()) {
+          if (pr.forced && !ui.pick.length && !ui.pickTouched) ui.pick = pr.from.slice();
+          const okN = ui.pick.length >= pr.min && ui.pick.length <= pr.max;
+          return '<span class="badge' + (okN ? ' ok' : '') + '">' + ui.pick.length + '/' + (pr.min === pr.max ? pr.max : pr.min + '–' + pr.max) + '</span>' +
+            '<button class="pri" data-act="pickDone" ' + (okN ? '' : 'disabled') + '>Confirm ' + ui.pick.length + '</button><button data-act="pickList">☰ List</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
+        }
         return '<button class="pri" data-act="openPick">Choose cards…</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'pick':
         return pr.options.map(o => {
@@ -1289,7 +1299,8 @@
     if (ui.mode === 'call-cost' && narrow()) {
       const need = costNeed(), sum = costSum();
       return '<span class="badge' + (sum === need ? ' ok' : sum > need ? ' bad' : '') + '">Lv ' + sum + '/' + need + '</span>' +
-        (ui.cost.length ? '<button data-act="costClear">' + (sum === need ? 'Change cost' : 'Clear') + '</button>' : '') + '<button data-act="cancel">Cancel</button>';
+        (sum === need && !ui.costOk ? '<button class="pri" data-act="costOk">✓ Confirm cost</button>' : '') +
+        (sum === need && ui.costOk ? '<button data-act="costEdit">Change cost</button>' : ui.cost.length ? '<button data-act="costClear">Clear</button>' : '') + '<button data-act="cancel">Cancel</button>';
     }
     if (ui.mode === 'call-cost') return costPanelHTML();
     if (ui.mode === 'call-dest' || ui.mode === 'move-dest') return '<button data-act="cancel">Cancel</button>';
@@ -1303,7 +1314,10 @@
          area di papan juga menyala dan bisa diketuk; (4) bila kartu di-drag ke area lebih dulu, tujuan itu sudah terkunci. */
   function costNeed() { return ui.sel ? S.getLv(G, ui.sel) : 0; }
   function costSum() { return ui.cost.reduce((n, i) => n + S.costLv(G, i), 0); }
-  function costReady() { return ui.mode === 'call-cost' && !!ui.sel && costSum() === costNeed(); }
+  // o2.51 (laporan #65): biaya pas → pemain menekan "Confirm cost" dulu; baru setelah itu area tujuan menyala. Sebelum itu,
+  // mengetuk kartu biaya yang sudah dipilih selalu melepasnya (dulu: langsung CALL ke area kartu itu, #17).
+  function costFull() { return ui.mode === 'call-cost' && !!ui.sel && costSum() === costNeed(); }
+  function costReady() { return costFull() && !!ui.costOk; }
   function costPool() { const p = G.prompt.p; return S.fieldCards(G, p).filter(i => !S.costBanned(G, i, p)); }
   const shortNm = i => S.nameOf(G, i).replace(/^「[^」]*」\s*/, '');
   function costWhere(i) { const L = S.locate(G, i); return L && L.zone === 'bat' ? S.SLOT_NAME[L.slot] : 'BASE'; }
@@ -1339,7 +1353,8 @@
     h += '<div class="cpcards">' + pool.map(costChip).join('') + '</div>';
     if (sug.length) h += '<div class="cpsug"><span class="cpl">Quick picks (optional)</span>' + sug.map((c, k) =>
       '<button class="cpq' + (same(c) ? ' on' : '') + '" data-act="costSet" data-k="' + k + '">' + esc(c.map(i => (G.inst[i].fd ? 'Face-down' : shortNm(i)) + ' Lv' + S.costLv(G, i)).join(' + ')) + '</button>').join('') + '</div>';
-    if (ready) {
+    if (ready && !ui.costOk) h += '<div class="cpdest"><button class="pri" data-act="costOk">✓ Confirm cost</button><span class="cpl">Then choose where to place it</span></div>';
+    if (ready && ui.costOk) {
       const dests = ui.dropDest && destOkWith(ui.dropDest) ? [ui.dropDest] : DESTS.filter(d => destOkWith(d));
       h += '<div class="cpdest"><span class="cpl">' + esc(ui.callType === 'ccall' ? 'COUNTER CALL to' : 'CALL to') + '</span>' +
         (dests.length ? dests.map(d => '<button class="pri" data-act="callTo" data-to="' + d + '">' + esc(costDestName(d)) + '</button>').join('')
@@ -1472,7 +1487,7 @@
     return h + '<span class="pv">vs ' + esc(S.nameOf(G, d)) + ' (' + pd + '): ' + (pa > pd ? '<b class="w">Win the Fight</b>' : pa < pd ? '<b class="l">Lose the Fight, your attacker Retreats</b>' : '<b class="d">BOTH LOSE</b>') + '</span> · locked in once declared (303.2.a.4.5)';
   }
   function callModeHint() {
-    if (ui.mode === 'call-cost') return esc(costReady() ? 'Cost ready. Choose where to place it below, or tap a glowing area.' : 'Choose cards on your FIELD to Retreat for this ' + (ui.callType === 'ccall' ? 'COUNTER CALL' : 'CALL') + ' until the combined Lv is exactly ' + S.getLv(G, ui.sel) + '. Each Face-Down Card counts as Lv1.');
+    if (ui.mode === 'call-cost') return esc(costReady() ? 'Cost confirmed. Choose where to place it below, or tap a glowing area.' : costFull() ? 'Cost ready. Press "Confirm cost", or tap a chosen card to remove it.' : 'Choose cards on your FIELD to Retreat for this ' + (ui.callType === 'ccall' ? 'COUNTER CALL' : 'CALL') + ' until the combined Lv is exactly ' + S.getLv(G, ui.sel) + '. Each Face-Down Card counts as Lv1.');
     return esc('Choose a highlighted destination (a BATTLE area or the BASE).');
   }
   /* Riwayat #66 (paket B): di HP petunjuk hanya muat dua baris, jadi kalimat panjang terpotong. Untuk Action Phase dan
@@ -1483,7 +1498,7 @@
     const pr = G.prompt;
     if (ui.ctrl[pr.p] === 'bot' || !myTurnPrompt() || (net.on && (pr.p !== net.seat || net.pending))) return '';
     const sp = s => '<span>' + esc(s) + '</span>';
-    if (ui.mode === 'call-cost') return costReady() ? sp('Tap a glowing area to place it.') : costSum() > costNeed() ? sp('Too high: tap a chosen card to remove it.') : sp('Tap your FIELD or BASE cards to pay the cost.');
+    if (ui.mode === 'call-cost') return costReady() ? sp('Tap a glowing area to place it.') : costFull() ? sp('Press Confirm cost, or tap a chosen card to remove it.') : costSum() > costNeed() ? sp('Too high: tap a chosen card to remove it.') : sp('Tap your FIELD or BASE cards to pay the cost.');
     if (ui.mode === 'call-dest' || ui.mode === 'move-dest') return sp('Tap a glowing area to place the card.');
     switch (pr.type) {
       case 'main':
@@ -1591,7 +1606,7 @@
         '<div class="row"><button class="pri" data-act="mullDone" style="font-size:15px;padding:10px 22px">' + (ui.mullSel.length ? '↻ Put back ' + ui.mullSel.length + ' · draw ' + ui.mullSel.length : '✓ Keep this hand') + '</button></div>', false, 'mull');
       return;
     }
-    if (pr && myTurnPrompt('choose') && !ui.pickClosed) {
+    if (pr && myTurnPrompt('choose') && !ui.pickClosed && !boardPick()) {
       const lab = i => { const L = S.locate(G, i); return L ? ({ hand: 'HAND', bat: S.SLOT_NAME[L.slot], base: 'BASE', att: 'attached', ret: 'RETREAT', void: 'VOID', deck: 'Deck' })[L.zone] + (L.p !== pr.p ? ' · opponent' : '') : ''; };
       if (pr.forced && !ui.pick.length && !ui.pickTouched) ui.pick = pr.from.slice();   // satu-satunya pilihan: sudah terisi, tinggal Confirm
       const okN = ui.pick.length >= pr.min && ui.pick.length <= pr.max;
@@ -1721,14 +1736,17 @@
       case 'order': act({ t: 'order', job: +t.dataset.job }); return;
       case 'orderSkip': ui.autoNo = +t.dataset.job; if (!act({ t: 'order', job: ui.autoNo })) ui.autoNo = null; return;
       case 'openPick': ui.pickClosed = false; render(); return;
-      case 'pickHide': ui.pickClosed = true; closeOv(); render(); return;
+      case 'pickHide': ui.pickClosed = true; ui.pickList = false; closeOv(); render(); return;
+      case 'pickList': ui.pickList = true; ui.pickClosed = false; render(); return;
       case 'pickDone': { const cs = ui.pick.slice(); ui.pick = []; ui.pickTouched = false; ui.pickClosed = false; act({ t: 'choose', cards: cs }); return; }
       case 'costTog': {
         const i = t.dataset.c;
-        ui.cost = ui.cost.includes(i) ? ui.cost.filter(x => x !== i) : ui.cost.concat(i); render(); return;
+        ui.cost = ui.cost.includes(i) ? ui.cost.filter(x => x !== i) : ui.cost.concat(i); ui.costOk = false; render(); return;
       }
-      case 'costSet': { const c = (ui.costSug || [])[+t.dataset.k]; if (c) { ui.cost = c.slice(); render(); } return; }
-      case 'costClear': ui.cost = []; render(); return;
+      case 'costSet': { const c = (ui.costSug || [])[+t.dataset.k]; if (c) { ui.cost = c.slice(); ui.costOk = false; render(); } return; }
+      case 'costClear': ui.cost = []; ui.costOk = false; render(); return;
+      case 'costOk': if (costFull()) { ui.costOk = true; render(); } return;
+      case 'costEdit': ui.costOk = false; render(); return;
       case 'callTo': if (costReady() && destOkWith(t.dataset.to)) act({ t: ui.callType, c: ui.sel, to: t.dataset.to, cost: ui.cost.slice() }); return;
       case 'costDone':
         if (ui.dropDest && destOkWith(ui.dropDest)) { act({ t: ui.callType, c: ui.sel, to: ui.dropDest, cost: ui.cost.slice() }); return; }
@@ -1767,8 +1785,28 @@
       case 'discDone': act({ t: 'discard', cards: ui.discSel.slice() }); return;
     }
   }
+  /* o2.51 (laporan #63): efek yang memilih kartu yang SEMUANYA ada di papan (BATTLE / BASE, kedua pihak) dipilih langsung di
+     papan — kartu pilihan menyala, ketuk untuk memilih/melepas, Confirm di baki. Pilihan dari HAND, RETREAT, Deck, dan kartu
+     yang diperlihatkan tetap memakai jendela pilihan. "List" membuka jendela yang sama bila pemain lebih suka. */
+  function boardPick() {
+    if (!G || !myTurnPrompt('choose') || ui.pickList) return false;
+    const pr = G.prompt;
+    if (pr.show && pr.show.length) return false;
+    return pr.from.length > 0 && pr.from.every(i => { const L = S.locate(G, i); return L && (L.zone === 'bat' || L.zone === 'base'); });
+  }
   function onCard(iid, e) {
     const L = S.locate(G, iid);
+    if (boardPick()) {
+      const pr = G.prompt;
+      if (pr.from.includes(iid)) {
+        ui.pickTouched = true;
+        if (ui.pick.includes(iid)) ui.pick = ui.pick.filter(x => x !== iid);
+        else if (ui.pick.length < pr.max) ui.pick = ui.pick.concat(iid);
+        else if (pr.max === 1) ui.pick = [iid];
+        render();
+      } else tip('Tap a glowing card, or press List.');
+      return;
+    }
     // mode korban CALL
     if (ui.mode === 'call-cost') {
       if (L && (L.zone === 'bat' || L.zone === 'base') && L.p === G.prompt.p) {
@@ -1777,6 +1815,7 @@
         if (costReady() && ui.cost.includes(iid) && L.zone === 'bat' && destOkWith(L.slot)) { act({ t: ui.callType, c: ui.sel, to: L.slot, cost: ui.cost.slice() }); return; }
         if (costReady() && ui.cost.includes(iid) && L.zone === 'base' && destOkWith('BASE')) { act({ t: ui.callType, c: ui.sel, to: 'BASE', cost: ui.cost.slice() }); return; }
         ui.cost = ui.cost.includes(iid) ? ui.cost.filter(x => x !== iid) : ui.cost.concat(iid);
+        ui.costOk = false;
         render();
       }
       return;
@@ -1808,6 +1847,7 @@
     }
     if (ui.mode === 'call-cost') {
       if (side !== 'bottom') { tip("That is your opponent's side. Tap a glowing area on your side."); return; }
+      if (costFull() && !ui.costOk) { tip('Press "Confirm cost" first.'); return; }
       if (!costReady()) { tip('First choose the cost: total Lv ' + costSum() + '/' + costNeed() + '.'); return; }
       if (destOk(slot)) act({ t: ui.callType, c: ui.sel, to: slot, cost: ui.cost.slice() });
       else tip('This card cannot go there. Tap a glowing area.');

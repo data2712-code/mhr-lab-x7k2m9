@@ -550,6 +550,12 @@ button.str{cursor:pointer}button.str:hover{border-color:#5a4a1a}.str.on,.stm.on{
 .card.fd .fdv span{font-family:var(--disp);font-size:clamp(7px,calc(var(--cw) * .15),11px);letter-spacing:.05em;color:#e8e4da;background:rgba(14,18,22,.82);border:1px solid #6b7686;border-radius:4px;padding:1px 4px;line-height:1.25;text-align:center}
 .card.sel{border-color:var(--paper);box-shadow:0 0 0 2px rgba(237,231,218,.5)}
 .card.cost{border-color:var(--red);box-shadow:0 0 0 2px rgba(228,68,46,.5)}
+/* o2.51 (#63): Lv berubah karena efek — lencana di sudut kanan atas, terlihat juga di HP */
+.card .lvmod{position:absolute;top:2px;right:2px;z-index:4;font-size:clamp(9px,calc(var(--cw,60px) * .16),12px);font-weight:900;line-height:1;padding:2px 4px;border-radius:5px;background:#5a1712;color:#ffd0c8;border:1px solid #ff8a78;box-shadow:0 1px 4px rgba(0,0,0,.6);pointer-events:none}
+.card .lvmod.up{background:#123a22;color:#c8f5d6;border-color:#5fd38a}
+/* o2.51 (#63): kartu yang bisa dipilih langsung di papan */
+.card.pickable{border-color:var(--gold);box-shadow:0 0 0 2px rgba(242,176,30,.75),0 0 14px rgba(242,176,30,.55);animation:pkpulse 1.4s ease-in-out infinite}
+@keyframes pkpulse{50%{box-shadow:0 0 0 2px rgba(242,176,30,.95),0 0 22px rgba(242,176,30,.8)}}
 .card.can{box-shadow:0 0 0 2px var(--gold),0 0 14px rgba(242,176,30,.45)}
 .card.atk{border-color:var(--gold);box-shadow:0 0 0 3px rgba(242,176,30,.45),0 0 22px rgba(242,176,30,.45)}
 .card .tag{position:absolute;top:1px;right:1px;font-size:8px;padding:0 3px;border-radius:3px;background:rgba(0,0,0,.85);z-index:2}
@@ -1253,25 +1259,25 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.44-sd56id" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.40-pb02only" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.50"></script>
-<script src="sim-cards.js?v=o2.50"></script>
-<script src="sim-cards-bp01.js?v=o2.50"></script>
-<script src="sim-cards-s4.js?v=o2.50"></script>
-<script src="sim-cards-sp01.js?v=o2.50"></script>
-<script src="sim-cards-t6.js?v=o2.50"></script>
-<script src="sim-bot.js?v=o2.50"></script>
-<script src="sim-sound.js?v=o2.50"></script>
-<script src="sim-shadow.js?v=o2.50"></script>
-<script src="sim-ui.js?v=o2.50"></script>
-<script src="sim-sandbox.js?v=o2.50"></script>
-<script src="sim-report.js?v=o2.50"></script>
-<script src="sim-modes.js?v=o2.50"></script>
-<script src="sim-i18n.js?v=o2.50"></script>
-<script src="sim-online.js?v=o2.50"></script>
-<script src="sim-ranked.js?v=o2.50"></script>
-<script src="sim-stats.js?v=o2.50"></script>
-<script src="sim-updates.js?v=o2.50"></script>
-<script src="sim-rules.js?v=o2.50"></script>
-<script src="sim-learn.js?v=o2.50"></script>
+<script src="sim.js?v=o2.51"></script>
+<script src="sim-cards.js?v=o2.51"></script>
+<script src="sim-cards-bp01.js?v=o2.51"></script>
+<script src="sim-cards-s4.js?v=o2.51"></script>
+<script src="sim-cards-sp01.js?v=o2.51"></script>
+<script src="sim-cards-t6.js?v=o2.51"></script>
+<script src="sim-bot.js?v=o2.51"></script>
+<script src="sim-sound.js?v=o2.51"></script>
+<script src="sim-shadow.js?v=o2.51"></script>
+<script src="sim-ui.js?v=o2.51"></script>
+<script src="sim-sandbox.js?v=o2.51"></script>
+<script src="sim-report.js?v=o2.51"></script>
+<script src="sim-modes.js?v=o2.51"></script>
+<script src="sim-i18n.js?v=o2.51"></script>
+<script src="sim-online.js?v=o2.51"></script>
+<script src="sim-ranked.js?v=o2.51"></script>
+<script src="sim-stats.js?v=o2.51"></script>
+<script src="sim-updates.js?v=o2.51"></script>
+<script src="sim-rules.js?v=o2.51"></script>
+<script src="sim-learn.js?v=o2.51"></script>
 </body>
 </html>

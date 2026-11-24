@@ -950,16 +950,17 @@
         id: 'end', zone: 'FIELD', optional: true, label: 'God Of Story',
         text: "Retreat 1 opponent Character with Lv X, or X of your opponent's face-down cards (X = your Characters in BATTLE that did not attack)?",
         when: (e, self, A) => e.k === 'TURN_END' && e.p === A.p,
-        can: A => { const X = A.battleChars(A.p).filter(i => !A.attackedThisTurn(i)).length; return X > 0 && (oppChars(A).some(i => A.lv(i) === X) || A.set(A.opp(A.p)).length >= X); },
+        // o2.51 (laporan #59, RS-036): kartu set lawan kurang dari X → retreat sebanyak yang ada ("do as much as you can").
+        can: A => { const X = A.battleChars(A.p).filter(i => !A.attackedThisTurn(i)).length; return X > 0 && (oppChars(A).some(i => A.lv(i) === X) || A.set(A.opp(A.p)).length > 0); },
         run: A => {
-          const op = A.opp(A.p), X = A.battleChars(A.p).filter(i => !A.attackedThisTurn(i)).length;
+          const op = A.opp(A.p), X = A.battleChars(A.p).filter(i => !A.attackedThisTurn(i)).length, n = Math.min(X, A.set(op).length);
           const opts = [];
           if (oppChars(A).some(i => A.lv(i) === X)) opts.push({ v: 'char', label: '1 Character with Lv' + X });
-          if (A.set(op).length >= X) opts.push({ v: 'set', label: X + ' face-down card(s)' });
+          if (n > 0) opts.push({ v: 'set', label: n + ' face-down card(s)' + (n < X ? ' (X = ' + X + ', all they have)' : '') });
           const m = A.pick('m', 'God Of Story: retreat which?', opts);
           const t = m === 'char'
             ? A.ask('t', { text: 'Choose 1 opponent Character with Lv' + X + ' in the field to Retreat', from: oppChars(A).filter(i => A.lv(i) === X), prefer: 'high' })
-            : A.ask('s', { text: 'Choose ' + X + " of your opponent's face-down cards to Retreat", from: A.set(op), min: X, max: X });
+            : A.ask('s', { text: 'Choose ' + n + " of your opponent's face-down cards to Retreat", from: A.set(op), min: n, max: n });
           t.forEach(i => A.retreat(i, 'God Of Story'));
         }
       }]

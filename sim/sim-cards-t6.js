@@ -577,11 +577,13 @@
         id: 'grow', zone: 'FIELD', once: true, optional: true, label: 'Rooted Revival',
         text: "Discard 1 card from your HAND to put 1 of this card's Attached Cards into your BATTLE?",
         when: (e, self) => e.k === 'ATTACHED' && e.host === self,
-        can: A => A.attached(A.self).length >= 2 && A.hand(A.p).length > 0 && A.emptySlots(A.p).length > 0,
+        // o2.51 (laporan #60, RS-036/RS-076): buang 1 kartu tetap boleh walau BATTLE penuh; bagian "If you do" lalu dilakukan sejauh mungkin.
+        can: A => A.attached(A.self).length >= 2 && A.hand(A.p).length > 0,
         run: A => {
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
-          const a = A.ask('a', { text: "Choose 1 of Groot's Attached Cards to put into your BATTLE", from: A.attached(A.self), prefer: 'high' });
-          const to = A.pick('to', 'Choose a BATTLE area', slotOpts(A, A.emptySlots(A.p)));
+          const room = A.emptySlots(A.p).length > 0;   // semua pilihan ditanyakan sebelum status berubah (aturan mesin)
+          const a = room ? A.ask('a', { text: "Choose 1 of Groot's Attached Cards to put into your BATTLE", from: A.attached(A.self), prefer: 'high' }) : [];
+          const to = room ? A.pick('to', 'Choose a BATTLE area', slotOpts(A, A.emptySlots(A.p))) : null;
           if (d.length && A.discard(d[0], 'Rooted Revival') && a.length && to) A.detachToBattle(a[0], to, 'Rooted Revival');
         }
       }]

@@ -106,9 +106,10 @@
   }
   // Dari papan: tombol Menu (permainan tetap berjalan, kursi ditahan 2 menit) atau akhir permainan.
   function leaveGame(final, noMenu) {
+    const sv = seatGet(), wasQueue = !!(sv && sv.queue);   // o2.51 (laporan #63): selesai Find a match → kembali ke Find a match
     disconnect(); conn.inGame = false;
     if (final) seatDel();
-    if (!noMenu) { U().toMenu(); if (window.MHRSimModes) window.MHRSimModes.show('online'); }
+    if (!noMenu) { U().toMenu(); if (window.MHRSimModes) window.MHRSimModes.show(wasQueue ? 'find' : 'online'); }
   }
 
   /* ---------- pilihan deck ----------

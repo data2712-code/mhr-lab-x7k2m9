@@ -604,6 +604,13 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.53 — Battle Sim o2.51: perbaikan God Of Story (#59), Groot (#60), tampilan #63–#65 — 24 November 2026 *(`sim-host.js`, `index.html`, `sim/`)*
+- 「God Of Story」Loki: kartu set lawan kurang dari X → semua yang ada bisa di-Retreat. 「Rooted Revival」Groot: buang 1 kartu
+  tetap boleh walau BATTLE penuh. Riwayat simulator #132. Perlu deploy server Battle Sim.
+- Tampilan Battle Sim (#63–#65): ✓ Confirm cost sebelum memilih area CALL, lencana Lv▼/Lv▲, pilih target langsung di papan,
+  selesai Find a match kembali ke Find a match, keterangan kartu tetap terbuka saat lawan beraksi.
+- `sim-host.js?v=7.53-sim51`, `SIM_URL ?v=o2.51`, footer v7.53.
+
 ### v7.52 — Battle Sim o2.50: tombol Find a match di tab Ranked — 23 November 2026 *(`sim-host.js`, `index.html`, `sim/`)*
 - Laporan pemain: tombol Find a match tidak ada di tab Ranked setelah punya rank. Kartu rank (season berjalan) kini punya tombol
   "⚔️ Find a match". Riwayat simulator #130.
