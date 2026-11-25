@@ -534,7 +534,7 @@
     if (!fq.on) return;
     fq.botGame = true;
     ui.launch({ decks: [mine.list, bot.list], names: [(s && s.username) || 'Player', 'Bot · ' + ({ easy: 'Easy', normal: 'Normal', hard: 'Hard', expert: 'Expert' })[level]], ctrl: ['human', 'bot'], first: 'random', timer: 'off', botLevel: level, gmode: 'practice',
-      deckNames: [fq.deck.name || 'Deck', bot.name || 'Deck'], youIdx: 0 });
+      deckNames: [fq.deck.name || 'Deck', bot.name || 'Deck'], youIdx: 0, arts: [mine.art || {}, bot.art || {}] });
     banner();
   }
 

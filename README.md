@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.56** · 24 November 2026
+**Versi saat ini: v7.59** · 25 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -603,6 +603,46 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.59 — Battle Sim o2.56: perbaikan laporan #66–#79 — 25 November 2026 *(`index.html`, `sim-host.js`, `sim/`; server Battle Sim)*
+
+- Panel biaya CALL di laptop (tinggi ≤ 900 px) tidak lagi mendorong tombol "Confirm cost" / tujuan ke luar layar (laporan #67/#68).
+- Mesin 0.14.5 (RS-079): R+X / Power+X "giliran ini" tidak hilang saat Karakter hanya pindah area BATTLE walau ada efek AUTO
+  "menjadi" (mis. Loki SD04-001 + Tombstone, laporan #74). Log lama tetap diputar dengan aturan lama.
+- 「Phoenix Host」Jean Grey: pilihan BASE diberi catatan bahwa TRIG【BATTLE】 tidak aktif di sana (laporan #66).
+- [ASSAULT] dilihat saat menang bertarung (Agony/Knull, RS-080); Venom 2099 UNIQUE tidak bisa dipakai berulang (#75); Sif, Heimdall,
+  Leviathan tetap boleh membuang walau tidak ada yang bisa dipindah (#78).
+- Power 0 diperiksa saat itu juga, juga di tengah efek (ruling pemilik #79, RS-081: Milano/Supreme Watcher vs Ancestral Plane); Chewie tidak
+  bisa memasang Chewie lawan (UNIQUE, F-13).
+- `sim/` dibuat ulang o2.56, `sim-host.js?v=7.59-sim56`. Detail: mhr-simulator riwayat #138–#140. **Server Battle Sim perlu di-deploy.**
+
+### v7.58 — Versi kartu (MR/SEC/HR…) disimpan per deck + chip versi di daftar deck; dipakai Battle Sim o2.55 — 24 November 2026 *(`index.html`, `sim-host.js`, `sim/`; server Battle Sim)*
+Pemilik (24 Nov 2026), dari feedback pemain: bisa memakai kartu rarity di atas UR di Battle Sim, dan cara memilih versi yang lebih mudah.
+Pemilik memilih: versi **disimpan di deck** (ikut link/kode & akun, lawan online ikut melihat) + **chip versi di daftar deck**.
+- **Kode deck** `encodeDeck(deck, nama, art)`: segmen ke-4 opsional `.<L><nnn><RAR>-…` (mis. `.I027MR-I021HR_616`). Pembaca lama
+  (situs/sim sebelumnya, `cariKodeDeckDibagikan`) mengabaikannya → kode lama & baru saling terbaca. Versi utama (`ra[0]`) tidak ditulis.
+  `encodeDeck()` tanpa argumen ke-3 = tanpa versi (pembanding isi deck di sinkron akun tetap sama).
+- **Per deck**: `store.deckArt[namaDeck][nomor]`; versi efektif `deckRar()` = pilihan deck → pilihan umum `store.art` (popup kartu) → versi
+  utama. `deckCodeOf()` dipakai untuk link/kode deck, PDF, simpan versi (riwayat deck) dan **sinkron akun** (`codeOf`), jadi ganti versi =
+  deck di akun ikut diperbarui. Deck yang dibuka dari link/akun/galeri memakai versi dari kodenya (`adoptDeckArt`); duplikat/rename/hapus
+  deck ikut membawa versinya.
+- **Daftar deck**: tampilan List = chip versi aktif (mis. "SEC ⟳"), diketuk = versi berikutnya; tampilan Grid = semua versi
+  (`varChips`, `setDeckRar`). Gambar di daftar deck memakai versi deck (`data-rar`, `altArtFile(no, rar)`).
+- **Battle Sim o2.55** (riwayat simulator #137): versi dari kode deck → `ui.arts`; gambar kartu `images/en/<no>_<RAR>.jpg` lalu versi utama
+  bila berkas tidak ada. Online: server menyimpan `room.arts` dan mengirim `arts` di setiap pesan state (lawan melihat versi Anda);
+  `deck_codes` hasil pertandingan ikut versi. Hanya tampilan: mesin, log, hash & replay tidak berubah. **Server Battle Sim perlu di-deploy**
+  (sekaligus CB01 dari v7.57).
+- `sim-host.js?v=7.58-sim55`, `SIM_URL ?v=o2.55`, footer v7.58. Dicek: Playwright Deck Builder (chip List & Grid, link deck berisi versi,
+  dibaca balik) dan Battle Sim (kartu tampil `_MR`), tanpa error.
+
+### v7.57 — Battle Sim o2.54: kartu CB01 Destined Convergence bisa dimainkan — 24 November 2026 *(`sim-host.js`, `index.html`, `sim/` + berkas baru `sim/sim-cards-cb01.js`)*
+- Pemilik (24 Nov 2026): "buat efek CB01 di sim". Ketujuh kartu CB01 ternyata cetak ulang (ilustrasi baru) kartu yang sudah ada:
+  CB01-001 = SP01-027, 002 = SP01-026, 003 = SP01-025, 004 = SP01-043, 005 = SP01-023, 006 = SP01-042, 007 = PB02-021 (nama, Lv, R, Power,
+  warna, trait & efek sama). `sim-cards-cb01.js` memakai resolver kartu aslinya; CB01 dikeluarkan dari `HIDDEN_SETS` (sisa: BP02).
+  Batas 3 per nama dan UNIQUE menghitung kartu CB01 bersama kartu aslinya (nama sama). CB01-003 hanya saat dipanggil (TD-12 / RS-078).
+- Entri Updates "CB01 Destined Convergence cards are playable". Riwayat simulator #136. **Server Battle Sim perlu di-deploy** (cards.js
+  baru + berkas mesin baru) supaya CB01 bisa dipakai di permainan online.
+- `sim-host.js?v=7.57-sim54`, `SIM_URL ?v=o2.54`, footer v7.57.
 
 ### v7.56 — Text Differences TD-12: CB01-003 / SP01-025 「Gunfire Negotiation」 ikuti teks Inggris — 24 November 2026 *(`rules-faq.js`, `index.html`, berkas baru `errata/TD-12.html`)*
 - Pemilik (24 Nov 2026): "untuk CB01-003 gunakan versi inggris sudah saya konfirmasi". EN: efek kedua terpicu "when this card enters the field

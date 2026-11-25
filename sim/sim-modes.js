@@ -345,7 +345,7 @@
     prefs.practice = { name, deck: o.deck, code: o.code || '', bot: o.bot || 'random', level, first, clock }; savePrefs();
     ui.launch({ decks: [mine.list, bot.list], names: [name, 'Bot · ' + LEVEL_LABEL[level]], ctrl: ['human', 'bot'],
       first: first === 'you' ? 0 : first === 'bot' ? 1 : 'random', timer: clock, botLevel: level, gmode: 'practice',
-      deckNames: [mine.name || 'Deck', bot.name || 'Deck'], youIdx: 0 });
+      deckNames: [mine.name || 'Deck', bot.name || 'Deck'], youIdx: 0, arts: [mine.art || {}, bot.art || {}] });
   }
 
   /* o2.48 (pemilik 23 Nov 2026): tab Stats dan History digabung menjadi satu tab "📈 Stats & History" dengan dua sub-tab. */

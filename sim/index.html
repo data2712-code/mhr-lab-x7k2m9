@@ -755,12 +755,14 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
    Jendela pilihan kartu: kartu mengecil mengikuti tinggi layar, tombol Confirm selalu terlihat. */
 .abar .tmin{display:none}
 @media (min-width:821px) and (max-height:900px){   /* o2.39: dulu ≤650 px; laptop 768–900 px juga memakai panel di kolom kanan supaya kartu FIELD lebih besar */
-  .midzone .abar.dock{position:fixed;right:8px;top:8px;width:284px;max-width:none;height:auto;max-height:calc(100vh - 16px);flex-direction:column;gap:6px;z-index:35;padding:8px 10px 10px;overflow:auto;border:1px solid var(--gold);background:#12171d}
+  .midzone .abar.dock{position:fixed;right:8px;top:8px;width:284px;max-width:none;height:auto;max-height:calc(100vh - 16px);flex-direction:column;flex-wrap:nowrap;gap:6px;z-index:35;padding:8px 10px 10px;overflow:auto;border:1px solid var(--gold);background:#12171d}
   .midzone .abar.dock .hint{width:auto;flex:none;max-height:6.2em;padding-right:54px}
   .midzone .abar.dock .acts{flex:none;flex-direction:column;overflow:visible;gap:5px;padding:0}
   .midzone .abar.dock .acts > *{flex:none}
   .midzone .abar.dock .acts button{width:100%;min-width:0;max-width:none;padding:5px 9px;font-size:12px;border-radius:8px}
   .midzone .abar.dock .acts button small{font-size:10.5px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* o2.56 (laporan #67/#68): panel biaya yang menempel tetap satu kolom; tombol di kepala panel selebar isinya */
+  .midzone .abar.dock .cpay .cphead > button{width:auto}
   .midzone .abar.dock .acts button.next{position:sticky;bottom:-10px;box-shadow:0 -6px 10px #12171d}
   .midzone .abar.dock .tmin{display:block;position:absolute;right:8px;top:8px;padding:2px 8px;font-size:11px;border-radius:999px;z-index:2}
   .midzone .abar.dock.min .acts,.midzone .abar.dock.min .hint > span:not(.ttl){display:none}
@@ -1259,26 +1261,27 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.55-cb01" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.55-cb01" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.53"></script>
-<script src="sim-cards.js?v=o2.53"></script>
-<script src="sim-cards-bp01.js?v=o2.53"></script>
-<script src="sim-cards-s4.js?v=o2.53"></script>
-<script src="sim-cards-sp01.js?v=o2.53"></script>
-<script src="sim-cards-t6.js?v=o2.53"></script>
-<script src="sim-cards-bp02.js?v=o2.53"></script>
-<script src="sim-bot.js?v=o2.53"></script>
-<script src="sim-sound.js?v=o2.53"></script>
-<script src="sim-shadow.js?v=o2.53"></script>
-<script src="sim-ui.js?v=o2.53"></script>
-<script src="sim-sandbox.js?v=o2.53"></script>
-<script src="sim-report.js?v=o2.53"></script>
-<script src="sim-modes.js?v=o2.53"></script>
-<script src="sim-i18n.js?v=o2.53"></script>
-<script src="sim-online.js?v=o2.53"></script>
-<script src="sim-ranked.js?v=o2.53"></script>
-<script src="sim-stats.js?v=o2.53"></script>
-<script src="sim-updates.js?v=o2.53"></script>
-<script src="sim-rules.js?v=o2.53"></script>
-<script src="sim-learn.js?v=o2.53"></script>
+<script src="sim.js?v=o2.56"></script>
+<script src="sim-cards.js?v=o2.56"></script>
+<script src="sim-cards-bp01.js?v=o2.56"></script>
+<script src="sim-cards-s4.js?v=o2.56"></script>
+<script src="sim-cards-sp01.js?v=o2.56"></script>
+<script src="sim-cards-t6.js?v=o2.56"></script>
+<script src="sim-cards-bp02.js?v=o2.56"></script>
+<script src="sim-cards-cb01.js?v=o2.56"></script>
+<script src="sim-bot.js?v=o2.56"></script>
+<script src="sim-sound.js?v=o2.56"></script>
+<script src="sim-shadow.js?v=o2.56"></script>
+<script src="sim-ui.js?v=o2.56"></script>
+<script src="sim-sandbox.js?v=o2.56"></script>
+<script src="sim-report.js?v=o2.56"></script>
+<script src="sim-modes.js?v=o2.56"></script>
+<script src="sim-i18n.js?v=o2.56"></script>
+<script src="sim-online.js?v=o2.56"></script>
+<script src="sim-ranked.js?v=o2.56"></script>
+<script src="sim-stats.js?v=o2.56"></script>
+<script src="sim-updates.js?v=o2.56"></script>
+<script src="sim-rules.js?v=o2.56"></script>
+<script src="sim-learn.js?v=o2.56"></script>
 </body>
 </html>

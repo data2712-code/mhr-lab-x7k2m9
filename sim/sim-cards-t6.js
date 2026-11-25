@@ -19,6 +19,7 @@
   const S = isNode ? require('./sim.js') : root.MHRSim;
 
   const ORANGE = 'Orange', PURPLE = 'Purple';
+  const chewieOk = (A, i) => A.st.lg145 || !S.uniqueBlocked(A.st, i, A.p);
   const traits = (A, i) => A.trait(i).split('/').map(x => x.trim());
   const hasTrait = (A, i, t) => traits(A, i).includes(t);
   const charName = (A, i) => A.name(i).replace(/^「[^」]*」\s*/, '');
@@ -214,9 +215,11 @@
         id: 'enter', zone: 'FIELD', optional: true, label: 'Judgment for Banishing',
         text: "Discard the top card of your Deck to move 1 of your opponent's Lv3-or-lower Characters from BATTLE to their BASE?",
         when: enterSelf,
-        can: A => A.deck(A.p).length > 0 && A.baseRoom(A.opp(A.p)) > 0 && oppBattle(A).some(i => A.lv(i) <= 3),
+        // o2.56 (laporan #78, RS-076): membuang kartu teratas tetap boleh walau tidak ada yang bisa dipindah (BASE lawan penuh / tanpa target).
+        can: A => A.deck(A.p).length > 0 && (!A.st.lg145 || (A.baseRoom(A.opp(A.p)) > 0 && oppBattle(A).some(i => A.lv(i) <= 3))),
         run: A => {
-          const t = A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters in BATTLE to move to their BASE", from: oppBattle(A).filter(i => A.lv(i) <= 3), prefer: 'high' });
+          const tg = A.baseRoom(A.opp(A.p)) > 0 ? oppBattle(A).filter(i => A.lv(i) <= 3) : [];
+          const t = tg.length ? A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters in BATTLE to move to their BASE", from: tg, prefer: 'high' }) : [];
           if (A.mill(A.p, 1, 'Judgment for Banishing').length) t.forEach(i => A.bbm(i, 'BASE', 'Judgment for Banishing'));
         }
       }]
@@ -228,10 +231,12 @@
         id: 'enter', zone: 'FIELD', optional: true, label: 'Judgment for Exile',
         text: "Discard 1 card from your HAND to move 1 of your opponent's Characters from WING to their BASE?",
         when: enterSelf,
-        can: A => A.hand(A.p).length > 0 && A.baseRoom(A.opp(A.p)) > 0 && A.wings(A.opp(A.p)).some(i => !A.isFd(i)),
+        // o2.56 (laporan #78, RS-076): membuang 1 kartu tetap boleh walau tidak ada yang bisa dipindah (BASE lawan penuh / tanpa target).
+        can: A => A.hand(A.p).length > 0 && (!A.st.lg145 || (A.baseRoom(A.opp(A.p)) > 0 && A.wings(A.opp(A.p)).some(i => !A.isFd(i)))),
         run: A => {
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
-          const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in WING to move to their BASE", from: A.wings(A.opp(A.p)).filter(i => !A.isFd(i)), prefer: 'high' });
+          const tg = A.baseRoom(A.opp(A.p)) > 0 ? A.wings(A.opp(A.p)).filter(i => !A.isFd(i)) : [];
+          const t = tg.length ? A.ask('t', { text: "Choose 1 of your opponent's Characters in WING to move to their BASE", from: tg, prefer: 'high' }) : [];
           if (d.length && A.discard(d[0], 'Judgment for Exile')) t.forEach(i => A.bbm(i, 'BASE', 'Judgment for Exile'));
         }
       }]
@@ -261,11 +266,13 @@
     'SD05-014': {
       acti: [{
         id: 'exile', zone: 'BATTLE', once: true, label: "Discard 1 card: move 1 opponent's Character with Power X or lower from BATTLE to their BASE",
-        can: A => A.hand(A.p).length > 0 && A.baseRoom(A.opp(A.p)) > 0 && oppBattle(A).some(i => A.pw(i) <= A.pw(A.self)),
+        // o2.56 (RS-076, sama dengan laporan #78): membuang 1 kartu tetap boleh walau tidak ada yang bisa dipindah.
+        can: A => A.hand(A.p).length > 0 && (!A.st.lg145 || (A.baseRoom(A.opp(A.p)) > 0 && oppBattle(A).some(i => A.pw(i) <= A.pw(A.self)))),
         run: A => {
           const X = A.pw(A.self);
           const d = A.ask('d', { text: 'Choose 1 card in your HAND to discard', from: A.hand(A.p) });
-          const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE with Power " + X + ' or lower to move to their BASE', from: oppBattle(A).filter(i => A.pw(i) <= X), prefer: 'high' });
+          const tg = A.baseRoom(A.opp(A.p)) > 0 ? oppBattle(A).filter(i => A.pw(i) <= X) : [];
+          const t = tg.length ? A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE with Power " + X + ' or lower to move to their BASE', from: tg, prefer: 'high' }) : [];
           if (d.length && A.discard(d[0], 'Banishing Bifrost')) t.forEach(i => A.bbm(i, 'BASE', 'Banishing Bifrost'));
         }
       }]
@@ -486,9 +493,11 @@
         id: 'enter', zone: 'BATTLE', optional: true, label: 'Giant Crash',
         text: "Discard the top card of your Deck to move 1 of your opponent's Lv3-or-lower Characters from BATTLE to their BASE?",
         when: enterSelf,
-        can: A => A.deck(A.p).length > 0 && A.baseRoom(A.opp(A.p)) > 0 && oppBattle(A).some(i => A.lv(i) <= 3),
+        // o2.56 (laporan #78, RS-076): membuang kartu teratas tetap boleh walau tidak ada yang bisa dipindah (BASE lawan penuh / tanpa target).
+        can: A => A.deck(A.p).length > 0 && (!A.st.lg145 || (A.baseRoom(A.opp(A.p)) > 0 && oppBattle(A).some(i => A.lv(i) <= 3))),
         run: A => {
-          const t = A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters in BATTLE to move to their BASE", from: oppBattle(A).filter(i => A.lv(i) <= 3), prefer: 'high' });
+          const tg = A.baseRoom(A.opp(A.p)) > 0 ? oppBattle(A).filter(i => A.lv(i) <= 3) : [];
+          const t = tg.length ? A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters in BATTLE to move to their BASE", from: tg, prefer: 'high' }) : [];
           if (A.mill(A.p, 1, 'Giant Crash').length) t.forEach(i => A.bbm(i, 'BASE', 'Giant Crash'));
         }
       }]
@@ -596,9 +605,10 @@
         id: 'enter', zone: 'BATTLE', optional: true, label: 'Sweet and Gentle',
         text: "Attach 1 of your opponent's Lv3-or-lower Characters in BATTLE to this card?",
         when: enterSelf,
-        can: A => rpOf(A, A.p) < rpOf(A, A.opp(A.p)) && oppBattle(A).some(i => A.lv(i) <= 3),
+        // o2.56 (laporan Chewie, F-13): Karakter lawan yang namanya bentrok UNIQUE di FIELD Anda (mis. Chewie lawan) tidak bisa dipilih.
+        can: A => rpOf(A, A.p) < rpOf(A, A.opp(A.p)) && oppBattle(A).some(i => A.lv(i) <= 3 && chewieOk(A, i)),
         run: A => {
-          const t = A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters in BATTLE to attach to Chewie", from: oppBattle(A).filter(i => A.lv(i) <= 3), prefer: 'high' });
+          const t = A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters in BATTLE to attach to Chewie", from: oppBattle(A).filter(i => A.lv(i) <= 3 && chewieOk(A, i)), prefer: 'high' });
           if (inField(A, A.self)) t.forEach(i => A.attach(i, A.self));
         }
       }]

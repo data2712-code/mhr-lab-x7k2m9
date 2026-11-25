@@ -29,7 +29,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = '0.14.4';   // o2.47: penyerang/target yang keluar FIELD lalu kembali = kartu baru, serangannya berakhir (laporan #52), BP01-032 Both Lose dengan BATTLE penuh (#53), SD06-011 tanpa target lawan (#51), BP01-067 bisa batal/tetap (#54) · o2.45: BP01-022 UNIQUE/[COUNTER] = AUTO (laporan #49), PB02-008 nama lengkap (#43), SP01-034 tanpa syarat terpasang (#44/#45), SP01-050 kebal Lv1 juga saat sendiri (#40), BP01-067 + AIR STRIKE (#41) · o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
+  const VERSION = '0.14.5';   // o2.56: efek AUTO tidak "mulai berlaku lagi" saat Karakter hanya pindah area BATTLE (laporan #74, RS-079) · o2.47: penyerang/target yang keluar FIELD lalu kembali = kartu baru, serangannya berakhir (laporan #52), BP01-032 Both Lose dengan BATTLE penuh (#53), SD06-011 tanpa target lawan (#51), BP01-067 bisa batal/tetap (#54) · o2.45: BP01-022 UNIQUE/[COUNTER] = AUTO (laporan #49), PB02-008 nama lengkap (#43), SP01-034 tanpa syarat terpasang (#44/#45), SP01-050 kebal Lv1 juga saat sendiri (#40), BP01-067 + AIR STRIKE (#41) · o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
   const SLOTS = ['F', 'W1', 'W2', 'B'];
   const SLOT_NAME = { F: 'FRONT', W1: 'WING 1', W2: 'WING 2', B: 'BACK', BASE: 'BASE' };
   // Posisi pada garis serangan (303.2.a.4.3.1.1): BACK sendiri = 0, WING = 1,
@@ -48,7 +48,7 @@
   let DEFS = {};
   /* Set yang DISEMBUNYIKAN (keputusan pemilik 7 Nov 2026, riwayat #48): belum rilis resmi di Indonesia dan teks efeknya
      belum terjemahan resmi. Kartunya tidak dimuat sama sekali: tidak bisa dipakai di deck, kode deck, maupun Sandbox. */
-  const HIDDEN_SETS = ['BP02', 'CB01'];   // riwayat #134 (24 Nov 2026): + CB01 Destined Convergence — kartunya baru masuk cards.js situs v7.55, efeknya belum dibuat di simulator. Riwayat #133 (pemilik 24 Nov 2026): BP02 Doomsday disimpan dulu — kartunya sudah ada di cards.js situs (pra-rilis, rilis Indonesia 16 Des 2026), efek dicicil di sim-cards-bp02.js; buka dengan mengosongkan lagi. Sebelumnya: riwayat #82 (keputusan pemilik 12 Nov 2026): SD05, SD06, PB02 dibuka dengan terjemahan pra-rilis (Tahap 6). Dulu ['SD05','SD06','PB02'] (#48).
+  const HIDDEN_SETS = ['BP02'];   // riwayat #136 (24 Nov 2026): CB01 dibuka (efek = kartu asli SP01/PB02, sim-cards-cb01.js). #134: CB01 sempat disembunyikan. Riwayat #133 (pemilik 24 Nov 2026): BP02 Doomsday disimpan dulu — kartunya sudah ada di cards.js situs (pra-rilis, rilis Indonesia 16 Des 2026), efek dicicil di sim-cards-bp02.js; buka dengan mengosongkan lagi. Sebelumnya: riwayat #82 (keputusan pemilik 12 Nov 2026): SD05, SD06, PB02 dibuka dengan terjemahan pra-rilis (Tahap 6). Dulu ['SD05','SD06','PB02'] (#48).
   const isHiddenNo = no => HIDDEN_SETS.includes(String(no || '').slice(0, 4).toUpperCase());
   let hiddenN = 0;
   function init(cards) {
@@ -105,7 +105,7 @@
     const t = String(text || '').trim();
     const m = t.match(/#d=([^\s&"'<>]+)/);
     let code = m ? decodeURIComponent(m[1]) : null;
-    if (!code) { const b = t.match(/\b1\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9]{4,}\b/); code = b ? b[0] : null; }
+    if (!code) { const b = t.match(/\b1\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9]{4,}(?:\.[A-Za-z0-9_-]+)?/); code = b ? b[0] : null; }   // #137: + segmen versi kartu
     if (!code) return null;
     const seg = code.split('.');
     if (seg[0] !== '1') return null;
@@ -119,18 +119,40 @@
       else if (no && isHiddenNo(no) && q > 0) hidden += q;      // riwayat #48: set yang disembunyikan
       else unknown++;
     }
-    return { name, list, unknown, hidden };
+    return { name, list, unknown, hidden, art: parseArt(seg[3], list) };
+  }
+  /* #137 (pemilik 24 Nov 2026): versi kartu (rarity/artwork) yang dipilih pemain ikut tersimpan di kode deck, segmen ke-4
+     (opsional, pembaca lama mengabaikannya): entri dipisah '-', tiap entri = huruf seri + 3 digit + kode rarity dari `ra`
+     kartu itu, mis. "I027MR-I021HR_616". Hanya tampilan: tidak mengubah aturan, mesin, log, maupun hash permainan.
+     Versi utama (ra[0]) tidak ditulis; kartu yang tidak ada di deck / kode yang tidak ada di `ra` diabaikan. */
+  function parseArt(segment, list) {
+    const out = {}, inDeck = new Set(list || []);
+    String(segment || '').split('-').forEach(e => {
+      const m = /^([A-Z])(\d{3})([A-Z]{1,4}(?:_[A-Z0-9]+)?)$/.exec(e); if (!m) return;
+      const ser = L2SER[m[1]], no = ser ? ser + '-' + m[2] : null, c = no && DB[no];
+      if (c && inDeck.has(no) && Array.isArray(c.ra) && c.ra.indexOf(m[3]) > 0) out[no] = m[3];
+    });
+    return out;
+  }
+  function artSegment(art, list) {
+    const inDeck = new Set(list || []), parts = [];
+    Object.keys(art || {}).sort().forEach(no => {
+      const c = DB[no], r = art[no], m = /^([A-Z0-9]+)-(\d{3})$/.exec(no), L = m && SER2L[m[1]];
+      if (L && c && inDeck.has(no) && Array.isArray(c.ra) && c.ra.indexOf(r) > 0) parts.push(L + m[2] + r);
+    });
+    return parts.join('-');
   }
 
   const hiddenList = () => HIDDEN_SETS.length > 1 ? HIDDEN_SETS.slice(0, -1).join(', ') + ' and ' + HIDDEN_SETS[HIDDEN_SETS.length - 1] : HIDDEN_SETS.join('');   // #133
   const HIDDEN_MSG = 'Cards from ' + hiddenList() + ' are not available in the simulator yet (their card effects are still being added)';
   // Kode deck format situs (versi 1, sama dengan encodeDeck() di index.html situs) — untuk riwayat pertandingan.
-  function encodeDeckCode(list, name) {
+  function encodeDeckCode(list, name, art) {
     const q = {}, order = [];
     (list || []).forEach(no => { if (!(no in q)) { q[no] = 0; order.push(no); } q[no]++; });
     const parts = [];
     order.forEach(no => { const m = no.match(/^([A-Z0-9]+)-(\d{3})$/); const L = m && SER2L[m[1]]; if (L) parts.push(L + m[2] + Math.min(q[no], 35).toString(36)); });
-    return '1.' + b64urlEncode(name || 'Deck') + '.' + parts.join('');
+    const a = artSegment(art, list);
+    return '1.' + b64urlEncode(name || 'Deck') + '.' + parts.join('') + (a ? '.' + a : '');
   }
   /* Validasi konstruksi deck (101.1). */
   function validateDeck(list) {
@@ -306,16 +328,20 @@
         if (!live.has(src)) continue;
         const def = defOf(st, src);
         if (!def || !def.auto) continue;
-        for (const a of def.auto) {
+        for (let ai = 0; ai < def.auto.length; ai++) {
+          const a = def.auto[ai];
           if (a.stat !== stat) continue;
           if (!inZone(st, src, a.zone)) continue;
           const A = readApi(st, src);
           if (immuneTo(st, iid, src)) continue;
           const v = a.value(A, src, iid);
           if (!v) continue;
-          const t = Math.max(st.inst[src].zt || 0, tz);
-          if (typeof v === 'object') out.push({ t, set: v.set, d: v.d || 0, auto: true, src });
-          else out.push({ t, d: v, auto: true, src });
+          const nt = Math.max(st.inst[src].zt || 0, tz);
+          // o2.56 (RS-079): cap waktu efek AUTO = saat efek itu mulai berlaku pada kartu ini (st.as, diisi settle()).
+          const key = autoKey(st, src, iid, stat, ai);
+          const t = st.as && st.as[key] != null ? st.as[key] : nt;
+          if (typeof v === 'object') out.push({ t, set: v.set, d: v.d || 0, auto: true, src, key, nt });
+          else out.push({ t, d: v, auto: true, src, key, nt });
         }
       }
     } finally { computing.delete(key); }
@@ -380,6 +406,30 @@
       const k = L ? L.zone + ':' + (L.slot || '') + ':' + (L.host || '') + ':' + (x.fd ? 1 : 0) : '-';
       if (x.lk !== k) { x.lk = k; x.zt = ++st.tick; }
     }
+  }
+  /* o2.56 (laporan #74, RS-079): efek AUTO yang terus berlaku pada satu kartu memakai cap waktu saat efek itu MULAI
+     berlaku. Pindah area di BATTLE (Reposition, BATTLE MOVE) tidak membuatnya mulai lagi — dulu cap waktu kartu target
+     ikut berubah, jadi mis. 「God of Trick」Loki (R menjadi 0) dianggap lebih baru dari R+2 Tombstone dan R+2 terhapus.
+     Kunci = sumber + target (zona tanpa area) + stat + nomor efek AUTO. Efek yang berhenti berlaku dihapus dari st.as. */
+  function zoneKey(st, i) { const k = String(st.inst[i].lk || '-').split(':'); return k[0] + ':' + (k[2] || '') + ':' + (k[3] || ''); }
+  function autoKey(st, src, iid, stat, ai) { return src + '@' + zoneKey(st, src) + '>' + iid + '@' + zoneKey(st, iid) + ':' + stat + ':' + ai; }
+  function stampAutos(st) {
+    if (st.lg145) { if (st.as) st.as = null; return; }
+    const old = st.as || {}, nu = {};
+    let changed = false;
+    for (let p = 0; p < 2; p++) {
+      const P = st.P[p], ids = [];
+      SLOTS.forEach(sl => { const i = P.bat[sl]; if (i) { ids.push(i); st.inst[i].att.forEach(a => ids.push(a)); } });
+      P.base.forEach(i => { ids.push(i); st.inst[i].att.forEach(a => ids.push(a)); });
+      ids.forEach(i => ['p', 'r', 'lv'].forEach(stat => statEntries(st, i, stat).forEach(e => {
+        if (!e.key) return;
+        nu[e.key] = old[e.key] != null ? old[e.key] : e.nt;
+        if (old[e.key] == null) changed = true;
+      })));
+    }
+    if (!changed && Object.keys(old).some(k => nu[k] == null)) changed = true;
+    st.as = nu;
+    if (changed) st.mver = (st.mver || 0) + 1;
   }
   // 301.41.a–c: ± / change TRIG/ACTI yang tertimpa change yang lebih baru berakhir selamanya.
   function pruneMods(st) {
@@ -694,7 +744,8 @@
     const from = locate(st, iid);
     // Laporan #21 (14 Nov 2026, RS-029): kartu dari luar FIELD yang dipasang = masuk FIELD, jadi UNIQUE ikut dicek.
     const hostL = locate(st, host), onField = from && (from.zone === 'bat' || from.zone === 'base' || from.zone === 'att');
-    if (!onField && hostL && uniqueBlocked(st, iid, hostL.p)) { log(st, 'eff', nameOf(st, iid) + ' cannot be attached: another card with the same name is on the FIELD (UNIQUE, 305.6.a).'); return false; }
+    // o2.56 (laporan Chewie, F-13 / RS-029): dari FIELD pemain lain ke FIELD Anda juga dicek UNIQUE (kartu terpasang ikut dihitung).
+    if (hostL && (!onField || (!st.lg145 && from.p !== hostL.p)) && uniqueBlocked(st, iid, hostL.p)) { log(st, 'eff', nameOf(st, iid) + ' cannot be attached: another card with the same name is on the FIELD (UNIQUE, 305.6.a).'); return false; }
     // 301.25.l: kartu yang terpasang pada kartu ini tidak lagi punya induk karakter → RETREAT.
     x.att.slice().forEach(s => retreat(st, s, 'its Character became an Attached Card, 301.25.l'));
     removeAnywhere(st, iid);
@@ -707,6 +758,7 @@
     // K-42 (keputusan pemilik 7 Nov 2026, CR 301.25.a): Karakter yang dipasang dari luar FIELD = DITEMPATKAN ke FIELD,
     // jadi memicu semua efek "enters the field" (termasuk "character enters the field"); dipasang dari FIELD = bergerak.
     if (from && !keepEn) emit(st, { k: 'ENTER', c: iid, p: locate(st, host).p, how: 'attach', from: from.zone, att: true, host });
+    return true;
   }
 
   /* ---------------- primitif Tahap 2 (SD02–SD04) ---------------- */
@@ -1046,11 +1098,24 @@
       });
     }
   }
+  /* o2.56 (laporan #79, RS-081, ruling pemilik 25 Nov 2026): efek AUTO selalu berlaku. Karakter yang ditempatkan / dipindah ke
+     BATTLE oleh efek dan Power-nya langsung 0 (mis. 「Ace Rescue」The Milano Power 500 ke FRONT saat 「Ancestral Plane」New Black
+     Panther lawan di WING memberi Power-500) langsung Retreat — sebelum sisa efek ("If you do, attach …") dijalankan.
+     Mengembalikan true bila kartu itu Retreat. Log < 0.14.5: tidak (diperiksa di settle() sesudah efek selesai). */
+  function zeroNow(st, iid) {
+    if (st.vanilla || st.lg145) return false;
+    const L = locate(st, iid); if (!L || L.zone !== 'bat') return false;
+    if (!(cardOf(st, iid).p > 0) || getPower(st, iid) !== 0) return false;
+    const P = iid => { const l = locate(st, iid); return l ? l.p : st.inst[iid].owner; };
+    const by = adjEntries(st, iid, 'p').some(e => e.d < 0 && e.src && st.inst[e.src] && P(e.src) !== L.p) ? opp(L.p) : L.p;
+    retreat(st, iid, 'Attack Power reduced to 0 by an effect, 301.16.a.1', { by });
+    return true;
+  }
   // Pemeriksaan otomatis setelah setiap perubahan: Power 0 karena efek → Retreat (301.16.a.1),
   // kartu terpasang yang induknya bukan karakter lagi → RETREAT (301.25.l), event R/Power naik.
   function settle(st) {
     if (st.vanilla) { checkWin(st); return; }
-    stampZones(st); pruneMods(st);
+    stampZones(st); stampAutos(st); pruneMods(st);
     // RS-001 (BP01-063 Time Abduction): Power "berkurang" = total pengurangan ± yang berlaku bertambah (efek sekali, aura
     // yang baru berlaku, masuk FIELD di bawah aura), termasuk yang membuat Karakter retreat. Buff yang berakhir tidak dihitung.
     const neg = {}, negO = {};
@@ -1146,7 +1211,7 @@
       prune(i, why) { A.mark(); if (immuneTo(st, i, self)) return false; return prune(st, i, why || 'effect'); },
       discard(i, why) { A.mark(); return discard(st, i, why); },
       draw(p, n) { A.mark(); return draw(st, p, n); },
-      attach(i, host) { A.mark(); attach(st, i, host); },
+      attach(i, host) { A.mark(); return attach(st, i, host); },
       mod(i, stat, d, why) {                                   // "in this turn"
         A.mark();
         if (immuneTo(st, i, self)) return;
@@ -1210,8 +1275,8 @@
       hasAb: (i, ab) => hasAbility(st, i, ab),
       cur: () => (st.bt && st.bt.cur) ? Object.assign({}, st.bt.cur) : null,
       targetsOf: i => targetsFor(st, i),
-      place(i, to, why) { A.mark(); return placeCard(st, i, to, why); },
-      bbm(i, to, why) { A.mark(); return effectBbm(st, i, to, why); },
+      place(i, to, why) { A.mark(); return placeCard(st, i, to, why) && !zeroNow(st, i); },
+      bbm(i, to, why) { A.mark(); return effectBbm(st, i, to, why) && !zeroNow(st, i); },
       cover(i, why) { A.mark(); return coverCard(st, i, why); },
       flip(i, why) { A.mark(); return flipCard(st, i, why); },
       bbmOk(i) { if (st.inst[i]) st.inst[i].bbmOk = st.turn; },
@@ -1257,9 +1322,9 @@
       },
       // --- Tahap 3 (BP01) ---
       battleMove(i, to, why) { A.mark(); return battleMove(st, i, to, why); },
-      detachToBattle(i, to, why) { A.mark(); return detachToBattle(st, i, to, why); },
+      detachToBattle(i, to, why) { A.mark(); return detachToBattle(st, i, to, why) && !zeroNow(st, i); },
       reorderTop(p, top, bottom, why) { A.mark(); return reorderTop(st, p, top, bottom, why); },
-      placeOnto(i, to, p, why) { A.mark(); return placeCard(st, i, to, why, p); },
+      placeOnto(i, to, p, why) { A.mark(); return placeCard(st, i, to, why, p) && !zeroNow(st, i); },
       emptySlots: p => SLOTS.filter(s => !st.P[p].bat[s]),
       attackedThisTurn: i => st.inst[i].dclT === st.turn,      // RS-027: hanya serangan yang dinyatakan
       timesTargeted: i => st.inst[i] && st.inst[i].tgdT === st.turn ? st.inst[i].tgdN : 0,   // Tahap 4 (PB01-002)
@@ -1502,9 +1567,12 @@
     };
     if (pa > pd) {
       log(st, 'judge', nameOf(st, b.a) + ' (' + pa + ') WINS THE FIGHT against ' + nameOf(st, tgNow) + ' (' + pd + ').');
+      // o2.56 (laporan Knull/Agony, RS-080): [ASSAULT] dilihat saat Win the Fight (305.4), sebelum Karakter yang kalah Retreat —
+      // mis. Agony "lawan punya Lv6 di BATTLE": Lv6 yang dikalahkan masih dihitung. Log lama (< 0.14.5): dilihat sesudah Retreat.
+      const asl0 = !st.lg145 && hasAbility(st, b.a, 'assault');
       fight(b.a, tgNow);
       retreat(st, tgNow, 'lost the fight', { vs: b.a });
-      if (hasAbility(st, b.a, 'assault') && locate(st, b.a)) weaknessHit(st, b.a, b.slot, ' (ASSAULT, 305.4)');
+      if ((asl0 || hasAbility(st, b.a, 'assault')) && locate(st, b.a)) weaknessHit(st, b.a, b.slot, ' (ASSAULT, 305.4)');
     } else if (pa < pd) {
       log(st, 'judge', nameOf(st, b.a) + ' (' + pa + ') LOSES THE FIGHT against ' + nameOf(st, tgNow) + ' (' + pd + ').');
       fight(tgNow, b.a);
@@ -2540,7 +2608,8 @@
     // o2.41: log lama (mesin < 0.14.1) tetap diputar dengan aturan lamanya, supaya replay & room yang dipulihkan tidak macet.
     if (o.e && verLt(o.e, '0.14.1')) { st.engine = o.e; st.lg021 = true; }        // SP01-021 dulu memicu dirinya sendiri
     if (o.e && verLt(o.e, '0.14.2')) { st.engine = o.e; st.lg066 = true; }
-    if (o.e && verLt(o.e, '0.14.4')) { st.engine = o.e; st.lg144 = true; }        // o2.47: aturan lama #51–#54 untuk log lama        // o2.44: BP01-066 dulu menaruh ke FIELD pemilik kartu
+    if (o.e && verLt(o.e, '0.14.4')) { st.engine = o.e; st.lg144 = true; }
+    if (o.e && verLt(o.e, '0.14.5')) { st.engine = o.e; st.lg145 = true; }        // o2.56: cap waktu AUTO lama (RS-079) untuk log lama        // o2.47: aturan lama #51–#54 untuk log lama        // o2.44: BP01-066 dulu menaruh ke FIELD pemilik kartu
     const acts = o.a || [], lim = n == null ? acts.length : Math.min(n, acts.length);
     for (let i = 0; i < lim; i++) {
       const r = apply(st, acts[i]);
@@ -2596,6 +2665,8 @@
       inst,
       prompt: !st.prompt ? null : mine ? cp(st.prompt) : { p: st.prompt.p, type: st.prompt.type, kind: st.prompt.kind },
       pending: (st.pend || []).length + (st.job ? 1 : 0),
+      as: st.as ? Object.fromEntries(Object.entries(st.as).filter(([k]) => { const m = k.match(/^([^@]+)@.*>([^@]+)@/); return m && inst[m[1]] && !inst[m[1]].hidden && inst[m[2]] && !inst[m[2]].hidden; })) : null,
+      lg145: !!st.lg145,
       log: logFor(st, p).map(e => e.k === 'start' ? Object.assign({}, e, { txt: e.txt.replace(/, seed \d+/, '') }) : e),
       nActions: st.actions.length
     };
@@ -2634,7 +2705,7 @@
     manualOps, attachHosts, MANUAL_OPS,
     testDeck, uniqueBlocked, hasAbility, handTriggerCards, placeSpots, bbmDests,
     lostEffects, abilityCount, costBanned, actiWhy, actiBlocked, noCallWhy,
-    HIDDEN_SETS, HIDDEN_MSG, hiddenList, isHiddenNo, hiddenCount, encodeDeckCode,
+    HIDDEN_SETS, HIDDEN_MSG, hiddenList, isHiddenNo, parseArt, artSegment, hiddenCount, encodeDeckCode,
     viewFor, visibleTo
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;

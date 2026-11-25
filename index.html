@@ -394,6 +394,13 @@
   .dl-coll-acts button[aria-pressed="true"]{background:rgba(242,176,30,.12)}
   .dl-coll-ok{color:var(--hijau);font-size:12px}
   .ds-own,.dg-own{font:700 10.5px var(--mono);padding:2px 5px;border-radius:5px;flex:none}
+  /* v7.58 — chip versi kartu (rarity) di daftar deck */
+  .ds-var{position:relative;z-index:1;flex:none;margin-left:4px;font:700 10.5px var(--mono);padding:3px 6px;border-radius:5px;
+    border:1px solid rgba(255,255,255,.35);background:rgba(14,18,22,.72);color:#fff;cursor:pointer;white-space:nowrap}
+  .ds-var:hover{border-color:var(--accent);color:var(--accent)}
+  .dg-var{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+  .dg-var button{font:700 10px var(--mono);padding:2px 5px;border-radius:5px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+  .dg-var button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:rgba(240,180,60,.12)}
   .ds-own{position:relative;z-index:1;margin-left:4px}
   .dg-own{position:absolute;left:4px;bottom:4px}
   .ds-own.full,.dg-own.full{background:rgba(31,122,77,.85);color:#d9ffe8}
@@ -3769,7 +3776,7 @@
 <script src="perf.js?v=7.34"></script>
 <script src="perf-ui.js?v=7.44"></script>
 <script src="rules-faq.js?v=7.56"></script>   <!-- v7.56 — TD-12; v7.24 — Rules FAQ & Errata (window.MHRRules); v7.26 — FAQ versi Bahasa Indonesia; v7.27 — Copy link ke halaman statis faq/ & errata/; v7.28 — TD-11 -->
-<script src="sim-host.js?v=7.55-sim53"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
+<script src="sim-host.js?v=7.59-sim56"></script>   <!-- v7.29 — Battle Sim (menu: semua akun login sejak beta O3, iframe sim/, jembatan login/deck, laporan) -->
 <script src="tower.js?v=7.51"></script>   <!-- v7.44 — 🗼 Control Tower (super-admin): Overview, Usage, Battle Sim reports, Binder reports, Verified organizers, Opponent deck list, Admin roles -->
 <!-- v6.88 — pop-up iklan carousel. v7.05: DILEPAS (kontrak iklan Era of Spiders + Asia Peak
      Invitational selesai 23 Okt 2026). Berkas promo-popup.js masih ada di repo untuk kampanye
@@ -3799,7 +3806,7 @@
   pemegang haknya masing-masing. Data kartu dirujuk dari
   <a href="https://www.marvelherorush.com/id/cards" target="_blank" rel="noopener">database resmi marvelherorush.com</a>.
   Alat ini akan diturunkan apabila diminta oleh pemegang hak.</span>
-  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.56</div>
+  <div style="margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#5A6673">v7.59</div>
 </footer>
 
 <div class="dview" id="simView" hidden>
@@ -4104,6 +4111,7 @@ function persist(){
   store.max  = parseInt($('#setMax').value)||3;
   store.view = state.view;
   store.art  = store.art || {};
+  store.deckArt = store.deckArt || {};   // v7.58 — versi kartu per deck (ikut kode deck, dipakai Battle Sim)
   store.cardLang = state.cardLang;
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(store));
@@ -4253,12 +4261,12 @@ function artFile(no, rar){
 /* Berkas yang sama tapi di direktori SEBALIKNYA dari yang baru gagal dimuat —
    dipakai imgFallback()/gridImgFallback()/lbImgFallback() sebagai langkah
    pertama, sebelum coba ekstensi lain. */
-function altArtFile(no){
+function altArtFile(no, rar){
   const c = DB.find(d=>d.no===no);
   if(!c) return null;
   const curDir = artDir(c);
   const altDir = curDir === 'images/en/' ? 'images/' : 'images/en/';
-  const r = artOf(no);
+  const r = (rar && c.ra.includes(rar)) ? rar : artOf(no);   // v7.58 — versi kartu per deck (data-rar)
   return (r === c.ra[0]) ? `${altDir}${no}.jpg` : `${altDir}${no}_${r}.jpg`;
 }
 
@@ -4266,7 +4274,7 @@ function imgFallback(img,no){
   const exts=['jpg','png','webp'];
   if(!img.dataset.dirFallback){
     img.dataset.dirFallback = '1';
-    const alt = altArtFile(no);
+    const alt = altArtFile(no, img.dataset.rar);
     if(alt){ img.dataset.ext = '0'; img.src = alt; return; }
   }
   let i=parseInt(img.dataset.ext)+1;
@@ -4703,7 +4711,7 @@ function renderDeck(){
       $('#deckList').innerHTML = collBox + `<div class="dl-grid">${tampil.map(({c,q})=>
         `<div class="dg">
           <button type="button" class="dg-img" data-zoom="${c.no}" title="${cardName(c).replace(/"/g,'&quot;')} · ${c.no} · ${c.f}">
-            <img src="${artFile(c.no)}" alt="${cardName(c).replace(/"/g,'&quot;')}" loading="lazy" data-ext="0" onerror="imgFallback(this,'${c.no}')">
+            <img src="${artFile(c.no, deckRar(store.active, c.no))}" data-rar="${deckRar(store.active, c.no)}" alt=""${cardName(c).replace(/"/g,'&quot;')}" loading="lazy" data-ext="0" onerror="imgFallback(this,'${c.no}')">
             <span class="dg-q">×${q}</span>
             ${ownBadge(c,q,'dg-own')}
           </button>
@@ -4712,15 +4720,17 @@ function renderDeck(){
             <span class="dg-no">${c.no}</span>
             <button class="qbtn" data-inc="${c.no}" aria-label="+1 ${c.no}">+</button>
           </div>
+          ${varChips(c, true)}
         </div>`).join('')}</div>`;
     } else {
       $('#deckList').innerHTML = collBox + `<div class="dl-strip">${tampil.map(({c,q})=>
         `<div class="ds">
-          <img class="ds-art" src="${artFile(c.no)}" alt="" loading="lazy" data-ext="0" onerror="imgFallback(this,'${c.no}')">
+          <img class="ds-art" src="${artFile(c.no, deckRar(store.active, c.no))}" data-rar="${deckRar(store.active, c.no)}" alt=""" loading="lazy" data-ext="0" onerror="imgFallback(this,'${c.no}')">
           <div class="ds-hit" data-zoom="${c.no}" data-prev="${c.no}" title="${cardName(c).replace(/"/g,'&quot;')} · ${c.no} · ${c.f}">
             <span class="ds-lv${DARK_TXT.has(c.c)?' dk':''}" style="background:${CMAP[c.c]}" aria-label="Lv${c.l}">${c.l}</span>
             <span class="ds-nm">${cardName(c)}</span>
           </div>
+          ${varChips(c)}
           ${ownBadge(c,q,'ds-own')}
           <span class="ds-q">
             <button class="qbtn" data-dec="${c.no}" aria-label="−1 ${c.no}">−</button>
@@ -4905,7 +4915,27 @@ $('#cards').addEventListener('click', e=>{
   if(z){ openLightbox(z.dataset.zoom); return; }
   if(e.target.dataset.act==='add') addCard(card.dataset.no);
 });
+/* v7.58 — pilih versi kartu (rarity) langsung dari daftar deck. Tampilan strip: satu chip versi aktif, diketuk = versi
+   berikutnya. Tampilan grid: semua versi. Pilihan disimpan per deck (store.deckArt) dan ikut kode/link deck & akun,
+   jadi juga tampil di Battle Sim (untuk pemain sendiri dan lawan online). Jumlah salinan tetap per nomor kartu. */
+function varChips(c, all){
+  if(!c || !Array.isArray(c.ra) || c.ra.length < 2) return '';
+  const cur = deckRar(store.active, c.no);
+  if(!all){
+    const nx = c.ra[(c.ra.indexOf(cur) + 1) % c.ra.length];
+    return `<button type="button" class="ds-var" data-dvar="${c.no}|${nx}" title="${escHtml(t('varNext'))}: ${escHtml(rarLabel(nx,c))}">${escHtml(rarLabel(cur,c))} ⟳</button>`;
+  }
+  return `<div class="dg-var">${c.ra.map(r=>`<button type="button" data-dvar="${c.no}|${r}" aria-pressed="${r===cur}">${escHtml(rarLabel(r,c))}</button>`).join('')}</div>`;
+}
+function setDeckRar(no, rar){
+  const c = DB.find(d=>d.no===no); if(!c || !c.ra.includes(rar)) return;
+  store.deckArt = store.deckArt || {};
+  (store.deckArt[store.active] = store.deckArt[store.active] || {})[no] = rar;
+  persist(); renderDeck();
+}
 $('#deckList').addEventListener('click', e=>{
+  const dv = e.target.closest('[data-dvar]');
+  if(dv){ const [no, rar] = dv.dataset.dvar.split('|'); setDeckRar(no, rar); return; }
   if(e.target.dataset.inc) return addCard(e.target.dataset.inc);
   if(e.target.dataset.dec) return decCard(e.target.dataset.dec);
   const z = e.target.closest('[data-zoom]');
@@ -5076,6 +5106,7 @@ const T = {
   cMain: 'main',
   cChecking: 'Checking image…',
   cUseMain: 'Using the main version.',
+  varNext: 'Tap to switch this card to the next version (saved in this deck, also shown in Battle Sim)',
   cClose: '✕ Close',
 
   /* --- warna --- */
@@ -6268,7 +6299,7 @@ async function buatDecklistPDF(){
     pdf.text(pdfSafe(t('dlImgScan')), R - QRS - 3.5, yAwal + QRS - 1.2, {align:'right'});
     y = Math.max(y, yAwal + QRS + 6);
   } else {
-    const kode = encodeDeck(state.deck, store.active);
+    const kode = deckCodeOf(store.active, state.deck);
     const potong = pdf.splitTextToSize(kode, R - M - 4);
     const tinggiKode = 5.5 + potong.length * 3.4;
     pdf.setDrawColor(175); pdf.setLineWidth(0.2);
@@ -6441,7 +6472,7 @@ function pdfUkuranQR(dasar, maks){
 function pdfLinkDeck(){
   const host = /^https?:$/.test(location.protocol) && /(^|\.)mhrdecklab\.com$/.test(location.hostname)
     ? location.origin + '/' : 'https://mhrdecklab.com/';
-  return host + '#d=' + encodeDeck(state.deck, store.active);
+  return host + '#d=' + deckCodeOf(store.active, state.deck);
 }
 
 async function buatDecklistGambarPDF(){
@@ -6724,6 +6755,7 @@ $('#btnDupDeck').addEventListener('click', ()=>{
   let i = 2, nama = `${asli} ${t('dupSuffix')}`;
   while(store.decks[nama]) nama = `${asli} ${t('dupSuffix')} ${i++}`;
   store.decks[nama] = {...state.deck};
+  store.deckArt = store.deckArt || {}; store.deckArt[nama] = {...(store.deckArt[asli] || {})};   // v7.58
   store.active = nama;
   state.deck = store.decks[nama];
   renderDeckSelect(); renderAll();
@@ -6734,6 +6766,7 @@ $('#btnDelDeck').addEventListener('click', ()=>{
   if(!confirm(`${t('mDelConfirm')} "${store.active}"?${ikutAkun ? '\n\n' + t('mDelConfirmCloud') : ''}`)) return;
   if(window.MHRCloudSync) window.MHRCloudSync.onDelete(store.active);   // v6.95 — ikut dihapus di akun
   delete store.decks[store.active];
+  if(store.deckArt) delete store.deckArt[store.active];   // v7.58
   store.active = Object.keys(store.decks)[0];
   state.deck = store.decks[store.active];
   renderDeckSelect(); renderAll();
@@ -6747,6 +6780,7 @@ $('#btnRenDeck').addEventListener('click', ()=>{
   if(store.decks[nama]){ alert(t('mNameUsed')); return; }
   store.decks[nama] = state.deck;
   delete store.decks[store.active];
+  if(store.deckArt && store.deckArt[store.active]){ store.deckArt[nama] = store.deckArt[store.active]; delete store.deckArt[store.active]; }   // v7.58
   if(window.MHRCloudSync) window.MHRCloudSync.onRename(store.active, nama);   // v6.95 — baris akun yang sama ikut di-rename
   store.active = nama;
   renderDeckSelect(); renderAll();
@@ -7387,7 +7421,50 @@ function b64urlDecode(str){
   try { return decodeURIComponent(escape(atob(str))); } catch(e){ return ''; }
 }
 
-function encodeDeck(deck, nama){
+/* v7.58 — versi kartu (rarity/artwork) ikut tersimpan di kode deck (permintaan pemain lewat pemilik, 24 Nov 2026):
+   segmen ke-4 opsional, mis. "1.<nama>.<kartu>.I027MR-I021HR_616" (huruf seri + 3 digit + kode rarity dari `ra`).
+   Pembaca lama (versi situs/Battle Sim sebelumnya, impor teks) mengabaikan segmen ini, jadi kode lama & baru saling terbaca.
+   Versi utama (ra[0]) tidak ditulis. encodeDeck(deck, nama) TANPA argumen ke-3 = tanpa segmen versi (dipakai pembanding
+   isi deck di sinkron akun); deckCodeOf(nama, deck) = kode lengkap dengan versi kartu deck itu. */
+function artSegment(deck, art){
+  const parts = [];
+  Object.keys(art || {}).sort().forEach(no=>{
+    const c = DB.find(d=>d.no===no), r = art[no], m = no.match(/^([A-Z0-9]+)-(\d{3})$/), L = m && SER2L[m[1]];
+    if(L && c && deck[no] > 0 && c.ra.indexOf(r) > 0) parts.push(L + m[2] + r);
+  });
+  return parts.join('-');
+}
+function parseArtSegment(seg, deck){
+  const out = {};
+  String(seg || '').split('-').forEach(e=>{
+    const m = /^([A-Z])(\d{3})([A-Z]{1,4}(?:_[A-Z0-9]+)?)$/.exec(e); if(!m) return;
+    const ser = L2SER[m[1]], no = ser ? `${ser}-${m[2]}` : null, c = no && DB.find(d=>d.no===no);
+    if(c && deck[no] > 0 && c.ra.indexOf(m[3]) > 0) out[no] = m[3];
+  });
+  return out;
+}
+/* Versi efektif kartu `no` di deck `nama`: pilihan deck itu, lalu pilihan umum (store.art), lalu versi utama. */
+function deckRar(nama, no){
+  const c = DB.find(d=>d.no===no); if(!c) return null;
+  const own = ((store.deckArt||{})[nama]||{})[no];
+  if(own && c.ra.includes(own)) return own;
+  const g = (store.art||{})[no];
+  return (g && c.ra.includes(g)) ? g : c.ra[0];
+}
+function deckArtMap(nama, deck){
+  const out = {};
+  Object.keys(deck || {}).forEach(no=>{ const c = DB.find(d=>d.no===no), r = deckRar(nama, no); if(c && r && r !== c.ra[0]) out[no] = r; });
+  return out;
+}
+function deckCodeOf(nama, deck){ deck = deck || store.decks[nama] || {}; return encodeDeck(deck, nama, deckArtMap(nama, deck)); }
+/* Versi dari kode deck yang dibuka/diunduh → disimpan eksplisit untuk SEMUA kartu deck itu (yang tidak disebut = versi utama). */
+function adoptDeckArt(nama, deck, art){
+  store.deckArt = store.deckArt || {};
+  const m = {};
+  Object.keys(deck || {}).forEach(no=>{ const c = DB.find(d=>d.no===no); if(c) m[no] = (art && art[no]) || c.ra[0]; });
+  store.deckArt[nama] = m;
+}
+function encodeDeck(deck, nama, art){
   const parts = [];
   for(const [no,q] of Object.entries(deck)){
     const m = no.match(/^([A-Z0-9]+)-(\d{3})$/);
@@ -7396,7 +7473,8 @@ function encodeDeck(deck, nama){
     if(!L) continue;
     parts.push(L + m[2] + Math.min(q,35).toString(36));
   }
-  return `1.${b64urlEncode(nama||'Deck')}.${parts.join('')}`;
+  const a = art ? artSegment(deck, art) : '';
+  return `1.${b64urlEncode(nama||'Deck')}.${parts.join('')}${a ? '.' + a : ''}`;
 }
 
 function decodeDeck(code){
@@ -7412,7 +7490,7 @@ function decodeDeck(code){
     if(no && DB.some(c=>c.no===no) && q>0) deck[no] = q;
     else unknown++;
   }
-  return {nama, deck, unknown};
+  return {nama, deck, unknown, art: parseArtSegment(seg[3], deck)};
 }
 
 /* ==================== IMPOR DECK DARI TEKS ====================
@@ -7426,7 +7504,7 @@ function decodeDeck(code){
 function cariKodeDeckDibagikan(teks){
   const mHash = teks.match(/#d=([^\s&"'<>]+)/);
   if(mHash) return decodeURIComponent(mHash[1]);
-  const mBare = teks.match(/\b1\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9]{4,}\b/);
+  const mBare = teks.match(/\b1\.[A-Za-z0-9_-]{2,}\.[A-Za-z0-9]{4,}(?:\.[A-Za-z0-9_-]+)?/);   // v7.58 + segmen versi
   if(mBare) return mBare[0];
   return null;
 }
@@ -7458,7 +7536,7 @@ function parseDeckText(teks){
 
 function deckShareURL(){
   const base = location.origin + location.pathname;
-  return base + '#d=' + encodeDeck(state.deck, store.active);
+  return base + '#d=' + deckCodeOf(store.active, state.deck);
 }
 
 /* v7.32 — link deck baru https://mhrdecklab.com/d/<kode>[?i=<id>] supaya WhatsApp menampilkan
@@ -7525,6 +7603,7 @@ function handleSharedLink(){
       let i = 2; while(store.decks[nama]) nama = `${res.nama} (${i++})`;
       store.decks[store.active] = state.deck;      // amankan deck yang sedang dibuka
       store.decks[nama] = {...res.deck};
+      adoptDeckArt(nama, res.deck, res.art);       // v7.58 — versi kartu dari link
       store.active = nama;
       state.deck = store.decks[nama];
       renderDeckSelect(); renderAll();
@@ -9364,6 +9443,7 @@ $('#pubGrid').addEventListener('click', async e=>{
     while(store.decks[nama]) nama = `${asli} ${i++}`;
     store.decks[store.active] = state.deck;
     store.decks[nama] = {...res.deck};
+    adoptDeckArt(nama, res.deck, res.art);   // v7.58
     store.active = nama;
     state.deck = store.decks[nama];
     renderDeckSelect();
@@ -9788,6 +9868,7 @@ $('#metaGrid').addEventListener('click', e=>{
     while(store.decks[nama]) nama = `${asli} ${i++}`;
     store.decks[store.active] = state.deck;      // amankan deck yang sedang dibuka
     store.decks[nama] = {...r.deck};
+    adoptDeckArt(nama, r.deck, r.art);   // v7.58
     store.active = nama;
     state.deck = store.decks[nama];
     renderDeckSelect();
@@ -10211,6 +10292,7 @@ $('#tourneyList').addEventListener('click', e=>{
     while(store.decks[nama]) nama = `${asli} ${i++}`;
     store.decks[store.active] = state.deck;      // amankan deck yang sedang dibuka
     store.decks[nama] = {...r.deck};
+    adoptDeckArt(nama, r.deck, r.art);   // v7.58
     store.active = nama;
     state.deck = store.decks[nama];
     renderDeckSelect();
@@ -11407,7 +11489,7 @@ window.addEventListener('hashchange', ()=>{
   const enqueue = fn => (chain = chain.then(fn).catch(err=>{ console.error('[MHR sync]', err); setStatus('error'); }));
 
   const deckIsEmpty = d => !d || !Object.keys(d).length;
-  const codeOf = name => encodeDeck(store.decks[name] || {}, name);
+  const codeOf = name => deckCodeOf(name, store.decks[name] || {});   // v7.58 — termasuk versi kartu
   /* updated_at Postgres bisa berpresisi mikrodetik (.123456+00:00) — dipotong ke
      milidetik supaya Date.parse konsisten di semua browser (termasuk Safari lama) */
   const ts = x => { const n = x ? Date.parse(String(x).replace(/(\.\d{3})\d+/, '$1')) : NaN; return isNaN(n) ? 0 : n; };
@@ -11554,6 +11636,7 @@ window.addEventListener('hashchange', ()=>{
           delete store.cloudLink[name]; store.cloudPending[name] = true; store.localAt[name] = nowIso;
           let nm = `${rowName} (2)`, i = 3; while(store.decks[nm]) nm = `${rowName} (${i++})`;
           store.decks[nm] = res.deck; store.cloudLink[nm] = row.id; store.cloudCode[nm] = row.deck_code;
+          adoptDeckArt(nm, res.deck, res.art);
           store.cloudAt[row.id] = row.updated_at; changed = true;
           continue;
         }
@@ -11563,13 +11646,13 @@ window.addEventListener('hashchange', ()=>{
         let target = name;
         if(rowName !== name && !store.decks[rowName]){                    // di-rename di perangkat lain
           target = rowName;
-          for(const k of ['cloudLink','cloudCode','localAt','cloudPending']){
+          for(const k of ['cloudLink','cloudCode','localAt','cloudPending','deckArt']){
             if(name in store[k]){ store[k][target] = store[k][name]; delete store[k][name]; }
           }
           delete store.decks[name];
           if(store.active === name) store.active = target;
         }
-        store.decks[target] = res.deck;
+        store.decks[target] = res.deck; adoptDeckArt(target, res.deck, res.art);
         store.cloudLink[target] = row.id;
         store.cloudCode[target] = row.deck_code;
         store.cloudAt[row.id] = row.updated_at;
@@ -11581,14 +11664,14 @@ window.addEventListener('hashchange', ()=>{
         if(store.decks[rowName] && !store.cloudLink[rowName]){
           const local = store.decks[rowName];
           if(deckIsEmpty(local) || encodeDeck(local, rowName) === encodeDeck(res.deck, rowName)){
-            store.decks[rowName] = res.deck; store.cloudLink[rowName] = row.id;
+            store.decks[rowName] = res.deck; store.cloudLink[rowName] = row.id; adoptDeckArt(rowName, res.deck, res.art);
             store.cloudCode[rowName] = row.deck_code; store.cloudAt[row.id] = row.updated_at;
             delete store.cloudPending[rowName]; changed = true;
             continue;
           }
         }
         let nm = rowName, i = 2; while(store.decks[nm]) nm = `${rowName} (${i++})`;
-        store.decks[nm] = res.deck; store.cloudLink[nm] = row.id;
+        store.decks[nm] = res.deck; store.cloudLink[nm] = row.id; adoptDeckArt(nm, res.deck, res.art);
         store.cloudCode[nm] = row.deck_code; store.cloudAt[row.id] = row.updated_at;
         changed = true;
       }
@@ -12244,7 +12327,7 @@ function renderHistory(){
       b.disabled = true;
       await window.MHRCloudSync.flush();
       const { data, error } = await window.MHRDecks.saveVersion({ deckId: HIST.deckId, name: store.active,
-        deckCode: encodeDeck(state.deck, store.active), label: label.trim() || t('histLabelDefault') });
+        deckCode: deckCodeOf(store.active, state.deck), label: label.trim() || t('histLabelDefault') });
       if(error || !data){ b.disabled = false; alert(t(error && error.missing ? 'histMissing' : 'histErr')); return; }
       HIST.rows.unshift({...data, deck:{...state.deck}});
       renderHistory();
@@ -12258,7 +12341,7 @@ function renderHistory(){
       if(deckCount()){
         await window.MHRCloudSync.flush();
         const { error } = await window.MHRDecks.saveVersion({ deckId: HIST.deckId, name: store.active,
-          deckCode: encodeDeck(state.deck, store.active), label: t('histBeforeRestore') });
+          deckCode: deckCodeOf(store.active, state.deck), label: t('histBeforeRestore') });
         if(error && !confirm(t('histRestoreNoBackup'))){ b.disabled = false; return; }
       }
       state.deck = {...r.deck};

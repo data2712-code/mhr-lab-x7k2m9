@@ -130,7 +130,7 @@
     if (cm && window.DECK_KOMUNITAS && window.DECK_KOMUNITAS[+cm[1]]) {
       const dd = window.DECK_KOMUNITAS[+cm[1]], d = S.decodeDeckCode(dd.cd);
       if (!d) return { err: 'Community deck "' + dd.nm + '" could not be read.' };
-      return { list: d.list, name: dd.nm, unknown: d.unknown, hidden: d.hidden };
+      return { list: d.list, name: dd.nm, unknown: d.unknown, hidden: d.hidden, art: d.art };
     }
     const d = S.decodeDeckCode(codeText);
     if (!d) return { err: (who || 'The') + " deck code could not be read. Paste a link or a \"1.xxx.xxx\" code from the Deck Builder." };
@@ -164,7 +164,7 @@
     const both = ui.ctrl[0] === 'human' && ui.ctrl[1] === 'human';
     launch({ decks, seed, first: f === 'random' ? 'random' : +f, names: [$('n0').value || 'Player 1', $('n1').value || 'Player 2'],
       ctrl: ui.ctrl, timer: ui.timer, botLevel: 'normal', gmode: both ? 'friend' : 'custom', deckNames: [0, 1].map(k => readDeck(k).name || 'Deck'),
-      youIdx: both ? null : ui.ctrl.indexOf('human') });
+      youIdx: both ? null : ui.ctrl.indexOf('human'), arts: [0, 1].map(k => readDeck(k).art || {}) });
   }
   /* Mulai permainan baru dari mode mana pun (riwayat #50). o: { decks, names, ctrl, first, seed, timer, botLevel, gmode,
      deckNames, youIdx }. Mode Siaga hanya di pass-and-play dua orang (kartu di HAND tetap rahasia). */
@@ -179,6 +179,7 @@
     ui.ctrl = o.ctrl.slice(); ui.manualCounter = false; ui.sandbox = false;
     ui.timer = o.timer || 'standard'; ui.botLevel = o.botLevel || 'normal'; ui.gmode = o.gmode || 'custom';
     ui.deckNames = (o.deckNames || []).slice(); ui.youIdx = o.youIdx == null ? null : o.youIdx; ui.recorded = false;
+    ui.arts = [0, 1].map(k => Object.assign({}, (o.arts || [])[k] || {}));   // #137: versi kartu per pemain
     ui.mleft = MATCH[ui.timer] || null;
     ui.lastLaunch = Object.assign({}, o, { seed: undefined });
     G = S.createGame({ decks: o.decks, seed: o.seed, first: o.first == null ? 'random' : o.first, names: o.names, vanilla: false,
@@ -195,6 +196,7 @@
     ui.ctrl = (c.ctrl || ['human', 'human']).slice(); ui.manualCounter = false; ui.sandbox = !!c.sandbox;
     ui.timer = c.timer || 'standard'; ui.botLevel = c.botLevel || 'normal'; ui.gmode = c.gmode || 'custom';
     ui.deckNames = (c.deckNames || []).slice(); ui.youIdx = c.youIdx == null ? null : c.youIdx; ui.recorded = false;
+    ui.arts = Array.isArray(c.arts) ? c.arts : [{}, {}];   // #137
     ui.mleft = MATCH[ui.timer] ? (c.mleft != null ? Math.max(0, +c.mleft) : MATCH[ui.timer]) : null;
     G = S.replay(o);
     if (G.replayError) ui.msg = G.replayError;
@@ -210,7 +212,7 @@
       ui.recorded = true; clearSaved(); return;
     }
     store.set(KEY_CUR, { v: 1, code: S.exportLog(G), gmode: ui.sandbox ? 'sandbox' : ui.gmode, ctrl: ui.ctrl, timer: ui.timer, botLevel: ui.botLevel,
-      deckNames: ui.deckNames, youIdx: ui.youIdx, sandbox: ui.sandbox, names: G.names, turn: G.turn, mleft: ui.mleft, at: Date.now() });
+      deckNames: ui.deckNames, arts: ui.arts, youIdx: ui.youIdx, sandbox: ui.sandbox, names: G.names, turn: G.turn, mleft: ui.mleft, at: Date.now() });
   }
   // Satu baris riwayat (bentuk dekat dengan match_logs fitur Performance: context, deck, lawan, games[{r,f,e}]).
   function matchRecord() {
@@ -479,7 +481,7 @@
     ui.ctrl = o.seat === 0 ? ['human', 'remote'] : ['remote', 'human'];
     track('sim_online');
     ui.sandbox = false; ui.replay = null; ui.gmode = 'online'; ui.timer = net.clock; ui.mleft = null; ui.hist = []; ui.recorded = true; ui.lastLaunch = null;
-    ui.youIdx = o.seat; ui.deckNames = (o.deckNames || []).slice(); ui.msg = ''; ui.overClosed = false;
+    ui.youIdx = o.seat; ui.deckNames = (o.deckNames || []).slice(); ui.msg = ''; ui.overClosed = false; ui.arts = [{}, {}];
     G = null;
   }
   const promptKey = () => G && G.prompt ? G.actions.length + ':' + G.prompt.type + ':' + G.prompt.p : '';
@@ -488,6 +490,7 @@
     const first = !G, key = promptKey();
     net.last = msg; net.recvAt = Date.now(); net.pending = false;
     if (msg.replay) net.replay = msg.replay;
+    if (Array.isArray(msg.arts)) ui.arts = msg.arts;   // #137: versi kartu kedua pemain dari server
     if (!msg.undoPending) { net.ask = null; net.waitUndo = false; }
     G = Shadow.shadow(msg.view);
     if (G.prompt && G.prompt.type === 'rps') G.prompt.p = msg.rps && msg.rps.mine == null ? net.seat : 1 - net.seat;   // jankenpon serentak
@@ -664,17 +667,25 @@
   /* ---------------- tampilan kartu ---------------- */
   /* Gambar cetakan INGGRIS dulu (images/en/), lalu images/ (kartu yang belum punya cetakan
      Inggris, mis. SD05/SD06/PB02 fan:2), lalu ekstensi lain. Sama dengan artDir() situs. */
-  function imgSources(no) {
+  /* #137: versi kartu (rarity) pilihan pemain dari kode deck (ui.arts[pemilik][nomor]) dipakai dulu
+     (images/en/<no>_<RAR>.jpg, lalu images/), baru versi utama bila berkasnya tidak ada. */
+  function artFor(no, owner) {
+    const a = ui.arts && owner != null && ui.arts[owner], r = a && a[no], c = S.card(no);
+    return r && c && Array.isArray(c.ra) && c.ra.indexOf(r) > 0 ? r : '';
+  }
+  function imgSources(no, rar) {
     const c = S.card(no), out = [];
     const dirs = c && c.fan === 2 ? ['images/'] : ['images/en/', 'images/'];
-    ['jpg', 'png', 'webp'].forEach(ext => dirs.forEach(d => out.push(BASE + d + no + '.' + ext)));
+    const files = rar ? [no + '_' + rar, no] : [no];
+    files.forEach(fn => ['jpg', 'png', 'webp'].forEach(ext => dirs.forEach(d => out.push(BASE + d + fn + '.' + ext))));
     return out;
   }
-  function imgTag(no) {
-    return '<img alt="" draggable="false" src="' + imgSources(no)[0] + '" data-no="' + no + '" data-i="0" onerror="window.__simImgErr(this)">';
+  function imgTag(no, owner) {
+    const rar = artFor(no, owner);
+    return '<img alt="" draggable="false" src="' + imgSources(no, rar)[0] + '" data-no="' + no + '"' + (rar ? ' data-rar="' + rar + '"' : '') + ' data-i="0" onerror="window.__simImgErr(this)">';
   }
   window.__simImgErr = function (img) {
-    const src = imgSources(img.dataset.no), i = (+img.dataset.i) + 1;
+    const src = imgSources(img.dataset.no, img.dataset.rar || ''), i = (+img.dataset.i) + 1;
     if (i < src.length) { img.dataset.i = i; img.src = src[i]; } else { img.remove(); }
   };
   const COLOR_EN = { Merah: 'Red', Kuning: 'Yellow', Biru: 'Blue', Hijau: 'Green', Orange: 'Orange', Purple: 'Purple' };
@@ -699,7 +710,7 @@
     const lent = opts.onField || opts.att ? lentHTML(iid) : '';
     if (lent) cls.push('lent');
     return '<div class="' + cls.concat(x.fd ? ['fd'] : []).join(' ') + '" data-iid="' + iid + '" title="' + esc(S.nameEn(c)) + '">' +
-      '<div class="ph">' + esc(S.nameEn(c)) + '</div>' + imgTag(x.no) +
+      '<div class="ph">' + esc(S.nameEn(c)) + '</div>' + imgTag(x.no, x.owner) +
       '<div class="cbar" style="background:' + (COLOR[c.c] || '#888') + '"></div>' + tag +
       (x.att && x.att.length ? '<span class="tag att">+' + x.att.length + ' att</span>' : '') + lent +
       '<div class="st"><b class="' + cmpCls(S.getLv(G, iid), c.l) + '">Lv' + S.getLv(G, iid) + '</b><i class="' + cmpCls(S.getR(G, iid), c.r) + '">R' + S.getR(G, iid) + '</i><span class="' + cmpCls(S.getPower(G, iid), c.p) + '">' + S.getPower(G, iid) + '</span></div></div>';
@@ -770,6 +781,8 @@
     const dockable = !!tr.querySelector('.acts > *') && (!tr.querySelector('.cpay') || (!narrow() && innerHeight <= 900));   // o2.39: panel biaya ikut menempel di kolom kanan di laptop
     tr.className = 'abar' + (ui.msg ? ' err' : '') + (dockable ? ' dock' : '') + (dockable && ui.trayMin ? ' min' : '');
     if (dockable) tr.insertAdjacentHTML('beforeend', '<button class="sm tmin" data-act="trayMin">' + (ui.trayMin ? '▸ Show' : '▾ Hide') + '</button>');
+    // o2.56 (laporan #67/#68): di panel yang menempel, tombol "Confirm cost" / tujuan CALL selalu digulir ke dalam pandangan.
+    if (dockable && !ui.trayMin) { const cd = tr.querySelector('.cpdest:not(.dim)'); if (cd && cd.scrollIntoView) cd.scrollIntoView({ block: 'nearest' }); }
     if (net.on) { const nb = netBarHTML(); if (nb) tr.insertAdjacentHTML('afterbegin', nb); }
     mobileArena();
     mobileBoard();

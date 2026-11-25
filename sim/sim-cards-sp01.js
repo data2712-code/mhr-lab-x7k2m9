@@ -112,7 +112,8 @@
         can: A => A.battleChars(A.p).length < oppBattle(A).length && A.battleChars(A.p).some(i => A.lv(i) === 6) && uniqOk(A),
         run: A => {
           const c = A.ask('c', { text: 'Choose 1 of your Lv6 Characters in BATTLE to Retreat', from: A.battleChars(A.p).filter(i => A.lv(i) === 6) });
-          const to = A.pick('to', 'Choose where to place 「Phoenix Host」Jean Grey', slotOpts(A, fieldSpots(A, [A.slot(c[0])])));
+          // o2.56 (laporan #66): TRIG【BATTLE】 Phoenix Host hanya aktif bila Jean masuk BATTLE — pilihan BASE diberi catatan.
+          const to = A.pick('to', 'Choose where to place 「Phoenix Host」Jean Grey', slotOpts(A, fieldSpots(A, [A.slot(c[0])])).map(o => o.v === 'BASE' ? Object.assign(o, { label: o.label + ' (its TRIG【BATTLE】 will not activate)' }) : o));
           if (A.retreat(c[0], 'Phoenix Host') && to) A.place(A.self, to, 'Phoenix Host');
         }
       }],
@@ -1083,12 +1084,13 @@
       }],
       acti: [{
         id: 'attach', zone: 'HAND', counter: true, label: 'Attach this card to 1 of your [Human] Characters: 1 opponent Character in BATTLE gets Lv-3',
-        can: A => A.chars(A.p).some(i => isHuman(A, i)),
+        // o2.56 (laporan #75): UNIQUE — tidak bisa dipakai bila Venom 2099 lain sudah di FIELD; Lv-3 hanya "if you do" (berhasil dipasang).
+        can: A => A.chars(A.p).some(i => isHuman(A, i)) && (A.st.lg145 || uniqOk(A)),
         run: A => {
           const h = A.ask('h', { text: 'Choose 1 of your [Human] Characters to attach Venom 2099 to', from: A.chars(A.p).filter(i => isHuman(A, i)), prefer: 'high' });
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Lv-3 this turn)", from: oppBattle(A), prefer: 'high' });
-          A.attach(A.self, h[0]);
-          t.forEach(i => A.mod(i, 'lv', -3, 'Venom 2099'));
+          const done = A.attach(A.self, h[0]);
+          if (done || A.st.lg145) t.forEach(i => A.mod(i, 'lv', -3, 'Venom 2099'));
         }
       }]
     },

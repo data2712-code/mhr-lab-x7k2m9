@@ -16,6 +16,55 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-25', t: 'fix', v: 'o2.56', reports: [66, 67, 68, 74, 75, 78, 79],
+      en: { h: 'Fixes: CALL cost panel on laptops, R+X after moving areas, ASSAULT, Venom 2099, Sif, Milano, Chewie', b: [
+        'On laptop screens (height 900px or less), the CALL cost panel on the right could push its "Confirm cost" and destination buttons off-screen once the total Lv was exact, so a Lv4+ card (e.g. 「Genius Burden」Ultron) could not be called. The panel now stays in one column and scrolls to those buttons.',
+        'R+X / Power+X "this turn" from an effect no longer disappears when the Character only changes area in BATTLE (e.g. 「Spider-Archenemy」Tombstone moved from FRONT to WING while 「God of Trick」Loki is attached). An AUTO "changes to" effect only overrides bonuses gained before it started applying.',
+        '「Phoenix Host」Jean Grey: the BASE choice now says that its TRIG【BATTLE】 will not activate there.',
+        '[ASSAULT] is checked when the Character wins the fight, before the loser retreats. 「Spider-Archenemy」Agony (or 「God of Symbiotes」Knull copying it) now gets ASSAULT when it defeats the only Lv6 Character in your opponent\'s BATTLE.',
+        '「Spider-Archenemy」Venom 2099 (UNIQUE) can no longer use its COUNTER·ACTI【HAND】 while another Venom 2099 is on your field, and the Lv-3 only applies when it is really attached.',
+        '「Judgment for Exile」Sif, 「Judgment for Banishing」Sif, 「Banishing Bifrost」Heimdall and 「Giant Crash」Leviathan: you may still discard even if nothing can be moved (your opponent\'s BASE is full or there is no target).',
+        'AUTO effects always apply: a Character placed into BATTLE by an effect whose Power becomes 0 retreats at once, before the rest of that effect. Example: 「Ace Rescue」The Milano (Power 500) placed into FRONT while your opponent\'s 「Ancestral Plane」New Black Panther is in WING (Power-500) retreats and attaches nothing.',
+        '「Sweet and Gentle」Chewie can no longer attach your opponent\'s 「Sweet and Gentle」Chewie (UNIQUE: two cards with that name can never be on your FIELD, Attached Cards included).'
+      ] },
+      id: { h: 'Perbaikan: panel biaya CALL di laptop, R+X setelah pindah area, ASSAULT, Venom 2099, Sif, Milano, Chewie', b: [
+        'Di layar laptop (tinggi 900px atau kurang), panel biaya CALL di kanan bisa mendorong tombol "Confirm cost" dan tombol tujuan ke luar layar begitu total Lv pas, sehingga kartu Lv4+ (mis. 「Genius Burden」Ultron) tidak bisa di-CALL. Panel kini tetap satu kolom dan menggulir ke tombol tersebut.',
+        'R+X / Power+X "giliran ini" dari efek tidak lagi hilang saat Karakter hanya pindah area di BATTLE (mis. 「Spider-Archenemy」Tombstone dari FRONT ke WING saat 「God of Trick」Loki terpasang). Efek AUTO "menjadi" hanya menimpa bonus yang didapat sebelum efek itu mulai berlaku.',
+        '「Phoenix Host」Jean Grey: pilihan BASE kini memberi tahu bahwa TRIG【BATTLE】-nya tidak aktif di sana.',
+        '[ASSAULT] dilihat saat Karakter menang bertarung, sebelum yang kalah Retreat. 「Spider-Archenemy」Agony (atau 「God of Symbiotes」Knull yang meniru efeknya) kini mendapat ASSAULT saat mengalahkan satu-satunya Karakter Lv6 di BATTLE lawan.',
+        '「Spider-Archenemy」Venom 2099 (UNIQUE) tidak bisa lagi memakai COUNTER·ACTI【HAND】 selama Venom 2099 lain ada di FIELD Anda, dan Lv-3 hanya berlaku bila kartu ini benar-benar terpasang.',
+        '「Judgment for Exile」Sif, 「Judgment for Banishing」Sif, 「Banishing Bifrost」Heimdall, dan 「Giant Crash」Leviathan: tetap boleh membuang walau tidak ada yang bisa dipindah (BASE lawan penuh atau tanpa target).',
+        'Efek AUTO selalu berlaku: Karakter yang ditempatkan ke BATTLE oleh efek dan Power-nya menjadi 0 langsung Retreat, sebelum sisa efek itu. Contoh: 「Ace Rescue」The Milano (Power 500) ke FRONT saat 「Ancestral Plane」New Black Panther lawan di WING (Power-500) langsung Retreat dan tidak memasang apa pun.',
+        '「Sweet and Gentle」Chewie tidak bisa lagi memasang 「Sweet and Gentle」Chewie lawan (UNIQUE: dua kartu dengan nama itu tidak boleh ada di FIELD Anda, termasuk kartu terpasang).'
+      ] }
+    },
+    {
+      d: '2026-11-24', t: 'improve', v: 'o2.55',
+      en: { h: 'Use alternate-art versions (MR, SEC, HR...) in Battle Sim', b: [
+        'In the Deck Builder, cards with other versions now have a version chip in your deck list: tap it to switch (List view) or pick one (Grid view).',
+        'The version is saved with that deck, its link/code and your account, and Battle Sim shows your cards in that version. In online games your opponent sees it too.',
+        'Versions are only artwork: the rules, the limit of 3 copies and the card effects do not change. Decks saved before this update show the main version until you pick one.'
+      ] },
+      id: { h: 'Pakai versi artwork lain (MR, SEC, HR...) di Battle Sim', b: [
+        'Di Deck Builder, kartu yang punya versi lain sekarang punya chip versi di daftar deck: ketuk untuk ganti (tampilan List) atau pilih langsung (tampilan Grid).',
+        'Versi tersimpan bersama deck itu, link/kode deck, dan akun Anda, lalu Battle Sim menampilkan kartu Anda dengan versi tersebut. Di permainan online lawan juga melihatnya.',
+        'Versi hanya artwork: aturan, batas 3 salinan, dan efek kartu tidak berubah. Deck yang disimpan sebelum pembaruan ini tampil versi utama sampai Anda memilih versi.'
+      ] }
+    },
+    {
+      d: '2026-11-24', t: 'news', v: 'o2.54',
+      en: { h: 'CB01 Destined Convergence cards are playable', b: [
+        'The 7 cards from the CB01 Destined Convergence collector box can now be used in Battle Sim decks: Symbiotic Suit Spider-Man, Amazing Spider-Man, Spider-Man Noir, Kingpin, Venom, Green Goblin and Mary Jane Watson.',
+        'They are reprints of SP01 and PB02 cards with new artwork and work exactly like the originals. They share the same name, so the limit of 3 cards per name counts both versions together.',
+        '「Gunfire Negotiation」Spider-Man Noir (SP01-025 and CB01-003): the reveal effect triggers only when the card is called, as the English text says.'
+      ] },
+      id: { h: 'Kartu CB01 Destined Convergence bisa dimainkan', b: [
+        '7 kartu dari kotak koleksi CB01 Destined Convergence sekarang bisa dipakai di deck Battle Sim: Symbiotic Suit Spider-Man, Amazing Spider-Man, Spider-Man Noir, Kingpin, Venom, Green Goblin, dan Mary Jane Watson.',
+        'Kartu ini cetak ulang kartu SP01 dan PB02 dengan ilustrasi baru, efeknya sama persis dengan kartu aslinya. Namanya sama, jadi batas 3 kartu per nama menghitung kedua versi bersama.',
+        '「Gunfire Negotiation」Spider-Man Noir (SP01-025 dan CB01-003): efek menunjukkan kartu hanya terpicu saat kartu dipanggil, sesuai teks Inggris.'
+      ] }
+    },
+    {
       d: '2026-11-24', t: 'fix', v: 'o2.51', reports: [59, 60, 63, 64, 65],
       en: { h: 'God Of Story and Groot fixes · Confirm cost · pick targets on the board', b: [
         '「God Of Story」Loki: if your opponent has fewer face-down cards than X, you can now Retreat all of the ones they have (do as much as you can).',
