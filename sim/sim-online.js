@@ -303,7 +303,7 @@
      Antrean di server (POST /api/queue/…): masuk dengan deck, lalu bertanya berkala. Lawan ditemukan → kedua pemain
      menekan Accept dalam 10 detik → room dimulai (jam Standard, giliran pertama acak). Setelah 45 detik menunggu (O-13)
      ditawarkan main lawan bot (permainan offline biasa, bot selalu bernama "Bot · level") sambil pencarian tetap jalan;
-     pemberitahuan "lawan ditemukan" tampil di atas papan. Pencarian berhenti sendiri setelah 10 menit. */
+     pemberitahuan "lawan ditemukan" tampil sebagai jendela besar di tengah layar (o2.57). Pencarian berhenti sendiri setelah 10 menit. */
   const BOT_OFFER_MS = window.MHRSIM_BOT_OFFER_MS || 45000;
   const fq = { on: false, ticket: null, token: null, since: 0, st: null, timer: null, tick: null, deck: null, deckVal: null, err: '', note: '', busy: false, botGame: false, foundBy: 0 };
   const fhead = '<div class="hd"><button data-mode="home">← Menu</button><h2>Find a match</h2></div>';
@@ -390,7 +390,7 @@
     if (!force && el.dataset.fq === mode && $('fqTime')) { $('fqTime').textContent = mmss(waited); const n = $('fqN'); if (n) n.textContent = st.waiting || 1; const e = $('onErr'); if (e) e.textContent = fq.err || ''; return; }
     el.dataset.fq = mode;
     let h = '<div class="hd"><button data-on="fqCancel">← Cancel</button><h2>Find a match</h2></div><div class="box" style="text-align:center">';
-    if (mode === 'found') h += '<p><b>Opponent found</b></p><p class="small muted" id="fqTime">Answer in the box at the top of the screen.</p>';
+    if (mode === 'found') h += '<p><b>Opponent found</b></p><p class="small muted" id="fqTime">Answer in the window in the middle of the screen.</p>';
     else {
       h += '<p style="margin:0"><b>Searching for an opponent…</b></p><div class="roomcode" id="fqTime">' + mmss(waited) + '</div>' +
         '<p class="small muted"><b id="fqN">' + (st.waiting || 1) + '</b> <span>player(s) searching now</span> · <span>your deck:</span> <span data-noi18n>' + esc(fq.deck ? fq.deck.name : 'Deck') + '</span></p><div class="spin"></div>';
@@ -401,32 +401,55 @@
     h += '</div><div id="onErr" class="err">' + esc(fq.err || '') + '</div>';
     el.innerHTML = h; tr();
   }
+  /* o2.57 (permintaan pemilik 25 Nov 2026): "lawan ditemukan" = jendela besar di TENGAH layar (latar digelapkan, nama lawan,
+     hitung mundur besar, tombol Accept / Decline besar, bunyi + getar sekali). Spanduk kecil di atas hanya untuk
+     "masih mencari" selagi main lawan bot. */
   function banner() {
-    let b = document.getElementById('fqBanner');
     const st = fq.st || {}, inGame = document.getElementById('game').classList.contains('on');
-    const show = fq.on && (st.state === 'found' || (inGame && st.state === 'waiting'));
-    if (!show) { if (b) b.remove(); return; }
-    if (!b) {
-      b = document.createElement('div'); b.id = 'fqBanner';
-      b.style.cssText = 'position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:200;width:max-content;max-width:94vw;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 12px;border-radius:12px;background:#12171d;border:2px solid #F2B01E;box-shadow:0 8px 24px rgba(0,0,0,.6);font-size:13px;color:#e8edf3';
-      b.addEventListener('click', e => { const t = e.target.closest('[data-fq]'); if (!t) return; if (t.dataset.fq === 'accept') fqAccept(); else fqStop(); });
-      document.body.appendChild(b);
+    const found = fq.on && st.state === 'found';
+    // spanduk kecil "masih mencari" (saat main lawan bot)
+    let b = document.getElementById('fqBanner');
+    const showB = fq.on && !found && inGame && st.state === 'waiting';
+    if (!showB) { if (b) b.remove(); }
+    else {
+      if (!b) {
+        b = document.createElement('div'); b.id = 'fqBanner';
+        b.style.cssText = 'position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:200;width:max-content;max-width:94vw;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 12px;border-radius:12px;background:#12171d;border:2px solid #2a313b;box-shadow:0 8px 24px rgba(0,0,0,.6);font-size:13px;color:#e8edf3';
+        b.addEventListener('click', e => { const t = e.target.closest('[data-fq]'); if (t && t.dataset.fq === 'stop') fqStop(); });
+        document.body.appendChild(b);
+      }
+      if (b.dataset.key !== 'w') { b.dataset.key = 'w'; b.innerHTML = '<span>Still searching for a player…</span><button data-fq="stop" class="sm">Stop searching</button>'; tr(); }
     }
-    const key = st.state + ':' + (st.accepted ? 1 : 0) + ':' + (st.opp || '');
-    if (st.state === 'found') {
-      const left = Math.ceil(Math.max(0, fq.foundBy - Date.now()) / 1000);
-      if (b.dataset.key !== key) {
-        b.dataset.key = key;
-        b.innerHTML = '<span><b>Opponent found:</b> <b data-noi18n>' + esc(st.opp || 'Player') + '</b></span>' + (st.accepted ? '<span>Waiting for your opponent to accept…</span>' :
-          '<button class="pri" data-fq="accept" style="min-height:40px"><span>Accept</span> (<i id="fqLeft" style="font-style:normal">' + left + '</i>)</button><button data-fq="decline" style="min-height:40px">Decline</button>') +
-          (inGame && !st.accepted ? '<span class="small" style="flex-basis:100%;text-align:center;color:#8f9bab">Accepting leaves the bot game.</span>' : '');
-        tr();
-      } else { const l = document.getElementById('fqLeft'); if (l) l.textContent = left; }
-    } else if (b.dataset.key !== key) {
-      b.dataset.key = key;
-      b.innerHTML = '<span>Still searching for a player…</span><button data-fq="stop" class="sm">Stop searching</button>'; tr();
+    // jendela "lawan ditemukan"
+    let m = document.getElementById('fqFound');
+    if (!found) { if (m) m.remove(); return; }
+    if (!m) {
+      m = document.createElement('div'); m.id = 'fqFound';
+      m.setAttribute('role', 'alertdialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'fqFoundT');
+      m.style.cssText = 'position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,8,12,.78);backdrop-filter:blur(3px)';
+      m.addEventListener('click', e => { const t = e.target.closest('[data-fq]'); if (!t) return; if (t.dataset.fq === 'accept') fqAccept(); else fqStop(); });
+      document.body.appendChild(m);
+      try { if (navigator.vibrate) navigator.vibrate([120, 80, 120]); } catch (e) { /* abaikan */ }
     }
-    b.style.borderColor = st.state === 'found' ? '#F2B01E' : '#2a313b';
+    const left = Math.ceil(Math.max(0, fq.foundBy - Date.now()) / 1000), total = (fq.foundTotal || 10000) / 1000;
+    const key = (st.accepted ? 1 : 0) + ':' + (st.opp || '') + ':' + (inGame ? 1 : 0);
+    if (m.dataset.key !== key) {
+      m.dataset.key = key;
+      m.innerHTML = '<div style="width:min(420px,100%);background:#12171d;border:2px solid #F2B01E;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 0 6px rgba(242,176,30,.12);padding:24px 20px 20px;text-align:center;color:#e8edf3">' +
+        '<div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#F2B01E;font-weight:700">⚔ Match found</div>' +
+        '<h2 id="fqFoundT" style="margin:8px 0 4px;font-size:clamp(26px,7vw,34px);line-height:1.1">Opponent found!</h2>' +
+        '<p style="margin:0 0 16px;font-size:15px;color:#b8c2cf"><span>vs</span> <b data-noi18n style="color:#fff;font-size:18px">' + esc(st.opp || 'Player') + '</b></p>' +
+        (st.accepted
+          ? '<div class="spin" style="margin:6px auto 12px"></div><p style="margin:0;font-size:15px"><b>Waiting for your opponent to accept…</b></p>'
+          : '<div id="fqRing" style="position:relative;width:96px;height:96px;margin:0 auto 18px;border-radius:50%;background:conic-gradient(#F2B01E calc(var(--p,1)*360deg),#2a313b 0)"><div style="position:absolute;inset:8px;border-radius:50%;background:#12171d;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800" id="fqLeft">' + left + '</div></div>' +
+            '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="pri" data-fq="accept" style="min-height:52px;min-width:150px;font-size:18px;font-weight:800">Accept</button><button data-fq="decline" style="min-height:52px;min-width:110px;font-size:16px">Decline</button></div>' +
+            (inGame ? '<p class="small" style="margin:12px 0 0;color:#8f9bab">Accepting leaves the bot game.</p>' : '')) +
+        '</div>';
+      tr();
+      const a = m.querySelector('[data-fq="accept"]'); if (a) try { a.focus({ preventScroll: true }); } catch (e) { /* abaikan */ }
+    }
+    const l = document.getElementById('fqLeft'); if (l) l.textContent = left;
+    const r = document.getElementById('fqRing'); if (r) r.style.setProperty('--p', String(Math.max(0, Math.min(1, (fq.foundBy - Date.now()) / (total * 1000)))));
   }
   function fqDraw() { drawFind(); banner(); }
   /* #81 (menu v7 · Play Blade): tombol FIND A MATCH di panel menu — deck dipilih di panel, lalu layar Find a match dibuka
@@ -482,7 +505,7 @@
   function fqApply(r) {
     const prev = (fq.st || {}).state;
     fq.st = r;
-    if (r.state === 'found' && prev !== 'found') { fq.foundBy = Date.now() + (r.left || 0); if (window.MHRSound) { try { window.MHRSound.play('turn'); } catch (e) { /* abaikan */ } } }
+    if (r.state === 'found' && prev !== 'found') { fq.foundBy = Date.now() + (r.left || 0); fq.foundTotal = Math.max(r.left || 0, 1000); if (window.MHRSound) { try { window.MHRSound.play('turn'); } catch (e) { /* abaikan */ } } }
     if (r.state !== 'found') fq.foundBy = 0;
     if (r.state === 'ready') { fqEnterRoom(r); return; }
     if (r.state === 'gone') { if (r.reason === 'expired' && !fq.rejoin) fqRejoin(); else fqEnd(GONE[r.reason] || 'The search stopped.'); }

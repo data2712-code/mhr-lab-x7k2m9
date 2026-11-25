@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.60** · 25 November 2026
+**Versi saat ini: v7.61** · 25 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -603,6 +603,25 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.61 — 🎮 Battle Sim stats di Control Tower + jendela "Lawan ditemukan" (Battle Sim o2.58) — 25 November 2026 *(`sim-meta.js` BARU, `tower.js`, `index.html`, `sim-host.js`, `sim/`)*
+
+- Tab baru 🗼 Control Tower → **🎮 Battle Sim stats** (super-admin; keputusan pemilik: admin saja). Sumber: semua pertandingan ONLINE
+  di `sim_matches` (Find a match + room privat; latihan lawan bot & 1 perangkat tidak tersimpan) + kode log tiap pertandingan.
+  Filter periode (7/14/30/90 hari/semua) & mode; tombol ↻ Reload dan ⬇ CSV per pertandingan.
+  - **Warna & deck**: % pemakaian warna, win rate per warna (garis 50%), kombinasi warna (jumlah, share, W-L, win rate), tabel
+    matchup 8 kombinasi teratas (baris vs kolom), tren pemakaian warna per minggu.
+  - **Hasil & durasi**: ringkasan (jumlah, pemain, per hari, rata-rata & median menit/giliran, win rate jalan pertama, menyerah, seri),
+    pertandingan per hari, jam ramai, cara berakhir, distribusi durasi + durasi per cara berakhir.
+  - **Keseimbangan**: win rate jalan pertama vs kedua, simpan tangan vs mulligan, selisih Rush Point pemenang, timeout, undo, per mode & jam.
+  - **Kartu**: play rate, rata-rata kopi, win rate (biru/merah = ≥3 poin di atas/bawah rata-rata), Called / Activated / Attacks per game.
+  - **Mulligan** (permintaan pemilik): kartu yang paling sering DISIMPAN dan paling sering dikembalikan dari tangan awal 6 kartu, terpisah
+    untuk pemain jalan pertama (1st turn) dan kedua (2nd turn).
+  - **Pemain**: 20 pemain paling aktif (jumlah, W-L, win rate, warna utama).
+  - Tanpa SQL baru (super-admin sudah bisa membaca semua `sim_matches`). Mesin `sim/sim.js` dimuat saat tab dibuka untuk memetakan kartu.
+    Diuji dengan data asli 1.102 pertandingan.
+- Battle Sim o2.58: saat Find a match menemukan lawan, muncul jendela besar di tengah layar (nama lawan, hitung mundur besar, tombol
+  Terima/Tolak besar, getar di HP). Detail: mhr-simulator riwayat #142.
 
 ### v7.60 — BP02 Doomsday: +6 kartu SR X-Men resmi, 5 kartu X-Men fan disembunyikan, gambar BP02 dipertajam — 25 November 2026 *(`cards.js`, `images/`, `images/en/`, `cards/`, `sitemap.xml`, `index.html`, `sim-host.js`, `sim/`)*
 

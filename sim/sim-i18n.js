@@ -260,7 +260,7 @@
     ['No opponent yet.', 'Belum ada lawan.'], ['Play the bot while you keep searching?', 'Main lawan bot sambil tetap mencari?'],
     ['The bot is always shown as a bot and the game is not saved to your online history. When a player is found you are asked whether to switch.', 'Bot selalu ditandai bot dan permainannya tidak masuk riwayat online Anda. Bila pemain ditemukan, Anda ditanya mau pindah atau tidak.'],
     ['🤖 Play the bot while waiting', '🤖 Main lawan bot sambil menunggu'], ['Opponent found', 'Lawan ditemukan'], ['Opponent found:', 'Lawan ditemukan:'],
-    ['Answer in the box at the top of the screen.', 'Jawab di kotak di bagian atas layar.'], ['Accept', 'Terima'], ['Waiting for your opponent to accept…', 'Menunggu lawan menerima…'],
+    ['Answer in the box at the top of the screen.', 'Jawab di kotak di bagian atas layar.'], ['Answer in the window in the middle of the screen.', 'Jawab di jendela di tengah layar.'], ['⚔ Match found', '⚔ Pertandingan ditemukan'], ['Opponent found!', 'Lawan ditemukan!'], ['Accept', 'Terima'], ['Waiting for your opponent to accept…', 'Menunggu lawan menerima…'],
     ['Accepting leaves the bot game.', 'Menerima berarti meninggalkan permainan lawan bot.'], ['Still searching for a player…', 'Masih mencari pemain…'], ['Stop searching', 'Berhenti mencari'],
     ['You did not accept in time, so the search stopped.', 'Anda tidak menerima tepat waktu, jadi pencarian berhenti.'],
     ['No opponent was found within 10 minutes. Try again later, or share a private room link with a friend.', 'Tidak ada lawan dalam 10 menit. Coba lagi nanti, atau kirim link room privat ke teman.'],

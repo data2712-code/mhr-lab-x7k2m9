@@ -16,6 +16,15 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-25', t: 'improve', v: 'o2.58',
+      en: { h: 'Find a match: a clearer "Opponent found" window', b: [
+        'When an opponent is found, a large window now opens in the middle of the screen with your opponent\'s name, a big countdown and big Accept / Decline buttons (on phones it also vibrates once). It used to be a small bar at the top of the screen.'
+      ] },
+      id: { h: 'Find a match: jendela "Lawan ditemukan" lebih jelas', b: [
+        'Saat lawan ditemukan, kini muncul jendela besar di tengah layar berisi nama lawan, hitung mundur besar, dan tombol Terima / Tolak yang besar (di HP juga bergetar sekali). Dulu hanya bilah kecil di bagian atas layar.'
+      ] }
+    },
+    {
       d: '2026-11-25', t: 'fix', v: 'o2.56', reports: [66, 67, 68, 74, 75, 78, 79],
       en: { h: 'Fixes: CALL cost panel on laptops, R+X after moving areas, ASSAULT, Venom 2099, Sif, Milano, Chewie', b: [
         'On laptop screens (height 900px or less), the CALL cost panel on the right could push its "Confirm cost" and destination buttons off-screen once the total Lv was exact, so a Lv4+ card (e.g. 「Genius Burden」Ultron) could not be called. The panel now stays in one column and scrolls to those buttons.',

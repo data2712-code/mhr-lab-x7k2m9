@@ -13,6 +13,7 @@
      overview  — ringkasan angka + pintasan ke alat admin di halaman lain
      usage     — usage.js        MHRUsage.renderAdmin(el)
      simrep    — sim-host.js     MHRSimHost.renderReports()  (#simRepWrap)
+     simmeta   — sim-meta.js     MHRSimMeta.render(el)       v7.61: statistik semua pertandingan online Battle Sim
      server    — (berkas ini)    v7.46: maintenance server Battle Sim (dulu panel admin di Battle Sim → Online · private room)
      binders   — binders-ui.js   MHRBindersUI.renderAdmin()  (#bdAdmin)
      org       — events-ui.js    MHREventsAdmin.render(el)
@@ -31,6 +32,7 @@
     ['overview', '🧭', 'Overview'],
     ['usage',    '📊', 'Usage'],
     ['simrep',   '🐞', 'Battle Sim reports'],
+    ['simmeta',  '🎮', 'Battle Sim stats'],    // v7.61 — sim-meta.js
     ['server',   '🔧', 'Battle Sim server'],
     ['binders',  '🛡', 'Binder reports'],
     ['org',      '🏟', 'Verified organizers'],
@@ -96,6 +98,11 @@
     if(tab === 'simrep'){
       p.innerHTML = box('🐞 Battle Sim reports', 'Bug reports & feedback from the simulator', '<div id="simRepWrap"><p class="ct-mut">Loading…</p></div>');
       if(window.MHRSimHost && window.MHRSimHost.renderReports) window.MHRSimHost.renderReports();
+      return;
+    }
+    if(tab === 'simmeta'){
+      p.innerHTML = '<div id="simMetaWrap"><p class="ct-mut">Loading…</p></div>';
+      if(window.MHRSimMeta) window.MHRSimMeta.render(q('#simMetaWrap'));
       return;
     }
     if(tab === 'server'){ drawServer(p); return; }
