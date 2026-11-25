@@ -168,13 +168,8 @@
     },
 
     /* ============================ PURPLE ============================ */
-    /* 「Absolute Zero」Iceman — AUTO【BACK】: R FRONT lawan jadi 0, kartu ini Power-1500. */
-    'BP02-088': {
-      auto: [
-        { stat: 'r', zone: 'BACK', value: (A, src, tgt) => (A.ctrl(tgt) === A.opp(A.ctrl(src)) && slotOf(A, tgt) === 'F' && !A.isFd(tgt) ? { set: 0 } : 0) },
-        { stat: 'p', zone: 'BACK', value: (A, src, tgt) => (tgt === src ? -1500 : 0) }
-      ]
-    },
+    /* BP02-084..088: 5 kartu X-Men terjemahan penggemar disembunyikan di situs v7.60 (nomor resmi belum diketahui; 084 = Storm,
+       086 = Jean Grey resmi). Resolver 「Absolute Zero」Iceman (dulu 'BP02-088') ada di riwayat git (#133); pasang lagi dengan nomor resminya. */
     /* 「Flight in Space」Captain Marvel */
     'BP02-098': {
       trig: [{

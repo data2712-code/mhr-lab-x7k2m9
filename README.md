@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.59** · 25 November 2026
+**Versi saat ini: v7.60** · 25 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -603,6 +603,20 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.60 — BP02 Doomsday: +6 kartu SR X-Men resmi, 5 kartu X-Men fan disembunyikan, gambar BP02 dipertajam — 25 November 2026 *(`cards.js`, `images/`, `images/en/`, `cards/`, `sitemap.xml`, `index.html`, `sim-host.js`, `sim/`)*
+
+- Sumber: PDF "MHR_BP02_Doomsday_English 25 Nov" (teks & gambar resmi Inggris dari post IG @marvelherorush.official 25 Nov).
+- **Baru (SR, teks resmi EN, `fan:1`)**: BP02-053 「Mind Takeover」Phoenix, 054 「Veil of Mind」Professor X, 055 「Sneak Card Steal」Gambit,
+  056 「Assisted Strike」X-23 (Orange), BP02-084 「Tempest Unleashed」Storm, 086 「Limit Break」Jean Grey (Purple). Teks Indonesia
+  terjemahan penggemar. Total BP02 di situs: 48 kartu.
+- **Disembunyikan** (keputusan pemilik): 5 kartu X-Men terjemahan penggemar yang dulu memakai BP02-084–088 (Professor X 「Mutant
+  Recruitment」, Gambit 「Shape of My Heart」, Nightcrawler, Beast, Iceman) — nomor resminya belum diketahui (084/086 ternyata Storm &
+  Jean Grey). Halaman `cards/BP02-085/087/088.html` + gambarnya dihapus; masuk lagi saat versi resminya terbit.
+- 43 kartu lain: teks/statistik di PDF sama dengan situs (dicek otomatis), tidak berubah.
+- **Gambar**: potongan poster 306×428 (images/ & images/en/) di-upscale 2× dengan super-resolution EDSR lalu dipertajam ke 500×698
+  (ukuran standar situs). 6 kartu baru dari gambar resmi 612×856 → 500×698. Watermark SAMPLE tetap ada.
+- Battle Sim o2.57: resolver Iceman (dulu BP02-088) dilepas; BP02 tetap tersembunyi. Detail: mhr-simulator riwayat #141.
 
 ### v7.59 — Battle Sim o2.56: perbaikan laporan #66–#79 — 25 November 2026 *(`index.html`, `sim-host.js`, `sim/`; server Battle Sim)*
 
