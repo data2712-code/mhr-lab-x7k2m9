@@ -693,13 +693,13 @@
   r('RS-067', 'cards', 'owner', ['SD05-007', 'PB02-007', 'PB02-018', 'SD05-001', 'SD05-017', 'SD05-018'], [
     'Small readings for SD05, SD06 and PB02 cards',
     'The Lv of a card in HAND, RETREAT or VOID is its printed Lv.',
-    '"Can not attack / can not move" also blocks rearranging that Character before the Battle Phase.',
+    '"Can not attack / can not move" does NOT stop rearranging that Character before attacks: rearranging is not movement (CR 303.2.a.4.2.1.1).',
     'Yondu: the extra activation happens only once per turn. Odin: the draw happens when the Power-X brings that Character to 0.',
     'Hela: "discarded" = sent to RETREAT from HAND or Deck by an effect.'
   ], [
     'Bacaan kecil untuk kartu SD05, SD06, dan PB02',
     'Lv kartu di HAND, RETREAT, atau VOID adalah Lv cetaknya.',
-    '"Tidak bisa menyerang / tidak bisa bergerak" juga melarang Karakter itu disusun ulang sebelum Battle Phase.',
+    '"Tidak bisa menyerang / tidak bisa bergerak" TIDAK melarang Karakter itu disusun ulang sebelum menyerang: menyusun ulang bukan perpindahan (CR 303.2.a.4.2.1.1).',
     'Yondu: aktivasi tambahan hanya satu kali per giliran. Odin: ambil kartu terjadi saat Power-X membuat Karakter itu menjadi 0.',
     'Hela: "dibuang" = dikirim ke RETREAT dari HAND atau Deck oleh efek.'
   ]);

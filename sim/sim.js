@@ -29,7 +29,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = '0.14.5';   // o2.56: efek AUTO tidak "mulai berlaku lagi" saat Karakter hanya pindah area BATTLE (laporan #74, RS-079) · o2.47: penyerang/target yang keluar FIELD lalu kembali = kartu baru, serangannya berakhir (laporan #52), BP01-032 Both Lose dengan BATTLE penuh (#53), SD06-011 tanpa target lawan (#51), BP01-067 bisa batal/tetap (#54) · o2.45: BP01-022 UNIQUE/[COUNTER] = AUTO (laporan #49), PB02-008 nama lengkap (#43), SP01-034 tanpa syarat terpasang (#44/#45), SP01-050 kebal Lv1 juga saat sendiri (#40), BP01-067 + AIR STRIKE (#41) · o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
+  const VERSION = '0.14.7';   // o2.60: rearrange bukan movement (laporan #80, CR 303.2.a.4.2.1.1); batal efek tanpa izin lawan (#83, job.ai/job.peek)   // o2.59: aura kemampuan dari kartu TERPASANG ikut berlaku (laporan #82, PB02-005 Nebula di Groot) · o2.56: efek AUTO tidak "mulai berlaku lagi" saat Karakter hanya pindah area BATTLE (laporan #74, RS-079) · o2.47: penyerang/target yang keluar FIELD lalu kembali = kartu baru, serangannya berakhir (laporan #52), BP01-032 Both Lose dengan BATTLE penuh (#53), SD06-011 tanpa target lawan (#51), BP01-067 bisa batal/tetap (#54) · o2.45: BP01-022 UNIQUE/[COUNTER] = AUTO (laporan #49), PB02-008 nama lengkap (#43), SP01-034 tanpa syarat terpasang (#44/#45), SP01-050 kebal Lv1 juga saat sendiri (#40), BP01-067 + AIR STRIKE (#41) · o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
   const SLOTS = ['F', 'W1', 'W2', 'B'];
   const SLOT_NAME = { F: 'FRONT', W1: 'WING 1', W2: 'WING 2', B: 'BACK', BASE: 'BASE' };
   // Posisi pada garis serangan (303.2.a.4.3.1.1): BACK sendiri = 0, WING = 1,
@@ -1033,7 +1033,8 @@
       if (da && da.hostAbil && !st.inst[a].fd) { try { if ((da.hostAbil(readApi(st, a), a, iid) || []).includes(ab)) return true; } catch (e) { /* abaikan */ } }
     }
     // Tahap 6: kemampuan dari aura kartu lain (PB02-005 Nebula: [AIR STRIKE] untuk Karakter [GOTG] di FRONT).
-    for (let p = 0; p < 2; p++) for (const src of charsOnField(st, p)) {
+    // o2.59 (laporan #82, F-13): kartu terpasang tetap punya efeknya sendiri → auranya ikut dihitung (log < 0.14.6: tidak).
+    for (let p = 0; p < 2; p++) for (const src of charsOnField(st, p).concat(st.lg146 ? [] : charsOnField(st, p).reduce((a, h) => a.concat(st.inst[h].att.filter(x => !st.inst[x].fd)), []))) {
       if (src === iid) continue;
       const ds = defOf(st, src); if (!ds || !ds.auraAbil) continue;
       try { if ((ds.auraAbil(readApi(st, src), src, iid) || []).includes(ab)) return true; } catch (e) { /* abaikan */ }
@@ -1628,6 +1629,27 @@
     return nameOf(st, i) + (L ? ' (' + (L.zone === 'bat' ? SLOT_NAME[L.slot] : ({ base: 'BASE', ret: 'RETREAT', void: 'VOID', hand: 'HAND', deck: 'Deck', att: 'attached' })[L.zone] || L.zone) + ')' : '');
   }
   // Jalankan job sampai selesai atau sampai butuh jawaban.
+  /* o2.60 (laporan #83, keputusan pemilik): pemain yang TIDAK JADI memakai efek boleh membatalkannya tanpa izin lawan.
+     job.ai = indeks aksi yang memulai pemakaian (ACTI, atau "Yes" pada efek opsional); job.peek = selama efek berjalan
+     ada informasi tersembunyi yang terlihat (kartu Deck, HAND lawan, kartu tertutup lawan) atau giliran memilih pindah ke
+     lawan — maka pembatalan bebas tidak boleh (pakai Undo biasa dengan izin lawan). */
+  function markPeek(st, job, spec) {
+    if (spec.p != null && spec.p !== job.p) { job.peek = true; return; }
+    const ids = (spec.from || []).concat((spec.options || []).map(o => o && o.v));
+    for (const i of ids) {
+      if (i == null || !st.inst[i]) continue;
+      const L = locate(st, i), x = st.inst[i];
+      if (!L || L.zone === 'deck' || (L.zone === 'hand' && L.p !== job.p) || (x.fd && x.owner !== job.p)) { job.peek = true; return; }
+    }
+  }
+  const cancelKey = (st, p) => [st.rng, st.P[0].deck.length, st.P[1].deck.length, st.P[1 - p].hand.length].join(',');
+  function cancelPoint(st, p) {
+    const job = st.job, pr = st.prompt;
+    if (!job || job.p !== p || !pr || pr.p !== p || pr.job !== job.id || typeof job.ai !== 'number' || job.peek) return null;
+    if (job.ai < 0 || job.ai >= st.actions.length) return null;
+    if (st.log.slice(job.lg || 0).some(e => e.k === 'reveal') || (job.k0 && job.k0 !== cancelKey(st, p))) return null;
+    return { idx: job.ai, label: jobLabel(st, job, true) };
+  }
   function runJob(st, job) {
     const e = jobDef(st, job);
     job.mut = false;
@@ -1647,6 +1669,7 @@
       }
     } catch (err) {
       if (err instanceof Ask) {
+        markPeek(st, job, err.spec);
         st.prompt = Object.assign({ type: err.spec.yesno ? 'yesno' : err.spec.pick ? 'pick' : 'choose', job: job.id, label: jobLabel(st, job, true) }, err.spec);
         if (err.spec.pick && !st.noPreview) {                 // o2.40: tandai area yang membuat kartu langsung Retreat dll.
           const w = previewWarn(st, err.spec.key, err.spec.options || []);
@@ -1937,7 +1960,7 @@
         const cur = SLOTS.map(s => P.bat[s] || '').sort().join(',');
         const nw = SLOTS.map(s => (a.map[s] || '')).sort().join(',');
         if (cur !== nw) return 'Rearranging may only change the positions of Characters already in your BATTLE.';
-        if (SLOTS.some(sl => P.bat[sl] && a.map[sl] !== P.bat[sl] && restricted(st, P.bat[sl], 'move'))) return 'A Character that cannot move must stay where it is (card effect).';
+        // o2.60 (laporan #80): CR 303.2.a.4.2.1.1 "Rearranging is not treated as movement" — larangan "can not move" tidak menghalangi rearrange.
         return null;
       }
       case 'attack': {
@@ -2239,7 +2262,6 @@
         permute(cur).forEach(perm => {
           const k = perm.join(','); if (seen.has(k)) return; seen.add(k);
           const map = {}; SLOTS.forEach((s, i) => { map[s] = perm[i]; });
-          if (SLOTS.some((sl, i) => cur[i] && perm[i] !== cur[i] && restricted(st, cur[i], 'move'))) return;   // Tahap 6: PB02-007
           out.push({ t: 'arrange', map });
         });
         return out;
@@ -2484,6 +2506,7 @@
           const e = jobDef(st, job);
           if (e && e.once) st.inst[job.c].once[e.id] = st.turn;
           job.stage = null;
+          job.ai = st.actions.length - 1; job.lg = st.log.length; job.k0 = cancelKey(st, p);          // o2.60 (laporan #83): titik batal efek
           log(st, 'eff', plabel(st, p) + ' uses ' + jobLabel(st, job) + '.');
         } else {
           // RS-002 (R-075): menolak efek opsional tidak menghabiskan jatah ONCE PER TURN.
@@ -2538,7 +2561,7 @@
     const e = actiDef(st, a.c, a.eff);
     if (e.once) st.inst[a.c].once[e.id] = st.turn;
     if (e.times) { const x = st.inst[a.c], w = x.tw[e.id]; x.tw[e.id] = { t: st.turn, n: (w && w.t === st.turn ? w.n : 0) + 1 }; }
-    const job = { id: ++st.jid, c: a.c, p, kind: 'acti', eff: e.id, opt: false, ans: {}, born: st.log.length };
+    const job = { id: ++st.jid, c: a.c, p, kind: 'acti', eff: e.id, opt: false, ans: {}, born: st.log.length, ai: st.actions.length - 1, lg: st.log.length, k0: cancelKey(st, p) };
     log(st, 'acti', plabel(st, p) + ' activates ' + jobLabel(st, job) + '.');
     st.job = job;
   }
@@ -2609,7 +2632,8 @@
     if (o.e && verLt(o.e, '0.14.1')) { st.engine = o.e; st.lg021 = true; }        // SP01-021 dulu memicu dirinya sendiri
     if (o.e && verLt(o.e, '0.14.2')) { st.engine = o.e; st.lg066 = true; }
     if (o.e && verLt(o.e, '0.14.4')) { st.engine = o.e; st.lg144 = true; }
-    if (o.e && verLt(o.e, '0.14.5')) { st.engine = o.e; st.lg145 = true; }        // o2.56: cap waktu AUTO lama (RS-079) untuk log lama        // o2.47: aturan lama #51–#54 untuk log lama        // o2.44: BP01-066 dulu menaruh ke FIELD pemilik kartu
+    if (o.e && verLt(o.e, '0.14.5')) { st.engine = o.e; st.lg145 = true; }
+    if (o.e && verLt(o.e, '0.14.6')) { st.engine = o.e; st.lg146 = true; }        // o2.59: aura dari kartu terpasang (laporan #82)        // o2.56: cap waktu AUTO lama (RS-079) untuk log lama        // o2.47: aturan lama #51–#54 untuk log lama        // o2.44: BP01-066 dulu menaruh ke FIELD pemilik kartu
     const acts = o.a || [], lim = n == null ? acts.length : Math.min(n, acts.length);
     for (let i = 0; i < lim; i++) {
       const r = apply(st, acts[i]);
@@ -2666,7 +2690,8 @@
       prompt: !st.prompt ? null : mine ? cp(st.prompt) : { p: st.prompt.p, type: st.prompt.type, kind: st.prompt.kind },
       pending: (st.pend || []).length + (st.job ? 1 : 0),
       as: st.as ? Object.fromEntries(Object.entries(st.as).filter(([k]) => { const m = k.match(/^([^@]+)@.*>([^@]+)@/); return m && inst[m[1]] && !inst[m[1]].hidden && inst[m[2]] && !inst[m[2]].hidden; })) : null,
-      lg145: !!st.lg145,
+      lg145: !!st.lg145, lg146: !!st.lg146,
+      cancelEff: !!(mine && cancelPoint(st, p)),          // o2.60 (laporan #83): tombol "Cancel this effect" tanpa izin lawan
       log: logFor(st, p).map(e => e.k === 'start' ? Object.assign({}, e, { txt: e.txt.replace(/, seed \d+/, '') }) : e),
       nActions: st.actions.length
     };
@@ -2706,7 +2731,7 @@
     testDeck, uniqueBlocked, hasAbility, handTriggerCards, placeSpots, bbmDests,
     lostEffects, abilityCount, costBanned, actiWhy, actiBlocked, noCallWhy,
     HIDDEN_SETS, HIDDEN_MSG, hiddenList, isHiddenNo, parseArt, artSegment, hiddenCount, encodeDeckCode,
-    viewFor, visibleTo
+    viewFor, visibleTo, cancelPoint
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   else root.MHRSim = API;

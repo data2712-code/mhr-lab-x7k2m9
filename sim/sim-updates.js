@@ -16,6 +16,32 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-26', t: 'improve', v: 'o2.60', reports: [80, 83],
+      en: { h: 'Rearranging is not a move · cancel an effect without asking · effect questions in the centre', b: [
+        'Rule fix: rearranging your BATTLE at the start of the Battle Phase is not movement (Comprehensive Rules 303.2.a.4.2.1.1). A Character that "cannot move" (for example 「Bewildering Dance」Star-Lord) can now be rearranged. It still cannot take BATTLE MOVE or BATTLE-BASE MOVE.',
+        'Changed your mind about an effect? While it is still waiting for your own choices, tap Cancel effect: the game goes back to before you activated it, or back to the "Use this effect?" question. Online this needs no permission from your opponent and does not use one of your 3 undos. It is not offered once hidden cards were seen (Deck, opponent\'s HAND) or something was drawn or shuffled.',
+        'On laptops and smaller PC screens, questions about your effects (use this effect?, choose cards, choose an area, effect order) now appear in the centre of the screen instead of the top-right corner. ▾ Hide shrinks it to a small bar at the top.'
+      ] },
+      id: { h: 'Menyusun ulang bukan perpindahan · batalkan efek tanpa izin · pertanyaan efek di tengah', b: [
+        'Perbaikan aturan: menyusun ulang BATTLE di awal Battle Phase bukan perpindahan (Comprehensive Rules 303.2.a.4.2.1.1). Karakter yang "tidak bisa bergerak" (mis. 「Bewildering Dance」Star-Lord) kini boleh disusun ulang. Karakter itu tetap tidak bisa BATTLE MOVE atau BATTLE-BASE MOVE.',
+        'Tidak jadi memakai efek? Selama efek itu masih menunggu pilihan Anda sendiri, ketuk Batalkan efek: permainan kembali ke sebelum efek diaktifkan, atau ke pertanyaan "Pakai efek ini?". Di online tidak perlu izin lawan dan tidak memakai jatah 3 Undo. Tidak tersedia bila kartu tersembunyi sudah terlihat (Deck, HAND lawan) atau ada kartu yang diambil / Deck dikocok.',
+        'Di laptop dan layar PC yang lebih kecil, pertanyaan tentang efek Anda (pakai efek ini?, pilih kartu, pilih area, urutan efek) kini muncul di tengah layar, bukan di pojok kanan atas. ▾ Hide mengecilkannya menjadi pita kecil di atas.'
+      ] }
+    },
+    {
+      d: '2026-11-26', t: 'fix', v: 'o2.59', reports: [82, 84, 88],
+      en: { h: 'Fixes: abilities from attached cards, clearer Time Abduction and Red Goblin choices', b: [
+        'An Attached Card keeps its own effects: 「Weakness Analysis」Nebula attached to a Character in BACK now gives AIR STRIKE to your [GOTG] Character in FRONT (for example Nebula attached to 「Rooted Revival」Groot).',
+        '「Time Abduction」Loki: when two copies trigger together and the first one already took the only target, the question for the second one now warns that there is nothing left to prune.',
+        '「Spider-Archenemy」Red Goblin: when you choose the other card to prune, the question shows the Lv of your opponent\'s Characters in BATTLE, so you can see which X has a target.'
+      ] },
+      id: { h: 'Perbaikan: kemampuan dari kartu terpasang, pilihan Time Abduction & Red Goblin lebih jelas', b: [
+        'Kartu terpasang tetap punya efeknya sendiri: 「Weakness Analysis」Nebula yang terpasang pada Karakter di BACK kini memberi AIR STRIKE ke Karakter [GOTG] Anda di FRONT (mis. Nebula terpasang di 「Rooted Revival」Groot).',
+        '「Time Abduction」Loki: bila dua kopi terpicu bersamaan dan yang pertama sudah mengambil satu-satunya target, pertanyaan untuk kopi kedua kini memberi peringatan bahwa tidak ada lagi yang bisa di-Prune.',
+        '「Spider-Archenemy」Red Goblin: saat memilih kartu lain untuk di-Prune, pertanyaannya menampilkan Lv Karakter lawan di BATTLE, supaya terlihat X mana yang punya target.'
+      ] }
+    },
+    {
       d: '2026-11-25', t: 'improve', v: 'o2.58',
       en: { h: 'Find a match: a clearer "Opponent found" window', b: [
         'When an opponent is found, a large window now opens in the middle of the screen with your opponent\'s name, a big countdown and big Accept / Decline buttons (on phones it also vibrates once). It used to be a small bar at the top of the screen.'

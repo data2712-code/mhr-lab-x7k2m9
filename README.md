@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.63** · 26 November 2026
+**Versi saat ini: v7.65** · 26 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -604,6 +604,21 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
 
+### v7.65 — Battle Sim o2.60 — 26 November 2026 *(`sim/`, `sim-host.js`, `sim-meta.js`, `index.html`; server Battle Sim)*
+
+- Laporan #80: menyusun ulang BATTLE di awal Battle Phase bukan perpindahan (CR 303.2.a.4.2.1.1) — Karakter "cannot move" (Star-Lord
+  PB02-007, Thor BP01-050) boleh disusun ulang.
+- Laporan #83: tombol "Cancel effect" juga online (tanpa izin lawan, tidak memakai jatah Undo) dan untuk efek opsional yang sudah dijawab Yes.
+- Pertanyaan efek di laptop / monitor kecil muncul di tengah layar (dulu pojok kanan atas). Mesin 0.14.7. Detail: mhr-simulator riwayat #144.
+  **Server Battle Sim perlu di-deploy.**
+
+### v7.64 — Perbaikan 🎮 Battle Sim stats (halaman kosong) + Battle Sim o2.59 — 26 November 2026 *(`sim-meta.js`, `index.html`, `sim-host.js`, `sim/`; server Battle Sim)*
+
+- Battle Sim stats tampak kosong: label bar memakai kelas `.lb` (= lightbox situs, `position:fixed` layar penuh) dan sel tabel `.n`.
+  Semua kelas di `sim-meta.js` kini berawalan `sm-`. Data sudah terhitung benar (1.472 pertandingan saat dicek).
+- Battle Sim o2.59 (mesin 0.14.6): kemampuan aura dari kartu terpasang (Nebula di Groot), peringatan Time Abduction tanpa target, info Lv
+  untuk Red Goblin. Detail: mhr-simulator riwayat #143. **Server Battle Sim perlu di-deploy.**
+
 ### v7.63 — Text Differences TD-13…TD-19 (PB02) + aturan "ikuti teks Inggris" — 26 November 2026 *(`rules-faq.js`, `errata/TD-13…19.html`, `faq/F-41*.html`, `index.html`)*
 
 - Permintaan pemilik 26 Nov 2026: beda makna PB02 versi Indonesia vs Inggris (lihat v7.62) masuk Text Differences, semua "ikuti teks Inggris":
@@ -611,7 +626,8 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
   TD-16 PB02-019 (Prune karakter sendiri; retreat kartu Lv1 lawan), TD-17 PB02-020 (karakter Anda), TD-18 PB02-008 (mengambil kartu wajib),
   TD-19 PB02-001 (melepas kartu terpasang opsional).
 - Pengantar Errata, pengantar Part 2 (Text differences) dan F-41 (EN & ID) kini menegaskan: saat teks berbeda, pemain selalu merujuk versi
-  Inggris; satu-satunya kasus teks Indonesia yang benar = SP01-026 「Vigil of Love」, teks Inggrisnya sudah dierrata (E-13).
+  Inggris; kasus teks Indonesia yang benar hanya SP01-026 「Vigil of Love」 (teks Inggrisnya sudah dierrata, E-13) dan BP01-054
+  「Ultron-Spawn Rebuild」 (TD-11; dikonfirmasi pemilik 26 Nov 2026).
 - Halaman statis baru `errata/TD-13…TD-19.html`; `faq/F-41.html` & `faq/F-41-id.html` diperbarui (tools/generate_faq_pages.js).
 - Battle Sim sudah mengikuti teks Inggris untuk ketujuh kartu ini (dicek di sim-cards-t6.js), tidak ada perubahan.
 

@@ -680,7 +680,9 @@
     'BP01-063': {
       trig: [{
         id: 'hand', zone: 'HAND', optional: true, label: 'Time Abduction',
-        text: "Prune this card from your HAND to prune 1 opponent Character with Power 3500 or lower in BATTLE?",
+        // o2.59 (laporan #88): bila saat ini tidak ada target, pertanyaannya memberi tahu (boleh tetap dipakai, RS-076).
+        text: A => "Prune this card from your HAND to prune 1 opponent Character with Power 3500 or lower in BATTLE?" +
+          (oppBattle(A).some(i => A.pw(i) <= 3500) ? '' : ' ⚠ Right now your opponent has NO Character with Power 3500 or lower in BATTLE: this card would be pruned with nothing to prune.'),
         when: (e, self, A) => e.k === 'STAT_DOWN' && e.p === A.p,
         can: A => A.zone(A.self) === 'HAND',
         run: A => {

@@ -642,7 +642,9 @@
     },
     /* 「Weakness Analysis」Nebula */
     'PB02-005': {
-      auraAbil: (A, src, tgt) => (A.slot(src) === 'B' && A.ctrl(tgt) === A.ctrl(src) && A.slot(tgt) === 'F' && isGotg(A, tgt) ? ['air'] : [])
+      // o2.59 (laporan #82): Nebula yang TERPASANG pada Karakter di BACK juga dihitung "di BACK" (area induknya, seperti inZone).
+      auraAbil: (A, src, tgt) => { const L = A.loc(src), sl = A.st.lg146 ? A.slot(src) : (L && (L.zone === 'bat' || (L.zone === 'att' && L.hostZone === 'bat')) ? L.slot : null);
+        return sl === 'B' && A.ctrl(tgt) === A.ctrl(src) && A.slot(tgt) === 'F' && isGotg(A, tgt) ? ['air'] : []; }
     },
     /* 「Galaxy Scout」Rocket Raccoon */
     'PB02-006': {

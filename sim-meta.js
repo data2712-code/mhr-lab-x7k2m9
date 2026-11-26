@@ -12,13 +12,14 @@
    Parameter (dipilih pemilik): meta warna & deck · hasil & durasi · keseimbangan & aturan · kartu. + ekspor CSV.
    Warna deck: warna dengan ≥ 4 kartu (warna "percikan" < 4 kartu diabaikan), sama dengan sim-stats.js.
    Win rate dihitung per deck (tiap pertandingan = 2 deck); seri tidak dihitung dalam win rate.
+   v7.64: semua kelas CSS memakai awalan sm- (dulu .lb / .n bentrok dengan lightbox & kelas situs → halaman tampak kosong).
    =================================================================== */
 (function(){
   'use strict';
   const q = s => document.querySelector(s);
   const E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const client = () => (window.MHRAuth && window.MHRAuth.ready) ? window.MHRAuth.client : null;
-  const SIM_JS = 'sim/sim.js?v=o2.58';
+  const SIM_JS = 'sim/sim.js?v=o2.60';
   const COLS = 'id,room,p1,p2,names,deck_names,clock,first,winner,end_cause,cause,turns,rp,timeouts,undo_used,log_code,engine,started_at,ended_at,mode';
   const COL = { Merah:['Red','#E4442E'], Kuning:['Yellow','#F2B01E'], Biru:['Blue','#3B87E8'], Hijau:['Green','#33A45C'], Orange:['Orange','#E8821E'], Purple:['Purple','#9B5DE5'] };
   const COL_ORDER = ['Merah','Kuning','Biru','Hijau','Orange','Purple'];
@@ -152,19 +153,19 @@
     .sm-tile span{font-size:12px;color:var(--muted)}
     .sm-bars{display:flex;flex-direction:column;gap:7px}
     .sm-bar{display:grid;grid-template-columns:minmax(90px,150px) 1fr 62px;gap:8px;align-items:center;font-size:12.5px}
-    .sm-bar .lb{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#C9CFD8}
-    .sm-bar .tr{height:14px;background:var(--ink);border-radius:4px;position:relative;overflow:hidden}
-    .sm-bar .tr i{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:var(--accent)}
-    .sm-bar .v{text-align:right;font-family:var(--mono);font-size:12px;color:var(--paper)}
-    .sm-bar .tr .mid{position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--paper);opacity:.85}
+    .sm-bar .sm-lb{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#C9CFD8}
+    .sm-bar .sm-trk{height:14px;background:var(--ink);border-radius:4px;position:relative;overflow:hidden}
+    .sm-bar .sm-trk i{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:var(--accent)}
+    .sm-bar .sm-val{text-align:right;font-family:var(--mono);font-size:12px;color:var(--paper)}
+    .sm-bar .sm-trk .sm-mid{position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--paper);opacity:.85}
     .sm-dots{display:inline-flex;gap:2px;vertical-align:middle;margin-right:5px}
     .sm-dots i{width:9px;height:9px;border-radius:50%;display:inline-block;background:#555}
     .sm-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
     .sm-tbl th{color:var(--muted);font-weight:600;text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
     .sm-tbl td{padding:5px 6px;border-bottom:1px solid #222a34;color:#D6DBE2;white-space:nowrap}
-    .sm-tbl td.n,.sm-tbl th.n{text-align:right;font-family:var(--mono)}
+    .sm-tbl td.sm-n,.sm-tbl th.sm-n{text-align:right;font-family:var(--mono)}
     .sm-scroll{overflow-x:auto}
-    .sm-mx td.c{text-align:center;font-family:var(--mono);font-size:11.5px;min-width:46px;border:2px solid var(--panel);border-radius:4px}
+    .sm-mx td.sm-c{text-align:center;font-family:var(--mono);font-size:11.5px;min-width:46px;border:2px solid var(--panel);border-radius:4px}
     .sm-cols{display:flex;align-items:flex-end;gap:2px;height:120px;padding-top:6px}
     .sm-cols div{flex:1;background:var(--accent);border-radius:3px 3px 0 0;min-height:1px;opacity:.9}
     .sm-cols div:hover{opacity:1;outline:1px solid var(--paper)}
@@ -179,7 +180,7 @@
   function bars(items, opt){        // items: [{label(html), v, max?, tip, color?, val(text)}]
     opt = opt || {};
     const max = opt.max || Math.max(1, ...items.map(i=>i.v || 0));
-    return '<div class="sm-bars">' + items.map(i=>`<div class="sm-bar" title="${E(i.tip || '')}"><span class="lb">${i.label}</span><span class="tr"><i style="width:${Math.max(0, Math.min(100, (i.v || 0) / max * 100))}%;${i.color ? 'background:' + i.color : ''}"></i>${opt.mid ? '<span class="mid"></span>' : ''}</span><span class="v">${i.val}</span></div>`).join('') + '</div>';
+    return '<div class="sm-bars">' + items.map(i=>`<div class="sm-bar" title="${E(i.tip || '')}"><span class="sm-lb">${i.label}</span><span class="sm-trk"><i style="width:${Math.max(0, Math.min(100, (i.v || 0) / max * 100))}%;${i.color ? 'background:' + i.color : ''}"></i>${opt.mid ? '<span class="sm-mid"></span>' : ''}</span><span class="sm-val">${i.val}</span></div>`).join('') + '</div>';
   }
   function tile(v, l){ return `<div class="sm-tile"><b>${v}</b><span>${l}</span></div>`; }
 
@@ -243,19 +244,19 @@
   }
   function secPairs(R){
     const P = pairStats(R), tot = R.length;
-    const rows = P.slice(0, 15).map(p=>`<tr><td>${dots(p.k)}${E(pairLabel(p.k))}</td><td class="n">${p.n}</td><td class="n">${fmtPct(pct(p.n, tot))}</td><td class="n">${p.s.w}-${p.s.l}${p.s.d ? '-' + p.s.d : ''}</td><td class="n">${fmtPct(p.s.wr)}${star(p.s.w + p.s.l)}</td></tr>`).join('');
-    return box('Colour combinations', 'Most played deck colours', `<div class="sm-scroll"><table class="sm-tbl"><tr><th>Deck colours</th><th class="n">Decks</th><th class="n">Share</th><th class="n">W-L</th><th class="n">Win rate</th></tr>${rows}</table></div>`);
+    const rows = P.slice(0, 15).map(p=>`<tr><td>${dots(p.k)}${E(pairLabel(p.k))}</td><td class="sm-n">${p.n}</td><td class="sm-n">${fmtPct(pct(p.n, tot))}</td><td class="sm-n">${p.s.w}-${p.s.l}${p.s.d ? '-' + p.s.d : ''}</td><td class="sm-n">${fmtPct(p.s.wr)}${star(p.s.w + p.s.l)}</td></tr>`).join('');
+    return box('Colour combinations', 'Most played deck colours', `<div class="sm-scroll"><table class="sm-tbl"><tr><th>Deck colours</th><th class="sm-n">Decks</th><th class="sm-n">Share</th><th class="sm-n">W-L</th><th class="sm-n">Win rate</th></tr>${rows}</table></div>`);
   }
   function secMatrix(R){
     const P = pairStats(R).filter(p=>p.k !== '?').slice(0, 8), keys = P.map(p=>p.k);
     if(keys.length < 2) return '';
     const cell = (a, b)=>{
-      if(a === b) return '<td class="c" style="color:var(--muted)">mirror</td>';
+      if(a === b) return '<td class="sm-c" style="color:var(--muted)">mirror</td>';
       const rows = R.filter(x=>x.key === a && x.opp === b), s = wl(rows);
-      if(!s.w && !s.l) return '<td class="c" style="color:#4a5563">·</td>';
+      if(!s.w && !s.l) return '<td class="sm-c" style="color:#4a5563">·</td>';
       const d = (s.wr - 50) / 50, a2 = Math.min(.55, Math.abs(d) * .8 + .08);
       const bg = d >= 0 ? `rgba(59,135,232,${a2})` : `rgba(228,68,46,${a2})`;
-      return `<td class="c" style="background:${bg}" title="${E(pairLabel(a))} vs ${E(pairLabel(b))}: ${s.w}W ${s.l}L">${Math.round(s.wr)}%${star(s.w + s.l)}<br><span style="color:var(--muted);font-size:10px">${s.w + s.l}</span></td>`;
+      return `<td class="sm-c" style="background:${bg}" title="${E(pairLabel(a))} vs ${E(pairLabel(b))}: ${s.w}W ${s.l}L">${Math.round(s.wr)}%${star(s.w + s.l)}<br><span style="color:var(--muted);font-size:10px">${s.w + s.l}</span></td>`;
     };
     return box('Matchups', 'Win rate of the ROW deck against the COLUMN deck (top 8 colour combinations). Blue = row wins more, red = row loses more; small number = games',
       `<div class="sm-scroll"><table class="sm-tbl sm-mx"><tr><th></th>${keys.map(k=>`<th title="${E(pairLabel(k))}">${dots(k)}</th>`).join('')}</tr>${keys.map(a=>`<tr><td>${dots(a)}${E(pairLabel(a))}</td>${keys.map(b=>cell(a, b)).join('')}</tr>`).join('')}</table></div>`);
@@ -267,8 +268,8 @@
     const weeks = Object.keys(W).map(Number).sort((a, b)=>a - b).slice(-8);
     if(weeks.length < 2) return '';
     const lab = t => new Date(t).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
-    const rows = COL_ORDER.map(c=>`<tr><td>${dots(c)}${COL[c][0]}</td>${weeks.map(w=>{ const n = W[w].filter(x=>x.cols.includes(c)).length; return `<td class="n" title="${n} of ${W[w].length} decks">${fmtPct(pct(n, W[w].length))}</td>`; }).join('')}</tr>`).join('');
-    return box('Colour usage by week', 'Share of decks per week (week starts Monday)', `<div class="sm-scroll"><table class="sm-tbl"><tr><th>Colour</th>${weeks.map(w=>`<th class="n">${lab(w)}<br><span style="font-weight:400">${W[w].length / 2 | 0} games</span></th>`).join('')}</tr>${rows}</table></div>`);
+    const rows = COL_ORDER.map(c=>`<tr><td>${dots(c)}${COL[c][0]}</td>${weeks.map(w=>{ const n = W[w].filter(x=>x.cols.includes(c)).length; return `<td class="sm-n" title="${n} of ${W[w].length} decks">${fmtPct(pct(n, W[w].length))}</td>`; }).join('')}</tr>`).join('');
+    return box('Colour usage by week', 'Share of decks per week (week starts Monday)', `<div class="sm-scroll"><table class="sm-tbl"><tr><th>Colour</th>${weeks.map(w=>`<th class="sm-n">${lab(w)}<br><span style="font-weight:400">${W[w].length / 2 | 0} games</span></th>`).join('')}</tr>${rows}</table></div>`);
   }
   function secActivity(G){
     const day = t => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -295,10 +296,10 @@
     const durs = G.map(g=>g.dur).filter(v=>v != null);
     const items = buckets.map(([a, b, l])=>{ const n = durs.filter(v=>v >= a && v < b).length; return { label:l, v:pct(n, durs.length), max:100, val:fmtPct(pct(n, durs.length)), tip:`${l}: ${n} match(es)` }; });
     const byEnd = {}; G.forEach(g=>{ if(g.dur != null) (byEnd[g.end] || (byEnd[g.end] = [])).push(g.dur); });
-    const t = Object.entries(byEnd).sort((a, b)=>b[1].length - a[1].length).map(([k, v])=>`<tr><td>${E(END[k] || k)}</td><td class="n">${v.length}</td><td class="n">${r1(avg(v))}</td><td class="n">${r1(median(v))}</td></tr>`).join('');
+    const t = Object.entries(byEnd).sort((a, b)=>b[1].length - a[1].length).map(([k, v])=>`<tr><td>${E(END[k] || k)}</td><td class="sm-n">${v.length}</td><td class="sm-n">${r1(avg(v))}</td><td class="sm-n">${r1(median(v))}</td></tr>`).join('');
     const turnsW = G.filter(g=>g.end === 'rp').map(g=>g.turns);
     return box('Match length', `${durs.length} match(es) with start & end time · 9-RP wins take ${turnsW.length ? r1(avg(turnsW)) : '—'} turns on average`,
-      bars(items, { max:100 }) + `<div class="sm-scroll" style="margin-top:10px"><table class="sm-tbl"><tr><th>Ended by</th><th class="n">Matches</th><th class="n">Avg min</th><th class="n">Median min</th></tr>${t}</table></div>`);
+      bars(items, { max:100 }) + `<div class="sm-scroll" style="margin-top:10px"><table class="sm-tbl"><tr><th>Ended by</th><th class="sm-n">Matches</th><th class="sm-n">Avg min</th><th class="sm-n">Median min</th></tr>${t}</table></div>`);
   }
   function secBalance(G, R){
     const fp = G.filter(g=>g.first === 0 || g.first === 1);
@@ -308,9 +309,9 @@
     const rpM = G.filter(g=>g.rp && (g.winner === 0 || g.winner === 1)).map(g=>(g.rp[g.winner] | 0) - (g.rp[1 - g.winner] | 0));
     const to = G.filter(g=>(g.to[0] | 0) + (g.to[1] | 0) > 0).length;
     const undo = G.filter(g=>g.undo).length;
-    const row = (l, s) => `<tr><td>${l}</td><td class="n">${s.n}</td><td class="n">${s.w}-${s.l}</td><td class="n">${fmtPct(s.wr)}${star(s.w + s.l)}</td></tr>`;
+    const row = (l, s) => `<tr><td>${l}</td><td class="sm-n">${s.n}</td><td class="sm-n">${s.w}-${s.l}</td><td class="sm-n">${fmtPct(s.wr)}${star(s.w + s.l)}</td></tr>`;
     return box('First player & mulligan', `${fp.length} match(es) with a recorded first player`,
-      `<div class="sm-scroll"><table class="sm-tbl"><tr><th></th><th class="n">Decks</th><th class="n">W-L</th><th class="n">Win rate</th></tr>${row('Going first', s1)}${row('Going second', s2)}${row('Kept the starting hand', m0)}${row('Mulliganed (avg ' + r1(mAvg) + ' card(s))', m1)}</table></div>
+      `<div class="sm-scroll"><table class="sm-tbl"><tr><th></th><th class="sm-n">Decks</th><th class="sm-n">W-L</th><th class="sm-n">Win rate</th></tr>${row('Going first', s1)}${row('Going second', s2)}${row('Kept the starting hand', m0)}${row('Mulliganed (avg ' + r1(mAvg) + ' card(s))', m1)}</table></div>
       <p class="sm-note">Mulligan rate: ${fmtPct(pct(mk.filter(x=>x.mull > 0).length, mk.length))} of ${mk.length} decks. Winner's Rush Point lead: ${r1(avg(rpM))} on average. Matches with at least one timeout: ${fmtPct(pct(to, G.length))}. Matches where undo was used: ${fmtPct(pct(undo, G.length))}.</p>`);
   }
   function secModes(G){
@@ -318,8 +319,8 @@
     const by = (fn, lab) => { const m = {}; G.forEach(g=>{ const k = fn(g); (m[k] || (m[k] = [])).push(g); }); return Object.entries(m).sort((a, b)=>b[1].length - a[1].length).map(([k, gs])=>{
       const durs = gs.map(g=>g.dur).filter(v=>v != null), fp = gs.filter(g=>g.first === 0 || g.first === 1);
       const fw = fp.filter(g=>g.winner === g.first).length, fl = fp.filter(g=>g.winner === 1 - g.first).length;
-      return `<tr><td>${E(lab(k))}</td><td class="n">${gs.length}</td><td class="n">${durs.length ? r1(avg(durs)) : '—'}</td><td class="n">${r1(avg(gs.map(g=>g.turns)))}</td><td class="n">${fmtPct(wrOf(fw, fl))}</td><td class="n">${fmtPct(pct(gs.filter(g=>g.end === 'conceded' || g.end === 'claim').length, gs.length))}</td></tr>`; }).join(''); };
-    const head = '<tr><th></th><th class="n">Matches</th><th class="n">Avg min</th><th class="n">Avg turns</th><th class="n">1st-player WR</th><th class="n">Left / conceded</th></tr>';
+      return `<tr><td>${E(lab(k))}</td><td class="sm-n">${gs.length}</td><td class="sm-n">${durs.length ? r1(avg(durs)) : '—'}</td><td class="sm-n">${r1(avg(gs.map(g=>g.turns)))}</td><td class="sm-n">${fmtPct(wrOf(fw, fl))}</td><td class="sm-n">${fmtPct(pct(gs.filter(g=>g.end === 'conceded' || g.end === 'claim').length, gs.length))}</td></tr>`; }).join(''); };
+    const head = '<tr><th></th><th class="sm-n">Matches</th><th class="sm-n">Avg min</th><th class="sm-n">Avg turns</th><th class="sm-n">1st-player WR</th><th class="sm-n">Left / conceded</th></tr>';
     const eng = {}; G.forEach(g=>{ eng[g.engine || '?'] = (eng[g.engine || '?'] || 0) + 1; });
     return box('By mode & clock', '', `<div class="sm-scroll"><table class="sm-tbl">${head}${by(g=>g.mode, k=>MODE[k] || k)}<tr><td colspan="6" style="color:var(--muted);padding-top:10px">Clock</td></tr>${by(g=>g.clock || '?', k=>CLOCK[k] || k)}</table></div>
       <p class="sm-note">Engine versions: ${Object.entries(eng).sort((a, b)=>b[1] - a[1]).map(([k, v])=>E(k) + ' (' + v + ')').join(', ')}.</p>`);
@@ -345,16 +346,16 @@
     const rows = list.slice(0, 60).map(m=>{
       const wr = wrOf(m.w, m.l), c = card(m.no), d = wr == null ? 0 : wr - base;
       return `<tr><td><span class="sm-card" title="${E(title(m.no))}"><img loading="lazy" src="images/${E(m.no)}.jpg" alt="">${dots(c && COL[c.c] ? c.c : '?')}${E(m.no)} · ${E(nm(m.no))}</span></td>
-        <td class="n">${fmtPct(pct(m.decks, N))}</td><td class="n">${r1(m.copies / m.decks)}</td><td class="n">${m.w}-${m.l}</td>
-        <td class="n" style="color:${wr == null ? 'inherit' : d >= 3 ? '#7FB8FF' : d <= -3 ? '#FF9A8A' : 'inherit'}">${fmtPct(wr)}</td>
-        <td class="n">${m.actGames ? r1(m.call / m.actGames) : '—'}</td><td class="n">${m.actGames ? r1(m.acti / m.actGames) : '—'}</td><td class="n">${m.actGames ? r1(m.atk / m.actGames) : '—'}</td></tr>`;
+        <td class="sm-n">${fmtPct(pct(m.decks, N))}</td><td class="sm-n">${r1(m.copies / m.decks)}</td><td class="sm-n">${m.w}-${m.l}</td>
+        <td class="sm-n" style="color:${wr == null ? 'inherit' : d >= 3 ? '#7FB8FF' : d <= -3 ? '#FF9A8A' : 'inherit'}">${fmtPct(wr)}</td>
+        <td class="sm-n">${m.actGames ? r1(m.call / m.actGames) : '—'}</td><td class="sm-n">${m.actGames ? r1(m.acti / m.actGames) : '—'}</td><td class="sm-n">${m.actGames ? r1(m.atk / m.actGames) : '—'}</td></tr>`;
     }).join('');
     const ctl = `<div class="sm-filt" style="margin:0 0 8px">
       <label class="ct-mut">Sort <select data-smf="cardSort">${[['deck','Most played'],['wr','Highest win rate'],['call','Most called per game'],['acti','Most activated per game']].map(([v, l])=>`<option value="${v}"${F.cardSort === v ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
       <label class="ct-mut">Min. decks <input data-smf="minCard" type="number" min="1" max="500" value="${F.minCard}" style="width:70px"></label>
       <span class="ct-mut">${list.length} card(s) · ${N} decks · average deck win rate ${fmtPct(base)}</span></div>`;
     return box('Cards', 'Play rate = % of decks with the card · Copies = average copies in those decks · Win rate = decks with the card (blue/red = 3+ points above/below average) · Called / Activated / Attacks = per game in which the deck had the card',
-      ctl + `<div class="sm-scroll"><table class="sm-tbl"><tr><th>Card</th><th class="n">Play rate</th><th class="n">Copies</th><th class="n">W-L</th><th class="n">Win rate</th><th class="n">Called</th><th class="n">Activated</th><th class="n">Attacks</th></tr>${rows}</table></div>` +
+      ctl + `<div class="sm-scroll"><table class="sm-tbl"><tr><th>Card</th><th class="sm-n">Play rate</th><th class="sm-n">Copies</th><th class="sm-n">W-L</th><th class="sm-n">Win rate</th><th class="sm-n">Called</th><th class="sm-n">Activated</th><th class="sm-n">Attacks</th></tr>${rows}</table></div>` +
       (list.length > 60 ? '<p class="sm-note">Showing the top 60. Use the CSV for the full data.</p>' : ''));
   }
   /* v7.61 (permintaan pemilik): kartu yang paling sering DISIMPAN saat mulligan, terpisah untuk pemain yang jalan pertama (1st turn)
@@ -371,8 +372,8 @@
       const list = Object.values(M).filter(m=>m.n >= F.minMull);
       const top = list.slice().sort((a, b)=>b.kept / b.n - a.kept / a.n || b.n - a.n).slice(0, 15);
       const low = list.slice().sort((a, b)=>a.kept / a.n - b.kept / b.n || b.n - a.n).slice(0, 8);
-      const row = m => { const c = card(m.no); return `<tr><td><span class="sm-card" title="${E(title(m.no))}"><img loading="lazy" src="images/${E(m.no)}.jpg" alt="">${dots(c && COL[c.c] ? c.c : '?')}${E(m.no)} · ${E(nm(m.no))}</span></td><td class="n">${m.n}</td><td class="n">${m.kept}</td><td class="n">${fmtPct(pct(m.kept, m.n))}</td></tr>`; };
-      const head = '<tr><th>Card</th><th class="n">In opening hand</th><th class="n">Kept</th><th class="n">Keep rate</th></tr>';
+      const row = m => { const c = card(m.no); return `<tr><td><span class="sm-card" title="${E(title(m.no))}"><img loading="lazy" src="images/${E(m.no)}.jpg" alt="">${dots(c && COL[c.c] ? c.c : '?')}${E(m.no)} · ${E(nm(m.no))}</span></td><td class="sm-n">${m.n}</td><td class="sm-n">${m.kept}</td><td class="sm-n">${fmtPct(pct(m.kept, m.n))}</td></tr>`; };
+      const head = '<tr><th>Card</th><th class="sm-n">In opening hand</th><th class="sm-n">Kept</th><th class="sm-n">Keep rate</th></tr>';
       return box(first ? 'Mulligan — going first (1st turn)' : 'Mulligan — going second (2nd turn)',
         `${hands} opening hand(s) · ${fmtPct(pct(mulls, hands))} mulliganed`,
         list.length ? `<div class="sm-scroll"><table class="sm-tbl">${head}${top.map(row).join('')}</table></div>
@@ -387,8 +388,8 @@
     const P = {};
     G.forEach(g=>[0, 1].forEach(p=>{ const id = g.pid[p] || g.names[p]; if(!id) return; const m = P[id] || (P[id] = { name:g.names[p], n:0, w:0, l:0, last:0, cols:{} }); m.n++; const r = res(g, p); if(r === 'w') m.w++; else if(r === 'l') m.l++; if(g.t > m.last){ m.last = g.t; m.name = g.names[p] || m.name; } const k = pairKey(g.cols[p]); m.cols[k] = (m.cols[k] || 0) + 1; }));
     const list = Object.values(P).sort((a, b)=>b.n - a.n).slice(0, 20);
-    const rows = list.map(m=>{ const top = Object.entries(m.cols).sort((a, b)=>b[1] - a[1])[0]; return `<tr><td>${E(m.name || '?')}</td><td class="n">${m.n}</td><td class="n">${m.w}-${m.l}</td><td class="n">${fmtPct(wrOf(m.w, m.l))}</td><td>${top ? dots(top[0]) + E(pairLabel(top[0])) : ''}</td><td class="n">${new Date(m.last).toLocaleDateString('en-GB', { day:'numeric', month:'short' })}</td></tr>`; }).join('');
-    return box('Most active players', `${Object.keys(P).length} player(s) in this period · top 20 (admin only)`, `<div class="sm-scroll"><table class="sm-tbl"><tr><th>Player</th><th class="n">Matches</th><th class="n">W-L</th><th class="n">Win rate</th><th>Main colours</th><th class="n">Last match</th></tr>${rows}</table></div>`);
+    const rows = list.map(m=>{ const top = Object.entries(m.cols).sort((a, b)=>b[1] - a[1])[0]; return `<tr><td>${E(m.name || '?')}</td><td class="sm-n">${m.n}</td><td class="sm-n">${m.w}-${m.l}</td><td class="sm-n">${fmtPct(wrOf(m.w, m.l))}</td><td>${top ? dots(top[0]) + E(pairLabel(top[0])) : ''}</td><td class="sm-n">${new Date(m.last).toLocaleDateString('en-GB', { day:'numeric', month:'short' })}</td></tr>`; }).join('');
+    return box('Most active players', `${Object.keys(P).length} player(s) in this period · top 20 (admin only)`, `<div class="sm-scroll"><table class="sm-tbl"><tr><th>Player</th><th class="sm-n">Matches</th><th class="sm-n">W-L</th><th class="sm-n">Win rate</th><th>Main colours</th><th class="sm-n">Last match</th></tr>${rows}</table></div>`);
   }
 
   /* ---------------- CSV ---------------- */

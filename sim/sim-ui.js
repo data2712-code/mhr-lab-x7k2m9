@@ -395,15 +395,27 @@
   }
   /* Laporan #5 (13 Nov 2026): batalkan efek ACTI yang baru diaktifkan selama masih memilih target/biaya. Aman karena resolver
      menanyakan semua pilihan SEBELUM perubahan pertama: permainan diputar ulang ke sebelum aktivasi. Hanya permainan lokal
-     (online: undo butuh persetujuan lawan). */
-  function canCancelEff() {
+     (online: undo butuh persetujuan lawan).
+     o2.60 (laporan #83, keputusan pemilik): juga ONLINE tanpa izin lawan dan tanpa jatah Undo, dan juga untuk efek opsional
+     yang sudah dijawab "Yes" (kembali ke pertanyaan "Use this effect?"). Mesin yang menentukan (S.cancelPoint / view.cancelEff):
+     efek masih menunggu pilihan pemain itu sendiri dan belum ada informasi tersembunyi yang terbuka. */
+  function cancelIdx() {
     const m = ui.actiMark, pr = G && G.prompt;
-    return !!(m && pr && !net.on && !ui.replay && G.job && G.job.kind === 'acti' && G.job.id === m.jid && G.job.p === pr.p &&
-      ['choose', 'pick', 'yesno'].includes(pr.type) && ui.ctrl[pr.p] === 'human' && ui.hist.length >= m.n);
+    if (!pr || ui.replay || net.on || ui.ctrl[pr.p] !== 'human') return -1;
+    if (m && G.job && G.job.kind === 'acti' && G.job.id === m.jid && G.job.p === pr.p && ui.hist.length >= m.n) return m.n;
+    const c = S.cancelPoint ? S.cancelPoint(G, pr.p) : null;
+    return c && c.idx <= ui.hist.length && ui.hist.slice(c.idx).every(h => h.p === pr.p && !h.auto) ? c.idx : -1;
+  }
+  function canCancelEff() {
+    const pr = G && G.prompt;
+    if (!pr || ui.replay || !['choose', 'pick', 'yesno'].includes(pr.type)) return false;
+    if (net.on) return !!(G.cancelEff && pr.p === net.seat && !G.result && !G.tu && !net.waitUndo && !(net.last && net.last.undoPending));
+    return cancelIdx() >= 0;
   }
   function cancelEffect() {
     if (!canCancelEff()) return;
-    const n = ui.actiMark.n, o = S.parseLog(S.exportLog(G));
+    if (net.on) { ui.pick = []; ui.pickTouched = false; ui.pickClosed = false; closeOv(); ui.msg = ''; net.send({ type: 'eff_cancel' }); render(); return; }
+    const n = cancelIdx(), o = S.parseLog(S.exportLog(G));
     G = S.replay(o, n);
     ui.hist.length = n; ui.clk = null; ui.sndN = logEnd(); ui.seenN = {}; ui.flashN = logEnd(); ui.toastN = logEnd();
     ui.actiMark = null; ui.pick = []; ui.pickTouched = false; ui.pickClosed = false; closeOv();
@@ -553,6 +565,11 @@
   function netUndoResult(m) {
     net.ask = null; net.waitUndo = false;
     const mine = m.from === net.seat;
+    if (m.free) {                                    // o2.60 (laporan #83): batal efek tanpa izin lawan
+      net.note = { text: mine ? 'Effect cancelled. Nothing was paid or changed.' : (G ? G.names[m.from] : 'Opponent') + ' decided not to use ' + (m.label || 'an effect') + ' (cancelled before it changed anything).', at: Date.now() };
+      if (mine) { ui.actiMark = null; resetSel(); }
+      closeOv(); if (G) render(); return;
+    }
     const t = m.cancelled ? (mine ? 'Undo request cancelled.' : (G ? G.names[m.from] : 'Opponent') + ' cancelled the undo request.') :
       mine ? (m.accepted ? 'Undo accepted: your last move was taken back.' : 'Your opponent declined the undo.') : (m.accepted ? 'You allowed the undo.' : '');
     net.note = t ? { text: t, at: Date.now() } : null;
@@ -779,7 +796,13 @@
     tr.innerHTML = abarHTML();
     // Laporan #26 (o2.29): panel berisi pilihan → .dock (di layar desktop pendek menempel di kolom kanan, lewat CSS).
     const dockable = !!tr.querySelector('.acts > *') && (!tr.querySelector('.cpay') || (!narrow() && innerHeight <= 900));   // o2.39: panel biaya ikut menempel di kolom kanan di laptop
-    tr.className = 'abar' + (ui.msg ? ' err' : '') + (dockable ? ' dock' : '') + (dockable && ui.trayMin ? ' min' : '');
+    // o2.60 (laporan pemain, permintaan pemilik): pertanyaan EFEK milik pemain ini (pakai efek? / pilih target / urutan efek)
+    // tidak lagi menempel di pojok kanan atas laptop & monitor kecil — muncul di TENGAH layar (CSS .dock.eff) dengan sorotan.
+    // Prompt efek yang baru selalu terbuka walau panel sebelumnya disembunyikan (▾ Hide).
+    const epr = G.prompt, effp = !!(dockable && epr && !G.result && !ui.replay && ['opt', 'yesno', 'pick', 'choose', 'order'].includes(epr.type) &&
+      (net.on ? epr.p === net.seat : ui.ctrl[epr.p] === 'human') && !tr.querySelector('.cpay'));
+    if (effp) { const ek = promptKey() + ':' + (epr.key || epr.job || ''); if (ui.effKey !== ek) { ui.effKey = ek; ui.trayMin = false; } }
+    tr.className = 'abar' + (ui.msg ? ' err' : '') + (dockable ? ' dock' : '') + (effp ? ' eff' : '') + (dockable && ui.trayMin ? ' min' : '');
     if (dockable) tr.insertAdjacentHTML('beforeend', '<button class="sm tmin" data-act="trayMin">' + (ui.trayMin ? '▸ Show' : '▾ Hide') + '</button>');
     // o2.56 (laporan #67/#68): di panel yang menempel, tombol "Confirm cost" / tujuan CALL selalu digulir ke dalam pandangan.
     if (dockable && !ui.trayMin) { const cd = tr.querySelector('.cpdest:not(.dim)'); if (cd && cd.scrollIntoView) cd.scrollIntoView({ block: 'nearest' }); }
