@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.61** · 25 November 2026
+**Versi saat ini: v7.63** · 26 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -603,6 +603,30 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.63 — Text Differences TD-13…TD-19 (PB02) + aturan "ikuti teks Inggris" — 26 November 2026 *(`rules-faq.js`, `errata/TD-13…19.html`, `faq/F-41*.html`, `index.html`)*
+
+- Permintaan pemilik 26 Nov 2026: beda makna PB02 versi Indonesia vs Inggris (lihat v7.62) masuk Text Differences, semua "ikuti teks Inggris":
+  TD-13 PB02-013 (ACTI【BATTLE】, bukan FIELD), TD-14 PB02-015 (karakter siapa saja), TD-15 PB02-016 (DOUBLE ATTACK hanya giliran ini),
+  TD-16 PB02-019 (Prune karakter sendiri; retreat kartu Lv1 lawan), TD-17 PB02-020 (karakter Anda), TD-18 PB02-008 (mengambil kartu wajib),
+  TD-19 PB02-001 (melepas kartu terpasang opsional).
+- Pengantar Errata, pengantar Part 2 (Text differences) dan F-41 (EN & ID) kini menegaskan: saat teks berbeda, pemain selalu merujuk versi
+  Inggris; satu-satunya kasus teks Indonesia yang benar = SP01-026 「Vigil of Love」, teks Inggrisnya sudah dierrata (E-13).
+- Halaman statis baru `errata/TD-13…TD-19.html`; `faq/F-41.html` & `faq/F-41-id.html` diperbarui (tools/generate_faq_pages.js).
+- Battle Sim sudah mengikuti teks Inggris untuk ketujuh kartu ini (dicek di sim-cards-t6.js), tidak ada perubahan.
+
+### v7.62 — PB02: teks & gambar kartu INDONESIA resmi — 25 November 2026 *(`cards.js`, `images/PB02-001…021.jpg`, `api/v1/`, `index.html`)*
+
+- Sumber: 21 gambar kartu PB02 versi Indonesia dari pemilik (folder "Sample PB02", 744×1039 PNG).
+- `cards.js`: teks Indonesia `e` 21 kartu PB02 diganti teks resmi dari kartu (ditulis apa adanya, termasuk salah ketik di kartu,
+  mis. PB02-007 "tidak dapat tidak dapat"); `fan:1` dihapus → lencana "ID*" & peringatan terjemahan penggemar hilang. UNIQUE / COUNTER
+  memakai teks pengingat standar (seperti SP01/SD03). Nama, statistik, trait & rarity (PR) sudah sama dengan kartu.
+- `images/PB02-0xx.jpg` = cetakan Indonesia (500×698, sudut transparan diisi hitam); `images/en/` tetap cetakan Inggris.
+- `api/v1` dibuat ulang (hanya PB02 berubah). Halaman `cards/PB02-*.html` tidak berubah isinya.
+- Beda makna ID vs EN yang ditemukan (belum dijadikan Text Differences, menunggu keputusan pemilik; Battle Sim tetap mengikuti teks Inggris,
+  RS-018): PB02-013 ACTI【FIELD】 (ID) vs 【BATTLE】 (EN); PB02-015 "karakter Anda" vs "of the characters"; PB02-016 tanpa "this turn";
+  PB02-019 "karakter lawan di RETREAT" vs "your characters", "karakter Lv1 lawan" vs "opponent's cards"; PB02-020 "1 karakter" vs "your";
+  PB02-008 "Anda bisa mengambil" (opsional) vs "you move"; PB02-001 "lepaskan" vs "you may remove".
 
 ### v7.61 — 🎮 Battle Sim stats di Control Tower + jendela "Lawan ditemukan" (Battle Sim o2.58) — 25 November 2026 *(`sim-meta.js` BARU, `tower.js`, `index.html`, `sim-host.js`, `sim/`)*
 
