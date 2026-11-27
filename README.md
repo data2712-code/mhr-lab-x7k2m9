@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.70** · 27 November 2026
+**Versi saat ini: v7.71** · 27 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -603,6 +603,30 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.71 — BP02 Doomsday: +14 kartu resmi (6 SR post 26 Nov + 8 GR post 27 Nov), 4 Doombot R disembunyikan — 27 November 2026 *(`cards.js`, `images/`, `images/en/`, `cards/`, `sitemap.xml`, `index.html`)*
+
+Pemilik (27 Nov 2026): "cek update terbaru BP02 … tambahkan di file pdf yang sudah kita buat, tambahkan juga ke website dan database kita
+untuk kartu BP02 yang belum masuk".
+- Sumber: post IG @marvelherorush.official 26 Nov (instagram.com/p/DgMoCwXmzXq/) dan 27 Nov (instagram.com/p/DgOqhAUmzlG/), teks &
+  gambar resmi Inggris. PDF spoiler BP02 diperbarui ke versi 27 Nov (67 kartu; `MHR_BP02_Doomsday_English (27 Nov).pdf` di Downloads).
+- **Baru (teks resmi EN, `fan:1`, teks Indonesia terjemahan penggemar)**:
+  - SR (post 26 Nov): BP02-050 「Lightning of Judgment」Odin (Orange) · 079 「The Nightsword」Hela, 080 「Heir to Death」Angela,
+    081 「Conversion Protocol」Doombot (UNIQUE), 082 「Hazareth Blast」Doombot, 083 「Dimensional Clone」Doombot (Purple).
+  - GR (post 27 Nov, rarity GR pertama di BP02): BP02-003 「Reboot」New Black Widow (Merah) · 016 「Web-Lock」Spider-Man (Kuning) ·
+    033 「End of Time」Sylvie (UNIQUE), 034 「Behind Enemy Lines」Ghost (Hijau) · 043 「Sorcerer Supreme」Wong (UNIQUE),
+    044 「Necromantic Possession Spell」Doctor Strange (Orange) · 076 「Rend the Mind」Doombot, 077 「Wreckage Barrier」Doombot (Purple).
+- **Disembunyikan** (mengikuti pola v7.60): 4 Doombot R yang dulu dibaca BP02-080…083 (「Bot Clone」, 「Mystic Absorption」, 「Clone
+  Transfer」, 「Prototype」; post IG 19 Nov, nomornya buram). Post 26 Nov menunjukkan BP02-080 = Angela dan 081–083 = Doombot SR,
+  jadi nomor resmi keempat Doombot R itu belum diketahui (mungkin 090–093). Datanya tetap ada di riwayat git (v7.54) dan PDF spoiler;
+  masukkan lagi saat nomornya terkonfirmasi. Halaman `cards/BP02-080…083.html` dan gambar `images/(en/)BP02-080…083.jpg` kini
+  milik kartu SR baru. Deck pra-rilis yang sempat memakai nomor 080–083 otomatis berisi kartu SR baru.
+- Total BP02 di situs: 58 kartu (48 − 4 + 14). Gambar 14 kartu baru: tangkapan post IG (±612×856) → 500×698, watermark SAMPLE tetap.
+- `tools/generate_card_pages.py`: 10 halaman baru + 4 diperbarui (`cards/BP02-003, 016, 033, 034, 043, 044, 050, 076, 077, 079` baru;
+  `080–083` diperbarui); `sitemap.xml` +10 URL (lastmod 2026-11-27 hanya untuk 14 halaman BP02 tersebut + halaman utama).
+- `api/v1` tidak dibuat ulang (BP02 masih pre-release, tidak masuk API). Battle Sim tidak berubah: BP02 tetap tersembunyi, dan
+  `sim-cards-bp02.js` tidak punya resolver untuk nomor-nomor yang berubah (dicek).
+- `cards.js?v=7.71-bp02c`, footer v7.71.
 
 ### v7.70 — Battle Sim o2.65: Kartu Terpasang tidak bisa dipasangi — 27 November 2026 *(`sim/`, `sim-host.js`, `sim-meta.js`, `index.html`; server Battle Sim)*
 
