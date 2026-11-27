@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.71** · 27 November 2026
+**Versi saat ini: v7.72** · 27 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -603,6 +603,11 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.72 — Battle Sim o2.66: Layout Arena (disimpan, belum opsi pemain) — 27 November 2026 *(`sim/`, `sim-host.js`, `sim-meta.js`, `index.html`)*
+
+- Layout papan Arena (desktop) **disimpan untuk review pemilik, belum menjadi opsi pemain**: tidak ada tombol; hanya terbuka lewat
+  `sim/index.html?layout=arena` (uji internal). Detail: mhr-simulator riwayat #150. Mesin tidak berubah — server tidak perlu di-deploy.
 
 ### v7.71 — BP02 Doomsday: +14 kartu resmi (6 SR post 26 Nov + 8 GR post 27 Nov), 4 Doombot R disembunyikan — 27 November 2026 *(`cards.js`, `images/`, `images/en/`, `cards/`, `sitemap.xml`, `index.html`)*
 

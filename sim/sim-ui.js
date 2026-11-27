@@ -85,6 +85,8 @@
     $('btnConcede').onclick = concede;
     $('btnConf').onclick = confCycle;
     if ($('btnHints')) $('btnHints').onclick = hintsToggle;
+    // o2.66 (permintaan pemilik): layout papan Classic / Arena (uji; desktop saja). ?layout=arena atau #layout=arena juga bisa.
+    if ($('btnLayout')) $('btnLayout').onclick = () => { ui.layout = ui.layout === 'arena' ? 'classic' : 'arena'; try { localStorage.setItem(KEY_LAYOUT, ui.layout); } catch (e) { /* abaikan */ } if (G) render(); };
     // Riwayat #94: di HP sisi kanan hanya Undo + "⋯"; tombol lain (Log, suara, Counter prompts, Hints, Concede, Menu) di dalam "⋯".
     if ($('btnMore')) {
       $('btnMore').onclick = e => { e.stopPropagation(); $('acts').classList.toggle('open'); };
@@ -427,6 +429,17 @@
      off  = selalu Pass otomatis (tidak pernah ditanya).
      Bawaan: lawan bot = auto (perilaku lama), online = on (perilaku lama). Dua pemain satu perangkat selalu on. */
   const KEY_CONF = 'mhrsim.confirm.v1';
+  /* o2.66 — Layout Arena (mockup pemilik 27 Nov 2026, kanvas "MHR Battle Sim – Layout Arena"): satu mat per pemain, susunan
+     berhadapan (sisi lawan dicerminkan), jalur Rush Point di tepi mat; kolom kiri = pelat pemain + HAND kipas; kolom kanan =
+     HAND lawan (punggung kartu), kapsul giliran, panel keputusan, Play-by-play; bar aksi cepat di garis tengah. Desktop saja. */
+  const KEY_LAYOUT = 'mhrsim.layout.v1';
+  // Disimpan untuk review pemilik (27 Nov 2026): BELUM menjadi opsi pemain — tidak ada tombol; hanya lewat ?layout=arena /
+  // #layout=arena pada sim/index.html (uji internal). KEY_LAYOUT dipakai lagi bila tombol ▦ diaktifkan kembali.
+  function readLayout() {
+    try { const m = (location.search + location.hash).match(/layout=(arena|classic)/); return m ? m[1] : 'classic'; }
+    catch (e) { return 'classic'; }
+  }
+  const arenaOn = () => (ui.layout || (ui.layout = readLayout())) === 'arena' && !narrow();
   const CONF_NEXT = { on: 'auto', auto: 'off', off: 'on' };
   const CONF_TIP = { on: 'Counter prompts ON: you are always asked in the Counter Step and Counter Phase.',
     auto: 'Counter prompts AUTO: you pass automatically when you have no COUNTER CALL or ACTI to use.',
@@ -786,6 +799,9 @@
     // Riwayat #52 (permintaan pemilik): baki keputusan pindah ke tengah papan (di antara FIELD kedua pemain) dan ticker
     // LIVE di atas diganti Timeline gaya Alternatif A (3 kejadian terakhir, di kanan tengah papan).
     const tr = trayEl();
+    const AR = ui.arenaNow = arenaOn();
+    $('game').classList.toggle('arena', AR);
+    if ($('btnLayout')) $('btnLayout').innerHTML = '▦ ' + (AR ? 'Arena' : 'Classic');
     parkMid();
     $('board').innerHTML = (both ? ohandHTML(top) : '') +
       halfHTML(top, true) + '<div class="midzone" id="midzone"></div>' + halfHTML(bottom, false);
@@ -804,8 +820,13 @@
     if (effp) { const ek = promptKey() + ':' + (epr.key || epr.job || ''); if (ui.effKey !== ek) { ui.effKey = ek; ui.trayMin = false; } }
     // o2.64 (permintaan pemilik): desktop → panel di KANAN papan (antara kedua BASE), lihat placeSide(); bila tidak muat, perilaku lama.
     const hasActs = !!tr.querySelector('.acts > *');
-    const sideGeo = !narrow() && hasActs ? sideGeometry() : null;
-    if (sideGeo) {
+    const sideGeo = !AR && !narrow() && hasActs ? sideGeometry() : null;
+    if (AR) {
+      const mine = !!(epr && !G.result && !ui.replay && (net.on ? epr.p === net.seat : ui.ctrl[epr.p] === 'human'));
+      tr.className = 'abar arenatray' + (ui.msg ? ' err' : '') + (mine && hasActs ? ' seff' : '');
+      tr.style.cssText = '';
+      placeArena(tr, top);
+    } else if (sideGeo) {
       const seff = effp || !!(epr && ['opt', 'yesno', 'pick', 'choose', 'order'].includes(epr.type) && (net.on ? epr.p === net.seat : ui.ctrl[epr.p] === 'human') && !G.result && !ui.replay);
       if (seff && !effp) { const ek = promptKey() + ':' + (epr.key || epr.job || ''); if (ui.effKey !== ek) { ui.effKey = ek; ui.trayMin = false; } }
       tr.className = 'abar side' + (ui.msg ? ' err' : '') + (seff ? ' seff' : '') + (ui.trayMin ? ' min' : '');
@@ -815,7 +836,7 @@
     }
     $('game').classList.toggle('trayside', !!sideGeo);
     if (sideGeo) $('game').style.setProperty('--sidew', Math.round($('board').getBoundingClientRect().right - sideGeo.left + 6) + 'px');
-    if (dockable || sideGeo) tr.insertAdjacentHTML('beforeend', '<button class="sm tmin" data-act="trayMin">' + (ui.trayMin ? '▸ Show' : '▾ Hide') + '</button>');
+    if (!AR && (dockable || sideGeo)) tr.insertAdjacentHTML('beforeend', '<button class="sm tmin" data-act="trayMin">' + (ui.trayMin ? '▸ Show' : '▾ Hide') + '</button>');
     if (net.on) { const nb = netBarHTML(); if (nb) tr.insertAdjacentHTML('afterbegin', nb); }
     mobileArena();
     mobileBoard();
@@ -823,6 +844,7 @@
     renderSide(v);
     fitHand();
     if (sideGeo) placeSide(tr);
+    if (AR) { arenaQuick(tr); arenaFan(); } else { const qb = document.querySelector('#midzone .qbar'); if (qb) qb.remove(); restoreClassic(); }
     // o2.56 (laporan #67/#68): di panel yang menempel, tombol "Confirm cost" / tujuan CALL selalu digulir ke dalam pandangan.
     if ((dockable || sideGeo) && !ui.trayMin) { const cd = tr.querySelector('.cpdest:not(.dim)'); if (cd && cd.scrollIntoView) cd.scrollIntoView({ block: 'nearest' }); }
     drawArrows();
@@ -1208,9 +1230,16 @@
     }
     return '<div class="half field side-' + (isTop ? 'opp' : 'me') + ' side ' + (isTop ? 'opp' : 'me') + '">' + railHTML(p, isTop) +
       '<div class="battle">' + slots + '</div>' +
-      '<div class="basecol"><div class="zl">' + esc(G.names[p]).toUpperCase() + '\'S BASE · ' + P.base.length + '/' + S.BASE_MAX + '</div><div class="basebox"' + (isTop ? '' : ' data-own="1"') + '>' + base.join('') + '</div></div></div>';
+      '<div class="basecol"><div class="zl">' + esc(G.names[p]).toUpperCase() + '\'S BASE · ' + P.base.length + '/' + S.BASE_MAX + '</div><div class="basebox"' + (isTop ? '' : ' data-own="1"') + '>' + base.join('') + '</div></div>' +
+      (ui.arenaNow ? rpStripHTML(p) : '') + '</div>';
   }
 
+  // o2.66 Arena: jalur Rush Point 9 bulatan di tepi mat (seperti "Life").
+  function rpStripHTML(p) {
+    const rp = G.P[p].rp || 0; let pips = '';
+    for (let k = 0; k < 9; k++) pips += '<i class="' + (k < rp ? 'on' : '') + '"></i>';
+    return '<div class="rpstrip" title="Rush Point ' + rp + '/9" aria-label="Rush Point ' + rp + ' of 9"><b>RP</b>' + pips + '<b>' + rp + '/9</b></div>';
+  }
   function handHTML(p) {
     const v = viewer();
     if (v !== 'all' && v !== p) return '';
@@ -1849,6 +1878,54 @@
     const pr = G.prompt;
     if (pr.show && pr.show.length) return false;
     return pr.from.length > 0 && pr.from.every(i => { const L = S.locate(G, i); return L && (L.zone === 'bat' || L.zone === 'base'); });
+  }
+  /* ---------- o2.66 Layout Arena: penempatan elemen ---------- */
+  // Kolom kanan: HAND lawan → kapsul giliran + fase → panel keputusan → tab/Play-by-play → tombol.
+  function placeArena(tr, top) {
+    const dr = $('drawer'), tabs = $('tabs'); if (!dr || !tabs) return;
+    let opp = $('arenaOpp');
+    if (!opp) { opp = document.createElement('div'); opp.id = 'arenaOpp'; opp.className = 'aropp'; }
+    const n = G.P[top] ? (Array.isArray(G.P[top].hand) ? G.P[top].hand.length : +G.P[top].hand || 0) : 0;
+    let backs = ''; for (let k = 0; k < Math.min(n, 12); k++) backs += '<i style="--k:' + k + ';--n:' + Math.min(n, 12) + '"></i>';
+    opp.innerHTML = '<div class="aroppb" aria-hidden="true">' + backs + '</div><div class="aroppn"><b>' + n + '</b><span>in ' + esc(G.names[top]) + '\'s HAND</span></div>';
+    dr.insertBefore(opp, dr.firstChild);
+    dr.querySelectorAll(':scope > .phstep').forEach(e => e.remove());
+    const ph = $('midzone') && $('midzone').querySelector('.phstep');
+    dr.insertBefore(pillEl(), tabs);
+    if (ph) dr.insertBefore(ph, tabs);
+    dr.insertBefore(tr, tabs);
+  }
+  // Kembali ke Classic: kembalikan elemen kolom kanan yang dipindah.
+  function restoreClassic() { const o = $('arenaOpp'); if (o) o.remove(); document.querySelectorAll('#drawer > .phstep').forEach(e => e.remove()); }
+  // Bar aksi cepat di garis tengah: judul momen + salinan tombol utama panel (klik = data-act yang sama).
+  function arenaQuick(tr) {
+    const mz = $('midzone'); if (!mz) return;
+    // tombol utama = sama dengan tombol bulat HP (mobileArena): Attack / Pass / Start Battle / Confirm / No attack, lalu Yes / Confirm pilihan
+    let pb = null;
+    for (const k of ['doAtk', 'pass', 'endAction', 'arrSave', 'noAtk', 'yes', 'pickDone', 'openPick']) { pb = tr.querySelector('.acts [data-act="' + k + '"]:not([disabled])'); if (pb) break; }
+    const t = trayTitle();
+    let btn = '';
+    if (pb) {
+      const attrs = Array.from(pb.attributes).filter(x => x.name.startsWith('data-')).map(x => x.name + '="' + esc(x.value) + '"').join(' ');
+      const lbl = FAB_LABEL[pb.dataset.act] || pb.textContent.trim();
+      btn = '<button class="' + (pb.dataset.act === 'noAtk' ? 'warn' : pb.dataset.act === 'endAction' ? 'next' : 'pri') + '" ' + attrs + '>' + esc(lbl) + '</button>';
+    }
+    mz.insertAdjacentHTML('beforeend', '<div class="qbar' + (pb ? ' on' : '') + '"><span class="qt">' + esc(t || '') + '</span>' + btn + '</div>');
+  }
+  // HAND sebagai kipas di kolom kiri: lebar tetap, makin banyak kartu makin rapat (mockup "HAND with 9 cards").
+  function arenaFan() {
+    const hc = document.querySelector('#handRow .handcards'); if (!hc) return;
+    const cards = [...hc.querySelectorAll('.card')], n = cards.length; if (!n) return;
+    const w = cards[0].offsetWidth || 100, W = (hc.clientWidth || 260) - 28, mid = (n - 1) / 2;
+    const step = n > 1 ? Math.min(w * 0.62, (W - w) / (n - 1)) : 0, off = 14 + Math.max(0, (W - (w + step * (n - 1))) / 2);
+    const rot = n > 1 ? Math.min(4, 22 / (n - 1)) : 0;
+    cards.forEach((c, i) => {
+      c.style.marginRight = '0';
+      c.style.left = Math.round(off + i * step) + 'px';
+      c.style.setProperty('--r', ((i - mid) * rot).toFixed(1) + 'deg');
+      c.style.setProperty('--y', Math.round(Math.abs(i - mid) * 3) + 'px');
+      c.style.zIndex = String(i + 1);
+    });
   }
   /* o2.64 (permintaan pemilik 27 Nov 2026): panel keputusan di kanan papan desktop, di antara BASE lawan (atas) dan BASE sendiri (bawah).
      sideGeometry() = ruang yang tersedia (null bila < 200 px tinggi / < 300 px lebar → perilaku lama); placeSide() menaruh panel di tengah

@@ -735,6 +735,90 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   #game .midzone .abar.side.seff.min{animation:none}
   #game.trayside .midzone{padding-right:var(--sidew,128px)}
 }
+/* ================= o2.66 · LAYOUT ARENA (uji, desktop) — mockup pemilik 27 Nov 2026 =================
+   Kolom kiri: pelat lawan + pelat Anda + HAND kipas · tengah: dua mat (lawan dicerminkan) + bar aksi cepat di garis tengah ·
+   kanan: HAND lawan, kapsul giliran/fase, panel keputusan, Play-by-play, tombol. */
+@media (min-width:821px){
+  #game.arena{--alw:clamp(220px,17vw,320px);--arw:clamp(300px,21vw,400px);
+    --cw: clamp(40px, min(calc((100vh - 210px) / 5.8), calc((100vw - var(--alw) - var(--arw) - 330px) / 5.4)), 120px);
+    --ch: calc(var(--cw) * 1.4); --mini: calc(var(--cw) * .5);
+    background:radial-gradient(ellipse at 50% 50%,#131B26 0%,#0B0F14 70%)}
+  #game.arena .main{grid-template-columns:minmax(0,1fr) var(--arw)}
+  #game.arena .lcol{display:grid;grid-template-columns:var(--alw) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);column-gap:12px;padding:10px 0 10px 12px}
+  #game.arena #teamR{grid-column:1;grid-row:1;align-self:start}
+  #game.arena #board{grid-column:2;grid-row:1 / span 2;padding:0 10px 0 0;gap:0;justify-content:center}
+  #game.arena .handbar{grid-column:1;grid-row:2;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:12px;border:0;background:none;padding-top:12px;min-height:0}
+  #game.arena .handbar .plate{width:auto}
+  #game.arena .plate{border:1px solid #2A3646;border-radius:14px;background:#121A24;padding:12px 14px;flex-wrap:wrap}
+  #game.arena .plate.op{border-color:#4A2A30}
+  #game.arena .plate.me{border:2px solid #2F5FA8}
+  #game.arena #baseRow{display:none}
+  /* HAND kipas */
+  #game.arena .handbar .hand{flex:1;min-height:0;display:block;padding:0;--cw:clamp(64px,calc(var(--alw) * .36),112px)}
+  #game.arena .handbar .hand .zl{display:block;margin:0 0 10px;font-family:var(--disp);font-size:16px;letter-spacing:.08em;color:var(--text)}
+  #game.arena .handbar .handcards{position:relative;display:block;height:calc(var(--cw) * 1.4 + 40px);margin-top:26px}
+  #game.arena .handbar .handcards .card{position:absolute;top:0;transform:translateY(var(--y,0)) rotate(var(--r,0deg));transform-origin:50% 100%;transition:transform .12s;margin:0}
+  #game.arena .handbar .handcards .card:hover,#game.arena .handbar .handcards .card.sel{transform:translateY(-26px) rotate(0deg);z-index:60 !important}
+  /* mat */
+  #game.arena .half{flex:0 1 auto;border-radius:16px;border:2px solid #2A3646;background:linear-gradient(180deg,#151D29 0%,#111821 100%);padding:10px 14px;gap:14px;margin:0}
+  #game.arena .half.side-opp{border-color:#5A2A2E;grid-template-columns:auto minmax(0,1fr) 96px 40px}
+  #game.arena .half.side-me{border-color:#2F5FA8;background:linear-gradient(0deg,#151D29 0%,#111821 100%);grid-template-columns:40px 96px minmax(0,1fr) auto}
+  #game.arena .side-opp .basecol{order:1;align-self:center;padding:0}
+  #game.arena .side-opp .battle{order:2}
+  #game.arena .side-opp .rail{order:3}
+  #game.arena .side-opp .rpstrip{order:4}
+  #game.arena .side-me .rpstrip{order:1}
+  #game.arena .side-me .rail{order:2}
+  #game.arena .side-me .battle{order:3}
+  #game.arena .side-me .basecol{order:4;align-self:center;padding:0}
+  #game.arena .basebox{--bcw:calc(var(--cw) * .8);grid-template-columns:repeat(3,calc(var(--bcw) + 6px))}
+  .rpstrip{display:none}
+  #game.arena .rpstrip{display:flex;flex-direction:column;align-items:center;justify-content:space-between;align-self:stretch;gap:4px;padding:8px 0;border-radius:12px;border:1px solid #2F5FA8;background:#111B2C}
+  #game.arena .side-opp .rpstrip{border-color:#5A2A2E;background:#1E1316;flex-direction:column-reverse}
+  #game.arena .rpstrip b{font-family:var(--disp);font-size:13px;color:#B9D3FF}
+  #game.arena .side-opp .rpstrip b{color:#FFB4B0}
+  #game.arena .rpstrip i{width:18px;height:18px;border-radius:50%;box-sizing:border-box;border:2px solid #2F5FA8}
+  #game.arena .rpstrip i.on{background:#4D8FF0;border-color:#4D8FF0}
+  #game.arena .side-opp .rpstrip i{border-color:#5A2A2E}
+  #game.arena .side-opp .rpstrip i.on{background:#E5484D;border-color:#E5484D}
+  /* garis tengah: hanya bar aksi cepat */
+  #game.arena .midzone{flex:none;padding:8px 0;flex-direction:row;justify-content:center;min-height:40px}
+  #game.arena .midzone .tl,#game.arena .midzone .phstep{display:none}
+  #game.arena .qbar{display:flex;align-items:center;gap:10px;min-width:min(520px,90%);max-width:92%;height:44px;box-sizing:border-box;padding:0 6px 0 16px;border-radius:12px;background:#182232;border:1px solid #3A4656;box-shadow:0 8px 24px rgba(0,0,0,.55);z-index:12}
+  #game.arena .qbar.on{border-color:var(--gold)}
+  #game.arena .qbar .qt{flex:1;font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:.05em;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #game.arena .qbar button{flex:none;height:32px;max-width:260px;padding:0 16px;border-radius:8px;font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #game.arena .qbar button small{display:none}
+  /* kolom kanan */
+  #game.arena .rcol{padding:10px;gap:10px;background:#0E141B;overflow:hidden}
+  #game.arena .aropp{display:flex;align-items:center;gap:12px;flex:none;height:70px}
+  #game.arena .aroppb{position:relative;flex:1;height:64px}
+  #game.arena .aroppb i{position:absolute;top:calc(var(--k) * 0px);left:calc(var(--k) * min(30px, calc((100% - 44px) / max(1, var(--n) - 1))));width:44px;height:62px;border-radius:5px;border:1px solid #3A4656;background:repeating-linear-gradient(135deg,#1B2533 0 6px,#232F40 6px 12px);transform:rotate(calc((var(--k) - (var(--n) - 1) / 2) * 4deg));box-shadow:0 3px 8px rgba(0,0,0,.5)}
+  #game.arena .aroppn{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+  #game.arena .aroppn b{font-family:var(--disp);font-size:26px;line-height:1}
+  #game.arena .aroppn span{font-size:11px;color:var(--muted)}
+  #game.arena .rcol > .pill{flex:none;white-space:normal;flex-wrap:wrap;border-radius:12px;padding:8px 12px;gap:6px 12px;max-width:none}
+  #game.arena .rcol > .phstep{flex:none;display:flex;justify-content:center}
+  #game.arena .abar.arenatray{flex:0 0 auto;height:auto;min-height:0;max-height:52vh;overflow:auto;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:8px;padding:12px;border:1px solid #2A3646;border-radius:12px;background:#121A24;box-shadow:none}
+  #game.arena .abar.arenatray.seff{border:2px solid var(--gold);box-shadow:0 0 22px rgba(242,176,30,.18);background:#1A1F18}
+  #game.arena .abar.arenatray.err{background:#24100c;border-color:#7a2a20}
+  #game.arena .abar.arenatray .hint{width:auto;flex:none;max-height:none;overflow:visible;font-size:12.5px}
+  #game.arena .abar.arenatray .hint .ttl{font-size:19px}
+  #game.arena .abar.arenatray .acts{flex:none;flex-direction:column;flex-wrap:nowrap;overflow:visible;gap:6px;padding:0}
+  #game.arena .abar.arenatray .acts > *{flex:none}
+  #game.arena .abar.arenatray .acts button{width:100%;min-width:0;max-width:none;padding:8px 11px;font-size:12.5px;border-radius:9px}
+  #game.arena .abar.arenatray .acts button small{white-space:normal}
+  #game.arena .abar.arenatray .ordj{display:flex;gap:6px}
+  #game.arena .abar.arenatray .ordj>button:first-child{flex:1 1 auto;width:auto}
+  #game.arena .abar.arenatray .ordj>button.sm{flex:none;width:auto;min-width:56px;text-align:center}
+  #game.arena .abar.arenatray .cpay .cphead > button{width:auto}
+  #game.arena .abar.arenatray .tmin{display:none}
+  #game.arena #sideBody{flex:1 1 auto;min-height:60px}
+  #game.arena .rcol > .phstep{flex-wrap:wrap;gap:2px 4px;font-size:11px}
+  #game.arena #acts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:0;flex:none}
+  #game.arena #acts button{min-width:0;padding:5px 4px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #game.arena #acts button span{display:none}
+}
 @keyframes sidepop{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
 @media (min-width:821px){
   .midzone .tl{display:none}            /* o2.29 (keputusan pemilik 17 Nov 2026): Timeline digabung ke Play-by-play di desktop; HP tetap */
@@ -1299,27 +1383,27 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.62-pb02id" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.55-cb01" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.65"></script>
-<script src="sim-cards.js?v=o2.65"></script>
-<script src="sim-cards-bp01.js?v=o2.65"></script>
-<script src="sim-cards-s4.js?v=o2.65"></script>
-<script src="sim-cards-sp01.js?v=o2.65"></script>
-<script src="sim-cards-t6.js?v=o2.65"></script>
-<script src="sim-cards-bp02.js?v=o2.65"></script>
-<script src="sim-cards-cb01.js?v=o2.65"></script>
-<script src="sim-bot.js?v=o2.65"></script>
-<script src="sim-sound.js?v=o2.65"></script>
-<script src="sim-shadow.js?v=o2.65"></script>
-<script src="sim-ui.js?v=o2.65"></script>
-<script src="sim-sandbox.js?v=o2.65"></script>
-<script src="sim-report.js?v=o2.65"></script>
-<script src="sim-modes.js?v=o2.65"></script>
-<script src="sim-i18n.js?v=o2.65"></script>
-<script src="sim-online.js?v=o2.65"></script>
-<script src="sim-ranked.js?v=o2.65"></script>
-<script src="sim-stats.js?v=o2.65"></script>
-<script src="sim-updates.js?v=o2.65"></script>
-<script src="sim-rules.js?v=o2.65"></script>
-<script src="sim-learn.js?v=o2.65"></script>
+<script src="sim.js?v=o2.66"></script>
+<script src="sim-cards.js?v=o2.66"></script>
+<script src="sim-cards-bp01.js?v=o2.66"></script>
+<script src="sim-cards-s4.js?v=o2.66"></script>
+<script src="sim-cards-sp01.js?v=o2.66"></script>
+<script src="sim-cards-t6.js?v=o2.66"></script>
+<script src="sim-cards-bp02.js?v=o2.66"></script>
+<script src="sim-cards-cb01.js?v=o2.66"></script>
+<script src="sim-bot.js?v=o2.66"></script>
+<script src="sim-sound.js?v=o2.66"></script>
+<script src="sim-shadow.js?v=o2.66"></script>
+<script src="sim-ui.js?v=o2.66"></script>
+<script src="sim-sandbox.js?v=o2.66"></script>
+<script src="sim-report.js?v=o2.66"></script>
+<script src="sim-modes.js?v=o2.66"></script>
+<script src="sim-i18n.js?v=o2.66"></script>
+<script src="sim-online.js?v=o2.66"></script>
+<script src="sim-ranked.js?v=o2.66"></script>
+<script src="sim-stats.js?v=o2.66"></script>
+<script src="sim-updates.js?v=o2.66"></script>
+<script src="sim-rules.js?v=o2.66"></script>
+<script src="sim-learn.js?v=o2.66"></script>
 </body>
 </html>
