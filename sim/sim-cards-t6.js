@@ -622,9 +622,12 @@
       ],
       trig: [{
         id: 'hand', zone: 'HAND', optional: true, label: 'Ace Rescue',
-        text: 'Place this card from your HAND into your FIELD and attach that [GOTG] Character to it?',
+        // o2.63 (RS-083, Head Judge 27 Nov 2026): Milano tetap boleh diletakkan walau Karakter GOTG itu sudah tidak di RETREAT
+        // (mis. di-Prune Drax lawan); bagian "attach that character" lalu tidak terjadi. Log < 0.14.10: syarat lama (harus di RETREAT).
+        text: A => A.zone(ev(A).c) === 'RETREAT' ? 'Place this card from your HAND into your FIELD and attach that [GOTG] Character to it?'
+          : 'That [GOTG] Character is no longer in your RETREAT. Place this card from your HAND into your FIELD anyway (nothing is attached)?',
         when: (e, self, A) => e.ctrl === A.owner(self) && lostOrOpp(A, e) && isGotg(A, e.c),
-        can: A => A.zone(A.self) === 'HAND' && A.zone(ev(A).c) === 'RETREAT' && A.canPlace(A.self, A.p),
+        can: A => A.zone(A.self) === 'HAND' && (A.zone(ev(A).c) === 'RETREAT' || !A.st.lg1410) && A.canPlace(A.self, A.p),
         run: A => {
           const to = A.pick('to', 'Choose where to place The Milano', slotOpts(A, A.spots(A.p)));
           if (to && A.place(A.self, to, 'Ace Rescue') && A.zone(ev(A).c) === 'RETREAT') A.attach(ev(A).c, A.self);
@@ -690,7 +693,9 @@
         id: 'enter', zone: 'BATTLE', optional: true, label: 'Soul-Shattering Assault',
         text: "Prune 1 Character from your opponent's RETREAT: 1 of their Characters in BATTLE gets Power-X (X = the pruned card's Power)?",
         when: enterSelf,
-        can: A => A.ret(A.opp(A.p)).length > 0 && oppBattle(A).length > 0,
+        // o2.63 (RS-083/RS-076, Head Judge 27 Nov 2026): Prune boleh walau lawan belum punya Karakter di BATTLE (bagian Power-X lalu
+        // tidak berpengaruh). Log < 0.14.10: syarat lama.
+        can: A => A.ret(A.opp(A.p)).length > 0 && (oppBattle(A).length > 0 || !A.st.lg1410),
         run: A => {
           const pr = A.ask('pr', { text: "Choose 1 Character in your opponent's RETREAT to Prune", from: A.ret(A.opp(A.p)), prefer: 'high' });
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters in BATTLE (Power- the pruned card's Power)", from: oppBattle(A), prefer: 'high' });

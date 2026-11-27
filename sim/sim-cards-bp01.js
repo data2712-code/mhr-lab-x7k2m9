@@ -447,7 +447,8 @@
         can: A => new Set(A.ret(A.p).filter(i => isMachine(A, i)).map(i => A.name(i))).size >= 3 && A.canPlace(A.self, A.p),
         run: A => {
           const pool = A.ret(A.p).filter(i => isMachine(A, i));
-          const c = A.ask('c', { text: 'Choose 3 [Machine] Characters with different names in your RETREAT to Prune', from: pool, min: 3, max: 3, prefer: 'low' });
+          // o2.61 (laporan #90/#92): pilihan wajib bernama berbeda (distinct) — layar memblokir nama yang sama, mesin menolak.
+          const c = A.ask('c', { text: 'Choose 3 [Machine] Characters with different names in your RETREAT to Prune', from: pool, min: 3, max: 3, prefer: 'low', distinct: 'name' });
           const to = A.pick('to', 'Choose where to place 「Death And Rebirth」Ultron', slotOpts(A, A.spots(A.p)));
           if (new Set(c.map(i => A.name(i))).size < 3) { A.log('Death And Rebirth: the 3 Characters must have different names; nothing happens.'); return; }
           c.forEach(i => A.prune(i, 'Death And Rebirth'));

@@ -16,6 +16,36 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-27', t: 'rules', v: 'o2.63',
+      en: { h: 'Head Judge ruling: Drax and The Milano (RS-083)', b: [
+        'Both 「Soul-Shattering Assault」Drax lose (BOTH LOSE) and both players\' 「Ace Rescue」The Milano trigger: the turn player\'s Milano resolves first, and their Drax (attached to it) triggers and resolves right away, before the other Milano (RS-016).',
+        '「Soul-Shattering Assault」Drax may now prune a Character from your opponent\'s RETREAT even when they have no Character in BATTLE; the Power-X part then does nothing.',
+        '「Ace Rescue」The Milano may still be placed when its [GOTG] Character has already left your RETREAT (for example pruned by the opponent\'s Drax); nothing is attached then.',
+        'The short-lived o2.62 order (both Milano first, then both Drax) was withdrawn after the Head Judge reconfirmed the rule.'
+      ] },
+      id: { h: 'Ruling Head Judge: Drax dan The Milano (RS-083)', b: [
+        'Kedua 「Soul-Shattering Assault」Drax kalah (BOTH LOSE) dan 「Ace Rescue」The Milano kedua pemain terpicu: Milano milik pemain giliran diselesaikan dulu, lalu Drax-nya (terpasang di Milano) langsung terpicu dan diselesaikan, sebelum Milano lawan (RS-016).',
+        '「Soul-Shattering Assault」Drax kini boleh mem-Prune Karakter di RETREAT lawan walau lawan tidak punya Karakter di BATTLE; bagian Power-X lalu tidak berpengaruh.',
+        '「Ace Rescue」The Milano tetap boleh diletakkan walau Karakter [GOTG]-nya sudah tidak di RETREAT (mis. di-Prune Drax lawan); tidak ada yang dipasang.',
+        'Urutan sementara o2.62 (kedua Milano dulu, lalu kedua Drax) dicabut setelah Head Judge menegaskan ulang aturannya.'
+      ] }
+    },
+    {
+      d: '2026-11-27', t: 'improve', v: 'o2.61', reports: [89, 90, 91, 92],
+      en: { h: 'Skip all optional effects at once, Death And Rebirth choices, clearer Red Goblin', b: [
+        'When several optional effects trigger together (for example 「Sense of Multiverse」Silk for every [Web] Character that 「Reversal of Multiverse」Spider-Punk prunes), the effect list now has Skip all optional at the top. The "Use this effect?" question also has No to all when the same effect is waiting several times.',
+        '「Death And Rebirth」Ultron: you can no longer pick two cards with the same name (for example two 「The Drone Surge」Ultron) for the 3 [Machine] Characters to prune. Before, that choice was accepted and the effect did nothing.',
+        '「Spider-Archenemy」Red Goblin: as the rules allow, you may still prune without a target (RS-076), but the question now names the cards that give a target, or warns that none does. You can still Cancel effect.',
+        'Effect list on phones and laptops: the Skip button sits beside its effect instead of taking half of the panel.'
+      ] },
+      id: { h: 'Lewati semua efek opsional sekaligus, pilihan Death And Rebirth, Red Goblin lebih jelas', b: [
+        'Saat beberapa efek opsional terpicu bersamaan (mis. 「Sense of Multiverse」Silk untuk tiap Karakter [Web] yang di-Prune 「Reversal of Multiverse」Spider-Punk), daftar efek kini punya tombol Lewati semua yang opsional di atas. Pertanyaan "Pakai efek ini?" juga punya Tidak untuk semua bila efek yang sama menunggu beberapa kali.',
+        '「Death And Rebirth」Ultron: kini tidak bisa memilih dua kartu bernama sama (mis. dua 「The Drone Surge」Ultron) untuk 3 Karakter [Machine] yang di-Prune. Dulu pilihan itu diterima lalu efeknya tidak terjadi.',
+        '「Spider-Archenemy」Red Goblin: sesuai aturan tetap boleh Prune walau tidak ada target (RS-076), tapi pertanyaannya kini menyebut kartu yang memberi target, atau memperingatkan bila tidak ada. Batalkan efek tetap tersedia.',
+        'Daftar efek di HP dan laptop: tombol Skip kecil di samping efeknya, tidak lagi memakan separuh panel.'
+      ] }
+    },
+    {
       d: '2026-11-26', t: 'improve', v: 'o2.60', reports: [80, 83],
       en: { h: 'Rearranging is not a move · cancel an effect without asking · effect questions in the centre', b: [
         'Rule fix: rearranging your BATTLE at the start of the Battle Phase is not movement (Comprehensive Rules 303.2.a.4.2.1.1). A Character that "cannot move" (for example 「Bewildering Dance」Star-Lord) can now be rearranged. It still cannot take BATTLE MOVE or BATTLE-BASE MOVE.',

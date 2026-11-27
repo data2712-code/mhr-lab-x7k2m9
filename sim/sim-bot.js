@@ -24,12 +24,14 @@
     };
   }
   const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
+  // o2.61: prompt distinct:'name' (BP01-040) — kandidat hanya satu kartu per nama, supaya pilihan bot tidak ditolak mesin.
+  const fromOf = (st, pr) => { if (pr.distinct !== 'name' || st.lg148) return pr.from; const seen = new Set(); return pr.from.filter(i => { const n = S.nameOf(st, i); if (seen.has(n)) return false; seen.add(n); return true; }); };
 
   function chooseRandom(st, rng) {
     const pr = st.prompt;
     if (pr.type === 'discard') return discardLowest(st, pr);
     if (pr.type === 'choose') {
-      const n = pr.min + Math.floor(rng() * (pr.max - pr.min + 1)), from = pr.from.slice();
+      const from = fromOf(st, pr).slice(), n = Math.min(from.length, pr.min + Math.floor(rng() * (pr.max - pr.min + 1)));
       for (let i = from.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); const x = from[i]; from[i] = from[j]; from[j] = x; }
       return { t: 'choose', cards: from.slice(0, n) };
     }
@@ -123,7 +125,7 @@
       case 'yesno': return { t: 'yesno', yes: true };
       case 'order': return { t: 'order', job: pr.jobs[0].id };
       case 'choose': {
-        const from = pr.from.slice();
+        const from = fromOf(st, pr).slice();
         if (pr.prefer === 'high') from.sort((a, b) => value(st, b) - value(st, a)); else from.sort((a, b) => value(st, a) - value(st, b));
         return { t: 'choose', cards: from.slice(0, pr.max) };
       }
@@ -226,9 +228,9 @@
   function chooseCands(st, rng) {
     const pr = st.prompt, out = [], seen = new Set();
     const add = cards => { const k = cards.slice().sort().join(','); if (!seen.has(k) && cards.length >= pr.min && cards.length <= pr.max) { seen.add(k); out.push({ t: 'choose', cards }); } };
-    const hi = pr.from.slice().sort((a, b) => value(st, b) - value(st, a));
+    const F = fromOf(st, pr), hi = F.slice().sort((a, b) => value(st, b) - value(st, a));
     add(hi.slice(0, pr.max)); add(hi.slice().reverse().slice(0, pr.max)); if (pr.min < pr.max) add(hi.slice(0, pr.min));
-    for (let k = 0; k < 10 && out.length < 8; k++) { const n = pr.min + Math.floor(rng() * (pr.max - pr.min + 1)); add(shuffleArr(rng, pr.from.slice()).slice(0, n)); }
+    for (let k = 0; k < 10 && out.length < 8; k++) { const n = pr.min + Math.floor(rng() * (pr.max - pr.min + 1)); add(shuffleArr(rng, F.slice()).slice(0, n)); }
     return out;
   }
   function arrangeCands(st, rng) {

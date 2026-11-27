@@ -774,6 +774,10 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   .midzone .abar.dock.eff .hint{max-height:9em;font-size:12.5px}
   .midzone .abar.dock.eff .hint .ttl{font-size:18px}
   .midzone .abar.dock.eff .acts button{padding:8px 11px;font-size:13px}
+  /* o2.61: urutan efek — tombol Skip kecil di samping efeknya (dulu ikut 100% lebar sehingga separuh panel) */
+  .midzone .abar.dock .ordj{display:flex;gap:6px}
+  .midzone .abar.dock .ordj>button:first-child{flex:1 1 auto;width:auto}
+  .midzone .abar.dock .ordj>button.sm{flex:none;width:auto;min-width:56px;text-align:center}
   .midzone .abar.dock.eff.min{top:8px;transform:translateX(-50%);box-shadow:0 6px 18px rgba(0,0,0,.6);animation:none}
   .modal{max-height:calc(100vh - 16px);padding:12px 16px}
   #ov{padding:8px}
@@ -879,6 +883,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   .abar.sheet .acts{flex-wrap:wrap;overflow:visible}
   .abar.sheet .acts button{flex:1 1 140px;min-width:0;max-width:none;min-height:48px;font-size:12.5px;padding:8px 10px}
   .abar.sheet .acts .cpay button{flex:0 0 auto;min-height:0;padding:6px 8px}
+  .abar.sheet .acts .ordj{flex:1 1 100%;display:flex;gap:6px}.abar.sheet .acts .ordj>button:first-child{flex:1 1 auto}.abar.sheet .acts .ordj>button.sm{flex:0 0 auto;min-width:64px}   /* o2.61: Skip kecil di samping efeknya */
   .abar.sheet .cpay .cpcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible}
   .abar.sheet .acts .cpay .cpchip{width:auto;flex:none;padding:5px 6px;flex-direction:column;align-items:flex-start;gap:1px;border-radius:9px}
   .abar.sheet .cpay .cpchip .nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -1014,6 +1019,7 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   .abar.sheet.cpanel .hint > span:last-child{-webkit-line-clamp:4}
   .abar.sheet.cpanel .acts{flex-direction:column;flex-wrap:nowrap}
   .abar.sheet.cpanel .acts button{flex:none;width:100%;min-height:46px}
+  .abar.sheet.cpanel .acts .ordj{display:flex;gap:6px}.abar.sheet.cpanel .acts .ordj>button:first-child{flex:1 1 auto;width:auto}.abar.sheet.cpanel .acts .ordj>button.sm{width:auto;min-width:64px}   /* o2.61 */
   .abar.sheet.cpanel .peek{align-self:center;order:9;margin-top:2px}
   .abar.sheet.cpanel.peeked{top:auto;bottom:calc(var(--hcw) * 1.4 + 26px + 52px + var(--brh) + 8px);transform:none;left:auto;right:56px;padding:4px;border-radius:999px}
   .abar.sheet.cpanel.peeked .peek{min-height:40px;padding:4px 16px}
@@ -1269,27 +1275,27 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.62-pb02id" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.55-cb01" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.60"></script>
-<script src="sim-cards.js?v=o2.60"></script>
-<script src="sim-cards-bp01.js?v=o2.60"></script>
-<script src="sim-cards-s4.js?v=o2.60"></script>
-<script src="sim-cards-sp01.js?v=o2.60"></script>
-<script src="sim-cards-t6.js?v=o2.60"></script>
-<script src="sim-cards-bp02.js?v=o2.60"></script>
-<script src="sim-cards-cb01.js?v=o2.60"></script>
-<script src="sim-bot.js?v=o2.60"></script>
-<script src="sim-sound.js?v=o2.60"></script>
-<script src="sim-shadow.js?v=o2.60"></script>
-<script src="sim-ui.js?v=o2.60"></script>
-<script src="sim-sandbox.js?v=o2.60"></script>
-<script src="sim-report.js?v=o2.60"></script>
-<script src="sim-modes.js?v=o2.60"></script>
-<script src="sim-i18n.js?v=o2.60"></script>
-<script src="sim-online.js?v=o2.60"></script>
-<script src="sim-ranked.js?v=o2.60"></script>
-<script src="sim-stats.js?v=o2.60"></script>
-<script src="sim-updates.js?v=o2.60"></script>
-<script src="sim-rules.js?v=o2.60"></script>
-<script src="sim-learn.js?v=o2.60"></script>
+<script src="sim.js?v=o2.63"></script>
+<script src="sim-cards.js?v=o2.63"></script>
+<script src="sim-cards-bp01.js?v=o2.63"></script>
+<script src="sim-cards-s4.js?v=o2.63"></script>
+<script src="sim-cards-sp01.js?v=o2.63"></script>
+<script src="sim-cards-t6.js?v=o2.63"></script>
+<script src="sim-cards-bp02.js?v=o2.63"></script>
+<script src="sim-cards-cb01.js?v=o2.63"></script>
+<script src="sim-bot.js?v=o2.63"></script>
+<script src="sim-sound.js?v=o2.63"></script>
+<script src="sim-shadow.js?v=o2.63"></script>
+<script src="sim-ui.js?v=o2.63"></script>
+<script src="sim-sandbox.js?v=o2.63"></script>
+<script src="sim-report.js?v=o2.63"></script>
+<script src="sim-modes.js?v=o2.63"></script>
+<script src="sim-i18n.js?v=o2.63"></script>
+<script src="sim-online.js?v=o2.63"></script>
+<script src="sim-ranked.js?v=o2.63"></script>
+<script src="sim-stats.js?v=o2.63"></script>
+<script src="sim-updates.js?v=o2.63"></script>
+<script src="sim-rules.js?v=o2.63"></script>
+<script src="sim-learn.js?v=o2.63"></script>
 </body>
 </html>

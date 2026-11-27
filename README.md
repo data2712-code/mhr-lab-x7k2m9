@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.65** · 26 November 2026
+**Versi saat ini: v7.68** · 27 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -603,6 +603,24 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.68 — Ruling Head Judge Drax × Milano (F-28) + Battle Sim o2.63 — 27 November 2026 *(`rules-faq.js`, `faq/F-28*.html`, `sim/`, `sim-host.js`, `sim-meta.js`, `index.html`; server Battle Sim)*
+
+- Head Judge menegaskan ulang: trigger turunan tetap diselesaikan tepat setelah efeknya (RS-016). Pengecualian v7.67 dihapus; F-28 EN/ID
+  kini memakai contoh Drax × Drax BOTH LOSE + Milano dari Head Judge (Drax A mem-Prune Drax B; Milano B turun tanpa lampiran).
+- Battle Sim o2.63 (mesin 0.14.10, RS-083). Detail: mhr-simulator riwayat #147. **Server Battle Sim perlu di-deploy.**
+
+### v7.67 — Aturan urutan trigger turunan (F-28) + Battle Sim o2.62 — 27 November 2026 *(`rules-faq.js`, `faq/F-28*.html`, `sim/`, `sim-host.js`, `sim-meta.js`, `index.html`; server Battle Sim)*
+
+- Keputusan pemilik: trigger turunan tidak mendahului efek pemain lain yang masih menunggu (contoh Drax × Drax BOTH LOSE + Milano kedua
+  pemain: Milano A → Milano B → Drax A → Drax B). FAQ F-28 EN/ID ditambah pengecualian & contoh.
+- Battle Sim o2.62 (mesin 0.14.9, RS-082). Detail: mhr-simulator riwayat #146. **Server Battle Sim perlu di-deploy.**
+
+### v7.66 — Battle Sim o2.61 — 27 November 2026 *(`sim/`, `sim-host.js`, `sim-meta.js`, `index.html`; server Battle Sim)*
+
+- Laporan #89: tombol "Skip all optional" dan "No to all" untuk banyak efek opsional sekaligus (Silk × Spider-Punk).
+- Laporan #90/#92: Death And Rebirth Ultron tidak bisa lagi memilih kartu bernama sama. Laporan #91: teks Red Goblin menyebut ada/tidaknya target.
+- Mesin 0.14.8. Detail: mhr-simulator riwayat #145. **Server Battle Sim perlu di-deploy.**
 
 ### v7.65 — Battle Sim o2.60 — 26 November 2026 *(`sim/`, `sim-host.js`, `sim-meta.js`, `index.html`; server Battle Sim)*
 

@@ -29,7 +29,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = '0.14.7';   // o2.60: rearrange bukan movement (laporan #80, CR 303.2.a.4.2.1.1); batal efek tanpa izin lawan (#83, job.ai/job.peek)   // o2.59: aura kemampuan dari kartu TERPASANG ikut berlaku (laporan #82, PB02-005 Nebula di Groot) · o2.56: efek AUTO tidak "mulai berlaku lagi" saat Karakter hanya pindah area BATTLE (laporan #74, RS-079) · o2.47: penyerang/target yang keluar FIELD lalu kembali = kartu baru, serangannya berakhir (laporan #52), BP01-032 Both Lose dengan BATTLE penuh (#53), SD06-011 tanpa target lawan (#51), BP01-067 bisa batal/tetap (#54) · o2.45: BP01-022 UNIQUE/[COUNTER] = AUTO (laporan #49), PB02-008 nama lengkap (#43), SP01-034 tanpa syarat terpasang (#44/#45), SP01-050 kebal Lv1 juga saat sendiri (#40), BP01-067 + AIR STRIKE (#41) · o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
+  const VERSION = '0.14.10';   // o2.63: RS-082 dicabut (Head Judge: RS-016 tetap); Drax PB02-009 boleh Prune tanpa target BATTLE, Milano PB02-003 boleh turun walau Karakter GOTG sudah tidak di RETREAT (RS-083) · o2.62: RS-082 (dicabut) · o2.61: pilihan "nama berbeda" ditegakkan saat memilih (laporan #90/#92, BP01-040), Skip semua efek opsional (#89) · o2.60: rearrange bukan movement (laporan #80, CR 303.2.a.4.2.1.1); batal efek tanpa izin lawan (#83, job.ai/job.peek)   // o2.59: aura kemampuan dari kartu TERPASANG ikut berlaku (laporan #82, PB02-005 Nebula di Groot) · o2.56: efek AUTO tidak "mulai berlaku lagi" saat Karakter hanya pindah area BATTLE (laporan #74, RS-079) · o2.47: penyerang/target yang keluar FIELD lalu kembali = kartu baru, serangannya berakhir (laporan #52), BP01-032 Both Lose dengan BATTLE penuh (#53), SD06-011 tanpa target lawan (#51), BP01-067 bisa batal/tetap (#54) · o2.45: BP01-022 UNIQUE/[COUNTER] = AUTO (laporan #49), PB02-008 nama lengkap (#43), SP01-034 tanpa syarat terpasang (#44/#45), SP01-050 kebal Lv1 juga saat sendiri (#40), BP01-067 + AIR STRIKE (#41) · o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
   const SLOTS = ['F', 'W1', 'W2', 'B'];
   const SLOT_NAME = { F: 'FRONT', W1: 'WING 1', W2: 'WING 2', B: 'BACK', BASE: 'BASE' };
   // Posisi pada garis serangan (303.2.a.4.3.1.1): BACK sendiri = 0, WING = 1,
@@ -1188,7 +1188,7 @@
         if (job.mut) throw new Error('ask() setelah perubahan status: ' + job.eff);
         // o2.27: `show` = semua kartu yang diperlihatkan efek (mis. 3 kartu teratas Deck), termasuk yang tidak bisa dipilih;
         // `why` = keterangan untuk kartu yang tidak bisa dipilih. Hanya untuk tampilan, tidak mengubah jawaban/log aksi.
-        throw new Ask(Object.assign({ key, text: spec.text, from, min, max, p: spec.p == null ? job.p : spec.p, prefer: spec.prefer || 'low', reveal: !!spec.reveal, forced: from.length === min && min === max },
+        throw new Ask(Object.assign({ key, text: spec.text, from, min, max, p: spec.p == null ? job.p : spec.p, prefer: spec.prefer || 'low', reveal: !!spec.reveal, forced: from.length === min && min === max }, spec.distinct ? { distinct: spec.distinct } : {},
           spec.show ? { show: spec.show.slice(), why: spec.why || '' } : {}));
       },
       yes(key, text) {
@@ -1756,7 +1756,7 @@
       if (st.result) return false;
       if (st.job) {
         const job = st.job;
-        if (job.stage === 'opt') { const jd = jobDef(st, job) || {}; let tx = jd.text; if (typeof tx === 'function') { try { tx = tx(api(st, job, job.c)); } catch (x) { tx = null; } } st.prompt = { type: 'opt', p: job.p, job: job.id, label: jobLabel(st, job, true), text: tx || 'Use this effect?', hand: jd.zone === 'HAND' }; const w = previewWarn(st); if (w) st.prompt.warn = w; return true; }
+        if (job.stage === 'opt') { const jd = jobDef(st, job) || {}; let tx = jd.text; if (typeof tx === 'function') { try { tx = tx(api(st, job, job.c)); } catch (x) { tx = null; } } st.prompt = { type: 'opt', p: job.p, job: job.id, label: jobLabel(st, job, true), text: tx || 'Use this effect?', hand: jd.zone === 'HAND' }; { const sm = st.pend.filter(j => j.c === job.c && j.eff === job.eff && j.p === job.p && j.opt).length; if (sm) st.prompt.same = sm; } const w = previewWarn(st); if (w) st.prompt.warn = w; return true; }
         if (!runJob(st, job)) return true;
         continue;
       }
@@ -1764,7 +1764,15 @@
       if (!st.pend.length) { st.tev = []; return false; }
       // RS-016 (304.1.h, keputusan pemilik 30 Okt 2026): kelompok trigger TERBARU diselesaikan dulu,
       // sebelum efek yang sudah menunggu; di dalam satu kelompok turn player dulu (304.1.g).
-      const maxB = Math.max.apply(null, st.pend.map(j => j.b || 0));
+      let maxB = Math.max.apply(null, st.pend.map(j => j.b || 0));
+      // RS-082 (o2.62) DICABUT di o2.63: Head Judge (27 Nov 2026) menegaskan RS-016 tetap — Drax A diselesaikan tepat setelah
+      // Milano A, sebelum Milano B. Urutan RS-082 hanya dipakai untuk memutar ulang log mesin 0.14.9 (st.rs082).
+      if (st.rs082) for (let it = 0; it < 8; it++) {
+        const qs = new Set(st.pend.filter(j => (j.b || 0) === maxB).map(j => j.p));
+        const wait = st.pend.filter(j => (j.b || 0) < maxB && !qs.has(j.p));
+        if (!wait.length) break;
+        maxB = Math.max.apply(null, wait.map(j => j.b || 0));
+      }
       const batch = st.pend.filter(j => (j.b || 0) === maxB);
       const mine = batch.filter(j => j.p === st.tp), theirs = batch.filter(j => j.p !== st.tp);
       const group = mine.length ? mine : theirs;                     // turn player dulu (304.1.g)
@@ -2010,10 +2018,18 @@
         return null;
       }
       case 'opt':
+        if (a.t === 'opt' && a.all && a.yes) return '"No to all" can only decline.';
         return a.t === 'opt' ? null : 'Decide whether to use this effect.';
       case 'yesno':
         return a.t === 'yesno' ? null : 'Answer the effect question.';
       case 'order':
+        // o2.61 (laporan #89): { t:'skip', jobs } = tidak memakai beberapa efek OPSIONAL sekaligus (tanpa klik satu per satu).
+        if (a.t === 'skip') {
+          const js = Array.isArray(a.jobs) ? a.jobs : [];
+          if (!js.length || new Set(js).size !== js.length) return 'Choose the optional effects to skip.';
+          if (!js.every(id => pr.jobs.some(j => j.id === id) && st.pend.some(j => j.id === id && j.opt && j.p === pr.p))) return 'Only optional effects in this list can be skipped.';
+          return null;
+        }
         return a.t === 'order' && pr.jobs.some(j => j.id === a.job) ? null : 'Choose which effect resolves next (304.1.f).';
       case 'choose': {
         if (a.t !== 'choose') return 'Choose cards for the effect.';
@@ -2021,6 +2037,7 @@
         if (new Set(cs).size !== cs.length) return 'A card was selected twice.';
         if (cs.length < pr.min || cs.length > pr.max) return 'Choose ' + (pr.min === pr.max ? pr.min : pr.min + '–' + pr.max) + ' card(s).';
         if (!cs.every(i => pr.from.includes(i))) return 'That card is not a valid choice.';
+        if (pr.distinct === 'name' && !st.lg148 && new Set(cs.map(i => nameOf(st, i))).size !== cs.length) return 'Choose cards with different names.';
         return null;
       }
     }
@@ -2297,6 +2314,11 @@
       case 'yesno': return [{ t: 'yesno', yes: true }, { t: 'yesno', yes: false }];
       case 'order': return pr.jobs.map(j => ({ t: 'order', job: j.id }));
       case 'choose': {
+        if (pr.distinct === 'name' && !st.lg148) {     // o2.61: hanya kombinasi bernama berbeda (satu wakil per nama)
+          const seen = new Set(), reps = pr.from.filter(i => { const n = nameOf(st, i); if (seen.has(n)) return false; seen.add(n); return true; });
+          for (let k = pr.min; k <= pr.max && out.length < lim; k++) combos(reps, k, lim - out.length).forEach(cs => out.push({ t: 'choose', cards: cs }));
+          if (out.length) return out;
+        }
         for (let k = pr.min; k <= pr.max && out.length < lim; k++) combos(pr.from, k, lim - out.length).forEach(cs => out.push({ t: 'choose', cards: cs }));
         return out;
       }
@@ -2512,6 +2534,11 @@
           // RS-002 (R-075): menolak efek opsional tidak menghabiskan jatah ONCE PER TURN.
           const hd = (jobDef(st, job) || {}).zone === 'HAND';
           log(st, 'eff', plabel(st, p) + ' does not use ' + jobLabel(st, job) + '.', hd ? { priv: p } : null);
+          // o2.61 (laporan #89): "No to all" — efek opsional yang sama (kartu & efek sama) yang masih menunggu juga tidak dipakai.
+          if (a.all) {
+            const same = st.pend.filter(j => j.c === job.c && j.eff === job.eff && j.p === p && j.opt);
+            if (same.length) { st.pend = st.pend.filter(j => !same.includes(j)); log(st, 'eff', plabel(st, p) + ' does not use the other ' + same.length + ' ' + jobLabel(st, job) + ' (No to all).', hd ? { priv: p } : null); }
+          }
           st.job = null;
         }
         break;
@@ -2523,6 +2550,12 @@
         break;
       }
       case 'order': {
+        if (a.t === 'skip') {
+          const drop = st.pend.filter(j => a.jobs.includes(j.id));
+          st.pend = st.pend.filter(j => !drop.includes(j));
+          drop.forEach(j => { const hd = (jobDef(st, j) || {}).zone === 'HAND'; log(st, 'eff', plabel(st, p) + ' does not use ' + jobLabel(st, j) + ' (skipped).', hd ? { priv: p } : null); });
+          break;
+        }
         const j = st.pend.find(x => x.id === a.job);
         // RS-016: memilih anggota kelompok baru = kelompok dimulai (trigger lama menunggu sampai kelompok selesai).
         st.grpSel = { b: pr.b, p: pr.p, started: !!(j && (j.b || 0) === pr.b) };
@@ -2633,7 +2666,10 @@
     if (o.e && verLt(o.e, '0.14.2')) { st.engine = o.e; st.lg066 = true; }
     if (o.e && verLt(o.e, '0.14.4')) { st.engine = o.e; st.lg144 = true; }
     if (o.e && verLt(o.e, '0.14.5')) { st.engine = o.e; st.lg145 = true; }
-    if (o.e && verLt(o.e, '0.14.6')) { st.engine = o.e; st.lg146 = true; }        // o2.59: aura dari kartu terpasang (laporan #82)        // o2.56: cap waktu AUTO lama (RS-079) untuk log lama        // o2.47: aturan lama #51–#54 untuk log lama        // o2.44: BP01-066 dulu menaruh ke FIELD pemilik kartu
+    if (o.e && verLt(o.e, '0.14.6')) { st.engine = o.e; st.lg146 = true; }
+    if (o.e && verLt(o.e, '0.14.8')) { st.engine = o.e; st.lg148 = true; }
+    if (o.e && o.e === '0.14.9') { st.engine = o.e; st.rs082 = true; }           // o2.62: RS-082 (dicabut o2.63) hanya untuk log 0.14.9
+    if (o.e && verLt(o.e, '0.14.10')) { st.engine = o.e; st.lg1410 = true; }      // o2.63: Drax tanpa target BATTLE, Milano tanpa lampiran        // o2.62: RS-082 urutan trigger turunan        // o2.61: pilihan distinct:'name' belum ditegakkan        // o2.59: aura dari kartu terpasang (laporan #82)        // o2.56: cap waktu AUTO lama (RS-079) untuk log lama        // o2.47: aturan lama #51–#54 untuk log lama        // o2.44: BP01-066 dulu menaruh ke FIELD pemilik kartu
     const acts = o.a || [], lim = n == null ? acts.length : Math.min(n, acts.length);
     for (let i = 0; i < lim; i++) {
       const r = apply(st, acts[i]);

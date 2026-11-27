@@ -782,6 +782,18 @@
     '「Swarming Assault」Chitauri Infantry: kartu teratas Deck tetap boleh dibuang walau lawan tidak punya Karakter di BATTLE; bagian Power-1000 lalu tidak berpengaruh (sama seperti RS-022).'
   ]);
 
+  r('RS-083', 'trig', 'hj', ['PB02-003', 'PB02-009'], [
+    'Drax × Drax BOTH LOSE with both players\' The Milano',
+    'RS-016 applies: A\'s 「Ace Rescue」The Milano resolves first and A\'s 「Soul-Shattering Assault」Drax (attached to it, so it enters the field) resolves right away, before B\'s Milano.',
+    'Drax A may prune B\'s Drax from RETREAT even if B has no Character in BATTLE yet; the Power-X part then does nothing (RS-076).',
+    'B\'s Milano may still be placed (optional), but nothing is attached because Drax B is already in VOID.'
+  ], [
+    'Drax × Drax BOTH LOSE dengan The Milano kedua pemain',
+    'RS-016 berlaku: 「Ace Rescue」The Milano milik A diselesaikan dulu dan 「Soul-Shattering Assault」Drax milik A (terpasang padanya, jadi masuk ke FIELD) langsung diselesaikan, sebelum Milano milik B.',
+    'Drax A boleh mem-Prune Drax B dari RETREAT walau B belum punya Karakter di BATTLE; bagian Power-X lalu tidak berpengaruh (RS-076).',
+    'Milano B tetap boleh diletakkan (opsional), tetapi tidak ada yang dipasang karena Drax B sudah di VOID.'
+  ]);
+
   /* ===================== tampilan ===================== */
   const S = () => window.MHRSim;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);

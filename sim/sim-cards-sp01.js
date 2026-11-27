@@ -176,7 +176,12 @@
         run: A => {
           // o2.59 (laporan #84): teks pilihan menyebut Lv lawan di BATTLE, supaya jelas X mana yang punya target.
           const lvs = oppBattle(A).map(i => A.lv(i)).sort((a, b) => a - b);
-          const o = A.ask('o', { text: 'Choose 1 other Character or attached card on your field to Prune. X = ' + A.lv(A.self) + ' + its Lv; opponent Characters in BATTLE have Lv ' + (lvs.length ? lvs.join(', ') : '— (none)') + '.', from: fieldAll(A, A.p).filter(i => i !== A.self), prefer: 'low' });
+          // o2.61 (laporan #91): sesuai RS-076 Red Goblin tetap boleh Prune walau tidak ada target, tapi pertanyaannya kini menyebut
+          // kartu mana yang memberi target — atau memperingatkan bahwa tidak ada pilihan yang memberi target.
+          const cand = fieldAll(A, A.p).filter(i => i !== A.self), good = cand.filter(i => oppBattle(A).some(t => A.lv(t) === A.lv(A.self) + A.lv(i)));
+          const gNames = [...new Set(good.map(i => A.name(i) + ' (Lv' + A.lv(i) + ')'))];
+          const o = A.ask('o', { text: 'Choose 1 other Character or attached card on your field to Prune. X = ' + A.lv(A.self) + ' + its Lv; opponent Characters in BATTLE have Lv ' + (lvs.length ? lvs.join(', ') : '— (none)') + '. ' +
+            (gNames.length ? 'Gives a target: ' + gNames.join(', ') + '.' : '⚠ None of these gives a target: Red Goblin and the chosen card would be pruned for nothing (you can still Cancel effect).'), from: cand, prefer: 'low' });
           const X = A.lv(A.self) + A.lv(o[0]);
           const t = A.ask('t', { text: "Choose 1 of your opponent's Characters with Lv" + X + ' in BATTLE to Prune', from: oppBattle(A).filter(i => A.lv(i) === X), prefer: 'high' });
           // Kalau kartu lain itu induk Red Goblin (Red Goblin terpasang), Red Goblin di-prune dulu supaya tidak ikut ke VOID.

@@ -1265,11 +1265,15 @@
       case 'counter': return callModeActs() || counterActs(pr);
       case 'opt': case 'yesno':
         return (pr.warn ? '<div class="pwarn optwarn">⚠ ' + esc(pr.warn) + '</div>' : '') +     // o2.40 (laporan #33): akibat efek, tidak terpotong
-          '<button class="pri" data-act="yes">Yes</button><button data-act="no">No</button>' + (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
+          '<button class="pri" data-act="yes">Yes</button><button data-act="no">No</button>' +
+          (pr.type === 'opt' && pr.same ? '<button class="warn" data-act="noAll" title="Also decline the other ' + pr.same + ' identical effect(s) waiting">No to all (' + (pr.same + 1) + ')</button>' : '') +   // o2.61 (laporan #89)
+          (canCancelEff() ? '<button class="warn" data-act="cancelEff">Cancel effect</button>' : '');
       case 'order':
         // o2.44 (laporan #37): efek opsional punya tombol "Skip" (= pilih efeknya lalu jawab No otomatis); efek yang saat ini
         // tidak punya target/syarat ditandai.
-        return pr.jobs.map(j => '<span class="ordj"><button data-act="order" data-job="' + j.id + '"' + (j.older ? ' title="Triggered earlier and still waiting (RS-016)"' : '') + '>' + esc(j.label) + (j.older ? ' (earlier)' : '') +
+        // o2.61 (laporan #89): banyak efek opsional sekaligus (mis. Silk tiap kali Karakter [Web] masuk VOID) → satu tombol di ATAS daftar
+        return (pr.jobs.filter(j => j.opt).length >= 2 ? '<button class="warn" data-act="skipAll" title="Do not use any of the optional effects in this list">Skip all optional (' + pr.jobs.filter(j => j.opt).length + ')</button>' : '') +
+          pr.jobs.map(j => '<span class="ordj"><button data-act="order" data-job="' + j.id + '"' + (j.older ? ' title="Triggered earlier and still waiting (RS-016)"' : '') + '>' + esc(j.label) + (j.older ? ' (earlier)' : '') +
           (j.from ? '<small class="ordfrom">from ' + esc(j.from) + '</small>' : '') +   // o2.47: asal efek (mis. HAND, WING 1)
           (j.dead ? '<small>No valid target now: it will be skipped</small>' : '') + '</button>' +
           (j.opt && !j.dead ? '<button class="sm warn" data-act="orderSkip" data-job="' + j.id + '" title="Do not use this effect">Skip</button>' : '') + '</span>').join('');
@@ -1689,6 +1693,7 @@
       const i = t.dataset.pick, pr = G.prompt;
       ui.pickTouched = true;
       if (ui.pick.includes(i)) ui.pick = ui.pick.filter(x => x !== i);
+      else if (pickSameName(pr, i)) { tip('Choose cards with different names.'); return; }
       else if (ui.pick.length < pr.max) ui.pick = ui.pick.concat(i);
       else if (pr.max === 1) ui.pick = [i];
       render(); return;
@@ -1770,6 +1775,8 @@
       case 'yes': act({ t: G.prompt.type === 'opt' ? 'opt' : 'yesno', yes: true }); return;
       case 'no': act({ t: G.prompt.type === 'opt' ? 'opt' : 'yesno', yes: false }); return;
       case 'order': act({ t: 'order', job: +t.dataset.job }); return;
+      case 'skipAll': act({ t: 'skip', jobs: G.prompt.jobs.filter(j => j.opt).map(j => j.id) }); return;
+      case 'noAll': act({ t: 'opt', yes: false, all: true }); return;
       case 'orderSkip': ui.autoNo = +t.dataset.job; if (!act({ t: 'order', job: ui.autoNo })) ui.autoNo = null; return;
       case 'openPick': ui.pickClosed = false; render(); return;
       case 'pickHide': ui.pickClosed = true; ui.pickList = false; closeOv(); render(); return;
@@ -1830,6 +1837,12 @@
     if (pr.show && pr.show.length) return false;
     return pr.from.length > 0 && pr.from.every(i => { const L = S.locate(G, i); return L && (L.zone === 'bat' || L.zone === 'base'); });
   }
+  // o2.61 (laporan #90/#92): prompt distinct:'name' (mis. BP01-040 Death And Rebirth) — kartu bernama sama tidak bisa dipilih dua kali.
+  function pickSameName(pr, i) {
+    if (!pr || pr.distinct !== 'name' || (pr.max === 1)) return false;
+    const n = S.nameOf(G, i);
+    return ui.pick.some(x => x !== i && S.nameOf(G, x) === n);
+  }
   function onCard(iid, e) {
     const L = S.locate(G, iid);
     if (boardPick()) {
@@ -1837,6 +1850,7 @@
       if (pr.from.includes(iid)) {
         ui.pickTouched = true;
         if (ui.pick.includes(iid)) ui.pick = ui.pick.filter(x => x !== iid);
+        else if (pickSameName(pr, iid)) { tip('Choose cards with different names.'); return; }
         else if (ui.pick.length < pr.max) ui.pick = ui.pick.concat(iid);
         else if (pr.max === 1) ui.pick = [iid];
         render();

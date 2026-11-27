@@ -19,7 +19,7 @@
   const q = s => document.querySelector(s);
   const E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const client = () => (window.MHRAuth && window.MHRAuth.ready) ? window.MHRAuth.client : null;
-  const SIM_JS = 'sim/sim.js?v=o2.60';
+  const SIM_JS = 'sim/sim.js?v=o2.63';
   const COLS = 'id,room,p1,p2,names,deck_names,clock,first,winner,end_cause,cause,turns,rp,timeouts,undo_used,log_code,engine,started_at,ended_at,mode';
   const COL = { Merah:['Red','#E4442E'], Kuning:['Yellow','#F2B01E'], Biru:['Blue','#3B87E8'], Hijau:['Green','#33A45C'], Orange:['Orange','#E8821E'], Purple:['Purple','#9B5DE5'] };
   const COL_ORDER = ['Merah','Kuning','Biru','Hijau','Orange','Purple'];
