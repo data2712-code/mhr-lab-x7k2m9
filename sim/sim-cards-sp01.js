@@ -223,14 +223,15 @@
     'SP01-009': {
       acti: [{
         id: 'move', zone: 'BATTLE', once: true, label: 'Attach 1 attached card to this card, or 1 of its attached cards to another Character in your BATTLE',
-        can: A => attachedOn(A, A.p).some(a => A.host(a) !== A.self) || (A.attached(A.self).length > 0 && A.battleChars(A.p).some(i => i !== A.self)),
+        // o2.65 (CR 301.25.a): Black Panther yang sedang terpasang tidak bisa dipasangi (pilihan "in" hilang).
+        can: A => (attachedOn(A, A.p).some(a => A.host(a) !== A.self && (A.st.lg1411 || a !== A.self)) && (A.st.lg1411 || !A.host(A.self))) || (A.attached(A.self).length > 0 && A.battleChars(A.p).some(i => i !== A.self)),
         run: A => {
           const opts = [];
-          if (attachedOn(A, A.p).some(a => A.host(a) !== A.self)) opts.push({ v: 'in', label: 'Attach 1 of your attached cards to this card' });
+          if (attachedOn(A, A.p).some(a => A.host(a) !== A.self && (A.st.lg1411 || a !== A.self)) && (A.st.lg1411 || !A.host(A.self))) opts.push({ v: 'in', label: 'Attach 1 of your attached cards to this card' });
           if (A.attached(A.self).length && A.battleChars(A.p).some(i => i !== A.self)) opts.push({ v: 'out', label: "Attach 1 of this card's attached cards to another Character in your BATTLE" });
           const m = A.pick('m', 'Choose one', opts);
           if (m === 'in') {
-            const c = A.ask('c', { text: 'Choose 1 of your attached cards to attach to Black Panther', from: attachedOn(A, A.p).filter(a => A.host(a) !== A.self), prefer: 'high' });
+            const c = A.ask('c', { text: 'Choose 1 of your attached cards to attach to Black Panther', from: attachedOn(A, A.p).filter(a => A.host(a) !== A.self && (A.st.lg1411 || a !== A.self)), prefer: 'high' });
             c.forEach(i => A.attach(i, A.self));
           } else if (m === 'out') {
             const c = A.ask('c', { text: "Choose 1 of Black Panther's attached cards", from: A.attached(A.self) });

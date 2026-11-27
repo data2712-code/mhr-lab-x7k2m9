@@ -802,16 +802,29 @@
     const epr = G.prompt, effp = !!(dockable && epr && !G.result && !ui.replay && ['opt', 'yesno', 'pick', 'choose', 'order'].includes(epr.type) &&
       (net.on ? epr.p === net.seat : ui.ctrl[epr.p] === 'human') && !tr.querySelector('.cpay'));
     if (effp) { const ek = promptKey() + ':' + (epr.key || epr.job || ''); if (ui.effKey !== ek) { ui.effKey = ek; ui.trayMin = false; } }
-    tr.className = 'abar' + (ui.msg ? ' err' : '') + (dockable ? ' dock' : '') + (effp ? ' eff' : '') + (dockable && ui.trayMin ? ' min' : '');
-    if (dockable) tr.insertAdjacentHTML('beforeend', '<button class="sm tmin" data-act="trayMin">' + (ui.trayMin ? '▸ Show' : '▾ Hide') + '</button>');
-    // o2.56 (laporan #67/#68): di panel yang menempel, tombol "Confirm cost" / tujuan CALL selalu digulir ke dalam pandangan.
-    if (dockable && !ui.trayMin) { const cd = tr.querySelector('.cpdest:not(.dim)'); if (cd && cd.scrollIntoView) cd.scrollIntoView({ block: 'nearest' }); }
+    // o2.64 (permintaan pemilik): desktop → panel di KANAN papan (antara kedua BASE), lihat placeSide(); bila tidak muat, perilaku lama.
+    const hasActs = !!tr.querySelector('.acts > *');
+    const sideGeo = !narrow() && hasActs ? sideGeometry() : null;
+    if (sideGeo) {
+      const seff = effp || !!(epr && ['opt', 'yesno', 'pick', 'choose', 'order'].includes(epr.type) && (net.on ? epr.p === net.seat : ui.ctrl[epr.p] === 'human') && !G.result && !ui.replay);
+      if (seff && !effp) { const ek = promptKey() + ':' + (epr.key || epr.job || ''); if (ui.effKey !== ek) { ui.effKey = ek; ui.trayMin = false; } }
+      tr.className = 'abar side' + (ui.msg ? ' err' : '') + (seff ? ' seff' : '') + (ui.trayMin ? ' min' : '');
+    } else {
+      tr.className = 'abar' + (ui.msg ? ' err' : '') + (dockable ? ' dock' : '') + (effp ? ' eff' : '') + (dockable && ui.trayMin ? ' min' : '');
+      tr.style.cssText = '';
+    }
+    $('game').classList.toggle('trayside', !!sideGeo);
+    if (sideGeo) $('game').style.setProperty('--sidew', Math.round($('board').getBoundingClientRect().right - sideGeo.left + 6) + 'px');
+    if (dockable || sideGeo) tr.insertAdjacentHTML('beforeend', '<button class="sm tmin" data-act="trayMin">' + (ui.trayMin ? '▸ Show' : '▾ Hide') + '</button>');
     if (net.on) { const nb = netBarHTML(); if (nb) tr.insertAdjacentHTML('afterbegin', nb); }
     mobileArena();
     mobileBoard();
     $('handRow').innerHTML = handHTML(bottom);
     renderSide(v);
     fitHand();
+    if (sideGeo) placeSide(tr);
+    // o2.56 (laporan #67/#68): di panel yang menempel, tombol "Confirm cost" / tujuan CALL selalu digulir ke dalam pandangan.
+    if ((dockable || sideGeo) && !ui.trayMin) { const cd = tr.querySelector('.cpdest:not(.dim)'); if (cd && cd.scrollIntoView) cd.scrollIntoView({ block: 'nearest' }); }
     drawArrows();
     placePop();                                      // riwayat #54: info + aksi kartu = popover di semua layar
     flashCheck(v);
@@ -1836,6 +1849,31 @@
     const pr = G.prompt;
     if (pr.show && pr.show.length) return false;
     return pr.from.length > 0 && pr.from.every(i => { const L = S.locate(G, i); return L && (L.zone === 'bat' || L.zone === 'base'); });
+  }
+  /* o2.64 (permintaan pemilik 27 Nov 2026): panel keputusan di kanan papan desktop, di antara BASE lawan (atas) dan BASE sendiri (bawah).
+     sideGeometry() = ruang yang tersedia (null bila < 200 px tinggi / < 300 px lebar → perilaku lama); placeSide() menaruh panel di tengah
+     ruang itu secara vertikal, rata kanan dengan papan. */
+  function sideGeometry() {
+    const bd = $('board'); if (!bd) return null;
+    const cols = [...bd.querySelectorAll('.basecol')]; if (cols.length < 2) return null;
+    const rs = cols.map(c => c.getBoundingClientRect()).filter(r => r.height > 0); if (rs.length < 2) return null;
+    const topR = rs.reduce((a, r) => (r.top < a.top ? r : a)), botR = rs.reduce((a, r) => (r.top > a.top ? r : a));
+    const b = bd.getBoundingClientRect(), right = b.right - 14;
+    // jangan menutupi area BATTLE (FRONT/WING/BACK): panel mulai di kanan kolom BATTLE paling kanan
+    const slots = [...bd.querySelectorAll('[data-slot]')].filter(e => ['F', 'W1', 'W2', 'B'].includes(e.dataset.slot)).map(e => e.getBoundingClientRect().right);
+    // … dan mulai sedikit di kiri kolom BASE (seperti kotak merah pemilik). Kapsul fase di garis tengah digeser ke kiri lewat
+    // #game.trayside (padding kanan garis tengah = lebar panel), jadi tidak tertutup. Hanya bergantung pada ukuran layar → stabil.
+    const minLeft = Math.max(b.left + 200, (slots.length ? Math.max.apply(null, slots) : b.left) + 14, Math.min(topR.left, botR.left) - 40);
+    const top = topR.bottom + 10, bottom = botR.top - 10, width = Math.min(520, right - minLeft);
+    if (bottom - top < 200 || width < 300) return null;
+    return { top, bottom, left: right - width, width };
+  }
+  function placeSide(tr) {
+    const g = sideGeometry(); if (!g) return;
+    const avail = g.bottom - g.top;
+    tr.style.cssText = 'left:' + Math.round(g.left) + 'px;width:' + Math.round(g.width) + 'px;top:' + Math.round(g.top) + 'px;max-height:' + Math.round(avail) + 'px';
+    const h = tr.offsetHeight;
+    if (h < avail) tr.style.top = Math.round(g.top + (avail - h) / 2) + 'px';
   }
   // o2.61 (laporan #90/#92): prompt distinct:'name' (mis. BP01-040 Death And Rebirth) — kartu bernama sama tidak bisa dipilih dua kali.
   function pickSameName(pr, i) {

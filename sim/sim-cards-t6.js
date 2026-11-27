@@ -31,6 +31,8 @@
   const inField = (A, i) => { const L = A.loc(i); return !!L && (L.zone === 'bat' || L.zone === 'base' || L.zone === 'att'); };
   const baseChars = (A, p) => A.chars(p).filter(i => A.loc(i).zone === 'base');
   const rpOf = (A, p) => A.st.P[p].rp;
+  // o2.65 (CR 301.25.a/301.26.a): kartu ini bisa dipasangi kartu lain hanya bila ia Karakter (tidak sedang terpasang). Log < 0.14.11: selalu.
+  const canHost = A => !!A.st.lg1411 || !A.host(A.self);
   const enterSelf = (e, self) => e.k === 'ENTER' && e.c === self;
   const calledEnter = (e, self) => e.k === 'ENTER' && e.c === self && (e.how === 'call' || e.how === 'ccall');
   const oppEnters = (e, self, A) => e.k === 'ENTER' && e.p === A.opp(A.ctrl(self));
@@ -576,7 +578,8 @@
       unique: true,
       acti: [{
         id: 'att', zone: 'FIELD', counter: true, once: true, label: 'Attach 1 [GOTG] Character from your RETREAT to this card',
-        can: A => A.ret(A.p).some(i => isGotg(A, i)),
+        // o2.65 (CR 301.25.a): Groot yang sendiri sedang terpasang (mis. di The Milano) bukan Karakter → tidak bisa dipasangi.
+        can: A => A.ret(A.p).some(i => isGotg(A, i)) && canHost(A),
         run: A => {
           const c = A.ask('c', { text: 'Choose 1 [GOTG] Character in your RETREAT to attach to Groot', from: A.ret(A.p).filter(i => isGotg(A, i)), prefer: 'high' });
           c.forEach(i => A.attach(i, A.self));
@@ -606,7 +609,7 @@
         text: "Attach 1 of your opponent's Lv3-or-lower Characters in BATTLE to this card?",
         when: enterSelf,
         // o2.56 (laporan Chewie, F-13): Karakter lawan yang namanya bentrok UNIQUE di FIELD Anda (mis. Chewie lawan) tidak bisa dipilih.
-        can: A => rpOf(A, A.p) < rpOf(A, A.opp(A.p)) && oppBattle(A).some(i => A.lv(i) <= 3 && chewieOk(A, i)),
+        can: A => rpOf(A, A.p) < rpOf(A, A.opp(A.p)) && oppBattle(A).some(i => A.lv(i) <= 3 && chewieOk(A, i)) && canHost(A),   // o2.65: Chewie terpasang tidak bisa dipasangi
         run: A => {
           const t = A.ask('t', { text: "Choose 1 of your opponent's Lv3-or-lower Characters in BATTLE to attach to Chewie", from: oppBattle(A).filter(i => A.lv(i) <= 3 && chewieOk(A, i)), prefer: 'high' });
           if (inField(A, A.self)) t.forEach(i => A.attach(i, A.self));

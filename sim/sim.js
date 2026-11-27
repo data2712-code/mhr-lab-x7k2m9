@@ -29,7 +29,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = '0.14.10';   // o2.63: RS-082 dicabut (Head Judge: RS-016 tetap); Drax PB02-009 boleh Prune tanpa target BATTLE, Milano PB02-003 boleh turun walau Karakter GOTG sudah tidak di RETREAT (RS-083) · o2.62: RS-082 (dicabut) · o2.61: pilihan "nama berbeda" ditegakkan saat memilih (laporan #90/#92, BP01-040), Skip semua efek opsional (#89) · o2.60: rearrange bukan movement (laporan #80, CR 303.2.a.4.2.1.1); batal efek tanpa izin lawan (#83, job.ai/job.peek)   // o2.59: aura kemampuan dari kartu TERPASANG ikut berlaku (laporan #82, PB02-005 Nebula di Groot) · o2.56: efek AUTO tidak "mulai berlaku lagi" saat Karakter hanya pindah area BATTLE (laporan #74, RS-079) · o2.47: penyerang/target yang keluar FIELD lalu kembali = kartu baru, serangannya berakhir (laporan #52), BP01-032 Both Lose dengan BATTLE penuh (#53), SD06-011 tanpa target lawan (#51), BP01-067 bisa batal/tetap (#54) · o2.45: BP01-022 UNIQUE/[COUNTER] = AUTO (laporan #49), PB02-008 nama lengkap (#43), SP01-034 tanpa syarat terpasang (#44/#45), SP01-050 kebal Lv1 juga saat sendiri (#40), BP01-067 + AIR STRIKE (#41) · o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
+  const VERSION = '0.14.11';   // o2.65: Kartu Terpasang tidak bisa punya kartu terpasang (CR 301.25.a; Groot di Milano) · o2.63: RS-082 dicabut (Head Judge: RS-016 tetap); Drax PB02-009 boleh Prune tanpa target BATTLE, Milano PB02-003 boleh turun walau Karakter GOTG sudah tidak di RETREAT (RS-083) · o2.62: RS-082 (dicabut) · o2.61: pilihan "nama berbeda" ditegakkan saat memilih (laporan #90/#92, BP01-040), Skip semua efek opsional (#89) · o2.60: rearrange bukan movement (laporan #80, CR 303.2.a.4.2.1.1); batal efek tanpa izin lawan (#83, job.ai/job.peek)   // o2.59: aura kemampuan dari kartu TERPASANG ikut berlaku (laporan #82, PB02-005 Nebula di Groot) · o2.56: efek AUTO tidak "mulai berlaku lagi" saat Karakter hanya pindah area BATTLE (laporan #74, RS-079) · o2.47: penyerang/target yang keluar FIELD lalu kembali = kartu baru, serangannya berakhir (laporan #52), BP01-032 Both Lose dengan BATTLE penuh (#53), SD06-011 tanpa target lawan (#51), BP01-067 bisa batal/tetap (#54) · o2.45: BP01-022 UNIQUE/[COUNTER] = AUTO (laporan #49), PB02-008 nama lengkap (#43), SP01-034 tanpa syarat terpasang (#44/#45), SP01-050 kebal Lv1 juga saat sendiri (#40), BP01-067 + AIR STRIKE (#41) · o2.41: SP01-021 tidak memicu dirinya sendiri (RS-068) · o2.44: BP01-066 menaruh ke FIELD pemakai
   const SLOTS = ['F', 'W1', 'W2', 'B'];
   const SLOT_NAME = { F: 'FRONT', W1: 'WING 1', W2: 'WING 2', B: 'BACK', BASE: 'BASE' };
   // Posisi pada garis serangan (303.2.a.4.3.1.1): BACK sendiri = 0, WING = 1,
@@ -745,6 +745,9 @@
     // Laporan #21 (14 Nov 2026, RS-029): kartu dari luar FIELD yang dipasang = masuk FIELD, jadi UNIQUE ikut dicek.
     const hostL = locate(st, host), onField = from && (from.zone === 'bat' || from.zone === 'base' || from.zone === 'att');
     // o2.56 (laporan Chewie, F-13 / RS-029): dari FIELD pemain lain ke FIELD Anda juga dicek UNIQUE (kartu terpasang ikut dihitung).
+    // o2.65 (CR 301.25.a, permintaan pemilik 27 Nov 2026): kartu hanya bisa dipasang di bawah KARAKTER; Kartu Terpasang bukan Karakter
+    // (301.26.a), jadi tidak bisa punya kartu terpasang (mis. Groot yang terpasang di Milano). Log < 0.14.11: aturan lama.
+    if (!st.lg1411 && (!hostL || hostL.zone === 'att' || H.host)) { log(st, 'eff', nameOf(st, iid) + ' cannot be attached: ' + nameOf(st, host) + ' is an Attached Card, not a Character (301.25.a).'); return false; }
     if (hostL && (!onField || (!st.lg145 && from.p !== hostL.p)) && uniqueBlocked(st, iid, hostL.p)) { log(st, 'eff', nameOf(st, iid) + ' cannot be attached: another card with the same name is on the FIELD (UNIQUE, 305.6.a).'); return false; }
     // 301.25.l: kartu yang terpasang pada kartu ini tidak lagi punya induk karakter → RETREAT.
     x.att.slice().forEach(s => retreat(st, s, 'its Character became an Attached Card, 301.25.l'));
@@ -2669,7 +2672,8 @@
     if (o.e && verLt(o.e, '0.14.6')) { st.engine = o.e; st.lg146 = true; }
     if (o.e && verLt(o.e, '0.14.8')) { st.engine = o.e; st.lg148 = true; }
     if (o.e && o.e === '0.14.9') { st.engine = o.e; st.rs082 = true; }           // o2.62: RS-082 (dicabut o2.63) hanya untuk log 0.14.9
-    if (o.e && verLt(o.e, '0.14.10')) { st.engine = o.e; st.lg1410 = true; }      // o2.63: Drax tanpa target BATTLE, Milano tanpa lampiran        // o2.62: RS-082 urutan trigger turunan        // o2.61: pilihan distinct:'name' belum ditegakkan        // o2.59: aura dari kartu terpasang (laporan #82)        // o2.56: cap waktu AUTO lama (RS-079) untuk log lama        // o2.47: aturan lama #51–#54 untuk log lama        // o2.44: BP01-066 dulu menaruh ke FIELD pemilik kartu
+    if (o.e && verLt(o.e, '0.14.10')) { st.engine = o.e; st.lg1410 = true; }
+    if (o.e && verLt(o.e, '0.14.11')) { st.engine = o.e; st.lg1411 = true; }      // o2.65: kartu terpasang tidak bisa dipasangi (301.25.a)      // o2.63: Drax tanpa target BATTLE, Milano tanpa lampiran        // o2.62: RS-082 urutan trigger turunan        // o2.61: pilihan distinct:'name' belum ditegakkan        // o2.59: aura dari kartu terpasang (laporan #82)        // o2.56: cap waktu AUTO lama (RS-079) untuk log lama        // o2.47: aturan lama #51–#54 untuk log lama        // o2.44: BP01-066 dulu menaruh ke FIELD pemilik kartu
     const acts = o.a || [], lim = n == null ? acts.length : Math.min(n, acts.length);
     for (let i = 0; i < lim; i++) {
       const r = apply(st, acts[i]);

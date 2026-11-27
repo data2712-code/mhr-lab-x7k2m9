@@ -712,6 +712,30 @@ svg.arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
   .midzone .abar:not(.dock) .acts > *{flex:1 1 120px}
   .midzone .abar:not(.dock) .acts button{min-width:0;max-width:none;padding:6px 9px}
 }
+/* o2.64 (permintaan pemilik 27 Nov 2026): di desktop panel keputusan (pertanyaan efek, pilihan, biaya CALL, tombol aksi) pindah dari garis
+   tengah ke KANAN papan, di antara BASE lawan dan BASE sendiri, supaya tidak menutupi kartu BATTLE. Posisi & ukuran dihitung di sim-ui.js
+   (placeSide, inline style); kelas .side. Bila ruangnya terlalu sempit, kembali ke perilaku lama (.dock / tengah). */
+@media (min-width:821px){
+  #game .midzone .abar.side{position:fixed;z-index:35;max-width:none;height:auto;min-height:0;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:6px;padding:10px 12px 12px;overflow:auto;border:1px solid var(--gold);border-radius:12px;background:#12171d;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+  #game .midzone .abar.side.err{background:#24100c}
+  #game .midzone .abar.side .hint{width:auto;flex:none;max-height:9em;overflow:auto;padding-right:64px;font-size:12px}
+  #game .midzone .abar.side .hint .ttl{font-size:17px}
+  #game .midzone .abar.side .acts{flex:none;flex-direction:column;flex-wrap:nowrap;overflow:visible;gap:6px;padding:0;align-content:stretch}
+  #game .midzone .abar.side .acts > *{flex:none}
+  #game .midzone .abar.side .acts button{width:100%;min-width:0;max-width:none;padding:7px 11px;font-size:12.5px;border-radius:9px}
+  #game .midzone .abar.side .acts button small{white-space:normal}
+  #game .midzone .abar.side .ordj{display:flex;gap:6px}
+  #game .midzone .abar.side .ordj>button:first-child{flex:1 1 auto;width:auto}
+  #game .midzone .abar.side .ordj>button.sm{flex:none;width:auto;min-width:56px;text-align:center}
+  #game .midzone .abar.side .cpay .cphead > button{width:auto}
+  #game .midzone .abar.side .acts button.next{position:sticky;bottom:-12px;box-shadow:0 -6px 10px #12171d}
+  #game .midzone .abar.side .tmin{display:block;position:absolute;right:10px;top:10px;padding:2px 8px;font-size:11px;border-radius:999px;z-index:2}
+  #game .midzone .abar.side.min .acts,#game .midzone .abar.side.min .hint > span:not(.ttl){display:none}
+  #game .midzone .abar.side.seff{border:2px solid var(--gold);box-shadow:0 12px 36px rgba(0,0,0,.65),0 0 22px rgba(240,192,64,.38);animation:sidepop .25s ease-out}
+  #game .midzone .abar.side.seff.min{animation:none}
+  #game.trayside .midzone{padding-right:var(--sidew,128px)}
+}
+@keyframes sidepop{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
 @media (min-width:821px){
   .midzone .tl{display:none}            /* o2.29 (keputusan pemilik 17 Nov 2026): Timeline digabung ke Play-by-play di desktop; HP tetap */
   .midzone{padding-right:128px}
@@ -1275,27 +1299,27 @@ window.MHRSIM_BASE = '../';
 </script>
 <script src="../cards.js?v=7.62-pb02id" onerror="window.MHRSIM_CARDS_FAIL=true"></script>
 <script src="../data.js?v=7.55-cb01" onerror="window.MHRSIM_DATA_FAIL=true"></script>
-<script src="sim.js?v=o2.63"></script>
-<script src="sim-cards.js?v=o2.63"></script>
-<script src="sim-cards-bp01.js?v=o2.63"></script>
-<script src="sim-cards-s4.js?v=o2.63"></script>
-<script src="sim-cards-sp01.js?v=o2.63"></script>
-<script src="sim-cards-t6.js?v=o2.63"></script>
-<script src="sim-cards-bp02.js?v=o2.63"></script>
-<script src="sim-cards-cb01.js?v=o2.63"></script>
-<script src="sim-bot.js?v=o2.63"></script>
-<script src="sim-sound.js?v=o2.63"></script>
-<script src="sim-shadow.js?v=o2.63"></script>
-<script src="sim-ui.js?v=o2.63"></script>
-<script src="sim-sandbox.js?v=o2.63"></script>
-<script src="sim-report.js?v=o2.63"></script>
-<script src="sim-modes.js?v=o2.63"></script>
-<script src="sim-i18n.js?v=o2.63"></script>
-<script src="sim-online.js?v=o2.63"></script>
-<script src="sim-ranked.js?v=o2.63"></script>
-<script src="sim-stats.js?v=o2.63"></script>
-<script src="sim-updates.js?v=o2.63"></script>
-<script src="sim-rules.js?v=o2.63"></script>
-<script src="sim-learn.js?v=o2.63"></script>
+<script src="sim.js?v=o2.65"></script>
+<script src="sim-cards.js?v=o2.65"></script>
+<script src="sim-cards-bp01.js?v=o2.65"></script>
+<script src="sim-cards-s4.js?v=o2.65"></script>
+<script src="sim-cards-sp01.js?v=o2.65"></script>
+<script src="sim-cards-t6.js?v=o2.65"></script>
+<script src="sim-cards-bp02.js?v=o2.65"></script>
+<script src="sim-cards-cb01.js?v=o2.65"></script>
+<script src="sim-bot.js?v=o2.65"></script>
+<script src="sim-sound.js?v=o2.65"></script>
+<script src="sim-shadow.js?v=o2.65"></script>
+<script src="sim-ui.js?v=o2.65"></script>
+<script src="sim-sandbox.js?v=o2.65"></script>
+<script src="sim-report.js?v=o2.65"></script>
+<script src="sim-modes.js?v=o2.65"></script>
+<script src="sim-i18n.js?v=o2.65"></script>
+<script src="sim-online.js?v=o2.65"></script>
+<script src="sim-ranked.js?v=o2.65"></script>
+<script src="sim-stats.js?v=o2.65"></script>
+<script src="sim-updates.js?v=o2.65"></script>
+<script src="sim-rules.js?v=o2.65"></script>
+<script src="sim-learn.js?v=o2.65"></script>
 </body>
 </html>

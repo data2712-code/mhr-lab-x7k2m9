@@ -794,6 +794,16 @@
     'Milano B tetap boleh diletakkan (opsional), tetapi tidak ada yang dipasang karena Drax B sudah di VOID.'
   ]);
 
+  r('RS-084', 'cards', 'cr', ['PB02-001', 'PB02-002', 'SP01-009'], [
+    'An Attached Card cannot have cards attached to it',
+    'Cards are attached underneath a Character (CR 301.25.a). An Attached Card is not a Character until it is detached (301.26.a).',
+    'Example: 「Rooted Revival」Groot attached to 「Ace Rescue」The Milano cannot attach a [GOTG] Character to itself.'
+  ], [
+    'Kartu Terpasang tidak bisa dipasangi kartu lain',
+    'Kartu dipasang di bawah sebuah Karakter (CR 301.25.a). Kartu Terpasang bukan Karakter sampai ia dilepas (301.26.a).',
+    'Contoh: 「Rooted Revival」Groot yang terpasang di 「Ace Rescue」The Milano tidak bisa memasang Karakter [GOTG] ke dirinya sendiri.'
+  ]);
+
   /* ===================== tampilan ===================== */
   const S = () => window.MHRSim;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);

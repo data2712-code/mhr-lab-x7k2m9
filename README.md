@@ -1,6 +1,6 @@
 # MHR Deck Lab
 
-**Versi saat ini: v7.68** · 27 November 2026
+**Versi saat ini: v7.70** · 27 November 2026
 
 Deck builder web untuk **Marvel Hero Rush TCG** — versi Indonesia.
 Dibuat karena belum ada deck builder resmi untuk game ini.
@@ -603,6 +603,16 @@ dan tetap dukung pembacaan versi 1 agar link lama tidak rusak.
 
 > Diurutkan dari yang terbaru. Entri tanpa nomor versi (cuma data/dokumentasi)
 > ditaruh di atas entri bernomor pada tanggal yang sama.
+
+### v7.70 — Battle Sim o2.65: Kartu Terpasang tidak bisa dipasangi — 27 November 2026 *(`sim/`, `sim-host.js`, `sim-meta.js`, `index.html`; server Battle Sim)*
+
+- CR 301.25.a/301.26.a: Groot yang terpasang di Milano tidak bisa lagi memasang kartu ke dirinya (RS-084). Detail: mhr-simulator riwayat #149.
+  **Server Battle Sim perlu di-deploy** (mesin 0.14.11).
+
+### v7.69 — Battle Sim o2.64: panel keputusan di kanan papan — 27 November 2026 *(`sim/`, `sim-host.js`, `sim-meta.js`, `index.html`)*
+
+- Di desktop panel keputusan pindah dari tengah papan ke sisi kanan (di antara kedua BASE). Detail: mhr-simulator riwayat #148.
+  Mesin tidak berubah — server tidak perlu di-deploy.
 
 ### v7.68 — Ruling Head Judge Drax × Milano (F-28) + Battle Sim o2.63 — 27 November 2026 *(`rules-faq.js`, `faq/F-28*.html`, `sim/`, `sim-host.js`, `sim-meta.js`, `index.html`; server Battle Sim)*
 

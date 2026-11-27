@@ -16,6 +16,28 @@
   'use strict';
   const UPDATES = [
     {
+      d: '2026-11-27', t: 'rules', v: 'o2.65',
+      en: { h: 'Attached Cards cannot have cards attached to them (RS-084)', b: [
+        'Cards are attached underneath a Character, and an Attached Card is not a Character (Comprehensive Rules 301.25.a, 301.26.a). For example, 「Rooted Revival」Groot attached to 「Ace Rescue」The Milano can no longer use its effect to attach another card to itself.',
+        'The same applies to every effect that would attach a card to an Attached Card.'
+      ] },
+      id: { h: 'Kartu Terpasang tidak bisa dipasangi kartu lain (RS-084)', b: [
+        'Kartu dipasang di bawah sebuah Karakter, dan Kartu Terpasang bukan Karakter (Comprehensive Rules 301.25.a, 301.26.a). Contoh: 「Rooted Revival」Groot yang terpasang di 「Ace Rescue」The Milano tidak bisa lagi memakai efeknya untuk memasang kartu lain ke dirinya.',
+        'Hal yang sama berlaku untuk semua efek yang akan memasang kartu ke sebuah Kartu Terpasang.'
+      ] }
+    },
+    {
+      d: '2026-11-27', t: 'improve', v: 'o2.64',
+      en: { h: 'Decision panel on the right side of the board (desktop)', b: [
+        'On computers, the decision panel (effect questions, card choices, effect order, CALL cost, Start Battle and other buttons) now sits on the right side of the board, between your opponent\'s BASE and yours, instead of across the middle. It no longer covers the cards in BATTLE, and the cards get a little more room.',
+        'Questions about your own effects still get a gold highlight. ▾ Hide shrinks the panel. On small screens where it does not fit, and on phones, the panel stays as before.'
+      ] },
+      id: { h: 'Panel keputusan di sisi kanan papan (desktop)', b: [
+        'Di komputer, panel keputusan (pertanyaan efek, pilihan kartu, urutan efek, biaya CALL, Mulai Battle dan tombol lain) kini ada di sisi kanan papan, di antara BASE lawan dan BASE Anda, bukan melintang di tengah. Panel tidak lagi menutupi kartu di BATTLE, dan kartu mendapat ruang sedikit lebih besar.',
+        'Pertanyaan tentang efek Anda sendiri tetap disorot emas. ▾ Hide mengecilkan panel. Di layar kecil yang tidak muat, dan di HP, panel tetap seperti sebelumnya.'
+      ] }
+    },
+    {
       d: '2026-11-27', t: 'rules', v: 'o2.63',
       en: { h: 'Head Judge ruling: Drax and The Milano (RS-083)', b: [
         'Both 「Soul-Shattering Assault」Drax lose (BOTH LOSE) and both players\' 「Ace Rescue」The Milano trigger: the turn player\'s Milano resolves first, and their Drax (attached to it) triggers and resolves right away, before the other Milano (RS-016).',
